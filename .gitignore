@@ -21,3 +21,7 @@ rad.json
 *.flf
 #Test results file
 TestResults.xml
+# persona çıktıları
+cikti/
+__pycache__/
+*.py[cod]

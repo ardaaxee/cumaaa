@@ -1,0 +1,132 @@
+"""Görsel prompt üretimi.
+
+Tek kural: karakterin yüzü/vücudu her promptta *kelimesi kelimesine aynı*
+"anchor" metniyle tarif edilir. Sahne, kıyafet, ışık ve kamera değişir.
+Tutarlılığı sağlayan şey budur; sabit seed ve referans görsel bunu güçlendirir.
+"""
+
+from __future__ import annotations
+
+import random
+
+from .models import Character, Pillar
+
+# Aracın referans görselle çalışan sürümleri için ipuçları.
+REFERENCE_HINTS = {
+    "midjourney": "--cref <REFERANS_GORSEL_URL> --cw 100 --ar {ar} --style raw --seed {seed}",
+    "flux": "IP-Adapter / Redux ile referans görsel ağırlığı 0.7-0.85",
+    "sdxl": "IP-Adapter FaceID plus, ağırlık 0.8; ayrıca LoRA eğitilebilir",
+    "nano-banana": "referans görseli ekle ve 'aynı kişi, aynı yüz' talimatını koru",
+}
+
+ASPECT = {"post": "4:5", "carousel": "4:5", "story": "9:16", "reel": "9:16", "profile": "1:1"}
+
+
+def context_for(ch: Character, pillar: Pillar | None, rng: random.Random) -> dict[str, str]:
+    """Sütuna uygun kıyafet / mekân / kamera seçer.
+
+    Sütun kendi listesini tanımlamışsa onu kullanır; yoksa karakterin genel
+    listesine düşer. Böylece laboratuvar karesine can yeleği gelmez.
+    """
+    v = ch.visual
+    return {
+        "wardrobe": rng.choice((pillar.wardrobe if pillar else None) or v.wardrobe),
+        "location": rng.choice((pillar.locations if pillar else None) or v.locations),
+        "camera": rng.choice((pillar.camera if pillar else None) or v.camera),
+    }
+
+
+def build_prompt(
+    ch: Character,
+    scene: str,
+    *,
+    rng: random.Random,
+    kind: str = "post",
+    pillar: Pillar | None = None,
+    wardrobe: str | None = None,
+    camera: str | None = None,
+    location: str | None = None,
+) -> str:
+    """Tek bir görsel için tam prompt metni üretir."""
+    v = ch.visual
+    ctx = context_for(ch, pillar, rng)
+    wardrobe = wardrobe or ctx["wardrobe"]
+    camera = camera or ctx["camera"]
+    location = location or ctx["location"]
+
+    parts = [
+        f"Fotoğraf. {scene}.",
+        f"KİŞİ (her karede birebir aynı): {v.anchor}. Saç: {v.hair}.",
+        f"Kıyafet: {wardrobe}.",
+        f"Mekân: {location}.",
+        f"Kamera/ışık: {camera}.",
+        f"Renk paleti: {', '.join(v.palette)}.",
+        f"Stil: {rng.choice(v.style_notes)}.",
+        "Instagram gönderisi için doğal, belgesel hissi veren gerçekçi fotoğraf.",
+        f"En-boy oranı {ASPECT.get(kind, '4:5')}.",
+    ]
+    prompt = " ".join(parts)
+    if v.negative:
+        prompt += "\n\nİSTENMEYEN: " + "; ".join(v.negative) + "."
+    prompt += f"\nSeed: {v.seed}"
+    return prompt
+
+
+def build_carousel(
+    ch: Character, pillar: Pillar, *, rng: random.Random, count: int = 3
+) -> list[str]:
+    """Aynı gün / aynı kıyafet / aynı mekân mantığıyla bir karusel serisi."""
+    ctx = context_for(ch, pillar, rng)
+    scenes = rng.sample(pillar.scenes, k=min(count, len(pillar.scenes)))
+    return [
+        build_prompt(
+            ch,
+            scene,
+            rng=rng,
+            kind="carousel",
+            pillar=pillar,
+            wardrobe=ctx["wardrobe"],
+            camera=ctx["camera"],
+            location=ctx["location"],
+        )
+        for scene in scenes
+    ]
+
+
+def profile_picture_prompt(ch: Character, rng: random.Random) -> str:
+    return build_prompt(
+        ch,
+        "omuz üstü portre, hafif yandan, kameraya bakmıyor, arkada bulanık deniz",
+        rng=rng,
+        kind="profile",
+        wardrobe="haki keten gömlek, kolları kıvrık",
+        location="açık havada, kıyıda",
+        camera="50mm, sığ alan derinliği, doğal gün ışığı",
+    )
+
+
+def reference_sheet_prompts(ch: Character, rng: random.Random) -> list[str]:
+    """İlk iş: karakter referans sayfası. Diğer tüm görseller buna dayanır."""
+    poses = [
+        "nötr ifade, tam karşıdan portre",
+        "profilden portre",
+        "hafif gülümseme, dörtte üç açı",
+        "tam boy, ayakta, düz duruş",
+    ]
+    return [
+        build_prompt(
+            ch,
+            f"karakter referans fotoğrafı: {pose}",
+            rng=rng,
+            kind="profile",
+            wardrobe="sade düz renk tişört ve kot",
+            location="düz açık gri arka plan önünde",
+            camera="50mm, yumuşak eşit ışık, gölgesiz",
+        )
+        for pose in poses
+    ]
+
+
+def tool_hint(tool: str, ch: Character, kind: str = "post") -> str:
+    template = REFERENCE_HINTS.get(tool, "")
+    return template.format(ar=ASPECT.get(kind, "4:5"), seed=ch.visual.seed)

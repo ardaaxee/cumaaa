@@ -1,0 +1,1 @@
+anthropic>=0.70.0   # sadece --llm için gerekir
