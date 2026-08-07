@@ -45,6 +45,13 @@ def _get(url: str, headers: dict[str, str]) -> dict:
         return json.loads(r.read().decode("utf-8"))
 
 
+def _data_uri(path: Path) -> str:
+    """Yerel görseli data: URI'ye çevirir (sağlayıcılara referans vermek için)."""
+    suffix = path.suffix.lower().lstrip(".") or "jpeg"
+    mime = "image/jpeg" if suffix in {"jpg", "jpeg"} else f"image/{suffix}"
+    return f"data:{mime};base64," + base64.b64encode(path.read_bytes()).decode()
+
+
 def _download(url: str, dest: Path) -> None:
     req = urllib.request.Request(url)
     with urllib.request.urlopen(req, timeout=TIMEOUT, context=_ssl_context()) as r:
@@ -54,7 +61,15 @@ def _download(url: str, dest: Path) -> None:
 # --- Replicate ---------------------------------------------------------------
 
 
-def replicate_generate(prompt: str, dest: Path, *, model: str, aspect: str, seed: int) -> Path:
+def replicate_generate(
+    prompt: str,
+    dest: Path,
+    *,
+    model: str,
+    aspect: str,
+    seed: int,
+    reference: Path | None = None,
+) -> Path:
     token = os.environ.get("REPLICATE_API_TOKEN")
     if not token:
         raise SystemExit("REPLICATE_API_TOKEN tanımlı değil.")
@@ -67,6 +82,11 @@ def replicate_generate(prompt: str, dest: Path, *, model: str, aspect: str, seed
             "output_format": "jpg",
         }
     }
+    if reference is not None:
+        # Flux ailesi referans görseli `image_prompt` ile alıyor. Yüz
+        # tutarlılığını sağlayan asıl mekanizma bu; promptdaki anchor
+        # metni tek başına yetmiyor.
+        body["input"]["image_prompt"] = _data_uri(reference)
     res = _post(f"https://api.replicate.com/v1/models/{model}/predictions", body, headers)
 
     # "Prefer: wait" çoğu zaman tamamlanmış sonuç döndürür; dönmezse yokla.
@@ -120,12 +140,27 @@ PROVIDERS = {
 }
 
 
+#: Referans görseli destekleyen sağlayıcılar.
+SUPPORTS_REFERENCE = {"replicate"}
+
+
 def generate(
-    prompt: str, dest: Path, *, provider: str, model: str | None, aspect: str, seed: int
+    prompt: str,
+    dest: Path,
+    *,
+    provider: str,
+    model: str | None,
+    aspect: str,
+    seed: int,
+    reference: Path | None = None,
 ) -> Path:
     model = model or PROVIDERS[provider]
     if provider == "replicate":
-        return replicate_generate(prompt, dest, model=model, aspect=aspect, seed=seed)
+        return replicate_generate(
+            prompt, dest, model=model, aspect=aspect, seed=seed, reference=reference
+        )
     if provider == "openai":
+        # OpenAI'nin düzenleme uç noktası farklı bir istek biçimi kullanıyor;
+        # referans desteği burada yok. Sessizce yok saymak yerine söylüyoruz.
         return openai_generate(prompt, dest, model=model, aspect=aspect)
     raise SystemExit(f"Bilinmeyen sağlayıcı: {provider}")

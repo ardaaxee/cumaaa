@@ -137,15 +137,31 @@ seferinde sahneye bakarak yazar.
 
 ```bash
 export REPLICATE_API_TOKEN=...
-python3 -m persona images --provider replicate --limit 5
-# veya
-export OPENAI_API_KEY=...
-python3 -m persona images --provider openai
+
+python3 -m persona images --out cikti --dry-run      # ne üretilecek, kaç tane
+python3 -m persona images --out cikti --identity-only # önce 4 kimlik karesi
+# kareleri gözden geçir, beğenmediğini sil ve tekrar çalıştır, sonra:
+python3 -m persona images --out cikti
 ```
 
-Görseller `cikti/gorseller/` altına düşer. **Not:** en iyi sonuç için önce
-referans karesini üretip aracın referans görsel özelliğini kullan; bu komut
-saf metinden üretir.
+Sıra önemli ve komut bunu kendisi uyguluyor: **önce kimlik kareleri**
+(`gorseller/identity/`), sonra içerik kareleri — ve içerik kareleri
+üretilirken ilk kimlik karesi otomatik olarak **referans görsel** verilir.
+Referans olmadan 100 promptdan 100 farklı yüz çıkar; mimarinin tamamı bunun
+üzerine kurulu.
+
+| Bayrak | Ne yapar |
+|---|---|
+| `--dry-run` | Üretmeden listeler; kaç kare, hangileri |
+| `--identity-only` | Sadece kimlik karelerini üretir |
+| `--skip-identity` | Kimlik karelerini atlar |
+| `--reference PATH` | Otomatik seçim yerine bu kareyi referans alır |
+| `--limit N` | Sadece ilk N içerik karesi |
+| `--overwrite` | Var olanları yeniden üretir |
+
+Var olan dosyalar atlanır, yani komut yarıda kesilirse kaldığı yerden devam
+eder. Referans görseli şu an sadece `replicate` sağlayıcısı destekliyor;
+`openai` ile yüzler kayar ve komut bunu uyarı olarak söyler.
 
 ### Kendi karakterini yap
 
