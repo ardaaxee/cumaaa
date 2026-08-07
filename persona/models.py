@@ -67,6 +67,8 @@ class Pillar:
     wardrobe: list[str] = field(default_factory=list)
     locations: list[str] = field(default_factory=list)
     camera: list[str] = field(default_factory=list)
+    #: Karede ikinci bir kişi varsa `Character.companions` içindeki adı.
+    companion: str = ""
 
     @classmethod
     def from_dict(cls, d: dict[str, Any]) -> Pillar:
@@ -91,6 +93,9 @@ class Character:
     visual: VisualIdentity
     voice: Voice
     pillars: list[Pillar]
+    #: Karede birlikte görünen kişilerin sabit görünüm tarifi (ad → anchor).
+    #: Ana karakterin anchor'ı gibi, bu metin de her promptta aynen tekrarlanır.
+    companions: dict[str, str] = field(default_factory=dict)
 
     # ---- yükleme / kaydetme -------------------------------------------------
 

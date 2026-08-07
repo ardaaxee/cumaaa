@@ -57,6 +57,17 @@ def build_prompt(
     parts = [
         f"Fotoğraf. {scene}.",
         f"KİŞİ (her karede birebir aynı): {v.anchor}. Saç: {v.hair}.",
+    ]
+
+    # Karede ikinci bir kişi varsa onun görünümü de sabit tutulmalı.
+    companion = pillar.companion if pillar else ""
+    if companion and companion in ch.companions:
+        parts.append(
+            f"İKİNCİ KİŞİ — {companion} (her karede birebir aynı): "
+            f"{ch.companions[companion]}."
+        )
+
+    parts += [
         f"Kıyafet: {wardrobe}.",
         f"Mekân: {location}.",
         f"Kamera/ışık: {camera}.",
