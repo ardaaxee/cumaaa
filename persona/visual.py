@@ -116,56 +116,88 @@ def profile_picture_prompt(ch: Character, rng: random.Random) -> str:
     )
 
 
-def reference_sheet_prompts(ch: Character, rng: random.Random) -> list[str]:
-    """İlk iş: karakter referans sayfası. Diğer tüm görseller buna dayanır."""
-    poses = [
-        "nötr ifade, tam karşıdan portre",
-        "profilden portre",
-        "hafif gülümseme, dörtte üç açı",
-        "tam boy, ayakta, düz duruş",
-    ]
-    return [
-        build_prompt(
-            ch,
-            f"karakter referans fotoğrafı: {pose}",
-            rng=rng,
-            kind="profile",
-            wardrobe="sade düz renk tişört ve kot",
-            location="düz açık gri arka plan önünde",
-            camera="50mm, yumuşak eşit ışık, gölgesiz",
-        )
-        for pose in poses
-    ]
+#: identity_reference modunda kullanılan dosya adı kökleri (poz sırasıyla).
+IDENTITY_SLUGS = ["01-onden", "02-profil", "03-uc-ceyrek", "04-tam-boy"]
 
 
-def companion_reference_prompts(ch: Character, name: str, rng: random.Random) -> list[str]:
+def identity_reference_prompts(
+    ch: Character, rng: random.Random | None = None
+) -> list[str]:
+    """`identity_reference` modu — yalnızca ana karakteri sabitleyen kareler.
+
+    Bilerek `build_prompt`'u kullanmaz: o fonksiyon sütuna bağlı companion
+    (yan karakter) satırı ekleyebiliyor. Burada karede tam olarak bir kişi
+    olması bir garanti, rastgeleliğe bırakılmış bir tercih değil — bu yüzden
+    prompt sıfırdan, sabit ve companion'a erişmeden kuruluyor.
+
+    `rng` kabul edilir ama kullanılmaz; bu modun çıktısı deterministiktir.
+    """
+    v = ch.visual
+    ir = v.identity_reference
+
+    prompts: list[str] = []
+    for pose in ir.poses:
+        parts = [
+            f"Kimlik referans fotoğrafı — {pose}.",
+            "KARE KURALI: karede tam olarak 1 (bir) kişi var. Başka insan yok, "
+            "yan karakter yok, hayvan veya evcil hayvan yok; arka planda da "
+            "insan ya da hayvan yok. Arka plan tamamen boş.",
+            f"KİŞİ (tek kişi, her karede birebir aynı): {v.anchor}. Saç: {v.hair}.",
+            f"Kıyafet: {ir.wardrobe}.",
+            f"Mekân: {ir.location}.",
+            f"Kamera/ışık: {ir.camera}.",
+            "Amaç: yüzü, saçı ve vücut kimliğini sabitlemek. Doğal ve gerçekçi "
+            "fotoğraf; ten dokusu görünür, retouch ve güzelleştirme yok.",
+            f"En-boy oranı {ir.aspect}.",
+        ]
+        prompt = " ".join(parts)
+        if v.negative:
+            prompt += "\n\nİSTENMEYEN: " + "; ".join(v.negative) + "."
+        prompt += "\n" + ir.negative_en
+        prompt += f"\nSeed: {v.seed}"
+        prompts.append(prompt)
+    return prompts
+
+
+def reference_sheet_prompts(ch: Character, rng: random.Random | None = None) -> list[str]:
+    """Karakter referans sayfası — artık identity_reference modunu kullanır.
+
+    Geriye dönük uyumluluk için isim korundu.
+    """
+    return identity_reference_prompts(ch, rng)
+
+
+def companion_reference_prompts(
+    ch: Character, name: str, rng: random.Random | None = None
+) -> list[str]:
     """Tekrar eden ikinci kişiler için ayrı referans sayfası.
 
-    Ana karakterin anchor'ı burada geçmez — kare sadece o kişiye ait.
+    Aynı identity_reference kuralları geçerli: karede tek kişi, hayvan yok,
+    arka plan boş. Ana karakterin anchor'ı burada geçmez — kare sadece o
+    kişiye ait. Çıktı deterministiktir; `rng` kabul edilir ama kullanılmaz.
     """
     anchor = ch.companions[name]
-    poses = [
-        "nötr ifade, tam karşıdan portre",
-        "profilden portre",
-        "hafif gülümseme, dörtte üç açı",
-        "tam boy, ayakta, düz duruş",
-    ]
+    ir = ch.visual.identity_reference
+
     out = []
-    for pose in poses:
-        out.append(
-            " ".join(
-                [
-                    f"Fotoğraf. Karakter referans fotoğrafı: {pose}.",
-                    f"KİŞİ — {name} (her karede birebir aynı): {anchor}.",
-                    "Mekân: düz açık gri arka plan önünde.",
-                    "Kamera/ışık: 50mm, yumuşak eşit ışık, gölgesiz.",
-                    f"Stil: {rng.choice(ch.visual.style_notes)}.",
-                    "Gerçekçi fotoğraf. En-boy oranı 1:1.",
-                    "\n\nİSTENMEYEN: " + "; ".join(ch.visual.negative) + ".",
-                    f"\nSeed: {ch.visual.seed}",
-                ]
-            )
-        )
+    for pose in ir.poses:
+        parts = [
+            f"Kimlik referans fotoğrafı — {pose}.",
+            "KARE KURALI: karede tam olarak 1 (bir) kişi var. Başka insan yok, "
+            "hayvan yok; arka plan tamamen boş.",
+            f"KİŞİ — {name} (tek kişi, her karede birebir aynı): {anchor}.",
+            f"Kıyafet: {ir.wardrobe}.",
+            f"Mekân: {ir.location}.",
+            f"Kamera/ışık: {ir.camera}.",
+            "Doğal ve gerçekçi fotoğraf; ten dokusu görünür, retouch yok.",
+            f"En-boy oranı {ir.aspect}.",
+        ]
+        prompt = " ".join(parts)
+        if ch.visual.negative:
+            prompt += "\n\nİSTENMEYEN: " + "; ".join(ch.visual.negative) + "."
+        prompt += "\n" + ir.negative_en
+        prompt += f"\nSeed: {ch.visual.seed}"
+        out.append(prompt)
     return out
 
 

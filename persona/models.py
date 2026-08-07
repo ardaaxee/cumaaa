@@ -11,6 +11,42 @@ from pathlib import Path
 from typing import Any
 
 
+#: Kimlik/referans karelerinin sonuna eklenen sert negatif kural.
+#: Görsel araçların çoğu İngilizce negatife daha iyi uyuyor, o yüzden İngilizce.
+IDENTITY_NEGATIVE = (
+    "ONLY ONE PERSON. No animals, no cat, no Poyraz, no other people, "
+    "no secondary characters, no background people, no background animals."
+)
+
+#: Kimlik referansı için varsayılan 4 poz.
+DEFAULT_IDENTITY_POSES = [
+    "önden portre, tam karşıdan, omuz üstü kadraj, nötr ifade, doğrudan kameraya bakıyor",
+    "profil portre, tam yandan 90 derece, omuz üstü kadraj, nötr ifade",
+    "3/4 açı portre, yüz kameradan 45 derece dönük, omuz üstü kadraj, çok hafif doğal gülümseme",
+    "tam boy, ayakta, düz duruş, kollar yanda serbest, tüm vücut kadrajda",
+]
+
+
+@dataclass
+class IdentityReference:
+    """`identity_reference` modu: yalnızca ana karakteri sabitleyen kareler.
+
+    Bu modda karede tam olarak bir kişi bulunur — yan karakter, hayvan ve
+    arka plan kalabalığı yoktur. Normal içerik promptlarını etkilemez.
+    """
+
+    wardrobe: str = "sade düz renk gri tişört ve koyu mavi kot, aksesuarsız"
+    location: str = "düz açık gri stüdyo fonu, tamamen boş, hiçbir nesne yok"
+    camera: str = "50mm, yumuşak eşit ışık, gölgesiz, nötr beyaz dengesi"
+    aspect: str = "1:1"
+    poses: list[str] = field(default_factory=lambda: list(DEFAULT_IDENTITY_POSES))
+    negative_en: str = IDENTITY_NEGATIVE
+
+    @classmethod
+    def from_dict(cls, d: dict[str, Any]) -> IdentityReference:
+        return cls(**d)
+
+
 @dataclass
 class VisualIdentity:
     """Tüm görsellerde aynı kişiyi üretmek için kullanılan sabit çapa."""
@@ -24,10 +60,16 @@ class VisualIdentity:
     style_notes: list[str] = field(default_factory=list)
     negative: list[str] = field(default_factory=list)
     seed: int = 720113
+    identity_reference: IdentityReference = field(default_factory=IdentityReference)
 
     @classmethod
     def from_dict(cls, d: dict[str, Any]) -> VisualIdentity:
-        return cls(**d)
+        d = dict(d)
+        ir = d.pop("identity_reference", None)
+        obj = cls(**d)
+        if ir:
+            obj.identity_reference = IdentityReference.from_dict(ir)
+        return obj
 
 
 @dataclass

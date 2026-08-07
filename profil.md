@@ -27,10 +27,10 @@ kurgusal karakter · içerikler yapay zekâ ile üretiliyor
 ## Profil fotoğrafı promptu
 
 ```
-Fotoğraf. omuz üstü portre, hafif yandan, kameraya bakmıyor, arkada bulanık deniz. KİŞİ (her karede birebir aynı): 27 yaşında Türk kadın; simetrik oval yüz, yüksek elmacık kemikleri, keskin ama yumuşak çene hattı, badem biçimli sıcak koyu kahverengi gözler ve uzun doğal kirpikler, kalın doğal kaşlar, ince düz burun, burun kemeriyle yanaklara yayılmış hafif çiller, dolgun olmayan ama net çizgili dudaklar, sol çene hattında küçük bir ben; kulakta tek ince altın halka, boyunda ince altın zincir; yüzücü yapısı — ince atletik gövde, düzgün duruş, belirgin köprücük kemiği, 1.68 boy; güneşten yanmış sıcak ten, makyajsız ya da neredeyse makyajsız. Saç: omuz altı koyu kahverengi doğal dalgalı saç, uçlarda güneşten açılmış bal tonları; genelde dağınık topuz ya da at kuyruğu, yüzün etrafında kaçak birkaç tel, denizden çıkınca tuzlu ve düzensiz. Kıyafet: haki keten gömlek, kolları kıvrık. Mekân: açık havada, kıyıda. Kamera/ışık: 50mm, sığ alan derinliği, doğal gün ışığı. Renk paleti: deniz mavisi, kum beji, solmuş turuncu, zeytin yeşili, kırık beyaz, yanık kiremit. Stil: poz vermemiş, yakalanmış anlar; kadraj bazen hafif eğri. Instagram gönderisi için doğal, belgesel hissi veren gerçekçi fotoğraf. En-boy oranı 1:1.
+Fotoğraf. omuz üstü portre, hafif yandan, kameraya bakmıyor, arkada bulanık deniz. KİŞİ (her karede birebir aynı): 27 yaşında Türk kadın; simetrik oval yüz, yüksek elmacık kemikleri, keskin ama yumuşak çene hattı, badem biçimli sıcak koyu kahverengi gözler ve uzun doğal kirpikler, kalın doğal kaşlar, ince düz burun, burun kemeriyle yanaklara yayılmış hafif çiller, dolgun olmayan ama net çizgili dudaklar, sol çene hattında küçük bir ben; kulakta tek ince altın halka, boyunda ince altın zincir; yüzücü yapısı — ince atletik gövde, düzgün duruş, belirgin köprücük kemiği, 1.68 boy; güneşten yanmış sıcak ten, makyajsız ya da neredeyse makyajsız. Saç: omuz altı koyu kahverengi doğal dalgalı saç, uçlarda güneşten açılmış bal tonları; genelde dağınık topuz ya da at kuyruğu, yüzün etrafında kaçak birkaç tel, denizden çıkınca tuzlu ve düzensiz. Kıyafet: haki keten gömlek, kolları kıvrık. Mekân: açık havada, kıyıda. Kamera/ışık: 50mm, sığ alan derinliği, doğal gün ışığı. Renk paleti: deniz mavisi, kum beji, solmuş turuncu, zeytin yeşili, kırık beyaz, yanık kiremit. Stil: güzellik ışıktan ve kadrajdan gelsin, pürüzsüzleştirmeden değil. Instagram gönderisi için doğal, belgesel hissi veren gerçekçi fotoğraf. En-boy oranı 1:1.
 
 İSTENMEYEN: plastik cilt, aşırı airbrush, stüdyo güzellik ışığı; pürüzsüzleştirilmiş ten, silinmiş çiller, yapay simetri; fazladan parmak, bozuk el, çarpık yüz; logo, okunaksız yazı, filigran; abartılı makyaj, moda çekimi pozu, mankenvari duruş; birden fazla farklı yüz, karakterin görünümünün değişmesi.
-Seed: 720113
+Seed: 7
 ```
 
 ## Öne çıkanlar (highlights)
@@ -133,37 +133,41 @@ referans görsel olarak kullan. Yüz tutarlılığı buradan gelir.
 ### Referans 1
 
 ```
-Fotoğraf. karakter referans fotoğrafı: nötr ifade, tam karşıdan portre. KİŞİ (her karede birebir aynı): 27 yaşında Türk kadın; simetrik oval yüz, yüksek elmacık kemikleri, keskin ama yumuşak çene hattı, badem biçimli sıcak koyu kahverengi gözler ve uzun doğal kirpikler, kalın doğal kaşlar, ince düz burun, burun kemeriyle yanaklara yayılmış hafif çiller, dolgun olmayan ama net çizgili dudaklar, sol çene hattında küçük bir ben; kulakta tek ince altın halka, boyunda ince altın zincir; yüzücü yapısı — ince atletik gövde, düzgün duruş, belirgin köprücük kemiği, 1.68 boy; güneşten yanmış sıcak ten, makyajsız ya da neredeyse makyajsız. Saç: omuz altı koyu kahverengi doğal dalgalı saç, uçlarda güneşten açılmış bal tonları; genelde dağınık topuz ya da at kuyruğu, yüzün etrafında kaçak birkaç tel, denizden çıkınca tuzlu ve düzensiz. Kıyafet: sade düz renk tişört ve kot. Mekân: düz açık gri arka plan önünde. Kamera/ışık: 50mm, yumuşak eşit ışık, gölgesiz. Renk paleti: deniz mavisi, kum beji, solmuş turuncu, zeytin yeşili, kırık beyaz, yanık kiremit. Stil: bazı kareler kişinin kendisini göstermez: sadece eller, ekipman, manzara. Instagram gönderisi için doğal, belgesel hissi veren gerçekçi fotoğraf. En-boy oranı 1:1.
+Kimlik referans fotoğrafı — önden portre, tam karşıdan, omuz üstü kadraj, nötr ifade, doğrudan kameraya bakıyor. KARE KURALI: karede tam olarak 1 (bir) kişi var. Başka insan yok, yan karakter yok, hayvan veya evcil hayvan yok; arka planda da insan ya da hayvan yok. Arka plan tamamen boş. KİŞİ (tek kişi, her karede birebir aynı): 27 yaşında Türk kadın; simetrik oval yüz, yüksek elmacık kemikleri, keskin ama yumuşak çene hattı, badem biçimli sıcak koyu kahverengi gözler ve uzun doğal kirpikler, kalın doğal kaşlar, ince düz burun, burun kemeriyle yanaklara yayılmış hafif çiller, dolgun olmayan ama net çizgili dudaklar, sol çene hattında küçük bir ben; kulakta tek ince altın halka, boyunda ince altın zincir; yüzücü yapısı — ince atletik gövde, düzgün duruş, belirgin köprücük kemiği, 1.68 boy; güneşten yanmış sıcak ten, makyajsız ya da neredeyse makyajsız. Saç: omuz altı koyu kahverengi doğal dalgalı saç, uçlarda güneşten açılmış bal tonları; genelde dağınık topuz ya da at kuyruğu, yüzün etrafında kaçak birkaç tel, denizden çıkınca tuzlu ve düzensiz. Kıyafet: sade düz renk gri tişört ve koyu mavi kot, aksesuarsız. Mekân: düz açık gri stüdyo fonu, tamamen boş, hiçbir nesne yok. Kamera/ışık: 50mm, yumuşak eşit ışık, gölgesiz, nötr beyaz dengesi. Amaç: yüzü, saçı ve vücut kimliğini sabitlemek. Doğal ve gerçekçi fotoğraf; ten dokusu görünür, retouch ve güzelleştirme yok. En-boy oranı 1:1.
 
 İSTENMEYEN: plastik cilt, aşırı airbrush, stüdyo güzellik ışığı; pürüzsüzleştirilmiş ten, silinmiş çiller, yapay simetri; fazladan parmak, bozuk el, çarpık yüz; logo, okunaksız yazı, filigran; abartılı makyaj, moda çekimi pozu, mankenvari duruş; birden fazla farklı yüz, karakterin görünümünün değişmesi.
-Seed: 720113
+ONLY ONE PERSON. No animals, no cat, no Poyraz, no other people, no secondary characters, no background people, no background animals.
+Seed: 7
 ```
 
 ### Referans 2
 
 ```
-Fotoğraf. karakter referans fotoğrafı: profilden portre. KİŞİ (her karede birebir aynı): 27 yaşında Türk kadın; simetrik oval yüz, yüksek elmacık kemikleri, keskin ama yumuşak çene hattı, badem biçimli sıcak koyu kahverengi gözler ve uzun doğal kirpikler, kalın doğal kaşlar, ince düz burun, burun kemeriyle yanaklara yayılmış hafif çiller, dolgun olmayan ama net çizgili dudaklar, sol çene hattında küçük bir ben; kulakta tek ince altın halka, boyunda ince altın zincir; yüzücü yapısı — ince atletik gövde, düzgün duruş, belirgin köprücük kemiği, 1.68 boy; güneşten yanmış sıcak ten, makyajsız ya da neredeyse makyajsız. Saç: omuz altı koyu kahverengi doğal dalgalı saç, uçlarda güneşten açılmış bal tonları; genelde dağınık topuz ya da at kuyruğu, yüzün etrafında kaçak birkaç tel, denizden çıkınca tuzlu ve düzensiz. Kıyafet: sade düz renk tişört ve kot. Mekân: düz açık gri arka plan önünde. Kamera/ışık: 50mm, yumuşak eşit ışık, gölgesiz. Renk paleti: deniz mavisi, kum beji, solmuş turuncu, zeytin yeşili, kırık beyaz, yanık kiremit. Stil: gülümseme zorlama değil, çoğu karede kameraya bakılmıyor. Instagram gönderisi için doğal, belgesel hissi veren gerçekçi fotoğraf. En-boy oranı 1:1.
+Kimlik referans fotoğrafı — profil portre, tam yandan 90 derece, omuz üstü kadraj, nötr ifade. KARE KURALI: karede tam olarak 1 (bir) kişi var. Başka insan yok, yan karakter yok, hayvan veya evcil hayvan yok; arka planda da insan ya da hayvan yok. Arka plan tamamen boş. KİŞİ (tek kişi, her karede birebir aynı): 27 yaşında Türk kadın; simetrik oval yüz, yüksek elmacık kemikleri, keskin ama yumuşak çene hattı, badem biçimli sıcak koyu kahverengi gözler ve uzun doğal kirpikler, kalın doğal kaşlar, ince düz burun, burun kemeriyle yanaklara yayılmış hafif çiller, dolgun olmayan ama net çizgili dudaklar, sol çene hattında küçük bir ben; kulakta tek ince altın halka, boyunda ince altın zincir; yüzücü yapısı — ince atletik gövde, düzgün duruş, belirgin köprücük kemiği, 1.68 boy; güneşten yanmış sıcak ten, makyajsız ya da neredeyse makyajsız. Saç: omuz altı koyu kahverengi doğal dalgalı saç, uçlarda güneşten açılmış bal tonları; genelde dağınık topuz ya da at kuyruğu, yüzün etrafında kaçak birkaç tel, denizden çıkınca tuzlu ve düzensiz. Kıyafet: sade düz renk gri tişört ve koyu mavi kot, aksesuarsız. Mekân: düz açık gri stüdyo fonu, tamamen boş, hiçbir nesne yok. Kamera/ışık: 50mm, yumuşak eşit ışık, gölgesiz, nötr beyaz dengesi. Amaç: yüzü, saçı ve vücut kimliğini sabitlemek. Doğal ve gerçekçi fotoğraf; ten dokusu görünür, retouch ve güzelleştirme yok. En-boy oranı 1:1.
 
 İSTENMEYEN: plastik cilt, aşırı airbrush, stüdyo güzellik ışığı; pürüzsüzleştirilmiş ten, silinmiş çiller, yapay simetri; fazladan parmak, bozuk el, çarpık yüz; logo, okunaksız yazı, filigran; abartılı makyaj, moda çekimi pozu, mankenvari duruş; birden fazla farklı yüz, karakterin görünümünün değişmesi.
-Seed: 720113
+ONLY ONE PERSON. No animals, no cat, no Poyraz, no other people, no secondary characters, no background people, no background animals.
+Seed: 7
 ```
 
 ### Referans 3
 
 ```
-Fotoğraf. karakter referans fotoğrafı: hafif gülümseme, dörtte üç açı. KİŞİ (her karede birebir aynı): 27 yaşında Türk kadın; simetrik oval yüz, yüksek elmacık kemikleri, keskin ama yumuşak çene hattı, badem biçimli sıcak koyu kahverengi gözler ve uzun doğal kirpikler, kalın doğal kaşlar, ince düz burun, burun kemeriyle yanaklara yayılmış hafif çiller, dolgun olmayan ama net çizgili dudaklar, sol çene hattında küçük bir ben; kulakta tek ince altın halka, boyunda ince altın zincir; yüzücü yapısı — ince atletik gövde, düzgün duruş, belirgin köprücük kemiği, 1.68 boy; güneşten yanmış sıcak ten, makyajsız ya da neredeyse makyajsız. Saç: omuz altı koyu kahverengi doğal dalgalı saç, uçlarda güneşten açılmış bal tonları; genelde dağınık topuz ya da at kuyruğu, yüzün etrafında kaçak birkaç tel, denizden çıkınca tuzlu ve düzensiz. Kıyafet: sade düz renk tişört ve kot. Mekân: düz açık gri arka plan önünde. Kamera/ışık: 50mm, yumuşak eşit ışık, gölgesiz. Renk paleti: deniz mavisi, kum beji, solmuş turuncu, zeytin yeşili, kırık beyaz, yanık kiremit. Stil: gülümseme zorlama değil, çoğu karede kameraya bakılmıyor. Instagram gönderisi için doğal, belgesel hissi veren gerçekçi fotoğraf. En-boy oranı 1:1.
+Kimlik referans fotoğrafı — 3/4 açı portre, yüz kameradan 45 derece dönük, omuz üstü kadraj, çok hafif doğal gülümseme. KARE KURALI: karede tam olarak 1 (bir) kişi var. Başka insan yok, yan karakter yok, hayvan veya evcil hayvan yok; arka planda da insan ya da hayvan yok. Arka plan tamamen boş. KİŞİ (tek kişi, her karede birebir aynı): 27 yaşında Türk kadın; simetrik oval yüz, yüksek elmacık kemikleri, keskin ama yumuşak çene hattı, badem biçimli sıcak koyu kahverengi gözler ve uzun doğal kirpikler, kalın doğal kaşlar, ince düz burun, burun kemeriyle yanaklara yayılmış hafif çiller, dolgun olmayan ama net çizgili dudaklar, sol çene hattında küçük bir ben; kulakta tek ince altın halka, boyunda ince altın zincir; yüzücü yapısı — ince atletik gövde, düzgün duruş, belirgin köprücük kemiği, 1.68 boy; güneşten yanmış sıcak ten, makyajsız ya da neredeyse makyajsız. Saç: omuz altı koyu kahverengi doğal dalgalı saç, uçlarda güneşten açılmış bal tonları; genelde dağınık topuz ya da at kuyruğu, yüzün etrafında kaçak birkaç tel, denizden çıkınca tuzlu ve düzensiz. Kıyafet: sade düz renk gri tişört ve koyu mavi kot, aksesuarsız. Mekân: düz açık gri stüdyo fonu, tamamen boş, hiçbir nesne yok. Kamera/ışık: 50mm, yumuşak eşit ışık, gölgesiz, nötr beyaz dengesi. Amaç: yüzü, saçı ve vücut kimliğini sabitlemek. Doğal ve gerçekçi fotoğraf; ten dokusu görünür, retouch ve güzelleştirme yok. En-boy oranı 1:1.
 
 İSTENMEYEN: plastik cilt, aşırı airbrush, stüdyo güzellik ışığı; pürüzsüzleştirilmiş ten, silinmiş çiller, yapay simetri; fazladan parmak, bozuk el, çarpık yüz; logo, okunaksız yazı, filigran; abartılı makyaj, moda çekimi pozu, mankenvari duruş; birden fazla farklı yüz, karakterin görünümünün değişmesi.
-Seed: 720113
+ONLY ONE PERSON. No animals, no cat, no Poyraz, no other people, no secondary characters, no background people, no background animals.
+Seed: 7
 ```
 
 ### Referans 4
 
 ```
-Fotoğraf. karakter referans fotoğrafı: tam boy, ayakta, düz duruş. KİŞİ (her karede birebir aynı): 27 yaşında Türk kadın; simetrik oval yüz, yüksek elmacık kemikleri, keskin ama yumuşak çene hattı, badem biçimli sıcak koyu kahverengi gözler ve uzun doğal kirpikler, kalın doğal kaşlar, ince düz burun, burun kemeriyle yanaklara yayılmış hafif çiller, dolgun olmayan ama net çizgili dudaklar, sol çene hattında küçük bir ben; kulakta tek ince altın halka, boyunda ince altın zincir; yüzücü yapısı — ince atletik gövde, düzgün duruş, belirgin köprücük kemiği, 1.68 boy; güneşten yanmış sıcak ten, makyajsız ya da neredeyse makyajsız. Saç: omuz altı koyu kahverengi doğal dalgalı saç, uçlarda güneşten açılmış bal tonları; genelde dağınık topuz ya da at kuyruğu, yüzün etrafında kaçak birkaç tel, denizden çıkınca tuzlu ve düzensiz. Kıyafet: sade düz renk tişört ve kot. Mekân: düz açık gri arka plan önünde. Kamera/ışık: 50mm, yumuşak eşit ışık, gölgesiz. Renk paleti: deniz mavisi, kum beji, solmuş turuncu, zeytin yeşili, kırık beyaz, yanık kiremit. Stil: aşırı retouch yok, ten dokusu, çiller ve gözenekler görünür kalsın. Instagram gönderisi için doğal, belgesel hissi veren gerçekçi fotoğraf. En-boy oranı 1:1.
+Kimlik referans fotoğrafı — tam boy, ayakta, düz duruş, kollar yanda serbest, tüm vücut kadrajda. KARE KURALI: karede tam olarak 1 (bir) kişi var. Başka insan yok, yan karakter yok, hayvan veya evcil hayvan yok; arka planda da insan ya da hayvan yok. Arka plan tamamen boş. KİŞİ (tek kişi, her karede birebir aynı): 27 yaşında Türk kadın; simetrik oval yüz, yüksek elmacık kemikleri, keskin ama yumuşak çene hattı, badem biçimli sıcak koyu kahverengi gözler ve uzun doğal kirpikler, kalın doğal kaşlar, ince düz burun, burun kemeriyle yanaklara yayılmış hafif çiller, dolgun olmayan ama net çizgili dudaklar, sol çene hattında küçük bir ben; kulakta tek ince altın halka, boyunda ince altın zincir; yüzücü yapısı — ince atletik gövde, düzgün duruş, belirgin köprücük kemiği, 1.68 boy; güneşten yanmış sıcak ten, makyajsız ya da neredeyse makyajsız. Saç: omuz altı koyu kahverengi doğal dalgalı saç, uçlarda güneşten açılmış bal tonları; genelde dağınık topuz ya da at kuyruğu, yüzün etrafında kaçak birkaç tel, denizden çıkınca tuzlu ve düzensiz. Kıyafet: sade düz renk gri tişört ve koyu mavi kot, aksesuarsız. Mekân: düz açık gri stüdyo fonu, tamamen boş, hiçbir nesne yok. Kamera/ışık: 50mm, yumuşak eşit ışık, gölgesiz, nötr beyaz dengesi. Amaç: yüzü, saçı ve vücut kimliğini sabitlemek. Doğal ve gerçekçi fotoğraf; ten dokusu görünür, retouch ve güzelleştirme yok. En-boy oranı 1:1.
 
 İSTENMEYEN: plastik cilt, aşırı airbrush, stüdyo güzellik ışığı; pürüzsüzleştirilmiş ten, silinmiş çiller, yapay simetri; fazladan parmak, bozuk el, çarpık yüz; logo, okunaksız yazı, filigran; abartılı makyaj, moda çekimi pozu, mankenvari duruş; birden fazla farklı yüz, karakterin görünümünün değişmesi.
-Seed: 720113
+ONLY ONE PERSON. No animals, no cat, no Poyraz, no other people, no secondary characters, no background people, no background animals.
+Seed: 7
 ```
 
 ## Elif — referans sayfası
@@ -175,37 +179,41 @@ görsel olarak ver.
 ### Elif referans 1
 
 ```
-Fotoğraf. Karakter referans fotoğrafı: nötr ifade, tam karşıdan portre. KİŞİ — Elif (her karede birebir aynı): 29 yaşında Türk kadın; açık buğday ten, kulak hizasında kısa siyah bob saç ve künt kesim kâkül, kalın çerçeveli yuvarlak gözlük ardında koyu yeşil gözler, ince uzun yüz, belirgin elmacık kemikleri, keskin çene, sol kaşında küçük bir yara izi, dudakta koyu kiremit ruj; uzun boylu (1.75), zarif ince yapı, uzun boyun; geniş kesim keten gömlek, bol triko ya da tulum giyer, bileğinde birkaç ince gümüş bilezik. Mekân: düz açık gri arka plan önünde. Kamera/ışık: 50mm, yumuşak eşit ışık, gölgesiz. Stil: gülümseme zorlama değil, çoğu karede kameraya bakılmıyor. Gerçekçi fotoğraf. En-boy oranı 1:1. 
+Kimlik referans fotoğrafı — önden portre, tam karşıdan, omuz üstü kadraj, nötr ifade, doğrudan kameraya bakıyor. KARE KURALI: karede tam olarak 1 (bir) kişi var. Başka insan yok, hayvan yok; arka plan tamamen boş. KİŞİ — Elif (tek kişi, her karede birebir aynı): 29 yaşında Türk kadın; açık buğday ten, kulak hizasında kısa siyah bob saç ve künt kesim kâkül, kalın çerçeveli yuvarlak gözlük ardında koyu yeşil gözler, ince uzun yüz, belirgin elmacık kemikleri, keskin çene, sol kaşında küçük bir yara izi, dudakta koyu kiremit ruj; uzun boylu (1.75), zarif ince yapı, uzun boyun; geniş kesim keten gömlek, bol triko ya da tulum giyer, bileğinde birkaç ince gümüş bilezik. Kıyafet: sade düz renk gri tişört ve koyu mavi kot, aksesuarsız. Mekân: düz açık gri stüdyo fonu, tamamen boş, hiçbir nesne yok. Kamera/ışık: 50mm, yumuşak eşit ışık, gölgesiz, nötr beyaz dengesi. Doğal ve gerçekçi fotoğraf; ten dokusu görünür, retouch yok. En-boy oranı 1:1.
 
-İSTENMEYEN: plastik cilt, aşırı airbrush, stüdyo güzellik ışığı; pürüzsüzleştirilmiş ten, silinmiş çiller, yapay simetri; fazladan parmak, bozuk el, çarpık yüz; logo, okunaksız yazı, filigran; abartılı makyaj, moda çekimi pozu, mankenvari duruş; birden fazla farklı yüz, karakterin görünümünün değişmesi. 
-Seed: 720113
+İSTENMEYEN: plastik cilt, aşırı airbrush, stüdyo güzellik ışığı; pürüzsüzleştirilmiş ten, silinmiş çiller, yapay simetri; fazladan parmak, bozuk el, çarpık yüz; logo, okunaksız yazı, filigran; abartılı makyaj, moda çekimi pozu, mankenvari duruş; birden fazla farklı yüz, karakterin görünümünün değişmesi.
+ONLY ONE PERSON. No animals, no cat, no Poyraz, no other people, no secondary characters, no background people, no background animals.
+Seed: 7
 ```
 
 ### Elif referans 2
 
 ```
-Fotoğraf. Karakter referans fotoğrafı: profilden portre. KİŞİ — Elif (her karede birebir aynı): 29 yaşında Türk kadın; açık buğday ten, kulak hizasında kısa siyah bob saç ve künt kesim kâkül, kalın çerçeveli yuvarlak gözlük ardında koyu yeşil gözler, ince uzun yüz, belirgin elmacık kemikleri, keskin çene, sol kaşında küçük bir yara izi, dudakta koyu kiremit ruj; uzun boylu (1.75), zarif ince yapı, uzun boyun; geniş kesim keten gömlek, bol triko ya da tulum giyer, bileğinde birkaç ince gümüş bilezik. Mekân: düz açık gri arka plan önünde. Kamera/ışık: 50mm, yumuşak eşit ışık, gölgesiz. Stil: her karede en az bir 'gerçek hayat' detayı: ıslak saç, kirli bot, kupada kalmış kahve. Gerçekçi fotoğraf. En-boy oranı 1:1. 
+Kimlik referans fotoğrafı — profil portre, tam yandan 90 derece, omuz üstü kadraj, nötr ifade. KARE KURALI: karede tam olarak 1 (bir) kişi var. Başka insan yok, hayvan yok; arka plan tamamen boş. KİŞİ — Elif (tek kişi, her karede birebir aynı): 29 yaşında Türk kadın; açık buğday ten, kulak hizasında kısa siyah bob saç ve künt kesim kâkül, kalın çerçeveli yuvarlak gözlük ardında koyu yeşil gözler, ince uzun yüz, belirgin elmacık kemikleri, keskin çene, sol kaşında küçük bir yara izi, dudakta koyu kiremit ruj; uzun boylu (1.75), zarif ince yapı, uzun boyun; geniş kesim keten gömlek, bol triko ya da tulum giyer, bileğinde birkaç ince gümüş bilezik. Kıyafet: sade düz renk gri tişört ve koyu mavi kot, aksesuarsız. Mekân: düz açık gri stüdyo fonu, tamamen boş, hiçbir nesne yok. Kamera/ışık: 50mm, yumuşak eşit ışık, gölgesiz, nötr beyaz dengesi. Doğal ve gerçekçi fotoğraf; ten dokusu görünür, retouch yok. En-boy oranı 1:1.
 
-İSTENMEYEN: plastik cilt, aşırı airbrush, stüdyo güzellik ışığı; pürüzsüzleştirilmiş ten, silinmiş çiller, yapay simetri; fazladan parmak, bozuk el, çarpık yüz; logo, okunaksız yazı, filigran; abartılı makyaj, moda çekimi pozu, mankenvari duruş; birden fazla farklı yüz, karakterin görünümünün değişmesi. 
-Seed: 720113
+İSTENMEYEN: plastik cilt, aşırı airbrush, stüdyo güzellik ışığı; pürüzsüzleştirilmiş ten, silinmiş çiller, yapay simetri; fazladan parmak, bozuk el, çarpık yüz; logo, okunaksız yazı, filigran; abartılı makyaj, moda çekimi pozu, mankenvari duruş; birden fazla farklı yüz, karakterin görünümünün değişmesi.
+ONLY ONE PERSON. No animals, no cat, no Poyraz, no other people, no secondary characters, no background people, no background animals.
+Seed: 7
 ```
 
 ### Elif referans 3
 
 ```
-Fotoğraf. Karakter referans fotoğrafı: hafif gülümseme, dörtte üç açı. KİŞİ — Elif (her karede birebir aynı): 29 yaşında Türk kadın; açık buğday ten, kulak hizasında kısa siyah bob saç ve künt kesim kâkül, kalın çerçeveli yuvarlak gözlük ardında koyu yeşil gözler, ince uzun yüz, belirgin elmacık kemikleri, keskin çene, sol kaşında küçük bir yara izi, dudakta koyu kiremit ruj; uzun boylu (1.75), zarif ince yapı, uzun boyun; geniş kesim keten gömlek, bol triko ya da tulum giyer, bileğinde birkaç ince gümüş bilezik. Mekân: düz açık gri arka plan önünde. Kamera/ışık: 50mm, yumuşak eşit ışık, gölgesiz. Stil: bazı kareler kişinin kendisini göstermez: sadece eller, ekipman, manzara. Gerçekçi fotoğraf. En-boy oranı 1:1. 
+Kimlik referans fotoğrafı — 3/4 açı portre, yüz kameradan 45 derece dönük, omuz üstü kadraj, çok hafif doğal gülümseme. KARE KURALI: karede tam olarak 1 (bir) kişi var. Başka insan yok, hayvan yok; arka plan tamamen boş. KİŞİ — Elif (tek kişi, her karede birebir aynı): 29 yaşında Türk kadın; açık buğday ten, kulak hizasında kısa siyah bob saç ve künt kesim kâkül, kalın çerçeveli yuvarlak gözlük ardında koyu yeşil gözler, ince uzun yüz, belirgin elmacık kemikleri, keskin çene, sol kaşında küçük bir yara izi, dudakta koyu kiremit ruj; uzun boylu (1.75), zarif ince yapı, uzun boyun; geniş kesim keten gömlek, bol triko ya da tulum giyer, bileğinde birkaç ince gümüş bilezik. Kıyafet: sade düz renk gri tişört ve koyu mavi kot, aksesuarsız. Mekân: düz açık gri stüdyo fonu, tamamen boş, hiçbir nesne yok. Kamera/ışık: 50mm, yumuşak eşit ışık, gölgesiz, nötr beyaz dengesi. Doğal ve gerçekçi fotoğraf; ten dokusu görünür, retouch yok. En-boy oranı 1:1.
 
-İSTENMEYEN: plastik cilt, aşırı airbrush, stüdyo güzellik ışığı; pürüzsüzleştirilmiş ten, silinmiş çiller, yapay simetri; fazladan parmak, bozuk el, çarpık yüz; logo, okunaksız yazı, filigran; abartılı makyaj, moda çekimi pozu, mankenvari duruş; birden fazla farklı yüz, karakterin görünümünün değişmesi. 
-Seed: 720113
+İSTENMEYEN: plastik cilt, aşırı airbrush, stüdyo güzellik ışığı; pürüzsüzleştirilmiş ten, silinmiş çiller, yapay simetri; fazladan parmak, bozuk el, çarpık yüz; logo, okunaksız yazı, filigran; abartılı makyaj, moda çekimi pozu, mankenvari duruş; birden fazla farklı yüz, karakterin görünümünün değişmesi.
+ONLY ONE PERSON. No animals, no cat, no Poyraz, no other people, no secondary characters, no background people, no background animals.
+Seed: 7
 ```
 
 ### Elif referans 4
 
 ```
-Fotoğraf. Karakter referans fotoğrafı: tam boy, ayakta, düz duruş. KİŞİ — Elif (her karede birebir aynı): 29 yaşında Türk kadın; açık buğday ten, kulak hizasında kısa siyah bob saç ve künt kesim kâkül, kalın çerçeveli yuvarlak gözlük ardında koyu yeşil gözler, ince uzun yüz, belirgin elmacık kemikleri, keskin çene, sol kaşında küçük bir yara izi, dudakta koyu kiremit ruj; uzun boylu (1.75), zarif ince yapı, uzun boyun; geniş kesim keten gömlek, bol triko ya da tulum giyer, bileğinde birkaç ince gümüş bilezik. Mekân: düz açık gri arka plan önünde. Kamera/ışık: 50mm, yumuşak eşit ışık, gölgesiz. Stil: bazı kareler kişinin kendisini göstermez: sadece eller, ekipman, manzara. Gerçekçi fotoğraf. En-boy oranı 1:1. 
+Kimlik referans fotoğrafı — tam boy, ayakta, düz duruş, kollar yanda serbest, tüm vücut kadrajda. KARE KURALI: karede tam olarak 1 (bir) kişi var. Başka insan yok, hayvan yok; arka plan tamamen boş. KİŞİ — Elif (tek kişi, her karede birebir aynı): 29 yaşında Türk kadın; açık buğday ten, kulak hizasında kısa siyah bob saç ve künt kesim kâkül, kalın çerçeveli yuvarlak gözlük ardında koyu yeşil gözler, ince uzun yüz, belirgin elmacık kemikleri, keskin çene, sol kaşında küçük bir yara izi, dudakta koyu kiremit ruj; uzun boylu (1.75), zarif ince yapı, uzun boyun; geniş kesim keten gömlek, bol triko ya da tulum giyer, bileğinde birkaç ince gümüş bilezik. Kıyafet: sade düz renk gri tişört ve koyu mavi kot, aksesuarsız. Mekân: düz açık gri stüdyo fonu, tamamen boş, hiçbir nesne yok. Kamera/ışık: 50mm, yumuşak eşit ışık, gölgesiz, nötr beyaz dengesi. Doğal ve gerçekçi fotoğraf; ten dokusu görünür, retouch yok. En-boy oranı 1:1.
 
-İSTENMEYEN: plastik cilt, aşırı airbrush, stüdyo güzellik ışığı; pürüzsüzleştirilmiş ten, silinmiş çiller, yapay simetri; fazladan parmak, bozuk el, çarpık yüz; logo, okunaksız yazı, filigran; abartılı makyaj, moda çekimi pozu, mankenvari duruş; birden fazla farklı yüz, karakterin görünümünün değişmesi. 
-Seed: 720113
+İSTENMEYEN: plastik cilt, aşırı airbrush, stüdyo güzellik ışığı; pürüzsüzleştirilmiş ten, silinmiş çiller, yapay simetri; fazladan parmak, bozuk el, çarpık yüz; logo, okunaksız yazı, filigran; abartılı makyaj, moda çekimi pozu, mankenvari duruş; birden fazla farklı yüz, karakterin görünümünün değişmesi.
+ONLY ONE PERSON. No animals, no cat, no Poyraz, no other people, no secondary characters, no background people, no background animals.
+Seed: 7
 ```
 
 ## Sinan — referans sayfası
@@ -217,42 +225,46 @@ görsel olarak ver.
 ### Sinan referans 1
 
 ```
-Fotoğraf. Karakter referans fotoğrafı: nötr ifade, tam karşıdan portre. KİŞİ — Sinan (her karede birebir aynı): 31 yaşında Türk erkek; güneşten yanmış koyu ten, kısa kesilmiş siyah saç, üç günlük sakal, geniş omuz ve dalgıç yapısı, koyu gözler, sol kaşında ikiye bölen ince iz, sıcak ve yorgun bir gülümseme; genelde neopren üstü indirilmiş dalgıç kıyafeti ya da solmuş tişört. Mekân: düz açık gri arka plan önünde. Kamera/ışık: 50mm, yumuşak eşit ışık, gölgesiz. Stil: bazı kareler kişinin kendisini göstermez: sadece eller, ekipman, manzara. Gerçekçi fotoğraf. En-boy oranı 1:1. 
+Kimlik referans fotoğrafı — önden portre, tam karşıdan, omuz üstü kadraj, nötr ifade, doğrudan kameraya bakıyor. KARE KURALI: karede tam olarak 1 (bir) kişi var. Başka insan yok, hayvan yok; arka plan tamamen boş. KİŞİ — Sinan (tek kişi, her karede birebir aynı): 31 yaşında Türk erkek; güneşten yanmış koyu ten, kısa kesilmiş siyah saç, üç günlük sakal, geniş omuz ve dalgıç yapısı, koyu gözler, sol kaşında ikiye bölen ince iz, sıcak ve yorgun bir gülümseme; genelde neopren üstü indirilmiş dalgıç kıyafeti ya da solmuş tişört. Kıyafet: sade düz renk gri tişört ve koyu mavi kot, aksesuarsız. Mekân: düz açık gri stüdyo fonu, tamamen boş, hiçbir nesne yok. Kamera/ışık: 50mm, yumuşak eşit ışık, gölgesiz, nötr beyaz dengesi. Doğal ve gerçekçi fotoğraf; ten dokusu görünür, retouch yok. En-boy oranı 1:1.
 
-İSTENMEYEN: plastik cilt, aşırı airbrush, stüdyo güzellik ışığı; pürüzsüzleştirilmiş ten, silinmiş çiller, yapay simetri; fazladan parmak, bozuk el, çarpık yüz; logo, okunaksız yazı, filigran; abartılı makyaj, moda çekimi pozu, mankenvari duruş; birden fazla farklı yüz, karakterin görünümünün değişmesi. 
-Seed: 720113
+İSTENMEYEN: plastik cilt, aşırı airbrush, stüdyo güzellik ışığı; pürüzsüzleştirilmiş ten, silinmiş çiller, yapay simetri; fazladan parmak, bozuk el, çarpık yüz; logo, okunaksız yazı, filigran; abartılı makyaj, moda çekimi pozu, mankenvari duruş; birden fazla farklı yüz, karakterin görünümünün değişmesi.
+ONLY ONE PERSON. No animals, no cat, no Poyraz, no other people, no secondary characters, no background people, no background animals.
+Seed: 7
 ```
 
 ### Sinan referans 2
 
 ```
-Fotoğraf. Karakter referans fotoğrafı: profilden portre. KİŞİ — Sinan (her karede birebir aynı): 31 yaşında Türk erkek; güneşten yanmış koyu ten, kısa kesilmiş siyah saç, üç günlük sakal, geniş omuz ve dalgıç yapısı, koyu gözler, sol kaşında ikiye bölen ince iz, sıcak ve yorgun bir gülümseme; genelde neopren üstü indirilmiş dalgıç kıyafeti ya da solmuş tişört. Mekân: düz açık gri arka plan önünde. Kamera/ışık: 50mm, yumuşak eşit ışık, gölgesiz. Stil: her karede en az bir 'gerçek hayat' detayı: ıslak saç, kirli bot, kupada kalmış kahve. Gerçekçi fotoğraf. En-boy oranı 1:1. 
+Kimlik referans fotoğrafı — profil portre, tam yandan 90 derece, omuz üstü kadraj, nötr ifade. KARE KURALI: karede tam olarak 1 (bir) kişi var. Başka insan yok, hayvan yok; arka plan tamamen boş. KİŞİ — Sinan (tek kişi, her karede birebir aynı): 31 yaşında Türk erkek; güneşten yanmış koyu ten, kısa kesilmiş siyah saç, üç günlük sakal, geniş omuz ve dalgıç yapısı, koyu gözler, sol kaşında ikiye bölen ince iz, sıcak ve yorgun bir gülümseme; genelde neopren üstü indirilmiş dalgıç kıyafeti ya da solmuş tişört. Kıyafet: sade düz renk gri tişört ve koyu mavi kot, aksesuarsız. Mekân: düz açık gri stüdyo fonu, tamamen boş, hiçbir nesne yok. Kamera/ışık: 50mm, yumuşak eşit ışık, gölgesiz, nötr beyaz dengesi. Doğal ve gerçekçi fotoğraf; ten dokusu görünür, retouch yok. En-boy oranı 1:1.
 
-İSTENMEYEN: plastik cilt, aşırı airbrush, stüdyo güzellik ışığı; pürüzsüzleştirilmiş ten, silinmiş çiller, yapay simetri; fazladan parmak, bozuk el, çarpık yüz; logo, okunaksız yazı, filigran; abartılı makyaj, moda çekimi pozu, mankenvari duruş; birden fazla farklı yüz, karakterin görünümünün değişmesi. 
-Seed: 720113
+İSTENMEYEN: plastik cilt, aşırı airbrush, stüdyo güzellik ışığı; pürüzsüzleştirilmiş ten, silinmiş çiller, yapay simetri; fazladan parmak, bozuk el, çarpık yüz; logo, okunaksız yazı, filigran; abartılı makyaj, moda çekimi pozu, mankenvari duruş; birden fazla farklı yüz, karakterin görünümünün değişmesi.
+ONLY ONE PERSON. No animals, no cat, no Poyraz, no other people, no secondary characters, no background people, no background animals.
+Seed: 7
 ```
 
 ### Sinan referans 3
 
 ```
-Fotoğraf. Karakter referans fotoğrafı: hafif gülümseme, dörtte üç açı. KİŞİ — Sinan (her karede birebir aynı): 31 yaşında Türk erkek; güneşten yanmış koyu ten, kısa kesilmiş siyah saç, üç günlük sakal, geniş omuz ve dalgıç yapısı, koyu gözler, sol kaşında ikiye bölen ince iz, sıcak ve yorgun bir gülümseme; genelde neopren üstü indirilmiş dalgıç kıyafeti ya da solmuş tişört. Mekân: düz açık gri arka plan önünde. Kamera/ışık: 50mm, yumuşak eşit ışık, gölgesiz. Stil: aşırı retouch yok, ten dokusu, çiller ve gözenekler görünür kalsın. Gerçekçi fotoğraf. En-boy oranı 1:1. 
+Kimlik referans fotoğrafı — 3/4 açı portre, yüz kameradan 45 derece dönük, omuz üstü kadraj, çok hafif doğal gülümseme. KARE KURALI: karede tam olarak 1 (bir) kişi var. Başka insan yok, hayvan yok; arka plan tamamen boş. KİŞİ — Sinan (tek kişi, her karede birebir aynı): 31 yaşında Türk erkek; güneşten yanmış koyu ten, kısa kesilmiş siyah saç, üç günlük sakal, geniş omuz ve dalgıç yapısı, koyu gözler, sol kaşında ikiye bölen ince iz, sıcak ve yorgun bir gülümseme; genelde neopren üstü indirilmiş dalgıç kıyafeti ya da solmuş tişört. Kıyafet: sade düz renk gri tişört ve koyu mavi kot, aksesuarsız. Mekân: düz açık gri stüdyo fonu, tamamen boş, hiçbir nesne yok. Kamera/ışık: 50mm, yumuşak eşit ışık, gölgesiz, nötr beyaz dengesi. Doğal ve gerçekçi fotoğraf; ten dokusu görünür, retouch yok. En-boy oranı 1:1.
 
-İSTENMEYEN: plastik cilt, aşırı airbrush, stüdyo güzellik ışığı; pürüzsüzleştirilmiş ten, silinmiş çiller, yapay simetri; fazladan parmak, bozuk el, çarpık yüz; logo, okunaksız yazı, filigran; abartılı makyaj, moda çekimi pozu, mankenvari duruş; birden fazla farklı yüz, karakterin görünümünün değişmesi. 
-Seed: 720113
+İSTENMEYEN: plastik cilt, aşırı airbrush, stüdyo güzellik ışığı; pürüzsüzleştirilmiş ten, silinmiş çiller, yapay simetri; fazladan parmak, bozuk el, çarpık yüz; logo, okunaksız yazı, filigran; abartılı makyaj, moda çekimi pozu, mankenvari duruş; birden fazla farklı yüz, karakterin görünümünün değişmesi.
+ONLY ONE PERSON. No animals, no cat, no Poyraz, no other people, no secondary characters, no background people, no background animals.
+Seed: 7
 ```
 
 ### Sinan referans 4
 
 ```
-Fotoğraf. Karakter referans fotoğrafı: tam boy, ayakta, düz duruş. KİŞİ — Sinan (her karede birebir aynı): 31 yaşında Türk erkek; güneşten yanmış koyu ten, kısa kesilmiş siyah saç, üç günlük sakal, geniş omuz ve dalgıç yapısı, koyu gözler, sol kaşında ikiye bölen ince iz, sıcak ve yorgun bir gülümseme; genelde neopren üstü indirilmiş dalgıç kıyafeti ya da solmuş tişört. Mekân: düz açık gri arka plan önünde. Kamera/ışık: 50mm, yumuşak eşit ışık, gölgesiz. Stil: bazı kareler kişinin kendisini göstermez: sadece eller, ekipman, manzara. Gerçekçi fotoğraf. En-boy oranı 1:1. 
+Kimlik referans fotoğrafı — tam boy, ayakta, düz duruş, kollar yanda serbest, tüm vücut kadrajda. KARE KURALI: karede tam olarak 1 (bir) kişi var. Başka insan yok, hayvan yok; arka plan tamamen boş. KİŞİ — Sinan (tek kişi, her karede birebir aynı): 31 yaşında Türk erkek; güneşten yanmış koyu ten, kısa kesilmiş siyah saç, üç günlük sakal, geniş omuz ve dalgıç yapısı, koyu gözler, sol kaşında ikiye bölen ince iz, sıcak ve yorgun bir gülümseme; genelde neopren üstü indirilmiş dalgıç kıyafeti ya da solmuş tişört. Kıyafet: sade düz renk gri tişört ve koyu mavi kot, aksesuarsız. Mekân: düz açık gri stüdyo fonu, tamamen boş, hiçbir nesne yok. Kamera/ışık: 50mm, yumuşak eşit ışık, gölgesiz, nötr beyaz dengesi. Doğal ve gerçekçi fotoğraf; ten dokusu görünür, retouch yok. En-boy oranı 1:1.
 
-İSTENMEYEN: plastik cilt, aşırı airbrush, stüdyo güzellik ışığı; pürüzsüzleştirilmiş ten, silinmiş çiller, yapay simetri; fazladan parmak, bozuk el, çarpık yüz; logo, okunaksız yazı, filigran; abartılı makyaj, moda çekimi pozu, mankenvari duruş; birden fazla farklı yüz, karakterin görünümünün değişmesi. 
-Seed: 720113
+İSTENMEYEN: plastik cilt, aşırı airbrush, stüdyo güzellik ışığı; pürüzsüzleştirilmiş ten, silinmiş çiller, yapay simetri; fazladan parmak, bozuk el, çarpık yüz; logo, okunaksız yazı, filigran; abartılı makyaj, moda çekimi pozu, mankenvari duruş; birden fazla farklı yüz, karakterin görünümünün değişmesi.
+ONLY ONE PERSON. No animals, no cat, no Poyraz, no other people, no secondary characters, no background people, no background animals.
+Seed: 7
 ```
 
 ## Araç ipuçları
 
-- **midjourney:** --cref <REFERANS_GORSEL_URL> --cw 100 --ar 4:5 --style raw --seed 720113
+- **midjourney:** --cref <REFERANS_GORSEL_URL> --cw 100 --ar 4:5 --style raw --seed 7
 - **flux:** IP-Adapter / Redux ile referans görsel ağırlığı 0.7-0.85
 - **sdxl:** IP-Adapter FaceID plus, ağırlık 0.8; ayrıca LoRA eğitilebilir
 - **nano-banana:** referans görseli ekle ve 'aynı kişi, aynı yüz' talimatını koru

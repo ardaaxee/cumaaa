@@ -156,7 +156,20 @@
       "abartılı makyaj, moda çekimi pozu, mankenvari duruş",
       "birden fazla farklı yüz, karakterin görünümünün değişmesi"
     ],
-    "seed": 720113
+    "seed": 720113,
+    "identity_reference": {
+      "wardrobe": "sade düz renk gri tişört ve koyu mavi kot, aksesuarsız",
+      "location": "düz açık gri stüdyo fonu, tamamen boş, hiçbir nesne yok",
+      "camera": "50mm, yumuşak eşit ışık, gölgesiz, nötr beyaz dengesi",
+      "aspect": "1:1",
+      "poses": [
+        "önden portre, tam karşıdan, omuz üstü kadraj, nötr ifade, doğrudan kameraya bakıyor",
+        "profil portre, tam yandan 90 derece, omuz üstü kadraj, nötr ifade",
+        "3/4 açı portre, yüz kameradan 45 derece dönük, omuz üstü kadraj, çok hafif doğal gülümseme",
+        "tam boy, ayakta, düz duruş, kollar yanda serbest, tüm vücut kadrajda"
+      ],
+      "negative_en": "ONLY ONE PERSON. No animals, no cat, no Poyraz, no other people, no secondary characters, no background people, no background animals."
+    }
   },
   "voice": {
     "language": "Türkçe",
