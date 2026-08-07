@@ -48,6 +48,16 @@ Yüz tutarlılığı bu tür hesapların en zor kısmı. Araç üç kaldıraç k
 Ayrıca kıyafet, mekân ve kamera seçimi **içerik sütununa bağlıdır** —
 laboratuvar karesine can yeleği, mutfak karesine dalış maskesi gelmez.
 
+Karede ikinci bir kişi varsa (`companions`) onun görünümü de aynı yöntemle
+sabitlenir ve `profil.md` ona da ayrı bir referans sayfası üretir.
+
+## Karaktere hayat veren şey: hikâye yayları
+
+`arcs` alanı aylara yayılan devam eden hikâyeleri tutar — tıkanan tez
+bölümü, takip edilen 12 numaralı fok, ev arkadaşının ilk sergisi. Tek tek
+gönderiler değil bunlar hesabı canlı gösterir; `profil.md` içinde adım adım
+listelenir, takvimi doldururken her yayın bir sonraki adımını sıraya koyarsın.
+
 ---
 
 ## Kullanım
