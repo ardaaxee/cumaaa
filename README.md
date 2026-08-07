@@ -4,9 +4,17 @@ Kurgusal bir Instagram karakteri için **tam içerik paketi** üreten araç:
 tutarlı fotoğraf promptları, karakterin kendi ağzından açıklamalar, reels
 senaryoları, hikâye planları ve yayın takvimi.
 
-Varsayılan karakter: **Beyza** (@beyza.saha.notu) — 27 yaşında deniz
-biyoloğu, İstanbul ↔ Datça arası gidip gelen bir doktora öğrencisi.
-Tamamen kurgusal.
+Depoda üç bağlantılı karakter var — aynı kurgusal evrende yaşayan, ayrı
+hesapları olan üç kişi:
+
+| Hesap | Kim | Ne paylaşır |
+|---|---|---|
+| `@beyza.saha.notu` | Beyza, 27, deniz biyoloğu | Saha, laboratuvar, İstanbul, portre |
+| `@elif.maketdefteri` | Elif, 29, mimar (ev arkadaşı) | Maket, sergi, ofis, ev |
+| `@sinan.dipnot` | Sinan, 31, dalgıç (saha ekibi) | Dalış, ekipman, tekne, ekip |
+
+Üçü birbirinin karesinde çıkıyor ve aynı olayı kendi ağzından anlatıyor.
+Hepsi kurgusal.
 
 ```bash
 python3 -m persona generate
@@ -181,6 +189,21 @@ eder. `tests/test_identity_reference.py` iki yönü de doğrular.
 ```bash
 python3 -m persona prompt "vapur güvertesinde çay içerken" --kind story
 ```
+
+### Üç hesabı birden: `network`
+
+```bash
+python3 -m persona network --out cikti-ag --full
+```
+
+Her karakter için ayrı bir paket (`cikti-ag/beyza/`, `elif/`, `sinan/`) ve
+hepsini bağlayan `hesap-agi.md` üretir: kim kimin karesinde çıkıyor, hangi
+hikâye yayı kaç hesapta geçiyor, aynı olay hangi sırayla paylaşılır.
+
+**Yüz kayması riski buradadır.** Bir kişi kendi dosyasında `visual.anchor`,
+başkasının dosyasında `companions[ad]` olarak geçer. İkisi ayrışırsa aynı
+karakter hesaplar arasında farklı bir yüze döner ve bu sessizce olur. Komut
+her çalıştığında kontrol eder, `tests/test_network.py` de doğrular.
 
 ### Testler
 

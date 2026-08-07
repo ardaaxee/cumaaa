@@ -9,7 +9,7 @@ import sys
 from datetime import date
 from pathlib import Path
 
-from . import content, export, images, visual
+from . import content, export, images, network, visual
 from .models import Character
 
 DEFAULT_CHARACTER = Path(__file__).parent / "characters" / "beyza.json"
@@ -128,6 +128,49 @@ def cmd_identity(args: argparse.Namespace) -> int:
     return 0
 
 
+def cmd_network(args: argparse.Namespace) -> int:
+    """Birden fazla hesabı tek bir evren olarak planla."""
+    paths = args.characters or sorted(DEFAULT_CHARACTER.parent.glob("*.json"))
+    chars = [Character.load(p) for p in paths]
+    if len(chars) < 2 :
+        raise SystemExit("Ağ planı için en az iki karakter dosyası gerekli.")
+
+    sorunlar = network.anchor_conflicts(chars)
+    for s in sorunlar:
+        print(f"UYARI: {s}", file=sys.stderr)
+
+    out = Path(args.out)
+    out.mkdir(parents=True, exist_ok=True)
+    (out / "hesap-agi.md").write_text(
+        network.build_network_doc(chars) + "\n", encoding="utf-8"
+    )
+
+    if args.full:
+        rng_seed = args.seed
+        for ch, path in zip(chars, paths):
+            sub_rng = random.Random(rng_seed if rng_seed is not None else ch.visual.seed)
+            start = date.fromisoformat(args.start) if args.start else date.today()
+            d = out / content.slugify(ch.display_name)
+            posts = content.build_posts(ch, args.posts, start, sub_rng, cadence_days=args.cadence)
+            reels = content.build_reels(ch, args.reels, start, sub_rng)
+            stories = content.build_stories(ch, args.stories, start, sub_rng)
+            rows = content.build_calendar(posts, reels, stories)
+            export.export_all(ch, posts, reels, stories, rows, d, sub_rng)
+            for slug, prompt in zip(
+                visual.IDENTITY_SLUGS, visual.identity_reference_prompts(ch)
+            ):
+                p = d / "identity" / f"{slug}.txt"
+                p.parent.mkdir(parents=True, exist_ok=True)
+                p.write_text(prompt + "\n", encoding="utf-8")
+            print(f"  @{ch.handle}: {len(posts)} gönderi, {len(reels)} reels", file=sys.stderr)
+
+    print(f"✓ {len(chars)} hesaplık ağ hazır: {out}")
+    print(f"  Başla: {out / 'hesap-agi.md'}")
+    if sorunlar:
+        print(f"  ⚠ {len(sorunlar)} görünüm tutarsızlığı var (yukarıda)")
+    return 0
+
+
 def cmd_prompt(args: argparse.Namespace) -> int:
     """Tek seferlik prompt üret (hızlı deneme için)."""
     ch = _load_character(args.character)
@@ -191,6 +234,18 @@ def build_parser() -> argparse.ArgumentParser:
         help="Yan karakterler için de ayrı kimlik kareleri üret",
     )
     idn.set_defaults(func=cmd_identity)
+
+    nw = sub.add_parser("network", help="Birden fazla hesabı tek evren olarak planla")
+    nw.add_argument("characters", nargs="*", help="Karakter JSON yolları (boşsa hepsi)")
+    nw.add_argument("--out", default="cikti-ag", help="Çıktı klasörü")
+    nw.add_argument("--full", action="store_true", help="Her hesap için tam paket üret")
+    nw.add_argument("--posts", type=int, default=20)
+    nw.add_argument("--reels", type=int, default=6)
+    nw.add_argument("--stories", type=int, default=14)
+    nw.add_argument("--cadence", type=int, default=2)
+    nw.add_argument("--start")
+    nw.add_argument("--seed", type=int)
+    nw.set_defaults(func=cmd_network)
 
     p = sub.add_parser("prompt", help="Tek bir sahne için görsel promptu yazdır")
     p.add_argument("scene", help="Sahne açıklaması")
