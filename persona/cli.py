@@ -154,6 +154,15 @@ def cmd_network(args: argparse.Namespace) -> int:
             posts = content.build_posts(ch, args.posts, start, sub_rng, cadence_days=args.cadence)
             reels = content.build_reels(ch, args.reels, start, sub_rng)
             stories = content.build_stories(ch, args.stories, start, sub_rng)
+
+            if args.captions_dir:
+                from . import llm
+
+                cap = Path(args.captions_dir) / f"{content.slugify(ch.display_name)}.json"
+                if cap.exists():
+                    np_, nr = llm.apply_caption_file(str(cap), posts, reels)
+                    print(f"    hazır açıklama: {np_} gönderi, {nr} reels", file=sys.stderr)
+
             rows = content.build_calendar(posts, reels, stories)
             export.export_all(ch, posts, reels, stories, rows, d, sub_rng)
             for slug, prompt in zip(
@@ -245,6 +254,10 @@ def build_parser() -> argparse.ArgumentParser:
     nw.add_argument("--cadence", type=int, default=2)
     nw.add_argument("--start")
     nw.add_argument("--seed", type=int)
+    nw.add_argument(
+        "--captions-dir",
+        help="Hazır açıklama klasörü; her karakter için <ad>.json aranır",
+    )
     nw.set_defaults(func=cmd_network)
 
     p = sub.add_parser("prompt", help="Tek bir sahne için görsel promptu yazdır")

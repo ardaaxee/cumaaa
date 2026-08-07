@@ -84,11 +84,25 @@ def build_prompt(
 
 
 def build_carousel(
-    ch: Character, pillar: Pillar, *, rng: random.Random, count: int = 3
+    ch: Character,
+    pillar: Pillar,
+    *,
+    rng: random.Random,
+    count: int = 3,
+    lead: str | None = None,
 ) -> list[str]:
-    """Aynı gün / aynı kıyafet / aynı mekân mantığıyla bir karusel serisi."""
+    """Aynı gün / aynı kıyafet / aynı mekân mantığıyla bir karusel serisi.
+
+    `lead` verilirse serinin ilk karesi o olur; çağıran taraf sahneyi
+    desteden çektiği için karusellerde de sahne tekrarı olmaz.
+    """
     ctx = context_for(ch, pillar, rng)
-    scenes = rng.sample(pillar.scenes, k=min(count, len(pillar.scenes)))
+    if lead is None:
+        scenes = rng.sample(pillar.scenes, k=min(count, len(pillar.scenes)))
+    else:
+        pool = [s for s in pillar.scenes if s != lead]
+        extra = rng.sample(pool, k=min(max(0, count - 1), len(pool)))
+        scenes = [lead, *extra]
     return [
         build_prompt(
             ch,

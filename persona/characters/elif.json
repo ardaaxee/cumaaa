@@ -47,10 +47,22 @@
     }
   ],
   "side_characters": [
-    { "name": "Beyza", "role": "Ev arkadaşı, deniz biyoloğu. Masanın diğer yarısı onun. Dört ay yok, dönünce ev doluyor." },
-    { "name": "Tolga", "role": "Ofis ortağı, 41. Her projeye 'bu bütçeyle olmaz' diye başlar, sonra yapar." },
-    { "name": "Sinan", "role": "Beyza'nın saha ekibinden dalgıç. Datça'daki depoyu ilk o gösterdi." },
-    { "name": "Nazlı", "role": "Galeriden küratör, 35. İki cümlede fikrini söyler, üçüncüde vazgeçirir." }
+    {
+      "name": "Beyza",
+      "role": "Ev arkadaşı, deniz biyoloğu. Masanın diğer yarısı onun. Dört ay yok, dönünce ev doluyor."
+    },
+    {
+      "name": "Tolga",
+      "role": "Ofis ortağı, 41. Her projeye 'bu bütçeyle olmaz' diye başlar, sonra yapar."
+    },
+    {
+      "name": "Sinan",
+      "role": "Beyza'nın saha ekibinden dalgıç. Datça'daki depoyu ilk o gösterdi."
+    },
+    {
+      "name": "Nazlı",
+      "role": "Galeriden küratör, 35. İki cümlede fikrini söyler, üçüncüde vazgeçirir."
+    }
   ],
   "routines": [
     "Hafta içi 09.00-18.30 ofis, akşam 20.00'den sonra kendi işi",
@@ -59,7 +71,14 @@
     "Her maketin ilk parçasını atıyor, ikinciden başlıyor",
     "Gece 01.00'den sonra müzik kapanır, sadece bıçak sesi"
   ],
-  "highlights": ["maket", "sergi", "ofis", "ev", "malzeme", "datça"],
+  "highlights": [
+    "maket",
+    "sergi",
+    "ofis",
+    "ev",
+    "malzeme",
+    "datça"
+  ],
   "companions": {
     "Beyza": "27 yaşında Türk kadın; simetrik oval yüz, yüksek elmacık kemikleri, keskin ama yumuşak çene hattı, badem biçimli sıcak koyu kahverengi gözler ve uzun doğal kirpikler, kalın doğal kaşlar, ince düz burun, burun kemeriyle yanaklara yayılmış hafif çiller, dolgun olmayan ama net çizgili dudaklar, sol çene hattında küçük bir ben; kulakta tek ince altın halka, boyunda ince altın zincir; yüzücü yapısı — ince atletik gövde, düzgün duruş, belirgin köprücük kemiği, 1.68 boy; güneşten yanmış sıcak ten, makyajsız ya da neredeyse makyajsız",
     "Sinan": "31 yaşında Türk erkek; güneşten yanmış koyu ten, kısa kesilmiş siyah saç, üç günlük sakal, geniş omuz ve dalgıç yapısı, koyu gözler, sol kaşında ikiye bölen ince iz, sıcak ve yorgun bir gülümseme"
@@ -75,7 +94,13 @@
       "uzun siyah elbise, ince gümüş bilezikler",
       "kot gömlek, üstünde karton tozu"
     ],
-    "palette": ["karton beji", "kiremit", "antrasit", "kırık beyaz", "soluk yeşil"],
+    "palette": [
+      "karton beji",
+      "kiremit",
+      "antrasit",
+      "kırık beyaz",
+      "soluk yeşil"
+    ],
     "camera": [
       "50mm, sığ alan derinliği, tek masa lambası, gece",
       "tepeden çekim, düz kompozisyon, gün ışığı",
@@ -136,7 +161,14 @@
       "kendi işini övmez, sadece tarif eder",
       "sabah paylaşımlarına 'konuşmuyorum' diye başlar"
     ],
-    "emoji": ["📐", "🔪", "🗞", "🌙", "☕", "🧱"],
+    "emoji": [
+      "📐",
+      "🔪",
+      "🗞",
+      "🌙",
+      "☕",
+      "🧱"
+    ],
     "signoffs": [
       "kesmeye devam.",
       "yarın kuruyunca bakarım.",
@@ -161,7 +193,10 @@
         "cetvel ve kalemle karton üstünde ölçü alırken, sadece eller",
         "bitmiş küçük maket avuç içinde, arka plan bulanık",
         "masanın gece hali: bıçak, yapıştırıcı, soğumuş kahve, dağınık parçalar",
-        "gözlüğünü alnına itmiş, maketin üstüne eğilmiş, yandan çekim"
+        "gözlüğünü alnına itmiş, maketin üstüne eğilmiş, yandan çekim",
+        "maket parçalarını kurutmaya bırakmış, ağırlıklarla bastırılmış, tepeden çekim",
+        "eskiz defterinde plan çizimi ve yanında aynı şeyin kartondan hali",
+        "gece masa lambası altında eller kartonu tutuyor, yüz kadraj dışında"
       ],
       "hooks": [
         "üçüncü kez aynı parçayı kestim. üçüncüsü doğru oldu.",
@@ -183,7 +218,13 @@
         "bu detayı nasıl çözerdiniz, gerçekten soruyorum.",
         "malzeme önerisi olan yazsın."
       ],
-      "hashtags": ["#maket", "#mimarlık", "#modelmaking", "#atölye", "#architecture"],
+      "hashtags": [
+        "#maket",
+        "#mimarlık",
+        "#modelmaking",
+        "#atölye",
+        "#architecture"
+      ],
       "wardrobe": [
         "koyu gri iş tulumu, cebinde maket bıçağı",
         "bol siyah triko ve geniş pantolon",
@@ -208,7 +249,10 @@
         "açılış gecesi kalabalık, iki kadın yan yana, düzgün giyinmiş",
         "duvara asılacak etiketleri düzenlerken, yerde oturmuş",
         "sergi kurulumunda merdiven üstünde spot ayarlarken",
-        "boş galeride tek başına, kurulum bitmiş, ışıklar açık"
+        "boş galeride tek başına, kurulum bitmiş, ışıklar açık",
+        "galeriye maketleri kutularla taşırken, kapı önünde",
+        "sergi sonrası boş kaideler ve sökülmüş etiketler",
+        "duvara asılı plan çizimlerinin önünde, arkadan çekilmiş"
       ],
       "hooks": [
         "dokuz maket. hepsi o mutfak masasında doğdu.",
@@ -228,7 +272,13 @@
         "hangi maketi merak ettiniz, anlatayım.",
         "bir sonraki mekân önerisi olan yazsın."
       ],
-      "hashtags": ["#sergi", "#mimarlık", "#maket", "#galeri", "#exhibition"],
+      "hashtags": [
+        "#sergi",
+        "#mimarlık",
+        "#maket",
+        "#galeri",
+        "#exhibition"
+      ],
       "wardrobe": [
         "uzun siyah elbise, ince gümüş bilezikler",
         "geniş kesim krem keten gömlek, kolları kıvrık",
@@ -250,7 +300,10 @@
         "iki ekran karşısında, elinde kahve, arkada rulo projeler",
         "masaya serilmiş büyük plan üstünde kalemle işaretlerken",
         "ofis penceresinden şehir, camda yansıma",
-        "toplantı masasında dağınık eskiz kağıtları, üstten çekim"
+        "toplantı masasında dağınık eskiz kağıtları, üstten çekim",
+        "ofis mutfağında ayakta kahve içerken, sabah ışığı",
+        "yazıcıdan çıkan plana ayakta bakarken",
+        "gece ofiste tek başına, ekran ışığı yüzünde"
       ],
       "hooks": [
         "tolga her projeye 'bu bütçeyle olmaz' diye başlıyor. sonra yapıyor.",
@@ -267,7 +320,12 @@
         "ofiste çalışanlar bu saati bilir.",
         "tadilat projesi yapan var mı, dertleşelim."
       ],
-      "hashtags": ["#mimarlık", "#ofis", "#proje", "#architecture"],
+      "hashtags": [
+        "#mimarlık",
+        "#ofis",
+        "#proje",
+        "#architecture"
+      ],
       "wardrobe": [
         "geniş kesim krem keten gömlek, kolları kıvrık",
         "beyaz tişört üstüne açık gömlek, önlük"
@@ -290,7 +348,10 @@
         "salonda yerde oturmuş iki kişi, aralarında laptop ve dağınık çıktılar",
         "balkonda iki sandalye, biri karton kesiyor diğeri okuyor",
         "kapı eşiğinde sarılma, karşıdakinin omzunda saha çantası",
-        "akşam mutfağında omuz omuza bulaşık, sırtları dönük"
+        "akşam mutfağında omuz omuza bulaşık, sırtları dönük",
+        "salonda kanepede, dizlerinde eskiz defteri",
+        "mutfak masasında iki farklı iş yan yana, tepeden çekim",
+        "kapıdan çıkarken çanta omuzda, aynada yansıma"
       ],
       "hooks": [
         "dört ay sahada kaldı, bugün döndü, ev bir anda kalabalıklaştı.",
@@ -310,7 +371,11 @@
         "masayı paylaşma kurallarını yazayım mı?",
         "onun hesabı da burada, saha kısmı orada."
       ],
-      "hashtags": ["#evarkadaşı", "#kadıköy", "#evhali"],
+      "hashtags": [
+        "#evarkadaşı",
+        "#kadıköy",
+        "#evhali"
+      ],
       "wardrobe": [
         "bol siyah triko ve geniş pantolon",
         "kot gömlek, üstünde karton tozu"
@@ -332,7 +397,10 @@
         "hırdavatçı rafında kutular ve profiller, elde bir parça",
         "farklı kalınlıkta kartonlar yan yana dizilmiş, tepeden çekim",
         "bir birleşim detayının yakın planı, milimetrik",
-        "eski bir binanın cephe detayı, sokakta çekilmiş"
+        "eski bir binanın cephe detayı, sokakta çekilmiş",
+        "kesim artıklarının tepeden çekimi, geometrik yığın",
+        "boya ve tutkal kutuları rafta, yakın plan",
+        "elde tutulan pleksi parçası ışığa tutulmuş"
       ],
       "hooks": [
         "bu profili altı ay aradım, hırdavatçıda buldum, 14 lira.",
@@ -349,7 +417,12 @@
         "bu malzemeyi kullanan var mı?",
         "sokakta detay fotoğrafı çeken bir tek ben değilim herhalde."
       ],
-      "hashtags": ["#malzeme", "#detay", "#mimarlık", "#maket"],
+      "hashtags": [
+        "#malzeme",
+        "#detay",
+        "#mimarlık",
+        "#maket"
+      ],
       "wardrobe": [
         "kot gömlek, üstünde karton tozu",
         "geniş kesim krem keten gömlek, kolları kıvrık"

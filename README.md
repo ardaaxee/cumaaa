@@ -118,10 +118,20 @@ python3 -m persona generate --seed 7 --captions ornek-aciklamalar.json
 }
 ```
 
-Depodaki [`ornek-aciklamalar.json`](ornek-aciklamalar.json) 30 gönderi ve 10
-reels için elle yazılmış, hikâye yaylarını ilerleten açıklamalar içerir —
-`--seed 7` ile eşleşir. Açıklamalar gönderiye `index` ile bağlanır, o yüzden
-tohumu sabit tut.
+`ornek-aciklamalar/` klasöründe üç karakterin de elle yazılmış açıklamaları
+var (her biri 30 gönderi + 10 reels, hikâye yaylarını sırayla ilerletir).
+Üçünü birden uygulamak için:
+
+```bash
+python3 -m persona network --out cikti-ag --full \
+  --posts 30 --reels 10 --stories 21 --seed 7 \
+  --captions-dir ornek-aciklamalar
+```
+
+**Açıklamalar gönderiye `index` ile bağlanır.** Tohumu, gönderi sayısını ya
+da sahne havuzlarını değiştirirsen sahne sırası kayar ve açıklamalar yanlış
+karelere düşer. Bu parametreleri sabit tut, ya da `--llm` kullan — o her
+seferinde sahneye bakarak yazar.
 
 ### Görselleri gerçekten üret (isteğe bağlı)
 

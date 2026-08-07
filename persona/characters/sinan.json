@@ -56,10 +56,22 @@
     }
   ],
   "side_characters": [
-    { "name": "Beyza", "role": "Saha ekibinden deniz biyoloğu. Ölçümü o planlar, tekneyi ben kullanırım." },
-    { "name": "Kaptan Hayri", "role": "Emekli balıkçı, 66. Havayı radardan iyi bilir, tartışmaya girmem." },
-    { "name": "Elif", "role": "Beyza'nın ev arkadaşı, mimar. Datça'daki depoyu ölçmeye geldi." },
-    { "name": "Mert", "role": "Dalış öğrencisi, 19. Her şeyi soruyor, bu iyi bir şey." }
+    {
+      "name": "Beyza",
+      "role": "Saha ekibinden deniz biyoloğu. Ölçümü o planlar, tekneyi ben kullanırım."
+    },
+    {
+      "name": "Kaptan Hayri",
+      "role": "Emekli balıkçı, 66. Havayı radardan iyi bilir, tartışmaya girmem."
+    },
+    {
+      "name": "Elif",
+      "role": "Beyza'nın ev arkadaşı, mimar. Datça'daki depoyu ölçmeye geldi."
+    },
+    {
+      "name": "Mert",
+      "role": "Dalış öğrencisi, 19. Her şeyi soruyor, bu iyi bir şey."
+    }
   ],
   "routines": [
     "Her dalış öncesi kontrol listesi, istisnasız",
@@ -68,7 +80,14 @@
     "Kışın hafta içi üç akşam dalış dersi",
     "Her ayın sonunda tüp ve regülatör bakımı"
   ],
-  "highlights": ["dalış", "ekipman", "tekne", "ekip", "güvenlik", "datça"],
+  "highlights": [
+    "dalış",
+    "ekipman",
+    "tekne",
+    "ekip",
+    "güvenlik",
+    "datça"
+  ],
   "companions": {
     "Beyza": "27 yaşında Türk kadın; simetrik oval yüz, yüksek elmacık kemikleri, keskin ama yumuşak çene hattı, badem biçimli sıcak koyu kahverengi gözler ve uzun doğal kirpikler, kalın doğal kaşlar, ince düz burun, burun kemeriyle yanaklara yayılmış hafif çiller, dolgun olmayan ama net çizgili dudaklar, sol çene hattında küçük bir ben; kulakta tek ince altın halka, boyunda ince altın zincir; yüzücü yapısı — ince atletik gövde, düzgün duruş, belirgin köprücük kemiği, 1.68 boy; güneşten yanmış sıcak ten, makyajsız ya da neredeyse makyajsız",
     "Elif": "29 yaşında Türk kadın; açık buğday ten, kulak hizasında kısa siyah bob saç ve künt kesim kâkül, kalın çerçeveli yuvarlak gözlük ardında koyu yeşil gözler, ince uzun yüz, belirgin elmacık kemikleri, keskin çene, sol kaşında küçük bir yara izi, dudakta koyu kiremit ruj; uzun boylu (1.75), zarif ince yapı, uzun boyun; bileğinde birkaç ince gümüş bilezik"
@@ -83,7 +102,13 @@
       "kalın polar, kışlık, kapüşon arkada",
       "ıslak dalış kıyafeti, omuzda tüp"
     ],
-    "palette": ["deniz mavisi", "neopren siyahı", "turuncu", "paslı kırmızı", "tuz beyazı"],
+    "palette": [
+      "deniz mavisi",
+      "neopren siyahı",
+      "turuncu",
+      "paslı kırmızı",
+      "tuz beyazı"
+    ],
     "camera": [
       "geniş açı, sert öğle güneşi, deniz ufku, güçlü gölgeler",
       "telefon kamerası, teknede, hazırlıksız kare",
@@ -144,7 +169,14 @@
       "cümleye 'bakın' diye başlar",
       "kendi payını küçültür, ekibi öne çıkarır"
     ],
-    "emoji": ["🤿", "⚓", "🌊", "🧰", "🐟", "☀️"],
+    "emoji": [
+      "🤿",
+      "⚓",
+      "🌊",
+      "🧰",
+      "🐟",
+      "☀️"
+    ],
     "signoffs": [
       "kontrol listesi, her seferinde.",
       "yarın hava iyi, kalkıyoruz.",
@@ -169,7 +201,10 @@
         "su altında elinde ölçüm şeridi, deniz çayırının üstünde",
         "dalış sonrası merdivenden çıkarken, ıslak, tüp omuzda",
         "su altında kayalık duvar boyunca ilerlerken, yüzeyden ışık huzmeleri",
-        "maskeyi çıkarmış, yüzünde maske izi, teknede oturuyor"
+        "maskeyi çıkarmış, yüzünde maske izi, teknede oturuyor",
+        "su altında deniz çayırının üstünde süzülürken, yandan çekim",
+        "dalış sonrası teknede oturmuş, yüzünde maske izi, havlu omuzda",
+        "yüzeye çıkarken aşağıdan çekim, güneş suyun üstünde parlıyor"
       ],
       "hooks": [
         "bugün iki dalış, toplam 74 dakika, su 19 derece.",
@@ -191,7 +226,13 @@
         "soru sormak isteyen kutuyu kullansın, hepsini cevaplıyorum.",
         "ilk dalışını yapacak olan varsa yazsın, korkulacak bir şey yok."
       ],
-      "hashtags": ["#dalış", "#scubadiving", "#datça", "#akdeniz", "#freediving"],
+      "hashtags": [
+        "#dalış",
+        "#scubadiving",
+        "#datça",
+        "#akdeniz",
+        "#freediving"
+      ],
       "wardrobe": [
         "neopren dalgıç kıyafeti, üst kısmı bele indirilmiş",
         "ıslak dalış kıyafeti, omuzda tüp",
@@ -215,7 +256,10 @@
         "askıda kuruyan neoprenler, sıralı tüpler, depo içi",
         "kontrol listesini elinde tutarken, arka planda tekne",
         "manometre yakın planı, elde, basınç okunuyor",
-        "hortumla ekipman yıkarken, iskele başında"
+        "hortumla ekipman yıkarken, iskele başında",
+        "tüpleri dolum için sıraya dizmiş, depo içi",
+        "neopreni ters çevirip hortumla yıkarken",
+        "dalış bilgisayarı ve kayıt defteri yan yana, tepeden çekim"
       ],
       "hooks": [
         "14 metrede regülatör kaçırmaya başladı. kırk saniye sürdü, bana kırk dakika geldi.",
@@ -235,7 +279,12 @@
         "bakımı kendiniz mi yapıyorsunuz, servise mi?",
         "yeni başlayanlar bu 11 maddeyi istesin, yollarım."
       ],
-      "hashtags": ["#dalış", "#ekipman", "#güvenlik", "#scubadiving"],
+      "hashtags": [
+        "#dalış",
+        "#ekipman",
+        "#güvenlik",
+        "#scubadiving"
+      ],
       "wardrobe": [
         "solmuş lacivert tişört ve şort, boynunda maske",
         "kalın polar, kışlık, kapüşon arkada"
@@ -258,7 +307,10 @@
         "iskeleye yanaşırken halat elinde, öne eğilmiş",
         "teknenin burnunda oturmuş, ayaklar suya sarkmış, gün batımı",
         "fırtına öncesi gri deniz, bağlı tekne, boş iskele",
-        "sabah 05.30, iskelede tek başına ekipman yüklerken"
+        "sabah 05.30, iskelede tek başına ekipman yüklerken",
+        "teknenin motorunu kontrol ederken, kapak açık",
+        "gece iskelede bağlı tekne, tek lamba, kimse yok",
+        "haritada rota çizerken, dümen başında"
       ],
       "hooks": [
         "sabah 05.30, iskelede iki kişiyiz: ben ve hayri amca.",
@@ -278,7 +330,12 @@
         "bu koyu bilen çıkar mı acaba.",
         "bekleme günlerini nasıl geçiriyorsunuz?"
       ],
-      "hashtags": ["#tekne", "#datça", "#deniz", "#akdeniz"],
+      "hashtags": [
+        "#tekne",
+        "#datça",
+        "#deniz",
+        "#akdeniz"
+      ],
       "wardrobe": [
         "turuncu can yeleği üstünde, elinde halat",
         "solmuş lacivert tişört ve şort, boynunda maske",
@@ -303,7 +360,10 @@
         "dalış öncesi brifing, ikisi eğilmiş haritaya bakıyor",
         "dalış sonrası ekipman toplarken karşılıklı konuşan iki kişi",
         "iskelede akşam, ekip yan yana oturmuş, ayaklar sallanıyor",
-        "su altında iki dalgıç, biri ölçüm yapıyor diğeri kamera tutuyor"
+        "su altında iki dalgıç, biri ölçüm yapıyor diğeri kamera tutuyor",
+        "iskelede ekipman yüklerken üç kişi, sabah",
+        "teknede yemek molası, herkesin elinde tabak",
+        "dalış sonrası iki kişi deftere kayıt tutuyor"
       ],
       "hooks": [
         "ölçümü o planlar, tekneyi ben kullanırım. üç yıldır böyle.",
@@ -323,7 +383,12 @@
         "onun hesabında ölçüm kısmı var, bende su kısmı.",
         "sahada kime güvenirsiniz sorusuna cevabım hazır."
       ],
-      "hashtags": ["#sahaekibi", "#denizbiyolojisi", "#dalış", "#datça"],
+      "hashtags": [
+        "#sahaekibi",
+        "#denizbiyolojisi",
+        "#dalış",
+        "#datça"
+      ],
       "wardrobe": [
         "neopren dalgıç kıyafeti, üst kısmı bele indirilmiş",
         "turuncu can yeleği üstünde, elinde halat"
@@ -347,7 +412,10 @@
         "sığ suda öğrenciyle birlikte, ikisi de yüzeyde, elle işaret gösteriyor",
         "iskelede ekipman anlatırken, önünde dizili parçalar",
         "beyaz tahtada basit bir dalış profili çizmiş, sınıf ortamı",
-        "havuzda ya da sığ koyda diz çökmüş, öğrenciye maske temizliği gösteriyor"
+        "havuzda ya da sığ koyda diz çökmüş, öğrenciye maske temizliği gösteriyor",
+        "öğrenciye tüp takarken, iskelede",
+        "sığ suda öğrencinin yanında, ikisi diz boyu suda",
+        "kayıt defterine öğrencinin dalışını işlerken"
       ],
       "hooks": [
         "mert her şeyi soruyor. bu iyi bir şey, kimse ona söylemesin.",
@@ -365,7 +433,12 @@
         "ilk dalışınızda en çok neyden korktunuz?",
         "soru kutusu açık, hepsini cevaplıyorum."
       ],
-      "hashtags": ["#dalışeğitimi", "#scubadiving", "#datça", "#yenibaşlayanlar"],
+      "hashtags": [
+        "#dalışeğitimi",
+        "#scubadiving",
+        "#datça",
+        "#yenibaşlayanlar"
+      ],
       "wardrobe": [
         "neopren dalgıç kıyafeti, üst kısmı bele indirilmiş",
         "solmuş lacivert tişört ve şort, boynunda maske"
