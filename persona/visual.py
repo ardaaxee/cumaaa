@@ -138,6 +138,37 @@ def reference_sheet_prompts(ch: Character, rng: random.Random) -> list[str]:
     ]
 
 
+def companion_reference_prompts(ch: Character, name: str, rng: random.Random) -> list[str]:
+    """Tekrar eden ikinci kişiler için ayrı referans sayfası.
+
+    Ana karakterin anchor'ı burada geçmez — kare sadece o kişiye ait.
+    """
+    anchor = ch.companions[name]
+    poses = [
+        "nötr ifade, tam karşıdan portre",
+        "profilden portre",
+        "hafif gülümseme, dörtte üç açı",
+        "tam boy, ayakta, düz duruş",
+    ]
+    out = []
+    for pose in poses:
+        out.append(
+            " ".join(
+                [
+                    f"Fotoğraf. Karakter referans fotoğrafı: {pose}.",
+                    f"KİŞİ — {name} (her karede birebir aynı): {anchor}.",
+                    "Mekân: düz açık gri arka plan önünde.",
+                    "Kamera/ışık: 50mm, yumuşak eşit ışık, gölgesiz.",
+                    f"Stil: {rng.choice(ch.visual.style_notes)}.",
+                    "Gerçekçi fotoğraf. En-boy oranı 1:1.",
+                    "\n\nİSTENMEYEN: " + "; ".join(ch.visual.negative) + ".",
+                    f"\nSeed: {ch.visual.seed}",
+                ]
+            )
+        )
+    return out
+
+
 def tool_hint(tool: str, ch: Character, kind: str = "post") -> str:
     template = REFERENCE_HINTS.get(tool, "")
     return template.format(ar=ASPECT.get(kind, "4:5"), seed=ch.visual.seed)

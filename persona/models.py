@@ -96,6 +96,9 @@ class Character:
     #: Karede birlikte görünen kişilerin sabit görünüm tarifi (ad → anchor).
     #: Ana karakterin anchor'ı gibi, bu metin de her promptta aynen tekrarlanır.
     companions: dict[str, str] = field(default_factory=dict)
+    #: Aylara yayılan hikâye yayları: {"name": ..., "beats": [...]}.
+    #: Hesabın "devam eden hayat" hissini bunlar taşır.
+    arcs: list[dict[str, Any]] = field(default_factory=list)
 
     # ---- yükleme / kaydetme -------------------------------------------------
 

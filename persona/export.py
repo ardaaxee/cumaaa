@@ -61,6 +61,22 @@ def export_profile(ch: Character, out: Path, rng: random.Random) -> None:
         "",
         *[f"- {r}" for r in ch.routines],
         "",
+    ]
+
+    if ch.arcs:
+        lines += [
+            "## Hikâye yayları",
+            "",
+            "Hesabı canlı tutan şey tek tek gönderiler değil, aylara yayılan bu",
+            "hikâyeler. Takvimi doldururken her yayın bir sonraki adımını sıraya koy.",
+            "",
+        ]
+        for arc in ch.arcs:
+            lines += [f"### {arc['name']}", ""]
+            lines += [f"{i}. {b}" for i, b in enumerate(arc.get("beats", []), 1)]
+            lines.append("")
+
+    lines += [
         "## Karakter referans sayfası (ÖNCE BUNU ÜRET)",
         "",
         "Aşağıdaki 4 kareyi üret, en iyisini seç ve bundan sonraki tüm görsellerde",
@@ -69,6 +85,18 @@ def export_profile(ch: Character, out: Path, rng: random.Random) -> None:
     ]
     for i, p in enumerate(visual.reference_sheet_prompts(ch, rng), 1):
         lines += [f"### Referans {i}", "", "```", p, "```", ""]
+
+    for name in ch.companions:
+        lines += [
+            f"## {name} — referans sayfası",
+            "",
+            f"{name} birden çok karede görünüyor; onun yüzü de sabit kalmalı.",
+            "Aynı yöntem: üret, birini seç, iki kişili karelerde ikinci referans",
+            "görsel olarak ver.",
+            "",
+        ]
+        for i, p in enumerate(visual.companion_reference_prompts(ch, name, rng), 1):
+            lines += [f"### {name} referans {i}", "", "```", p, "```", ""]
 
     lines += [
         "## Araç ipuçları",
