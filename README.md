@@ -14,6 +14,21 @@ python3 -m persona generate
 
 Bağımlılık yok — çekirdek üretim sadece standart kütüphane kullanır.
 
+## Kurulum
+
+Depoyu klonlayıp doğrudan `python3 -m persona` ile çalıştırabilirsin.
+Sistem geneline `persona` komutu olarak kurmak istersen:
+
+```bash
+pip install -e .           # çekirdek
+pip install -e ".[llm]"    # + Claude ile yeniden yazım
+persona generate
+```
+
+Örnek çıktı olarak deponun kökündeki [`profil.md`](profil.md) dosyasına
+bakabilirsin — biyografi, profil fotoğrafı promptu ve karakter referans
+sayfası orada.
+
 ---
 
 ## Neden tutarlı görsel çıkıyor

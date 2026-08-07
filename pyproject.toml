@@ -1,0 +1,36 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "persona"
+version = "0.1.0"
+description = "Kurgusal bir Instagram karakteri için tutarlı içerik paketi üretir"
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "Apache-2.0" }
+keywords = ["instagram", "içerik", "kurgusal karakter", "prompt", "yapay zeka"]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Natural Language :: Turkish",
+    "Topic :: Multimedia :: Graphics",
+]
+
+# Çekirdek üretim bağımlılıksız çalışır.
+dependencies = []
+
+[project.optional-dependencies]
+# Açıklamaları Claude ile yeniden yazmak için: pip install "persona[llm]"
+llm = ["anthropic>=0.70.0"]
+
+[project.scripts]
+persona = "persona.cli:main"
+
+[project.urls]
+Repository = "https://github.com/ardaaxee/cumaaa"
+
+[tool.setuptools.packages.find]
+include = ["persona*"]
+
+[tool.setuptools.package-data]
+persona = ["characters/*.json"]
