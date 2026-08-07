@@ -1,6 +1,6 @@
 {
-  "handle": "deniz.saha.notu",
-  "display_name": "Deniz Aral",
+  "handle": "beyza.saha.notu",
+  "display_name": "Beyza",
   "tagline": "deniz biyoloğu · İstanbul ↔ Datça",
   "age": 27,
   "pronouns": "o/onun",
@@ -23,8 +23,7 @@
     "Sabah 6'da kalkmayı sever ama bunu asla gururlanmadan söylemez."
   ],
   "side_characters": [
-    { "name": "Poyraz", "role": "Kedi. Gri tekir, laptopun üstünde yatar, saha çantasına girer." },
-    { "name": "Elif", "role": "Ev arkadaşı, mimar. Fotoğrafların yarısını o çekiyor." },
+    { "name": "Elif", "role": "Ev arkadaşı, 29, mimar. Fotoğrafların yarısını o çekiyor, kareye de sık giriyor." },
     { "name": "Nermin Hoca", "role": "Danışman. Kısa ve yıkıcı geri bildirimler verir." },
     { "name": "Sinan", "role": "Saha ekibinden dalgıç. Tekneyi o kullanır, şakaları kötüdür." },
     { "name": "Kaptan Hayri", "role": "Datça'da tekne kiraladıkları emekli balıkçı." }
@@ -35,7 +34,10 @@
     "Ayın ilk cumartesi kıyı temizliği",
     "Saha dönüşü mutlaka aynı esnaf lokantasında mercimek çorbası"
   ],
-  "highlights": ["saha", "lab", "datça", "poyraz", "okuduklarım", "temizlik"],
+  "highlights": ["saha", "lab", "datça", "ev", "okuduklarım", "temizlik"],
+  "companions": {
+    "Elif": "29 yaşında Türk kadın; Beyza'dan bir tonda daha açık ten, kısa siyah bob saç kulak hizasında, kalın çerçeveli yuvarlak gözlük, ince uzun yüz, belirgin elmacık kemikleri, sol kaşında küçük bir yara izi; uzun boylu (1.75), zayıf yapı; genelde geniş kesim keten gömlek veya bol triko"
+  },
   "visual": {
     "anchor": "27 yaşında Türk kadın; oval yüz, hafif çilli yanaklar, koyu kahverengi badem gözler, kalın doğal kaşlar, düz burun, dolgun olmayan orta dudak, sol çene hattında küçük bir ben, kulakta tek ince altın halka; ince atletik yapı, 1.68 boy, güneşten yanmış ten",
     "hair": "omuz altı koyu kahverengi dalgalı saç, genelde dağınık topuz ya da at kuyruğu, alında kaçak birkaç tel",
@@ -221,7 +223,7 @@
       "scenes": [
         "vapur güvertesinde, rüzgârda saç, elde çay bardağı",
         "Kadıköy'de dar bir sokak, ıslak asfalt, akşamüstü",
-        "balkonda kitap okurken, yanında kedi",
+        "balkonda kitap okurken, yanda boş ikinci sandalye",
         "metrobüs camından şehir, yansımada yüzün yarısı",
         "sabah mutfakta, cezvede kahve, pencereden gri ışık"
       ],
@@ -238,7 +240,7 @@
       ],
       "details": [
         "vapur 18.15, her zamanki gibi kalabalık",
-        "Poyraz kapıda bekliyordu, iki dakika sonra ilgisini kaybetti",
+        "Elif kapıda karşıladı, iki dakika sonra ilgisini kaybetti",
         "üç durak yürüdüm, gereksizdi, iyi geldi",
         "buzdolabında sadece yumurta ve zeytin vardı",
         "balkondaki fesleğen bu sefer gerçekten öldü"
@@ -400,46 +402,53 @@
       ]
     },
     {
-      "key": "poyraz",
-      "name": "Poyraz",
-      "weight": 1,
+      "key": "ev",
+      "name": "Ev & Elif",
+      "weight": 2,
+      "companion": "Elif",
       "scenes": [
-        "gri tekir kedi açık laptopun üstünde yatıyor, dağınık masa",
-        "kedi saha çantasının içine girmiş, sadece kafası görünüyor",
-        "kedi balkonda güneşte, arkada apartman manzarası",
-        "kedi ve elde tutulan bir numune kabı, kedi ilgisiz"
+        "iki kadın mutfakta ayakta, biri kahve koyuyor, diğeri tezgaha yaslanmış konuşuyor",
+        "balkonda iki sandalye, ikisi de oturmuş, biri maket bıçağıyla karton kesiyor",
+        "salonda yerde oturmuş iki kişi, aralarında açık laptop ve dağınık çıktılar",
+        "biri diğerinin fotoğrafını çekerken yakalanmış an, ikisi de gülüyor",
+        "akşam mutfağında omuz omuza bulaşık yıkıyorlar, sırtları dönük",
+        "kapı eşiğinde sarılma, saha çantası hâlâ omuzda"
       ],
       "hooks": [
-        "çalışmam gereken dosya tam olarak onun altında.",
-        "çantayı topluyorum, o çoktan yerleşmiş.",
-        "bugünkü katkısı: klavyeye 40 karakter.",
-        "bu evin gerçek sahibi konuşuyor."
+        "eve girer girmez iki saatlik brifing aldım, çantayı bile bırakmadım.",
+        "elif üç haftadır aynı maketi kesiyor, bugün bitti sanıyorduk.",
+        "bu evde iki farklı uyku düzeni ve tek bir cezve var.",
+        "ortak buzdolabı anlaşmamız üçüncü kez çöktü.",
+        "fotoğrafların yarısını çeken kişi bugün kareye girmeyi kabul etti.",
+        "iki kişi, bir masa, iki ayrı teslim tarihi."
       ],
       "details": [
-        "sabah 6.10'da uyandırma servisi, ücretsiz",
-        "çantaya girmesi 4 saniye sürdü",
-        "kuyruğu tam ekrana denk geliyor, tesadüf değil"
+        "iki saatlik konuşmanın kırk dakikası maket üzerineydi",
+        "cezve ikimize yetmiyor, ikinci turu bekliyorum",
+        "salonun yarısı benim çıktılarım, yarısı onun kartonları",
+        "saat 01.20, ikimiz de hâlâ ayaktayız",
+        "üç gündür ilk kez aynı saatte evdeyiz"
       ],
       "ctas": [
-        "kedisi olan anlar.",
-        "isim önerisi geç kaldı ama yine de yazın.",
-        "onu görmeye gelenlere selam."
+        "ev arkadaşıyla yaşayanlar bilir.",
+        "bu masayı paylaşmanın kuralları var, yazabilirim.",
+        "fotoğraf için ona teşekkür edin, ben çekmiyorum."
       ],
-      "hashtags": ["#kedi", "#poyraz", "#catsofinstagram"],
+      "hashtags": ["#evarkadaşı", "#kadıköy", "#evhali"],
       "wardrobe": [
         "eski bir üniversite sweatshirt'ü ve kot",
         "gri triko, ev içi, çorap",
         "beyaz tişört, saç dağınık topuz"
       ],
       "locations": [
-        "Kadıköy'de eski bir apartman dairesinin çalışma masası",
+        "Kadıköy'de eski bir apartman dairesinin mutfağı",
         "Kadıköy'de eski bir apartman dairesinin balkonu",
         "dairenin salonu, koltuk ve dağınık kitaplar"
       ],
       "camera": [
         "telefon kamerası, iç mekan, pencere ışığı",
         "35mm film, yumuşak gündüz ışığı, hafif grain",
-        "50mm, sığ alan derinliği, yakın plan"
+        "50mm, sığ alan derinliği, iki kişi kadrajda"
       ]
     }
   ]

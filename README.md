@@ -4,8 +4,9 @@ Kurgusal bir Instagram karakteri için **tam içerik paketi** üreten araç:
 tutarlı fotoğraf promptları, karakterin kendi ağzından açıklamalar, reels
 senaryoları, hikâye planları ve yayın takvimi.
 
-Varsayılan karakter: **Deniz Aral** — 27 yaşında deniz biyoloğu, İstanbul ↔
-Datça arası gidip gelen bir doktora öğrencisi. Tamamen kurgusal.
+Varsayılan karakter: **Beyza** (@beyza.saha.notu) — 27 yaşında deniz
+biyoloğu, İstanbul ↔ Datça arası gidip gelen bir doktora öğrencisi.
+Tamamen kurgusal.
 
 ```bash
 python3 -m persona generate

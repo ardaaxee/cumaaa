@@ -12,7 +12,7 @@ from pathlib import Path
 from . import content, export, images, visual
 from .models import Character
 
-DEFAULT_CHARACTER = Path(__file__).parent / "characters" / "deniz_aral.json"
+DEFAULT_CHARACTER = Path(__file__).parent / "characters" / "beyza.json"
 
 
 def _load_character(path: str | None) -> Character:
