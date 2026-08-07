@@ -147,10 +147,45 @@ cümlesi sayısını sınırlar. Varsayılan karakterle 24 gönderi neredeyse
 tamamen özgün çıkar, 40 gönderide birkaç tekrar olur — ya `hooks` listesini
 uzat ya da `--llm` ile çalıştır.
 
+### Kimlik referans kareleri (`identity_reference` modu)
+
+Yüzü sabitleyen kareler normal içerikten ayrı bir moddan üretilir. Bu modda
+karede **tam olarak bir kişi** vardır: yan karakter yok, hayvan yok, arka
+planda insan ya da hayvan yok, fon boş.
+
+```bash
+python3 -m persona identity                      # ekrana bas
+python3 -m persona identity --out cikti/identity  # dosyaya yaz
+python3 -m persona identity --out cikti/identity --companions  # Elif ve Sinan için de
+```
+
+Dört poz üretir: önden portre, profil, 3/4 açı, tam boy. Her promptun sonuna
+şu kural birebir eklenir:
+
+```
+ONLY ONE PERSON. No animals, no cat, no Poyraz, no other people,
+no secondary characters, no background people, no background animals.
+```
+
+Bu mod `build_prompt`'u bilerek kullanmaz — o fonksiyon sütuna bağlı olarak
+ikinci kişi satırı ekleyebiliyor, dolayısıyla "tek kişi" oradan geçseydi
+garanti değil parametreye bağlı bir umut olurdu. Ayarları karakter
+dosyasındaki `visual.identity_reference` bloğundan değiştirebilirsin.
+
+**Kısıtlama yalnızca bu moda özeldir.** Normal gönderi, reels ve hikâye
+promptları etkilenmez; yan karakterli sütunlar ikinci kişiyi eklemeye devam
+eder. `tests/test_identity_reference.py` iki yönü de doğrular.
+
 ### Tek prompt
 
 ```bash
 python3 -m persona prompt "vapur güvertesinde çay içerken" --kind story
+```
+
+### Testler
+
+```bash
+python3 -m unittest discover -s tests -v
 ```
 
 ---

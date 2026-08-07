@@ -103,6 +103,31 @@ def cmd_new_character(args: argparse.Namespace) -> int:
     return 0
 
 
+def cmd_identity(args: argparse.Namespace) -> int:
+    """identity_reference modu: sadece kimlik sabitleme kareleri."""
+    ch = _load_character(args.character)
+
+    targets: list[tuple[str, list[str]]] = [(ch.display_name, visual.identity_reference_prompts(ch))]
+    if args.companions:
+        for name in ch.companions:
+            targets.append((name, visual.companion_reference_prompts(ch, name)))
+
+    out = Path(args.out) if args.out else None
+    for who, prompts in targets:
+        for slug, prompt in zip(visual.IDENTITY_SLUGS, prompts):
+            if out:
+                path = out / content.slugify(who) / f"{slug}.txt"
+                path.parent.mkdir(parents=True, exist_ok=True)
+                path.write_text(prompt + "\n", encoding="utf-8")
+            else:
+                print(f"### {who} · {slug}\n{prompt}\n")
+
+    total = sum(len(p) for _, p in targets)
+    if out:
+        print(f"✓ {total} kimlik referans promptu yazıldı: {out}")
+    return 0
+
+
 def cmd_prompt(args: argparse.Namespace) -> int:
     """Tek seferlik prompt üret (hızlı deneme için)."""
     ch = _load_character(args.character)
@@ -153,6 +178,19 @@ def build_parser() -> argparse.ArgumentParser:
     n.add_argument("path", help="Hedef JSON yolu")
     n.add_argument("--overwrite", action="store_true")
     n.set_defaults(func=cmd_new_character)
+
+    idn = sub.add_parser(
+        "identity",
+        help="Kimlik referans kareleri (tek kişi, hayvan yok, boş arka plan)",
+    )
+    idn.add_argument("--character", help="Karakter JSON yolu")
+    idn.add_argument("--out", help="Klasöre yaz (verilmezse ekrana basar)")
+    idn.add_argument(
+        "--companions",
+        action="store_true",
+        help="Yan karakterler için de ayrı kimlik kareleri üret",
+    )
+    idn.set_defaults(func=cmd_identity)
 
     p = sub.add_parser("prompt", help="Tek bir sahne için görsel promptu yazdır")
     p.add_argument("scene", help="Sahne açıklaması")
