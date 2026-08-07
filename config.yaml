@@ -1,0 +1,41 @@
+# Günlük YouTube yükleme otomasyonu ayarları.
+# Buradaki her değer ortam değişkeni ile ezilebilir (bkz. README).
+
+drive:
+  # Videoların bulunduğu Google Drive klasörünün ID'si.
+  # Boş bırakılırsa DRIVE_FOLDER_ID ortam değişkeni / GitHub secret kullanılır.
+  folder_id: ""
+
+  # Yükleme bittikten sonra videonun taşınacağı klasör (opsiyonel).
+  # Kullanmak için OAuth token'ı tam "drive" yetkisiyle üretilmiş olmalı.
+  done_folder_id: ""
+
+  # Sıraya alma kriteri: created_time | modified_time | name
+  order: created_time
+
+upload:
+  # Her çalıştırmada kaç video yüklenecek.
+  # YouTube kotası: 1 yükleme = 1600 birim, günlük varsayılan kota 10.000 birim.
+  videos_per_run: 1
+
+  # public | unlisted | private
+  privacy_status: public
+
+  # 22 = People & Blogs, 24 = Entertainment, 27 = Education, 28 = Science & Tech
+  category_id: "22"
+
+  made_for_kids: false
+
+  # Her videoya eklenecek sabit etiketler.
+  default_tags: []
+
+  # Şablon değişkenleri: {name} (dosya adı, uzantısız), {date} (YYYY-MM-DD)
+  title_template: "{name}"
+  description_template: |
+    {name}
+
+    Bu video otomatik olarak yayınlanmıştır.
+
+state:
+  # Hangi Drive dosyalarının yüklendiğini tutan dosya.
+  path: state/uploaded.json

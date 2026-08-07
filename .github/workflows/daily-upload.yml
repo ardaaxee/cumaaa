@@ -1,0 +1,79 @@
+name: Günlük YouTube yüklemesi
+
+on:
+  schedule:
+    # 06:00 UTC = Türkiye saatiyle 09:00. GitHub cron'u yoğunlukta
+    # birkaç dakika gecikmeli tetikleyebilir, bu normaldir.
+    # NOT: Zamanlanmış iş akışları YALNIZCA varsayılan dalda (main) çalışır.
+    - cron: "0 6 * * *"
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: "Deneme çalıştırması (hiçbir şey yüklenmez)"
+        type: boolean
+        default: false
+      count:
+        description: "Yüklenecek video sayısı"
+        type: string
+        default: "1"
+
+# Aynı anda iki yükleme çalışmasın: aynı video iki kez yüklenebilirdi.
+concurrency:
+  group: youtube-daily-upload
+  cancel-in-progress: false
+
+jobs:
+  upload:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    permissions:
+      contents: write
+
+    steps:
+      - name: Depoyu al
+        uses: actions/checkout@v4
+
+      - name: Python kur
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+
+      - name: Bağımlılıkları kur
+        run: pip install -r requirements.txt
+
+      - name: Videoyu yükle
+        env:
+          GOOGLE_CLIENT_ID: ${{ secrets.GOOGLE_CLIENT_ID }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+          GOOGLE_REFRESH_TOKEN: ${{ secrets.GOOGLE_REFRESH_TOKEN }}
+          DRIVE_FOLDER_ID: ${{ secrets.DRIVE_FOLDER_ID }}
+          DRIVE_DONE_FOLDER_ID: ${{ secrets.DRIVE_DONE_FOLDER_ID }}
+          PYTHONPATH: src
+        run: |
+          python -m youtube_daily.main \
+            --count "${{ inputs.count || '1' }}" \
+            ${{ inputs.dry_run && '--dry-run' || '' }}
+
+      - name: Yükleme kaydını işle
+        # Yükleme başarısız olsa bile kaydı işlemeliyiz: kısmen başarılı bir
+        # çalıştırmada yüklenmiş videolar tekrar yüklenmesin.
+        if: always() && !inputs.dry_run
+        run: |
+          if git diff --quiet -- state/uploaded.json; then
+            echo "Kayıtta değişiklik yok."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add state/uploaded.json
+          git commit -m "chore: yükleme kaydını güncelle [skip ci]"
+          for delay in 2 4 8 16; do
+            if git push; then
+              exit 0
+            fi
+            echo "Push başarısız, $delay sn sonra tekrar denenecek..."
+            sleep "$delay"
+            git pull --rebase --autostash
+          done
+          git push
