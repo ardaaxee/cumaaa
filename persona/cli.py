@@ -62,23 +62,67 @@ def cmd_images(args: argparse.Namespace) -> int:
         raise SystemExit(f"{bundle} yok. Önce `persona generate` çalıştır.")
 
     ch = _load_character(args.character)
-    blocks: list[tuple[str, str]] = []
+    dest_dir = out / "gorseller"
+    ref_dir = dest_dir / "identity"
+
+    # 1) Kimlik kareleri önce. Diğer her şey bunlara dayanıyor.
+    identity: list[tuple[str, str]] = list(
+        zip(
+            [f"IDENTITY-{s}" for s in visual.IDENTITY_SLUGS],
+            visual.identity_reference_prompts(ch),
+        )
+    )
+
+    # 2) Sonra içerik promptları.
+    content_blocks: list[tuple[str, str]] = []
     for chunk in bundle.read_text(encoding="utf-8").split("### ")[1:]:
         header, _, body = chunk.partition("\n")
-        name = header.split(" ")[1] if " " in header else header
-        blocks.append((name.strip(), body.strip()))
-
+        # Başlık "POST 01-1 (saha)" biçiminde. Sadece sayıyı almak POST ve
+        # REEL adlarını çakıştırıyor (ikisi de "01-1") — tür ön ekini koru.
+        name = header.split(" (")[0].strip().replace(" ", "-")
+        content_blocks.append((name, body.strip()))
     if args.limit:
-        blocks = blocks[: args.limit]
+        content_blocks = content_blocks[: args.limit]
 
-    dest_dir = out / "gorseller"
+    jobs = ([] if args.skip_identity else identity) + (
+        [] if args.identity_only else content_blocks
+    )
+
+    def dest_for(name: str) -> Path:
+        """Hedef yol tek yerden hesaplanır — 'zaten var mı' kontrolü ile
+        yazma yolu ayrışırsa devam etme özelliği sessizce bozulur."""
+        base = ref_dir if name.startswith("IDENTITY-") else dest_dir
+        return base / f"{name}.jpg"
+
+    pending = [(n, p) for n, p in jobs if args.overwrite or not dest_for(n).exists()]
+
+    if args.dry_run:
+        print(f"Üretilecek: {len(pending)} görsel ({len(jobs)} iş, "
+              f"{len(jobs) - len(pending)} zaten var)")
+        for n, _ in pending[:12]:
+            print(f"  {n}")
+        if len(pending) > 12:
+            print(f"  … +{len(pending) - 12}")
+        return 0
+
+    # Referans: kullanıcı verdiyse o, yoksa üretilen ilk kimlik karesi.
+    reference = Path(args.reference) if args.reference else None
+    if reference and not reference.exists():
+        raise SystemExit(f"Referans görsel yok: {reference}")
+
     made = 0
-    for name, prompt in blocks:
-        dest = dest_dir / f"{name}.jpg"
-        if dest.exists() and not args.overwrite:
-            continue
-        aspect = "9:16" if name.startswith("REEL") else "4:5"
-        print(f"→ {name}", file=sys.stderr)
+    for name, prompt in pending:
+        is_identity = name.startswith("IDENTITY-")
+        dest = dest_for(name)
+        aspect = "1:1" if is_identity else ("9:16" if name.startswith("REEL") else "4:5")
+
+        # Kimlik karelerine referans verilmez — referansı onlar üretir.
+        ref = None if is_identity else reference
+        if ref is None and not is_identity and args.provider in images.SUPPORTS_REFERENCE:
+            auto = ref_dir / f"IDENTITY-{visual.IDENTITY_SLUGS[0]}.jpg"
+            ref = auto if auto.exists() else None
+
+        print(f"→ {name}{' (referanslı)' if ref else ''}", file=sys.stderr)
         images.generate(
             prompt,
             dest,
@@ -86,9 +130,13 @@ def cmd_images(args: argparse.Namespace) -> int:
             model=args.model,
             aspect=aspect,
             seed=ch.visual.seed,
+            reference=ref,
         )
         made += 1
+
     print(f"✓ {made} görsel üretildi: {dest_dir}")
+    if args.provider not in images.SUPPORTS_REFERENCE:
+        print("  ⚠ Bu sağlayıcı referans görseli desteklemiyor; yüzler kayabilir.")
     return 0
 
 
@@ -222,8 +270,12 @@ def build_parser() -> argparse.ArgumentParser:
     i.add_argument("--character", help="Karakter JSON yolu")
     i.add_argument("--provider", default="replicate", choices=list(images.PROVIDERS))
     i.add_argument("--model", help="Sağlayıcıya özel model kimliği")
-    i.add_argument("--limit", type=int, help="Sadece ilk N promptu üret")
+    i.add_argument("--limit", type=int, help="Sadece ilk N içerik promptu üret")
     i.add_argument("--overwrite", action="store_true")
+    i.add_argument("--dry-run", action="store_true", help="Ne üretileceğini yazdır, üretme")
+    i.add_argument("--reference", help="İçerik karelerinde kullanılacak referans görsel")
+    i.add_argument("--identity-only", action="store_true", help="Sadece kimlik karelerini üret")
+    i.add_argument("--skip-identity", action="store_true", help="Kimlik karelerini atla")
     i.set_defaults(func=cmd_images)
 
     n = sub.add_parser("new-character", help="Yeni karakter için şablon kopyala")
