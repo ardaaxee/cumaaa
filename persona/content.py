@@ -34,17 +34,22 @@ def build_posts(
     posts: list[Post] = []
     recent: list[str] = []
     used_openers: set[str] = set()
+    # Sahneler sütun başına destelenir: havuz tükenmeden aynı kare iki kez
+    # düşmesin. Aksi halde aynı fotoğraf akışta 3-4 kez tekrar ediyor.
+    scene_decks: dict[str, Deck] = {}
 
     for i in range(count):
         p = _pick_pillar(ch, rng, recent)
         recent.append(p.key)
 
         carousel = rng.random() < 0.35
+        deck = scene_decks.setdefault(p.key, Deck(p.scenes, rng))
+        scene = deck.draw()
         if carousel:
-            prompts = visual.build_carousel(ch, p, rng=rng, count=rng.randint(2, 3))
-            scene = p.scenes[0]
+            prompts = visual.build_carousel(
+                ch, p, rng=rng, count=rng.randint(2, 3), lead=scene
+            )
         else:
-            scene = rng.choice(p.scenes)
             prompts = [visual.build_prompt(ch, scene, rng=rng, kind="post", pillar=p)]
 
         ctx = visual.context_for(ch, p, rng)
