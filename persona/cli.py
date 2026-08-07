@@ -32,7 +32,12 @@ def cmd_generate(args: argparse.Namespace) -> int:
     reels = content.build_reels(ch, args.reels, start, rng)
     stories = content.build_stories(ch, args.stories, start, rng)
 
-    if args.llm:
+    if args.captions:
+        from . import llm
+
+        np_, nr = llm.apply_caption_file(args.captions, posts, reels)
+        print(f"Hazır açıklamalar uygulandı: {np_} gönderi, {nr} reels", file=sys.stderr)
+    elif args.llm:
         from . import llm
 
         print("Claude ile açıklamalar yeniden yazılıyor…", file=sys.stderr)
@@ -123,6 +128,10 @@ def build_parser() -> argparse.ArgumentParser:
     g.add_argument("--start", help="Başlangıç tarihi (YYYY-AA-GG)")
     g.add_argument("--seed", type=int, help="Rastgelelik tohumu")
     g.add_argument("--llm", action="store_true", help="Açıklamaları Claude ile yaz")
+    g.add_argument(
+        "--captions",
+        help="Hazır açıklama JSON'u uygula (API gerekmez; --llm'i geçersiz kılar)",
+    )
     g.add_argument(
         "--effort",
         default="medium",
