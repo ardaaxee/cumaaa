@@ -94,6 +94,27 @@ python3 -m persona generate --llm --effort medium
 `claude-opus-5` kullanır, karakterin ses tarifini sistem promptuna koyar ve
 yapılandırılmış çıktı ile açıklama + ilk yorum döndürür.
 
+### API'siz aynı sonuç: hazır açıklamalar
+
+Kimlik bilgin yoksa ya da açıklamaları elle yazmak istiyorsan, `--llm`'in
+ürettiğiyle aynı biçimde bir JSON verebilirsin:
+
+```bash
+python3 -m persona generate --seed 7 --captions ornek-aciklamalar.json
+```
+
+```json
+{
+  "posts": [{ "index": 1, "caption": "...", "first_comment": "#..." }],
+  "reels": [{ "index": 1, "caption": "..." }]
+}
+```
+
+Depodaki [`ornek-aciklamalar.json`](ornek-aciklamalar.json) 30 gönderi ve 10
+reels için elle yazılmış, hikâye yaylarını ilerleten açıklamalar içerir —
+`--seed 7` ile eşleşir. Açıklamalar gönderiye `index` ile bağlanır, o yüzden
+tohumu sabit tut.
+
 ### Görselleri gerçekten üret (isteğe bağlı)
 
 ```bash

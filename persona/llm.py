@@ -109,6 +109,44 @@ def _call(ch: Character, user_payload: str, effort: str) -> list[dict[str, Any]]
     return json.loads(text)["captions"]
 
 
+def apply_caption_file(
+    path: str, posts: list[Post], reels: list[Reel]
+) -> tuple[int, int]:
+    """Hazır yazılmış açıklamaları pakete uygular.
+
+    Dosya biçimi `rewrite_*` fonksiyonlarının ürettiğiyle aynı:
+
+        {"posts":  [{"index": 1, "caption": "...", "first_comment": "..."}],
+         "reels":  [{"index": 1, "caption": "..."}]}
+
+    API kimlik bilgisi olmadan da (ya da açıklamaları elle yazmak
+    istediğinde) `--llm` ile aynı sonucu almanı sağlar.
+    """
+    with open(path, encoding="utf-8") as fh:
+        data = json.load(fh)
+
+    by_post = {r["index"]: r for r in data.get("posts", [])}
+    by_reel = {r["index"]: r for r in data.get("reels", [])}
+
+    n_posts = 0
+    for p in posts:
+        r = by_post.get(p.index)
+        if r:
+            p.caption = r["caption"].strip()
+            if r.get("first_comment"):
+                p.first_comment = r["first_comment"].strip()
+            n_posts += 1
+
+    n_reels = 0
+    for rl in reels:
+        r = by_reel.get(rl.index)
+        if r:
+            rl.caption = r["caption"].strip()
+            n_reels += 1
+
+    return n_posts, n_reels
+
+
 def rewrite_post_captions(
     ch: Character, posts: list[Post], effort: str = "medium", batch: int = 10
 ) -> None:
