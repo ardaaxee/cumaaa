@@ -8,9 +8,11 @@ görsel üretir. Sadece standart kütüphane kullanılır (proxy ayarlarına uya
 from __future__ import annotations
 
 import base64
+import email.utils
 import json
 import os
 import ssl
+import sys
 import time
 import urllib.error
 import urllib.request
@@ -18,23 +20,115 @@ from pathlib import Path
 
 TIMEOUT = 300
 
+#: 429 alındığında en fazla kaç kez tekrar denenir (sonsuz döngü olmasın).
+MAX_RETRIES = 8
+
+#: Retry-After başlığı da gövde de yoksa beklenecek süre.
+DEFAULT_RETRY_WAIT = 10.0
+
 
 def _ssl_context() -> ssl.SSLContext:
     ca = os.environ.get("SSL_CERT_FILE") or os.environ.get("REQUESTS_CA_BUNDLE")
     return ssl.create_default_context(cafile=ca) if ca else ssl.create_default_context()
 
 
-def _post(url: str, payload: dict, headers: dict[str, str]) -> dict:
-    data = json.dumps(payload).encode("utf-8")
-    req = urllib.request.Request(url, data=data, method="POST")
-    req.add_header("Content-Type", "application/json")
-    for k, v in headers.items():
-        req.add_header(k, v)
+def _parse_retry_after(raw: str | None) -> float | None:
+    """`Retry-After` başlığını saniyeye çevirir.
+
+    Başlık ya saniye sayısı ya da HTTP tarihi olabilir (RFC 9110). İkisini de
+    kabul ediyoruz; çözülemeyen değer için None dönüp çağırana karar bırakıyoruz.
+    """
+    if raw is None:
+        return None
+    raw = raw.strip()
+    if not raw:
+        return None
     try:
-        with urllib.request.urlopen(req, timeout=TIMEOUT, context=_ssl_context()) as r:
-            return json.loads(r.read().decode("utf-8"))
-    except urllib.error.HTTPError as e:
-        raise RuntimeError(f"{url} → HTTP {e.code}: {e.read().decode('utf-8')[:500]}") from e
+        return float(raw)
+    except ValueError:
+        pass
+    try:
+        when = email.utils.parsedate_to_datetime(raw)
+    except (TypeError, ValueError):
+        return None
+    if when is None:
+        return None
+    import datetime as _dt
+
+    now = _dt.datetime.now(_dt.timezone.utc)
+    if when.tzinfo is None:
+        when = when.replace(tzinfo=_dt.timezone.utc)
+    return max(0.0, (when - now).total_seconds())
+
+
+def _retry_after_seconds(err: urllib.error.HTTPError, body: str) -> float:
+    """Bekleme süresi: önce başlık, sonra gövdedeki `retry_after`, sonra varsayılan."""
+    header = err.headers.get("Retry-After") if err.headers else None
+    seconds = _parse_retry_after(header)
+
+    if seconds is None:
+        try:
+            parsed = json.loads(body)
+        except (ValueError, TypeError):
+            parsed = None
+        if isinstance(parsed, dict):
+            value = parsed.get("retry_after")
+            if isinstance(value, (int, float)) and not isinstance(value, bool):
+                seconds = float(value)
+            elif isinstance(value, str):
+                seconds = _parse_retry_after(value)
+
+    if seconds is None:
+        seconds = DEFAULT_RETRY_WAIT
+    return max(0.0, seconds)
+
+
+def _format_wait(seconds: float) -> str:
+    return str(int(seconds)) if float(seconds).is_integer() else f"{seconds:.1f}"
+
+
+def _post(
+    url: str, payload: dict, headers: dict[str, str], *, label: str = "Replicate"
+) -> dict:
+    """POST gönderir; 429 alırsa Retry-After'a uyup tekrar dener.
+
+    Hız sınırı geçici bir durum, hata değil — tek bir 429 yüzünden 100
+    karelik bir üretimin ortasında durmak istemiyoruz. 429 dışındaki HTTP
+    hatalarının davranışı değişmedi: anında RuntimeError.
+    """
+    data = json.dumps(payload).encode("utf-8")
+
+    for attempt in range(MAX_RETRIES + 1):
+        req = urllib.request.Request(url, data=data, method="POST")
+        req.add_header("Content-Type", "application/json")
+        for k, v in headers.items():
+            req.add_header(k, v)
+        try:
+            with urllib.request.urlopen(
+                req, timeout=TIMEOUT, context=_ssl_context()
+            ) as r:
+                return json.loads(r.read().decode("utf-8"))
+        except urllib.error.HTTPError as e:
+            body = e.read().decode("utf-8", "replace")
+
+            if e.code != 429:
+                raise RuntimeError(f"{url} → HTTP {e.code}: {body[:500]}") from e
+
+            if attempt >= MAX_RETRIES:
+                raise RuntimeError(
+                    f"{url} → HTTP 429: hız sınırı {MAX_RETRIES} tekrar denemeden "
+                    f"sonra da devam ediyor, vazgeçildi. Son yanıt: {body[:300]}"
+                ) from e
+
+            wait = _retry_after_seconds(e, body)
+            print(
+                f"{label} rate limit (429), {_format_wait(wait)} saniye bekleniyor...",
+                file=sys.stderr,
+            )
+            time.sleep(wait)
+
+    # Döngü ya return ya raise ile biter; buraya düşülmez.
+    raise RuntimeError(f"{url} → beklenmeyen durum: tekrar denemeler tükendi")
 
 
 def _get(url: str, headers: dict[str, str]) -> dict:
@@ -124,6 +218,7 @@ def openai_generate(prompt: str, dest: Path, *, model: str, aspect: str) -> Path
         "https://api.openai.com/v1/images/generations",
         body,
         {"Authorization": f"Bearer {key}"},
+        label="OpenAI",
     )
     item = res["data"][0]
     dest.parent.mkdir(parents=True, exist_ok=True)
