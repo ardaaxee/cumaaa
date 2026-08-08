@@ -27,12 +27,23 @@ def export_profile(ch: Character, out: Path, rng: random.Random) -> None:
         "",
         "## Profil",
         "",
-        f"- **Ad:** {ch.display_name}",
+        f"- **Görünen ad:** {ch.display_name}",
         f"- **Kullanıcı adı:** @{ch.handle}",
-        f"- **Kategori önerisi:** Bilim / Eğitim",
         f"- **Yaş / şehir:** {ch.age} · {ch.city}",
         f"- **Meslek:** {ch.occupation}",
+        f"- **Kısa tanım:** {ch.tagline}",
         "",
+    ]
+
+    if ch.handle_suggestions:
+        lines += [
+            "### Kullanıcı adı önerileri",
+            "",
+            *[f"- `@{h}`" for h in ch.handle_suggestions],
+            "",
+        ]
+
+    lines += [
         "## Biyografi (Instagram bio alanına yapıştır)",
         "",
         "```",
@@ -49,6 +60,19 @@ def export_profile(ch: Character, out: Path, rng: random.Random) -> None:
         "",
         *[f"- {h}" for h in ch.highlights],
         "",
+        "## Renk paleti",
+        "",
+        *[f"- {c}" for c in ch.visual.palette],
+        "",
+        "## İçerik kategorileri",
+        "",
+        "| Sütun | Ağırlık | Ne anlatır |",
+        "|---|---|---|",
+        *[
+            f"| {p.name} | {p.weight} | {p.scenes[0][:60]}… |"
+            for p in ch.pillars
+        ],
+        "",
         "## Arka plan (paylaşılmaz, tutarlılık için)",
         "",
         *[f"- {b}" for b in ch.backstory],
@@ -60,6 +84,34 @@ def export_profile(ch: Character, out: Path, rng: random.Random) -> None:
         "## Rutinler",
         "",
         *[f"- {r}" for r in ch.routines],
+        "",
+    ]
+
+    if ch.personality:
+        lines += ["## Kişilik", "", *[f"- {p}" for p in ch.personality], ""]
+    if ch.interests:
+        lines += ["## İlgi alanları", "", *[f"- {i}" for i in ch.interests], ""]
+    if ch.weekly_plan:
+        lines += [
+            "## Haftalık paylaşım takvimi",
+            "",
+            *[f"- {w}" for w in ch.weekly_plan],
+            "",
+        ]
+
+    lines += [
+        "## Konuşma tarzı",
+        "",
+        f"Dil: {ch.voice.language}, {ch.voice.person}.",
+        "",
+        "**Ton:**",
+        *[f"- {t}" for t in ch.voice.tone],
+        "",
+        "**Üslup özellikleri:**",
+        *[f"- {q}" for q in ch.voice.quirks],
+        "",
+        "**Kaçınılanlar:**",
+        *[f"- {a}" for a in ch.voice.avoid],
         "",
     ]
 
@@ -205,16 +257,69 @@ def export_calendar(rows: list[dict[str, str]], out: Path) -> None:
         w.writerows(rows)
 
 
-def export_prompt_bundle(posts: list[Post], reels: list[Reel], out: Path) -> None:
-    """Tüm görsel promptları tek dosyada — toplu üretim için."""
-    chunks: list[str] = []
+#: gorseller/ altında oluşturulan klasörler (ad ön ekiyle eşleşir).
+IMAGE_DIRS = {
+    "IDENTITY": "identity",
+    "PROFILE": "profile",
+    "POST": "posts",
+    "REEL": "reels",
+    "STORY": "stories",
+}
+
+
+def image_name(ch: Character, kind: str, number: int) -> str:
+    """BEYZA-POST-001 gibi benzersiz bir görsel adı üretir."""
+    width = 2 if kind in {"IDENTITY", "PROFILE"} else 3
+    return f"{ch.file_prefix}-{kind}-{number:0{width}d}"
+
+
+def export_prompt_bundle(
+    ch: Character,
+    posts: list[Post],
+    reels: list[Reel],
+    stories: list[StoryDay],
+    out: Path,
+    rng: random.Random,
+) -> None:
+    """Tüm görsel promptları tek dosyada — toplu üretim için.
+
+    Adlar `persona images` tarafından hem dosya adı hem klasör seçimi için
+    kullanılıyor; tür ön eki ve sıra numarası burada belirleniyor.
+    """
+    chunks: list[str] = [
+        f"### {image_name(ch, 'PROFILE', 1)} (profil fotoğrafı)\n"
+        + visual.profile_picture_prompt(ch, rng)
+    ]
+
+    n = 0
     for p in posts:
-        for i, prompt in enumerate(p.image_prompts, 1):
-            chunks.append(f"### POST {p.index:02d}-{i} ({p.pillar})\n{prompt}")
+        for prompt in p.image_prompts:
+            n += 1
+            chunks.append(f"### {image_name(ch, 'POST', n)} ({p.pillar})\n{prompt}")
+
+    n = 0
     for r in reels:
         for s in r.shots:
-            chunks.append(f"### REEL {r.index:02d}-{s['no']} ({r.pillar})\n{s['prompt']}")
+            n += 1
+            chunks.append(
+                f"### {image_name(ch, 'REEL', n)} ({r.pillar} · plan {s['no']})\n"
+                + s["prompt"]
+            )
+
+    n = 0
+    for day in stories:
+        for f in day.frames:
+            n += 1
+            chunks.append(
+                f"### {image_name(ch, 'STORY', n)} (gün {day.day:02d} · {f.kind})\n"
+                + f.visual
+            )
+
     _write(out / "tum-promptlar.txt", "\n\n".join(chunks))
+
+    # İstenen klasör yapısı üretim başlamadan hazır dursun.
+    for sub in IMAGE_DIRS.values():
+        (out / "gorseller" / sub).mkdir(parents=True, exist_ok=True)
 
 
 def export_readme(ch: Character, out: Path, counts: dict[str, int]) -> None:
@@ -272,7 +377,7 @@ def export_all(
     export_reels(reels, out)
     export_stories(stories, out)
     export_calendar(rows, out)
-    export_prompt_bundle(posts, reels, out)
+    export_prompt_bundle(ch, posts, reels, stories, out, rng)
     export_readme(
         ch, out, {"posts": len(posts), "reels": len(reels), "stories": len(stories)}
     )

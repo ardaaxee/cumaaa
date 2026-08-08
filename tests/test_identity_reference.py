@@ -49,8 +49,11 @@ class IdentityReferenceTest(unittest.TestCase):
             self.assertIn(parca, prompt)
 
     def test_negatif_kural_birebir_eklenir(self) -> None:
+        """Karakterin kendi negatif kuralı promptun sonunda birebir durmalı."""
+        kural = self.ch.visual.identity_reference.negative_en
+        self.assertIn("ONLY ONE PERSON", kural)
         for prompt in self.prompts:
-            self.assertIn(IDENTITY_NEGATIVE, prompt)
+            self.assertIn(kural, prompt)
 
     def test_negatif_kural_metni_istenen_metin(self) -> None:
         self.assertEqual(
@@ -119,28 +122,35 @@ class CompanionReferenceTest(unittest.TestCase):
                 self.assertNotIn(self.ch.visual.anchor, prompt)
 
 
-class NormalIcerikBozulmadiTest(unittest.TestCase):
-    """Kısıtlama yalnızca kimlik karelerinde; normal içerik etkilenmemeli."""
+class CokKisiliKarakterTest(unittest.TestCase):
+    """Solo olmayan karakterlerde companion mekanizması hâlâ çalışmalı.
+
+    Beyza artık solo; bu davranış arşivdeki çok kişili karakterle test
+    ediliyor, yoksa özellik test kapsamı dışında kalırdı.
+    """
 
     @classmethod
     def setUpClass(cls) -> None:
-        cls.ch = Character.load(CHARACTER)
+        cls.ch = Character.load(CHARACTER.parent / "arsiv" / "elif.json")
 
-    def test_companion_lu_sutun_hala_ikinci_kisi_ekliyor(self) -> None:
+    def test_solo_degil(self) -> None:
+        self.assertFalse(self.ch.solo)
+
+    def test_companion_lu_sutun_ikinci_kisi_ekliyor(self) -> None:
         pillar = self.ch.pillar("ev")
-        self.assertEqual(pillar.companion, "Elif")
+        self.assertEqual(pillar.companion, "Beyza")
         prompt = visual.build_prompt(
             self.ch, pillar.scenes[0], rng=random.Random(1), pillar=pillar
         )
-        self.assertIn("İKİNCİ KİŞİ — Elif", prompt)
-        self.assertNotIn(IDENTITY_NEGATIVE, prompt)
+        self.assertIn("İKİNCİ KİŞİ — Beyza", prompt)
 
-    def test_normal_promptta_kimlik_kurali_yok(self) -> None:
-        pillar = self.ch.pillar("saha")
+    def test_solo_kurali_eklenmiyor(self) -> None:
+        """Tek-kişi kuralı yalnızca solo karakterlerde ve kimlik karelerinde."""
+        pillar = self.ch.pillar("maket")
         prompt = visual.build_prompt(
             self.ch, pillar.scenes[0], rng=random.Random(2), pillar=pillar
         )
-        self.assertNotIn("tam olarak 1 (bir) kişi", prompt)
+        self.assertNotIn("KARE KURALI", prompt)
         self.assertNotIn(IDENTITY_NEGATIVE, prompt)
 
 

@@ -4,39 +4,31 @@ Kurgusal bir Instagram karakteri için **tam içerik paketi** üreten araç:
 tutarlı fotoğraf promptları, karakterin kendi ağzından açıklamalar, reels
 senaryoları, hikâye planları ve yayın takvimi.
 
-Depoda üç bağlantılı karakter var — aynı kurgusal evrende yaşayan, ayrı
-hesapları olan üç kişi:
-
-| Hesap | Kim | Ne paylaşır |
-|---|---|---|
-| `@beyza.saha.notu` | Beyza, 27, deniz biyoloğu | Saha, laboratuvar, İstanbul, portre |
-| `@elif.maketdefteri` | Elif, 29, mimar (ev arkadaşı) | Maket, sergi, ofis, ev |
-| `@sinan.dipnot` | Sinan, 31, dalgıç (saha ekibi) | Dalış, ekipman, tekne, ekip |
-
-Üçü birbirinin karesinde çıkıyor ve aynı olayı kendi ağzından anlatıyor.
-Hepsi kurgusal.
+Varsayılan karakter: **Beyza** (@beyza.gunluk) — 25 yaşında, İstanbul'da
+evden çalışan bir grafik tasarımcı. Günlük hayat içeriği: masa, ev, kahve,
+kitap, sokak, deniz. **Solo karakter:** her karede yalnızca o var.
 
 ```bash
-python3 -m persona generate
-# → cikti/ klasörü: profil, 24 gönderi, 8 reels, 14 gün hikâye, takvim
+python3 -m persona generate --character persona/characters/beyza.json \
+  --out cikti-ag/beyza --posts 30 --reels 20 --stories 30
 ```
 
 Bağımlılık yok — çekirdek üretim sadece standart kütüphane kullanır.
 
-## Kurulum
+## Solo karakter garantisi
 
-Depoyu klonlayıp doğrudan `python3 -m persona` ile çalıştırabilirsin.
-Sistem geneline `persona` komutu olarak kurmak istersen:
+`beyza.json` içinde `"solo": true`. Bu bir tercih değil, kodla zorlanan bir
+garanti:
 
-```bash
-pip install -e .           # çekirdek
-pip install -e ".[llm]"    # + Claude ile yeniden yazım
-persona generate
-```
+- Her prompta **tek-kişi kuralı** ekleniyor ("karede tam olarak 1 yetişkin
+  kadın; başka insan, çocuk, hayvan yok").
+- Companion (ikinci kişi) enjeksiyonu tamamen kapanıyor.
+- Her promptun sonuna İngilizce negatif kural düşüyor: `multiple people,
+  another person, male, man, child, animal, cat, dog, ...`
+- `tests/test_beyza_solo.py` üretilen **bütün** promptları tarıyor: 256
+  promptun 256'sında kural var, hiçbirinde ikinci kişi ya da erkek geçmiyor.
 
-Örnek çıktı olarak deponun kökündeki [`profil.md`](profil.md) dosyasına
-bakabilirsin — biyografi, profil fotoğrafı promptu ve karakter referans
-sayfası orada.
+Çok kişili karakterler (arşivdeki Elif ve Sinan) eski davranışı sürdürüyor.
 
 ---
 
@@ -53,18 +45,20 @@ Yüz tutarlılığı bu tür hesapların en zor kısmı. Araç üç kaldıraç k
    görsel olarak ver (Midjourney `--cref`, Flux/SDXL IP-Adapter, Nano Banana
    referans görseli). Asıl tutarlılık buradan gelir.
 
-Ayrıca kıyafet, mekân ve kamera seçimi **içerik sütununa bağlıdır** —
-laboratuvar karesine can yeleği, mutfak karesine dalış maskesi gelmez.
+Ayrıca kıyafet, mekân ve kamera seçimi **içerik sütununa bağlıdır** — masa
+karesine yağmurluk, sahil karesine ev terliği gelmez.
 
-Karede ikinci bir kişi varsa (`companions`) onun görünümü de aynı yöntemle
-sabitlenir ve `profil.md` ona da ayrı bir referans sayfası üretir.
+Çok kişili karakterlerde (arşivdekiler) karedeki ikinci kişi de aynı
+yöntemle sabitlenir ve `profil.md` ona ayrı bir referans sayfası üretir.
+Beyza solo olduğu için bu yol onda tamamen kapalı.
 
 ## Karaktere hayat veren şey: hikâye yayları
 
-`arcs` alanı aylara yayılan devam eden hikâyeleri tutar — tıkanan tez
-bölümü, takip edilen 12 numaralı fok, ev arkadaşının ilk sergisi. Tek tek
-gönderiler değil bunlar hesabı canlı gösterir; `profil.md` içinde adım adım
-listelenir, takvimi doldururken her yayın bir sonraki adımını sıraya koyarsın.
+`arcs` alanı aylara yayılan devam eden hikâyeleri tutar — Beyza'da kendi
+yazı tipini çizmesi, evi yavaş yavaş toplaması, deniz kenarına kaçış planı.
+Tek tek gönderiler değil bunlar hesabı canlı gösterir; `profil.md` içinde
+adım adım listelenir, takvimi doldururken her yayın bir sonraki adımını
+sıraya koyarsın.
 
 ---
 
@@ -118,15 +112,9 @@ python3 -m persona generate --seed 7 --captions ornek-aciklamalar.json
 }
 ```
 
-`ornek-aciklamalar/` klasöründe üç karakterin de elle yazılmış açıklamaları
-var (her biri 30 gönderi + 10 reels, hikâye yaylarını sırayla ilerletir).
-Üçünü birden uygulamak için:
-
-```bash
-python3 -m persona network --out cikti-ag --full \
-  --posts 30 --reels 10 --stories 21 --seed 7 \
-  --captions-dir ornek-aciklamalar
-```
+`ornek-aciklamalar/arsiv/` klasöründe arşivlenen karakterlerin elle yazılmış
+açıklamaları duruyor (her biri 30 gönderi + 10 reels, hikâye yaylarını
+sırayla ilerletir). Kendi dosyanı yazarken biçim örneği olarak bakabilirsin.
 
 **Açıklamalar gönderiye `index` ile bağlanır.** Tohumu, gönderi sayısını ya
 da sahne havuzlarını değiştirirsen sahne sırası kayar ve açıklamalar yanlış
@@ -188,17 +176,18 @@ karede **tam olarak bir kişi** vardır: yan karakter yok, hayvan yok, arka
 planda insan ya da hayvan yok, fon boş.
 
 ```bash
-python3 -m persona identity                      # ekrana bas
+python3 -m persona identity                       # ekrana bas
 python3 -m persona identity --out cikti/identity  # dosyaya yaz
-python3 -m persona identity --out cikti/identity --companions  # Elif ve Sinan için de
+python3 -m persona identity --out cikti/identity --companions  # varsa ikinci kişiler için de
 ```
 
-Dört poz üretir: önden portre, profil, 3/4 açı, tam boy. Her promptun sonuna
-şu kural birebir eklenir:
+Dört poz üretir: önden portre, profil, 3/4 açı, tam boy. Beyza'da her
+promptun sonuna şu kural birebir eklenir:
 
 ```
-ONLY ONE PERSON. No animals, no cat, no Poyraz, no other people,
-no secondary characters, no background people, no background animals.
+ONLY ONE PERSON. No animals, no cat, no dog, no other people,
+no secondary characters, no background people, no background animals,
+no male, no man, no child.
 ```
 
 Bu mod `build_prompt`'u bilerek kullanmaz — o fonksiyon sütuna bağlı olarak
@@ -206,9 +195,11 @@ ikinci kişi satırı ekleyebiliyor, dolayısıyla "tek kişi" oradan geçseydi
 garanti değil parametreye bağlı bir umut olurdu. Ayarları karakter
 dosyasındaki `visual.identity_reference` bloğundan değiştirebilirsin.
 
-**Kısıtlama yalnızca bu moda özeldir.** Normal gönderi, reels ve hikâye
-promptları etkilenmez; yan karakterli sütunlar ikinci kişiyi eklemeye devam
-eder. `tests/test_identity_reference.py` iki yönü de doğrular.
+Solo olmayan karakterlerde kısıtlama **yalnızca bu moda özeldir**: normal
+gönderi, reels ve hikâye promptları etkilenmez, yan karakterli sütunlar
+ikinci kişiyi eklemeye devam eder. Beyza'da ise `"solo": true` sayesinde
+aynı garanti bütün promptlara yayılır.
+`tests/test_identity_reference.py` iki yönü de doğrular.
 
 ### Tek prompt
 
@@ -222,9 +213,11 @@ python3 -m persona prompt "vapur güvertesinde çay içerken" --kind story
 python3 -m persona network --out cikti-ag --full
 ```
 
-Her karakter için ayrı bir paket (`cikti-ag/beyza/`, `elif/`, `sinan/`) ve
-hepsini bağlayan `hesap-agi.md` üretir: kim kimin karesinde çıkıyor, hangi
-hikâye yayı kaç hesapta geçiyor, aynı olay hangi sırayla paylaşılır.
+`persona/characters/` altındaki her karakter için ayrı bir paket
+(`cikti-ag/beyza/`) ve hepsini bağlayan `hesap-agi.md` üretir: kim kimin
+karesinde çıkıyor, hangi hikâye yayı kaç hesapta geçiyor, aynı olay hangi
+sırayla paylaşılır. Varsayılan kurulumda tek karakter (Beyza) var; arşivdeki
+karakterleri de katmak istersen `--characters` ile yollarını ver.
 
 **Yüz kayması riski buradadır.** Bir kişi kendi dosyasında `visual.anchor`,
 başkasının dosyasında `companions[ad]` olarak geçer. İkisi ayrışırsa aynı
@@ -248,6 +241,12 @@ cikti/
 ├── karakter.json          kullanılan karakter dosyası
 ├── takvim.md / .csv       yayın takvimi
 ├── tum-promptlar.txt      tüm görsel promptlar tek dosyada
+├── gorseller/             üretilen görseller (images komutu doldurur)
+│   ├── identity/          BEYZA-IDENTITY-01..04.jpg  ← önce bunlar
+│   ├── profile/           BEYZA-PROFILE-01.jpg
+│   ├── posts/             BEYZA-POST-001.jpg …
+│   ├── reels/             BEYZA-REEL-001.jpg …
+│   └── stories/           BEYZA-STORY-001.jpg …
 ├── posts/NN-slug/
 │   ├── gorsel.txt         (karusel ise gorsel-1.txt, gorsel-2.txt…)
 │   ├── aciklama.txt

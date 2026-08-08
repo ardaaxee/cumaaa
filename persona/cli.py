@@ -63,24 +63,19 @@ def cmd_images(args: argparse.Namespace) -> int:
 
     ch = _load_character(args.character)
     dest_dir = out / "gorseller"
-    ref_dir = dest_dir / "identity"
+    ref_dir = dest_dir / export.IMAGE_DIRS["IDENTITY"]
 
     # 1) Kimlik kareleri önce. Diğer her şey bunlara dayanıyor.
-    identity: list[tuple[str, str]] = list(
-        zip(
-            [f"IDENTITY-{s}" for s in visual.IDENTITY_SLUGS],
-            visual.identity_reference_prompts(ch),
-        )
-    )
+    identity: list[tuple[str, str]] = [
+        (export.image_name(ch, "IDENTITY", i), prompt)
+        for i, prompt in enumerate(visual.identity_reference_prompts(ch), 1)
+    ]
 
     # 2) Sonra içerik promptları.
     content_blocks: list[tuple[str, str]] = []
     for chunk in bundle.read_text(encoding="utf-8").split("### ")[1:]:
         header, _, body = chunk.partition("\n")
-        # Başlık "POST 01-1 (saha)" biçiminde. Sadece sayıyı almak POST ve
-        # REEL adlarını çakıştırıyor (ikisi de "01-1") — tür ön ekini koru.
-        name = header.split(" (")[0].strip().replace(" ", "-")
-        content_blocks.append((name, body.strip()))
+        content_blocks.append((header.split(" (")[0].strip(), body.strip()))
     if args.limit:
         content_blocks = content_blocks[: args.limit]
 
@@ -88,11 +83,17 @@ def cmd_images(args: argparse.Namespace) -> int:
         [] if args.identity_only else content_blocks
     )
 
+    def kind_of(name: str) -> str:
+        """BEYZA-POST-001 → POST. Bilinmeyen ad POST sayılır."""
+        for kind in export.IMAGE_DIRS:
+            if f"-{kind}-" in name:
+                return kind
+        return "POST"
+
     def dest_for(name: str) -> Path:
         """Hedef yol tek yerden hesaplanır — 'zaten var mı' kontrolü ile
         yazma yolu ayrışırsa devam etme özelliği sessizce bozulur."""
-        base = ref_dir if name.startswith("IDENTITY-") else dest_dir
-        return base / f"{name}.jpg"
+        return dest_dir / export.IMAGE_DIRS[kind_of(name)] / f"{name}.jpg"
 
     pending = [(n, p) for n, p in jobs if args.overwrite or not dest_for(n).exists()]
 
@@ -110,16 +111,25 @@ def cmd_images(args: argparse.Namespace) -> int:
     if reference and not reference.exists():
         raise SystemExit(f"Referans görsel yok: {reference}")
 
+    aspect_by_kind = {
+        "IDENTITY": "1:1",
+        "PROFILE": "1:1",
+        "POST": "4:5",
+        "REEL": "9:16",
+        "STORY": "9:16",
+    }
+
     made = 0
     for name, prompt in pending:
-        is_identity = name.startswith("IDENTITY-")
+        kind = kind_of(name)
+        is_identity = kind == "IDENTITY"
         dest = dest_for(name)
-        aspect = "1:1" if is_identity else ("9:16" if name.startswith("REEL") else "4:5")
+        aspect = aspect_by_kind[kind]
 
         # Kimlik karelerine referans verilmez — referansı onlar üretir.
         ref = None if is_identity else reference
         if ref is None and not is_identity and args.provider in images.SUPPORTS_REFERENCE:
-            auto = ref_dir / f"IDENTITY-{visual.IDENTITY_SLUGS[0]}.jpg"
+            auto = ref_dir / f"{export.image_name(ch, 'IDENTITY', 1)}.jpg"
             ref = auto if auto.exists() else None
 
         print(f"→ {name}{' (referanslı)' if ref else ''}", file=sys.stderr)

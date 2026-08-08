@@ -18,6 +18,18 @@ IDENTITY_NEGATIVE = (
     "no secondary characters, no background people, no background animals."
 )
 
+#: Solo karakterlerde HER prompta eklenen negatif kural. Kimlik karelerine
+#: özel değil — akıştaki her fotoğraf tek kişilik olmalı.
+REALISM_NEGATIVE = (
+    "multiple people, another person, male, man, child, animal, cat, dog, "
+    "duplicate person, different identity, different face, face morphing, "
+    "plastic skin, airbrushed skin, beauty filter, CGI, 3D render, "
+    "illustration, anime, doll face, excessive makeup, distorted face, "
+    "asymmetrical eyes caused by generation, malformed hands, extra fingers, "
+    "missing fingers, duplicated limbs, watermark, logo, text, artificial skin, "
+    "overprocessed image"
+)
+
 #: Kimlik referansı için varsayılan 4 poz.
 DEFAULT_IDENTITY_POSES = [
     "önden portre, tam karşıdan, omuz üstü kadraj, nötr ifade, doğrudan kameraya bakıyor",
@@ -61,6 +73,10 @@ class VisualIdentity:
     negative: list[str] = field(default_factory=list)
     seed: int = 720113
     identity_reference: IdentityReference = field(default_factory=IdentityReference)
+    #: Her prompta eklenen İngilizce negatif kural (araçlar buna daha iyi uyuyor).
+    negative_en: str = REALISM_NEGATIVE
+    #: "Telefonla çekilmiş gerçek fotoğraf" hissini kuran teknik notlar.
+    realism: list[str] = field(default_factory=list)
 
     @classmethod
     def from_dict(cls, d: dict[str, Any]) -> VisualIdentity:
@@ -141,6 +157,28 @@ class Character:
     #: Aylara yayılan hikâye yayları: {"name": ..., "beats": [...]}.
     #: Hesabın "devam eden hayat" hissini bunlar taşır.
     arcs: list[dict[str, Any]] = field(default_factory=list)
+
+    #: True ise karede başka insan/hayvan ASLA olmaz. Bu bir tercih değil
+    #: garanti: companion enjeksiyonu kapanır ve her prompta tek-kişi kuralı
+    #: ile İngilizce negatif eklenir.
+    solo: bool = False
+
+    #: Instagram için alternatif kullanıcı adı önerileri.
+    handle_suggestions: list[str] = field(default_factory=list)
+    #: Kişilik özellikleri (profil.md'de listelenir).
+    personality: list[str] = field(default_factory=list)
+    #: İlgi alanları.
+    interests: list[str] = field(default_factory=list)
+    #: Haftalık paylaşım planı: "Pazartesi — ..." gibi 7 satır.
+    weekly_plan: list[str] = field(default_factory=list)
+
+    @property
+    def file_prefix(self) -> str:
+        """Görsel dosya adlarının ön eki: BEYZA-POST-001.jpg gibi."""
+        tr = str.maketrans("çğıöşüÇĞİÖŞÜ", "cgiosuCGIOSU")
+        return "".join(
+            c for c in self.display_name.translate(tr).upper() if c.isalnum()
+        ) or "KARAKTER"
 
     # ---- yükleme / kaydetme -------------------------------------------------
 
