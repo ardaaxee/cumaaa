@@ -102,32 +102,34 @@
   ],
   "companions": {},
   "visual": {
-    "anchor": "20 yaşında genç bir kadın; doğal oval yüz, belirgin ama yumuşak elmacık kemikleri, doğal çene hattı, sıcak koyu kahverengi badem gözler, doğal kalın kaşlar, ince ve düz burun, doğal dolgunlukta dudaklar, burun ve yanaklarda hafif doğal çiller, sol çene hattında küçük bir ben; sağlıklı genç cilt, gerçek cilt dokusu ve görünür gözenekler, ciltte hafif doğal ton farkları; doğal güzel ama filtresiz bir yüz, makyajsız ya da çok hafif makyajlı; doğal ince-atletik yetişkin kadın vücudu, ortalama boy (1.68), abartılmamış gerçekçi oranlar",
-    "anchor_en": "a 20-year-old adult woman, naturally pretty in an ordinary unfiltered way. Natural oval face, defined but soft cheekbones, gentle natural jawline, warm dark brown almond-shaped eyes, thick naturally shaped eyebrows, slim straight nose, soft natural lips, light natural freckles scattered across her nose and cheeks, a small beauty mark on her left jawline. Healthy young skin with real human texture, visible pores and subtle natural tone variation. No makeup or very light makeup. Her face is exactly the same person in every photograph.",
-    "hair": "koyu kahverengi, omuz altına kadar, doğal hafif dalgalı; uçlarda hafif doğal bal tonları; bazı karelerde açık, bazılarında at kuyruğu ya da dağınık topuz; yüz çevresinde kaçak birkaç tel, saç telleri tek tek görünür",
-    "hair_en": "dark brown hair falling below her shoulders, naturally wavy, with subtle honey-toned highlights at the ends. Sometimes worn loose, sometimes in a ponytail or a messy bun. Individual hair strands and small flyaways are visible around her face.",
+    "anchor": "20 yaşında genç bir kadın; simetriye yakın yumuşak oval yüz, belirgin ama yumuşak elmacık kemikleri, ince çene hattı, iri badem gözler açık ela-yeşil, doğal kalın ve düzgün kaşlar, ince düz burun, dolgun doğal dudaklar, burun üstünde çok hafif çiller, sol çene hattında küçük bir ben; açık ten, sağlıklı ve bakımlı görünüm, gerçek cilt dokusu ve görünür gözenekler, ciltte hafif doğal ton farkları; çekici ve bakımlı ama filtresiz bir yüz, hafif doğal makyaj; doğal ince yetişkin kadın vücudu, ortalama boy (1.68), abartılmamış gerçekçi oranlar",
+    "anchor_en": "a 20-year-old adult woman, conventionally pretty in a natural unfiltered way. Softly oval face, defined but soft cheekbones, delicate jawline, large almond-shaped hazel-green eyes, thick well-shaped eyebrows, slim straight nose, full natural lips, a few faint freckles across her nose, a small beauty mark on her left jawline. Fair healthy skin with real human texture, visible pores and subtle natural tone variation. Light natural makeup. She is an invented fictional person who does not resemble any real individual. Her face is exactly the same person in every photograph.",
+    "hair": "uzun, omuz altına kadar inen, doğal dalgalı açık bal sarısı saç; bazı karelerde açık, bazılarında at kuyruğu ya da dağınık topuz; yüz çevresinde kaçak birkaç tel, saç telleri tek tek görünür",
+    "hair_en": "long honey-blonde hair falling well below her shoulders, naturally wavy with soft movement. Sometimes worn loose, sometimes in a ponytail or a messy bun. Individual hair strands and small flyaways are visible around her face.",
     "body_en": "adult woman with a natural slim athletic build, realistic human anatomy, average height, natural unexaggerated proportions. Her body identity stays the same across every photograph.",
     "wardrobe": [
       "bol beyaz tişört ve açık mavi kot",
       "büyük bej örgü hırka, altında sade tişört",
-      "gri eşofman altı ve bol sweatshirt, ev içi",
+      "krem rengi crop tişört ve bej şort, ev içi",
       "krem keten gömlek, kolları kıvrık",
       "siyah basic tişört ve geniş kot pantolon",
       "yeşil kadife gömlek, üstünde ince kolye",
       "uzun kahverengi hırka ve beyaz tişört",
       "sade lacivert elbise, düz ayakkabı",
-      "trençkot ve şal, dışarı için"
+      "trençkot ve şal, dışarı için",
+      "oversize beyaz tişört ve gri eşofman altı, ev içi"
     ],
     "wardrobe_en": [
       "a loose white t-shirt and light blue jeans",
       "an oversized beige knitted cardigan over a plain t-shirt",
-      "grey sweatpants and a baggy sweatshirt, at home",
+      "a cream cropped t-shirt and beige shorts, at home",
       "a cream linen shirt with the sleeves rolled up",
       "a plain black t-shirt and wide-leg jeans",
       "a green corduroy shirt with a thin necklace",
       "a long brown cardigan over a white t-shirt",
       "a plain navy dress and flat shoes",
-      "a trench coat and a scarf, dressed for outside"
+      "a trench coat and a scarf, dressed for outside",
+      "an oversized white t-shirt and grey sweatpants, at home"
     ],
     "palette": [
       "sıcak bej",
@@ -252,7 +254,15 @@
       "bazen cümleyi yarım bırakır",
       "kendinden bahsederken üçüncü bir şeye kaçar: hava, kahve, ışık"
     ],
-    "emoji": ["☕", "📖", "🌤", "🪴", "🫠", "📓", "🌊"],
+    "emoji": [
+      "☕",
+      "📖",
+      "🌤",
+      "🪴",
+      "🫠",
+      "📓",
+      "🌊"
+    ],
     "signoffs": [
       "bugünlük bu kadar.",
       "yarın devamı var.",
@@ -327,14 +337,20 @@
         "siz de mi işe kablo düzenleyerek başlıyorsunuz?",
         "yazı tipi önerisi olan yazsın, ciddiyim."
       ],
-      "hashtags": ["#grafiktasarım", "#tasarımöğrencisi", "#tipografi", "#tasarım", "#çalışmamasası"],
+      "hashtags": [
+        "#grafiktasarım",
+        "#tasarımöğrencisi",
+        "#tipografi",
+        "#tasarım",
+        "#çalışmamasası"
+      ],
       "wardrobe": [
-        "gri eşofman altı ve bol sweatshirt, ev içi",
+        "krem rengi crop tişört ve bej şort, ev içi",
         "bol beyaz tişört ve açık mavi kot",
         "büyük bej örgü hırka, altında sade tişört"
       ],
       "wardrobe_en": [
-        "grey sweatpants and a baggy sweatshirt, at home",
+        "a cream cropped t-shirt and beige shorts, at home",
         "a loose white t-shirt and light blue jeans",
         "an oversized beige knitted cardigan over a plain t-shirt"
       ],
@@ -399,16 +415,23 @@
         "sizin evinizde en sevdiğiniz köşe neresi?",
         "yağmuru sevenler burada mı?"
       ],
-      "hashtags": ["#evhali", "#kadıköy", "#haftasonu", "#slowliving"],
+      "hashtags": [
+        "#evhali",
+        "#kadıköy",
+        "#haftasonu",
+        "#slowliving"
+      ],
       "wardrobe": [
-        "gri eşofman altı ve bol sweatshirt, ev içi",
+        "krem rengi crop tişört ve bej şort, ev içi",
         "uzun kahverengi hırka ve beyaz tişört",
-        "büyük bej örgü hırka, altında sade tişört"
+        "büyük bej örgü hırka, altında sade tişört",
+        "oversize beyaz tişört ve gri eşofman altı, ev içi"
       ],
       "wardrobe_en": [
-        "grey sweatpants and a baggy sweatshirt, at home",
+        "a cream cropped t-shirt and beige shorts, at home",
         "a long brown cardigan over a white t-shirt",
-        "an oversized beige knitted cardigan over a plain t-shirt"
+        "an oversized beige knitted cardigan over a plain t-shirt",
+        "an oversized white t-shirt and grey sweatpants, at home"
       ],
       "locations": [
         "dairenin salonu, kanepe ve dağınık kitaplar",
@@ -470,16 +493,23 @@
         "alarmı kaç kez erteliyorsunuz, dürüst olun.",
         "sabah insanı olan var mı gerçekten?"
       ],
-      "hashtags": ["#sabah", "#gece", "#günlük", "#okuma"],
+      "hashtags": [
+        "#sabah",
+        "#gece",
+        "#günlük",
+        "#okuma"
+      ],
       "wardrobe": [
-        "gri eşofman altı ve bol sweatshirt, ev içi",
+        "krem rengi crop tişört ve bej şort, ev içi",
         "uzun kahverengi hırka ve beyaz tişört",
-        "bol beyaz tişört ve açık mavi kot"
+        "bol beyaz tişört ve açık mavi kot",
+        "oversize beyaz tişört ve gri eşofman altı, ev içi"
       ],
       "wardrobe_en": [
-        "grey sweatpants and a baggy sweatshirt, at home",
+        "a cream cropped t-shirt and beige shorts, at home",
         "a long brown cardigan over a white t-shirt",
-        "a loose white t-shirt and light blue jeans"
+        "a loose white t-shirt and light blue jeans",
+        "an oversized white t-shirt and grey sweatpants, at home"
       ],
       "locations": [
         "yatak odası, açık kitap ve gece lambası"
@@ -541,16 +571,23 @@
         "günde kaç kahve, dürüst cevap.",
         "bu kupayı soranlar oluyor, ikinci el."
       ],
-      "hashtags": ["#kahve", "#filtrekahve", "#sabah", "#evdekahve"],
+      "hashtags": [
+        "#kahve",
+        "#filtrekahve",
+        "#sabah",
+        "#evdekahve"
+      ],
       "wardrobe": [
-        "gri eşofman altı ve bol sweatshirt, ev içi",
+        "krem rengi crop tişört ve bej şort, ev içi",
         "bol beyaz tişört ve açık mavi kot",
-        "uzun kahverengi hırka ve beyaz tişört"
+        "uzun kahverengi hırka ve beyaz tişört",
+        "oversize beyaz tişört ve gri eşofman altı, ev içi"
       ],
       "wardrobe_en": [
-        "grey sweatpants and a baggy sweatshirt, at home",
+        "a cream cropped t-shirt and beige shorts, at home",
         "a loose white t-shirt and light blue jeans",
-        "a long brown cardigan over a white t-shirt"
+        "a long brown cardigan over a white t-shirt",
+        "an oversized white t-shirt and grey sweatpants, at home"
       ],
       "locations": [
         "dairenin mutfağı, tezgahta filtre kahve takımı"
@@ -607,7 +644,12 @@
         "balkonunuzda ne var, merak ediyorum.",
         "hangi bitki dayanıklı, öneri bekliyorum."
       ],
-      "hashtags": ["#balkon", "#bitki", "#evhali", "#sabah"],
+      "hashtags": [
+        "#balkon",
+        "#bitki",
+        "#evhali",
+        "#sabah"
+      ],
       "wardrobe": [
         "büyük bej örgü hırka, altında sade tişört",
         "uzun kahverengi hırka ve beyaz tişört",
@@ -676,7 +718,12 @@
         "kenara not alan var mı, yoksa yalnız mıyım?",
         "bu kitapçıyı bilen çıkar mı?"
       ],
-      "hashtags": ["#kitap", "#okuma", "#kitapçı", "#kitapönerisi"],
+      "hashtags": [
+        "#kitap",
+        "#okuma",
+        "#kitapçı",
+        "#kitapönerisi"
+      ],
       "wardrobe": [
         "büyük bej örgü hırka, altında sade tişört",
         "krem keten gömlek, kolları kıvrık",
@@ -749,7 +796,12 @@
         "hazırlanma süreniz kaç dakika, dürüst olun.",
         "bu hırkayı soranlar oldu, ikinci el."
       ],
-      "hashtags": ["#günlük", "#doğallık", "#istanbul", "#ootd"],
+      "hashtags": [
+        "#günlük",
+        "#doğallık",
+        "#istanbul",
+        "#ootd"
+      ],
       "wardrobe": [
         "krem keten gömlek, kolları kıvrık",
         "yeşil kadife gömlek, üstünde ince kolye",
@@ -821,7 +873,12 @@
         "evde mi kafede mi, siz hangisindensiniz?",
         "prizli kafe bilen var mı?"
       ],
-      "hashtags": ["#kafe", "#kahve", "#istanbul", "#kadıköy"],
+      "hashtags": [
+        "#kafe",
+        "#kahve",
+        "#istanbul",
+        "#kadıköy"
+      ],
       "wardrobe": [
         "trençkot ve şal, dışarı için",
         "siyah basic tişört ve geniş kot pantolon",
@@ -891,7 +948,12 @@
         "siz de yürüyerek mi geziyorsunuz bu şehri?",
         "yağmurda yürümeyi seven?"
       ],
-      "hashtags": ["#istanbul", "#kadıköy", "#sokak", "#şehir"],
+      "hashtags": [
+        "#istanbul",
+        "#kadıköy",
+        "#sokak",
+        "#şehir"
+      ],
       "wardrobe": [
         "trençkot ve şal, dışarı için",
         "siyah basic tişört ve geniş kot pantolon",
