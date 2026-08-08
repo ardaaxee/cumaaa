@@ -102,10 +102,10 @@
   ],
   "companions": {},
   "visual": {
-    "anchor": "20 yaşında genç bir kadın; simetriye yakın yumuşak oval yüz, belirgin ama yumuşak elmacık kemikleri, ince çene hattı, iri badem gözler açık ela-yeşil, doğal kalın ve düzgün kaşlar, ince düz burun, dolgun doğal dudaklar, burun üstünde çok hafif çiller, sol çene hattında küçük bir ben; açık ten, sağlıklı ve bakımlı görünüm, gerçek cilt dokusu ve görünür gözenekler, ciltte hafif doğal ton farkları; çekici ve bakımlı ama filtresiz bir yüz, hafif doğal makyaj; doğal ince yetişkin kadın vücudu, ortalama boy (1.68), abartılmamış gerçekçi oranlar",
-    "anchor_en": "a 20-year-old adult woman, conventionally pretty in a natural unfiltered way. Softly oval face, defined but soft cheekbones, delicate jawline, large almond-shaped hazel-green eyes, thick well-shaped eyebrows, slim straight nose, full natural lips, a few faint freckles across her nose, a small beauty mark on her left jawline. Fair healthy skin with real human texture, visible pores and subtle natural tone variation. Light natural makeup. She is an invented fictional person who does not resemble any real individual. Her face is exactly the same person in every photograph.",
-    "hair": "uzun, omuz altına kadar inen, doğal dalgalı açık bal sarısı saç; bazı karelerde açık, bazılarında at kuyruğu ya da dağınık topuz; yüz çevresinde kaçak birkaç tel, saç telleri tek tek görünür",
-    "hair_en": "long honey-blonde hair falling well below her shoulders, naturally wavy with soft movement. Sometimes worn loose, sometimes in a ponytail or a messy bun. Individual hair strands and small flyaways are visible around her face.",
+    "anchor": "20 yaşında genç yetişkin bir kadın; yumuşak oval yüz, belirgin ama yumuşak elmacık kemikleri, ince çene hattı, doğal kahverengi badem gözler, doğal kalın ve düzgün kaşlar, ince düz burun, dolgun doğal dudaklar, burun üstünde çok hafif çiller, sol çene hattında küçük bir ben; sağlıklı genç ten, gerçek cilt dokusu ve görünür gözenekler, ciltte hafif doğal ton farkları ve küçük doğal kusurlar; güzel ama filtresiz bir yüz, hafif doğal makyaj ya da makyajsız; doğal ince yetişkin kadın vücudu, ortalama boy (1.68), abartılmamış gerçekçi oranlar",
+    "anchor_en": "a 20-year-old adult woman, young adult face, pretty in a natural unfiltered way. Softly oval face, defined but soft cheekbones, delicate jawline, warm natural brown almond-shaped eyes, thick well-shaped eyebrows, slim straight nose, full natural lips, a few faint freckles across her nose, a small beauty mark on her left jawline. Healthy young skin with real human texture, visible pores, subtle natural tone variation and small natural imperfections. Light natural makeup or a bare face. She is an invented fictional person who does not resemble any real individual. Her face is exactly the same person in every photograph.",
+    "hair": "uzun, doğal koyu kahverengi saç, omuz altına kadar iniyor, doğal hafif dalgalı; bazı karelerde açık, bazılarında at kuyruğu ya da dağınık topuz; yüz çevresinde kaçak birkaç tel, saç telleri tek tek görünür",
+    "hair_en": "long natural dark brown hair falling well below her shoulders, naturally wavy with soft movement. Sometimes worn loose, sometimes in a ponytail or a messy bun. Individual hair strands and small flyaways are visible around her face.",
     "body_en": "adult woman with a natural slim athletic build, realistic human anatomy, average height, natural unexaggerated proportions. Her body identity stays the same across every photograph.",
     "wardrobe": [
       "bol beyaz tişört ve açık mavi kot",
@@ -463,7 +463,9 @@
         "yatak odasının penceresinden gelen sabah ışığında",
         "gece geç saat, yatakta telefon ışığında",
         "yatağı toplarken, gündüz ışığı",
-        "yatak kenarında oturmuş çorap giyerken"
+        "yatak kenarında oturmuş çorap giyerken",
+        "yatak odasında ahşap dolabın önünde ayakta, telefonla video çekerken, ev kıyafeti",
+        "yatak odasında ayakta, saçını arkaya atarken, doğal duruş"
       ],
       "scenes_en": [
         "reading a book in bed with the bedside lamp on",
@@ -472,7 +474,9 @@
         "standing in the morning light coming through the bedroom window",
         "late at night in bed, her face lit by her phone screen",
         "making the bed in daylight",
-        "sitting on the edge of the bed pulling on her socks"
+        "sitting on the edge of the bed pulling on her socks",
+        "standing in her bedroom in front of the wooden wardrobe, filming a short video on her phone, in home clothes",
+        "standing in her bedroom pushing her hair back, relaxed natural posture"
       ],
       "hooks": [
         "gece 01.00, kitap açık, göz kapalı, sayfa aynı.",
@@ -766,7 +770,8 @@
         "dışarı çıkmadan önce mont giyerken, koridorda",
         "aynada yarım görünen yüz, buğulu değil, gündüz",
         "aynadan omuz üstü kare, saç açık, sade tişört",
-        "girişte ayakkabı giyerken, çanta yerde"
+        "girişte ayakkabı giyerken, çanta yerde",
+        "yatak odası aynasında boy aynası selfie'si, ev kıyafeti, doğal duruş"
       ],
       "scenes_en": [
         "a natural mirror selfie in the bathroom, her phone visible, no makeup",
@@ -775,7 +780,8 @@
         "putting on her coat in the hallway before going out",
         "her face half visible in the mirror, clear glass, daytime",
         "a head and shoulders mirror shot, hair loose, plain t-shirt",
-        "putting her shoes on by the front door, bag on the floor"
+        "putting her shoes on by the front door, bag on the floor",
+        "a full-length mirror selfie in her bedroom, home clothes, relaxed natural posture"
       ],
       "hooks": [
         "çıkmadan önceki son kontrol. çanta, anahtar, telefon — biri hep eksik.",
