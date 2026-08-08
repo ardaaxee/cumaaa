@@ -68,6 +68,9 @@ class VoiceEngine:
         return self._deck("emoji", self.ch.voice.emoji).draw()
 
     def side_character_line(self) -> str:
+        """Yan karakteri olmayan (solo) karakterlerde boş döner."""
+        if not self.ch.side_characters:
+            return ""
         sc = self.rng.choice(self.ch.side_characters)
         templates = [
             f"{sc['name']} bugün de kendi işini yaptı.",
@@ -87,7 +90,7 @@ class VoiceEngine:
             body += f" ({self._deck('aside', ASIDES).draw()})"
         lines.append(body)
 
-        if self.rng.random() < 0.35:
+        if self.ch.side_characters and self.rng.random() < 0.35:
             lines.append(self.side_character_line())
 
         if with_cta and self.rng.random() < 0.65:

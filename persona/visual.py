@@ -54,13 +54,22 @@ def build_prompt(
     camera = camera or ctx["camera"]
     location = location or ctx["location"]
 
-    parts = [
-        f"Fotoğraf. {scene}.",
-        f"KİŞİ (her karede birebir aynı): {v.anchor}. Saç: {v.hair}.",
-    ]
+    parts = [f"Fotoğraf. {scene}."]
+
+    # Solo karakterde tek-kişi kuralı promptun başında duruyor: modeller
+    # baştaki talimatlara sondakilerden daha çok uyuyor.
+    if ch.solo:
+        parts.append(
+            f"KARE KURALI: karede tam olarak 1 (bir) yetişkin kadın var — "
+            f"{ch.display_name}. Başka insan yok, çocuk yok, hayvan yok; "
+            "arka planda insan yüzü ya da hayvan yok."
+        )
+
+    parts.append(f"KİŞİ (her karede birebir aynı): {v.anchor}. Saç: {v.hair}.")
 
     # Karede ikinci bir kişi varsa onun görünümü de sabit tutulmalı.
-    companion = pillar.companion if pillar else ""
+    # Solo karakterde bu dal hiç çalışmaz.
+    companion = "" if ch.solo else (pillar.companion if pillar else "")
     if companion and companion in ch.companions:
         parts.append(
             f"İKİNCİ KİŞİ — {companion} (her karede birebir aynı): "
@@ -73,12 +82,22 @@ def build_prompt(
         f"Kamera/ışık: {camera}.",
         f"Renk paleti: {', '.join(v.palette)}.",
         f"Stil: {rng.choice(v.style_notes)}.",
-        "Instagram gönderisi için doğal, belgesel hissi veren gerçekçi fotoğraf.",
+    ]
+    if v.realism:
+        parts.append(f"Gerçekçilik: {rng.choice(v.realism)}.")
+    parts += [
+        "Sıradan bir akıllı telefonla çekilmiş gerçek fotoğraf hissi; "
+        "profesyonel model çekimi değil.",
         f"En-boy oranı {ASPECT.get(kind, '4:5')}.",
     ]
+
     prompt = " ".join(parts)
     if v.negative:
         prompt += "\n\nİSTENMEYEN: " + "; ".join(v.negative) + "."
+    if v.negative_en:
+        prompt += "\n" + v.negative_en
+    if ch.solo:
+        prompt += "\n" + v.identity_reference.negative_en
     prompt += f"\nSeed: {v.seed}"
     return prompt
 
@@ -161,12 +180,15 @@ def identity_reference_prompts(
             f"Mekân: {ir.location}.",
             f"Kamera/ışık: {ir.camera}.",
             "Amaç: yüzü, saçı ve vücut kimliğini sabitlemek. Doğal ve gerçekçi "
-            "fotoğraf; ten dokusu görünür, retouch ve güzelleştirme yok.",
+            "fotoğraf; ten dokusu ve gözenekler görünür, retouch ve "
+            "güzelleştirme yok.",
             f"En-boy oranı {ir.aspect}.",
         ]
         prompt = " ".join(parts)
         if v.negative:
             prompt += "\n\nİSTENMEYEN: " + "; ".join(v.negative) + "."
+        if v.negative_en:
+            prompt += "\n" + v.negative_en
         prompt += "\n" + ir.negative_en
         prompt += f"\nSeed: {v.seed}"
         prompts.append(prompt)

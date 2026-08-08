@@ -275,7 +275,8 @@ class MevcutDosyalariAtlamaTest(unittest.TestCase):
     def _paket_kur(self, kok: Path) -> None:
         (kok).mkdir(parents=True, exist_ok=True)
         (kok / "tum-promptlar.txt").write_text(
-            "### POST 01-1 (saha)\nbir prompt\n\n### REEL 01-1 (lab)\nbaşka bir prompt\n",
+            "### BEYZA-POST-001 (masa)\nbir prompt\n\n"
+            "### BEYZA-REEL-001 (ev)\nbaşka bir prompt\n",
             encoding="utf-8",
         )
 
@@ -304,7 +305,7 @@ class MevcutDosyalariAtlamaTest(unittest.TestCase):
             cikti = self._dry_run(kok)
             # 4 kimlik + 2 içerik
             self.assertIn("Üretilecek: 6 görsel", cikti)
-            self.assertIn("IDENTITY-01-onden", cikti)
+            self.assertIn("BEYZA-IDENTITY-01", cikti)
 
     def test_var_olan_kimlik_karesi_atlanir(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
@@ -312,24 +313,26 @@ class MevcutDosyalariAtlamaTest(unittest.TestCase):
             self._paket_kur(kok)
             ident = kok / "gorseller" / "identity"
             ident.mkdir(parents=True)
-            (ident / "IDENTITY-01-onden.jpg").write_bytes(b"x")
+            (ident / "BEYZA-IDENTITY-01.jpg").write_bytes(b"x")
 
             cikti = self._dry_run(kok)
             self.assertIn("1 zaten var", cikti)
-            self.assertNotIn("IDENTITY-01-onden", cikti)
-            self.assertIn("IDENTITY-02-profil", cikti)
+            self.assertNotIn("BEYZA-IDENTITY-01", cikti)
+            self.assertIn("BEYZA-IDENTITY-02", cikti)
 
-    def test_post_ve_reel_adlari_cakismaz(self) -> None:
-        """POST 01-1 ve REEL 01-1 aynı dosyaya yazarsa biri kaybolur."""
+    def test_post_ve_reel_ayri_klasore_gidiyor(self) -> None:
+        """POST posts/, REEL reels/ altına; adlar da tür ön eki taşıyor."""
         with tempfile.TemporaryDirectory() as tmp:
             kok = Path(tmp) / "cikti"
             self._paket_kur(kok)
-            (kok / "gorseller").mkdir(parents=True)
-            (kok / "gorseller" / "POST-01-1.jpg").write_bytes(b"x")
+            posts = kok / "gorseller" / "posts"
+            posts.mkdir(parents=True)
+            (posts / "BEYZA-POST-001.jpg").write_bytes(b"x")
 
             cikti = self._dry_run(kok)
             self.assertIn("1 zaten var", cikti)
-            self.assertIn("REEL-01-1", cikti, "reels karesi ayrı ad almalı")
+            self.assertIn("BEYZA-REEL-001", cikti, "reels karesi ayrı ad almalı")
+            self.assertNotIn("BEYZA-POST-001", cikti)
 
 
 if __name__ == "__main__":

@@ -15,7 +15,9 @@ from persona import network
 from persona.models import Character
 
 CHARDIR = Path(__file__).resolve().parents[1] / "persona" / "characters"
-PATHS = sorted(CHARDIR.glob("*.json"))
+#: Ağ özelliği çok kişili karakterlerle çalışıyor. Varsayılan karakter
+#: (Beyza) artık solo olduğu için testler arşivdeki sete bakıyor.
+PATHS = sorted((CHARDIR / "arsiv").glob("*.json"))
 
 
 class NetworkTest(unittest.TestCase):
@@ -24,10 +26,8 @@ class NetworkTest(unittest.TestCase):
         cls.chars = [Character.load(p) for p in PATHS]
         cls.by_name = {c.display_name: c for c in cls.chars}
 
-    def test_uc_karakter_var(self) -> None:
-        self.assertEqual(
-            sorted(self.by_name), ["Beyza", "Elif", "Sinan"]
-        )
+    def test_arsivdeki_karakterler(self) -> None:
+        self.assertEqual(sorted(self.by_name), ["Elif", "Sinan"])
 
     def test_kullanici_adlari_benzersiz(self) -> None:
         handles = [c.handle for c in self.chars]
@@ -61,10 +61,18 @@ class NetworkTest(unittest.TestCase):
                         f"{name}, {ch.display_name}'i tanımıyor",
                     )
 
-    def test_ortak_hikaye_yayi_var(self) -> None:
-        arcs = network.shared_arcs(self.chars)
-        self.assertIn("Kış saha kampanyası", arcs)
-        self.assertIn("Elif'in ilk sergisi", arcs)
+    def test_ortak_yay_tespiti_calisiyor(self) -> None:
+        """İki karakter aynı yayı taşırsa tespit edilmeli."""
+        import copy
+
+        a, b = copy.deepcopy(self.chars[0]), copy.deepcopy(self.chars[1])
+        ortak = {"name": "Ortak olay", "beats": ["bir", "iki"]}
+        a.arcs.append(ortak)
+        b.arcs.append(dict(ortak))
+
+        arcs = network.shared_arcs([a, b])
+        self.assertIn("Ortak olay", arcs)
+        self.assertEqual(len(arcs["Ortak olay"]), 2)
 
     def test_her_karakterin_kimlik_modu_calisiyor(self) -> None:
         from persona import visual
@@ -81,7 +89,8 @@ class NetworkTest(unittest.TestCase):
         doc = network.build_network_doc(self.chars)
         for ch in self.chars:
             self.assertIn(ch.handle, doc)
-        self.assertIn("Ortak hikâye yayları", doc)
+        self.assertIn("Hesaplar", doc)
+        self.assertIn("Kim kimin karesinde çıkıyor", doc)
 
 
 if __name__ == "__main__":
