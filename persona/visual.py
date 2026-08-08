@@ -23,17 +23,31 @@ ASPECT = {"post": "4:5", "carousel": "4:5", "story": "9:16", "reel": "9:16", "pr
 
 
 def context_for(ch: Character, pillar: Pillar | None, rng: random.Random) -> dict[str, str]:
-    """Sütuna uygun kıyafet / mekân / kamera seçer.
+    """Sütuna uygun kıyafet / mekân / kamera seçer — Türkçe ve İngilizce.
 
     Sütun kendi listesini tanımlamışsa onu kullanır; yoksa karakterin genel
-    listesine düşer. Böylece laboratuvar karesine can yeleği gelmez.
+    listesine düşer. Böylece sahil karesine ev terliği gelmez.
+
+    Seçim **tek bir indeks** üzerinden yapılıyor: aynı kare iki dilde
+    tarif edilirken Türkçesinde hırka, İngilizcesinde trençkot yazmasın.
+    İngilizce liste eksikse o alan boş döner; render tarafı bunu hata
+    sayar, çünkü modele Türkçe göndermek sessiz bir kalite kaybı olurdu.
     """
     v = ch.visual
-    return {
-        "wardrobe": rng.choice((pillar.wardrobe if pillar else None) or v.wardrobe),
-        "location": rng.choice((pillar.locations if pillar else None) or v.locations),
-        "camera": rng.choice((pillar.camera if pillar else None) or v.camera),
-    }
+    out: dict[str, str] = {}
+    for key_tr, key_en, glob_tr, glob_en in (
+        ("wardrobe", "wardrobe_en", v.wardrobe, v.wardrobe_en),
+        ("locations", "locations_en", v.locations, v.locations_en),
+        ("camera", "camera_en", v.camera, v.camera_en),
+    ):
+        tr_pool = (getattr(pillar, key_tr) if pillar else None) or glob_tr
+        en_pool = (getattr(pillar, key_en) if pillar else None) or glob_en
+        i = rng.randrange(len(tr_pool))
+        # Çıktı anahtarı tekil: "location", "wardrobe", "camera".
+        name = "location" if key_tr == "locations" else key_tr
+        out[name] = tr_pool[i]
+        out[f"{name}_en"] = en_pool[i] if i < len(en_pool) else ""
+    return out
 
 
 def build_prompt(

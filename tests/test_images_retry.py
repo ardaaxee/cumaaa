@@ -274,9 +274,15 @@ class MevcutDosyalariAtlamaTest(unittest.TestCase):
 
     def _paket_kur(self, kok: Path) -> None:
         (kok).mkdir(parents=True, exist_ok=True)
+        # Modele giden dosya İngilizce olan; komut onu okuyor.
+        (kok / "render-promptlari-en.txt").write_text(
+            "### BEYZA-POST-001 (masa)\na prompt\n\n"
+            "### BEYZA-REEL-001 (salon)\nanother prompt\n",
+            encoding="utf-8",
+        )
         (kok / "tum-promptlar.txt").write_text(
             "### BEYZA-POST-001 (masa)\nbir prompt\n\n"
-            "### BEYZA-REEL-001 (ev)\nbaşka bir prompt\n",
+            "### BEYZA-REEL-001 (salon)\nbaşka bir prompt\n",
             encoding="utf-8",
         )
 

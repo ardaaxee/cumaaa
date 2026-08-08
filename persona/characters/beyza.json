@@ -9,15 +9,15 @@
     "beyza.dailynote"
   ],
   "display_name": "Beyza",
-  "tagline": "İstanbul · evde, masada, bazen dışarıda",
-  "age": 25,
+  "tagline": "İstanbul · okul, masa, kahve, bazen dışarısı",
+  "age": 20,
   "pronouns": "o/onun",
   "city": "İstanbul",
-  "occupation": "Serbest çalışan grafik tasarımcı; evden çalışıyor, ara sıra kafede",
+  "occupation": "Görsel iletişim tasarımı öğrencisi; ara sıra küçük serbest işler alıyor",
   "disclosure": "Kurgusal karakter · görseller ve metinler yapay zekâ ile üretilir",
   "solo": true,
   "bio_lines": [
-    "grafik tasarımcı, evden",
+    "tasarım öğrencisi, çoğu gün evde",
     "kahve → masa → pencere, bu sırayla",
     "okuduklarım ve yarım kalan işlerim",
     "İstanbul",
@@ -41,8 +41,8 @@
     "uzun playlistler yapmak"
   ],
   "backstory": [
-    "Eskişehir'de büyüdü, üniversite için İstanbul'a geldi ve kaldı.",
-    "Görsel iletişim tasarımı okudu; iki yıl ajansta çalıştı, sonra serbest geçti.",
+    "Eskişehir'de büyüdü, üniversite için İstanbul'a geldi.",
+    "Görsel iletişim tasarımı okuyor, ikinci sınıf.",
     "Kadıköy'de küçük bir daire; en sevdiği yer pencere kenarındaki masa.",
     "Sabahları geç başlar, akşamları geç biter, bunu düzeltmeye çalışmıyor.",
     "Bir kitabı bitirmeden ikincisine başlar, üçü aynı anda açıktır.",
@@ -72,13 +72,13 @@
       ]
     },
     {
-      "name": "Deniz kenarına kaçış",
+      "name": "İlk gerçek iş",
       "beats": [
-        "İki aydır şehirden çıkmamış olmanın farkına varma",
-        "Son dakika bir hafta sonu planı",
-        "Sahilde tek başına yürüyüş, telefon çantada",
-        "Dönüşte otobüste pencere kenarı",
-        "Eve dönünce masayı yeniden düzenleme isteği"
+        "Instagram'dan gelen ilk küçük tasarım teklifi",
+        "Fiyat söylemenin ne kadar zor olduğunu keşfetme",
+        "Üç revizyon, hepsi ilk versiyona dönüyor",
+        "İşin teslimi ve ilk faturayı kesme telaşı",
+        "İkinci teklif geliyor, bu sefer fiyatı daha rahat söylüyor"
       ]
     }
   ],
@@ -98,12 +98,15 @@
     "okuduklarım",
     "dışarıda",
     "yazı tipi",
-    "seyahat"
+    "balkon"
   ],
   "companions": {},
   "visual": {
-    "anchor": "25 yaşında yetişkin Türk kadın; doğal oval yüz, hafif ve doğal yüz asimetrisi (sol göz sağdan bir tık küçük, gülümseme sola daha çok kayıyor), koyu kahverengi doğal gözler, doğal şekilli bakımsız bırakılmış kaşlar, düz doğal burun, orta dolgunlukta doğal dudaklar, sağ yanakta çok küçük bir ben, alında ve burun kenarında görünür gözenekler, ciltte hafif kızarıklık ve doğal doku, çok hafif göz altı morluğu; doğal yetişkin kadın vücut yapısı, ortalama boy (1.66), abartılmamış doğal oranlar; makyajsız ya da neredeyse makyajsız",
-    "hair": "koyu kahverengi, omuz hizasının biraz altında, doğal hafif dalgalı; bazı karelerde açık, bazılarında at kuyruğu ya da dağınık topuz; yüz çevresinde kaçak birkaç tel, saç telleri tek tek görünür",
+    "anchor": "20 yaşında genç bir kadın; doğal oval yüz, belirgin ama yumuşak elmacık kemikleri, doğal çene hattı, sıcak koyu kahverengi badem gözler, doğal kalın kaşlar, ince ve düz burun, doğal dolgunlukta dudaklar, burun ve yanaklarda hafif doğal çiller, sol çene hattında küçük bir ben; sağlıklı genç cilt, gerçek cilt dokusu ve görünür gözenekler, ciltte hafif doğal ton farkları; doğal güzel ama filtresiz bir yüz, makyajsız ya da çok hafif makyajlı; doğal ince-atletik yetişkin kadın vücudu, ortalama boy (1.68), abartılmamış gerçekçi oranlar",
+    "anchor_en": "a 20-year-old adult woman, naturally pretty in an ordinary unfiltered way. Natural oval face, defined but soft cheekbones, gentle natural jawline, warm dark brown almond-shaped eyes, thick naturally shaped eyebrows, slim straight nose, soft natural lips, light natural freckles scattered across her nose and cheeks, a small beauty mark on her left jawline. Healthy young skin with real human texture, visible pores and subtle natural tone variation. No makeup or very light makeup. Her face is exactly the same person in every photograph.",
+    "hair": "koyu kahverengi, omuz altına kadar, doğal hafif dalgalı; uçlarda hafif doğal bal tonları; bazı karelerde açık, bazılarında at kuyruğu ya da dağınık topuz; yüz çevresinde kaçak birkaç tel, saç telleri tek tek görünür",
+    "hair_en": "dark brown hair falling below her shoulders, naturally wavy, with subtle honey-toned highlights at the ends. Sometimes worn loose, sometimes in a ponytail or a messy bun. Individual hair strands and small flyaways are visible around her face.",
+    "body_en": "adult woman with a natural slim athletic build, realistic human anatomy, average height, natural unexaggerated proportions. Her body identity stays the same across every photograph.",
     "wardrobe": [
       "bol beyaz tişört ve açık mavi kot",
       "büyük bej örgü hırka, altında sade tişört",
@@ -114,6 +117,17 @@
       "uzun kahverengi hırka ve beyaz tişört",
       "sade lacivert elbise, düz ayakkabı",
       "trençkot ve şal, dışarı için"
+    ],
+    "wardrobe_en": [
+      "a loose white t-shirt and light blue jeans",
+      "an oversized beige knitted cardigan over a plain t-shirt",
+      "grey sweatpants and a baggy sweatshirt, at home",
+      "a cream linen shirt with the sleeves rolled up",
+      "a plain black t-shirt and wide-leg jeans",
+      "a green corduroy shirt with a thin necklace",
+      "a long brown cardigan over a white t-shirt",
+      "a plain navy dress and flat shoes",
+      "a trench coat and a scarf, dressed for outside"
     ],
     "palette": [
       "sıcak bej",
@@ -132,6 +146,15 @@
       "akşam iç mekan, tek sıcak lamba, yüksek ISO, görünür grain",
       "gün batımı yan ışığı, sıcak ton, doğal gölgeler"
     ],
+    "camera_en": [
+      "shot on a phone camera in natural window light, very slightly overexposed, realistic sensor noise",
+      "50mm lens look, shallow depth of field, soft daylight from a window",
+      "35mm, daytime, straight-on composition, slight lens imperfection and vignetting",
+      "phone selfie taken in a mirror, natural indoor light, slight motion blur",
+      "wide-angle phone camera outdoors on an overcast day, low contrast",
+      "indoors in the evening lit by a single warm lamp, high ISO, visible grain",
+      "low golden sunset light from the side, warm tones, natural shadows"
+    ],
     "locations": [
       "Kadıköy'de küçük bir dairenin pencere kenarındaki çalışma masası",
       "dairenin salonu, kanepe ve dağınık kitaplar",
@@ -143,8 +166,22 @@
       "Kadıköy'de dar bir sokak, ıslak asfalt",
       "küçük bir kafe, ahşap masa, pencere kenarı",
       "ikinci el kitapçı, dar raf aralığı",
-      "sahil yürüyüş yolu, deniz kenarı, bulutlu",
-      "otobüs ya da vapur penceresi kenarı, seyahat"
+      "salonun penceresi, perde açık, yağmurlu gün",
+      "dairenin girişi, ayakkabılar ve çanta"
+    ],
+    "locations_en": [
+      "a small flat in Istanbul, a desk pushed up against the window.",
+      "the living room of the flat, a sofa and books scattered around.",
+      "the kitchen of the flat, pour-over coffee gear on the counter.",
+      "the bedroom, an open book and a bedside lamp.",
+      "the balcony of the flat, a few potted plants and two chairs.",
+      "a bathroom mirror in natural daylight.",
+      "the hallway by the front door, a mirror and a coat on a hook.",
+      "a narrow street in Istanbul, wet asphalt.",
+      "a small café, a wooden table by the window.",
+      "a second-hand bookshop, a narrow aisle between tall shelves.",
+      "the living room window, curtains open, a rainy day outside.",
+      "the entrance of the flat, shoes and a bag by the door."
     ],
     "style_notes": [
       "poz vermemiş, günlük hayattan yakalanmış an; kadraj bazen hafif eğri",
@@ -178,14 +215,23 @@
     "seed": 250417,
     "identity_reference": {
       "wardrobe": "sade düz renk gri tişört, aksesuarsız, makyajsız",
+      "wardrobe_en": "a plain solid grey t-shirt, bare face, hair worn down",
       "location": "düz açık gri arka plan, tamamen boş, hiçbir nesne yok",
+      "location_en": "a plain light grey seamless studio backdrop with nothing on it.",
       "camera": "50mm görünümü, yumuşak eşit doğal ışık, gölgesiz, nötr beyaz dengesi",
+      "camera_en": "50mm lens, soft even natural light, no harsh shadows, neutral white balance, sharp focus on her face",
       "aspect": "1:1",
       "poses": [
         "önden portre, tam karşıdan, omuz üstü kadraj, nötr ifade, doğrudan kameraya bakıyor",
         "profil portre, tam yandan 90 derece, omuz üstü kadraj, nötr ifade",
         "3/4 açı portre, yüz kameradan 45 derece dönük, omuz üstü kadraj, çok hafif doğal gülümseme",
         "tam boy, ayakta, düz duruş, kollar yanda serbest, tüm vücut kadrajda, doğal vücut oranları"
+      ],
+      "poses_en": [
+        "front-facing portrait, head and shoulders, neutral relaxed expression, looking straight into the camera",
+        "full profile portrait, her head turned exactly 90 degrees to the side, head and shoulders, neutral expression",
+        "three-quarter portrait, her face turned 45 degrees away from the camera, head and shoulders, very faint natural smile",
+        "full body photograph, standing upright, arms relaxed at her sides, her whole body inside the frame, natural body proportions"
       ],
       "negative_en": "ONLY ONE PERSON. No animals, no cat, no dog, no other people, no secondary characters, no background people, no background animals, no male, no man, no child."
     }
@@ -246,6 +292,17 @@
         "pencereye dönmüş, dışarı bakarken, arkadan çekim",
         "yeni bir dosyayı açarken duraksama anı, ekran boş"
       ],
+      "scenes_en": [
+        "sitting at her desk by the window, looking at her laptop screen, photographed from the side",
+        "her hands and a pencil on the desk over an open sketchbook, shot from directly above",
+        "sitting at her computer in the evening, half her face lit by the screen",
+        "her desk at night: a half-finished mug of coffee, scattered papers, a single lamp",
+        "leaning back in her chair mid-stretch, daytime",
+        "drawing letterforms by hand, close on the paper and her hand",
+        "her desk from above: keyboard, notebook, coffee, a tangle of cables",
+        "turned towards the window looking outside, photographed from behind",
+        "pausing as she opens a new file, the screen still blank"
+      ],
       "hooks": [
         "saat 10.00'da masa başındaydım, 10.40'ta hâlâ aynı boş dosyaya bakıyordum.",
         "bugün üç saat çalıştım, ikisi kablo düzenlemekle geçti.",
@@ -270,57 +327,77 @@
         "siz de mi işe kablo düzenleyerek başlıyorsunuz?",
         "yazı tipi önerisi olan yazsın, ciddiyim."
       ],
-      "hashtags": ["#grafiktasarım", "#evdençalışma", "#tipografi", "#tasarım", "#çalışmamasası"],
+      "hashtags": ["#grafiktasarım", "#tasarımöğrencisi", "#tipografi", "#tasarım", "#çalışmamasası"],
       "wardrobe": [
         "gri eşofman altı ve bol sweatshirt, ev içi",
         "bol beyaz tişört ve açık mavi kot",
         "büyük bej örgü hırka, altında sade tişört"
       ],
+      "wardrobe_en": [
+        "grey sweatpants and a baggy sweatshirt, at home",
+        "a loose white t-shirt and light blue jeans",
+        "an oversized beige knitted cardigan over a plain t-shirt"
+      ],
       "locations": [
         "Kadıköy'de küçük bir dairenin pencere kenarındaki çalışma masası"
+      ],
+      "locations_en": [
+        "a small flat in Istanbul, a desk pushed up against the window."
       ],
       "camera": [
         "telefon kamerası, doğal pencere ışığı, hafif fazla pozlanmış, gerçekçi noise",
         "50mm görünümü, sığ alan derinliği, yumuşak pencere ışığı",
         "akşam iç mekan, tek sıcak lamba, yüksek ISO, görünür grain"
+      ],
+      "camera_en": [
+        "shot on a phone camera in natural window light, very slightly overexposed, realistic sensor noise",
+        "50mm lens look, shallow depth of field, soft daylight from a window",
+        "indoors in the evening lit by a single warm lamp, high ISO, visible grain"
       ]
     },
     {
-      "key": "ev",
-      "name": "Ev hali",
+      "key": "salon",
+      "name": "Salon & pencere",
       "weight": 4,
       "scenes": [
         "kanepede bacaklar toplanmış oturuyor, elinde kupa",
         "pencere kenarında oturmuş dışarı bakıyor, yağmurlu hava",
-        "yatakta kitap okurken, gece lambası açık",
-        "balkonda sandalyede, saksılar arkada, sabah ışığı",
         "salonda yerde oturmuş, önünde açık kitaplar",
         "hafta sonu ev hali: dağınık kanepe, örtü, yarım kahve",
-        "balkondaki bitkileri sularken, arkadan çekim",
         "kanepede uzanmış telefona bakıyor, doğal ışık",
-        "pencere önünde ayakta, elinde kupa, sırtı dönük"
+        "pencere önünde ayakta, elinde kupa, sırtı dönük",
+        "perdeyi aralayıp dışarı bakarken, sabah ışığı",
+        "kanepenin kolunda oturmuş ayakkabı bağlarken"
+      ],
+      "scenes_en": [
+        "sitting on the sofa with her legs tucked up, holding a mug",
+        "sitting by the window looking outside on a rainy day",
+        "sitting on the living room floor with open books in front of her",
+        "a weekend at home: a messy sofa, a throw blanket, a half-drunk coffee",
+        "lying on the sofa looking at her phone in natural light",
+        "standing at the window holding a mug, seen from behind",
+        "pulling the curtain aside to look outside in the morning light",
+        "perched on the arm of the sofa tying her shoelaces"
       ],
       "hooks": [
         "bugün hiçbir yere çıkmadım ve bundan hiç pişman değilim.",
         "yağmur başladı, planım değişti, plan zaten yoktu.",
         "kanepede iki saat geçirdim. üretken saymıyorum ama gerekliydi.",
-        "balkondaki üç saksıdan biri hayatta. oranı paylaşmıyorum.",
         "hafta sonu kuralı: dosya açmak yok. cumartesi 14.00'te bozuldu.",
         "bu evde en sevdiğim yer pencere kenarı, tartışmaya kapalı.",
         "sabah kalkıp perdeyi açmak günün en iyi kısmı olabilir.",
-        "gece 01.00, kitap açık, göz kapalı, sayfa aynı."
+        "yağmurlu günlerde bu pencerenin önünden kalkamıyorum."
       ],
       "details": [
         "üç kitap açık, üçü de yarım",
         "kupa üçüncü, ikisi soğudu",
-        "saksı sayısı 6, hayatta olan 2",
         "battaniye eylülden beri kanepede",
         "dışarı çıkmadığım üçüncü gün"
       ],
       "ctas": [
         "hafta sonu evde kalanlar el kaldırsın.",
         "sizin evinizde en sevdiğiniz köşe neresi?",
-        "bitki öldürmeyen biri varsa yazsın, gerçekten."
+        "yağmuru sevenler burada mı?"
       ],
       "hashtags": ["#evhali", "#kadıköy", "#haftasonu", "#slowliving"],
       "wardrobe": [
@@ -328,19 +405,101 @@
         "uzun kahverengi hırka ve beyaz tişört",
         "büyük bej örgü hırka, altında sade tişört"
       ],
+      "wardrobe_en": [
+        "grey sweatpants and a baggy sweatshirt, at home",
+        "a long brown cardigan over a white t-shirt",
+        "an oversized beige knitted cardigan over a plain t-shirt"
+      ],
       "locations": [
         "dairenin salonu, kanepe ve dağınık kitaplar",
-        "yatak odası, açık kitap ve gece lambası",
-        "dairenin balkonu, birkaç saksı ve iki sandalye"
+        "salonun penceresi, perde açık, yağmurlu gün"
+      ],
+      "locations_en": [
+        "the living room of the flat, a sofa and books scattered around.",
+        "the living room window, curtains open, a rainy day outside."
       ],
       "camera": [
         "telefon kamerası, doğal pencere ışığı, hafif fazla pozlanmış, gerçekçi noise",
         "35mm, gündüz, düz kompozisyon, hafif lens kusuru ve vinyet",
         "akşam iç mekan, tek sıcak lamba, yüksek ISO, görünür grain"
+      ],
+      "camera_en": [
+        "shot on a phone camera in natural window light, very slightly overexposed, realistic sensor noise",
+        "35mm, daytime, straight-on composition, slight lens imperfection and vignetting",
+        "indoors in the evening lit by a single warm lamp, high ISO, visible grain"
       ]
     },
     {
-      "key": "kahve",
+      "key": "yatak",
+      "name": "Yatak odası",
+      "weight": 2,
+      "scenes": [
+        "yatakta kitap okurken, gece lambası açık",
+        "sabah uyanmış, yatağın kenarında oturuyor, dağınık saç",
+        "yatakta yüzükoyun uzanmış, önünde defter",
+        "yatak odasının penceresinden gelen sabah ışığında",
+        "gece geç saat, yatakta telefon ışığında",
+        "yatağı toplarken, gündüz ışığı",
+        "yatak kenarında oturmuş çorap giyerken"
+      ],
+      "scenes_en": [
+        "reading a book in bed with the bedside lamp on",
+        "just woken up, sitting on the edge of the bed with messy hair",
+        "lying on her front on the bed with a notebook in front of her",
+        "standing in the morning light coming through the bedroom window",
+        "late at night in bed, her face lit by her phone screen",
+        "making the bed in daylight",
+        "sitting on the edge of the bed pulling on her socks"
+      ],
+      "hooks": [
+        "gece 01.00, kitap açık, göz kapalı, sayfa aynı.",
+        "sabah 08.55'te uyandım, 09.40'ta hâlâ yatağın kenarındaydım.",
+        "yatağı toplamak günün ilk başarısı sayılır mı?",
+        "gece okuyacaktım, telefona baktım, sabah oldu.",
+        "bu odanın sabah ışığı için erken kalkmaya değer.",
+        "uyumadan önce not almayı denedim, sabah okuyamadım."
+      ],
+      "details": [
+        "gece lambası saat 01.20'de hâlâ açık",
+        "yastığın yanında iki kitap",
+        "alarm dört kez ertelendi",
+        "defterde okunmayan üç satır"
+      ],
+      "ctas": [
+        "gece okuyanlar burada mı?",
+        "alarmı kaç kez erteliyorsunuz, dürüst olun.",
+        "sabah insanı olan var mı gerçekten?"
+      ],
+      "hashtags": ["#sabah", "#gece", "#günlük", "#okuma"],
+      "wardrobe": [
+        "gri eşofman altı ve bol sweatshirt, ev içi",
+        "uzun kahverengi hırka ve beyaz tişört",
+        "bol beyaz tişört ve açık mavi kot"
+      ],
+      "wardrobe_en": [
+        "grey sweatpants and a baggy sweatshirt, at home",
+        "a long brown cardigan over a white t-shirt",
+        "a loose white t-shirt and light blue jeans"
+      ],
+      "locations": [
+        "yatak odası, açık kitap ve gece lambası"
+      ],
+      "locations_en": [
+        "the bedroom, an open book and a bedside lamp."
+      ],
+      "camera": [
+        "akşam iç mekan, tek sıcak lamba, yüksek ISO, görünür grain",
+        "50mm görünümü, sığ alan derinliği, yumuşak pencere ışığı",
+        "telefon kamerası, doğal pencere ışığı, hafif fazla pozlanmış, gerçekçi noise"
+      ],
+      "camera_en": [
+        "indoors in the evening lit by a single warm lamp, high ISO, visible grain",
+        "50mm lens look, shallow depth of field, soft daylight from a window",
+        "shot on a phone camera in natural window light, very slightly overexposed, realistic sensor noise"
+      ]
+    },
+    {
+      "key": "mutfak",
       "name": "Mutfak & kahve",
       "weight": 3,
       "scenes": [
@@ -352,6 +511,16 @@
         "mutfak penceresinden gelen ışıkta, ayakta kahve içerken",
         "bulaşıkları yıkarken, sırtı dönük, akşam",
         "buzdolabının önünde duraksama anı"
+      ],
+      "scenes_en": [
+        "making pour-over coffee in the kitchen, steam rising from the cup",
+        "coffee gear and a scale on the counter, shot from directly above",
+        "holding a mug with both hands, close up, window light on her face",
+        "making breakfast at the kitchen counter in the morning",
+        "standing at the stove as the coffee boils over in the pot",
+        "standing drinking coffee in the light from the kitchen window",
+        "washing up at the sink in the evening, seen from behind",
+        "pausing in front of the open fridge"
       ],
       "hooks": [
         "18 gram kahve, 300 gram su, dört dakika. bugün yine ölçmedim.",
@@ -378,13 +547,92 @@
         "bol beyaz tişört ve açık mavi kot",
         "uzun kahverengi hırka ve beyaz tişört"
       ],
+      "wardrobe_en": [
+        "grey sweatpants and a baggy sweatshirt, at home",
+        "a loose white t-shirt and light blue jeans",
+        "a long brown cardigan over a white t-shirt"
+      ],
       "locations": [
         "dairenin mutfağı, tezgahta filtre kahve takımı"
+      ],
+      "locations_en": [
+        "the kitchen of the flat, pour-over coffee gear on the counter."
       ],
       "camera": [
         "telefon kamerası, doğal pencere ışığı, hafif fazla pozlanmış, gerçekçi noise",
         "50mm görünümü, sığ alan derinliği, yumuşak pencere ışığı",
         "35mm, gündüz, düz kompozisyon, hafif lens kusuru ve vinyet"
+      ],
+      "camera_en": [
+        "shot on a phone camera in natural window light, very slightly overexposed, realistic sensor noise",
+        "50mm lens look, shallow depth of field, soft daylight from a window",
+        "35mm, daytime, straight-on composition, slight lens imperfection and vignetting"
+      ]
+    },
+    {
+      "key": "balkon",
+      "name": "Balkon",
+      "weight": 2,
+      "scenes": [
+        "balkonda sandalyede oturuyor, saksılar arkada, sabah ışığı",
+        "balkondaki bitkileri sularken, arkadan çekim",
+        "balkon korkuluğuna yaslanmış, elinde kupa",
+        "balkonda kitap okurken, ayaklar sandalyede",
+        "akşamüstü balkonda, gün batımı yan ışığı",
+        "balkonda oturmuş dışarı bakıyor, yandan çekim"
+      ],
+      "scenes_en": [
+        "sitting on a chair on the balcony in the morning light, potted plants behind her",
+        "watering the plants on the balcony, seen from behind",
+        "leaning on the balcony railing holding a mug",
+        "reading a book on the balcony with her feet up on the chair",
+        "on the balcony in the late afternoon, low golden light from the side",
+        "sitting on the balcony looking out, photographed from the side"
+      ],
+      "hooks": [
+        "balkondaki üç saksıdan biri hayatta. oranı paylaşmıyorum.",
+        "balkonu nihayet oturulabilir hale getirdim, iki ay sürdü.",
+        "sabah kahvesini balkonda içmek günü değiştiriyor, abartmıyorum.",
+        "bitkilerle aramız iyi değil ama pes etmiyorum.",
+        "akşamüstü ışığı burada başka vuruyor."
+      ],
+      "details": [
+        "saksı sayısı 6, hayatta olan 2",
+        "sandalye ikinci el, 80 lira",
+        "sulama günü çarşamba, iki hafta atladım",
+        "balkonda geçen süre bugün 40 dakika"
+      ],
+      "ctas": [
+        "bitki öldürmeyen biri varsa yazsın, gerçekten.",
+        "balkonunuzda ne var, merak ediyorum.",
+        "hangi bitki dayanıklı, öneri bekliyorum."
+      ],
+      "hashtags": ["#balkon", "#bitki", "#evhali", "#sabah"],
+      "wardrobe": [
+        "büyük bej örgü hırka, altında sade tişört",
+        "uzun kahverengi hırka ve beyaz tişört",
+        "bol beyaz tişört ve açık mavi kot"
+      ],
+      "wardrobe_en": [
+        "an oversized beige knitted cardigan over a plain t-shirt",
+        "a long brown cardigan over a white t-shirt",
+        "a loose white t-shirt and light blue jeans"
+      ],
+      "locations": [
+        "dairenin balkonu, birkaç saksı ve iki sandalye"
+      ],
+      "locations_en": [
+        "the balcony of the flat, a few potted plants and two chairs."
+      ],
+      "camera": [
+        "35mm, gündüz, düz kompozisyon, hafif lens kusuru ve vinyet",
+        "gün batımı yan ışığı, sıcak ton, doğal gölgeler",
+        "telefon kamerası, doğal pencere ışığı, hafif fazla pozlanmış, gerçekçi noise"
+      ],
+      "camera_en": [
+        "35mm, daytime, straight-on composition, slight lens imperfection and vignetting",
+        "low golden sunset light from the side, warm tones, natural shadows",
+        "shot on a phone camera in natural window light, very slightly overexposed, realistic sensor noise"
       ]
     },
     {
@@ -398,8 +646,16 @@
         "kitapçıda dar raf aralığında, elinde iki kitap",
         "kanepede kitap okurken, ayaklar toplanmış",
         "kitabın kenarına not alırken, kaleme yakın plan",
-        "yatakta kitap açık, gece lambası, geç saat",
         "kitapçıdan çıkarken, elinde kağıt poşet, sokakta"
+      ],
+      "scenes_en": [
+        "holding an open book in window light, half her face visible",
+        "a book with a notepad beside it, shot from directly above",
+        "a stack of books with a pair of reading glasses on top",
+        "in a narrow aisle of a bookshop holding two books",
+        "reading on the sofa with her feet tucked up",
+        "writing a note in the margin of a book, close on her hand and the pen",
+        "walking out of the bookshop with a paper bag, on the street"
       ],
       "hooks": [
         "bu ay üç kitap başladım, birini bitirdim, oranı tartışmayalım.",
@@ -426,15 +682,30 @@
         "krem keten gömlek, kolları kıvrık",
         "siyah basic tişört ve geniş kot pantolon"
       ],
+      "wardrobe_en": [
+        "an oversized beige knitted cardigan over a plain t-shirt",
+        "a cream linen shirt with the sleeves rolled up",
+        "a plain black t-shirt and wide-leg jeans"
+      ],
       "locations": [
         "dairenin salonu, kanepe ve dağınık kitaplar",
         "yatak odası, açık kitap ve gece lambası",
         "ikinci el kitapçı, dar raf aralığı"
       ],
+      "locations_en": [
+        "the living room of the flat, a sofa and books scattered around.",
+        "the bedroom, an open book and a bedside lamp.",
+        "a second-hand bookshop, a narrow aisle between tall shelves."
+      ],
       "camera": [
         "50mm görünümü, sığ alan derinliği, yumuşak pencere ışığı",
         "35mm, gündüz, düz kompozisyon, hafif lens kusuru ve vinyet",
         "akşam iç mekan, tek sıcak lamba, yüksek ISO, görünür grain"
+      ],
+      "camera_en": [
+        "50mm lens look, shallow depth of field, soft daylight from a window",
+        "35mm, daytime, straight-on composition, slight lens imperfection and vignetting",
+        "indoors in the evening lit by a single warm lamp, high ISO, visible grain"
       ]
     },
     {
@@ -447,8 +718,17 @@
         "saçını toplarken aynaya bakıyor, doğal ışık",
         "dışarı çıkmadan önce mont giyerken, koridorda",
         "aynada yarım görünen yüz, buğulu değil, gündüz",
-        "yatak kenarında oturmuş ayakkabı giyerken",
-        "aynadan omuz üstü kare, saç açık, sade tişört"
+        "aynadan omuz üstü kare, saç açık, sade tişört",
+        "girişte ayakkabı giyerken, çanta yerde"
+      ],
+      "scenes_en": [
+        "a natural mirror selfie in the bathroom, her phone visible, no makeup",
+        "checking her outfit in the hallway mirror with a bag on her shoulder",
+        "tying her hair up while looking in the mirror, natural light",
+        "putting on her coat in the hallway before going out",
+        "her face half visible in the mirror, clear glass, daytime",
+        "a head and shoulders mirror shot, hair loose, plain t-shirt",
+        "putting her shoes on by the front door, bag on the floor"
       ],
       "hooks": [
         "çıkmadan önceki son kontrol. çanta, anahtar, telefon — biri hep eksik.",
@@ -476,113 +756,169 @@
         "trençkot ve şal, dışarı için",
         "sade lacivert elbise, düz ayakkabı"
       ],
+      "wardrobe_en": [
+        "a cream linen shirt with the sleeves rolled up",
+        "a green corduroy shirt with a thin necklace",
+        "a trench coat and a scarf, dressed for outside",
+        "a plain navy dress and flat shoes"
+      ],
       "locations": [
         "banyoda ayna, doğal gündüz ışığı",
         "kapı önü koridoru, ayna ve askıda mont",
-        "yatak odası, açık kitap ve gece lambası"
+        "dairenin girişi, ayakkabılar ve çanta"
+      ],
+      "locations_en": [
+        "a bathroom mirror in natural daylight.",
+        "the hallway by the front door, a mirror and a coat on a hook.",
+        "the entrance of the flat, shoes and a bag by the door."
       ],
       "camera": [
         "telefon selfie, aynadan, doğal iç mekan ışığı, hafif motion blur",
-        "telefon kamerası, doğal pencere ışığı, hafif fazla pozlanmış, gerçekçi noise"
+        "telefon kamerası, doğal pencere ışığı, hafif fazla pozlanmış, gerçekçi noise",
+        "35mm, gündüz, düz kompozisyon, hafif lens kusuru ve vinyet"
+      ],
+      "camera_en": [
+        "phone selfie taken in a mirror, natural indoor light, slight motion blur",
+        "shot on a phone camera in natural window light, very slightly overexposed, realistic sensor noise",
+        "35mm, daytime, straight-on composition, slight lens imperfection and vignetting"
       ]
     },
     {
-      "key": "disarida",
-      "name": "Dışarıda",
+      "key": "kafe",
+      "name": "Kafe",
       "weight": 3,
       "scenes": [
-        "sokakta yürürken, arkadan çekilmiş, ıslak asfalt",
         "kafede pencere kenarında, önünde kahve ve defter",
-        "sokak köşesinde durup telefona bakarken",
         "kafenin içinde, elinde fincan, arka plan bulanık",
-        "yürürken dönüp bakan bir an, doğal gülümseme",
-        "kaldırımda, elinde poşet, akşamüstü",
-        "vitrin önünde durmuş, camda hafif yansıma",
-        "otobüs durağında beklerken, tek başına"
+        "kafe masasında çalışırken, dizüstü açık",
+        "fincanı kaldırırken, elleri ve masa yakın plan",
+        "kafe penceresinden dışarı bakarken, yandan çekim",
+        "kafeden çıkarken kapıda, çanta omuzda"
+      ],
+      "scenes_en": [
+        "at a café table by the window with a coffee and a notebook in front of her",
+        "inside a café holding a cup, the background softly out of focus",
+        "working at a café table with her laptop open",
+        "lifting her cup, close on her hands and the table",
+        "looking out of the café window, photographed from the side",
+        "leaving the café at the door with her bag on her shoulder"
       ],
       "hooks": [
-        "bugün üç durak yürüdüm. gereksizdi. iyi geldi.",
         "kafede iki saat oturdum, kırk dakika çalıştım.",
-        "kadıköy'de yağmur başka yağıyor, kanıtlayamam.",
-        "bu sokaktan haftada dört kez geçiyorum, bugün ilk kez baktım.",
-        "dışarı çıkma sebebim kahveydi, iki kitapla döndüm.",
-        "akşamüstü ışığı için evden çıkmaya değer."
+        "evde çalışamadığım gün kafeye kaçıyorum, verim aynı.",
+        "bu kafenin pencere kenarı benim masam sayılır artık.",
+        "bir kahve, bir su, iki saat. adil bir anlaşma.",
+        "dışarı çıkma sebebim kahveydi, iki kitapla döndüm."
       ],
       "details": [
-        "üç durak yürüdüm, 22 dakika",
         "kafede iki saat, bir kahve, bir su",
-        "eve dönüş 18.40, hava kararmıştı",
-        "poşette iki kitap ve bir ekmek"
+        "pencere kenarı boştu, koştum",
+        "dizüstü şarjı %14",
+        "defterde iki satır, ikisi de liste"
       ],
       "ctas": [
-        "bu sokağı bilen var mı?",
         "kafe önerisi olan yazsın, çalışılabilir olsun.",
-        "siz de yürüyerek mi geziyorsunuz bu şehri?"
+        "evde mi kafede mi, siz hangisindensiniz?",
+        "prizli kafe bilen var mı?"
       ],
-      "hashtags": ["#istanbul", "#kadıköy", "#sokak", "#kafe"],
+      "hashtags": ["#kafe", "#kahve", "#istanbul", "#kadıköy"],
       "wardrobe": [
         "trençkot ve şal, dışarı için",
         "siyah basic tişört ve geniş kot pantolon",
         "yeşil kadife gömlek, üstünde ince kolye",
-        "uzun kahverengi hırka ve beyaz tişört"
+        "krem keten gömlek, kolları kıvrık"
+      ],
+      "wardrobe_en": [
+        "a trench coat and a scarf, dressed for outside",
+        "a plain black t-shirt and wide-leg jeans",
+        "a green corduroy shirt with a thin necklace",
+        "a cream linen shirt with the sleeves rolled up"
       ],
       "locations": [
-        "Kadıköy'de dar bir sokak, ıslak asfalt",
-        "küçük bir kafe, ahşap masa, pencere kenarı",
-        "ikinci el kitapçı, dar raf aralığı"
+        "küçük bir kafe, ahşap masa, pencere kenarı"
+      ],
+      "locations_en": [
+        "a small café, a wooden table by the window."
+      ],
+      "camera": [
+        "50mm görünümü, sığ alan derinliği, yumuşak pencere ışığı",
+        "35mm, gündüz, düz kompozisyon, hafif lens kusuru ve vinyet",
+        "telefon kamerası, doğal pencere ışığı, hafif fazla pozlanmış, gerçekçi noise"
+      ],
+      "camera_en": [
+        "50mm lens look, shallow depth of field, soft daylight from a window",
+        "35mm, daytime, straight-on composition, slight lens imperfection and vignetting",
+        "shot on a phone camera in natural window light, very slightly overexposed, realistic sensor noise"
+      ]
+    },
+    {
+      "key": "sokak",
+      "name": "Sokakta",
+      "weight": 3,
+      "scenes": [
+        "sokakta yürürken, arkadan çekilmiş, ıslak asfalt",
+        "sokak köşesinde durup telefona bakarken",
+        "yürürken dönüp bakan bir an, doğal gülümseme",
+        "kaldırımda, elinde poşet, akşamüstü",
+        "vitrin önünde durmuş, camda hafif yansıma",
+        "otobüs durağında beklerken, tek başına",
+        "yağmurda şemsiyeyle yürürken, ıslak sokak"
+      ],
+      "scenes_en": [
+        "walking down the street photographed from behind, wet asphalt",
+        "stopping at a street corner to look at her phone",
+        "turning to look back mid-walk with a natural smile",
+        "on the pavement in the late afternoon carrying a bag",
+        "stopped in front of a shop window, a faint reflection in the glass",
+        "waiting alone at a bus stop",
+        "walking with an umbrella in the rain on a wet street"
+      ],
+      "hooks": [
+        "bugün üç durak yürüdüm. gereksizdi. iyi geldi.",
+        "kadıköy'de yağmur başka yağıyor, kanıtlayamam.",
+        "bu sokaktan haftada dört kez geçiyorum, bugün ilk kez baktım.",
+        "akşamüstü ışığı için evden çıkmaya değer.",
+        "yürüyerek gitmek her zaman daha uzun sürüyor ve her zaman daha iyi."
+      ],
+      "details": [
+        "üç durak yürüdüm, 22 dakika",
+        "eve dönüş 18.40, hava kararmıştı",
+        "poşette iki kitap ve bir ekmek",
+        "şemsiye çantada iki haftadır duruyordu"
+      ],
+      "ctas": [
+        "bu sokağı bilen var mı?",
+        "siz de yürüyerek mi geziyorsunuz bu şehri?",
+        "yağmurda yürümeyi seven?"
+      ],
+      "hashtags": ["#istanbul", "#kadıköy", "#sokak", "#şehir"],
+      "wardrobe": [
+        "trençkot ve şal, dışarı için",
+        "siyah basic tişört ve geniş kot pantolon",
+        "sade lacivert elbise, düz ayakkabı",
+        "uzun kahverengi hırka ve beyaz tişört"
+      ],
+      "wardrobe_en": [
+        "a trench coat and a scarf, dressed for outside",
+        "a plain black t-shirt and wide-leg jeans",
+        "a plain navy dress and flat shoes",
+        "a long brown cardigan over a white t-shirt"
+      ],
+      "locations": [
+        "Kadıköy'de dar bir sokak, ıslak asfalt"
+      ],
+      "locations_en": [
+        "a narrow street in Istanbul, wet asphalt."
       ],
       "camera": [
         "geniş açı telefon, sokakta, bulutlu gün, düşük kontrast",
         "35mm, gündüz, düz kompozisyon, hafif lens kusuru ve vinyet",
         "gün batımı yan ışığı, sıcak ton, doğal gölgeler"
-      ]
-    },
-    {
-      "key": "seyahat",
-      "name": "Seyahat & deniz",
-      "weight": 2,
-      "scenes": [
-        "sahil yürüyüş yolunda, deniz arkada, rüzgârda saç",
-        "otobüs penceresi kenarında, camda yansıma, yol",
-        "deniz kenarında oturmuş, ayaklar sallanıyor, arkadan",
-        "vapur güvertesinde, elinde çay bardağı",
-        "sahilde yürürken ayakkabılar elde, kum",
-        "otel ya da pansiyon odasında, çanta açık, sabah ışığı",
-        "deniz kenarında gün batımı, silüet"
       ],
-      "hooks": [
-        "iki aydır şehirden çıkmamışım. fark edince bilet aldım.",
-        "sahilde telefon çantada kaldı. iki saat.",
-        "otobüste pencere kenarı bulmak günün zaferi.",
-        "deniz görünce her şey biraz daha idare edilebilir oluyor.",
-        "dönüş yolunda masayı yeniden düzenlemeyi planladım. yapmadım."
-      ],
-      "details": [
-        "yol 4 saat, pencere kenarı",
-        "sahilde iki saat, telefon çantada",
-        "çanta iki gecelik, üç kitap var",
-        "dönüş bileti pazar 17.30"
-      ],
-      "ctas": [
-        "son dakika kaçış yapan var mı?",
-        "burayı bilen çıkar mı acaba.",
-        "deniz mi dağ mı, tartışmayı açıyorum."
-      ],
-      "hashtags": ["#seyahat", "#deniz", "#haftasonukaçamağı", "#gezi"],
-      "wardrobe": [
-        "krem keten gömlek, kolları kıvrık",
-        "bol beyaz tişört ve açık mavi kot",
-        "uzun kahverengi hırka ve beyaz tişört",
-        "trençkot ve şal, dışarı için"
-      ],
-      "locations": [
-        "sahil yürüyüş yolu, deniz kenarı, bulutlu",
-        "otobüs ya da vapur penceresi kenarı, seyahat"
-      ],
-      "camera": [
-        "geniş açı telefon, sokakta, bulutlu gün, düşük kontrast",
-        "gün batımı yan ışığı, sıcak ton, doğal gölgeler",
-        "telefon kamerası, doğal pencere ışığı, hafif fazla pozlanmış, gerçekçi noise"
+      "camera_en": [
+        "wide-angle phone camera outdoors on an overcast day, low contrast",
+        "35mm, daytime, straight-on composition, slight lens imperfection and vignetting",
+        "low golden sunset light from the side, warm tones, natural shadows"
       ]
     }
   ]

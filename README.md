@@ -32,21 +32,60 @@ garanti:
 
 ---
 
+## İki ayrı prompt: biri sana, biri modele
+
+`generate` her kare için **iki** prompt yazar:
+
+| Dosya | Dil | Kime |
+|---|---|---|
+| `tum-promptlar.txt` | Türkçe | sana — okuman, düzenlemen için |
+| `render-promptlari-en.txt` | İngilizce | modele — `images` bunu gönderir |
+| `kimlik-promptlari-en.txt` | İngilizce | 4 kimlik karesi |
+
+Adlar üç dosyada da birebir aynı, yani `BEYZA-POST-007`'yi Türkçesinden
+okuyup İngilizcesinde bulabilirsin.
+
+Bu ayrım şart, çünkü:
+
+1. **FLUX'un metin kodlayıcısı (T5) İngilizce.** Türkçe prompt zayıf
+   koşullama veriyor ve yüz/cinsiyet tutmuyor.
+2. **FLUX'ta `negative_prompt` girdisi yok.** Negatif listeyi promptun
+   sonuna eklemek onu *pozitif* koşullamaya çevirir: içinde "male, man,
+   child" geçen bir prompt erkek üretir. `render.py` kısıtları olumlu
+   cümlelerle kuruyor — "exactly one adult woman", "the rest of the frame
+   is just the room itself".
+
 ## Neden tutarlı görsel çıkıyor
 
-Yüz tutarlılığı bu tür hesapların en zor kısmı. Araç üç kaldıraç kullanır:
+Yüz tutarlılığı bu tür hesapların en zor kısmı. Araç dört kaldıraç kullanır:
 
-1. **Sabit "anchor" metni.** Karakterin yüzü ve vücudu her promptta kelimesi
-   kelimesine aynı cümleyle tarif edilir (`visual.anchor`). Değişen sadece
-   sahne, kıyafet, ışık.
-2. **Sabit seed.** Tüm promptlara aynı seed düşülür.
-3. **Referans sayfası.** `profil.md` içinde 4 adet karakter referans karesi
-   promptu var. Önce onları üret, birini seç ve görsel aracına referans
-   görsel olarak ver (Midjourney `--cref`, Flux/SDXL IP-Adapter, Nano Banana
-   referans görseli). Asıl tutarlılık buradan gelir.
+1. **Kimlik promptu kimlikle başlıyor.** İlk cümle kim, kaç yaşında, hangi
+   cinsiyet ve karede kaç kişi olduğunu söyler. Modeller promptun başına
+   sonundan daha çok uyuyor.
+2. **Sabit "anchor" metni.** Yüz ve vücut her promptta kelimesi kelimesine
+   aynı cümleyle tarif edilir (`visual.anchor_en`). Değişen sadece sahne,
+   kıyafet, ışık, kamera açısı ve poz.
+3. **Sabit seed.** Tüm promptlara aynı seed düşülür.
+4. **Gerçekten gönderilen referans görsel.** Önce 4 kimlik karesi üretilir,
+   sonra ilki her içerik karesine referans olarak **istek gövdesinde**
+   gider. Alan adı modelin şemasından okunur (`render.MODEL_CAPS`):
+   Kontext `input_image`, 1.1-pro `image_prompt`, flux-dev `image`. Yanlış
+   ad sessizce yok sayılır ve her karede farklı bir yüz çıkar — bu yüzden
+   tahmin edilmiyor.
+
+Varsayılan modeller:
+
+| Aşama | Model | Neden |
+|---|---|---|
+| Kimlik kareleri | `flux-1.1-pro` | ortada referans yok, saf metinden üretim |
+| İçerik kareleri | `flux-kontext-pro` | verilen kişiyi koruyarak yeni sahne kurar |
+
+`flux-1.1-pro`'nun `image_prompt`'u Redux'tur: stil ve kompozisyon aktarır,
+**yüzü kilitlemez**. Tutarlılık için içerik tarafında Kontext kullanılıyor.
 
 Ayrıca kıyafet, mekân ve kamera seçimi **içerik sütununa bağlıdır** — masa
-karesine yağmurluk, sahil karesine ev terliği gelmez.
+karesine yağmurluk, sokak karesine ev terliği gelmez. Türkçe ve İngilizce
+seçim aynı indeksten yapılır, ikisi ayrışmaz.
 
 Çok kişili karakterlerde (arşivdekiler) karedeki ikinci kişi de aynı
 yöntemle sabitlenir ve `profil.md` ona ayrı bir referans sayfası üretir.
@@ -132,11 +171,10 @@ python3 -m persona images --out cikti --identity-only # önce 4 kimlik karesi
 python3 -m persona images --out cikti
 ```
 
-Sıra önemli ve komut bunu kendisi uyguluyor: **önce kimlik kareleri**
-(`gorseller/identity/`), sonra içerik kareleri — ve içerik kareleri
-üretilirken ilk kimlik karesi otomatik olarak **referans görsel** verilir.
-Referans olmadan 100 promptdan 100 farklı yüz çıkar; mimarinin tamamı bunun
-üzerine kurulu.
+Sıra önemli ve komut bunu **zorunlu tutuyor**: kimlik kareleri
+(`gorseller/identity/`) tamamlanmadan içerik üretimi başlamaz — eksikse
+komut ne yapman gerektiğini yazıp durur. Referans olmadan 260 promptdan 260
+farklı yüz çıkar; mimarinin tamamı bunun üzerine kurulu.
 
 | Bayrak | Ne yapar |
 |---|---|
@@ -144,6 +182,7 @@ Referans olmadan 100 promptdan 100 farklı yüz çıkar; mimarinin tamamı bunun
 | `--identity-only` | Sadece kimlik karelerini üretir |
 | `--skip-identity` | Kimlik karelerini atlar |
 | `--reference PATH` | Otomatik seçim yerine bu kareyi referans alır |
+| `--reference-param AD` | Referans alanının adını elle ver (şema değişirse) |
 | `--limit N` | Sadece ilk N içerik karesi |
 | `--overwrite` | Var olanları yeniden üretir |
 

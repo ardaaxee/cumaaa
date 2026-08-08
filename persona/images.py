@@ -18,6 +18,8 @@ import urllib.error
 import urllib.request
 from pathlib import Path
 
+from . import render
+
 TIMEOUT = 300
 
 #: 429 alındığında en fazla kaç kez tekrar denenir (sonsuz döngü olmasın).
@@ -177,10 +179,13 @@ def replicate_generate(
     aspect: str,
     seed: int,
     reference: Path | None = None,
+    negative: str = "",
+    reference_param: str | None = None,
 ) -> Path:
     token = os.environ.get("REPLICATE_API_TOKEN")
     if not token:
         raise SystemExit("REPLICATE_API_TOKEN tanımlı değil.")
+    caps = render.caps_for(model)
     headers = {"Authorization": f"Bearer {token}", "Prefer": "wait"}
     body = {
         "input": {
@@ -190,11 +195,26 @@ def replicate_generate(
             "output_format": "jpg",
         }
     }
+
+    # Negatif metin YALNIZCA modelin gerçek bir `negative_prompt` girdisi
+    # varsa gönderilir. FLUX'ta yok; oraya negatif eklemek onu pozitif
+    # koşullamaya çevirir ve tam istemediğimiz şeyi ürettirir.
+    if negative and caps.supports_negative:
+        body["input"]["negative_prompt"] = negative
+
     if reference is not None:
-        # Flux ailesi referans görseli `image_prompt` ile alıyor. Yüz
-        # tutarlılığını sağlayan asıl mekanizma bu; promptdaki anchor
-        # metni tek başına yetmiyor.
-        body["input"]["image_prompt"] = _data_uri(reference)
+        param = reference_param or caps.reference_param
+        if not param:
+            raise SystemExit(
+                f"{model} referans görsel almıyor (bilinen girdi yok). "
+                "Yüz tutarlılığı için --model black-forest-labs/flux-kontext-pro "
+                "kullan ya da --reference-param ile alan adını ver."
+            )
+        # Alan adı modele göre değişiyor: Kontext `input_image`, 1.1-pro
+        # `image_prompt`, flux-dev `image`. Yanlış ad sessizce yok sayılır
+        # ve her karede farklı bir yüz çıkar — bu yüzden şemadan geliyor.
+        body["input"][param] = _data_uri(reference)
+
     res = _post(f"https://api.replicate.com/v1/models/{model}/predictions", body, headers)
 
     # "Prefer: wait" çoğu zaman tamamlanmış sonuç döndürür; dönmezse yokla.
@@ -244,10 +264,15 @@ def openai_generate(prompt: str, dest: Path, *, model: str, aspect: str) -> Path
 
 
 PROVIDERS = {
-    "replicate": "black-forest-labs/flux-1.1-pro",
+    # Kimlik kareleri metinden üretiliyor; içerik kareleri referansla.
+    # Kontext ailesi verilen kişiyi koruyarak yeni sahne kurduğu için
+    # varsayılan bu: 1.1-pro'nun `image_prompt`'u yüzü kilitlemiyor.
+    "replicate": "black-forest-labs/flux-kontext-pro",
     "openai": "gpt-image-1",
 }
 
+#: Kimlik karelerinin varsayılan modeli: referans yok, saf metinden üretim.
+IDENTITY_MODEL = "black-forest-labs/flux-1.1-pro"
 
 #: Referans görseli destekleyen sağlayıcılar.
 SUPPORTS_REFERENCE = {"replicate"}
@@ -262,11 +287,20 @@ def generate(
     aspect: str,
     seed: int,
     reference: Path | None = None,
+    negative: str = "",
+    reference_param: str | None = None,
 ) -> Path:
     model = model or PROVIDERS[provider]
     if provider == "replicate":
         return replicate_generate(
-            prompt, dest, model=model, aspect=aspect, seed=seed, reference=reference
+            prompt,
+            dest,
+            model=model,
+            aspect=aspect,
+            seed=seed,
+            reference=reference,
+            negative=negative,
+            reference_param=reference_param,
         )
     if provider == "openai":
         # OpenAI'nin düzenleme uç noktası farklı bir istek biçimi kullanıyor;
