@@ -156,6 +156,26 @@ class IcerikPromptuTest(unittest.TestCase):
         for p in self.prompts:
             self.assertIn(self.ch.visual.anchor_en, p)
 
+    def test_kimlik_koruma_talimati_her_karede(self) -> None:
+        """Kontext'te yüzü referanstan taşıyan asıl cümle bu."""
+        for p in self.prompts:
+            self.assertIn("KEEP THE EXACT SAME WOMAN AS IN THE REFERENCE IMAGE", p)
+            self.assertIn("Only the clothing, the location, the lighting", p)
+
+    def test_makul_uzunluk(self) -> None:
+        """T5 penceresi ~512 token; aşarsa promptun sonu kırpılır.
+
+        Kimlik tarifi promptun ortasında olduğu için kırpılma önce
+        gerçekçilik notlarını, sonra kimliği yer.
+        """
+        for i, p in enumerate(self.prompts):
+            self.assertLess(len(p.split()) * 1.35, 512, f"içerik {i} çok uzun")
+
+    def test_kimlik_koruma_kimlik_karelerinde_yok(self) -> None:
+        """Kimlik kareleri referansı *üretiyor*; onlara referans talimatı gitmez."""
+        for p in render.identity_render_prompts(self.ch):
+            self.assertNotIn("REFERENCE IMAGE", p)
+
 
 class ModelSemasiTest(unittest.TestCase):
     """Referans alan adı modelin gerçek şemasından gelmeli."""

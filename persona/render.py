@@ -118,18 +118,19 @@ def _identity_lines(ch: Character) -> list[str]:
 
 
 #: Her prompta giren gerçekçilik cümlesi — hepsi olumlu ifade.
+#: Kısa tutuluyor: T5 penceresi ~512 token ve kimlik tarifi öncelikli.
 REALISM_EN = (
     "Photorealistic photograph of a real human being. Real skin texture with "
-    "visible pores and natural minor blemishes, uneven natural skin tone, "
-    "individual hair strands, realistic fabric texture and creases, realistic "
-    "shadows and physically accurate light, natural muted colours, realistic "
-    "lens depth of field, subtle natural sensor grain. Shot on a real camera."
+    "visible pores and natural minor blemishes, uneven skin tone, individual "
+    "hair strands, realistic fabric creases, physically accurate light and "
+    "shadows, natural muted colours, realistic lens depth of field, subtle "
+    "sensor grain."
 )
 
 #: İçerik kareleri için ek his: hazırlıksız günlük fotoğraf.
 CANDID_EN = (
-    "Candid everyday snapshot, the kind of photo a real person takes on their "
-    "own phone or DSLR. Relaxed natural pose, unposed, imperfect framing."
+    "Candid everyday snapshot taken on her own phone. Relaxed natural pose, "
+    "unposed, imperfect framing."
 )
 
 
@@ -159,6 +160,17 @@ def identity_render_prompts(ch: Character) -> list[str]:
     return out
 
 
+#: Referans görselle üretirken modele verilen kimlik koruma talimatı.
+#: Kontext ailesinde asıl işi yapan cümle bu: referanstaki kişiyi koru,
+#: yalnızca sahneyi değiştir. Promptta sadece "aynı kişi" yazmak yetmiyor.
+KEEP_IDENTITY_EN = (
+    "KEEP THE EXACT SAME WOMAN AS IN THE REFERENCE IMAGE. Her face, eyes, nose, "
+    "mouth, jawline, skin, freckles, beauty mark, hair colour and age stay "
+    "identical to the reference. Only the clothing, the location, the lighting, "
+    "the camera angle and her pose change. Same person, different moment."
+)
+
+
 def content_render_prompt(
     ch: Character,
     scene_en: str,
@@ -171,6 +183,7 @@ def content_render_prompt(
     """Tek bir içerik karesinin İngilizce promptu."""
     parts = [
         _lead(ch),
+        KEEP_IDENTITY_EN,
         f"SCENE: {scene_en}",
         *_identity_lines(ch),
         f"WEARING: {wardrobe_en}",
