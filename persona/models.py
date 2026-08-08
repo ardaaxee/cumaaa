@@ -38,6 +38,18 @@ DEFAULT_IDENTITY_POSES = [
     "tam boy, ayakta, düz duruş, kollar yanda serbest, tüm vücut kadrajda",
 ]
 
+#: `DEFAULT_IDENTITY_POSES` ile aynı sıradaki İngilizce karşılıkları.
+DEFAULT_IDENTITY_POSES_EN = [
+    "front-facing portrait, head and shoulders, neutral expression, "
+    "looking straight into the camera",
+    "full profile portrait, head turned exactly 90 degrees to the side, "
+    "head and shoulders, neutral expression",
+    "three-quarter portrait, face turned 45 degrees from the camera, "
+    "head and shoulders, very faint natural smile",
+    "full body photograph, standing upright, arms relaxed at her sides, "
+    "her whole body inside the frame, natural body proportions",
+]
+
 
 @dataclass
 class IdentityReference:
@@ -53,6 +65,15 @@ class IdentityReference:
     aspect: str = "1:1"
     poses: list[str] = field(default_factory=lambda: list(DEFAULT_IDENTITY_POSES))
     negative_en: str = IDENTITY_NEGATIVE
+
+    # --- görsel API'sine giden İngilizce karşılıklar (bkz. render.py) ---
+    wardrobe_en: str = "a plain solid grey t-shirt, no accessories, no jewellery"
+    location_en: str = "a plain light grey seamless studio backdrop."
+    camera_en: str = (
+        "50mm lens, soft even natural light, neutral white balance, no harsh shadows"
+    )
+    #: Poz tarifleri; `poses` ile aynı sırada olmalı.
+    poses_en: list[str] = field(default_factory=lambda: list(DEFAULT_IDENTITY_POSES_EN))
 
     @classmethod
     def from_dict(cls, d: dict[str, Any]) -> IdentityReference:
@@ -77,6 +98,17 @@ class VisualIdentity:
     negative_en: str = REALISM_NEGATIVE
     #: "Telefonla çekilmiş gerçek fotoğraf" hissini kuran teknik notlar.
     realism: list[str] = field(default_factory=list)
+
+    # --- görsel API'sine giden İngilizce karşılıklar (bkz. render.py) ---
+    #: Yüz tarifi. Modele giden asıl kimlik metni bu; `anchor` insan içindir.
+    anchor_en: str = ""
+    hair_en: str = ""
+    body_en: str = ""
+    #: `wardrobe` / `locations` / `camera` ile **aynı sırada** İngilizce
+    #: karşılıklar. Aynı indeks aynı kıyafeti göstermeli.
+    wardrobe_en: list[str] = field(default_factory=list)
+    locations_en: list[str] = field(default_factory=list)
+    camera_en: list[str] = field(default_factory=list)
 
     @classmethod
     def from_dict(cls, d: dict[str, Any]) -> VisualIdentity:
@@ -128,9 +160,29 @@ class Pillar:
     #: Karede ikinci bir kişi varsa `Character.companions` içindeki adı.
     companion: str = ""
 
+    # --- görsel API'sine giden İngilizce karşılıklar (bkz. render.py) ---
+    #: `scenes` ile **aynı sırada** İngilizce sahne tarifleri.
+    scenes_en: list[str] = field(default_factory=list)
+    wardrobe_en: list[str] = field(default_factory=list)
+    locations_en: list[str] = field(default_factory=list)
+    camera_en: list[str] = field(default_factory=list)
+
     @classmethod
     def from_dict(cls, d: dict[str, Any]) -> Pillar:
         return cls(**d)
+
+    def scene_en(self, scene_tr: str) -> str:
+        """Türkçe sahnenin İngilizce karşılığı.
+
+        Eşleme indeks üzerinden: iki liste aynı sırada olmalı. Karşılık
+        yoksa boş döner ve çağıran taraf bunu hata olarak ele alır —
+        sessizce Türkçe metni modele göndermek istemiyoruz.
+        """
+        try:
+            i = self.scenes.index(scene_tr)
+        except ValueError:
+            return ""
+        return self.scenes_en[i] if i < len(self.scenes_en) else ""
 
 
 @dataclass
@@ -221,12 +273,16 @@ class Post:
     pillar: str
     slug: str
     scene: str
+    #: Belgelerde görünen Türkçe promptlar.
     image_prompts: list[str]
     caption: str
     hashtags: list[str]
     alt_text: str
     location: str
     first_comment: str
+    #: Görsel API'sine gönderilen İngilizce promptlar; `image_prompts` ile
+    #: aynı sırada, aynı sayıda.
+    render_prompts: list[str] = field(default_factory=list)
 
 
 @dataclass
@@ -248,9 +304,12 @@ class Reel:
 @dataclass
 class StoryFrame:
     kind: str
+    #: Belgelerde görünen Türkçe prompt.
     visual: str
     text: str
     sticker: str
+    #: Görsel API'sine gönderilen İngilizce prompt.
+    render: str = ""
 
 
 @dataclass

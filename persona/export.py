@@ -8,7 +8,7 @@ import random
 from dataclasses import asdict
 from pathlib import Path
 
-from . import visual
+from . import render, visual
 from .models import Character, Post, Reel, StoryDay
 from .voice import VoiceEngine
 
@@ -283,39 +283,70 @@ def export_prompt_bundle(
 ) -> None:
     """Tüm görsel promptları tek dosyada — toplu üretim için.
 
+    İki dosya yazılır ve **adlandırma ikisinde de birebir aynıdır**:
+
+    - `tum-promptlar.txt` — Türkçe, insanın okuması için.
+    - `render-promptlari-en.txt` — İngilizce, `persona images` bunu modele
+      gönderir. Nedeni `render.py` başında: FLUX'un metin kodlayıcısı
+      İngilizce ve negatif prompt girdisi yok.
+
     Adlar `persona images` tarafından hem dosya adı hem klasör seçimi için
     kullanılıyor; tür ön eki ve sıra numarası burada belirleniyor.
     """
-    chunks: list[str] = [
-        f"### {image_name(ch, 'PROFILE', 1)} (profil fotoğrafı)\n"
-        + visual.profile_picture_prompt(ch, rng)
-    ]
+    tr_chunks: list[str] = []
+    en_chunks: list[str] = []
+
+    def add(name: str, note: str, tr: str, en: str) -> None:
+        tr_chunks.append(f"### {name} ({note})\n{tr}")
+        en_chunks.append(f"### {name} ({note})\n{en}")
+
+    add(
+        image_name(ch, "PROFILE", 1),
+        "profil fotoğrafı",
+        visual.profile_picture_prompt(ch, rng),
+        render.profile_render_prompt(ch),
+    )
 
     n = 0
     for p in posts:
-        for prompt in p.image_prompts:
+        for i, prompt in enumerate(p.image_prompts):
             n += 1
-            chunks.append(f"### {image_name(ch, 'POST', n)} ({p.pillar})\n{prompt}")
+            en = p.render_prompts[i] if i < len(p.render_prompts) else ""
+            add(image_name(ch, "POST", n), p.pillar, prompt, en)
 
     n = 0
     for r in reels:
         for s in r.shots:
             n += 1
-            chunks.append(
-                f"### {image_name(ch, 'REEL', n)} ({r.pillar} · plan {s['no']})\n"
-                + s["prompt"]
+            add(
+                image_name(ch, "REEL", n),
+                f"{r.pillar} · plan {s['no']}",
+                s["prompt"],
+                s.get("render", ""),
             )
 
     n = 0
     for day in stories:
         for f in day.frames:
             n += 1
-            chunks.append(
-                f"### {image_name(ch, 'STORY', n)} (gün {day.day:02d} · {f.kind})\n"
-                + f.visual
+            add(
+                image_name(ch, "STORY", n),
+                f"gün {day.day:02d} · {f.kind}",
+                f.visual,
+                f.render,
             )
 
-    _write(out / "tum-promptlar.txt", "\n\n".join(chunks))
+    _write(out / "tum-promptlar.txt", "\n\n".join(tr_chunks))
+    _write(out / "render-promptlari-en.txt", "\n\n".join(en_chunks))
+
+    # Kimlik promptları da dosyaya düşsün: üretmeden önce okunabilsinler.
+    _write(
+        out / "kimlik-promptlari-en.txt",
+        "\n\n".join(
+            f"### {image_name(ch, 'IDENTITY', i)}\n{p}"
+            for i, p in enumerate(render.identity_render_prompts(ch), 1)
+        ),
+    )
 
     # İstenen klasör yapısı üretim başlamadan hazır dursun.
     for sub in IMAGE_DIRS.values():

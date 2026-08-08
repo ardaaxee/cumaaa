@@ -62,7 +62,7 @@ class KarakterTest(unittest.TestCase):
 
     def test_yukleniyor(self) -> None:
         self.assertEqual(self.ch.display_name, "Beyza")
-        self.assertEqual(self.ch.age, 25)
+        self.assertEqual(self.ch.age, 20)
 
     def test_solo_isaretli(self) -> None:
         self.assertTrue(self.ch.solo)
@@ -89,8 +89,9 @@ class KarakterTest(unittest.TestCase):
         self.assertIn("no male", n)
 
     def test_dogal_gorunum_tarifi(self) -> None:
+        """Güzel ama filtresiz: gerçek cilt dokusu tarifi kaybolmasın."""
         a = self.ch.visual.anchor.lower()
-        for parca in ["asimetri", "gözenek", "doğal", "makyajsız"]:
+        for parca in ["gözenek", "doğal", "makyaj", "cilt dokusu"]:
             self.assertIn(parca, a, f"anchor'da '{parca}' yok")
 
     def test_gercekcilik_notlari_var(self) -> None:

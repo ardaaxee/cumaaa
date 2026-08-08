@@ -9,7 +9,7 @@ import sys
 from datetime import date
 from pathlib import Path
 
-from . import content, export, images, network, visual
+from . import content, export, images, network, render, visual
 from .models import Character
 
 DEFAULT_CHARACTER = Path(__file__).parent / "characters" / "beyza.json"
@@ -57,8 +57,17 @@ def cmd_generate(args: argparse.Namespace) -> int:
 
 def cmd_images(args: argparse.Namespace) -> int:
     out = Path(args.out)
-    bundle = out / "tum-promptlar.txt"
+
+    # Modele giden metin İngilizce olan. Türkçe paket belgeler için;
+    # diffusion modeline gönderilirse yüz/cinsiyet tutmuyor (bkz. render.py).
+    bundle = out / "render-promptlari-en.txt"
     if not bundle.exists():
+        eski = out / "tum-promptlar.txt"
+        if eski.exists():
+            raise SystemExit(
+                f"{bundle} yok ama {eski} var — paket eski sürümle üretilmiş. "
+                "Yeniden çalıştır: persona generate --out " + str(out)
+            )
         raise SystemExit(f"{bundle} yok. Önce `persona generate` çalıştır.")
 
     ch = _load_character(args.character)
@@ -68,7 +77,7 @@ def cmd_images(args: argparse.Namespace) -> int:
     # 1) Kimlik kareleri önce. Diğer her şey bunlara dayanıyor.
     identity: list[tuple[str, str]] = [
         (export.image_name(ch, "IDENTITY", i), prompt)
-        for i, prompt in enumerate(visual.identity_reference_prompts(ch), 1)
+        for i, prompt in enumerate(render.identity_render_prompts(ch), 1)
     ]
 
     # 2) Sonra içerik promptları.
@@ -97,6 +106,27 @@ def cmd_images(args: argparse.Namespace) -> int:
 
     pending = [(n, p) for n, p in jobs if args.overwrite or not dest_for(n).exists()]
 
+    # Referans: kullanıcı verdiyse o, yoksa üretilen ilk kimlik karesi.
+    reference = Path(args.reference) if args.reference else None
+    if reference and not reference.exists():
+        raise SystemExit(f"Referans görsel yok: {reference}")
+
+    # KİMLİK KAPISI: içerik kareleri kimlik kareleri olmadan üretilmez.
+    # Referanssız üretilen 130 kare 130 farklı yüz demek — kullanıcı onları
+    # görmeden buraya kadar gelinmemeli. Kuru çalıştırmada uyarı, gerçek
+    # üretimde durdurma.
+    eksik_kimlik = ""
+    if not args.identity_only and reference is None:
+        hazir = sorted(ref_dir.glob(f"{ch.file_prefix}-IDENTITY-*.jpg"))
+        if len(hazir) < len(identity):
+            eksik_kimlik = (
+                f"Kimlik kareleri eksik ({len(hazir)}/{len(identity)}): {ref_dir}\n"
+                "İçerik kareleri referanssız üretilirse her karede farklı bir "
+                "yüz çıkar. Önce şunu çalıştır:\n"
+                f"  python3 -m persona images --out {out} --identity-only\n"
+                "Kareleri gözden geçir, sonra bu komutu tekrar çalıştır."
+            )
+
     if args.dry_run:
         print(f"Üretilecek: {len(pending)} görsel ({len(jobs)} iş, "
               f"{len(jobs) - len(pending)} zaten var)")
@@ -104,12 +134,12 @@ def cmd_images(args: argparse.Namespace) -> int:
             print(f"  {n}")
         if len(pending) > 12:
             print(f"  … +{len(pending) - 12}")
+        if eksik_kimlik:
+            print("\n⚠ " + eksik_kimlik)
         return 0
 
-    # Referans: kullanıcı verdiyse o, yoksa üretilen ilk kimlik karesi.
-    reference = Path(args.reference) if args.reference else None
-    if reference and not reference.exists():
-        raise SystemExit(f"Referans görsel yok: {reference}")
+    if eksik_kimlik:
+        raise SystemExit(eksik_kimlik)
 
     aspect_by_kind = {
         "IDENTITY": "1:1",
@@ -132,21 +162,33 @@ def cmd_images(args: argparse.Namespace) -> int:
             auto = ref_dir / f"{export.image_name(ch, 'IDENTITY', 1)}.jpg"
             ref = auto if auto.exists() else None
 
+        # Kimlik kareleri saf metinden üretiliyor: ortada henüz referans
+        # yok, o yüzden referans alan modeli değil metin modelini kullanıyoruz.
+        model = args.model
+        if model is None and args.provider == "replicate":
+            model = images.IDENTITY_MODEL if is_identity else images.PROVIDERS["replicate"]
+
         print(f"→ {name}{' (referanslı)' if ref else ''}", file=sys.stderr)
         images.generate(
             prompt,
             dest,
             provider=args.provider,
-            model=args.model,
+            model=model,
             aspect=aspect,
             seed=ch.visual.seed,
             reference=ref,
+            negative=ch.visual.negative_en,
+            reference_param=args.reference_param,
         )
         made += 1
 
     print(f"✓ {made} görsel üretildi: {dest_dir}")
     if args.provider not in images.SUPPORTS_REFERENCE:
         print("  ⚠ Bu sağlayıcı referans görseli desteklemiyor; yüzler kayabilir.")
+    if args.identity_only:
+        print(f"\nKimlik karelerini gözden geçir: {ref_dir}")
+        print("Beğenmediğini sil ve aynı komutu tekrar çalıştır (sadece eksikler üretilir).")
+        print(f"Hepsi doğruysa: python3 -m persona images --out {out}")
     return 0
 
 
@@ -284,6 +326,10 @@ def build_parser() -> argparse.ArgumentParser:
     i.add_argument("--overwrite", action="store_true")
     i.add_argument("--dry-run", action="store_true", help="Ne üretileceğini yazdır, üretme")
     i.add_argument("--reference", help="İçerik karelerinde kullanılacak referans görsel")
+    i.add_argument(
+        "--reference-param",
+        help="Modelin referans görsel alanının adı (varsayılan: model şemasından)",
+    )
     i.add_argument("--identity-only", action="store_true", help="Sadece kimlik karelerini üret")
     i.add_argument("--skip-identity", action="store_true", help="Kimlik karelerini atla")
     i.set_defaults(func=cmd_images)

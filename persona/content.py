@@ -7,7 +7,7 @@ import re
 import unicodedata
 from datetime import date, timedelta
 
-from . import visual
+from . import render, visual
 from .models import Character, Pillar, Post, Reel, StoryDay, StoryFrame
 from .voice import Deck, VoiceEngine
 
@@ -27,6 +27,49 @@ def _pick_pillar(ch: Character, rng: random.Random, recent: list[str]) -> Pillar
     return rng.choice(pool or ch.weighted_pillars())
 
 
+def _pair(
+    ch: Character,
+    p: Pillar,
+    scene: str,
+    ctx: dict[str, str],
+    *,
+    kind: str,
+    rng: random.Random,
+    suffix_tr: str = "",
+    suffix_en: str = "",
+) -> tuple[str, str]:
+    """Aynı kare için (Türkçe belge promptu, İngilizce render promptu).
+
+    İkisi aynı `ctx`'i paylaşıyor: kıyafet, mekân ve kamera iki dilde de
+    aynı. Türkçe olan `profil.md` ve `tum-promptlar.txt` içindir; modele
+    giden İngilizce olandır (nedeni `render.py` başında yazılı).
+    """
+    scene_tr = f"{scene} ({suffix_tr})" if suffix_tr else scene
+    tr = visual.build_prompt(
+        ch,
+        scene_tr,
+        rng=rng,
+        kind=kind,
+        pillar=p,
+        wardrobe=ctx["wardrobe"],
+        camera=ctx["camera"],
+        location=ctx["location"],
+    )
+
+    scene_en = p.scene_en(scene) or scene
+    if suffix_en:
+        scene_en = f"{scene_en} ({suffix_en})"
+    en = render.content_render_prompt(
+        ch,
+        scene_en,
+        kind=kind,
+        wardrobe_en=ctx["wardrobe_en"],
+        location_en=ctx["location_en"],
+        camera_en=ctx["camera_en"],
+    )
+    return tr, en
+
+
 def build_posts(
     ch: Character, count: int, start: date, rng: random.Random, cadence_days: int = 2
 ) -> list[Post]:
@@ -42,17 +85,22 @@ def build_posts(
         p = _pick_pillar(ch, rng, recent)
         recent.append(p.key)
 
-        carousel = rng.random() < 0.35
         deck = scene_decks.setdefault(p.key, Deck(p.scenes, rng))
         scene = deck.draw()
-        if carousel:
-            prompts = visual.build_carousel(
-                ch, p, rng=rng, count=rng.randint(2, 3), lead=scene
-            )
-        else:
-            prompts = [visual.build_prompt(ch, scene, rng=rng, kind="post", pillar=p)]
 
+        # Karusel: aynı gün, aynı kıyafet, aynı mekân — o yüzden tek ctx.
         ctx = visual.context_for(ch, p, rng)
+        scenes = [scene]
+        if rng.random() < 0.35:
+            pool = [s for s in p.scenes if s != scene]
+            scenes += rng.sample(pool, k=min(rng.randint(1, 2), len(pool)))
+
+        pairs = [
+            _pair(ch, p, s, ctx, kind="carousel" if len(scenes) > 1 else "post", rng=rng)
+            for s in scenes
+        ]
+        prompts = [t for t, _ in pairs]
+        renders = [e for _, e in pairs]
 
         # Aynı kanca cümlesiyle başlayan iki gönderi olmasın.
         for _ in range(6):
@@ -70,6 +118,7 @@ def build_posts(
                 slug=slugify(caption.splitlines()[0]),
                 scene=scene,
                 image_prompts=prompts,
+                render_prompts=renders,
                 caption=caption,
                 hashtags=voice.hashtags(p),
                 alt_text=voice.alt_text(scene),
@@ -110,14 +159,15 @@ def build_reels(
         seconds = [0]
         for n in range(shot_count):
             dur = rng.choice([2, 3, 3, 4, 5])
+            ctx = visual.context_for(ch, p, rng)
+            tr, en = _pair(ch, p, scene_pool[n], ctx, kind="reel", rng=rng)
             shots.append(
                 {
                     "no": str(n + 1),
                     "sure": f"{seconds[0]}-{seconds[0] + dur}s",
                     "gorsel": scene_pool[n],
-                    "prompt": visual.build_prompt(
-                        ch, scene_pool[n], rng=rng, kind="reel", pillar=p
-                    ),
+                    "prompt": tr,
+                    "render": en,
                 }
             )
             seconds[0] += dur
@@ -155,14 +205,21 @@ def build_reels(
     return reels
 
 
+#: (tür, Türkçe kadraj notu, İngilizce kadraj notu, sticker)
 STORY_KINDS = [
-    ("anlık", "o an çekilmiş dikey kare", "yazı: tek cümle"),
-    ("anket", "basit bir görsel", "sticker: anket, iki seçenek"),
-    ("soru kutusu", "sade arka plan", "sticker: soru kutusu"),
-    ("perde arkası", "dağınık, hazırlıksız kare", "yazı: kısa açıklama"),
-    ("geri sayım", "mekân görseli", "sticker: geri sayım"),
-    ("tekrar paylaşım", "son gönderinin kadrajı", "yazı: 'yeni gönderi'"),
-    ("müzik", "manzara", "sticker: müzik"),
+    ("anlık", "o an çekilmiş dikey kare", "vertical shot taken in the moment",
+     "yazı: tek cümle"),
+    ("anket", "basit bir görsel", "simple uncluttered composition",
+     "sticker: anket, iki seçenek"),
+    ("soru kutusu", "sade arka plan", "plain quiet background",
+     "sticker: soru kutusu"),
+    ("perde arkası", "dağınık, hazırlıksız kare", "messy unprepared candid shot",
+     "yazı: kısa açıklama"),
+    ("geri sayım", "mekân görseli", "wider shot of the place",
+     "sticker: geri sayım"),
+    ("tekrar paylaşım", "son gönderinin kadrajı", "same framing as the last post",
+     "yazı: 'yeni gönderi'"),
+    ("müzik", "manzara", "wider atmospheric view", "sticker: müzik"),
 ]
 
 
@@ -177,14 +234,18 @@ def build_stories(
         recent.append(p.key)
         frames: list[StoryFrame] = []
         kinds = rng.sample(STORY_KINDS, k=rng.randint(3, 5))
-        for kind, vis, sticker in kinds:
+        for kind, vis_tr, vis_en, sticker in kinds:
             scene = rng.choice(p.scenes)
+            ctx = visual.context_for(ch, p, rng)
+            tr, en = _pair(
+                ch, p, scene, ctx, kind="story", rng=rng,
+                suffix_tr=vis_tr, suffix_en=vis_en,
+            )
             frames.append(
                 StoryFrame(
                     kind=kind,
-                    visual=visual.build_prompt(
-                        ch, f"{scene} ({vis})", rng=rng, kind="story", pillar=p
-                    ),
+                    visual=tr,
+                    render=en,
                     text=_story_text(kind, p, voice, rng),
                     sticker=sticker,
                 )
