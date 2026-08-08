@@ -61,22 +61,36 @@ def _parse_retry_after(raw: str | None) -> float | None:
     return max(0.0, (when - now).total_seconds())
 
 
+def _body_retry_after(body: str) -> float | None:
+    """Yanıt gövdesindeki `retry_after` alanını saniyeye çevirir."""
+    try:
+        parsed = json.loads(body)
+    except (ValueError, TypeError):
+        return None
+    if not isinstance(parsed, dict):
+        return None
+
+    value = parsed.get("retry_after")
+    if isinstance(value, bool):  # bool, int'in alt tipi — sayı sayılmasın
+        return None
+    if isinstance(value, (int, float)):
+        return float(value)
+    if isinstance(value, str):
+        return _parse_retry_after(value)
+    return None
+
+
 def _retry_after_seconds(err: urllib.error.HTTPError, body: str) -> float:
-    """Bekleme süresi: önce başlık, sonra gövdedeki `retry_after`, sonra varsayılan."""
-    header = err.headers.get("Retry-After") if err.headers else None
-    seconds = _parse_retry_after(header)
+    """Bekleme süresi: önce gövdedeki `retry_after`, sonra başlık, sonra varsayılan.
+
+    Replicate bu değeri JSON gövdesinde döndürüyor (ör. `retry_after: 6`),
+    başlık her yanıtta bulunmayabiliyor. Bu yüzden gövde önce okunuyor.
+    """
+    seconds = _body_retry_after(body)
 
     if seconds is None:
-        try:
-            parsed = json.loads(body)
-        except (ValueError, TypeError):
-            parsed = None
-        if isinstance(parsed, dict):
-            value = parsed.get("retry_after")
-            if isinstance(value, (int, float)) and not isinstance(value, bool):
-                seconds = float(value)
-            elif isinstance(value, str):
-                seconds = _parse_retry_after(value)
+        header = err.headers.get("Retry-After") if err.headers else None
+        seconds = _parse_retry_after(header)
 
     if seconds is None:
         seconds = DEFAULT_RETRY_WAIT

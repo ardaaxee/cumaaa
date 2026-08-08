@@ -94,11 +94,55 @@ class RetryTest(unittest.TestCase):
         _, _, sleep, _ = self._run([err, ok])
         sleep.assert_called_once_with(7.0)
 
-    def test_baslik_govdeye_tercih_edilir(self) -> None:
+    def test_govde_basliga_tercih_edilir(self) -> None:
+        """Replicate süreyi gövdede döndürüyor; başlık her yanıtta olmayabiliyor."""
         ok = _FakeResponse({"ok": True})
-        err = _http_error(429, headers={"Retry-After": "2"}, body=json.dumps({"retry_after": 99}))
+        err = _http_error(429, headers={"Retry-After": "99"}, body=json.dumps({"retry_after": 6}))
         _, _, sleep, _ = self._run([err, ok])
-        sleep.assert_called_once_with(2.0)
+        sleep.assert_called_once_with(6.0)
+
+    def test_bildirilen_vaka_govdede_6_saniye(self) -> None:
+        """Gerçek hata: HTTP 429, gövdede retry_after ~6 sn, başlık yok."""
+        ok = _FakeResponse({"status": "succeeded"})
+        err = _http_error(
+            429,
+            body=json.dumps({"detail": "Request was throttled.", "retry_after": 6}),
+        )
+        result, error, sleep, n = self._run([err, ok])
+
+        self.assertIsNone(error)
+        self.assertEqual(result, {"status": "succeeded"})
+        sleep.assert_called_once_with(6.0)
+        self.assertEqual(n, 2)
+
+    def test_govdede_ondalikli_sure(self) -> None:
+        ok = _FakeResponse({"ok": True})
+        err = _http_error(429, body=json.dumps({"retry_after": 5.5}))
+        _, _, sleep, _ = self._run([err, ok])
+        sleep.assert_called_once_with(5.5)
+
+    def test_govdede_metin_sure(self) -> None:
+        ok = _FakeResponse({"ok": True})
+        err = _http_error(429, body=json.dumps({"retry_after": "4"}))
+        _, _, sleep, _ = self._run([err, ok])
+        sleep.assert_called_once_with(4.0)
+
+    def test_govdede_gecersiz_sure_basliga_duser(self) -> None:
+        ok = _FakeResponse({"ok": True})
+        err = _http_error(
+            429, headers={"Retry-After": "3"}, body=json.dumps({"retry_after": None})
+        )
+        _, _, sleep, _ = self._run([err, ok])
+        sleep.assert_called_once_with(3.0)
+
+    def test_govdede_bool_sayi_sayilmaz(self) -> None:
+        """True Python'da 1'e eşit; yanlışlıkla 1 saniye beklemeyelim."""
+        ok = _FakeResponse({"ok": True})
+        err = _http_error(
+            429, headers={"Retry-After": "8"}, body=json.dumps({"retry_after": True})
+        )
+        _, _, sleep, _ = self._run([err, ok])
+        sleep.assert_called_once_with(8.0)
 
     def test_baslik_ve_govde_yoksa_varsayilan_10_saniye(self) -> None:
         ok = _FakeResponse({"ok": True})
