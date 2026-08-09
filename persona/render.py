@@ -123,11 +123,22 @@ def _identity_lines(ch: Character) -> list[str]:
 #: Her prompta giren gerçekçilik cümlesi — hepsi olumlu ifade.
 #: Kısa tutuluyor: T5 penceresi ~512 token ve kimlik tarifi öncelikli.
 REALISM_EN = (
+    # "minor" kelimesi bilerek kullanılmıyor: yaş sınıflandırıcıları onu
+    # reşit olmayan anlamında okuyup üretimi düşürebiliyor. Aynı gerekçeyle
+    # "young", "girl", "petite" gibi sözcükler de bu metinde yok.
     "Photorealistic photograph of a real human being. Real skin texture with "
-    "visible pores and natural minor blemishes, uneven skin tone, individual "
+    "visible pores and small natural blemishes, uneven skin tone, individual "
     "hair strands, realistic fabric creases, physically accurate light and "
     "shadows, natural muted colours, realistic lens depth of field, subtle "
     "sensor grain."
+)
+
+#: Teşhis için asgari kimlik promptu. Zincirde bir sorun olup olmadığını
+#: ayırmaya yarar: bu bile "NSFW" dönüyorsa sorun prompt metninde değildir.
+MINIMAL_IDENTITY_PROMPT = (
+    "A single adult woman in a plain grey t-shirt, front-facing neutral "
+    "portrait, head and shoulders, plain light grey studio background, "
+    "natural photographic lighting, photorealistic."
 )
 
 #: İçerik kareleri için ek his: hazırlıksız günlük fotoğraf.
