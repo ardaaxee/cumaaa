@@ -83,16 +83,70 @@ class KimlikPromptuTest(unittest.TestCase):
             self.assertIn("ONE SINGLE ADULT WOMAN", bas)
             self.assertIn("BEYZA", bas)
 
-    def test_woman_female_ve_isim_geciyor(self) -> None:
+    def test_kadin_ve_isim_geciyor(self) -> None:
+        """Cinsiyet "adult woman" ile kuruluyor.
+
+        Eskiden ayrıca "The subject is FEMALE" cümlesi vardı; yaş
+        ifadeleriyle birlikte kaldırıldı. "adult woman" iki kez geçtiği
+        için cinsiyet sinyali zayıflamıyor.
+        """
         for p in self.prompts:
             düz = p.lower()
-            self.assertIn("woman", düz)
-            self.assertIn("female", düz)
+            self.assertGreaterEqual(düz.count("adult woman"), 2)
             self.assertIn("beyza", düz)
 
-    def test_yas_yaziyor(self) -> None:
+    def test_render_yas_ifadesi_eklemiyor(self) -> None:
+        """Regresyon: render.py prompta yaş ifadesi enjekte etmemeli.
+
+        Sayısal yaş ve "young adult / in her twenties" gibi gençlik
+        ifadeleri Replicate'in güvenlik filtresini tetikleyip üretimi
+        "NSFW content detected" ile düşürüyordu. Kimlik tanımının tamamı
+        karakterin JSON'undaki anchor_en alanından gelir.
+        """
+        for i, p in enumerate(self.prompts, 1):
+            duz = p.lower()
+            for ifade in [
+                "young adult",
+                "in her twenties",
+                "20-year-old",
+                f"{self.ch.age}-year-old",
+                "year-old",
+                "teen",
+                "schoolgirl",
+            ]:
+                self.assertNotIn(ifade, duz, f"IDENTITY-{i}: '{ifade}'")
+
+    def test_nsfw_cagrisimli_kiyafet_yok(self) -> None:
+        """Kimlik promptunda bedene/cinselliğe çağrışım yapan ifade olmasın."""
+        for i, p in enumerate(self.prompts, 1):
+            duz = p.lower()
+            for ifade in [
+                "crop", "cropped", "lingerie", "bikini", "underwear",
+                "sexy", "sensual", "seductive", "nude", "topless",
+                "cleavage", "curvy", "revealing", "tight",
+            ]:
+                self.assertNotIn(ifade, duz, f"IDENTITY-{i}: '{ifade}'")
+
+    def test_kimlik_karesi_istenen_kurulumu_kullaniyor(self) -> None:
+        """Sade gri tişört, nötr ifade, boş açık gri fon, 1:1."""
         for p in self.prompts:
-            self.assertIn(f"{self.ch.age}-year-old", p)
+            self.assertIn("plain solid grey t-shirt", p)
+            self.assertIn("light grey seamless studio backdrop", p)
+            self.assertIn("background is completely empty", p)
+            self.assertIn("Aspect ratio 1:1.", p)
+        self.assertIn("neutral relaxed expression", self.prompts[0])
+
+    def test_kimlik_tanimi_json_dan_geliyor(self) -> None:
+        """Kimlik alanları render.py'de tekrar hard-code edilmemeli."""
+        import inspect
+
+        from persona import render as r
+
+        kaynak = inspect.getsource(r)
+        for alan in [self.ch.visual.anchor_en, self.ch.visual.hair_en,
+                     self.ch.visual.body_en]:
+            self.assertIn(alan, self.prompts[0], "alan prompta girmemiş")
+            self.assertNotIn(alan[:40], kaynak, "alan render.py'de hard-code")
 
     def test_yanlis_kimlik_sozcugu_yok(self) -> None:
         """En kritik test: erkek/hayvan sözcükleri prompta hiç girmemeli."""
@@ -147,9 +201,16 @@ class IcerikPromptuTest(unittest.TestCase):
         for i, p in enumerate(self.prompts):
             self.assertEqual(_yanlis_kimlik_bul(p), [], f"içerik {i}")
 
+    def test_render_yas_ifadesi_eklemiyor(self) -> None:
+        """İçerik promptlarında da yaş enjeksiyonu olmamalı."""
+        for i, p in enumerate(self.prompts):
+            duz = p.lower()
+            for ifade in ["young adult", "in her twenties", "year-old", "teen"]:
+                self.assertNotIn(ifade, duz, f"içerik {i}: '{ifade}'")
+
     def test_tek_kisi_olumlu_ifade_ile(self) -> None:
         for p in self.prompts:
-            self.assertIn("Exactly one person in the entire frame", p)
+            self.assertIn("Exactly one adult woman in the entire frame", p)
             self.assertIn("only person there", p)
 
     def test_ayni_yuz_tarifi_her_karede(self) -> None:

@@ -106,6 +106,14 @@ def cmd_images(args: argparse.Namespace) -> int:
 
     pending = [(n, p) for n, p in jobs if args.overwrite or not dest_for(n).exists()]
 
+    aspect_by_kind = {
+        "IDENTITY": "1:1",
+        "PROFILE": "1:1",
+        "POST": "4:5",
+        "REEL": "9:16",
+        "STORY": "9:16",
+    }
+
     # Referans: kullanıcı verdiyse o, yoksa üretilen ilk kimlik karesi.
     reference = Path(args.reference) if args.reference else None
     if reference and not reference.exists():
@@ -134,20 +142,26 @@ def cmd_images(args: argparse.Namespace) -> int:
             print(f"  {n}")
         if len(pending) > 12:
             print(f"  … +{len(pending) - 12}")
+
+        # Modele gidecek metni göster. Az sayıda kare varsa (kimlik seti
+        # gibi) hepsi, çoksa sadece ilki — 264 promptu ekrana basmak
+        # çıktıyı kullanılamaz hale getirirdi.
+        goster = pending if args.show_prompts else pending[: 8 if len(pending) <= 8 else 1]
+        if goster:
+            print("\n--- Modele gönderilecek prompt ---")
+            for n, p in goster:
+                print(f"\n### {n}  [{aspect_by_kind[kind_of(n)]}]\n{p}")
+            kalan = len(pending) - len(goster)
+            if kalan:
+                print(f"\n… +{kalan} prompt daha. Hepsi için --show-prompts, "
+                      f"ya da: {bundle}")
+
         if eksik_kimlik:
             print("\n⚠ " + eksik_kimlik)
         return 0
 
     if eksik_kimlik:
         raise SystemExit(eksik_kimlik)
-
-    aspect_by_kind = {
-        "IDENTITY": "1:1",
-        "PROFILE": "1:1",
-        "POST": "4:5",
-        "REEL": "9:16",
-        "STORY": "9:16",
-    }
 
     made = 0
     for name, prompt in pending:
@@ -325,6 +339,11 @@ def build_parser() -> argparse.ArgumentParser:
     i.add_argument("--limit", type=int, help="Sadece ilk N içerik promptu üret")
     i.add_argument("--overwrite", action="store_true")
     i.add_argument("--dry-run", action="store_true", help="Ne üretileceğini yazdır, üretme")
+    i.add_argument(
+        "--show-prompts",
+        action="store_true",
+        help="--dry-run ile: promptların tamamını yazdır (varsayılan: ilk birkaçı)",
+    )
     i.add_argument("--reference", help="İçerik karelerinde kullanılacak referans görsel")
     i.add_argument(
         "--reference-param",

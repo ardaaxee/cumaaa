@@ -102,15 +102,15 @@
   ],
   "companions": {},
   "visual": {
-    "anchor": "20 yaşında genç yetişkin bir kadın; yumuşak oval yüz, belirgin ama yumuşak elmacık kemikleri, ince çene hattı, doğal kahverengi badem gözler, doğal kalın ve düzgün kaşlar, ince düz burun, dolgun doğal dudaklar, burun üstünde çok hafif çiller, sol çene hattında küçük bir ben; sağlıklı genç ten, gerçek cilt dokusu ve görünür gözenekler, ciltte hafif doğal ton farkları ve küçük doğal kusurlar; güzel ama filtresiz bir yüz, hafif doğal makyaj ya da makyajsız; doğal ince yetişkin kadın vücudu, ortalama boy (1.68), abartılmamış gerçekçi oranlar",
-    "anchor_en": "a 20-year-old adult woman, young adult face, pretty in a natural unfiltered way. Softly oval face, defined but soft cheekbones, delicate jawline, warm natural brown almond-shaped eyes, thick well-shaped eyebrows, slim straight nose, full natural lips, a few faint freckles across her nose, a small beauty mark on her left jawline. Healthy young skin with real human texture, visible pores, subtle natural tone variation and small natural imperfections. Light natural makeup or a bare face. She is an invented fictional person who does not resemble any real individual.",
+    "anchor": "yetişkin bir kadın; olgun yetişkin yüz hatları, yumuşak oval yüz, belirgin elmacık kemikleri, belirgin yetişkin çene hattı, doğal kahverengi badem gözler, doğal kalın ve düzgün kaşlar, ince düz burun, dolgun doğal dudaklar, burun üstünde çok hafif çiller, sol çene hattında küçük bir ben; sağlıklı yetişkin ten, gerçek cilt dokusu ve görünür gözenekler, ciltte hafif doğal ton farkları ve küçük doğal kusurlar; güzel ama filtresiz bir yüz, hafif doğal makyaj ya da makyajsız; doğal ince yetişkin kadın vücudu, ortalama boy, abartılmamış gerçekçi oranlar",
+    "anchor_en": "an adult woman with clearly mature adult facial features, pretty in a natural unfiltered way. Softly oval face, defined cheekbones, defined adult jawline, warm natural brown almond-shaped eyes, thick well-shaped eyebrows, slim straight nose, full natural lips, a few faint freckles across her nose, a small beauty mark on her left jawline. Healthy adult skin with real human texture, visible pores, subtle natural tone variation and small natural imperfections. Light natural makeup or a bare face. She is an invented fictional person who does not resemble any real individual.",
     "hair": "uzun, doğal açık sarı saç (bal tonlu, platin değil), omuz altına kadar iniyor, doğal hafif dalgalı; koyu olmayan doğal saç dibi; bazı karelerde açık, bazılarında at kuyruğu ya da dağınık topuz; yüz çevresinde kaçak birkaç tel, saç telleri tek tek görünür",
     "hair_en": "long natural blonde hair with warm honey tones, falling well below her shoulders, naturally wavy with soft movement. Sometimes worn loose, sometimes in a ponytail or a messy bun. Individual hair strands and small flyaways are visible around her face.",
-    "body_en": "adult woman with a natural slim athletic build, realistic human anatomy, average height, natural unexaggerated proportions.",
+    "body_en": "a grown adult woman with a natural slim build, realistic adult human anatomy and natural unexaggerated proportions",
     "wardrobe": [
       "bol beyaz tişört ve açık mavi kot",
       "büyük bej örgü hırka, altında sade tişört",
-      "krem rengi crop tişört ve bej şort, ev içi",
+      "krem rengi tişört ve bej eşofman altı, ev içi",
       "krem keten gömlek, kolları kıvrık",
       "siyah basic tişört ve geniş kot pantolon",
       "yeşil kadife gömlek, üstünde ince kolye",
@@ -122,7 +122,7 @@
     "wardrobe_en": [
       "a loose white t-shirt and light blue jeans",
       "an oversized beige knitted cardigan over a plain t-shirt",
-      "a cream cropped t-shirt and beige shorts, at home",
+      "a cream t-shirt and beige lounge trousers, at home",
       "a cream linen shirt with the sleeves rolled up",
       "a plain black t-shirt and wide-leg jeans",
       "a green corduroy shirt with a thin necklace",
@@ -345,12 +345,12 @@
         "#çalışmamasası"
       ],
       "wardrobe": [
-        "krem rengi crop tişört ve bej şort, ev içi",
+        "krem rengi tişört ve bej eşofman altı, ev içi",
         "bol beyaz tişört ve açık mavi kot",
         "büyük bej örgü hırka, altında sade tişört"
       ],
       "wardrobe_en": [
-        "a cream cropped t-shirt and beige shorts, at home",
+        "a cream t-shirt and beige lounge trousers, at home",
         "a loose white t-shirt and light blue jeans",
         "an oversized beige knitted cardigan over a plain t-shirt"
       ],
@@ -422,13 +422,13 @@
         "#slowliving"
       ],
       "wardrobe": [
-        "krem rengi crop tişört ve bej şort, ev içi",
+        "krem rengi tişört ve bej eşofman altı, ev içi",
         "uzun kahverengi hırka ve beyaz tişört",
         "büyük bej örgü hırka, altında sade tişört",
         "oversize beyaz tişört ve gri eşofman altı, ev içi"
       ],
       "wardrobe_en": [
-        "a cream cropped t-shirt and beige shorts, at home",
+        "a cream t-shirt and beige lounge trousers, at home",
         "a long brown cardigan over a white t-shirt",
         "an oversized beige knitted cardigan over a plain t-shirt",
         "an oversized white t-shirt and grey sweatpants, at home"
@@ -504,13 +504,13 @@
         "#okuma"
       ],
       "wardrobe": [
-        "krem rengi crop tişört ve bej şort, ev içi",
+        "krem rengi tişört ve bej eşofman altı, ev içi",
         "uzun kahverengi hırka ve beyaz tişört",
         "bol beyaz tişört ve açık mavi kot",
         "oversize beyaz tişört ve gri eşofman altı, ev içi"
       ],
       "wardrobe_en": [
-        "a cream cropped t-shirt and beige shorts, at home",
+        "a cream t-shirt and beige lounge trousers, at home",
         "a long brown cardigan over a white t-shirt",
         "a loose white t-shirt and light blue jeans",
         "an oversized white t-shirt and grey sweatpants, at home"
@@ -582,13 +582,13 @@
         "#evdekahve"
       ],
       "wardrobe": [
-        "krem rengi crop tişört ve bej şort, ev içi",
+        "krem rengi tişört ve bej eşofman altı, ev içi",
         "bol beyaz tişört ve açık mavi kot",
         "uzun kahverengi hırka ve beyaz tişört",
         "oversize beyaz tişört ve gri eşofman altı, ev içi"
       ],
       "wardrobe_en": [
-        "a cream cropped t-shirt and beige shorts, at home",
+        "a cream t-shirt and beige lounge trousers, at home",
         "a loose white t-shirt and light blue jeans",
         "a long brown cardigan over a white t-shirt",
         "an oversized white t-shirt and grey sweatpants, at home"
