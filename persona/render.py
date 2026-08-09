@@ -93,18 +93,21 @@ def caps_for(model: str) -> ModelCaps:
 
 
 def _lead(ch: Character) -> str:
-    """Promptun ilk cümlesi: kim, kaç yaşında, hangi cinsiyet, kaç kişi.
+    """Promptun ilk cümlesi: kim ve karede kaç kişi.
 
-    Bilerek olumlu ve tekrarlı. "Do not generate a male person" gibi bir
-    olumsuzlama yazmıyoruz: negatif desteği olmayan bir modelde bu cümle
-    "male person" tokenlarını pozitif koşullamaya sokar ve tam istemediğimiz
-    şeyi üretir.
+    Bilerek olumlu. "Do not generate a male person" gibi bir olumsuzlama
+    yazmıyoruz: negatif desteği olmayan bir modelde bu cümle "male person"
+    tokenlarını pozitif koşullamaya sokar ve tam istemediğimiz şeyi üretir.
+
+    **Yaş buraya yazılmaz.** Sayısal yaş ve "young adult / in her twenties"
+    gibi gençlik ifadeleri sağlayıcının güvenlik filtresini tetikleyip
+    üretimi "NSFW content detected" ile düşürüyordu. Kimlik tanımının
+    tamamı karakterin JSON'undaki `anchor_en` alanından geliyor; burada
+    tekrar edilmiyor.
     """
     return (
         f"ONE SINGLE ADULT WOMAN, {ch.display_name.upper()}. "
-        f"This is a fictional {ch.age}-year-old woman. "
-        f"The subject is FEMALE, a young adult woman in her twenties. "
-        f"Exactly one person in the entire frame, completely alone."
+        "Exactly one adult woman in the entire frame, alone."
     )
 
 
