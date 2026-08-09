@@ -116,6 +116,38 @@ class KimlikPromptuTest(unittest.TestCase):
             ]:
                 self.assertNotIn(ifade, duz, f"IDENTITY-{i}: '{ifade}'")
 
+    def test_guvenlik_filtresi_tetikleyicisi_yok(self) -> None:
+        """Görsel modellerinin güvenlik sınıflandırıcılarını tetikleyen aileler.
+
+        "minor" bu listede: "natural minor blemishes" ifadesi yaş
+        sınıflandırıcısı tarafından reşit olmama sinyali olarak okunabiliyor
+        ve üretim "NSFW content detected" ile düşüyordu.
+        """
+        aileler = {
+            "yaş": ["child", "kid", "teen", "teenage", "minor", "young", "youth",
+                    "school", "girl", "baby", "underage", "petite"],
+            "çıplaklık": ["nude", "naked", "topless", "undress", "underwear",
+                          "lingerie", "bra", "panties", "bikini", "swimsuit",
+                          "see-through", "sheer", "transparent"],
+            "cinsellik": ["sexy", "sensual", "seductive", "erotic", "provocative",
+                          "suggestive", "alluring", "intimate", "boudoir", "pinup"],
+            "beden": ["curvy", "voluptuous", "busty", "cleavage", "breast", "bust",
+                      "thigh", "hips", "butt", "booty", "revealing", "skimpy",
+                      "tight", "form-fitting"],
+        }
+        for i, p in enumerate(self.prompts, 1):
+            duz = p.lower()
+            for aile, kelimeler in aileler.items():
+                bulunan = [
+                    k for k in kelimeler if re.search(rf"\b{re.escape(k)}\b", duz)
+                ]
+                self.assertEqual(bulunan, [], f"IDENTITY-{i} ({aile})")
+
+    def test_minimal_teshis_promptu_var(self) -> None:
+        m = render.MINIMAL_IDENTITY_PROMPT
+        self.assertIn("A single adult woman in a plain grey t-shirt", m)
+        self.assertIn("photorealistic", m)
+
     def test_nsfw_cagrisimli_kiyafet_yok(self) -> None:
         """Kimlik promptunda bedene/cinselliğe çağrışım yapan ifade olmasın."""
         for i, p in enumerate(self.prompts, 1):

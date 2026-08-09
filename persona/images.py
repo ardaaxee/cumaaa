@@ -171,9 +171,12 @@ def _download(url: str, dest: Path) -> None:
 # --- Replicate ---------------------------------------------------------------
 
 
-def replicate_generate(
+def replicate_url(model: str) -> str:
+    return f"https://api.replicate.com/v1/models/{model}/predictions"
+
+
+def replicate_payload(
     prompt: str,
-    dest: Path,
     *,
     model: str,
     aspect: str,
@@ -181,12 +184,16 @@ def replicate_generate(
     reference: Path | None = None,
     negative: str = "",
     reference_param: str | None = None,
-) -> Path:
-    token = os.environ.get("REPLICATE_API_TOKEN")
-    if not token:
-        raise SystemExit("REPLICATE_API_TOKEN tanımlı değil.")
+) -> dict:
+    """Replicate'e gönderilecek JSON gövdesini kurar — istek atmadan.
+
+    Gerçek çağrı da hata ayıklama dökümü de bu fonksiyonu kullanıyor.
+    Ayrı bir "temsili gövde" üretmiyoruz: döküm ile gönderilen şeyin
+    ayrışması, tam da hata ararken güvenilmez olurdu.
+
+    Kimlik bilgisi (token) bu gövdede yok; o başlıkta taşınıyor.
+    """
     caps = render.caps_for(model)
-    headers = {"Authorization": f"Bearer {token}", "Prefer": "wait"}
     body = {
         "input": {
             "prompt": prompt,
@@ -215,7 +222,35 @@ def replicate_generate(
         # ve her karede farklı bir yüz çıkar — bu yüzden şemadan geliyor.
         body["input"][param] = _data_uri(reference)
 
-    res = _post(f"https://api.replicate.com/v1/models/{model}/predictions", body, headers)
+    return body
+
+
+def replicate_generate(
+    prompt: str,
+    dest: Path,
+    *,
+    model: str,
+    aspect: str,
+    seed: int,
+    reference: Path | None = None,
+    negative: str = "",
+    reference_param: str | None = None,
+) -> Path:
+    token = os.environ.get("REPLICATE_API_TOKEN")
+    if not token:
+        raise SystemExit("REPLICATE_API_TOKEN tanımlı değil.")
+    headers = {"Authorization": f"Bearer {token}", "Prefer": "wait"}
+    body = replicate_payload(
+        prompt,
+        model=model,
+        aspect=aspect,
+        seed=seed,
+        reference=reference,
+        negative=negative,
+        reference_param=reference_param,
+    )
+
+    res = _post(replicate_url(model), body, headers)
 
     # "Prefer: wait" çoğu zaman tamamlanmış sonuç döndürür; dönmezse yokla.
     deadline = time.time() + TIMEOUT

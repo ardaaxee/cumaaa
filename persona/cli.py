@@ -55,6 +55,57 @@ def cmd_generate(args: argparse.Namespace) -> int:
     return 0
 
 
+def _dump_payload(ch, isler, args, aspect_by_kind, kind_of, reference, ref_dir) -> None:
+    """Replicate'e gidecek TAM JSON gövdesini yazdırır — istek atmadan.
+
+    Gövde gerçek çağrının kullandığı `images.replicate_payload` ile
+    kuruluyor, ayrıca bir temsil üretilmiyor. Token gövdede zaten yok
+    (Authorization başlığında taşınıyor), o yüzden basılan hiçbir şey
+    kimlik bilgisi içermez; başlıklar da maskeli gösteriliyor.
+    """
+    import json
+
+    for name, prompt in isler:
+        kind = kind_of(name)
+        is_identity = kind == "IDENTITY"
+
+        model = args.model
+        if model is None and args.provider == "replicate":
+            model = images.IDENTITY_MODEL if is_identity else images.PROVIDERS["replicate"]
+
+        ref = None if is_identity else reference
+        if ref is None and not is_identity and args.provider in images.SUPPORTS_REFERENCE:
+            auto = ref_dir / f"{export.image_name(ch, 'IDENTITY', 1)}.jpg"
+            ref = auto if auto.exists() else None
+
+        body = images.replicate_payload(
+            prompt,
+            model=model,
+            aspect=aspect_by_kind[kind],
+            seed=ch.visual.seed,
+            reference=ref,
+            negative=ch.visual.negative_en,
+            reference_param=args.reference_param,
+        )
+
+        # data: URI'ler binlerce satır; uzunluğunu bildirip kısaltıyoruz.
+        gosterim = {"input": {}}
+        for k, v in body["input"].items():
+            gosterim["input"][k] = (
+                f"<data URI, {len(v)} karakter, {v[:30]}…>"
+                if isinstance(v, str) and v.startswith("data:")
+                else v
+            )
+
+        print(f"\n=== {name} → POST {images.replicate_url(model)}")
+        print("Headers: {'Content-Type': 'application/json', "
+              "'Authorization': 'Bearer <REDACTED>', 'Prefer': 'wait'}")
+        print(json.dumps(gosterim, ensure_ascii=False, indent=2))
+        print(f"[alanlar: {sorted(body['input'])}]")
+        print(f"[referans gönderiliyor mu: "
+              f"{any(k in body['input'] for k in ('image_prompt', 'input_image', 'image'))}]")
+
+
 def cmd_images(args: argparse.Namespace) -> int:
     out = Path(args.out)
 
@@ -75,9 +126,14 @@ def cmd_images(args: argparse.Namespace) -> int:
     ref_dir = dest_dir / export.IMAGE_DIRS["IDENTITY"]
 
     # 1) Kimlik kareleri önce. Diğer her şey bunlara dayanıyor.
+    kimlik_promptlari = render.identity_render_prompts(ch)
+    if args.minimal_prompt:
+        # Teşhis modu: kimlik metnini asgariye indir. Bu bile reddediliyorsa
+        # sorun promptun içeriğinde değil, zincirin başka bir yerindedir.
+        kimlik_promptlari = [render.MINIMAL_IDENTITY_PROMPT] * len(kimlik_promptlari)
     identity: list[tuple[str, str]] = [
         (export.image_name(ch, "IDENTITY", i), prompt)
-        for i, prompt in enumerate(render.identity_render_prompts(ch), 1)
+        for i, prompt in enumerate(kimlik_promptlari, 1)
     ]
 
     # 2) Sonra içerik promptları.
@@ -155,6 +211,10 @@ def cmd_images(args: argparse.Namespace) -> int:
             if kalan:
                 print(f"\n… +{kalan} prompt daha. Hepsi için --show-prompts, "
                       f"ya da: {bundle}")
+
+        if args.show_payload:
+            _dump_payload(ch, goster or pending[:1], args, aspect_by_kind, kind_of,
+                          reference, ref_dir)
 
         if eksik_kimlik:
             print("\n⚠ " + eksik_kimlik)
@@ -343,6 +403,16 @@ def build_parser() -> argparse.ArgumentParser:
         "--show-prompts",
         action="store_true",
         help="--dry-run ile: promptların tamamını yazdır (varsayılan: ilk birkaçı)",
+    )
+    i.add_argument(
+        "--show-payload",
+        action="store_true",
+        help="--dry-run ile: API'ye gidecek tam JSON gövdesini yazdır (istek atmaz)",
+    )
+    i.add_argument(
+        "--minimal-prompt",
+        action="store_true",
+        help="Teşhis: kimlik promptu yerine asgari tek cümlelik metni kullan",
     )
     i.add_argument("--reference", help="İçerik karelerinde kullanılacak referans görsel")
     i.add_argument(
