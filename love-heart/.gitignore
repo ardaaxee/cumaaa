@@ -1,0 +1,26 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.Python
+
+# Sanal ortamlar
+.venv/
+venv/
+env/
+
+# Gizli bilgiler (bu projede yok ama yanlislikla eklenmesin)
+.env
+.env.*
+*.key
+*.pem
+secrets.json
+
+# Isletim sistemi / editor
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# Loglar
+*.log

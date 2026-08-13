@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="{{ config.background }}">
+  <meta name="description" content="Sana özel küçük bir kalp.">
+  <meta name="robots" content="noindex">
+  <title>{{ config.page_title }}</title>
+
+  <link rel="preload" href="{{ url_for('static', filename='css/style.css') }}" as="style">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>❤️</text></svg>">
+
+  <style nonce="{{ csp_nonce }}">
+    :root {
+      --heart-1: {{ config.heart_color }};
+      --heart-2: {{ config.heart_color_2 }};
+      --bg-1: {{ config.background }};
+      --bg-2: {{ config.background_2 }};
+    }
+  </style>
+</head>
+<body>
+  <canvas id="fx" aria-hidden="true"></canvas>
+
+  <main class="stage">
+    <button id="heart" class="heart" type="button"
+            aria-label="Kalbe dokun ve kalp atışını başlat">
+      <span class="heart__glow" aria-hidden="true"></span>
+      <svg class="heart__svg" viewBox="0 0 100 90" role="img" aria-hidden="true" focusable="false">
+        <defs>
+          <!-- stop-color'lar style.css icinde config renkleriyle eziliyor;
+               buradaki degerler yalnizca yedek. -->
+          <linearGradient id="heartFill" x1="18%" y1="0%" x2="82%" y2="100%">
+            <stop class="stop-light" offset="0%" stop-color="#ff9dbb"/>
+            <stop class="stop-main" offset="55%" stop-color="#ff3d73"/>
+            <stop class="stop-deep" offset="100%" stop-color="#b3123f"/>
+          </linearGradient>
+          <radialGradient id="heartShine" cx="32%" cy="26%" r="42%">
+            <stop offset="0%" stop-color="#ffffff" stop-opacity="0.75"/>
+            <stop offset="100%" stop-color="#ffffff" stop-opacity="0"/>
+          </radialGradient>
+        </defs>
+        <path class="heart__path"
+              d="M50 86.5C50 86.5 6.5 59.5 6.5 32.6 6.5 16.6 18.6 6 31.2 6c8.7 0 15.6 4.7 18.8 11.6C53.2 10.7 60.1 6 68.8 6 81.4 6 93.5 16.6 93.5 32.6 93.5 59.5 50 86.5 50 86.5Z"
+              fill="url(#heartFill)"/>
+        <path d="M50 86.5C50 86.5 6.5 59.5 6.5 32.6 6.5 16.6 18.6 6 31.2 6c8.7 0 15.6 4.7 18.8 11.6C53.2 10.7 60.1 6 68.8 6 81.4 6 93.5 16.6 93.5 32.6 93.5 59.5 50 86.5 50 86.5Z"
+              fill="url(#heartShine)"/>
+      </svg>
+    </button>
+
+    <p class="message" id="message">{{ config.message }}</p>
+    <p class="hint" id="hint" aria-hidden="true">{{ config.hint }}</p>
+  </main>
+
+  <script src="{{ url_for('static', filename='js/app.js') }}" defer></script>
+</body>
+</html>
