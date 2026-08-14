@@ -84,30 +84,30 @@ Tek dosya: `love-heart/config.json`
 ```json
 {
   "message": "Seni seviyorum ❤️",
-  "hint": "kalbe dokun",
+  "hint": "Kalbe dokun ❤️",
   "page_title": "Seni seviyorum ❤️",
   "heart_color": "#ff3d73",
-  "heart_color_2": "#ff9dbb",
-  "background": "#120912",
-  "background_2": "#31102a"
+  "secondary_color": "#ff9dbb",
+  "background_color": "#120912"
 }
 ```
 
 | Alan | Ne işe yarar |
 |------|--------------|
 | `message` | Kalbin altındaki ana yazı |
-| `hint` | Kalbin altındaki küçük ipucu ("kalbe dokun"); dokununca kaybolur |
+| `hint` | Kalbin altındaki küçük ipucu; ilk dokunuşta kaybolur |
 | `page_title` | Tarayıcı sekmesinde ve link paylaşınca görünen başlık |
 | `heart_color` | Kalbin ana rengi |
-| `heart_color_2` | Kalbin açık tonu (üst parlaklık ve küçük kalpler) |
-| `background` | Arka planın koyu rengi |
-| `background_2` | Arka plan gradient'inin ikinci rengi |
+| `secondary_color` | Kalbin açık tonu (üst parlaklık ve yayılan küçük kalpler) |
+| `background_color` | Arka planın koyu rengi (gradient bundan türetilir) |
 
-Değiştirdikten sonra sayfayı yenile (deploy ettiysen değişikliği GitHub'a
-push et, hosting otomatik güncellenir).
+Değiştirip kaydettikten sonra sayfayı yenilemen yeterli — sunucuyu yeniden
+başlatmana gerek yok. (Deploy ettiysen değişikliği GitHub'a push et, hosting
+otomatik günceller.)
 
-Bir alanı silsen veya dosyayı bozsan bile site çökmez, varsayılan değerlerle
-açılmaya devam eder.
+Bir alanı silsen, dosyayı bozsan, hatta tamamen silsen bile site çökmez;
+varsayılan değerlerle açılmaya devam eder. Renk alanına geçersiz bir değer
+yazarsan o alan sessizce varsayılana döner.
 
 **Emoji ekleme:** Yazıya doğrudan ❤️ 🥰 ✨ gibi emojiler yazabilirsin.
 

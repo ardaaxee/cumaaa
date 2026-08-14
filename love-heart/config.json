@@ -1,9 +1,8 @@
 {
   "message": "Seni seviyorum ❤️",
-  "hint": "kalbe dokun",
+  "hint": "Kalbe dokun ❤️",
   "page_title": "Seni seviyorum ❤️",
   "heart_color": "#ff3d73",
-  "heart_color_2": "#ff9dbb",
-  "background": "#120912",
-  "background_2": "#31102a"
+  "secondary_color": "#ff9dbb",
+  "background_color": "#120912"
 }

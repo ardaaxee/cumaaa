@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <meta name="theme-color" content="{{ config.background }}">
+  <meta name="theme-color" content="{{ config.background_color }}">
   <meta name="description" content="Sana özel küçük bir kalp.">
   <meta name="robots" content="noindex">
   <title>{{ config.page_title }}</title>
@@ -12,12 +12,13 @@
   <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>❤️</text></svg>">
 
+  <!-- config.json'dan gelen renkler. Degerler app.py'de hex/renk-adi olarak
+       dogrulaniyor, blok CSP nonce'u ile calisiyor. -->
   <style nonce="{{ csp_nonce }}">
     :root {
       --heart-1: {{ config.heart_color }};
-      --heart-2: {{ config.heart_color_2 }};
-      --bg-1: {{ config.background }};
-      --bg-2: {{ config.background_2 }};
+      --heart-2: {{ config.secondary_color }};
+      --bg-1: {{ config.background_color }};
     }
   </style>
 </head>
@@ -26,9 +27,9 @@
 
   <main class="stage">
     <button id="heart" class="heart" type="button"
-            aria-label="Kalbe dokun ve kalp atışını başlat">
+            aria-label="Kalbe dokun">
       <span class="heart__glow" aria-hidden="true"></span>
-      <svg class="heart__svg" viewBox="0 0 100 90" role="img" aria-hidden="true" focusable="false">
+      <svg class="heart__svg" viewBox="0 0 100 90" aria-hidden="true" focusable="false">
         <defs>
           <!-- stop-color'lar style.css icinde config renkleriyle eziliyor;
                buradaki degerler yalnizca yedek. -->

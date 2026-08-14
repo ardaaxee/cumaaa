@@ -1,13 +1,14 @@
 """Sevgiliye özel, tek kalpli minimal web sitesi.
 
 Lokal calistirma:   python3 app.py
-Production:         gunicorn app:app
+Production:         gunicorn app:app --bind 0.0.0.0:$PORT
 """
 
 from __future__ import annotations
 
 import json
 import os
+import re
 import secrets
 from pathlib import Path
 
@@ -16,23 +17,45 @@ from flask import Flask, g, render_template
 BASE_DIR = Path(__file__).resolve().parent
 CONFIG_PATH = BASE_DIR / "config.json"
 
-# config.json bozuk ya da eksik olsa bile site acilmaya devam etsin diye
-# her alanin bir varsayilani var.
+# config.json bozuk, eksik ya da hic yok olsa bile site acilmaya devam etsin
+# diye her alanin bir varsayilani var.
 DEFAULT_CONFIG = {
     "message": "Seni seviyorum ❤️",
-    "hint": "kalbe dokun",
+    "hint": "Kalbe dokun ❤️",
     "page_title": "Seni seviyorum ❤️",
-    "heart_color": "#ff4d7e",
-    "heart_color_2": "#ff8fb1",
-    "background": "#140a16",
-    "background_2": "#2a0f22",
+    "heart_color": "#ff3d73",
+    "secondary_color": "#ff9dbb",
+    "background_color": "#120912",
 }
+
+# Eski anahtar isimleriyle yazilmis config'ler de calissin.
+ALIASES = {
+    "secondary_color": ("heart_color_2",),
+    "background_color": ("background",),
+    "page_title": ("title",),
+}
+
+# Renk alanlari dogrudan CSS'e giriyor: yalnizca hex ve basit renk adi kabul.
+COLOR_KEYS = ("heart_color", "secondary_color", "background_color")
+COLOR_RE = re.compile(r"^(#(?:[0-9a-fA-F]{3}|[0-9a-fA-F]{6})|[a-zA-Z]{3,20})$")
 
 app = Flask(__name__)
 
+_cached_config = None
+_cached_mtime = None
+
+
+def _pick(data: dict, key: str):
+    """Once asil anahtari, sonra eski isimlerini dene."""
+    for name in (key,) + ALIASES.get(key, ()):
+        value = data.get(name)
+        if isinstance(value, str) and value.strip():
+            return value.strip()
+    return None
+
 
 def load_config() -> dict:
-    """config.json'u oku, eksik/bozuk alanlari varsayilanla tamamla."""
+    """config.json'u oku; eksik/bozuk alanlari varsayilanla tamamla."""
     data = {}
     try:
         with CONFIG_PATH.open("r", encoding="utf-8") as fh:
@@ -43,27 +66,36 @@ def load_config() -> dict:
             app.logger.warning("config.json bir JSON nesnesi degil, varsayilanlar kullanildi.")
     except FileNotFoundError:
         app.logger.warning("config.json bulunamadi, varsayilanlar kullanildi.")
-    except (json.JSONDecodeError, OSError) as exc:
+    except (json.JSONDecodeError, OSError, UnicodeDecodeError) as exc:
         app.logger.warning("config.json okunamadi (%s), varsayilanlar kullanildi.", exc)
 
-    config = dict(DEFAULT_CONFIG)
+    config = {}
     for key, default in DEFAULT_CONFIG.items():
-        value = data.get(key)
-        if isinstance(value, str) and value.strip():
-            config[key] = value.strip()
-        else:
-            config[key] = default
+        value = _pick(data, key)
+        if value is None:
+            value = default
+        elif key in COLOR_KEYS and not COLOR_RE.match(value):
+            app.logger.warning("config.json: '%s' gecerli bir renk degil (%r).", key, value)
+            value = default
+        config[key] = value
     return config
 
 
-# Production'da config bir kez okunur; development'ta her istekte tazelenir.
-_CACHED_CONFIG = load_config()
-
-
 def get_config() -> dict:
-    if app.debug:
-        return load_config()
-    return _CACHED_CONFIG
+    """config.json degistiyse yeniden oku, degismediyse onbellekten ver."""
+    global _cached_config, _cached_mtime
+    try:
+        mtime = CONFIG_PATH.stat().st_mtime
+    except OSError:
+        mtime = None
+    if _cached_config is None or mtime != _cached_mtime:
+        _cached_config = load_config()
+        _cached_mtime = mtime
+    return _cached_config
+
+
+# Ilk yukleme uygulama acilirken yapilsin.
+get_config()
 
 
 @app.before_request
@@ -97,15 +129,15 @@ def not_found(_error):
 
 @app.after_request
 def add_headers(response):
-    # Sade ama makul guvenlik basliklari. Site tamamen self-contained oldugu
-    # icin CSP disariya hicbir kaynak birakmiyor.
+    # Site tamamen kendi sunucusundan geliyor; CSP disariya hicbir kaynak
+    # birakmiyor (CDN, font, analytics yok).
     nonce = getattr(g, "csp_nonce", "")
     style_src = "style-src 'self' 'nonce-%s'" % nonce if nonce else "style-src 'self'"
     response.headers.setdefault(
         "Content-Security-Policy",
         "default-src 'self'; img-src 'self' data:; %s; "
-        "script-src 'self'; base-uri 'none'; form-action 'none'; "
-        "frame-ancestors 'none'" % style_src,
+        "script-src 'self'; connect-src 'none'; object-src 'none'; "
+        "base-uri 'none'; form-action 'none'; frame-ancestors 'none'" % style_src,
     )
     response.headers.setdefault("X-Content-Type-Options", "nosniff")
     response.headers.setdefault("Referrer-Policy", "no-referrer")
@@ -119,6 +151,5 @@ def add_headers(response):
 
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", "5000"))
-    debug = os.environ.get("FLASK_DEBUG", "").lower() in {"1", "true", "yes"}
-    # 0.0.0.0: ayni Wi-Fi'daki telefondan da test edilebilsin.
-    app.run(host="0.0.0.0", port=port, debug=debug)
+    # 0.0.0.0: ayni Wi-Fi'daki telefondan da test edilebilsin. Debug kapali.
+    app.run(host="0.0.0.0", port=port)
