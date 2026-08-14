@@ -12,7 +12,7 @@ import re
 import secrets
 from pathlib import Path
 
-from flask import Flask, g, render_template
+from flask import Flask, g, render_template, send_from_directory
 
 BASE_DIR = Path(__file__).resolve().parent
 CONFIG_PATH = BASE_DIR / "config.json"
@@ -20,12 +20,11 @@ CONFIG_PATH = BASE_DIR / "config.json"
 # config.json bozuk, eksik ya da hic yok olsa bile site acilmaya devam etsin
 # diye her alanin bir varsayilani var.
 DEFAULT_CONFIG = {
-    "message": "Seni seviyorum ❤️",
-    "hint": "Kalbe dokun ❤️",
-    "page_title": "Seni seviyorum ❤️",
-    "heart_color": "#ff3d73",
+    "heart_color": "#ff2e63",
     "secondary_color": "#ff9dbb",
     "background_color": "#120912",
+    # Sayfada gorunmez; yalnizca tarayici sekmesinin basligi.
+    "page_title": "❤",
 }
 
 # Eski anahtar isimleriyle yazilmis config'ler de calissin.
@@ -113,6 +112,15 @@ def inject_nonce():
 @app.route("/")
 def index():
     return render_template("index.html", config=get_config())
+
+
+@app.route("/favicon.ico")
+def favicon():
+    """Bazi tarayicilar <link rel=icon> olsa da /favicon.ico istiyor;
+    404 log kirliligi olmasin diye ayni SVG kalbi donduruyoruz."""
+    return send_from_directory(
+        app.static_folder, "favicon.svg", mimetype="image/svg+xml"
+    )
 
 
 @app.route("/healthz")
