@@ -1,0 +1,173 @@
+{
+  "profile": {
+    "name": "ARDA",
+    "handle": "@lov4ardaa",
+    "instagram": "https://instagram.com/lov4ardaa",
+    "tagline": "Termux'ta geliştiriyorum. Öğrendiğim her şeyi buraya bırakıyorum.",
+    "location": "Türkiye",
+    "site_name": "whoisarda"
+  },
+  "currently_building": [
+    {
+      "title": "Termux LAB",
+      "note": "Sanal terminal üzerinde çalışan komut satırı müfredatı — 22 ders, gerçek görev doğrulaması.",
+      "state": "aktif"
+    },
+    {
+      "title": "whoisarda v2",
+      "note": "Sitenin tamamı yeniden yazıldı: index navigasyon, komut merkezi, çalışan araçlar.",
+      "state": "yayında"
+    }
+  ],
+  "drops": [
+    {
+      "date": "2026-08-15",
+      "title": "v2 — sitenin tamamı yeniden yazıldı",
+      "body": "Index tabanlı navigasyon, gerçek komut merkezi, 10 çalışan araç, sanal terminalli Termux LAB ve bağımlılıksız QR üretimi.",
+      "target": "lab"
+    },
+    {
+      "date": "2026-08-15",
+      "title": "Termux LAB açıldı",
+      "body": "BEGINNER / INTERMEDIATE / ADVANCED / PROJECTS — 22 ders. Görevler sanal dosya sisteminde gerçekten doğrulanıyor.",
+      "target": "lab"
+    },
+    {
+      "date": "2026-08-15",
+      "title": "Tools: 10 araç",
+      "body": "QR, JSON, base64, hash, timestamp, renk, metin, UUID, JWT çözümleyici, URL kodlayıcı. Hepsi cihazında çalışır.",
+      "target": "tools"
+    }
+  ],
+  "projects": [
+    {
+      "id": "whoisarda",
+      "title": "whoisarda",
+      "kind": "web",
+      "status": "yayında",
+      "year": "2026",
+      "summary": "Instagram bio linki olarak çalışan, mobil öncelikli kişisel platform. Portfolyo değil — öğrenme ve araç ürünü.",
+      "what": "Tek sayfalık bir uygulama kabuğu. Index navigasyonu, komut merkezi, sanal terminalli Termux müfredatı, tarayıcıda çalışan araçlar ve interaktif deneyler barındırıyor.",
+      "why": "Instagram'dan gelen kişiye bir CV göstermenin anlamı yok. Onun yerine ilk dokunuşta çalışan bir şey vermek, sonra Instagram'a geri döndürmek istedim.",
+      "tech": ["Python", "Flask", "Vanilla JS", "CSS", "SQLite", "Canvas API", "Web Audio API"],
+      "highlights": [
+        "Bağımlılıksız QR üreteci — ISO/IEC 18004 byte modu, saf Python",
+        "Tarayıcıda çalışan sanal dosya sistemi ve komut yorumlayıcısı",
+        "Sıfır dış kütüphane: framework yok, web fontu yok, CDN yok"
+      ],
+      "repo": "https://github.com/ardaaxee/cumaaa",
+      "demo": "/",
+      "featured": true
+    }
+  ],
+  "archive": [
+    {
+      "title": "youtube-automation",
+      "year": "2026",
+      "note": "YouTube iş akışı otomasyonu",
+      "repo": "https://github.com/ardaaxee/youtube-automation"
+    },
+    {
+      "title": "Oyun",
+      "year": "2026",
+      "note": "Oyun denemesi",
+      "repo": "https://github.com/ardaaxee/Oyun"
+    },
+    {
+      "title": "Uygulama-",
+      "year": "2026",
+      "note": "Uygulama denemesi",
+      "repo": "https://github.com/ardaaxee/Uygulama-"
+    },
+    {
+      "title": "cumaa",
+      "year": "2026",
+      "note": "Erken sürüm deposu",
+      "repo": "https://github.com/ardaaxee/cumaa"
+    },
+    {
+      "title": "Sevgilim",
+      "year": "2026",
+      "note": "Kişisel proje",
+      "repo": "https://github.com/ardaaxee/Sevgilim"
+    },
+    {
+      "title": "Sevgilimm",
+      "year": "2026",
+      "note": "Kişisel proje — ikinci sürüm",
+      "repo": "https://github.com/ardaaxee/Sevgilimm"
+    }
+  ],
+  "notes": [
+    {
+      "id": "termux-home",
+      "title": "Termux'ta ~ neden başka bir yere gidiyor",
+      "date": "2026-08-15",
+      "tags": ["termux", "linux"],
+      "excerpt": "Normal Linux'ta ev dizini /home/kullanıcı'dır. Termux'ta değil — ve bunu bilmemek yolları elle yazarken sürekli hataya yol açar.",
+      "body": [
+        "Termux bir sanal makine değil. Android uygulamasının kendi sanal alanı (sandbox) içinde çalışan gerçek bir Linux kullanıcı alanı.",
+        "Android, her uygulamaya kendi özel veri dizinini verir. Termux için bu dizin /data/data/com.termux/files. Ev dizinin de bunun altında: /data/data/com.termux/files/home",
+        "Bu yüzden ~ yazdığında kabuk bunu /data/data/com.termux/files/home olarak açar. /home/arda gibi bir yol Termux'ta yoktur ve o yolu elle yazarsan \"No such file or directory\" alırsın.",
+        "Pratik sonuç: betiklerinde asla sabit yol yazma. ~ veya $HOME kullan. Böylece betiğin hem Termux'ta hem normal Linux'ta çalışır.",
+        "İkinci sonuç: Termux'u kaldırdığında bu dizin de silinir. Ev dizinindeki çalışmaların uygulamayla birlikte gider. Önemli işlerini ~/storage altına veya bir git deposuna taşı."
+      ]
+    },
+    {
+      "id": "rm-rf",
+      "title": "rm neden geri alınamaz",
+      "date": "2026-08-15",
+      "tags": ["linux", "güvenlik"],
+      "excerpt": "Terminalde silinen dosya çöp kutusuna gitmez. Sebebi ceza değil, dosya sisteminin nasıl çalıştığı.",
+      "body": [
+        "Çöp kutusu bir dosya sistemi özelliği değil, masaüstü ortamının özelliği. Dosya yöneticisi \"sil\" dediğinde dosyayı gerçekten silmez — gizli bir klasöre taşır ve nereden geldiğini bir yere not eder.",
+        "rm ise doğrudan çekirdeğe unlink çağrısı yapar. Bu çağrı, dosya adını dizinden koparır. Dosyaya başka bağlantı kalmamışsa ve onu açık tutan bir program yoksa, kapladığı bloklar boş olarak işaretlenir.",
+        "Bloklar hemen üzerine yazılmaz — yani veri teoride bir süre diskte durur. Ama bunu kurtarmak için özel araçlar ve genellikle ham cihaz erişimi gerekir. Android'de, üstelik uygulama sanal alanı içinde, bu pratikte mümkün değildir.",
+        "rm -rf iki riski birleştirir: -r klasörün altındaki her şeye iner, -f ise sormaz ve hata bastırır. Yol ifadesinde tek bir yazım hatası çok fazla şeyi götürür.",
+        "Alışkanlık önerisi: silmeden önce aynı ifadeyi ls ile çalıştır. ls ne gösteriyorsa rm onu silecek. Bu iki saniyelik kontrol, en pahalı hataları önler."
+      ]
+    },
+    {
+      "id": "flask-host",
+      "title": "127.0.0.1 ile 0.0.0.0 arasındaki fark",
+      "date": "2026-08-15",
+      "tags": ["flask", "ağ"],
+      "excerpt": "Telefonunda Flask çalıştırıyorsun ama bilgisayarından açamıyorsun. Sebep neredeyse her zaman bu tek satır.",
+      "body": [
+        "Flask varsayılan olarak 127.0.0.1 adresine bağlanır. Bu adres geri döngü (loopback) arayüzüdür ve sadece cihazın kendisinden erişilebilir.",
+        "0.0.0.0 ise \"bu makinedeki tüm ağ arayüzlerini dinle\" demektir. Sunucuyu böyle başlattığında, telefonun yerel ağdaki IP adresi üzerinden başka cihazlar da bağlanabilir.",
+        "Termux'ta: app.run(host=\"0.0.0.0\", port=5000) yazarsın, sonra ifconfig veya ip addr ile telefonun yerel IP'sini öğrenirsin. Bilgisayarından http://<telefonun-ip>:5000 adresine gidersin. İki cihaz da aynı Wi-Fi ağında olmalı.",
+        "Güvenlik tarafı önemli: 0.0.0.0 ile dinlemek, aynı ağdaki herkesin sunucuna erişebileceği anlamına gelir. Halka açık bir Wi-Fi'de bunu yapma. Geliştirme sunucusu zaten üretim için tasarlanmadı — debug modu açıkken uzaktan kod çalıştırmaya açık bir konsol sunar.",
+        "Kural: kendi ağında geliştirirken 0.0.0.0, başka her durumda 127.0.0.1."
+      ]
+    },
+    {
+      "id": "gitignore",
+      "title": ".gitignore olmadan repo neden şişer",
+      "date": "2026-08-15",
+      "tags": ["git"],
+      "excerpt": "node_modules'ü bir kez commit'lersen, silsen bile repo geçmişinde sonsuza kadar kalır.",
+      "body": [
+        "Git bir anlık görüntü sistemi değil, geçmiş sistemidir. Bir dosyayı commit'lediğinde o içerik nesne veritabanına yazılır ve orada kalır.",
+        "Sonraki bir commit'te dosyayı silsen bile, eski commit hâlâ ona referans verir. Yani depo klonlandığında o veri de iner. \"Sildim\" demek geçmişten çıktı demek değildir.",
+        "Bu yüzden .gitignore dosyasını ilk commit'ten önce yazmak gerekir. Tipik içerik: node_modules/, __pycache__/, .env, *.db, venv/, .DS_Store",
+        ".env özellikle kritik: içinde API anahtarları olur. Bir kez commit'lendiyse anahtarı sadece dosyadan silmek yetmez — anahtarı iptal edip yenisini almak gerekir. Depo herkese açıksa bunu hemen yap.",
+        "Yanlışlıkla eklenmiş bir dosyayı takipten çıkarmak için: git rm --cached dosya. Bu, dosyayı diskte bırakır ama git'in takibinden çıkarır. Geçmişi temizlemek ise ayrı ve çok daha zahmetli bir iştir."
+      ]
+    },
+    {
+      "id": "commit-message",
+      "title": "Commit mesajı nasıl yazılır",
+      "date": "2026-08-15",
+      "tags": ["git", "alışkanlık"],
+      "excerpt": "\"güncelleme\" diye commit atmak, altı ay sonra kendine tuzak kurmaktır.",
+      "body": [
+        "Commit mesajı gelecekteki sana yazılmış bir nottur. git log --oneline ile geçmişe baktığında projenin hikâyesini okuyabilmelisin.",
+        "İyi bir mesaj ne yapıldığını emir kipiyle söyler: \"QR üretimini bağımlılıksız hale getir\". Kötü mesaj durumu anlatır ve hiçbir şey söylemez: \"düzeltmeler\", \"son hali\", \"asdf\".",
+        "İlk satır 50 karakteri geçmesin ve nokta ile bitmesin. Daha fazla açıklama gerekiyorsa bir boş satır bırakıp gövdede neden yaptığını anlat — ne yaptığın zaten diff'te görünür, neden yaptığın görünmez.",
+        "Bir commit tek bir işi içermeli. Üç ayrı şeyi tek commit'e koyarsan, birini geri almak istediğinde diğer ikisini de kaybedersin.",
+        "Pratik kontrol: mesajı yazarken \"ve\" kelimesine ihtiyaç duyuyorsan, muhtemelen iki ayrı commit atmalısın."
+      ]
+    }
+  ]
+}
