@@ -9,17 +9,29 @@
   },
   "currently_building": [
     {
+      "title": "EXPLORE destesi",
+      "note": "Sitedeki 48 içeriğin tamamını kaydırarak keşfettiren kart destesi.",
+      "state": "yeni"
+    },
+    {
       "title": "Termux LAB",
       "note": "Sanal terminal üzerinde çalışan komut satırı müfredatı — 22 ders, gerçek görev doğrulaması.",
       "state": "aktif"
-    },
-    {
-      "title": "whoisarda v2",
-      "note": "Sitenin tamamı yeniden yazıldı: index navigasyon, komut merkezi, çalışan araçlar.",
-      "state": "yayında"
     }
   ],
   "drops": [
+    {
+      "date": "2026-08-15",
+      "title": "v2.1 — keşif, terminal ve tanılama",
+      "body": "EXPLORE kart destesi, tam ekran interaktif TERMINAL, canlı ölçüm yapan SYSTEM STATUS, komut kartı, filtrelenebilir projeler ve gizli bir bölüm.",
+      "target": "explore"
+    },
+    {
+      "date": "2026-08-15",
+      "title": "Görsel dil tam monokroma geçti",
+      "body": "Yeşil aksan kaldırıldı. Vurgu artık renkle değil ışıkla taşınıyor; tek doygun renkler anlamsal: amber uyarır, kırmızı hata verir.",
+      "target": "status"
+    },
     {
       "date": "2026-08-15",
       "title": "v2 — sitenin tamamı yeniden yazıldı",
@@ -47,12 +59,21 @@
       "status": "yayında",
       "year": "2026",
       "summary": "Instagram bio linki olarak çalışan, mobil öncelikli kişisel platform. Portfolyo değil — öğrenme ve araç ürünü.",
-      "what": "Tek sayfalık bir uygulama kabuğu. Index navigasyonu, komut merkezi, sanal terminalli Termux müfredatı, tarayıcıda çalışan araçlar ve interaktif deneyler barındırıyor.",
+      "what": "Tek sayfalık bir uygulama kabuğu. Index navigasyonu, keşif destesi, komut merkezi, tam ekran sanal terminal, canlı tanılama paneli, Termux müfredatı, tarayıcıda çalışan araçlar ve interaktif deneyler barındırıyor.",
       "why": "Instagram'dan gelen kişiye bir CV göstermenin anlamı yok. Onun yerine ilk dokunuşta çalışan bir şey vermek, sonra Instagram'a geri döndürmek istedim.",
-      "tech": ["Python", "Flask", "Vanilla JS", "CSS", "SQLite", "Canvas API", "Web Audio API"],
+      "tech": [
+        "Python",
+        "Flask",
+        "Vanilla JS",
+        "CSS",
+        "SQLite",
+        "Canvas API",
+        "Web Audio API"
+      ],
       "highlights": [
         "Bağımlılıksız QR üreteci — ISO/IEC 18004 byte modu, saf Python",
         "Tarayıcıda çalışan sanal dosya sistemi ve komut yorumlayıcısı",
+        "Canlı ölçüm yapan tanılama paneli — tek bir uydurma sayaç yok",
         "Sıfır dış kütüphane: framework yok, web fontu yok, CDN yok"
       ],
       "repo": "https://github.com/ardaaxee/cumaaa",
@@ -103,7 +124,10 @@
       "id": "termux-home",
       "title": "Termux'ta ~ neden başka bir yere gidiyor",
       "date": "2026-08-15",
-      "tags": ["termux", "linux"],
+      "tags": [
+        "termux",
+        "linux"
+      ],
       "excerpt": "Normal Linux'ta ev dizini /home/kullanıcı'dır. Termux'ta değil — ve bunu bilmemek yolları elle yazarken sürekli hataya yol açar.",
       "body": [
         "Termux bir sanal makine değil. Android uygulamasının kendi sanal alanı (sandbox) içinde çalışan gerçek bir Linux kullanıcı alanı.",
@@ -117,7 +141,10 @@
       "id": "rm-rf",
       "title": "rm neden geri alınamaz",
       "date": "2026-08-15",
-      "tags": ["linux", "güvenlik"],
+      "tags": [
+        "linux",
+        "güvenlik"
+      ],
       "excerpt": "Terminalde silinen dosya çöp kutusuna gitmez. Sebebi ceza değil, dosya sisteminin nasıl çalıştığı.",
       "body": [
         "Çöp kutusu bir dosya sistemi özelliği değil, masaüstü ortamının özelliği. Dosya yöneticisi \"sil\" dediğinde dosyayı gerçekten silmez — gizli bir klasöre taşır ve nereden geldiğini bir yere not eder.",
@@ -131,7 +158,10 @@
       "id": "flask-host",
       "title": "127.0.0.1 ile 0.0.0.0 arasındaki fark",
       "date": "2026-08-15",
-      "tags": ["flask", "ağ"],
+      "tags": [
+        "flask",
+        "ağ"
+      ],
       "excerpt": "Telefonunda Flask çalıştırıyorsun ama bilgisayarından açamıyorsun. Sebep neredeyse her zaman bu tek satır.",
       "body": [
         "Flask varsayılan olarak 127.0.0.1 adresine bağlanır. Bu adres geri döngü (loopback) arayüzüdür ve sadece cihazın kendisinden erişilebilir.",
@@ -145,7 +175,9 @@
       "id": "gitignore",
       "title": ".gitignore olmadan repo neden şişer",
       "date": "2026-08-15",
-      "tags": ["git"],
+      "tags": [
+        "git"
+      ],
       "excerpt": "node_modules'ü bir kez commit'lersen, silsen bile repo geçmişinde sonsuza kadar kalır.",
       "body": [
         "Git bir anlık görüntü sistemi değil, geçmiş sistemidir. Bir dosyayı commit'lediğinde o içerik nesne veritabanına yazılır ve orada kalır.",
@@ -159,7 +191,10 @@
       "id": "commit-message",
       "title": "Commit mesajı nasıl yazılır",
       "date": "2026-08-15",
-      "tags": ["git", "alışkanlık"],
+      "tags": [
+        "git",
+        "alışkanlık"
+      ],
       "excerpt": "\"güncelleme\" diye commit atmak, altı ay sonra kendine tuzak kurmaktır.",
       "body": [
         "Commit mesajı gelecekteki sana yazılmış bir nottur. git log --oneline ile geçmişe baktığında projenin hikâyesini okuyabilmelisin.",

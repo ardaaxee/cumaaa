@@ -34,13 +34,13 @@ CONTENT_DIR = BASE_DIR / "content"
 INSTANCE_DIR = BASE_DIR / "instance"
 DB_PATH = INSTANCE_DIR / "messages.db"
 
-VERSION = "2.0.0"
+VERSION = "2.1.0"
 STARTED_AT = time.time()
 
 # Sections that the single-page shell can deep-link into.
 SECTIONS = (
-    "lab", "tools", "projects", "playground",
-    "notes", "archive", "contact", "share", "drops",
+    "explore", "lab", "terminal", "tools", "projects", "playground",
+    "notes", "archive", "status", "contact", "share", "drops",
 )
 
 app = Flask(__name__)
@@ -131,6 +131,10 @@ PLAYGROUND_REGISTRY = [
 COMMANDS = [
     {"name": "help", "desc": "Tüm komutları listele", "action": "help"},
     {"name": "home", "desc": "Ana ekrana dön", "action": "nav", "target": "home"},
+    {"name": "explore", "desc": "Keşif destesini aç", "action": "nav", "target": "explore"},
+    {"name": "terminal", "desc": "İnteraktif terminali aç", "action": "nav", "target": "terminal"},
+    {"name": "cheatsheet", "desc": "Komut kartını aç", "action": "nav", "target": "cheatsheet"},
+    {"name": "status", "desc": "Sistem durumunu aç", "action": "nav", "target": "status"},
     {"name": "lab", "desc": "Termux LAB'i aç", "action": "nav", "target": "lab"},
     {"name": "termux", "desc": "Termux LAB'i aç (lab ile aynı)", "action": "nav", "target": "lab"},
     {"name": "tools", "desc": "Araçları aç", "action": "nav", "target": "tools"},
@@ -145,7 +149,7 @@ COMMANDS = [
     {"name": "github", "desc": "GitHub profilini aç", "action": "external", "target": "https://github.com/ardaaxee"},
     {"name": "theme", "desc": "Kontrast modunu değiştir", "action": "theme"},
     {"name": "motion", "desc": "Hareket efektlerini aç/kapat", "action": "motion"},
-    {"name": "status", "desc": "Sunucu durumunu göster", "action": "status"},
+    {"name": "ping", "desc": "Sunucu durumunu satır içi göster", "action": "status"},
     {"name": "clear", "desc": "Komut geçmişini temizle", "action": "clear"},
 ]
 

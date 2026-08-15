@@ -306,9 +306,9 @@ const TOOLS = {
   },
 
   color() {
-    const picker = h("input", { type: "color", value: "#00e08a", class: "input", style: "height:52px;padding:6px" });
-    const hexInput = input({ value: "#00e08a", placeholder: "#00e08a" });
-    const swatch = h("div", { class: "swatch", style: "background:#00e08a" });
+    const picker = h("input", { type: "color", value: "#8a8f98", class: "input", style: "height:52px;padding:6px" });
+    const hexInput = input({ value: "#8a8f98", placeholder: "#8a8f98" });
+    const swatch = h("div", { class: "swatch", style: "background:#8a8f98" });
     const shades = h("div", { class: "swatches" });
     const out = h("dl", { class: "kv" });
 
@@ -389,7 +389,7 @@ const TOOLS = {
 
     picker.addEventListener("input", () => { hexInput.value = picker.value; update(picker.value); });
     hexInput.addEventListener("input", () => update(hexInput.value));
-    update("#00e08a");
+    update("#8a8f98");
 
     return h("div", null,
       swatch,

@@ -7,6 +7,10 @@ import { initLab, refreshHomeProgress } from "./js/lab.js";
 import { initTools } from "./js/tools.js";
 import { initPlayground } from "./js/playground.js";
 import { initPalette, openPalette } from "./js/palette.js";
+import { initExplore } from "./js/explore.js";
+import { initTerminal } from "./js/terminal.js";
+import { initStatus } from "./js/status.js";
+import { initEgg } from "./js/egg.js";
 
 const content = window.__BOOT__;
 
@@ -55,10 +59,17 @@ function initWordmark() {
   const node = $("#wordmark");
   if (!node) return;
 
+  // Re-entrancy guard: rapid taps must not restart the effect, or the wordmark
+  // never settles and the element stays visually unstable.
+  let playing = false;
   const play = () => {
-    if (prefersReducedMotion()) return;
+    if (prefersReducedMotion() || playing) return;
+    playing = true;
     node.classList.add("is-glitch");
-    setTimeout(() => node.classList.remove("is-glitch"), 780);
+    setTimeout(() => {
+      node.classList.remove("is-glitch");
+      playing = false;
+    }, 780);
     scrambleWordmark(node);
   };
 
@@ -146,7 +157,7 @@ function initArrival() {
   if (!fromInstagram) return;
   if (store.get("greeted")) return;
   store.set("greeted", true);
-  setTimeout(() => toast("Instagram'dan geldin — LAB'den başlamanı öneririm"), 1400);
+  setTimeout(() => toast("Instagram'dan geldin — EXPLORE ile başla"), 1400);
 }
 
 /* --- service worker ------------------------------------------------------- */
@@ -174,9 +185,13 @@ function boot() {
   initLab(content);
   initTools(content);
   initPlayground(content);
+  initExplore(content);
+  initTerminal(content);
+  initStatus();
   initPalette(content);
 
   initTriggers();
+  initEgg();
   initWordmark();
   initGlow();
   initScroll();

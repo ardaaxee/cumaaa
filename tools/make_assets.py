@@ -17,7 +17,7 @@ BG = (5, 5, 6)
 GRID = (14, 15, 19)
 TEXT = (237, 238, 240)
 MUTED = (111, 116, 126)
-ACCENT = (0, 224, 138)
+ACCENT = (255, 255, 255)
 
 # 5x7 bitmap font. Only the glyphs this project renders are defined.
 FONT = {
@@ -142,7 +142,7 @@ def build_og():
 
     canvas.text(112, 140, "TERMUX", 5, MUTED)
     canvas.text(80, 220, "ARDA", 30, TEXT)
-    canvas.text(84, 452, "@lov4ardaa", 9, ACCENT)
+    canvas.text(84, 452, "@lov4ardaa", 9, TEXT)
     canvas.text(84, 536, "LAB · TOOLS · NOTES · PLAYGROUND", 4, MUTED)
 
     size = canvas.write(STATIC / "og.png")
@@ -173,8 +173,8 @@ def build_favicon():
     svg = (
         '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">'
         '<rect width="32" height="32" rx="7" fill="#050506"/>'
-        '<path d="M16 7l6.4 18h-3.9l-1.2-3.6h-6.6L9.5 25H5.6L12 7h4zm-.1 4.9l-2.2 6.6h4.4l-2.2-6.6z" fill="#00e08a"/>'
-        '<rect y="29" width="32" height="3" fill="#00e08a"/>'
+        '<path d="M16 7l6.4 18h-3.9l-1.2-3.6h-6.6L9.5 25H5.6L12 7h4zm-.1 4.9l-2.2 6.6h4.4l-2.2-6.6z" fill="#ffffff"/>'
+        '<rect y="29" width="32" height="3" fill="#ffffff"/>'
         "</svg>"
     )
     path = STATIC / "favicon.svg"

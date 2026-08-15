@@ -1,35 +1,160 @@
 /* Projects, archive, notes, drops, contact and share panels. */
 
-import { h, clear, icon, copy, share, canShare, toast, formatDate } from "./core.js";
+import { h, clear, icon, copy, share, canShare, toast, formatDate, debounce } from "./core.js";
 import { registerPanel, open, listItem } from "./ui.js";
 
 let content = null;
 
+/* --- instagram profile card ----------------------------------------------- */
+
+/** Reusable profile card. Counts come from real content, never invented. */
+export function instagramCard({ compact = false } = {}) {
+  const profile = content.profile;
+  const initials = profile.name.slice(0, 2).toUpperCase();
+
+  return h("a", {
+    class: "igcard" + (compact ? " igcard--compact" : ""),
+    href: profile.instagram,
+    target: "_blank",
+    rel: "noopener me",
+    "data-track": "ig-card",
+  },
+    h("span", { class: "igcard__glow", "aria-hidden": "true" }),
+    h("span", { class: "igcard__row" },
+      h("span", { class: "igcard__avatar" }, initials),
+      h("span", { class: "igcard__id" },
+        h("span", { class: "igcard__handle" }, profile.handle),
+        h("span", { class: "igcard__name" }, profile.tagline)),
+      h("span", { class: "igcard__badge" }, icon("i-ig", 18))),
+    h("span", { class: "igcard__stats" },
+      h("span", { class: "igcard__stat" },
+        h("b", null, content.counts.lab_lessons), " ders"),
+      h("span", { class: "igcard__stat" },
+        h("b", null, content.counts.tools), " araç"),
+      h("span", { class: "igcard__stat" },
+        h("b", null, content.counts.notes), " not")),
+    h("span", { class: "igcard__cta" },
+      "Instagram'da takip et", icon("i-arrow", 16)));
+}
+
 /* --- projects ------------------------------------------------------------- */
 
-function renderProjects() {
-  if (!content.projects.length) {
-    return h("div", { class: "empty" }, "Henüz yayınlanmış proje yok.");
+/** Projects and archive share one filterable surface. */
+function workItems() {
+  const items = content.projects.map((project) => ({
+    kind: "live",
+    id: project.id,
+    title: project.title,
+    sub: project.summary,
+    badge: project.status,
+    year: project.year,
+    type: project.kind,
+    tech: project.tech || [],
+    onClick: () => open("project", project.id),
+  }));
+
+  for (const entry of content.archive) {
+    items.push({
+      kind: "archive",
+      id: "archive:" + entry.title,
+      title: entry.title,
+      sub: entry.note,
+      badge: "arşiv",
+      year: entry.year,
+      type: "repo",
+      tech: [],
+      href: entry.repo,
+    });
   }
+  return items;
+}
+
+function renderProjects() {
+  const items = workItems();
+  if (!items.length) return h("div", { class: "empty" }, "Henüz yayınlanmış proje yok.");
+
+  const host = h("div", { class: "list" });
+  const summary = h("p", { class: "field__hint" });
+  let filter = "all";
+  let query = "";
+
+  const filters = [
+    { id: "all", label: "hepsi" },
+    { id: "live", label: "yayında" },
+    { id: "archive", label: "arşiv" },
+  ];
+
+  const chips = h("div", { class: "chips" },
+    filters.map((entry) => h("button", {
+      class: "chip" + (entry.id === "all" ? " is-on" : ""),
+      type: "button",
+      dataset: { filter: entry.id },
+      onclick: (event) => {
+        filter = entry.id;
+        for (const chip of event.currentTarget.parentElement.children) {
+          chip.classList.toggle("is-on", chip.dataset.filter === filter);
+        }
+        paint();
+      },
+    }, entry.label,
+      h("span", { class: "chip__n" },
+        entry.id === "all" ? items.length
+          : items.filter((i) => i.kind === entry.id).length))));
+
+  const search = h("input", {
+    class: "input", type: "search", placeholder: "proje ara…",
+    "aria-label": "Proje ara", autocomplete: "off",
+  });
+
+  const paint = () => {
+    clear(host);
+    const q = query.trim().toLocaleLowerCase("tr-TR");
+    const visible = items.filter((item) => {
+      if (filter !== "all" && item.kind !== filter) return false;
+      if (!q) return true;
+      return (item.title + " " + item.sub + " " + item.tech.join(" "))
+        .toLocaleLowerCase("tr-TR").includes(q);
+    });
+
+    if (!visible.length) {
+      host.appendChild(h("div", { class: "empty" }, "Eşleşen proje yok."));
+    } else {
+      for (const item of visible) {
+        host.appendChild(listItem({
+          title: item.title,
+          sub: item.sub,
+          badge: item.badge,
+          onClick: item.onClick,
+          href: item.href,
+        }));
+      }
+    }
+    summary.textContent = `${visible.length} / ${items.length} gösteriliyor`;
+  };
+
+  search.addEventListener("input", debounce(() => { query = search.value; paint(); }, 140));
+  paint();
+
   return h("div", null,
-    h("p", { class: "lede" }, "Her proje için ne, neden, hangi teknoloji ve hangi durumda olduğu yazılı."),
-    h("div", { class: "list" },
-      content.projects.map((project) =>
-        listItem({
-          title: project.title,
-          sub: project.summary,
-          badge: project.status,
-          onClick: () => open("project", project.id),
-        }))),
-    h("button", {
-      class: "btn btn--block", style: "margin-top:16px",
-      onclick: () => open("archive"),
-    }, `arşive bak (${content.archive.length})`));
+    h("p", { class: "lede" },
+      "Yayındaki işler ve arşiv tek yerde. Her proje için ne, neden, " +
+      "hangi teknoloji ve hangi durumda olduğu yazılı."),
+    chips,
+    search,
+    summary,
+    host);
 }
 
 function renderProject(ctx) {
   const project = content.projects.find((item) => item.id === ctx.arg);
   if (!project) return h("div", { class: "empty" }, "Proje bulunamadı.");
+
+  /* Content elsewhere on the site that shares this project's tech. */
+  const related = content.search.filter((entry) =>
+    (entry.type === "note" || entry.type === "lesson")
+    && (project.tech || []).some((tech) =>
+      (entry.keywords || []).some((k) => k.toLowerCase() === tech.toLowerCase())
+      || entry.title.toLowerCase().includes(tech.toLowerCase()))).slice(0, 4);
 
   return h("div", null,
     h("div", { class: "proj__head" },
@@ -39,6 +164,20 @@ function renderProject(ctx) {
         h("span", { class: "pill pill--on" }, project.status),
         h("span", { class: "pill" }, project.year),
         h("span", { class: "pill" }, project.kind))),
+
+    h("div", { class: "specs" },
+      h("div", { class: "spec" },
+        h("span", { class: "spec__k" }, "durum"),
+        h("span", { class: "spec__v" }, project.status)),
+      h("div", { class: "spec" },
+        h("span", { class: "spec__k" }, "yıl"),
+        h("span", { class: "spec__v" }, project.year)),
+      h("div", { class: "spec" },
+        h("span", { class: "spec__k" }, "tür"),
+        h("span", { class: "spec__v" }, project.kind)),
+      h("div", { class: "spec" },
+        h("span", { class: "spec__k" }, "teknoloji"),
+        h("span", { class: "spec__v" }, String((project.tech || []).length)))),
 
     h("div", { class: "lsn__block" },
       h("div", { class: "lsn__h" }, "Ne"),
@@ -58,6 +197,17 @@ function renderProject(ctx) {
     h("div", { class: "lsn__block" },
       h("div", { class: "lsn__h" }, "Teknoloji"),
       h("div", { class: "pills" }, project.tech.map((item) => h("span", { class: "pill" }, item)))),
+
+    related.length
+      ? h("div", { class: "lsn__block" },
+          h("div", { class: "lsn__h" }, "İlgili içerik"),
+          h("div", { class: "list" },
+            related.map((entry) => listItem({
+              title: entry.title,
+              sub: entry.sub,
+              onClick: () => open(entry.type === "note" ? "note" : "lesson", entry.arg),
+            }))))
+      : null,
 
     h("div", { class: "lsn__block" },
       h("div", { class: "btnrow" },
@@ -310,10 +460,7 @@ function renderShare() {
     h("div", { class: "card" },
       h("h3", { class: "card__title" }, "Bağlantı"),
       h("p", { class: "out", style: "margin-top:8px" }, url)),
-    h("a", {
-      class: "btn btn--block", style: "margin-top:4px",
-      href: content.profile.instagram, target: "_blank", rel: "noopener",
-    }, icon("i-ig", 16), content.profile.handle));
+    instagramCard());
 }
 
 /* --- registration --------------------------------------------------------- */

@@ -32,7 +32,8 @@ const response = await page.goto(BASE, { waitUntil: "networkidle" });
 check("sayfa 200 döndü", response.status() === 200);
 check("başlık doğru", (await page.title()).includes("ARDA"));
 check("wordmark görünür", await page.locator("#wordmark").isVisible());
-check("index 10 satır", (await page.locator(".row").count()) === 10);
+// v2.1 grew the index from 10 to 13 visible rows (+1 hidden VOID row)
+check("index 13 görünür satır", (await page.locator(".row:visible").count()) === 13);
 check("dock görünür", await page.locator(".dock__cmd").isVisible());
 check("CTA görünür", (await page.locator(".outro__line").innerText()).includes("THE STORY DOESN'T"));
 
@@ -185,11 +186,12 @@ await page.locator("#paletteInput").fill("ogren");
 await page.waitForTimeout(250);
 check("türkçe karakter katlama çalışıyor", (await page.locator(".res").count()) > 0);
 
-// a real command
-await page.locator("#paletteInput").fill("status");
+// a real command — `ping` prints the server readout inline (v2.1 renamed this
+// from `status`, which now opens the SYSTEM STATUS panel instead)
+await page.locator("#paletteInput").fill("ping");
 await page.locator("#paletteInput").press("Enter");
 await page.waitForTimeout(700);
-check("status komutu gerçek veri getirdi",
+check("ping komutu gerçek veri getirdi",
   (await page.locator("#paletteLog").innerText()).includes("whoisarda"));
 
 await page.locator("#paletteInput").fill("tools");

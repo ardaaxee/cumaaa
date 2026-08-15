@@ -267,6 +267,10 @@ export function initPalette(bootContent) {
   commands = [
     { name: "help", desc: "Tüm komutları listele", action: "help" },
     { name: "home", desc: "Ana ekrana dön", action: "nav", target: "home" },
+    { name: "explore", desc: "Keşif destesini aç", action: "nav", target: "explore" },
+    { name: "terminal", desc: "İnteraktif terminali aç", action: "nav", target: "terminal" },
+    { name: "cheatsheet", desc: "Komut kartını aç", action: "nav", target: "cheatsheet" },
+    { name: "status", desc: "Sistem durumunu aç", action: "nav", target: "status" },
     { name: "lab", desc: "Termux LAB'i aç", action: "nav", target: "lab" },
     { name: "termux", desc: "Termux LAB'i aç", action: "nav", target: "lab" },
     { name: "tools", desc: "Araçları aç", action: "nav", target: "tools" },
@@ -281,7 +285,7 @@ export function initPalette(bootContent) {
     { name: "github", desc: "GitHub profilini aç", action: "external", target: "https://github.com/ardaaxee" },
     { name: "theme", desc: "Yüksek kontrast modunu aç/kapat", action: "theme" },
     { name: "motion", desc: "Hareket efektlerini aç/kapat", action: "motion" },
-    { name: "status", desc: "Sunucu durumunu göster", action: "status" },
+    { name: "ping", desc: "Sunucu durumunu satır içi göster", action: "status" },
     { name: "clear", desc: "Çıktıyı temizle", action: "clear" },
   ];
 

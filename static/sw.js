@@ -1,7 +1,7 @@
 /* Offline support. Static assets are cached; HTML and API stay network-first
  * so content is never served stale when the device is online. */
 
-const VERSION = "whoisarda-v2";
+const VERSION = "whoisarda-v2.1";
 const ASSETS = [
   "/",
   "/static/style.css",
@@ -14,6 +14,11 @@ const ASSETS = [
   "/static/js/panels.js",
   "/static/js/playground.js",
   "/static/js/palette.js",
+  "/static/js/term.js",
+  "/static/js/explore.js",
+  "/static/js/terminal.js",
+  "/static/js/status.js",
+  "/static/js/egg.js",
   "/static/favicon.svg",
 ];
 

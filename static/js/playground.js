@@ -90,7 +90,7 @@ const EXPERIMENTS = {
           const a = particles[i], b = particles[j];
           const dist = Math.hypot(a.x - b.x, a.y - b.y);
           if (dist < 92) {
-            ctx.strokeStyle = `rgba(0,224,138,${(1 - dist / 92) * 0.4})`;
+            ctx.strokeStyle = `rgba(255,255,255,${(1 - dist / 92) * 0.4})`;
             ctx.lineWidth = 1;
             ctx.beginPath();
             ctx.moveTo(a.x, a.y);
@@ -165,7 +165,7 @@ const EXPERIMENTS = {
       const ctx = canvas.getContext("2d");
       const rect = canvas.getBoundingClientRect();
       ctx.clearRect(0, 0, rect.width, rect.height);
-      ctx.fillStyle = "#00e08a";
+      ctx.fillStyle = "#ffffff";
       for (let r = 0; r < rows; r++) {
         for (let c = 0; c < cols; c++) {
           if (grid[r][c]) ctx.fillRect(c * CELL + 1, r * CELL + 1, CELL - 2, CELL - 2);
