@@ -140,10 +140,11 @@ def build_og():
     canvas.rect(0, 0, 1200, 6, ACCENT)
     canvas.rect(80, 132, 8, 44, ACCENT)
 
-    canvas.text(112, 140, "TERMUX", 5, MUTED)
-    canvas.text(80, 220, "ARDA", 30, TEXT)
-    canvas.text(84, 452, "@lov4ardaa", 9, TEXT)
-    canvas.text(84, 536, "LAB · TOOLS · NOTES · PLAYGROUND", 4, MUTED)
+    canvas.text(112, 140, "DIGITAL IDENTITY / 2026", 5, MUTED)
+    canvas.text(80, 214, "ARDA.OS", 24, TEXT)
+    canvas.text(84, 430, "@lov4ardaa", 9, TEXT)
+    canvas.text(84, 512, "AI · AUTOMATION · WEB · TERMUX", 4, MUTED)
+    canvas.text(84, 556, "EXPERIMENTS", 4, MUTED)
 
     size = canvas.write(STATIC / "og.png")
     print(f"  static/og.png          1200x630  {size:,} bytes")

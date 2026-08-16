@@ -1,205 +1,274 @@
-/* whoisarda — boot. */
+/* ARDA.OS — boot and interaction layer. Vanilla, no libraries. */
 
-import { $, $$, store, toast, prefersReducedMotion } from "./js/core.js";
-import { initUI, open, hasPanel } from "./js/ui.js";
-import { initPanels } from "./js/panels.js";
-import { initLab, refreshHomeProgress } from "./js/lab.js";
-import { initTools } from "./js/tools.js";
-import { initPlayground } from "./js/playground.js";
-import { initPalette, openPalette } from "./js/palette.js";
-import { initExplore } from "./js/explore.js";
-import { initTerminal } from "./js/terminal.js";
-import { initStatus } from "./js/status.js";
-import { initEgg } from "./js/egg.js";
+import { $, $$, h, store, prefersReducedMotion } from "./js/core.js";
+import { initModal } from "./js/modal.js";
+import { initSections } from "./js/sections.js";
+import { initConsole } from "./js/console.js";
+import { initConnect } from "./js/connect.js";
+import { DISCOVER } from "./js/data.js";
 
 const content = window.__BOOT__;
 
-/* --- preferences ---------------------------------------------------------- */
+/* --- 11. boot ------------------------------------------------------------- */
 
-function restorePreferences() {
-  const root = document.documentElement;
-  const contrast = store.get("contrast");
-  if (contrast) root.dataset.contrast = contrast;
-  const motion = store.get("motion");
-  if (motion) root.dataset.motion = motion;
-}
+function initBoot() {
+  const boot = $("#boot");
+  if (!boot) return;
 
-/* --- wordmark ------------------------------------------------------------- */
-
-const SCRAMBLE_CHARS = "!<>-_\\/[]{}—=+*^?#01";
-
-function scrambleWordmark(node) {
-  if (prefersReducedMotion()) return;
-  const target = node.dataset.text || node.textContent;
-  const queue = Array.from({ length: target.length }, (_, i) => ({
-    to: target[i],
-    start: Math.floor(Math.random() * 14),
-    end: Math.floor(Math.random() * 16) + 16,
-  }));
-  let frame = 0;
-
-  const tick = () => {
-    let output = "";
-    let complete = 0;
-    for (const item of queue) {
-      if (frame >= item.end) { output += item.to; complete++; }
-      else if (frame >= item.start) {
-        output += SCRAMBLE_CHARS[Math.floor(Math.random() * SCRAMBLE_CHARS.length)];
-      } else output += target[complete] === undefined ? "" : " ";
-    }
-    node.textContent = output;
-    if (complete === queue.length) { node.textContent = target; return; }
-    frame++;
-    requestAnimationFrame(tick);
-  };
-  tick();
-}
-
-function initWordmark() {
-  const node = $("#wordmark");
-  if (!node) return;
-
-  // Re-entrancy guard: rapid taps must not restart the effect, or the wordmark
-  // never settles and the element stays visually unstable.
-  let playing = false;
-  const play = () => {
-    if (prefersReducedMotion() || playing) return;
-    playing = true;
-    node.classList.add("is-glitch");
-    setTimeout(() => {
-      node.classList.remove("is-glitch");
-      playing = false;
-    }, 780);
-    scrambleWordmark(node);
+  // Never hold the visitor: the overlay is capped at ~1.1s and any interaction
+  // dismisses it immediately.
+  const finish = () => {
+    if (boot.classList.contains("done")) return;
+    boot.classList.add("done");
+    document.body.classList.remove("lock");
+    startHero();
+    setTimeout(() => boot.remove(), 420);
   };
 
-  setTimeout(play, 180);
-  node.addEventListener("click", play);
-  node.addEventListener("keydown", (event) => {
-    if (event.key === "Enter" || event.key === " ") { event.preventDefault(); play(); }
+  if (prefersReducedMotion()) { finish(); return; }
+
+  document.body.classList.add("lock");
+  const timer = setTimeout(finish, 1100);
+  const early = () => { clearTimeout(timer); finish(); };
+  boot.addEventListener("click", early);
+  window.addEventListener("touchstart", early, { once: true, passive: true });
+  window.addEventListener("wheel", early, { once: true, passive: true });
+  window.addEventListener("keydown", early, { once: true });
+}
+
+/* --- 1. hero -------------------------------------------------------------- */
+
+function splitChars(node) {
+  const text = node.dataset.text || node.textContent;
+  node.textContent = "";
+  text.split("").forEach((ch, i) => {
+    const span = document.createElement("span");
+    span.className = "ch";
+    span.textContent = ch;
+    span.style.animationDelay = `${i * 52}ms`;
+    node.appendChild(span);
   });
 }
 
-/* --- pointer glow --------------------------------------------------------- */
+function startHero() {
+  if (!prefersReducedMotion()) {
+    $$(".hero__title [data-text]").forEach(splitChars);
+  }
+  $$(".hero__line").forEach((line, i) =>
+    setTimeout(() => line.classList.add("in"), 260 + i * 40));
+}
 
-function initGlow() {
-  const glow = $(".bg-glow");
-  if (!glow || !window.matchMedia("(hover: hover)").matches) return;
+/* --- reveal on scroll ----------------------------------------------------- */
+
+let revealObserver = null;
+
+function initReveal() {
+  const items = $$(".rv:not(.in)");
+  if (!items.length) return;
+  if (prefersReducedMotion()) { items.forEach((n) => n.classList.add("in")); return; }
+
+  if (!revealObserver) {
+    revealObserver = new IntersectionObserver((entries) => {
+      for (const entry of entries) {
+        if (!entry.isIntersecting) continue;
+        entry.target.classList.add("in");
+        revealObserver.unobserve(entry.target);
+      }
+    }, { rootMargin: "0px 0px -10% 0px", threshold: 0.05 });
+  }
+  items.forEach((n) => revealObserver.observe(n));
+}
+
+/* --- scroll: progress, bar, grid drift ------------------------------------ */
+
+function initScroll() {
+  const fill = $("#progressFill");
+  const bar = $("#bar");
+  const grid = $(".grid");
   let ticking = false;
-  window.addEventListener("pointermove", (event) => {
+
+  const update = () => {
+    const y = window.scrollY;
+    const max = document.documentElement.scrollHeight - window.innerHeight;
+    const pct = max > 0 ? (y / max) * 100 : 0;
+
+    if (fill) fill.style.width = `${pct.toFixed(2)}%`;
+    if (bar) bar.classList.toggle("solid", y > 24);
+    if (grid && !prefersReducedMotion()) {
+      grid.style.setProperty("--gy", `${-(y * 0.06) % 56}px`);
+    }
+    ticking = false;
+  };
+
+  window.addEventListener("scroll", () => {
+    if (ticking) return;
+    ticking = true;
+    requestAnimationFrame(update);
+  }, { passive: true });
+  update();
+}
+
+/* --- pointer beam + magnetic buttons -------------------------------------- */
+
+function initPointer() {
+  const fine = window.matchMedia("(hover: hover) and (pointer: fine)").matches;
+  if (!fine || prefersReducedMotion()) return;
+
+  const beam = $(".beam");
+  let ticking = false;
+  window.addEventListener("pointermove", (e) => {
     if (ticking) return;
     ticking = true;
     requestAnimationFrame(() => {
-      glow.style.setProperty("--px", event.clientX + "px");
-      glow.style.setProperty("--py", event.clientY + "px");
+      if (beam) {
+        beam.style.setProperty("--mx", `${e.clientX}px`);
+        beam.style.setProperty("--my", `${e.clientY}px`);
+      }
       ticking = false;
+    });
+  }, { passive: true });
+
+  // Magnetic-ish pull, kept small so it reads as polish rather than a gimmick.
+  for (const el of $$(".mag")) {
+    el.addEventListener("pointermove", (e) => {
+      const r = el.getBoundingClientRect();
+      const dx = (e.clientX - (r.left + r.width / 2)) / r.width;
+      const dy = (e.clientY - (r.top + r.height / 2)) / r.height;
+      el.style.transform = `translate(${dx * 7}px, ${dy * 7}px)`;
+    });
+    el.addEventListener("pointerleave", () => { el.style.transform = ""; });
+  }
+}
+
+/* --- 10. discover navigation ---------------------------------------------- */
+
+function initDiscover() {
+  const nav = $("#disc");
+  const list = $("#discList");
+  const toggle = $("#discToggle");
+  const nowLabel = $("#discNow");
+  if (!nav || !list || !toggle) return;
+
+  const close = () => {
+    nav.classList.remove("open");
+    toggle.setAttribute("aria-expanded", "false");
+  };
+
+  DISCOVER.forEach((item, i) => {
+    const btn = h("button", {
+      class: "disc__a",
+      type: "button",
+      dataset: { target: item.id },
+      onclick: () => {
+        close();
+        const target = document.getElementById(item.id);
+        if (target) {
+          target.scrollIntoView({
+            behavior: prefersReducedMotion() ? "auto" : "smooth",
+            block: "start",
+          });
+        }
+      },
+    },
+      h("span", { class: "n" }, String(i + 1).padStart(2, "0")),
+      h("span", null, item.label),
+      h("span", { class: "bar2" }));
+    list.appendChild(h("li", null, btn));
+  });
+
+  toggle.addEventListener("click", (e) => {
+    e.stopPropagation();
+    const isOpen = nav.classList.toggle("open");
+    toggle.setAttribute("aria-expanded", String(isOpen));
+  });
+
+  document.addEventListener("click", (e) => {
+    if (!nav.classList.contains("open")) return;
+    if (!nav.contains(e.target)) close();
+  });
+
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape") close();
+  });
+
+  // Scroll spy — marks whichever section owns the upper third of the screen.
+  const spy = new IntersectionObserver((entries) => {
+    for (const entry of entries) {
+      if (!entry.isIntersecting) continue;
+      const id = entry.target.id;
+      const found = DISCOVER.find((d) => d.id === id);
+      if (nowLabel && found) nowLabel.textContent = found.label;
+      for (const a of list.querySelectorAll(".disc__a")) {
+        a.classList.toggle("on", a.dataset.target === id);
+      }
+    }
+  }, { rootMargin: "-25% 0px -65% 0px" });
+
+  DISCOVER.forEach((d) => {
+    const el = document.getElementById(d.id);
+    if (el) spy.observe(el);
+  });
+}
+
+/* --- clock in the bar ----------------------------------------------------- */
+
+function initClock() {
+  const el = $("#barClock");
+  if (!el) return;
+  const tick = () => {
+    el.textContent = new Date().toLocaleTimeString("tr-TR", {
+      hour: "2-digit", minute: "2-digit", hour12: false,
+    });
+  };
+  tick();
+  setInterval(tick, 20000);
+}
+
+/* --- smooth anchors ------------------------------------------------------- */
+
+function initAnchors() {
+  document.addEventListener("click", (e) => {
+    const link = e.target.closest('a[href^="#"]');
+    if (!link) return;
+    const id = link.getAttribute("href").slice(1);
+    const target = document.getElementById(id);
+    if (!target) return;
+    e.preventDefault();
+    target.scrollIntoView({
+      behavior: prefersReducedMotion() ? "auto" : "smooth",
+      block: "start",
     });
   });
 }
 
-/* --- scroll behaviours ---------------------------------------------------- */
+/* --- preferences ---------------------------------------------------------- */
 
-function initScroll() {
-  const topbar = $("#topbar");
-  if (topbar) {
-    const sentinel = document.createElement("div");
-    sentinel.style.cssText = "position:absolute;top:0;height:1px;width:1px";
-    document.body.prepend(sentinel);
-    new IntersectionObserver(([entry]) => {
-      topbar.classList.toggle("is-stuck", !entry.isIntersecting);
-    }).observe(sentinel);
-  }
-
-  const revealables = $$(".rv");
-  if (!revealables.length) return;
-  if (prefersReducedMotion()) {
-    revealables.forEach((node) => node.classList.add("is-in"));
-    return;
-  }
-  const observer = new IntersectionObserver((entries) => {
-    for (const entry of entries) {
-      if (entry.isIntersecting) {
-        entry.target.classList.add("is-in");
-        observer.unobserve(entry.target);
-      }
-    }
-  }, { rootMargin: "0px 0px -8% 0px" });
-  revealables.forEach((node) => observer.observe(node));
-}
-
-/* --- navigation wiring ---------------------------------------------------- */
-
-function initTriggers() {
-  document.addEventListener("click", (event) => {
-    const trigger = event.target.closest("[data-open]");
-    if (!trigger) return;
-    const id = trigger.dataset.open;
-    if (id === "cmd") { event.preventDefault(); openPalette(); return; }
-    if (hasPanel(id)) { event.preventDefault(); open(id); }
-  });
-}
-
-/* --- deep links & Instagram arrival --------------------------------------- */
-
-function initDeepLink() {
-  history.replaceState({ waDepth: 0 }, "", location.pathname + location.search);
-  const section = location.pathname.replace(/^\/+|\/+$/g, "");
-  if (section && hasPanel(section)) open(section);
-}
-
-function initArrival() {
-  const params = new URLSearchParams(location.search);
-  const from = (params.get("from") || "").toLowerCase();
-  const referrer = document.referrer || "";
-  const fromInstagram = from === "ig" || from === "instagram"
-    || /instagram\.com/i.test(referrer);
-
-  if (!fromInstagram) return;
-  if (store.get("greeted")) return;
-  store.set("greeted", true);
-  setTimeout(() => toast("Instagram'dan geldin — EXPLORE ile başla"), 1400);
-}
-
-/* --- service worker ------------------------------------------------------- */
-
-function initServiceWorker() {
-  if (!("serviceWorker" in navigator)) return;
-  if (location.protocol !== "https:" && location.hostname !== "localhost"
-      && location.hostname !== "127.0.0.1") return;
-  window.addEventListener("load", () => {
-    navigator.serviceWorker.register("/sw.js").catch(() => { /* offline support is optional */ });
-  });
+function restore() {
+  const motion = store.get("motion");
+  if (motion) document.documentElement.dataset.motion = motion;
 }
 
 /* --- boot ----------------------------------------------------------------- */
 
 function boot() {
   if (!content) {
-    console.error("whoisarda: content payload missing");
+    console.error("ARDA.OS: content payload missing");
     return;
   }
 
-  restorePreferences();
-  initUI();
-  initPanels(content);
-  initLab(content);
-  initTools(content);
-  initPlayground(content);
-  initExplore(content);
-  initTerminal(content);
-  initStatus();
-  initPalette(content);
+  restore();
+  initModal();
+  initSections(content);
+  initConsole(content);
+  initConnect();
 
-  initTriggers();
-  initEgg();
-  initWordmark();
-  initGlow();
+  initBoot();
+  initDiscover();
   initScroll();
-  initDeepLink();
-  initArrival();
-  initServiceWorker();
-
-  refreshHomeProgress();
+  initPointer();
+  initClock();
+  initAnchors();
+  initReveal();
 }
 
 if (document.readyState === "loading") {

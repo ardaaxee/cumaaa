@@ -1,24 +1,17 @@
 /* Offline support. Static assets are cached; HTML and API stay network-first
  * so content is never served stale when the device is online. */
 
-const VERSION = "whoisarda-v2.1";
+const VERSION = "arda-os-v3";
 const ASSETS = [
   "/",
   "/static/style.css",
   "/static/app.js",
   "/static/js/core.js",
-  "/static/js/ui.js",
-  "/static/js/vfs.js",
-  "/static/js/lab.js",
-  "/static/js/tools.js",
-  "/static/js/panels.js",
-  "/static/js/playground.js",
-  "/static/js/palette.js",
-  "/static/js/term.js",
-  "/static/js/explore.js",
-  "/static/js/terminal.js",
-  "/static/js/status.js",
-  "/static/js/egg.js",
+  "/static/js/data.js",
+  "/static/js/modal.js",
+  "/static/js/sections.js",
+  "/static/js/console.js",
+  "/static/js/connect.js",
   "/static/favicon.svg",
 ];
 

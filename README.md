@@ -1,55 +1,82 @@
-# whoisarda
+# ARDA.OS
 
-[@lov4ardaa](https://instagram.com/lov4ardaa) — Instagram bio linki olarak çalışan,
-mobil öncelikli kişisel platform.
+[@lov4ardaa](https://www.instagram.com/lov4ardaa/) — DIGITAL IDENTITY / 2026
 
-Portfolyo değil: Instagram'dan gelen kişiye ilk dokunuşta çalışan bir şey vermek,
-sonra Instagram'a geri döndürmek üzerine kurulu bir öğrenme + araç ürünü.
+> Merak ediyorum.
+> Sistemler kuruyorum.
+> Fikirleri gerçeğe dönüştürüyorum.
+
+Instagram biyografisinden gelen ziyaretçi için tasarlanmış, mobil öncelikli
+kişisel dijital kimlik sitesi. Siyah, editorial + cyber interface.
 
 ## Çalıştırma
 
 ```bash
 pip install -r requirements.txt
 python app.py
-# http://127.0.0.1:5000
+# http://localhost:8080
 ```
 
-Termux'ta telefondan test ederken başka bir cihazdan da açmak istersen:
+Telefondan başka bir cihazla test etmek için:
 
 ```bash
-HOST=0.0.0.0 python app.py
+HOST=0.0.0.0 PORT=8080 python app.py
 ```
 
-Sadece kendi güvendiğin ağda yap — ayrıntı için sitedeki
-"127.0.0.1 ile 0.0.0.0 arasındaki fark" notu.
+Sadece güvendiğin ağda yap.
 
 ## Ortam değişkenleri
 
-Hepsi isteğe bağlı; hiçbiri yoksa site tam çalışır.
+Hepsi isteğe bağlı.
 
 | Değişken | İşlevi |
 |---|---|
-| `SECRET_KEY` | IP karma tuzu. Üretimde mutlaka ayarla. |
-| `PORT` / `HOST` | Sunucu adresi (varsayılan `127.0.0.1:5000`) |
+| `PORT` / `HOST` | Sunucu adresi (varsayılan `127.0.0.1:8080`) |
+| `SECRET_KEY` | IP karma tuzu — üretimde mutlaka ayarla |
 | `DEBUG` | Doluysa Flask hata ayıklama modu |
 | `TELEGRAM_BOT_TOKEN` + `TELEGRAM_CHAT_ID` | İletişim mesajlarını Telegram'a bildirir |
-| `ADMIN_TOKEN` | `/api/messages` okumasını açar. Ayarlanmazsa endpoint 404 döner. |
+| `ADMIN_TOKEN` | `/api/messages` okumasını açar; ayarlanmazsa 404 |
 
-Gelen mesajları okumak:
+## Bölümler
 
-```bash
-ADMIN_TOKEN=birseyler python app.py
-curl "localhost:5000/api/messages?token=birseyler"
-```
+| # | Bölüm | İçerik |
+|---|---|---|
+| 01 | **HERO** | ARDA.OS, manifesto, EXPLORE + INSTAGRAM |
+| 02 | **SYSTEM STATUS** | ONLINE · SYSTEM · LOCAL NODE · BUILD · CURRENT TIME · VIEWPORT |
+| 03 | **WHAT I DO** | AI / AUTOMATION / WEB / TERMUX / EXPERIMENTS — dokununca açılır |
+| 04 | **TERMUX LAB** | `$ AI TOOLS` `$ AUTOMATION` `$ WEB SERVERS` `$ LINUX` `$ EXPERIMENTS` |
+| 05 | **PROJECTS** | Büyük interaktif kartlar → modal (ne / neden / teknoloji / EXPLORE) |
+| 06 | **NOW** | CURRENTLY BUILDING / LEARNING / EXPLORING |
+| 07 | **DIGITAL TOOLBOX** | Python, JavaScript, HTML, CSS, Linux, Termux, Git, AI |
+| 08 | **CONSOLE** | Site içi komutlar — sistem erişimi yok |
+| 09 | **CONNECT** | FOLLOW THE JOURNEY + COPY LINK / SHARE / QR / CONTACT |
+
+Ayrıca: açılış geçişi, scroll progress, DISCOVER navigasyonu, footer.
+
+## İçeriği değiştirme
+
+Metinlerin neredeyse tamamı **`static/js/data.js`** içinde. Kod bilmeden
+düzenlenebilir — tırnak içindeki yazıyı değiştir, kaydet, sayfayı yenile.
+
+- `IDENTITY` — isim, manifesto, Instagram
+- `WHAT_I_DO` — beş alan, açıklama ve etiketler
+- `LAB` — Termux LAB kategorileri
+- `NOW` — şu an ne yaptığın
+- `TOOLBOX` — kullandığın teknolojiler
+- `DISCOVER` — alt navigasyon sırası
+
+Projeler sunucu tarafında: **`content/site.json`** → `projects` / `archive`.
 
 ## API
+
+Mevcut uç noktalar korundu.
 
 | Endpoint | Açıklama |
 |---|---|
 | `GET /api/status` | Sürüm, gerçek çalışma süresi, içerik sayıları |
 | `POST /api/contact` | İletişim formu — doğrulama, honeypot, saatlik hız sınırı, SQLite |
 | `GET /api/qr` | QR üretimi. `format=svg` (varsayılan) veya `format=json` |
-| `GET /api/commands` | Komut merkezinin komut kaydı |
+| `GET /api/commands` | Komut kaydı |
 | `GET /api/content` | Tüm içerik + arama indeksi |
 | `GET /api/note/<id>` | Tek not |
 | `GET /api/messages` | Kayıtlı mesajlar (`ADMIN_TOKEN` gerekir) |
@@ -58,89 +85,53 @@ curl "localhost:5000/api/messages?token=birseyler"
 ## Yapı
 
 ```
-app.py              Flask uygulaması — tüm endpointler
-qrgen.py            Bağımlılıksız QR kodlayıcı (ISO/IEC 18004, byte modu)
-content/
-  site.json         Profil, projeler, arşiv, notlar, drops
-  lab.json          Termux LAB müfredatı — 22 ders
-templates/
-  index.html        Tek sayfalık kabuk (sunucuda render edilir, SEO için)
-static/
-  style.css         Tasarım sistemi + tüm bileşenler
-  app.js            Giriş noktası
-  js/core.js        DOM, depolama, pano, toast
-  js/ui.js          Panel/sheet sistemi + geçmiş entegrasyonu
-  js/vfs.js         Sanal dosya sistemi + komut yorumlayıcısı
-  js/term.js        Paylaşılan terminal bileşeni
-  js/lab.js         LAB, komut kartı, ilerleme kartı
-  js/terminal.js    Tam ekran interaktif terminal
-  js/explore.js     EXPLORE keşif destesi
-  js/status.js      Canlı tanılama paneli
-  js/tools.js       10 araç
-  js/playground.js  4 deney
-  js/panels.js      Projeler, notlar, arşiv, iletişim, paylaşım
-  js/palette.js     Komut merkezi
-  js/egg.js         Gizli bölüm
-  sw.js             Çevrimdışı önbellek
-tools/make_assets.py  og.png ve ikonları üretir
-tools/test_lab.mjs    LAB müfredatı testleri (node)
-tools/test_browser.mjs / test_v21.mjs   Tarayıcı testleri (Playwright)
+app.py                 Flask — tüm endpointler + cache fingerprint
+qrgen.py               Bağımlılıksız QR kodlayıcı (ISO/IEC 18004)
+content/site.json      Projeler, arşiv, notlar
+content/lab.json       Komut referansı ($ LINUX modalında kullanılır)
+templates/index.html   Tek sayfalık kabuk
+static/style.css       Tasarım sistemi + tüm bileşenler
+static/app.js          Açılış, scroll, reveal, magnetic, discover
+static/js/data.js      DÜZENLENEBİLİR İÇERİK
+static/js/core.js      DOM, depolama, pano, toast
+static/js/modal.js     Modal + geri tuşu entegrasyonu
+static/js/sections.js  Bölüm render'ları
+static/js/console.js   Güvenli site konsolu
+static/js/connect.js   Copy / Share / QR / Contact
+static/sw.js           Çevrimdışı önbellek
+tools/make_assets.py   og.png + ikonlar
+tools/test_site.mjs    93 tarayıcı testi (Playwright)
 ```
 
-## Bölümler
+## Cache
 
-| Bölüm | Ne yapar |
-|---|---|
-| **EXPLORE** | Sitedeki 48 içeriğin tamamını kaydırılabilir kart destesinde sunar |
-| **TERMUX LAB** | 22 ders, 4 track, sanal terminalde doğrulanan görevler |
-| **TERMINAL** | Tam ekran yorumlayıcı — borular, yönlendirme, git, pkg, `open` ile site gezinme |
-| **TOOLS** | 10 araç, hepsi cihazda çalışır |
-| **PROJECTS** | Proje + arşiv tek filtrelenebilir yüzeyde |
-| **PLAYGROUND** | 4 interaktif deney |
-| **NOTES / ARCHIVE** | Teknik yazılar ve eski depolar |
-| **COMMAND** | Bulanık arama + 22 gerçek komut |
-| **SYSTEM STATUS** | Canlı ölçüm: uç nokta gecikmeleri, cihaz, tarayıcı yetenekleri |
-| **VOID** | Gizli bölüm — üç ayrı yoldan açılır |
+Eski tasarımın tarayıcıda takılı kalmaması için:
 
-## Testler
-
-```bash
-python3 tools/make_assets.py     # og.png + ikonlar
-node tools/test_lab.mjs          # 36 müfredat testi
-node tools/test_browser.mjs      # 43 tarayıcı testi
-node tools/test_v21.mjs          # 50 tarayıcı testi
-```
-
-Tarayıcı testleri için Playwright ve çalışan bir sunucu gerekir.
-
-## İçeriği güncelleme
-
-Kod değiştirmeden `content/` altındaki JSON dosyalarını düzenlemen yeterli —
-sunucu dosya değişince içeriği yeniden okur.
-
-- **Yeni proje**: `content/site.json` → `projects` dizisine ekle
-- **Yeni not**: `notes` dizisine ekle
-- **Yeni güncelleme duyurusu**: `drops` dizisinin başına ekle
-- **Yeni ders**: `content/lab.json` → ilgili track'in `lessons` dizisine ekle
-
-`archive` girdilerindeki açıklamalar depo adlarından türetildi;
-kendi kelimelerinle güncellemen iyi olur.
+- HTML `no-cache, must-revalidate` ile döner
+- CSS/JS URL'leri dosya mtime'ından türeyen bir parmak izi taşır
+  (`?v=3.0.0-...`) ve parmak izli istekler `immutable` olarak önbelleklenir
+- Service worker sürümü `arda-os-v3` — eski önbellek otomatik silinir
 
 ## Tasarım kuralları
 
-Bu depoda bilinçli olarak **yok**:
+Bilinçli olarak **yok**: matrix efekti, yeşil terminal yağmuru, otomatik ses,
+sahte sayaç, framework, web fontu, CDN, takip kodu, dış istek.
 
-- Sahte sayaç, sahte sistem durumu, sahte "online kullanıcı"
-  (SYSTEM STATUS'taki her değer istek anında ölçülür)
-- Göstermelik terminal — LAB'deki terminal gerçek bir dosya sistemini değiştirir
-- Emüle edilemeyen şeyin emüle ediliyormuş gibi gösterilmesi
-  (`python`, `node`, ağ komutları açıkça "burada çalışmaz" der)
-- Framework, web fontu, CDN, takip kodu, dış istek
-- Klişe Matrix/yeşil terminal estetiği — vurgu renkle değil ışıkla taşınır;
-  tek doygun renkler anlamsaldır (amber uyarır, kırmızı hata verir)
+Konsol bir kabuk değil: dosya sistemi, yorumlayıcı ve cihaz erişimi yoktur —
+her komut elle yazılmış, sadece sayfada gezinen bir fonksiyondur.
 
-Araçların tamamı ziyaretçinin cihazında çalışır; tek istisna QR üretimi,
-o da bu sitenin kendi `/api/qr` endpointini kullanır.
+SYSTEM STATUS değerleri API'siz ama uydurma değil: bağlantı `navigator.onLine`,
+saat gerçek saat, LOCAL NODE gerçek saat diliminden, VIEWPORT gerçek ekrandan.
+
+## Test
+
+```bash
+python3 tools/make_assets.py    # og.png + ikonlar
+node tools/test_site.mjs        # 93 tarayıcı testi (sunucu açık olmalı)
+```
+
+375 / 390 / 412 px genişlikte taşma, üst üste binme, 10.5px altı yazı ve
+40px altı dokunma hedefi kontrol edilir.
 
 ## Lisans
 

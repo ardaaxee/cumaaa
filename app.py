@@ -34,13 +34,35 @@ CONTENT_DIR = BASE_DIR / "content"
 INSTANCE_DIR = BASE_DIR / "instance"
 DB_PATH = INSTANCE_DIR / "messages.db"
 
-VERSION = "2.1.0"
+VERSION = "3.0.0"
 STARTED_AT = time.time()
+
+_ASSET_FILES = (
+    "static/style.css",
+    "static/app.js",
+    "static/js/core.js",
+    "static/js/data.js",
+    "static/js/modal.js",
+    "static/js/sections.js",
+    "static/js/console.js",
+    "static/js/connect.js",
+    "templates/index.html",
+)
+
+
+def asset_version():
+    """Fingerprint of the front-end files; changes whenever any of them do."""
+    stamp = 0.0
+    for name in _ASSET_FILES:
+        path = BASE_DIR / name
+        if path.exists():
+            stamp = max(stamp, path.stat().st_mtime)
+    return "%s-%d" % (VERSION, int(stamp))
 
 # Sections that the single-page shell can deep-link into.
 SECTIONS = (
-    "explore", "lab", "terminal", "tools", "projects", "playground",
-    "notes", "archive", "status", "contact", "share", "drops",
+    "status", "whatido", "lab", "projects", "now", "toolbox",
+    "console", "connect",
 )
 
 app = Flask(__name__)
@@ -302,6 +324,11 @@ def notify(name, email, message):
 # Pages
 # --------------------------------------------------------------------------- #
 
+@app.context_processor
+def inject_asset_version():
+    return {"asset_v": asset_version()}
+
+
 @app.route("/")
 def index():
     return render_template("index.html", content=load_content(), version=VERSION)
@@ -534,7 +561,14 @@ def security_headers(response):
     response.headers.setdefault(
         "Permissions-Policy", "geolocation=(), camera=(), microphone=()")
     if request.path.startswith("/static/"):
-        response.headers.setdefault("Cache-Control", "public, max-age=3600")
+        # Static URLs carry a fingerprint, so they may be cached hard.
+        if request.args.get("v"):
+            response.headers["Cache-Control"] = "public, max-age=31536000, immutable"
+        else:
+            response.headers["Cache-Control"] = "no-cache"
+    elif response.mimetype == "text/html":
+        # The shell must always be revalidated or an old design lingers.
+        response.headers["Cache-Control"] = "no-cache, must-revalidate"
     return response
 
 
@@ -549,6 +583,6 @@ def not_found(_e):
 init_db()
 
 if __name__ == "__main__":
-    port = int(os.environ.get("PORT", 5000))
+    port = int(os.environ.get("PORT", 8080))
     host = os.environ.get("HOST", "127.0.0.1")
     app.run(host=host, port=port, debug=bool(os.environ.get("DEBUG")))
