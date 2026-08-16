@@ -1,0 +1,567 @@
+{
+  "home": "/data/data/com.termux/files/home",
+  "user": "arda",
+  "tracks": [
+    {
+      "id": "beginner",
+      "label": "BEGINNER",
+      "summary": "Dosya sisteminde hareket etmeyi ve dosya oluşturmayı öğren. Hiçbir ön bilgi gerekmiyor.",
+      "lessons": [
+        {
+          "id": "pwd",
+          "command": "pwd",
+          "title": "pwd",
+          "subtitle": "Neredesin?",
+          "what": "Bulunduğun dizinin tam yolunu yazdırır. Adı \"print working directory\" ifadesinden gelir.",
+          "why": "Terminalde her komut, bulunduğun dizine göre çalışır. Kaybolduğunda ilk yazacağın komut budur. Termux açıldığında seni ev dizinine bırakır ve orada olduğunu doğrulamak istersin.",
+          "example": "$ pwd\n/data/data/com.termux/files/home",
+          "explain": "Termux'un ev dizini normal Linux'taki /home/kullanıcı değildir. Android uygulama sanal alanı içinde /data/data/com.termux/files/home yolundadır. Bu yüzden ~ kısayolu Termux'ta bu uzun yola karşılık gelir.",
+          "anatomy": [
+            { "token": "pwd", "desc": "print working directory — bulunduğun dizini yazdır. Argüman almaz." }
+          ],
+          "flags": [],
+          "task": {
+            "prompt": "Sanal terminalde bulunduğun dizini yazdır.",
+            "hint": "Sadece pwd yaz ve Enter'a bas.",
+            "check": { "type": "ran", "cmd": "pwd" }
+          }
+        },
+        {
+          "id": "ls",
+          "command": "ls",
+          "title": "ls",
+          "subtitle": "Burada ne var?",
+          "what": "Bulunduğun dizindeki dosya ve klasörleri listeler.",
+          "why": "Bir dizine girdiğinde içinde ne olduğunu görmeden ilerleyemezsin. ls, terminaldeki gözündür.",
+          "example": "$ ls\nnotes.txt  projects  scripts\n\n$ ls -la\ntotal 12\ndrwx------  4 arda arda 4096 Aug 15 12:04 .\ndrwx------  3 arda arda 4096 Aug 15 12:00 ..\n-rw-------  1 arda arda   28 Aug 15 12:04 notes.txt\ndrwx------  2 arda arda 4096 Aug 15 12:02 projects",
+          "explain": "Nokta ile başlayan dosyalar (.bashrc gibi) gizli sayılır ve düz ls ile görünmez. -a bayrağı onları da gösterir. -l uzun format verir: izinler, sahip, boyut ve değiştirilme tarihi.",
+          "anatomy": [
+            { "token": "ls", "desc": "list — dizin içeriğini listele." },
+            { "token": "-l", "desc": "long format — her satırda izin, sahip, boyut, tarih göster." },
+            { "token": "-a", "desc": "all — gizli dosyaları (nokta ile başlayanları) da göster." }
+          ],
+          "flags": [
+            { "flag": "-l", "desc": "Uzun/detaylı liste" },
+            { "flag": "-a", "desc": "Gizli dosyalar dahil" },
+            { "flag": "-la", "desc": "İkisi birden — en sık kullanılan kombinasyon" },
+            { "flag": "-h", "desc": "Boyutları KB/MB olarak okunabilir yaz (-lh ile birlikte)" }
+          ],
+          "task": {
+            "prompt": "Ev dizinindeki gizli dosyalar dahil her şeyi uzun formatta listele.",
+            "hint": "ls -la yazmayı dene.",
+            "check": { "type": "ran_with", "cmd": "ls", "args_any": ["-la", "-al", "-a -l", "-l -a"] }
+          }
+        },
+        {
+          "id": "cd",
+          "command": "cd",
+          "title": "cd",
+          "subtitle": "Dizinler arasında gez",
+          "what": "Çalışma dizinini değiştirir — \"change directory\".",
+          "why": "Bir projenin içinde çalışmak için önce o klasöre girmen gerekir. cd olmadan terminalde hiçbir yere gidemezsin.",
+          "example": "$ cd projects\n$ pwd\n/data/data/com.termux/files/home/projects\n\n$ cd ..\n$ pwd\n/data/data/com.termux/files/home\n\n$ cd ~\n$ cd\n",
+          "explain": "cd .. bir üst dizine çıkarır. cd ~ veya argümansız cd seni her zaman ev dizinine döndürür. cd - ise bir önceki bulunduğun dizine geri atlar; klasörler arası gidip gelirken çok işe yarar.",
+          "anatomy": [
+            { "token": "cd", "desc": "change directory — çalışma dizinini değiştir." },
+            { "token": "..", "desc": "bir üst dizin" },
+            { "token": "~", "desc": "ev dizini kısayolu" },
+            { "token": "-", "desc": "bir önceki dizin" }
+          ],
+          "flags": [],
+          "task": {
+            "prompt": "projects klasörüne gir.",
+            "hint": "cd projects",
+            "check": { "type": "cwd_endswith", "path": "/projects" }
+          }
+        },
+        {
+          "id": "mkdir",
+          "command": "mkdir",
+          "title": "mkdir",
+          "subtitle": "Klasör oluştur",
+          "what": "Yeni bir dizin oluşturur — \"make directory\".",
+          "why": "Her proje kendi klasöründe yaşamalı. Ev dizinini dağınık bırakmak, ilerleyen aşamada en çok pişman olacağın şeydir.",
+          "example": "$ mkdir lab\n$ mkdir -p site/static/css\n$ ls\nlab  site",
+          "explain": "-p bayrağı iç içe klasörleri tek seferde oluşturur ve klasör zaten varsa hata vermez. Betik yazarken bu davranış çok kullanışlıdır.",
+          "anatomy": [
+            { "token": "mkdir", "desc": "make directory — dizin oluştur." },
+            { "token": "-p", "desc": "parents — ara klasörleri de oluştur, varsa hata verme." }
+          ],
+          "flags": [
+            { "flag": "-p", "desc": "İç içe klasörleri oluştur, varsa sessiz geç" }
+          ],
+          "task": {
+            "prompt": "Ev dizininde lab adında bir klasör oluştur.",
+            "hint": "Önce cd ~ ile eve dön, sonra mkdir lab.",
+            "check": { "type": "isdir", "path": "~/lab" }
+          }
+        },
+        {
+          "id": "touch",
+          "command": "touch",
+          "title": "touch",
+          "subtitle": "Boş dosya oluştur",
+          "what": "Var olmayan bir dosyayı boş olarak oluşturur; varsa değiştirilme zamanını günceller.",
+          "why": "Bir betik veya not dosyasına başlamadan önce dosyayı oluşturmanın en hızlı yolu.",
+          "example": "$ touch notes.txt\n$ ls\nnotes.txt",
+          "explain": "touch dosyanın içeriğine dokunmaz. İçine yazı koymak için echo ile yönlendirme veya nano gibi bir editör kullanırsın.",
+          "anatomy": [
+            { "token": "touch", "desc": "dosyayı oluştur veya zaman damgasını güncelle." },
+            { "token": "notes.txt", "desc": "oluşturulacak dosyanın adı" }
+          ],
+          "flags": [],
+          "task": {
+            "prompt": "lab klasörünün içinde notes.txt adında bir dosya oluştur.",
+            "hint": "cd lab sonra touch notes.txt",
+            "check": { "type": "isfile", "path": "~/lab/notes.txt" }
+          }
+        },
+        {
+          "id": "cat",
+          "command": "cat",
+          "title": "cat",
+          "subtitle": "Dosyayı oku",
+          "what": "Bir dosyanın içeriğini ekrana basar — adı \"concatenate\" kelimesinden gelir.",
+          "why": "Kısa dosyaları açmadan görmenin en hızlı yolu. Yapılandırma dosyalarını kontrol ederken sürekli kullanırsın.",
+          "example": "$ echo \"merhaba\" > notes.txt\n$ cat notes.txt\nmerhaba\n\n$ cat -n notes.txt\n     1\tmerhaba",
+          "explain": "cat uzun dosyalarda ekranı doldurur; o durumda less veya head/tail tercih edilir. Birden fazla dosya verirsen hepsini arka arkaya birleştirip basar.",
+          "anatomy": [
+            { "token": "cat", "desc": "dosya içeriğini standart çıktıya yaz." },
+            { "token": "-n", "desc": "satırları numaralandır." }
+          ],
+          "flags": [
+            { "flag": "-n", "desc": "Satır numarası ekle" }
+          ],
+          "task": {
+            "prompt": "notes.txt dosyasının içine \"termux\" yaz, sonra cat ile içeriğini oku.",
+            "hint": "echo termux > notes.txt sonra cat notes.txt",
+            "check": { "type": "file_contains", "path": "~/lab/notes.txt", "text": "termux" }
+          }
+        },
+        {
+          "id": "cp",
+          "command": "cp",
+          "title": "cp",
+          "subtitle": "Kopyala",
+          "what": "Dosya veya dizinleri kopyalar — \"copy\".",
+          "why": "Bir yapılandırma dosyasını değiştirmeden önce yedeğini almak, en temel güvenlik alışkanlığıdır.",
+          "example": "$ cp notes.txt notes.bak\n$ cp -r site site-yedek\n$ ls\nnotes.bak  notes.txt  site  site-yedek",
+          "explain": "Klasör kopyalarken -r (recursive) zorunludur, yoksa cp klasörü atlar. Hedefte aynı isimde dosya varsa cp sormadan üzerine yazar; -i bayrağı bunu sorar hale getirir.",
+          "anatomy": [
+            { "token": "cp", "desc": "copy — kaynağı hedefe kopyala." },
+            { "token": "-r", "desc": "recursive — klasörleri içeriğiyle birlikte kopyala." },
+            { "token": "notes.txt", "desc": "kaynak" },
+            { "token": "notes.bak", "desc": "hedef" }
+          ],
+          "flags": [
+            { "flag": "-r", "desc": "Klasörleri içeriğiyle kopyala" },
+            { "flag": "-i", "desc": "Üzerine yazmadan önce sor" },
+            { "flag": "-v", "desc": "Ne kopyalandığını yazdır" }
+          ],
+          "task": {
+            "prompt": "notes.txt dosyasının notes.bak adında bir kopyasını oluştur.",
+            "hint": "cp notes.txt notes.bak",
+            "check": { "type": "isfile", "path": "~/lab/notes.bak" }
+          }
+        },
+        {
+          "id": "mv",
+          "command": "mv",
+          "title": "mv",
+          "subtitle": "Taşı ve yeniden adlandır",
+          "what": "Dosyayı başka bir yere taşır veya adını değiştirir — \"move\".",
+          "why": "Linux'ta ayrı bir \"rename\" komutu yoktur. Yeniden adlandırma, aynı klasör içinde taşımaktan ibarettir.",
+          "example": "$ mv notes.txt gunluk.txt\n$ mv gunluk.txt ~/lab/arsiv/\n",
+          "explain": "Hedef var olan bir klasörse dosya oraya taşınır. Hedef bir dosya adıysa yeniden adlandırma olur. cp gibi mv de sormadan üzerine yazar — bu yüzden -i alışkanlığı faydalıdır.",
+          "anatomy": [
+            { "token": "mv", "desc": "move — taşı veya yeniden adlandır." },
+            { "token": "-i", "desc": "üzerine yazmadan önce sor." }
+          ],
+          "flags": [
+            { "flag": "-i", "desc": "Üzerine yazmadan önce sor" },
+            { "flag": "-v", "desc": "Yapılan işlemi yazdır" }
+          ],
+          "task": {
+            "prompt": "notes.bak dosyasının adını yedek.txt olarak değiştir.",
+            "hint": "mv notes.bak yedek.txt",
+            "check": { "type": "isfile", "path": "~/lab/yedek.txt" }
+          }
+        },
+        {
+          "id": "rm",
+          "command": "rm",
+          "title": "rm",
+          "subtitle": "Sil — dikkatli ol",
+          "what": "Dosya ve klasörleri siler — \"remove\".",
+          "why": "Terminalde silinen dosya çöp kutusuna gitmez. Geri alınamaz. Bu dersin asıl konusu komut değil, refleks.",
+          "example": "$ rm yedek.txt\n$ rm -r eski-klasor\n$ rm -i onemli.txt\nrm: remove regular file 'onemli.txt'? n",
+          "explain": "rm -rf yazmadan önce iki kez düşün: -r klasörü içeriğiyle siler, -f hiçbir şey sormadan siler. Yanlış bir yol yazarsan uyarı almadan veri kaybedersin. Alışkanlık olarak önce ls ile hedefi doğrula, sonra sil. Bu emülatörde silme işlemi güvenlidir — sayfayı yenilediğinde her şey geri gelir.",
+          "anatomy": [
+            { "token": "rm", "desc": "remove — sil." },
+            { "token": "-r", "desc": "recursive — klasörü içindekilerle birlikte sil." },
+            { "token": "-f", "desc": "force — onay sorma, hata gösterme." },
+            { "token": "-i", "desc": "interactive — her silme için onay iste." }
+          ],
+          "flags": [
+            { "flag": "-r", "desc": "Klasörleri sil" },
+            { "flag": "-i", "desc": "Her dosya için onay iste — güvenli alışkanlık" },
+            { "flag": "-f", "desc": "Zorla sil — en riskli bayrak" }
+          ],
+          "warning": "Gerçek cihazında rm -rf ile deneme yapma. Bu dersi sanal terminalde çalış.",
+          "task": {
+            "prompt": "yedek.txt dosyasını sil.",
+            "hint": "rm yedek.txt",
+            "check": { "type": "not_exists", "path": "~/lab/yedek.txt" }
+          }
+        }
+      ]
+    },
+    {
+      "id": "intermediate",
+      "label": "INTERMEDIATE",
+      "summary": "Arama, filtreleme, yönlendirme ve paket yönetimi. Terminali gerçekten kullanmaya buradan başlarsın.",
+      "lessons": [
+        {
+          "id": "echo-redirect",
+          "command": "echo >",
+          "title": "echo & yönlendirme",
+          "subtitle": "Çıktıyı dosyaya yaz",
+          "what": "echo verilen metni ekrana basar. > ve >> operatörleri bu çıktıyı ekran yerine bir dosyaya yönlendirir.",
+          "why": "Yönlendirme, Unix felsefesinin kalbidir. Herhangi bir komutun çıktısını dosyaya kaydedebilir veya başka bir komuta besleyebilirsin.",
+          "example": "$ echo \"ilk satir\" > log.txt\n$ echo \"ikinci satir\" >> log.txt\n$ cat log.txt\nilk satir\nikinci satir",
+          "explain": "> dosyayı sıfırlayıp baştan yazar — mevcut içerik silinir. >> ise sonuna ekler. Bu tek karakterlik fark, yanlış kullanıldığında saatlerce emeği silebilir.",
+          "anatomy": [
+            { "token": "echo", "desc": "argümanı standart çıktıya yaz." },
+            { "token": ">", "desc": "çıktıyı dosyaya yaz — dosyanın eski içeriğini siler." },
+            { "token": ">>", "desc": "çıktıyı dosyanın sonuna ekle." }
+          ],
+          "flags": [],
+          "task": {
+            "prompt": "lab klasöründe log.txt oluştur ve içine iki satır ekle: önce \"baslangic\", sonra \"devam\".",
+            "hint": "echo baslangic > log.txt sonra echo devam >> log.txt",
+            "check": { "type": "file_contains_all", "path": "~/lab/log.txt", "texts": ["baslangic", "devam"] }
+          }
+        },
+        {
+          "id": "grep",
+          "command": "grep",
+          "title": "grep",
+          "subtitle": "İçerik ara",
+          "what": "Dosyaların içinde metin arar ve eşleşen satırları basar.",
+          "why": "Yüzlerce satırlık bir log dosyasında hatayı gözle aramak yerine grep ile saniyede bulursun. Terminalde en çok kullanılan araçlardan biridir.",
+          "example": "$ grep \"hata\" log.txt\nhata: baglanti kurulamadi\n\n$ grep -i \"HATA\" log.txt\nhata: baglanti kurulamadi\n\n$ grep -n \"devam\" log.txt\n2:devam",
+          "explain": "-i büyük/küçük harf ayrımını kapatır. -n eşleşmenin kaçıncı satırda olduğunu gösterir. -r ise bir klasördeki tüm dosyalarda özyinelemeli arama yapar. grep, bir borunun sonunda da çalışır: ls | grep txt",
+          "anatomy": [
+            { "token": "grep", "desc": "global regular expression print — desen ara." },
+            { "token": "\"devam\"", "desc": "aranacak desen" },
+            { "token": "log.txt", "desc": "aranacak dosya" },
+            { "token": "-i", "desc": "büyük/küçük harf duyarsız ara" },
+            { "token": "-n", "desc": "satır numarasını göster" },
+            { "token": "-r", "desc": "klasör içinde özyinelemeli ara" }
+          ],
+          "flags": [
+            { "flag": "-i", "desc": "Harf duyarsız" },
+            { "flag": "-n", "desc": "Satır numarası" },
+            { "flag": "-r", "desc": "Klasör içinde ara" },
+            { "flag": "-v", "desc": "Eşleşmeyen satırları göster" }
+          ],
+          "task": {
+            "prompt": "log.txt içinde \"devam\" kelimesini ara.",
+            "hint": "grep devam log.txt",
+            "check": { "type": "ran_output_contains", "cmd": "grep", "text": "devam" }
+          }
+        },
+        {
+          "id": "find",
+          "command": "find",
+          "title": "find",
+          "subtitle": "Dosya ara",
+          "what": "Bir dizin ağacında isme, türe veya başka ölçütlere göre dosya arar.",
+          "why": "grep içeriği arar, find dosyanın kendisini arar. \"Şu dosyayı nereye koymuştum?\" sorusunun cevabıdır.",
+          "example": "$ find . -name \"*.txt\"\n./notes.txt\n./log.txt\n\n$ find ~ -type d -name \"lab\"\n/data/data/com.termux/files/home/lab",
+          "explain": "İlk argüman aramanın başlayacağı dizindir; . bulunduğun yer demektir. -name isme göre eşleştirir ve joker karakter (*) kullanır — tırnak içine almak kabuğun onu erkenden genişletmesini engeller. -type f sadece dosyaları, -type d sadece klasörleri getirir.",
+          "anatomy": [
+            { "token": "find", "desc": "dosya ağacında arama yap." },
+            { "token": ".", "desc": "aramanın başlayacağı dizin (burası)" },
+            { "token": "-name", "desc": "dosya adına göre eşleştir" },
+            { "token": "\"*.txt\"", "desc": "joker desen — txt ile biten her şey" },
+            { "token": "-type d", "desc": "sadece dizinleri getir (f = dosya)" }
+          ],
+          "flags": [
+            { "flag": "-name", "desc": "İsme göre ara" },
+            { "flag": "-type f", "desc": "Sadece dosyalar" },
+            { "flag": "-type d", "desc": "Sadece klasörler" }
+          ],
+          "task": {
+            "prompt": "Ev dizininden başlayarak .txt uzantılı dosyaları bul.",
+            "hint": "cd ~ sonra find . -name \"*.txt\"",
+            "check": { "type": "ran_output_contains", "cmd": "find", "text": ".txt" }
+          }
+        },
+        {
+          "id": "pipe",
+          "command": "|",
+          "title": "borular (pipe)",
+          "subtitle": "Komutları birbirine bağla",
+          "what": "| operatörü bir komutun çıktısını doğrudan başka bir komutun girdisine bağlar.",
+          "why": "Unix'in gücü buradan gelir: küçük, tek iş yapan araçları birleştirerek karmaşık işler yaparsın. Yeni bir program yazmadan yeni bir yetenek elde edersin.",
+          "example": "$ ls | grep txt\nlog.txt\nnotes.txt\n\n$ cat log.txt | wc -l\n2",
+          "explain": "Borunun solundaki komut bitmeden sağdaki çalışmaya başlayabilir. wc -l satır sayar, head ilk satırları, tail son satırları verir. Zincir istediğin kadar uzayabilir: cat log.txt | grep hata | wc -l",
+          "anatomy": [
+            { "token": "ls", "desc": "dosyaları listele — çıktı üretir" },
+            { "token": "|", "desc": "pipe — soldaki çıktıyı sağdaki komuta girdi olarak ver" },
+            { "token": "grep txt", "desc": "gelen satırlar arasında txt geçenleri süz" },
+            { "token": "wc -l", "desc": "word count -lines — gelen satır sayısını say" }
+          ],
+          "flags": [],
+          "task": {
+            "prompt": "lab klasöründeki dosyaları listeleyip içinden sadece txt geçenleri süz.",
+            "hint": "ls | grep txt",
+            "check": { "type": "ran_piped", "cmds": ["ls", "grep"] }
+          }
+        },
+        {
+          "id": "pkg",
+          "command": "pkg",
+          "title": "pkg",
+          "subtitle": "Termux paket yöneticisi",
+          "what": "Termux'ta program kurmak, güncellemek ve kaldırmak için kullanılan paket yöneticisi.",
+          "why": "Termux kurulduğunda içinde neredeyse hiçbir şey yoktur. python, git, nodejs — hepsini pkg ile kurarsın. Termux'u kullanılabilir yapan komut budur.",
+          "example": "$ pkg update\n$ pkg install python\n$ pkg search nodejs\n$ pkg uninstall python\n$ pkg list-installed",
+          "explain": "Yeni kuruluma başlarken önce pkg update çalıştırmak alışkanlık olmalı — paket listesi eski kalırsa kurulumlar başarısız olur. pkg, arka planda apt'yi kullanır; ikisi de çalışır ama Termux'ta pkg tercih edilir.\n\nGüvenlik notu: internetten bulduğun rastgele kurulum betiklerini çalıştırma. Paketleri resmi depodan pkg ile kur.",
+          "anatomy": [
+            { "token": "pkg", "desc": "Termux paket yöneticisi" },
+            { "token": "install", "desc": "paket kur" },
+            { "token": "update", "desc": "paket listesini tazele" },
+            { "token": "upgrade", "desc": "kurulu paketleri yükselt" },
+            { "token": "search", "desc": "depoda paket ara" },
+            { "token": "uninstall", "desc": "paketi kaldır" }
+          ],
+          "flags": [],
+          "task": {
+            "prompt": "Sanal ortamda paket listesini güncelle, sonra python paketini kur.",
+            "hint": "pkg update sonra pkg install python",
+            "check": { "type": "pkg_installed", "name": "python" }
+          }
+        },
+        {
+          "id": "chmod",
+          "command": "chmod",
+          "title": "chmod",
+          "subtitle": "İzinler",
+          "what": "Bir dosyanın okuma, yazma ve çalıştırma izinlerini değiştirir.",
+          "why": "Yazdığın bir betiği çalıştırmak istediğinde \"permission denied\" hatası alırsın. Çözümü chmod +x'tir.",
+          "example": "$ ls -l script.sh\n-rw------- 1 arda arda 42 Aug 15 12:10 script.sh\n\n$ chmod +x script.sh\n$ ls -l script.sh\n-rwx------ 1 arda arda 42 Aug 15 12:10 script.sh",
+          "explain": "İzinler üç gruptur: sahip (user), grup, diğerleri. Her grupta r (read/4), w (write/2), x (execute/1) bulunur. chmod 755 demek: sahip için 7 (rwx), grup ve diğerleri için 5 (r-x) demektir. Başlangıçta sayısal formu ezberlemek yerine +x / -x yeterlidir.\n\nchmod 777 çözüm değildir — herkese tam yetki vermek, sorunu gizlemenin en kötü yoludur.",
+          "anatomy": [
+            { "token": "chmod", "desc": "change mode — izinleri değiştir" },
+            { "token": "+x", "desc": "çalıştırma iznini ekle" },
+            { "token": "-x", "desc": "çalıştırma iznini kaldır" },
+            { "token": "755", "desc": "sahip rwx, grup r-x, diğerleri r-x" }
+          ],
+          "flags": [
+            { "flag": "+x", "desc": "Çalıştırılabilir yap" },
+            { "flag": "644", "desc": "Normal dosya: sahip okur/yazar, diğerleri okur" },
+            { "flag": "755", "desc": "Betik/klasör: sahip tam, diğerleri okur ve çalıştırır" }
+          ],
+          "task": {
+            "prompt": "lab klasöründe script.sh oluştur ve çalıştırılabilir yap.",
+            "hint": "touch script.sh sonra chmod +x script.sh",
+            "check": { "type": "is_executable", "path": "~/lab/script.sh" }
+          }
+        }
+      ]
+    },
+    {
+      "id": "advanced",
+      "label": "ADVANCED",
+      "summary": "Sürüm kontrolü, çalışma zamanları ve gerçek geliştirme akışı.",
+      "lessons": [
+        {
+          "id": "git",
+          "command": "git",
+          "title": "git",
+          "subtitle": "Sürüm kontrolü",
+          "what": "Kodundaki her değişikliği kaydeden, geri alabilmeni ve başkalarıyla çalışmanı sağlayan sürüm kontrol sistemi.",
+          "why": "Git olmadan \"çalışan sürüm\" diye bir şey yoktur. Bir şeyi bozduğunda geri dönebileceğin tek nokta commit'lerdir.",
+          "example": "$ pkg install git\n$ git init\nInitialized empty Git repository\n\n$ git status\n$ git add .\n$ git commit -m \"ilk commit\"\n$ git log --oneline",
+          "explain": "Akış üç adımlıdır: çalışma alanı → hazırlık alanı (git add) → depo (git commit). git status hangi aşamada ne olduğunu gösterir ve takıldığında ilk bakacağın komuttur. commit mesajı ne yaptığını anlatmalı; \"güncelleme\" demek altı ay sonra hiçbir şey ifade etmez.",
+          "anatomy": [
+            { "token": "git init", "desc": "bulunduğun klasörü git deposuna çevir" },
+            { "token": "git status", "desc": "neyin değiştiğini, neyin hazırlandığını göster" },
+            { "token": "git add .", "desc": "tüm değişiklikleri hazırlık alanına al" },
+            { "token": "git commit -m", "desc": "hazırlanan değişiklikleri mesajla kaydet" },
+            { "token": "git log --oneline", "desc": "commit geçmişini tek satırlık özet olarak göster" }
+          ],
+          "flags": [
+            { "flag": "-m", "desc": "Commit mesajını satır içinde ver" },
+            { "flag": "--oneline", "desc": "Geçmişi kısa göster" }
+          ],
+          "task": {
+            "prompt": "lab klasörünü bir git deposuna çevir ve ilk commit'i oluştur.",
+            "hint": "git init, git add ., git commit -m \"ilk commit\"",
+            "check": { "type": "git_committed" }
+          }
+        },
+        {
+          "id": "python",
+          "command": "python",
+          "title": "python",
+          "subtitle": "Termux'ta Python",
+          "what": "Python yorumlayıcısını çalıştırır. Betik dosyasını çalıştırabilir veya etkileşimli kabuğu açabilirsin.",
+          "why": "Termux'ta otomasyon, veri işleme ve web sunucusu yazmanın en pratik yolu Python'dur. Kurulumu tek komuttur ve telefonda sorunsuz çalışır.",
+          "example": "$ pkg install python\n$ python --version\nPython 3.12.0\n\n$ python hello.py\n$ python -m http.server 8000\n$ pip install flask",
+          "explain": "python -m modul biçimi, kurulu bir modülü doğrudan çalıştırır — http.server ile tek komutta dosya sunucusu açabilirsin. pip Python'un paket yöneticisidir ve pkg'den ayrıdır: pkg sistem paketlerini, pip Python kütüphanelerini kurar.\n\nBu emülatörde Python gerçekten çalıştırılmaz; bu ders okuma ve komut anatomisi üzerinedir. Gerçek çalıştırma için kendi cihazındaki Termux'u kullan.",
+          "anatomy": [
+            { "token": "python", "desc": "Python 3 yorumlayıcısı" },
+            { "token": "hello.py", "desc": "çalıştırılacak betik dosyası" },
+            { "token": "--version", "desc": "kurulu sürümü yazdır" },
+            { "token": "-m http.server", "desc": "http.server modülünü doğrudan çalıştır" },
+            { "token": "pip install", "desc": "Python kütüphanesi kur" }
+          ],
+          "flags": [
+            { "flag": "--version", "desc": "Sürüm bilgisi" },
+            { "flag": "-m", "desc": "Modülü çalıştır" },
+            { "flag": "-c", "desc": "Tek satırlık kodu doğrudan çalıştır" }
+          ],
+          "no_sandbox": true,
+          "task": {
+            "prompt": "Bu ders okuma dersidir. Anatomi bölümündeki tokenlara dokunup her parçanın ne yaptığını incele, sonra dersi tamamla.",
+            "hint": "Anatomi kartındaki her token'a dokun.",
+            "check": { "type": "read_only" }
+          }
+        },
+        {
+          "id": "node",
+          "command": "node",
+          "title": "node",
+          "subtitle": "Termux'ta Node.js",
+          "what": "JavaScript'i tarayıcı dışında çalıştıran çalışma zamanı.",
+          "why": "Web tarafında JavaScript yazıyorsan, aynı dili sunucu ve araç tarafında da kullanabilirsin. npm ile devasa bir paket ekosistemine erişirsin.",
+          "example": "$ pkg install nodejs\n$ node --version\nv22.11.0\n\n$ node app.js\n$ npm init -y\n$ npm install express",
+          "explain": "npm, Node'un paket yöneticisidir. npm init -y bir package.json oluşturur; bu dosya projenin bağımlılıklarını kaydeder. node_modules klasörü çok büyür — git deposuna eklememek için .gitignore dosyasına yazılır.\n\nBu emülatörde Node gerçekten çalıştırılmaz; ders komutların ne yaptığı üzerinedir.",
+          "anatomy": [
+            { "token": "node", "desc": "Node.js çalışma zamanı" },
+            { "token": "app.js", "desc": "çalıştırılacak JavaScript dosyası" },
+            { "token": "npm init -y", "desc": "varsayılan ayarlarla package.json oluştur" },
+            { "token": "npm install", "desc": "paketi kur ve package.json'a ekle" }
+          ],
+          "flags": [
+            { "flag": "--version", "desc": "Sürüm bilgisi" },
+            { "flag": "-y", "desc": "Soruları atla, varsayılanları kabul et" }
+          ],
+          "no_sandbox": true,
+          "task": {
+            "prompt": "Anatomi bölümünü incele ve dersi tamamla.",
+            "hint": "Her token'a dokunarak açıklamasını oku.",
+            "check": { "type": "read_only" }
+          }
+        },
+        {
+          "id": "storage",
+          "command": "termux-setup-storage",
+          "title": "storage",
+          "subtitle": "Telefon depolamasına erişim",
+          "what": "Termux'un telefonun paylaşılan depolama alanına (İndirilenler, Resimler vb.) erişmesi için izin ister.",
+          "why": "Varsayılan olarak Termux kendi sanal alanına hapsedilmiştir. Telefondaki dosyalarla çalışmak istiyorsan bu izni bir kez vermen gerekir.",
+          "example": "$ termux-setup-storage\n$ ls ~/storage\ndcim  downloads  movies  music  pictures  shared",
+          "explain": "Komutu çalıştırdığında Android bir izin penceresi açar. Kabul ettikten sonra ev dizininde storage adında bir klasör oluşur ve içindeki bağlantılar telefonun gerçek klasörlerine gider.\n\nDikkat: ~/storage altındaki dosyalar telefonunun gerçek dosyalarıdır. Burada rm çalıştırmak fotoğraflarını gerçekten siler. Bu yüzden bu alanda çalışırken önce ls ile doğrula.",
+          "anatomy": [
+            { "token": "termux-setup-storage", "desc": "paylaşılan depolama izni iste ve ~/storage bağlantılarını oluştur" },
+            { "token": "~/storage/downloads", "desc": "telefonun İndirilenler klasörü" },
+            { "token": "~/storage/dcim", "desc": "kamera ile çekilen fotoğraflar" }
+          ],
+          "flags": [],
+          "no_sandbox": true,
+          "warning": "~/storage gerçek dosyalarındır. Silme komutlarını burada denemeden önce iki kez düşün.",
+          "task": {
+            "prompt": "Bu ders okuma dersidir. Uyarıyı ve anatomiyi incele, sonra tamamla.",
+            "hint": "Depolama alanının neden riskli olduğunu not et.",
+            "check": { "type": "read_only" }
+          }
+        }
+      ]
+    },
+    {
+      "id": "projects",
+      "label": "PROJECTS",
+      "summary": "Öğrendiğin komutları uçtan uca bir işe dönüştür. Her proje birden fazla adımdan oluşur.",
+      "lessons": [
+        {
+          "id": "proj-structure",
+          "command": "proje iskeleti",
+          "title": "Proje iskeleti kur",
+          "subtitle": "Çok adımlı görev",
+          "what": "Tek bir oturumda gerçek bir proje klasörü oluşturup dosyalarını yerleştireceksin.",
+          "why": "Tek tek öğrenilen komutlar ancak bir araya geldiğinde işe yarar. Bu görev, sekiz dersi tek akışta birleştirir.",
+          "example": "$ mkdir -p site/static site/templates\n$ cd site\n$ touch app.py\n$ echo \"# site\" > README.md\n$ ls -la",
+          "explain": "Gerçek projelerde klasör yapısı baştan kurulur. static dosyalar (css, js), templates ise HTML şablonları içindir — Flask tam olarak bu yapıyı bekler.",
+          "anatomy": [
+            { "token": "mkdir -p", "desc": "iç içe klasörleri tek komutta oluştur" },
+            { "token": "site/static", "desc": "css, js, görsel dosyaları" },
+            { "token": "site/templates", "desc": "HTML şablonları" },
+            { "token": "app.py", "desc": "uygulamanın giriş noktası" }
+          ],
+          "flags": [],
+          "task": {
+            "prompt": "Ev dizininde site klasörü oluştur; içinde static ve templates alt klasörleri ile app.py dosyası bulunsun.",
+            "hint": "cd ~ sonra mkdir -p site/static site/templates sonra touch site/app.py",
+            "check": {
+              "type": "all",
+              "checks": [
+                { "type": "isdir", "path": "~/site/static" },
+                { "type": "isdir", "path": "~/site/templates" },
+                { "type": "isfile", "path": "~/site/app.py" }
+              ]
+            }
+          }
+        },
+        {
+          "id": "flask",
+          "command": "flask",
+          "title": "flask",
+          "subtitle": "Telefonda web sunucusu",
+          "what": "Flask, Python ile web uygulaması yazmanı sağlayan küçük bir çatıdır. Termux'ta sorunsuz çalışır.",
+          "why": "Telefonunda çalışan gerçek bir web sunucusu kurabilirsin. Bu sitenin arka ucu da Flask ile yazıldı.",
+          "example": "$ pip install flask\n$ cat app.py\nfrom flask import Flask\napp = Flask(__name__)\n\n@app.route(\"/\")\ndef home():\n    return \"merhaba\"\n\n$ python app.py\n * Running on http://127.0.0.1:5000",
+          "explain": "@app.route(\"/\") bir URL'i bir fonksiyona bağlar. Kullanıcı o adrese girdiğinde fonksiyon çalışır ve döndürdüğü şey tarayıcıya gider. Sunucu çalışırken telefonun tarayıcısından 127.0.0.1:5000 adresine giderek sonucu görebilirsin.\n\nBu emülatörde sunucu gerçekten başlatılmaz — dosya yapısını kurmayı burada, çalıştırmayı kendi Termux'unda yaparsın.",
+          "anatomy": [
+            { "token": "pip install flask", "desc": "Flask kütüphanesini kur" },
+            { "token": "Flask(__name__)", "desc": "uygulama nesnesini oluştur" },
+            { "token": "@app.route(\"/\")", "desc": "kök URL'i alttaki fonksiyona bağla" },
+            { "token": "python app.py", "desc": "geliştirme sunucusunu başlat" },
+            { "token": "127.0.0.1:5000", "desc": "sadece cihazın kendisinden erişilebilen yerel adres" }
+          ],
+          "flags": [],
+          "task": {
+            "prompt": "site klasöründeki app.py dosyasına Flask içe aktarma satırını yaz.",
+            "hint": "cd ~/site sonra echo \"from flask import Flask\" > app.py",
+            "check": { "type": "file_contains", "path": "~/site/app.py", "text": "flask" }
+          }
+        },
+        {
+          "id": "proj-git-flow",
+          "command": "git akışı",
+          "title": "Projeyi sürümle",
+          "subtitle": "Çok adımlı görev",
+          "what": "Kurduğun projeyi git ile takibe alacak, bir değişiklik yapıp ikinci commit'i oluşturacaksın.",
+          "why": "Tek commit atmak kolaydır. Asıl alışkanlık, her anlamlı değişiklikten sonra commit atmaktır.",
+          "example": "$ cd ~/site\n$ git init\n$ git add .\n$ git commit -m \"proje iskeleti\"\n$ echo \"# site\" > README.md\n$ git add README.md\n$ git commit -m \"readme eklendi\"\n$ git log --oneline",
+          "explain": "Her commit bir dönüm noktasıdır. İyi bir commit tek bir işi anlatır: \"readme eklendi\" iyi, \"bir sürü şey\" kötü. git log --oneline ile geçmişi okuduğunda projenin hikâyesini görebilmelisin.",
+          "anatomy": [
+            { "token": "git init", "desc": "depoyu başlat" },
+            { "token": "git add README.md", "desc": "sadece belirli bir dosyayı hazırla" },
+            { "token": "git commit -m", "desc": "hazırlananları kaydet" },
+            { "token": "git log --oneline", "desc": "geçmişi özet olarak oku" }
+          ],
+          "flags": [],
+          "task": {
+            "prompt": "site klasöründe git deposu başlat ve en az iki commit oluştur.",
+            "hint": "git init, git add ., git commit -m \"...\", sonra bir dosya ekleyip tekrar commit at.",
+            "check": { "type": "git_commits_min", "count": 2 }
+          }
+        }
+      ]
+    }
+  ]
+}
