@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8" />
+<!-- Mobil uyum için görünüm ayarı (Instagram'dan telefonla açılacak) -->
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+<meta name="theme-color" content="#05060a" />
+<meta name="description" content="Arda — interaktif kod sanatı." />
+<title>ARDA · Kod Sanatı</title>
+
+<style>
+  /* ===========================================================
+     TEMEL DÜZEN & KARANLIK TEMA
+     =========================================================== */
+  :root {
+    --bg-0: #05060a;          /* En koyu arka plan */
+    --bg-1: #0a0d18;          /* İkincil arka plan */
+    --ink:  #e8ecff;          /* Ana metin rengi */
+    --muted:#8b93b8;          /* Soluk metin */
+    --c1:   #6ae3ff;          /* Aksan 1 (camgöbeği) */
+    --c2:   #b388ff;          /* Aksan 2 (mor) */
+    --c3:   #ff7bd5;          /* Aksan 3 (pembe) */
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html, body { height: 100%; }
+
+  body {
+    background: var(--bg-0);
+    color: var(--ink);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    overflow: hidden;                 /* Sayfa kaymasın; tuval tam ekran */
+    -webkit-tap-highlight-color: transparent;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  /* Parçacık simülasyonunun çizildiği tuval — tüm ekranı kaplar */
+  #scene {
+    position: fixed;
+    inset: 0;
+    display: block;
+    z-index: 0;
+    touch-action: none;               /* Dokunmatik jestleri biz yönetiriz */
+  }
+
+  /* ===========================================================
+     ÖN PLAN İÇERİĞİ (İsim + tipografi)
+     =========================================================== */
+  .overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 2;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 24px;
+    pointer-events: none;             /* Tıklamalar tuvale geçsin */
+  }
+
+  .kicker {
+    font-size: clamp(11px, 2.6vw, 14px);
+    letter-spacing: 0.42em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 18px;
+    padding-left: 0.42em;             /* letter-spacing dengelemesi */
+    opacity: 0;
+    animation: fadeUp 1s ease 0.2s forwards;
+  }
+
+  /* "MERHABA, BEN" satırı — kendi kendine yazılan kısım */
+  .hello {
+    font-size: clamp(13px, 3.4vw, 18px);
+    letter-spacing: 0.28em;
+    color: var(--ink);
+    margin-bottom: 10px;
+    min-height: 1.4em;
+    font-weight: 500;
+  }
+
+  /* Yanıp sönen imleç */
+  .caret {
+    display: inline-block;
+    width: 2px;
+    height: 1em;
+    margin-left: 2px;
+    background: var(--c1);
+    vertical-align: -0.12em;
+    animation: blink 1s steps(1) infinite;
+    box-shadow: 0 0 10px var(--c1);
+  }
+
+  /* Büyük, ışıltılı isim */
+  .name {
+    font-size: clamp(64px, 20vw, 220px);
+    font-weight: 800;
+    line-height: 0.9;
+    letter-spacing: 0.02em;
+    background: linear-gradient(100deg, var(--c1), var(--c2) 45%, var(--c3));
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    filter: drop-shadow(0 0 28px rgba(120, 150, 255, 0.35));
+    opacity: 0;
+    transform: translateY(18px);
+    animation: nameIn 1.1s cubic-bezier(.2,.8,.2,1) 0.9s forwards;
+    padding-right: 0.02em;
+  }
+
+  .tagline {
+    margin-top: 22px;
+    font-size: clamp(12px, 3vw, 16px);
+    color: var(--muted);
+    letter-spacing: 0.06em;
+    opacity: 0;
+    animation: fadeUp 1s ease 1.5s forwards;
+  }
+
+  /* Alt bilgi ipucu — nasıl etkileşileceğini anlatır */
+  .hint {
+    position: fixed;
+    left: 0; right: 0;
+    bottom: max(18px, env(safe-area-inset-bottom));
+    z-index: 2;
+    text-align: center;
+    font-size: clamp(10px, 2.6vw, 12px);
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: rgba(139, 147, 184, 0.7);
+    pointer-events: none;
+    opacity: 0;
+    animation: fadeUp 1s ease 2s forwards;
+  }
+
+  /* Sağ üstteki küçük imza rozeti */
+  .badge {
+    position: fixed;
+    top: max(16px, env(safe-area-inset-top));
+    right: max(16px, env(safe-area-inset-right));
+    z-index: 2;
+    font-size: 11px;
+    letter-spacing: 0.24em;
+    text-transform: uppercase;
+    color: var(--muted);
+    padding: 8px 12px;
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 999px;
+    background: rgba(255,255,255,0.03);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+    opacity: 0;
+    animation: fadeUp 1s ease 2.2s forwards;
+  }
+
+  /* ===========================================================
+     ANİMASYON TANIMLARI
+     =========================================================== */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(12px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes nameIn {
+    from { opacity: 0; transform: translateY(18px) scale(0.98); filter: drop-shadow(0 0 0 rgba(120,150,255,0)); }
+    to   { opacity: 1; transform: translateY(0) scale(1); filter: drop-shadow(0 0 28px rgba(120,150,255,0.35)); }
+  }
+  @keyframes blink {
+    50% { opacity: 0; }
+  }
+
+  /* Hareket azaltma tercihi olan kullanıcılar için animasyonları sakinleştir */
+  @media (prefers-reduced-motion: reduce) {
+    .kicker, .name, .tagline, .hint, .badge { animation-duration: 0.01ms; animation-delay: 0s; opacity: 1; transform: none; }
+    .caret { animation: none; }
+  }
+</style>
+</head>
+
+<body>
+  <!-- Parçacık ağının çizileceği tuval -->
+  <canvas id="scene"></canvas>
+
+  <!-- Ön plan tipografisi -->
+  <main class="overlay" aria-label="Karşılama">
+    <div class="kicker">Kod Sanatı · 2026</div>
+    <div class="hello"><span id="typed"></span><span class="caret" aria-hidden="true"></span></div>
+    <h1 class="name">ARDA</h1>
+    <p class="tagline">Hareket et · Dokun · Tıkla — ağ sana tepki verir</p>
+  </main>
+
+  <div class="badge">@arda</div>
+  <div class="hint">Ekrana dokun ve sürükle</div>
+
+<script>
+/* ===============================================================
+   KOD SANATI — İNTERAKTİF PARÇACIK AĞI (CONSTELLATION)
+   Saf JavaScript, harici kütüphane yok, tamamen çevrimdışı.
+   =============================================================== */
+(function () {
+  "use strict";
+
+  // ---- Tuval ve bağlam kurulumu ----
+  const canvas = document.getElementById("scene");
+  const ctx = canvas.getContext("2d", { alpha: false });
+
+  let W = 0, H = 0, DPR = 1;          // Genişlik, yükseklik, cihaz piksel oranı
+  let particles = [];                 // Parçacık listesi
+  let ripples = [];                   // Tıklama dalgaları
+
+  // Fare / dokunma imleci durumu
+  const pointer = { x: -9999, y: -9999, active: false };
+
+  // Renk paleti (parçacıklara rastgele atanır)
+  const PALETTE = ["#6ae3ff", "#b388ff", "#ff7bd5", "#8ad6ff", "#c9a7ff"];
+
+  // Hareket azaltma tercihi
+  const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  // ---- Ekran boyutuna göre performans ayarı ----
+  // Küçük ekranlarda daha az parçacık => 60 FPS hedefi korunur.
+  function targetCount() {
+    const area = window.innerWidth * window.innerHeight;
+    // Yaklaşık her 11.000 pikselde 1 parçacık, alt/üst sınırlı
+    let n = Math.round(area / 11000);
+    n = Math.max(36, Math.min(n, 150));
+    if (reduceMotion) n = Math.min(n, 60);
+    return n;
+  }
+
+  // Bağlantı çizgisinin görüneceği azami mesafe (ekrana göre ölçekli)
+  let linkDist = 130;
+
+  // ---- Parçacık sınıfı (basit nesne) ----
+  function makeParticle() {
+    const speed = 0.25 + Math.random() * 0.45;
+    const ang = Math.random() * Math.PI * 2;
+    return {
+      x: Math.random() * W,
+      y: Math.random() * H,
+      vx: Math.cos(ang) * speed,
+      vy: Math.sin(ang) * speed,
+      r: 1 + Math.random() * 1.8,     // Yarıçap
+      color: PALETTE[(Math.random() * PALETTE.length) | 0]
+    };
+  }
+
+  // ---- Tuvali ekran boyutuna göre ölçekle ----
+  function resize() {
+    DPR = Math.min(window.devicePixelRatio || 1, 2); // Retina için üst sınır 2
+    W = window.innerWidth;
+    H = window.innerHeight;
+    canvas.width = Math.floor(W * DPR);
+    canvas.height = Math.floor(H * DPR);
+    canvas.style.width = W + "px";
+    canvas.style.height = H + "px";
+    ctx.setTransform(DPR, 0, 0, DPR, 0, 0);          // Koordinatları CSS pikseline sabitle
+
+    // Bağlantı mesafesini ekran genişliğine göre uyarlanır yap
+    linkDist = Math.max(90, Math.min(160, W / 9));
+
+    // Parçacık sayısını yeniden dengele
+    const want = targetCount();
+    if (particles.length > want) {
+      particles.length = want;
+    } else {
+      while (particles.length < want) particles.push(makeParticle());
+    }
+  }
+
+  // ---- İmleç konumunu güncelle (fare + dokunma ortak) ----
+  function setPointer(x, y, active) {
+    pointer.x = x;
+    pointer.y = y;
+    pointer.active = active;
+  }
+
+  // ---- Tıklama/dokunma dalgası (görsel geri bildirim) ----
+  function spawnRipple(x, y) {
+    ripples.push({ x, y, r: 0, max: Math.max(W, H) * 0.5, life: 1 });
+
+    // Yakındaki parçacıkları dışa doğru itelim (patlama hissi)
+    for (const p of particles) {
+      const dx = p.x - x, dy = p.y - y;
+      const d = Math.hypot(dx, dy) || 1;
+      if (d < 220) {
+        const force = (1 - d / 220) * 6;
+        p.vx += (dx / d) * force;
+        p.vy += (dy / d) * force;
+      }
+    }
+  }
+
+  // ---- Ana döngü ----
+  let last = performance.now();
+
+  function frame(now) {
+    const dt = Math.min(32, now - last) / 16.67;     // ~60fps'e göre normalize zaman
+    last = now;
+
+    // Arka planı hafif iz bırakacak şekilde temizle (yumuşak akış hissi)
+    ctx.fillStyle = "rgba(5, 6, 10, 0.28)";
+    ctx.fillRect(0, 0, W, H);
+
+    // --- Parçacıkları güncelle ve çiz ---
+    for (const p of particles) {
+      // İmlece doğru yumuşak çekim (etkileşim)
+      if (pointer.x > -9999) {
+        const dx = pointer.x - p.x, dy = pointer.y - p.y;
+        const d2 = dx * dx + dy * dy;
+        if (d2 < 200 * 200) {
+          const d = Math.sqrt(d2) || 1;
+          const pull = (pointer.active ? 0.7 : 0.28) * (1 - d / 200);
+          p.vx += (dx / d) * pull * dt;
+          p.vy += (dy / d) * pull * dt;
+        }
+      }
+
+      // Sürtünme (hızın kontrolden çıkmasını engeller)
+      p.vx *= 0.98;
+      p.vy *= 0.98;
+
+      // Konumu ilerlet
+      p.x += p.vx * dt;
+      p.y += p.vy * dt;
+
+      // Kenarlardan sek (ekran içinde kalsın)
+      if (p.x < 0)  { p.x = 0;  p.vx *= -1; }
+      if (p.x > W)  { p.x = W;  p.vx *= -1; }
+      if (p.y < 0)  { p.y = 0;  p.vy *= -1; }
+      if (p.y > H)  { p.y = H;  p.vy *= -1; }
+
+      // Parçacığı çiz (hafif parıltı)
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+      ctx.fillStyle = p.color;
+      ctx.fill();
+    }
+
+    // --- Parçacıkları birbirine çizgiyle bağla (constellation) ---
+    // O(n^2) ama uyarlanabilir parçacık sayısı sayesinde mobilde de akıcı.
+    for (let i = 0; i < particles.length; i++) {
+      const a = particles[i];
+      for (let j = i + 1; j < particles.length; j++) {
+        const b = particles[j];
+        const dx = a.x - b.x, dy = a.y - b.y;
+        const d2 = dx * dx + dy * dy;
+        if (d2 < linkDist * linkDist) {
+          const d = Math.sqrt(d2);
+          const alpha = (1 - d / linkDist) * 0.55;    // Uzaklıkla solan çizgi
+          ctx.globalAlpha = alpha;
+          ctx.strokeStyle = a.color;
+          ctx.lineWidth = 0.7;
+          ctx.beginPath();
+          ctx.moveTo(a.x, a.y);
+          ctx.lineTo(b.x, b.y);
+          ctx.stroke();
+        }
+      }
+    }
+    ctx.globalAlpha = 1;
+
+    // --- İmlecin etrafındaki parçacıklara özel bağlantı (etkileşim vurgusu) ---
+    if (pointer.x > -9999) {
+      for (const p of particles) {
+        const dx = pointer.x - p.x, dy = pointer.y - p.y;
+        const d2 = dx * dx + dy * dy;
+        if (d2 < (linkDist * 1.4) * (linkDist * 1.4)) {
+          const d = Math.sqrt(d2);
+          ctx.globalAlpha = (1 - d / (linkDist * 1.4)) * 0.6;
+          ctx.strokeStyle = "#ffffff";
+          ctx.lineWidth = 0.6;
+          ctx.beginPath();
+          ctx.moveTo(pointer.x, pointer.y);
+          ctx.lineTo(p.x, p.y);
+          ctx.stroke();
+        }
+      }
+      ctx.globalAlpha = 1;
+    }
+
+    // --- Tıklama dalgalarını çiz ve güncelle ---
+    for (let i = ripples.length - 1; i >= 0; i--) {
+      const rp = ripples[i];
+      rp.r += (rp.max - rp.r) * 0.06 * dt + 2;        // Dışa doğru genişle
+      rp.life -= 0.012 * dt;                          // Zamanla sön
+      if (rp.life <= 0) { ripples.splice(i, 1); continue; }
+
+      ctx.globalAlpha = rp.life * 0.5;
+      ctx.strokeStyle = "#8ad6ff";
+      ctx.lineWidth = 1.4;
+      ctx.beginPath();
+      ctx.arc(rp.x, rp.y, rp.r, 0, Math.PI * 2);
+      ctx.stroke();
+    }
+    ctx.globalAlpha = 1;
+
+    requestAnimationFrame(frame);
+  }
+
+  /* ===============================================================
+     OLAY DİNLEYİCİLERİ (fare + dokunma)
+     =============================================================== */
+
+  // Fare hareketi
+  window.addEventListener("mousemove", (e) => setPointer(e.clientX, e.clientY, false));
+  window.addEventListener("mousedown", (e) => { setPointer(e.clientX, e.clientY, true); spawnRipple(e.clientX, e.clientY); });
+  window.addEventListener("mouseup", () => { pointer.active = false; });
+  window.addEventListener("mouseleave", () => setPointer(-9999, -9999, false));
+
+  // Dokunmatik etkileşim
+  window.addEventListener("touchstart", (e) => {
+    const t = e.touches[0];
+    setPointer(t.clientX, t.clientY, true);
+    spawnRipple(t.clientX, t.clientY);
+  }, { passive: true });
+
+  window.addEventListener("touchmove", (e) => {
+    const t = e.touches[0];
+    setPointer(t.clientX, t.clientY, true);
+  }, { passive: true });
+
+  window.addEventListener("touchend", () => setPointer(-9999, -9999, false));
+
+  // Pencere yeniden boyutlanınca tuvali güncelle
+  window.addEventListener("resize", resize);
+  window.addEventListener("orientationchange", resize);
+
+  // Sekme arka plandayken zaman sıçramasını engelle
+  document.addEventListener("visibilitychange", () => { last = performance.now(); });
+
+  /* ===============================================================
+     KENDİ KENDİNE YAZILAN "MERHABA, BEN" METNİ
+     =============================================================== */
+  const typedEl = document.getElementById("typed");
+  const message = "MERHABA, BEN";
+  let ti = 0;
+
+  function typeLoop() {
+    if (ti <= message.length) {
+      typedEl.textContent = message.slice(0, ti);
+      ti++;
+      setTimeout(typeLoop, 90 + Math.random() * 60);
+    }
+  }
+
+  /* ===============================================================
+     BAŞLAT
+     =============================================================== */
+  resize();
+  requestAnimationFrame(frame);
+  setTimeout(typeLoop, 500);   // Kısa gecikmeyle yazmaya başla
+})();
+</script>
+</body>
+</html>
