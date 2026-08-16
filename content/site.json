@@ -2,24 +2,25 @@
   "profile": {
     "name": "ARDA",
     "handle": "@lov4ardaa",
-    "instagram": "https://instagram.com/lov4ardaa",
+    "instagram": "https://www.instagram.com/lov4ardaa/",
     "tagline": "Termux'ta geliştiriyorum. Öğrendiğim her şeyi buraya bırakıyorum.",
     "location": "Türkiye",
     "site_name": "whoisarda"
   },
   "currently_building": [
     {
-      "title": "EXPLORE destesi",
-      "note": "Sitedeki 48 içeriğin tamamını kaydırarak keşfettiren kart destesi.",
-      "state": "yeni"
-    },
-    {
-      "title": "Termux LAB",
-      "note": "Sanal terminal üzerinde çalışan komut satırı müfredatı — 22 ders, gerçek görev doğrulaması.",
-      "state": "aktif"
+      "title": "ARDA.OS",
+      "note": "Bu sitenin kendisi — tasarım ve arka uç.",
+      "state": "yayında"
     }
   ],
   "drops": [
+    {
+      "date": "2026-08-15",
+      "title": "v3.1 — final experience upgrade",
+      "body": "Yeni hero, DISCOVER geçişi, komut paleti, 18 derslik Termux yolu, tam ekran proje detayı, yerel oturum paneli ve keşfedilebilir detaylar.",
+      "target": "lab"
+    },
     {
       "date": "2026-08-15",
       "title": "v2.1 — keşif, terminal ve tanılama",
@@ -31,49 +32,30 @@
       "title": "Görsel dil tam monokroma geçti",
       "body": "Yeşil aksan kaldırıldı. Vurgu artık renkle değil ışıkla taşınıyor; tek doygun renkler anlamsal: amber uyarır, kırmızı hata verir.",
       "target": "status"
-    },
-    {
-      "date": "2026-08-15",
-      "title": "v2 — sitenin tamamı yeniden yazıldı",
-      "body": "Index tabanlı navigasyon, gerçek komut merkezi, 10 çalışan araç, sanal terminalli Termux LAB ve bağımlılıksız QR üretimi.",
-      "target": "lab"
-    },
-    {
-      "date": "2026-08-15",
-      "title": "Termux LAB açıldı",
-      "body": "BEGINNER / INTERMEDIATE / ADVANCED / PROJECTS — 22 ders. Görevler sanal dosya sisteminde gerçekten doğrulanıyor.",
-      "target": "lab"
-    },
-    {
-      "date": "2026-08-15",
-      "title": "Tools: 10 araç",
-      "body": "QR, JSON, base64, hash, timestamp, renk, metin, UUID, JWT çözümleyici, URL kodlayıcı. Hepsi cihazında çalışır.",
-      "target": "tools"
     }
   ],
   "projects": [
     {
-      "id": "whoisarda",
-      "title": "whoisarda",
+      "id": "arda-os",
+      "title": "ARDA.OS",
       "kind": "web",
       "status": "yayında",
       "year": "2026",
-      "summary": "Instagram bio linki olarak çalışan, mobil öncelikli kişisel platform. Portfolyo değil — öğrenme ve araç ürünü.",
-      "what": "Tek sayfalık bir uygulama kabuğu. Index navigasyonu, keşif destesi, komut merkezi, tam ekran sanal terminal, canlı tanılama paneli, Termux müfredatı, tarayıcıda çalışan araçlar ve interaktif deneyler barındırıyor.",
-      "why": "Instagram'dan gelen kişiye bir CV göstermenin anlamı yok. Onun yerine ilk dokunuşta çalışan bir şey vermek, sonra Instagram'a geri döndürmek istedim.",
+      "summary": "Instagram bio linki olarak çalışan kişisel dijital kimlik sitesi. Portfolyo değil — keşfedilecek bir sistem.",
+      "what": "Tek sayfalık bir deneyim: canlı tarayıcı verileriyle beslenen bir hero, komut paleti, site içi konsol, Termux öğrenme yolu, tam ekran proje detayları ve yerel oturum paneli.",
+      "why": "Instagram'dan gelen kişiye CV göstermenin anlamı yok. Onun yerine birkaç dakika keşfedilecek bir şey vermek, sonra Instagram'a geri döndürmek istedim.",
       "tech": [
         "Python",
         "Flask",
         "Vanilla JS",
         "CSS",
         "SQLite",
-        "Canvas API",
-        "Web Audio API"
+        "Canvas API"
       ],
       "highlights": [
         "Bağımlılıksız QR üreteci — ISO/IEC 18004 byte modu, saf Python",
-        "Tarayıcıda çalışan sanal dosya sistemi ve komut yorumlayıcısı",
-        "Canlı ölçüm yapan tanılama paneli — tek bir uydurma sayaç yok",
+        "18 derslik Termux yolu, ilerleme cihazda saklanır",
+        "Komut paleti: ⌘K, / ve mobilde görünür düğme",
         "Sıfır dış kütüphane: framework yok, web fontu yok, CDN yok"
       ],
       "repo": "https://github.com/ardaaxee/cumaaa",

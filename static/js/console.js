@@ -1,14 +1,18 @@
 /* CONSOLE — site navigation only.
  *
- * This is deliberately NOT a shell. There is no filesystem, no interpreter and
- * no way to reach the device: every command is a fixed, hand-written function
- * that scrolls the page, opens a modal or follows a link.
+ * Deliberately not a shell: no filesystem, no interpreter, no device access.
+ * Every command is a hand-written function that scrolls, opens a panel or
+ * follows a link.
  */
 
 import { $, h, clear, store } from "./core.js";
 import { IDENTITY, WHAT_I_DO, LAB, NOW, TOOLBOX } from "./data.js";
+import { openModule, lessonDone, lessonTotal } from "./lab.js";
+import { openProject } from "./sections.js";
+import { openPalette } from "./palette.js";
+import { eggCommand } from "./egg.js";
 
-const HIST_KEY = "console:history";
+const HIST = "console:history";
 let content = null;
 let out, input;
 
@@ -18,10 +22,10 @@ function write(text, cls = "") {
 }
 
 function goto(id, label) {
-  const target = document.getElementById(id);
-  if (!target) { write(`bölüm bulunamadı: ${id}`, "e"); return; }
+  const el = document.getElementById(id);
+  if (!el) { write(`bölüm bulunamadı: ${id}`, "e"); return; }
   write(`→ ${label}`, "g");
-  setTimeout(() => target.scrollIntoView({ behavior: "smooth", block: "start" }), 180);
+  setTimeout(() => el.scrollIntoView({ behavior: "smooth", block: "start" }), 160);
 }
 
 const COMMANDS = {
@@ -34,8 +38,8 @@ const COMMANDS = {
         write(`  ${name.padEnd(11, " ")}${cmd.desc}`);
       }
       write("");
-      write("Bu konsol yalnızca site içinde gezinir.", "d");
-      write("Sistem komutu çalıştırmaz, cihazına erişmez.", "d");
+      write("Arama için ⌘K / Ctrl+K ya da üstteki arama düğmesi.", "d");
+      write("Bu konsol yalnızca site içinde gezinir; cihazına erişmez.", "d");
     },
   },
 
@@ -45,33 +49,49 @@ const COMMANDS = {
       write(IDENTITY.name, "g");
       write(IDENTITY.role, "d");
       write("");
-      IDENTITY.manifesto.forEach((line) => write(line));
+      write(IDENTITY.statement.join(" "), "u");
       write("");
-      write(IDENTITY.intro, "d");
+      IDENTITY.manifesto.forEach((l) => write(l));
     },
   },
 
   projects: {
-    desc: "projelere git",
-    run() {
-      const total = content.projects.length + content.archive.length;
-      write(`${total} kayıt — ${content.projects.length} yayında, ${content.archive.length} arşiv`);
-      content.projects.forEach((p) => write(`  [yayında] ${p.title} — ${p.summary}`));
-      content.archive.forEach((a) => write(`  [arşiv]   ${a.title}`, "d"));
+    desc: "projeleri listele ve aç",
+    run(arg) {
+      if (arg) {
+        const hit = content.projects.find((p) => p.id.toLowerCase() === arg)
+          || content.projects.find((p) => p.title.toLowerCase().includes(arg));
+        if (hit) { write(`→ ${hit.title}`, "g"); setTimeout(() => openProject(hit.id), 160); return; }
+        write(`proje bulunamadı: ${arg}`, "e");
+        return;
+      }
+      write(`${content.projects.length} yayında · ${content.archive.length} arşiv`, "g");
+      content.projects.forEach((p) => write(`  ${p.title.padEnd(14, " ")}${p.summary}`));
+      write("");
+      write("bir projeyi açmak için: projects <ad>", "d");
       goto("projects", "PROJECTS");
     },
   },
 
   termux: {
-    desc: "termux lab'e git",
-    run() {
-      write(LAB.subtitle, "g");
-      LAB.categories.forEach((c) => write(`  ${c.cmd.padEnd(16, " ")}${c.line}`));
+    desc: "termux lab modülleri",
+    run(arg) {
+      if (arg) {
+        const m = LAB.modules.find((x) => x.id.startsWith(arg) || x.label.toLowerCase().includes(arg));
+        if (m) { write(`→ ${m.label}`, "g"); setTimeout(() => openModule(m.id), 200); return; }
+        write(`modül bulunamadı: ${arg}`, "e");
+        return;
+      }
+      write(`${LAB.subtitle}  [${lessonDone()}/${lessonTotal()} COMPLETE]`, "g");
+      LAB.modules.forEach((m) =>
+        write(`  ${m.index}  ${m.label.padEnd(20, " ")}${m.level}  ${m.lessons.length} ders`));
+      write("");
+      write("bir modülü açmak için: termux <ad>", "d");
       goto("lab", "TERMUX LAB");
     },
   },
 
-  stack: {
+  tools: {
     desc: "kullandığım teknolojiler",
     run() {
       TOOLBOX.forEach((t) => write(`  ${t.name.padEnd(12, " ")}${t.use}`));
@@ -82,15 +102,23 @@ const COMMANDS = {
   now: {
     desc: "şu an ne yapıyorum",
     run() {
-      write("CURRENTLY BUILDING", "g");
-      NOW.building.forEach((x) => write(`  ${x}`));
-      write("");
-      write("CURRENTLY LEARNING", "g");
-      NOW.learning.forEach((x) => write(`  ${x}`));
-      write("");
-      write("CURRENTLY EXPLORING", "g");
-      NOW.exploring.forEach((x) => write(`  ${x}`));
+      NOW.blocks.forEach((b) => {
+        write(b.key, "g");
+        b.items.forEach((i) => write(`  ${i.title} — ${i.line}`));
+        write("");
+      });
       goto("now", "NOW");
+    },
+  },
+
+  archive: {
+    desc: "arşivlenmiş depolar",
+    run() {
+      write(`${content.archive.length} arşiv kaydı`, "g");
+      content.archive.forEach((a) => write(`  ${a.year}  ${a.title.padEnd(20, " ")}${a.note}`));
+      write("");
+      write("açmak için: projects <ad>", "d");
+      goto("projects", "PROJECTS");
     },
   },
 
@@ -102,6 +130,11 @@ const COMMANDS = {
     },
   },
 
+  search: {
+    desc: "komut paletini aç",
+    run() { write("palet açılıyor…", "g"); setTimeout(openPalette, 160); },
+  },
+
   instagram: {
     desc: "instagram profilini aç",
     run() {
@@ -110,34 +143,25 @@ const COMMANDS = {
     },
   },
 
-  share: {
-    desc: "paylaşım bölümüne git",
-    run() { goto("connect", "CONNECT"); },
-  },
-
   contact: {
     desc: "mesaj formunu aç",
     run() {
       write("iletişim formu açılıyor…", "g");
-      const btn = $("#contactBtn");
-      if (btn) setTimeout(() => btn.click(), 200);
+      const b = $("#contactBtn");
+      if (b) setTimeout(() => b.click(), 180);
     },
   },
 
-  status: {
-    desc: "sistem durumuna git",
-    run() { goto("status", "SYSTEM STATUS"); },
-  },
-
-  whoami: {
-    desc: "ziyaretçi bilgisi",
+  session: {
+    desc: "bu oturumun bilgileri",
     run() {
       write(`viewport   ${window.innerWidth}×${window.innerHeight}`);
-      write(`dil        ${navigator.language}`);
-      write(`bağlantı   ${navigator.onLine ? "çevrimiçi" : "çevrimdışı"}`);
-      write(`giriş      ${matchMedia("(hover: hover)").matches ? "işaretçi" : "dokunmatik"}`);
+      write(`device     ${matchMedia("(hover: none)").matches ? "MOBILE" : "DESKTOP"}`);
+      write(`online     ${navigator.onLine ? "YES" : "NO"}`);
+      write(`local time ${new Date().toLocaleTimeString("tr-TR", { hour12: false })}`);
       write("");
-      write("Bu değerler tarayıcından okundu, hiçbir yere gönderilmedi.", "d");
+      write("Tarayıcından okundu, hiçbir yere gönderilmedi.", "d");
+      goto("session", "SESSION");
     },
   },
 
@@ -171,14 +195,16 @@ function exec(raw) {
   if (!line) return;
   write(`> ${line}`, "u");
 
-  const name = line.split(/\s+/)[0].toLowerCase();
+  if (eggCommand(line, write)) return;
+
+  const [name, ...rest] = line.toLowerCase().split(/\s+/);
   const cmd = COMMANDS[name];
   if (!cmd) {
     write(`komut bulunamadı: ${name}`, "e");
     write("help yazarak listeyi görebilirsin.", "d");
     return;
   }
-  cmd.run();
+  cmd.run(rest.join(" ").trim());
 }
 
 export function initConsole(bootContent) {
@@ -188,31 +214,26 @@ export function initConsole(bootContent) {
 
   out = h("div", { class: "term__out" });
   input = h("input", {
-    class: "term__in",
-    type: "text",
-    autocomplete: "off",
-    autocapitalize: "off",
-    autocorrect: "off",
-    spellcheck: "false",
-    placeholder: "komut yaz…",
+    class: "term__in", type: "text", autocomplete: "off", autocapitalize: "off",
+    autocorrect: "off", spellcheck: "false", placeholder: "komut yaz…",
     "aria-label": "Konsol komut girişi",
   });
 
-  let history = store.get(HIST_KEY, []);
+  let history = store.get(HIST, []);
   if (!Array.isArray(history)) history = [];
   let hi = -1;
 
   input.addEventListener("keydown", (e) => {
     if (e.key === "Enter") {
       e.preventDefault();
-      const value = input.value;
-      if (!value.trim()) return;
-      history.unshift(value);
+      const v = input.value;
+      if (!v.trim()) return;
+      history.unshift(v);
       history = history.slice(0, 40);
-      store.set(HIST_KEY, history);
+      store.set(HIST, history);
       hi = -1;
       input.value = "";
-      exec(value);
+      exec(v);
       return;
     }
     if (e.key === "ArrowUp") {
@@ -236,24 +257,23 @@ export function initConsole(bootContent) {
     }
   });
 
-  const keys = ["help", "about", "projects", "termux", "now", "stack",
-                "whoami", "instagram", "clear"];
+  const keys = ["help", "about", "projects", "termux", "tools", "now",
+                "archive", "instagram", "contact", "clear"];
 
   clear(host);
-  host.appendChild(h("div", { class: "term__bar" },
-    h("span", { class: "term__dots" }, h("i"), h("i"), h("i")),
-    h("span", { class: "term__ttl" }, "arda.os / console"),
-    h("span", { class: "term__safe" }, "SITE ONLY")));
-  host.appendChild(out);
-  host.appendChild(h("div", { class: "term__line" },
-    h("span", { class: "term__ps" }, ">"),
-    input));
-  host.appendChild(h("div", { class: "term__keys" },
-    keys.map((k) => h("button", {
-      class: "term__key",
-      type: "button",
-      onclick: () => { input.value = k; exec(k); input.value = ""; },
-    }, k))));
+  host.append(
+    h("div", { class: "term__bar" },
+      h("span", { class: "term__dots" }, h("i"), h("i"), h("i")),
+      h("span", { class: "term__ttl" }, "arda.os / console"),
+      h("span", { class: "term__safe" }, "SITE ONLY")),
+    out,
+    h("div", { class: "term__line" }, h("span", { class: "term__ps" }, ">"), input),
+    h("div", { class: "term__keys" },
+      keys.map((k) => h("button", {
+        class: "term__key", type: "button",
+        onclick: () => { exec(k); },
+      }, k))),
+  );
 
   out.addEventListener("click", () => {
     if (!window.getSelection().toString()) input.focus();

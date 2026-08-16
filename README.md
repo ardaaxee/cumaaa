@@ -41,17 +41,18 @@ Hepsi isteğe bağlı.
 
 | # | Bölüm | İçerik |
 |---|---|---|
-| 01 | **HERO** | ARDA.OS, manifesto, EXPLORE + INSTAGRAM |
-| 02 | **SYSTEM STATUS** | ONLINE · SYSTEM · LOCAL NODE · BUILD · CURRENT TIME · VIEWPORT |
-| 03 | **WHAT I DO** | AI / AUTOMATION / WEB / TERMUX / EXPERIMENTS — dokununca açılır |
-| 04 | **TERMUX LAB** | `$ AI TOOLS` `$ AUTOMATION` `$ WEB SERVERS` `$ LINUX` `$ EXPERIMENTS` |
-| 05 | **PROJECTS** | Büyük interaktif kartlar → modal (ne / neden / teknoloji / EXPLORE) |
-| 06 | **NOW** | CURRENTLY BUILDING / LEARNING / EXPLORING |
-| 07 | **DIGITAL TOOLBOX** | Python, JavaScript, HTML, CSS, Linux, Termux, Git, AI |
-| 08 | **CONSOLE** | Site içi komutlar — sistem erişimi yok |
-| 09 | **CONNECT** | FOLLOW THE JOURNEY + COPY LINK / SHARE / QR / CONTACT |
+| — | **HERO** | ARDA.OS · BUILD. EXPERIMENT. LEARN. · manifesto · canlı LOCAL TIME / ONLINE / VIEWPORT · DISCOVER + INSTAGRAM |
+| 01 | **WHAT I DO** | AI / AUTOMATION / WEB / TERMUX / EXPERIMENTS — dokununca açılır |
+| 02 | **TERMUX LAB** | 5 modül · 18 ders · komut + açıklama + örnek + kopyala · ilerleme sayacı |
+| 03 | **PROJECTS** | Büyük kartlar → tam ekran detay geçişi |
+| 04 | **NOW** | CURRENTLY BUILDING / LEARNING / EXPLORING |
+| 05 | **DIGITAL TOOLBOX** | 8 teknoloji, dokununca açıklama açılır |
+| 06 | **SESSION** | Gerçek tarayıcı oturumu — sahte sayaç yok |
+| 07 | **CONSOLE** | Site içi komutlar — sistem erişimi yok |
+| 08 | **CONNECT** | FOLLOW THE JOURNEY + COPY LINK / SHARE / QR / CONTACT |
 
-Ayrıca: açılış geçişi, scroll progress, DISCOVER navigasyonu, footer.
+Ayrıca: açılış geçişi, DISCOVER scan geçişi, komut paleti (⌘K / `/` / mobil düğme),
+scroll progress, DISCOVER navigasyonu, keşfedilebilir detaylar, footer.
 
 ## İçeriği değiştirme
 
@@ -60,10 +61,11 @@ düzenlenebilir — tırnak içindeki yazıyı değiştir, kaydet, sayfayı yeni
 
 - `IDENTITY` — isim, manifesto, Instagram
 - `WHAT_I_DO` — beş alan, açıklama ve etiketler
-- `LAB` — Termux LAB kategorileri
+- `LAB` — Termux Lab modülleri ve dersleri
 - `NOW` — şu an ne yaptığın
 - `TOOLBOX` — kullandığın teknolojiler
 - `DISCOVER` — alt navigasyon sırası
+- `EGGS` — keşfedilebilir detayların metinleri
 
 Projeler sunucu tarafında: **`content/site.json`** → `projects` / `archive`.
 
@@ -94,13 +96,18 @@ static/style.css       Tasarım sistemi + tüm bileşenler
 static/app.js          Açılış, scroll, reveal, magnetic, discover
 static/js/data.js      DÜZENLENEBİLİR İÇERİK
 static/js/core.js      DOM, depolama, pano, toast
-static/js/modal.js     Modal + geri tuşu entegrasyonu
-static/js/sections.js  Bölüm render'ları
+static/js/modal.js     Sheet modal (contact / QR)
+static/js/detail.js    Tam ekran proje detayı
+static/js/sections.js  What I do / projects / now / toolbox
+static/js/lab.js       Termux Lab + ilerleme
+static/js/session.js   Yerel oturum paneli
+static/js/palette.js   Komut paleti + arama indeksi
 static/js/console.js   Güvenli site konsolu
 static/js/connect.js   Copy / Share / QR / Contact
+static/js/egg.js       Keşfedilebilir detaylar
 static/sw.js           Çevrimdışı önbellek
 tools/make_assets.py   og.png + ikonlar
-tools/test_site.mjs    93 tarayıcı testi (Playwright)
+tools/test_site.mjs    154 tarayıcı testi (Playwright)
 ```
 
 ## Cache
@@ -120,18 +127,19 @@ sahte sayaç, framework, web fontu, CDN, takip kodu, dış istek.
 Konsol bir kabuk değil: dosya sistemi, yorumlayıcı ve cihaz erişimi yoktur —
 her komut elle yazılmış, sadece sayfada gezinen bir fonksiyondur.
 
-SYSTEM STATUS değerleri API'siz ama uydurma değil: bağlantı `navigator.onLine`,
-saat gerçek saat, LOCAL NODE gerçek saat diliminden, VIEWPORT gerçek ekrandan.
+SESSION ve hero göstergeleri API'siz ama uydurma değil: bağlantı `navigator.onLine`,
+saat gerçek saat, viewport gerçek ekran, cihaz türü gerçek medya sorgusu.
+Ziyaretçi sayacı yoktur ve eklenmeyecektir.
 
 ## Test
 
 ```bash
 python3 tools/make_assets.py    # og.png + ikonlar
-node tools/test_site.mjs        # 93 tarayıcı testi (sunucu açık olmalı)
+node tools/test_site.mjs        # 154 tarayıcı testi (sunucu açık olmalı)
 ```
 
-375 / 390 / 412 px genişlikte taşma, üst üste binme, 10.5px altı yazı ve
-40px altı dokunma hedefi kontrol edilir.
+375 / 390 / 412 / 430 px genişlikte taşma, üst üste binme, 10.5px altı yazı ve
+44px altı dokunma hedefi kontrol edilir.
 
 ## Lisans
 

@@ -34,7 +34,7 @@ CONTENT_DIR = BASE_DIR / "content"
 INSTANCE_DIR = BASE_DIR / "instance"
 DB_PATH = INSTANCE_DIR / "messages.db"
 
-VERSION = "3.0.0"
+VERSION = "3.1.0"
 STARTED_AT = time.time()
 
 _ASSET_FILES = (
@@ -43,9 +43,14 @@ _ASSET_FILES = (
     "static/js/core.js",
     "static/js/data.js",
     "static/js/modal.js",
+    "static/js/detail.js",
     "static/js/sections.js",
+    "static/js/lab.js",
+    "static/js/session.js",
     "static/js/console.js",
     "static/js/connect.js",
+    "static/js/palette.js",
+    "static/js/egg.js",
     "templates/index.html",
 )
 
@@ -61,8 +66,8 @@ def asset_version():
 
 # Sections that the single-page shell can deep-link into.
 SECTIONS = (
-    "status", "whatido", "lab", "projects", "now", "toolbox",
-    "console", "connect",
+    "whatido", "lab", "projects", "now", "toolbox",
+    "session", "console", "connect",
 )
 
 app = Flask(__name__)
@@ -167,7 +172,7 @@ COMMANDS = [
     {"name": "drops", "desc": "Son güncellemeleri göster", "action": "nav", "target": "drops"},
     {"name": "contact", "desc": "İletişim formunu aç", "action": "nav", "target": "contact"},
     {"name": "share", "desc": "Paylaşım ve QR panelini aç", "action": "nav", "target": "share"},
-    {"name": "instagram", "desc": "Instagram profilini aç", "action": "external", "target": "https://instagram.com/lov4ardaa"},
+    {"name": "instagram", "desc": "Instagram profilini aç", "action": "external", "target": "https://www.instagram.com/lov4ardaa/"},
     {"name": "github", "desc": "GitHub profilini aç", "action": "external", "target": "https://github.com/ardaaxee"},
     {"name": "theme", "desc": "Kontrast modunu değiştir", "action": "theme"},
     {"name": "motion", "desc": "Hareket efektlerini aç/kapat", "action": "motion"},

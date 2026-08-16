@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 
 <title>ARDA.OS — {{ content.profile.handle }}</title>
-<meta name="description" content="ARDA.OS — Digital Identity / 2026. Merak ediyorum, sistemler kuruyorum, fikirleri gerçeğe dönüştürüyorum. Android üzerinde kurulan sistemler, projeler ve deneyler.">
+<meta name="description" content="ARDA.OS — Digital Identity / 2026. Build. Experiment. Learn. Bir telefonun içine sığan geliştirme ortamı: Termux Lab, projeler, araçlar ve deneyler.">
 <meta name="author" content="ARDA">
 <meta name="theme-color" content="#000000">
 <meta name="color-scheme" content="dark">
@@ -13,17 +13,19 @@
 
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="ARDA.OS">
-<meta property="og:title" content="ARDA.OS — Digital Identity / 2026">
-<meta property="og:description" content="Merak ediyorum. Sistemler kuruyorum. Fikirleri gerçeğe dönüştürüyorum.">
+<meta property="og:title" content="ARDA.OS — Build. Experiment. Learn.">
+<meta property="og:description" content="Digital Identity / 2026. Bir telefonun içine sığan geliştirme ortamı: Termux Lab, projeler ve deneyler.">
 <meta property="og:url" content="{{ request.url_root }}">
 <meta property="og:image" content="{{ request.url_root }}static/og.png?v={{ asset_v }}">
+<meta property="og:image:type" content="image/png">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="ARDA.OS — Digital Identity / 2026">
 <meta property="og:locale" content="tr_TR">
 
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="ARDA.OS — Digital Identity / 2026">
-<meta name="twitter:description" content="Merak ediyorum. Sistemler kuruyorum. Fikirleri gerçeğe dönüştürüyorum.">
+<meta name="twitter:title" content="ARDA.OS — Build. Experiment. Learn.">
+<meta name="twitter:description" content="Digital Identity / 2026. Termux Lab, projeler ve deneyler.">
 <meta name="twitter:image" content="{{ request.url_root }}static/og.png?v={{ asset_v }}">
 
 <link rel="icon" href="{{ url_for('static', filename='favicon.svg') }}?v={{ asset_v }}" type="image/svg+xml">
@@ -44,7 +46,7 @@
   "name": "ARDA",
   "alternateName": "ARDA.OS",
   "url": "{{ request.url_root }}",
-  "description": "Merak ediyorum. Sistemler kuruyorum. Fikirleri gerçeğe dönüştürüyorum.",
+  "description": "Build. Experiment. Learn. Bir telefonun içine sığan geliştirme ortamı.",
   "sameAs": ["{{ content.profile.instagram }}"]
 }
 </script>
@@ -53,13 +55,22 @@
 <body>
 <a class="skip" href="#hero">İçeriğe atla</a>
 
-<!-- 11. açılış geçişi — 1.2 saniyeyi geçmez, tıklanınca hemen kapanır -->
+<!-- boot -->
 <div class="boot" id="boot" aria-hidden="true">
-  <div class="boot__inner">
+  <div class="boot__in">
     <div class="boot__mark">ARDA.OS</div>
     <div class="boot__line">INITIALIZING DIGITAL SPACE</div>
     <div class="boot__bar"><span class="boot__fill"></span></div>
   </div>
+</div>
+
+<!-- discover scan transition -->
+<div class="scan" id="scan" hidden aria-hidden="true">
+  <div class="scan__in">
+    <div class="scan__l" id="scanLine">SCANNING DIGITAL SPACE</div>
+    <div class="scan__dots"><i></i><i></i><i></i></div>
+  </div>
+  <div class="scan__sweep"></div>
 </div>
 
 <div class="grid" aria-hidden="true"></div>
@@ -99,15 +110,20 @@
   <symbol id="i-plus" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round">
     <path d="M12 5v14M5 12h14"/>
   </symbol>
+  <symbol id="i-search" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round">
+    <circle cx="11" cy="11" r="7"/><path d="M20 20l-3.6-3.6"/>
+  </symbol>
 </defs></svg>
 
-<!-- fixed chrome -->
 <header class="bar" id="bar">
-  <a class="bar__mark" href="#hero" aria-label="ARDA.OS — başa dön">
+  <a class="bar__mark" href="#hero" id="wordmark" aria-label="ARDA.OS — başa dön">
     <span class="bar__dot" aria-hidden="true"></span>ARDA<span class="bar__os">.OS</span>
   </a>
   <div class="bar__right">
-    <span class="bar__clock" id="barClock" aria-hidden="true">--:--</span>
+    <button class="bar__cmd" id="paletteBtn" type="button" aria-label="Ara ve komut çalıştır">
+      <svg width="16" height="16"><use href="#i-search"/></svg>
+      <kbd>⌘K</kbd>
+    </button>
     <a class="bar__ig" href="{{ content.profile.instagram }}" target="_blank" rel="noopener me" aria-label="Instagram profili">
       <svg width="17" height="17"><use href="#i-ig"/></svg>
     </a>
@@ -116,99 +132,96 @@
 
 <main>
 
-  <!-- 1. HERO -->
+  <!-- 2 — HERO -->
   <section class="hero" id="hero">
-    <div class="wrap">
+    <div class="hero__fx" aria-hidden="true">
+      <span class="hero__coord hero__coord--v" style="--p:22%"></span>
+      <span class="hero__coord hero__coord--v" style="--p:78%"></span>
+      <span class="hero__coord hero__coord--h" style="--p:30%"></span>
+      <span class="hero__coord hero__coord--h" style="--p:72%"></span>
+      <span class="hero__mk" style="--x:22%;--y:30%"></span>
+      <span class="hero__mk" style="--x:78%;--y:30%"></span>
+      <span class="hero__mk" style="--x:22%;--y:72%"></span>
+      <span class="hero__mk" style="--x:78%;--y:72%"></span>
+      <span class="hero__tick" style="--x:22%;--y:30%">22.30</span>
+      <span class="hero__tick" style="--x:78%;--y:72%">78.72</span>
+    </div>
+
+    <div class="wrap hero__wrap">
       <p class="hero__meta">
-        <span class="hero__pulse" aria-hidden="true"></span>
-        DIGITAL IDENTITY / 2026
+        <span class="hero__pulse"></span>DIGITAL IDENTITY / 2026
       </p>
 
-      <h1 class="hero__title">
-        <span class="hero__word" data-text="ARDA">ARDA</span><span class="hero__ext" data-text=".OS">.OS</span>
-      </h1>
+      <h1 class="hero__title"><span class="hero__w" data-text="ARDA">ARDA</span><span class="hero__x" data-text=".OS">.OS</span></h1>
 
-      <div class="hero__manifesto" id="manifesto">
-        <p class="hero__line"><span>Merak ediyorum.</span></p>
-        <p class="hero__line"><span>Sistemler kuruyorum.</span></p>
-        <p class="hero__line"><span>Fikirleri gerçeğe dönüştürüyorum.</span></p>
-      </div>
+      <div class="hero__st" id="statement"></div>
 
-      <p class="hero__sub">Android üzerinde geliştiriyorum. Kurduğum her sistem burada.</p>
+      <div class="hero__man" id="manifesto"></div>
+
+      <div class="hero__live" id="heroLive"></div>
 
       <div class="hero__cta">
-        <a class="btn btn--solid mag" href="#whatido" data-scroll>
-          EXPLORE <svg width="16" height="16"><use href="#i-arrow"/></svg>
-        </a>
+        <button class="btn btn--solid mag" id="discoverBtn" type="button">
+          DISCOVER <svg width="16" height="16"><use href="#i-arrow"/></svg>
+        </button>
         <a class="btn mag" href="{{ content.profile.instagram }}" target="_blank" rel="noopener me">
           <svg width="16" height="16"><use href="#i-ig"/></svg> INSTAGRAM
         </a>
       </div>
+    </div>
 
-      <div class="hero__scroll" aria-hidden="true">
-        <span class="hero__scrollLine"></span> KAYDIR
-      </div>
+    <div class="hero__foot" aria-hidden="true">
+      <span class="hero__sweep"></span><span>SCROLL</span>
     </div>
   </section>
 
-  <!-- 2. SYSTEM STATUS -->
-  <section class="sec" id="status">
-    <div class="wrap">
-      <div class="head">
-        <span class="head__i">02</span>
-        <h2 class="head__t">SYSTEM STATUS</h2>
-        <span class="head__rule"></span>
-      </div>
-      <div class="stat" id="statusGrid"></div>
-      <p class="fine">Bu değerler cihazından okunur — sunucuya sorulmaz, uydurulmaz.</p>
-    </div>
-  </section>
-
-  <!-- 3. WHAT I DO -->
+  <!-- 3 — WHAT I DO -->
   <section class="sec" id="whatido">
     <div class="wrap">
       <div class="head">
-        <span class="head__i">03</span>
-        <h2 class="head__t">WHAT I DO</h2>
+        <span class="head__i">01</span>
+        <h2 class="head__t rvt">WHAT I DO</h2>
         <span class="head__rule"></span>
       </div>
       <div class="acc" id="whatidoList"></div>
     </div>
   </section>
 
-  <!-- 4. TERMUX LAB -->
+  <!-- 5 — TERMUX LAB -->
   <section class="sec sec--alt" id="lab">
     <div class="wrap">
       <div class="head">
-        <span class="head__i">04</span>
-        <h2 class="head__t">TERMUX LAB</h2>
+        <span class="head__i">02</span>
+        <h2 class="head__t rvt">TERMUX LAB</h2>
         <span class="head__rule"></span>
+        <span class="head__n" id="labCount">0 / 0</span>
       </div>
-      <p class="lead">Android üzerinde kurduğum sistemler.</p>
-      <div class="labgrid" id="labGrid"></div>
+      <p class="lead">Sıfırdan başlayan bir komut satırı yolu. Okuduğun her dersi işaretle — ilerlemen bu cihazda kalır.</p>
+      <div class="labbar"><span class="labbar__fill" id="labFill"></span></div>
+      <div class="labmods" id="labMods"></div>
       <p class="fine" id="labNote"></p>
     </div>
   </section>
 
-  <!-- 5. PROJECTS -->
+  <!-- 6 — PROJECTS -->
   <section class="sec" id="projects">
     <div class="wrap">
       <div class="head">
-        <span class="head__i">05</span>
-        <h2 class="head__t">PROJECTS</h2>
+        <span class="head__i">03</span>
+        <h2 class="head__t rvt">PROJECTS</h2>
         <span class="head__rule"></span>
         <span class="head__n">{{ content.projects|length + content.archive|length }}</span>
       </div>
-      <div class="projects" id="projectList"></div>
+      <div class="pjs" id="projectList"></div>
     </div>
   </section>
 
-  <!-- 6. NOW -->
+  <!-- 7 — NOW -->
   <section class="sec sec--alt" id="now">
     <div class="wrap">
       <div class="head">
-        <span class="head__i">06</span>
-        <h2 class="head__t">NOW</h2>
+        <span class="head__i">04</span>
+        <h2 class="head__t rvt">NOW</h2>
         <span class="head__rule"></span>
         <span class="head__n" id="nowDate"></span>
       </div>
@@ -216,45 +229,60 @@
     </div>
   </section>
 
-  <!-- 7. DIGITAL TOOLBOX -->
+  <!-- 8 — DIGITAL TOOLBOX -->
   <section class="sec" id="toolbox">
     <div class="wrap">
       <div class="head">
-        <span class="head__i">07</span>
-        <h2 class="head__t">DIGITAL TOOLBOX</h2>
+        <span class="head__i">05</span>
+        <h2 class="head__t rvt">DIGITAL TOOLBOX</h2>
         <span class="head__rule"></span>
       </div>
       <div class="tools" id="toolGrid"></div>
+      <div class="toolout" id="toolOut" hidden></div>
     </div>
   </section>
 
-  <!-- 16. CONSOLE -->
-  <section class="sec sec--alt" id="console">
+  <!-- 9 — LIVE ACTIVITY -->
+  <section class="sec sec--alt" id="session">
     <div class="wrap">
       <div class="head">
-        <span class="head__i">08</span>
-        <h2 class="head__t">CONSOLE</h2>
+        <span class="head__i">06</span>
+        <h2 class="head__t rvt">SESSION</h2>
+        <span class="head__rule"></span>
+        <span class="head__n">LOCAL</span>
+      </div>
+      <p class="lead">Bu oturumun bilgileri. Tarayıcından okunur, hiçbir yere gönderilmez, kaydedilmez.</p>
+      <div class="sess" id="sessGrid"></div>
+    </div>
+  </section>
+
+  <!-- 4 — CONSOLE -->
+  <section class="sec" id="console">
+    <div class="wrap">
+      <div class="head">
+        <span class="head__i">07</span>
+        <h2 class="head__t rvt">CONSOLE</h2>
         <span class="head__rule"></span>
       </div>
-      <p class="lead">Site içi komutlar. Sistem komutu çalıştırmaz — sadece burada gezinir.</p>
+      <p class="lead">Site içi komutlar. Sistem komutu çalıştırmaz, cihazına erişmez.</p>
       <div class="term" id="term"></div>
     </div>
   </section>
 
-  <!-- 8 + 9. INSTAGRAM + SHARE -->
-  <section class="sec" id="connect">
+  <!-- 10 + 11 — CONNECT -->
+  <section class="sec sec--alt" id="connect">
     <div class="wrap">
       <div class="head">
-        <span class="head__i">09</span>
-        <h2 class="head__t">CONNECT</h2>
+        <span class="head__i">08</span>
+        <h2 class="head__t rvt">CONNECT</h2>
         <span class="head__rule"></span>
       </div>
 
-      <a class="follow mag" href="{{ content.profile.instagram }}" target="_blank" rel="noopener me">
+      <a class="follow mag" href="{{ content.profile.instagram }}" target="_blank" rel="noopener me" id="followCta">
         <span class="follow__glow" aria-hidden="true"></span>
         <span class="follow__k">FOLLOW THE JOURNEY</span>
         <span class="follow__h">{{ content.profile.handle }}</span>
-        <span class="follow__n">Siteyi kapatmadan önce Instagram'a uğra.</span>
+        <span class="follow__n">Burada gördüklerin burada bitmiyor.</span>
         <span class="follow__go"><svg width="18" height="18"><use href="#i-ig"/></svg> PROFİLE GİT</span>
       </a>
 
@@ -277,7 +305,6 @@
     </div>
   </section>
 
-  <!-- 17. FOOTER -->
   <footer class="foot">
     <div class="wrap">
       <div class="foot__mark">ARDA<span>.OS</span></div>
@@ -286,7 +313,7 @@
         <a href="{{ content.profile.instagram }}" target="_blank" rel="noopener me">Instagram</a>
         <a href="{{ content.projects[0].repo if content.projects else '#' }}" target="_blank" rel="noopener">Kaynak</a>
         <a href="/api/status">API</a>
-        <a href="#hero" data-scroll>Back to top <svg width="13" height="13"><use href="#i-up"/></svg></a>
+        <a href="#hero" data-top>Back to top <svg width="13" height="13"><use href="#i-up"/></svg></a>
       </div>
       <div class="foot__fine">framework yok · web fontu yok · takip kodu yok · v{{ version }}</div>
     </div>
@@ -294,7 +321,7 @@
 
 </main>
 
-<!-- 10. DISCOVER -->
+<!-- discover nav -->
 <nav class="disc" id="disc" aria-label="Bölüm gezinme">
   <button class="disc__toggle" id="discToggle" type="button" aria-expanded="false" aria-controls="discList">
     <svg width="16" height="16"><use href="#i-menu"/></svg>
@@ -303,7 +330,32 @@
   <ul class="disc__list" id="discList"></ul>
 </nav>
 
-<!-- modal -->
+<!-- command palette -->
+<div class="pal" id="pal" hidden role="dialog" aria-modal="true" aria-label="Komut merkezi">
+  <div class="pal__box">
+    <div class="pal__bar">
+      <svg width="17" height="17" aria-hidden="true"><use href="#i-search"/></svg>
+      <input class="pal__in" id="palInput" type="text" autocomplete="off" autocapitalize="off"
+             autocorrect="off" spellcheck="false" placeholder="ara veya komut yaz…"
+             aria-label="Arama ve komut girişi">
+      <button class="pal__esc" id="palClose" type="button">ESC</button>
+    </div>
+    <div class="pal__res" id="palRes"></div>
+  </div>
+</div>
+
+<!-- full-screen project detail -->
+<div class="det" id="det" hidden role="dialog" aria-modal="true" aria-labelledby="detTitle">
+  <div class="det__bar">
+    <span class="det__k" id="detKind"></span>
+    <button class="det__x" id="detClose" type="button" aria-label="Kapat">
+      <svg width="18" height="18"><use href="#i-x"/></svg>
+    </button>
+  </div>
+  <div class="det__body" id="detBody"></div>
+</div>
+
+<!-- sheet modal (contact / qr) -->
 <div class="scrim" id="scrim" hidden></div>
 <div class="modal" id="modal" hidden role="dialog" aria-modal="true" aria-labelledby="modalTitle">
   <div class="modal__head">

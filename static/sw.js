@@ -1,7 +1,7 @@
 /* Offline support. Static assets are cached; HTML and API stay network-first
  * so content is never served stale when the device is online. */
 
-const VERSION = "arda-os-v3";
+const VERSION = "arda-os-v4";
 const ASSETS = [
   "/",
   "/static/style.css",
@@ -9,9 +9,14 @@ const ASSETS = [
   "/static/js/core.js",
   "/static/js/data.js",
   "/static/js/modal.js",
+  "/static/js/detail.js",
   "/static/js/sections.js",
+  "/static/js/lab.js",
+  "/static/js/session.js",
   "/static/js/console.js",
   "/static/js/connect.js",
+  "/static/js/palette.js",
+  "/static/js/egg.js",
   "/static/favicon.svg",
 ];
 
