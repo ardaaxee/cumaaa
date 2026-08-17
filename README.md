@@ -62,7 +62,57 @@ Contact formu backend olmadığında otomatik olarak **mailto** ile açılır.
 
 ---
 
-## Yayınlama (Instagram linki için)
+## Production dağıtımı (önerilen — Instagram bio için)
+
+**Neden statik değil?** `/api/contact` sunucu tarafında çalışır (16 KB gövde sınırı,
+IP rate limit, Origin kontrolü, dosyaya yazma). Tamamen statik hosting Python
+çalıştıramaz; orada form yalnızca **mailto** fallback'ine düşer. Contact'ın gerçek
+çalışması için **Flask + Gunicorn** (production WSGI) gerekir. HTTPS ve reverse
+proxy'yi yönetilen platform (Render/Railway) otomatik sağlar — **dev server internete
+açılmaz.**
+
+Repoda hazır dosyalar: `Procfile`, `runtime.txt`, `render.yaml`, `requirements.txt`.
+
+### Render.com (en kolay, ücretsiz)
+1. Repo'yu GitHub'a gönder (bu branch'te).
+2. https://dashboard.render.com → **New → Blueprint** → repoyu seç.
+   `render.yaml` otomatik okunur (veya **New → Web Service** ile manuel):
+   - Build: `pip install -r requirements.txt`
+   - Start: `gunicorn app:app --workers 1 --threads 4 --bind 0.0.0.0:$PORT --timeout 30`
+   - Health check path: `/api/health`
+3. Deploy sonrası verilen `https://arda-os.onrender.com` gibi URL'yi
+   Instagram bio linkine koy.
+
+### Railway / Heroku
+`Procfile` bunlarda da geçerli:
+```
+web: gunicorn app:app --workers 1 --threads 4 --bind 0.0.0.0:$PORT --timeout 30
+```
+Railway: New Project → Deploy from repo (otomatik algılar). `PORT` platformca verilir.
+
+### Kendi sunucun (VPS) — nginx/Caddy + Gunicorn
+```bash
+pip install -r requirements.txt
+gunicorn app:app --workers 1 --threads 4 --bind 127.0.0.1:8080 --timeout 30
+```
+Önüne HTTPS terminasyonu yapan bir reverse proxy koy (Caddy örneği):
+```
+arda.example.com {
+    reverse_proxy 127.0.0.1:8080
+}
+```
+
+> **Not — tek worker bilinçlidir:** Bellek-içi rate limit (app.py) süreç genelinde
+> tutarlı olsun diye `--workers 1 --threads 4` kullanılır (thread'ler `threading.Lock`
+> ile korunur). Ölçek gerekiyorsa harici bir sayaç (Redis) gerekir.
+>
+> **Not — mesaj kalıcılığı:** `content/messages.jsonl` yerel dosyaya yazılır. Render
+> free gibi **ephemeral** disklerde her yeniden dağıtımda sıfırlanır. Mesajları kalıcı
+> istiyorsan bir kalıcı disk (Render Disk) bağla ya da e-posta/DB entegrasyonu ekle.
+
+### Statik alternatif (contact = mailto)
+Backend istemiyorsan aşağıdaki statik yollar da çalışır; bu durumda contact formu
+otomatik **mailto** fallback'i kullanır (sunucu-taraflı /api/contact devre dışı olur).
 
 ### Netlify Drop (en hızlı)
 1. https://app.netlify.com/drop adresine git.

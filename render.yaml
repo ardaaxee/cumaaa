@@ -1,0 +1,16 @@
+# Render.com — tek tıkla dağıtım için Blueprint.
+# Repo'yu Render'a bağla; Render bu dosyayı okuyup Gunicorn ile yayına alır.
+# HTTPS ve reverse proxy Render tarafından otomatik sağlanır (dev server internete açılmaz).
+services:
+  - type: web
+    name: arda-os
+    runtime: python
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    # Tek worker + thread: bellek-içi rate limit (app.py) süreç genelinde tutarlı kalır
+    startCommand: gunicorn app:app --workers 1 --threads 4 --bind 0.0.0.0:$PORT --timeout 30
+    healthCheckPath: /api/health
+    autoDeploy: true
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11.15
