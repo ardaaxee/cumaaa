@@ -520,6 +520,62 @@ a.now-row:hover .now-arrow { color: var(--accent); transform: translate(4px,-4px
 .sr-note { font-family: var(--mono); font-size: 7.5px; letter-spacing: 0.16em; color: var(--faint); border: 1px solid var(--line-soft); border-radius: 20px; padding: 2px 8px; }
 
 /* =========================================================================
+   v6 — kişisel deneyim: SIGNAL / DIGITAL DNA / CURRENT SESSION / FINAL SCREEN
+   ========================================================================= */
+
+/* Bölüm alt açıklaması */
+.signal-sub { font-family: var(--mono); font-size: 9px; letter-spacing: 0.16em; color: var(--muted); margin-bottom: var(--s-3); text-transform: lowercase; }
+
+/* Hero meta canlı nokta */
+.live-dot { display: inline-block; width: 6px; height: 6px; border-radius: 50%; background: var(--ok); margin-right: 7px; vertical-align: 1px; }
+.pmeta-v#pm-building, .pmeta-v#pm-status { text-transform: uppercase; }
+
+/* DIGITAL DNA — bağlı harita */
+.dna { position: relative; min-height: 230px; display: grid; place-items: center; padding: var(--s-3) 0; }
+.dna-lines { position: absolute; inset: 0; z-index: 0; pointer-events: none; }
+.dna-lines line { stroke: rgba(255,255,255,0.10); stroke-width: 1; }
+.dna-lines .dna-hub { fill: var(--accent); opacity: 0.5; }
+.dna-nodes { position: relative; z-index: 1; display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 10px; max-width: 100%; }
+.dna-node {
+  display: inline-flex; align-items: center; gap: 9px; min-height: 44px; padding: 0 15px;
+  border: 1px solid var(--line); border-radius: 999px; background: var(--bg);
+  font-family: var(--mono); font-size: 11px; letter-spacing: 0.12em; color: var(--ink-dim);
+  transition: border-color .3s, color .3s, transform .3s var(--ease);
+}
+.dna-node.reveal, .dna-node { }
+.dna-node:not(.in) { opacity: 0; transform: translateY(8px); }
+.dna-node.in { opacity: 1; transform: none; transition: opacity .5s var(--ease), transform .5s var(--ease); transition-delay: var(--d,0ms); }
+.dna-node:hover { border-color: var(--line-hard); color: var(--ink); }
+.dna-node:active { transform: scale(0.96); }
+.dna-dot { width: 5px; height: 5px; border-radius: 50%; background: var(--accent); opacity: 0.7; flex: 0 0 auto; }
+
+/* Termux başlık + modül sayısı */
+.termux-kb { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.termux-count { color: var(--accent); border: 1px solid var(--line); border-radius: 999px; padding: 3px 9px; letter-spacing: 0.14em; }
+
+/* Connect CTA — handle + tagline */
+.connect-cta .cta-main { display: flex; flex-direction: column; gap: 4px; }
+.cta-handle { font-family: var(--mono); font-size: 9px; letter-spacing: 0.14em; color: var(--bg); opacity: 0.7; }
+.cta-tagline { font-size: 13px; color: var(--muted); margin: calc(-1 * var(--s-3) + 4px) 0 var(--s-4); }
+
+/* CURRENT SESSION */
+.current-session { margin-top: var(--s-5); }
+.cs-head { display: flex; align-items: baseline; gap: 12px; margin-bottom: var(--s-2); }
+.cs-head .idx { font-family: var(--mono); font-size: 11px; color: var(--accent); }
+.cs-head .ttl { font-family: var(--mono); font-size: 10px; letter-spacing: 0.28em; color: var(--ink-dim); }
+.cs-head .rule { flex: 1; height: 1px; background: var(--line-soft); }
+
+/* FINAL SCREEN */
+.final-screen { margin-top: var(--s-6); padding: var(--s-6) 0 var(--s-4); border-top: 1px solid var(--line-soft); text-align: center; }
+.fs-label { font-family: var(--mono); font-size: 9px; letter-spacing: 0.36em; color: var(--muted); }
+.fs-system { font-family: var(--display); font-weight: 800; letter-spacing: -0.03em; font-size: clamp(40px, 15vw, 76px); line-height: 0.9; margin: var(--s-3) 0; color: var(--ink); }
+.fs-statement { display: flex; flex-direction: column; gap: 2px; align-items: center; }
+.fs-statement span { font-family: var(--mono); font-size: 11px; letter-spacing: 0.24em; color: var(--ink-dim); }
+.fs-statement span:nth-child(2) { color: var(--muted); }
+.fs-statement span:nth-child(3) { color: var(--faint); }
+.fs-foot { margin-top: var(--s-4); font-family: var(--mono); font-size: 8.5px; letter-spacing: 0.16em; color: var(--faint); display: flex; gap: 8px; justify-content: center; }
+
+/* =========================================================================
    RESPONSIVE
    ========================================================================= */
 @media (max-width: 360px) {

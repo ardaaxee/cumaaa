@@ -21,24 +21,21 @@ window.SITE_DATA = {
     ],
     "line": "Merak ettiğim şeyleri kurar, çalışana kadar uğraşırım."
   },
-  "now": [
-    {
-      "k": "LISTENING",
-      "v": "Spotify",
-      "sub": "AUDIO",
-      "href": ""
-    },
+  "signal": [
     {
       "k": "BUILDING",
       "v": "ARDA.OS",
-      "sub": "IN PROGRESS",
-      "href": ""
+      "sub": "IN PROGRESS"
     },
     {
       "k": "LEARNING",
       "v": "Linux / Termux",
-      "sub": "DAILY",
-      "href": ""
+      "sub": "DAILY"
+    },
+    {
+      "k": "EXPLORING",
+      "v": "AI / Web / Automation",
+      "sub": "CURIOUS"
     }
   ],
   "music": {
@@ -56,6 +53,7 @@ window.SITE_DATA = {
       "type": "Digital Space",
       "what": "Instagram bio'mdaki linkin açtığı kişisel dijital alan.",
       "why": "Sıradan bir link listesi istemedim; kendi yerim olsun istedim.",
+      "learned": "Tasarımın koddan önce geldiğini; boşluk ve tipografinin çoğu efektten daha güçlü olduğunu.",
       "tech": [
         "HTML",
         "CSS",
@@ -73,6 +71,7 @@ window.SITE_DATA = {
       "type": "Learning Space",
       "what": "Termux komutlarını topladığım küçük öğrenme alanı.",
       "why": "Öğrendiklerimi unutmamak ve tek yerde tutmak için yapıyorum.",
+      "learned": "İlerlemeyi localStorage ile saklamayı ve bir şeyi öğretmenin en iyi tekrar yolu olduğunu.",
       "tech": [
         "JS",
         "localStorage"
@@ -88,6 +87,7 @@ window.SITE_DATA = {
       "type": "Experiment",
       "what": "Görsel ve animasyon denediğim bir oyun alanı.",
       "why": "Sadece merak — canvas'la oynayıp neler olduğunu görüyorum.",
+      "learned": "requestAnimationFrame ile akıcı hareketi ve efektlerde 'az çoktur' dengesini.",
       "tech": [
         "Canvas",
         "JS"
@@ -397,10 +397,27 @@ window.SITE_DATA = {
           "t": "Önce sade ve hızlı olsun; süsleme sonra gelir."
         }
       ]
+    },
+    {
+      "id": "automation",
+      "code": "07",
+      "title": "AUTOMATION",
+      "blurb": "Tekrarlayan işleri bırakmak.",
+      "sections": [
+        {
+          "h": "FİKİR",
+          "t": "Aynı işi iki kez yapıyorsam, üçüncüde bir script yazmayı deniyorum."
+        },
+        {
+          "h": "NASIL",
+          "t": "Küçük Python/shell script'leri + Termux ile pratik otomasyonlar."
+        }
+      ]
     }
   ],
   "connect": {
     "intro": "Bir fikir, iş ya da sadece merhaba.",
+    "ctaTagline": "Burada ne yaptığımı görmek için.",
     "email": "acarcuma25@gmail.com",
     "links": [
       {

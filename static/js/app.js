@@ -42,10 +42,14 @@
     $("#eb-kicker").textContent = p.kicker || "DIGITAL SPACE";
     $("#brand-name").textContent = p.system || "ARDA.OS";
     $("#bio").textContent = p.bio || "";
-    $("#pm-build").textContent = p.build || "2026";
-    $("#foot-handle").textContent = p.handle || "";
+    if ($("#foot-handle")) $("#foot-handle").textContent = p.handle || "";
     const ig = $("#ig-btn"); ig.href = p.instagram || "#";
     $("#ig-label").textContent = p.igCta || "INSTAGRAM";
+
+    // Hero meta: CURRENTLY = signal[0] (BUILDING ...)
+    const sig = DATA.signal || [];
+    const building = sig.find((s) => /BUILD/i.test(s.k)) || sig[0];
+    if (building) $("#pm-building").textContent = (building.v || "").toUpperCase();
 
     // Hero ana ifade: hero.statement dizisi -> stacked "BUILD." vb.
     // Zamanlama: BUILD ~0.3s, EXPERIMENT ~0.5s, LEARN ~0.7s
@@ -54,18 +58,28 @@
     $("#hero-statement").innerHTML = words.map((w, i) =>
       `<span class="hs-word" style="--wd:${300 + i * 200}ms">${esc(w)}${/[.]$/.test(w) ? "" : "."}</span>`).join("");
     $("#hero-line").textContent = h.line || "";
+
+    // Final screen
+    $("#fs-system").textContent = p.system || "ARDA.OS";
+    $("#fs-statement").innerHTML = words.map((w) => `<span>${esc(w)}${/[.]$/.test(w) ? "" : "."}</span>`).join("");
+    $("#fs-year").textContent = `${p.system || "ARDA.OS"} ${p.build || "2026"}`;
   }
 
   // Gerçek oturum bilgisi — yalnızca tarayıcıdan okunabilen veriler (sahte metrik yok)
   const SESSION_ID = Math.random().toString(16).slice(2, 6).toUpperCase();
+  const SESSION_START = Date.now();
+  function timeOnSite() {
+    const s = Math.floor((Date.now() - SESSION_START) / 1000);
+    return String((s / 60) | 0).padStart(2, "0") + ":" + String(s % 60).padStart(2, "0");
+  }
   function renderSession() {
     const el = $("#session-readout"); if (!el) return;
     const device = isTouch ? "MOBILE" : "DESKTOP";
     const vp = `${window.innerWidth}×${window.innerHeight}`;
     const online = navigator.onLine ? "ONLINE" : "OFFLINE";
     el.innerHTML =
-      `<span class="sr-tag">SESSION</span>` +
-      [["DEVICE", device], ["VIEWPORT", vp], ["STATUS", online], ["ID", SESSION_ID]]
+      `<span class="sr-tag">ID ${esc(SESSION_ID)}</span>` +
+      [["DEVICE", device], ["VIEWPORT", vp], ["STATUS", online], ["TIME ON SITE", timeOnSite()]]
         .map(([k, v]) => `<span class="sr-item"><b>${k}</b> ${esc(v)}</span>`).join("") +
       `<span class="sr-note">LOCAL ONLY</span>`;
   }
@@ -74,6 +88,8 @@
     let t; window.addEventListener("resize", () => { clearTimeout(t); t = setTimeout(renderSession, 200); });
     window.addEventListener("online", renderSession);
     window.addEventListener("offline", renderSession);
+    // TIME ON SITE'ı düşük maliyetle güncelle
+    setInterval(() => { if (!document.hidden) renderSession(); }, 15000);
   }
 
   // Gerçek yerel saat (browser verisi)
@@ -88,9 +104,10 @@
     setTimeout(() => { tick(); setInterval(tick, 30000); }, (60 - new Date().getSeconds()) * 1000);
   }
 
-  function renderNow() {
+  function renderSignal() {
     const arrow = `<svg class="now-arrow" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17L17 7M9 7h8v8"/></svg>`;
-    $("#now-list").innerHTML = (DATA.now || []).map((n) => {
+    const items = DATA.signal || DATA.now || [];
+    $("#signal-list").innerHTML = items.map((n) => {
       const body = `<span class="now-body"><span class="now-v">${esc(n.v)}${n.href ? arrow : ""}</span>${n.sub ? `<span class="now-sub">${esc(n.sub)}</span>` : ""}</span>`;
       const k = `<span class="now-k">${esc(n.k)}</span>`;
       return n.href
@@ -117,15 +134,32 @@
     }
   }
 
-  function renderToolbox() {
-    // Kompakt sistem öğeleri: sadece kod + başlık (açıklama modalda)
-    $("#tools-grid").innerHTML = (DATA.toolbox || []).map((t, i) =>
-      `<button class="tool" data-i="${i}" style="--d:${i * 45}ms">
-        <div class="tool-code">${esc(t.code)}</div>
-        <div class="tool-title">${esc(t.title)}</div>
+  // DIGITAL DNA — kullanılan alanları birbirine bağlanan hafif bir harita gibi göster
+  function renderDNA() {
+    const nodes = DATA.toolbox || [];
+    $("#dna-nodes").innerHTML = nodes.map((t, i) =>
+      `<button class="dna-node" data-i="${i}" style="--d:${i * 55}ms" aria-label="${esc(t.title)}">
+        <span class="dna-dot"></span><span class="dna-label">${esc(t.title)}</span>
       </button>`).join("");
-    $$("#tools-grid .tool").forEach((el) =>
+    $$("#dna-nodes .dna-node").forEach((el) =>
       el.addEventListener("click", () => openTool(DATA.toolbox[+el.dataset.i])));
+    drawDNALines();
+  }
+  // Düğümleri merkeze bağlayan ince çizgiler (hub) — layout sonrası ölçülür
+  function drawDNALines() {
+    const map = $("#dna-map"), svg = $("#dna-lines"); if (!map || !svg) return;
+    const r = map.getBoundingClientRect();
+    if (r.width < 2) return;
+    svg.setAttribute("viewBox", `0 0 ${r.width} ${r.height}`);
+    svg.setAttribute("width", r.width); svg.setAttribute("height", r.height);
+    const cx = r.width / 2, cy = r.height / 2;
+    let lines = "";
+    $$("#dna-nodes .dna-node").forEach((n) => {
+      const b = n.getBoundingClientRect();
+      const x = b.left - r.left + b.width / 2, y = b.top - r.top + b.height / 2;
+      lines += `<line x1="${cx.toFixed(1)}" y1="${cy.toFixed(1)}" x2="${x.toFixed(1)}" y2="${y.toFixed(1)}" />`;
+    });
+    svg.innerHTML = lines + `<circle cx="${cx.toFixed(1)}" cy="${cy.toFixed(1)}" r="2.5" class="dna-hub"/>`;
   }
 
   function termuxTotal() {
@@ -185,6 +219,8 @@
     const cta = $("#connect-cta");
     cta.href = (DATA.profile && DATA.profile.instagram) || "#";
     $("#connect-cta-label").textContent = (DATA.profile && DATA.profile.igCta) || "FOLLOW THE JOURNEY";
+    $("#connect-handle").textContent = (DATA.profile && DATA.profile.handle) || "";
+    $("#cta-tagline").textContent = c.ctaTagline || "";
     const arrow = `<svg class="find-arrow" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17L17 7M9 7h8v8"/></svg>`;
     // Editorial FIND ARDA satırları: profil linkleri + copy/share/qr aksiyonları
     const rows = [];
@@ -230,17 +266,20 @@
     const link = pr.link
       ? `<a class="detail-link" href="${esc(pr.link)}" target="_blank" rel="noopener">PROJEYİ AÇ →</a>`
       : `<span class="detail-link soon" aria-disabled="true">LINK YAKINDA</span>`;
-    // Doğal anlatım: NEDİR / NEDEN / NEYLE
+    // Doğal anlatım: WHAT / WHY / BUILT WITH / WHAT I LEARNED
     const blocks = [
-      pr.what ? { h: "NEDİR", t: pr.what } : null,
-      pr.why ? { h: "NEDEN", t: pr.why } : null,
+      pr.what ? { h: "WHAT", t: pr.what } : null,
+      pr.why ? { h: "WHY", t: pr.why } : null,
     ].filter(Boolean).map((s) => `<div class="tool-section"><h4>${esc(s.h)}</h4><p>${esc(s.t)}</p></div>`).join("");
+    const learned = pr.learned
+      ? `<div class="tool-section learned"><h4>WHAT I LEARNED</h4><p>${esc(pr.learned)}</p></div>` : "";
     showOverlay(
       `<div class="detail-kicker">PROJECT / ${esc(pr.year)}</div>
        <h2 class="detail-title">${esc(pr.title)}</h2>
        <div class="detail-rows">${rows}</div>
        ${blocks}
-       ${tags ? `<div class="tool-section"><h4>NEYLE</h4><div class="tech-tags">${tags}</div></div>` : ""}${link}`);
+       ${tags ? `<div class="tool-section"><h4>BUILT WITH</h4><div class="tech-tags">${tags}</div></div>` : ""}
+       ${learned}${link}`);
   }
 
   function openTool(t) {
@@ -402,16 +441,16 @@
   let paletteIndex = [], palSel = 0, palFiltered = [];
   function buildPaletteIndex() {
     const idx = [];
-    (DATA.projects || []).forEach((p, i) => idx.push({ title: p.title, sub: p.type, cat: "PROJECT", run: () => openProject(DATA.projects[i]) }));
-    (DATA.termux.categories || []).forEach((c, i) => idx.push({ title: "TERMUX / " + c.title, sub: c.desc, cat: "TERMUX", run: () => { scrollToSection("#sec-termux"); setTimeout(() => openTermux(DATA.termux.categories[i]), 300); } }));
-    (DATA.toolbox || []).forEach((t, i) => idx.push({ title: t.title, sub: t.blurb || "araç", cat: "TOOL", run: () => openTool(DATA.toolbox[i]) }));
-    idx.push({ title: "PROFILE", sub: "kimlik", cat: "SECTION", run: () => scrollToSection("#sec-profile") });
-    idx.push({ title: "NOW", sub: "şu an", cat: "SECTION", run: () => scrollToSection("#sec-now") });
-    idx.push({ title: "MUSIC", sub: DATA.music.url ? "spotify" : "yakında", cat: "SECTION", run: () => (DATA.music.url ? window.open(DATA.music.url, "_blank") : scrollToSection("#sec-music")) });
-    idx.push({ title: "CONTACT", sub: "mesaj gönder", cat: "SECTION", run: () => scrollToSection("#sec-connect") });
-    idx.push({ title: "COPY LINK", sub: "bağlantıyı kopyala", cat: "ACTION", run: () => { openShare(); handleShareAction("copy"); } });
-    idx.push({ title: "SHARE", sub: "paylaş", cat: "ACTION", run: () => { openShare(); handleShareAction("share"); } });
-    idx.push({ title: "QR CODE", sub: "qr kod", cat: "ACTION", run: () => { openShare(); handleShareAction("qr"); } });
+    (DATA.projects || []).forEach((p, i) => idx.push({ title: p.title, sub: p.type, cat: "PROJECT", cmd: "projects project", run: () => openProject(DATA.projects[i]) }));
+    (DATA.termux.categories || []).forEach((c, i) => idx.push({ title: "TERMUX / " + c.title, sub: c.desc, cat: "TERMUX", cmd: "termux", run: () => { scrollToSection("#sec-termux"); setTimeout(() => openTermux(DATA.termux.categories[i]), 300); } }));
+    (DATA.toolbox || []).forEach((t, i) => idx.push({ title: t.title, sub: t.blurb || "araç", cat: "TOOL", cmd: "tools tool dna", run: () => openTool(DATA.toolbox[i]) }));
+    idx.push({ title: "PROFILE", sub: "kimlik", cat: "SECTION", cmd: "profile", run: () => scrollToSection("#sec-profile") });
+    idx.push({ title: "SIGNAL", sub: "şu anki durum", cat: "SECTION", cmd: "signal now", run: () => scrollToSection("#sec-signal") });
+    idx.push({ title: "MUSIC", sub: DATA.music.url ? "spotify" : "yakında", cat: "SECTION", cmd: "music", run: () => (DATA.music.url ? window.open(DATA.music.url, "_blank") : scrollToSection("#sec-music")) });
+    idx.push({ title: "CONNECT", sub: "iletişim", cat: "SECTION", cmd: "connect contact", run: () => scrollToSection("#sec-connect") });
+    idx.push({ title: "COPY LINK", sub: "bağlantıyı kopyala", cat: "ACTION", cmd: "copy search", run: () => { openShare(); handleShareAction("copy"); } });
+    idx.push({ title: "SHARE", sub: "paylaş", cat: "ACTION", cmd: "share", run: () => { openShare(); handleShareAction("share"); } });
+    idx.push({ title: "QR CODE", sub: "qr kod", cat: "ACTION", cmd: "qr", run: () => { openShare(); handleShareAction("qr"); } });
     paletteIndex = idx;
   }
   const palette = $("#palette"), palInput = $("#palette-input"), palResults = $("#palette-results");
@@ -431,8 +470,9 @@
   }
   function renderPalette(q) {
     q = q.trim().toLowerCase();
+    if (q[0] === "/") q = q.slice(1);   // slash komut desteği: /projects, /termux ...
     palFiltered = !q ? paletteIndex : paletteIndex.filter((it) =>
-      (it.title + " " + it.cat + " " + (it.sub || "")).toLowerCase().includes(q));
+      (it.title + " " + it.cat + " " + (it.sub || "") + " " + (it.cmd || "")).toLowerCase().includes(q));
     palSel = 0;
     palResults.innerHTML = palFiltered.length
       ? palFiltered.map((it, i) =>
@@ -484,7 +524,7 @@
   function scrollToSection(sel) { const el = $(sel); if (el) el.scrollIntoView({ behavior: reduceMotion ? "auto" : "smooth", block: "start" }); }
 
   function setupReveal() {
-    const sel = ".reveal, .hero-statement, .tool, .termux-cat, .project";
+    const sel = ".reveal, .hero-statement, .tool, .dna-node, .termux-cat, .project";
     if (reduceMotion) { $$(sel).forEach((e) => e.classList.add("in")); return; }
     const io = new IntersectionObserver((ents) => ents.forEach((en) => { if (en.isIntersecting) { en.target.classList.add("in"); io.unobserve(en.target); } }), { threshold: 0.12, rootMargin: "0px 0px -6% 0px" });
     $$(sel).forEach((el) => io.observe(el));
@@ -638,8 +678,9 @@
     let taps = 0, tapTimer;
     $("#avatar").addEventListener("click", () => { taps++; clearTimeout(tapTimer); tapTimer = setTimeout(() => (taps = 0), 900); if (taps >= 5) { taps = 0; toast(eggs.avatar || "access granted"); $("#hero-name").classList.add("glitch"); setTimeout(() => $("#hero-name").classList.remove("glitch"), 1200); } });
 
-    // (4) Footer'a dokun
-    $("#foot").addEventListener("click", () => toast(eggs.footer || ""));
+    // (4) Final ekranına dokun
+    const footEl = $("#fs-foot") || $("#foot");
+    if (footEl) footEl.addEventListener("click", () => toast(eggs.footer || ""));
 
     // (3) "?" + type "arda" + konami + Esc
     let buf = "", konami = [], seq = ["ArrowUp", "ArrowUp", "ArrowDown", "ArrowDown"];
@@ -660,10 +701,13 @@
   async function init() {
     DATA = await loadData();
     if (!DATA) { $("#boot").innerHTML = '<div class="boot-word">içerik yüklenemedi</div>'; return; }
-    renderProfile(); startClock(); setupSession(); renderNow(); renderMusic(); renderToolbox(); renderTermux(); renderProjects(); renderConnect();
+    renderProfile(); startClock(); setupSession(); renderSignal(); renderMusic(); renderDNA(); renderTermux(); renderProjects(); renderConnect();
     buildPaletteIndex();
     setupReveal(); setupTouchStates(); setupDots(); setupScrollBar(); setupPointerFX(); setupCoords(); setupAmbient();
     setupContact(); setupSecrets(); boot();
+    // DNA çizgilerini yeniden çiz (yerleşim/resize)
+    requestAnimationFrame(drawDNALines);
+    let dnaT; window.addEventListener("resize", () => { clearTimeout(dnaT); dnaT = setTimeout(drawDNALines, 200); });
   }
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", init); else init();
 })();

@@ -76,17 +76,18 @@
           <svg class="ig-arrow" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17L17 7M9 7h8v8"/></svg>
         </a>
         <div class="reveal pmeta" style="--d:1160ms">
-          <div class="pmeta-cell"><div class="pmeta-k">CURRENTLY</div><div class="pmeta-v" id="pm-status">ONLINE</div></div>
           <div class="pmeta-cell"><div class="pmeta-k">LOCAL TIME</div><div class="pmeta-v" id="pm-clock">--:--</div></div>
-          <div class="pmeta-cell"><div class="pmeta-k">BUILD</div><div class="pmeta-v" id="pm-build">2026</div></div>
+          <div class="pmeta-cell"><div class="pmeta-k">STATUS</div><div class="pmeta-v" id="pm-status"><span class="live-dot"></span>ONLINE</div></div>
+          <div class="pmeta-cell"><div class="pmeta-k">CURRENTLY</div><div class="pmeta-v" id="pm-building">BUILDING</div></div>
         </div>
       </div>
     </section>
 
-    <!-- 02 NOW -->
-    <section class="section" id="sec-now" data-index="02" data-name="NOW">
-      <div class="reveal section-head"><span class="idx">02</span><span class="ttl">NOW</span><span class="rule"></span></div>
-      <div class="now-list" id="now-list"></div>
+    <!-- 02 SIGNAL -->
+    <section class="section" id="sec-signal" data-index="02" data-name="SIGNAL">
+      <div class="reveal section-head"><span class="idx">02</span><span class="ttl">SIGNAL</span><span class="rule"></span></div>
+      <div class="reveal signal-sub">şu anki dijital durum</div>
+      <div class="now-list" id="signal-list"></div>
     </section>
 
     <!-- 03 MUSIC -->
@@ -95,16 +96,20 @@
       <div class="reveal now-playing" id="now-playing"></div>
     </section>
 
-    <!-- 04 TOOLBOX -->
-    <section class="section" id="sec-tools" data-index="04" data-name="TOOLBOX">
-      <div class="reveal section-head"><span class="idx">04</span><span class="ttl">DIGITAL TOOLBOX</span><span class="rule"></span></div>
-      <div class="tools-grid" id="tools-grid"></div>
+    <!-- 04 DIGITAL DNA -->
+    <section class="section" id="sec-tools" data-index="04" data-name="DNA">
+      <div class="reveal section-head"><span class="idx">04</span><span class="ttl">DIGITAL DNA</span><span class="rule"></span></div>
+      <div class="reveal signal-sub">kullandığım · öğrendiğim alanlar — dokun, aç</div>
+      <div class="dna reveal" id="dna-map">
+        <svg class="dna-lines" id="dna-lines" aria-hidden="true"></svg>
+        <div class="dna-nodes" id="dna-nodes"></div>
+      </div>
     </section>
 
     <!-- 05 TERMUX -->
     <section class="section" id="sec-termux" data-index="05" data-name="TERMUX">
       <div class="reveal section-head"><span class="idx">05</span><span class="ttl">TERMUX LAB</span><span class="rule"></span></div>
-      <div class="reveal termux-kb">LAB / KNOWLEDGE BASE</div>
+      <div class="reveal termux-kb"><span>LAB / KNOWLEDGE BASE</span><span class="termux-count" id="termux-count">24 MODULES</span></div>
       <p class="reveal termux-intro" id="termux-intro"></p>
       <div class="reveal termux-progress"><div class="tp-bar"><i id="tp-fill"></i></div><span class="tp-label" id="tp-label">0 / 0 COMPLETE</span></div>
       <div class="termux-grid" id="termux-grid"></div>
@@ -130,18 +135,29 @@
       </form>
 
       <a class="reveal connect-cta" id="connect-cta" target="_blank" rel="noopener">
-        <span id="connect-cta-label">FOLLOW THE JOURNEY</span>
+        <span class="cta-main"><span id="connect-cta-label">FOLLOW THE JOURNEY</span><span class="cta-handle" id="connect-handle">@lov4ardaa</span></span>
         <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
       </a>
+      <p class="reveal cta-tagline" id="cta-tagline"></p>
+
       <div class="reveal">
         <h2 class="find-title">FIND ARDA</h2>
         <div class="find-list" id="find-list"></div>
       </div>
 
-      <div class="reveal session-readout" id="session-readout" aria-label="Oturum bilgisi — yalnızca cihazından okunur"></div>
-      <footer class="foot" id="foot">
-        <span id="foot-handle">@arda</span><span>·</span><span>ARDA.OS 2026</span>
-      </footer>
+      <!-- CURRENT SESSION — yalnızca bu cihazdaki oturumdan üretilen gerçek veriler -->
+      <div class="reveal current-session">
+        <div class="cs-head"><span class="idx">·</span><span class="ttl">CURRENT SESSION</span><span class="rule"></span></div>
+        <div class="session-readout" id="session-readout" aria-label="Oturum bilgisi — yalnızca cihazından okunur"></div>
+      </div>
+
+      <!-- FINAL SCREEN -->
+      <div class="reveal final-screen" id="final-screen">
+        <div class="fs-label">END OF TRANSMISSION</div>
+        <div class="fs-system" id="fs-system">ARDA.OS</div>
+        <div class="fs-statement" id="fs-statement"></div>
+        <div class="fs-foot"><span id="foot-handle">@lov4ardaa</span><span>·</span><span id="fs-year">ARDA.OS 2026</span></div>
+      </div>
       <div class="end-line" id="end-line"></div>
     </section>
 
