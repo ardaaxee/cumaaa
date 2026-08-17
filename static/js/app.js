@@ -45,11 +45,14 @@
     $("#pm-build").textContent = p.build || "2026";
     $("#foot-handle").textContent = p.handle || "";
     const ig = $("#ig-btn"); ig.href = p.instagram || "#";
+    $("#ig-label").textContent = p.igCta || "INSTAGRAM";
 
-    // Hero ana ifade: tagline "BUILD / EXPERIMENT / LEARN" -> stacked "BUILD." vb.
-    const words = (p.tagline || "BUILD / EXPERIMENT / LEARN").split("/").map((w) => w.trim()).filter(Boolean);
+    // Hero ana ifade: hero.statement dizisi -> stacked "BUILD." vb.
+    const h = DATA.hero || {};
+    const words = (h.statement && h.statement.length ? h.statement : ["BUILD", "EXPERIMENT", "LEARN"]);
     $("#hero-statement").innerHTML = words.map((w, i) =>
       `<span class="hs-word" style="--wd:${120 + i * 110}ms">${esc(w)}${/[.]$/.test(w) ? "" : "."}</span>`).join("");
+    $("#hero-line").textContent = h.line || "";
   }
 
   // Gerçek yerel saat (browser verisi)
@@ -84,8 +87,8 @@
       box.innerHTML =
         `<div class="np-head">${eq} NOW PLAYING</div>
          <div class="np-title">SPOTIFY</div>
-         <div class="np-sub">${esc(m.note || "profili / çalma listesini aç")}</div>
-         <a class="np-open" href="${esc(m.url)}" target="_blank" rel="noopener">SPOTIFY'DA AÇ →</a>`;
+         <div class="np-sub">${esc(m.note || "çalma listesini aç")}</div>
+         <a class="np-open" href="${esc(m.url)}" target="_blank" rel="noopener">${esc(m.cta || "LISTEN ON SPOTIFY →")}</a>`;
     } else {
       box.innerHTML =
         `<div class="np-head">${eq} NOW PLAYING</div>
@@ -93,15 +96,15 @@
     }
   }
 
-  function renderTools() {
+  function renderToolbox() {
     // Kompakt sistem öğeleri: sadece kod + başlık (açıklama modalda)
-    $("#tools-grid").innerHTML = (DATA.tools || []).map((t, i) =>
+    $("#tools-grid").innerHTML = (DATA.toolbox || []).map((t, i) =>
       `<button class="tool" data-i="${i}" style="--d:${i * 45}ms">
         <div class="tool-code">${esc(t.code)}</div>
         <div class="tool-title">${esc(t.title)}</div>
       </button>`).join("");
     $$("#tools-grid .tool").forEach((el) =>
-      el.addEventListener("click", () => openTool(DATA.tools[+el.dataset.i])));
+      el.addEventListener("click", () => openTool(DATA.toolbox[+el.dataset.i])));
   }
 
   function termuxTotal() {
@@ -195,12 +198,17 @@
       .map(([k, v]) => `<div class="detail-row"><span class="k">${esc(k)}</span><span class="v">${esc(v)}</span></div>`).join("");
     const tags = (pr.tech || []).map((t) => `<span class="tech-tag">${esc(t)}</span>`).join("");
     const link = pr.link ? `<a class="detail-link" href="${esc(pr.link)}" target="_blank" rel="noopener">PROJEYİ AÇ →</a>` : "";
+    // Doğal anlatım: NEDİR / NEDEN / NEYLE
+    const blocks = [
+      pr.what ? { h: "NEDİR", t: pr.what } : null,
+      pr.why ? { h: "NEDEN", t: pr.why } : null,
+    ].filter(Boolean).map((s) => `<div class="tool-section"><h4>${esc(s.h)}</h4><p>${esc(s.t)}</p></div>`).join("");
     showOverlay(
       `<div class="detail-kicker">PROJECT / ${esc(pr.year)}</div>
        <h2 class="detail-title">${esc(pr.title)}</h2>
        <div class="detail-rows">${rows}</div>
-       <div class="detail-desc">${esc(pr.description)}</div>
-       ${tags ? `<div class="tech-tags">${tags}</div>` : ""}${link}`);
+       ${blocks}
+       ${tags ? `<div class="tool-section"><h4>NEYLE</h4><div class="tech-tags">${tags}</div></div>` : ""}${link}`);
   }
 
   function openTool(t) {
@@ -270,15 +278,27 @@
   $("#share-toggle").addEventListener("click", openShare);
   shareSheet.addEventListener("click", (e) => { if (e.target === shareSheet) closeShare(); });
 
+  // Küçük "COPIED / LINK READY" feedback animasyonu
+  function flashFeedback(emId, btnId, text) {
+    const em = $("#" + emId), btn = $("#" + btnId);
+    if (em) { em.textContent = text; em.classList.add("show"); }
+    if (btn) btn.classList.add("flash");
+    setTimeout(() => { if (em) { em.classList.remove("show"); em.textContent = ""; } if (btn) btn.classList.remove("flash"); }, 1700);
+  }
+
   async function handleShareAction(kind) {
     if (kind === "copy") {
       const ok = await copyText(shareURL());
-      $("#copy-state").textContent = ok ? "kopyalandı" : "hata";
-      toast(ok ? "Bağlantı kopyalandı" : "Kopyalanamadı");
-      setTimeout(() => ($("#copy-state").textContent = ""), 1600);
+      if (ok) flashFeedback("copy-state", "btn-copy", "COPIED");
+      else toast("Kopyalanamadı");
     } else if (kind === "share") {
-      if (navigator.share) { try { await navigator.share({ title: "ARDA.OS", url: shareURL() }); } catch (e) {} }
-      else { const ok = await copyText(shareURL()); toast(ok ? "Paylaşım yok — bağlantı kopyalandı" : "Paylaşım desteklenmiyor"); }
+      if (navigator.share) {
+        try { await navigator.share({ title: "ARDA.OS", url: shareURL() }); flashFeedback("share-state", "btn-share", "LINK READY"); } catch (e) {}
+      } else {
+        const ok = await copyText(shareURL());
+        if (ok) flashFeedback("share-state", "btn-share", "LINK READY");
+        else toast("Paylaşım desteklenmiyor");
+      }
     } else if (kind === "qr") { buildQR(); }
   }
   $("#btn-copy").addEventListener("click", () => handleShareAction("copy"));
@@ -330,7 +350,7 @@
     idx.push({ title: "PROFILE — " + (DATA.profile.name || "ARDA"), sub: "kimlik", cat: "PROFILE", run: () => scrollToSection("#sec-profile") });
     idx.push({ title: "NOW", sub: "şu an", cat: "NOW", run: () => scrollToSection("#sec-now") });
     idx.push({ title: "MUSIC", sub: DATA.music.url ? "spotify" : "yakında", cat: "MUSIC", run: () => (DATA.music.url ? window.open(DATA.music.url, "_blank") : scrollToSection("#sec-music")) });
-    (DATA.tools || []).forEach((t, i) => idx.push({ title: t.title, sub: t.blurb || "araç", cat: "TOOLS", run: () => openTool(DATA.tools[i]) }));
+    (DATA.toolbox || []).forEach((t, i) => idx.push({ title: t.title, sub: t.blurb || "araç", cat: "TOOLS", run: () => openTool(DATA.toolbox[i]) }));
     (DATA.termux.categories || []).forEach((c, i) => idx.push({ title: "TERMUX / " + c.title, sub: c.desc, cat: "TERMUX", run: () => { scrollToSection("#sec-termux"); setTimeout(() => openTermux(DATA.termux.categories[i]), 300); } }));
     (DATA.projects || []).forEach((p, i) => idx.push({ title: p.title, sub: p.type, cat: "PROJECTS", run: () => openProject(DATA.projects[i]) }));
     idx.push({ title: "CONTACT", sub: "mesaj gönder", cat: "CONNECT", run: () => scrollToSection("#sec-connect") });
@@ -523,7 +543,7 @@
   async function init() {
     DATA = await loadData();
     if (!DATA) { $("#boot").innerHTML = '<div class="boot-word">içerik yüklenemedi</div>'; return; }
-    renderProfile(); startClock(); renderNow(); renderMusic(); renderTools(); renderTermux(); renderProjects(); renderConnect();
+    renderProfile(); startClock(); renderNow(); renderMusic(); renderToolbox(); renderTermux(); renderProjects(); renderConnect();
     buildPaletteIndex();
     setupReveal(); setupTouchStates(); setupDots(); setupScrollBar(); setupPointerFX(); setupCoords(); setupAmbient();
     setupContact(); setupSecrets(); boot();

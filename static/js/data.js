@@ -4,14 +4,22 @@ window.SITE_DATA = {
   "profile": {
     "name": "ARDA",
     "system": "ARDA.OS",
-    "handle": "@arda",
+    "handle": "@lov4ardaa",
     "kicker": "DIGITAL SPACE",
-    "tagline": "BUILD / EXPERIMENT / LEARN",
     "avatarInitials": "AR",
     "avatarImage": "",
-    "bio": "Termux, Python ve web ile küçük deneyler. Burası bir link listesi değil — kendi dijital alanım.",
+    "bio": "Termux, Linux ve biraz kodla uğraşıyorum. Burası benim küçük dijital alanım — bir link listesi değil.",
     "build": "2026",
-    "instagram": "https://instagram.com/"
+    "instagram": "https://instagram.com/lov4ardaa",
+    "igCta": "FOLLOW THE JOURNEY"
+  },
+  "hero": {
+    "statement": [
+      "BUILD",
+      "EXPERIMENT",
+      "LEARN"
+    ],
+    "line": "Merak ettiğim şeyleri kurar, çalışana kadar uğraşırım."
   },
   "now": [
     {
@@ -28,124 +36,67 @@ window.SITE_DATA = {
     },
     {
       "k": "LEARNING",
-      "v": "Termux / Linux",
+      "v": "Linux / Termux",
       "sub": "DAILY",
       "href": ""
     }
   ],
   "music": {
     "url": "",
-    "note": "Spotify bağlantısı ekle: content/site.json → music.url"
+    "cta": "LISTEN ON SPOTIFY →",
+    "note": "Spotify bağlantısı yakında."
   },
-  "tools": [
+  "projects": [
     {
-      "id": "termux",
-      "code": "01",
-      "title": "TERMUX",
-      "blurb": "Android'de tam terminal ortamı.",
-      "action": "termux-lab"
-    },
-    {
-      "id": "linux",
-      "code": "02",
-      "title": "LINUX",
-      "blurb": "Dosya, süreç ve izinlerin mantığı.",
-      "sections": [
-        {
-          "h": "NE İŞE YARAR",
-          "t": "Termux'un altında çalışan sistem. Dosya, süreç ve izinleri anlamak her şeyin temeli."
-        },
-        {
-          "h": "BAŞLA",
-          "t": "ls, cd, pwd, chmod, ps komutlarıyla gez. Önce gör, sonra değiştir."
-        }
+      "id": "arda-os",
+      "num": "01",
+      "title": "ARDA.OS",
+      "status": "live",
+      "year": "2026",
+      "type": "Digital Space",
+      "what": "Instagram bio'mdaki linkin açtığı kişisel dijital alan.",
+      "why": "Sıradan bir link listesi istemedim; kendi yerim olsun istedim.",
+      "tech": [
+        "HTML",
+        "CSS",
+        "JS",
+        "Flask"
       ],
-      "links": [
-        {
-          "label": "TERMUX LAB → FILE SYSTEM",
-          "action": "termux-lab"
-        }
-      ]
+      "link": ""
     },
     {
-      "id": "python",
-      "code": "03",
-      "title": "PYTHON",
-      "blurb": "Otomasyon ve küçük araçlar.",
-      "sections": [
-        {
-          "h": "NEDEN",
-          "t": "Script, otomasyon ve hızlı prototip için ideal ilk dil."
-        },
-        {
-          "h": "İLK ADIM",
-          "t": "pkg install python → python dosya.py. Sonra pip ile kütüphane ekle."
-        }
+      "id": "termux-lab",
+      "num": "02",
+      "title": "TERMUX LAB",
+      "status": "wip",
+      "year": "2026",
+      "type": "Learning Space",
+      "what": "Termux komutlarını topladığım küçük öğrenme alanı.",
+      "why": "Öğrendiklerimi unutmamak ve tek yerde tutmak için yapıyorum.",
+      "tech": [
+        "JS",
+        "localStorage"
       ],
-      "links": [
-        {
-          "label": "TERMUX LAB → PYTHON",
-          "action": "termux-lab"
-        }
-      ]
+      "link": ""
     },
     {
-      "id": "git",
-      "code": "04",
-      "title": "GIT",
-      "blurb": "Sürüm kontrolü ve iş akışı.",
-      "sections": [
-        {
-          "h": "FİKİR",
-          "t": "Her değişiklik bir anlık görüntü. Geri dönebilmek özgürlüktür."
-        },
-        {
-          "h": "AKIŞ",
-          "t": "init → add → commit → push. Küçük ve sık commit at."
-        }
+      "id": "signal",
+      "num": "03",
+      "title": "SIGNAL",
+      "status": "concept",
+      "year": "2026",
+      "type": "Experiment",
+      "what": "Görsel ve animasyon denediğim bir oyun alanı.",
+      "why": "Sadece merak — canvas'la oynayıp neler olduğunu görüyorum.",
+      "tech": [
+        "Canvas",
+        "JS"
       ],
-      "links": [
-        {
-          "label": "TERMUX LAB → GIT",
-          "action": "termux-lab"
-        }
-      ]
-    },
-    {
-      "id": "ai",
-      "code": "05",
-      "title": "AI",
-      "blurb": "Modeli araç gibi kullanmak.",
-      "sections": [
-        {
-          "h": "YAKLAŞIM",
-          "t": "Prompt'u net yaz, bağlam ver, çıktıyı her zaman doğrula. Model bir asistan, karar senin."
-        },
-        {
-          "h": "PRATİK",
-          "t": "Tekrarlayan işleri otomatikleştir; öğrenmeyi hızlandır, yerine koyma."
-        }
-      ]
-    },
-    {
-      "id": "web",
-      "code": "06",
-      "title": "WEB",
-      "blurb": "Sağlam temel, sonra framework.",
-      "sections": [
-        {
-          "h": "TEMEL",
-          "t": "HTML/CSS/JS üçlüsünü gerçekten öğren. Framework bunun üstüne gelir."
-        },
-        {
-          "h": "İLKE",
-          "t": "Önce erişilebilirlik ve performans; sonra süsleme."
-        }
-      ]
+      "link": ""
     }
   ],
   "termux": {
-    "intro": "Telefondan komut satırı öğrenmek için sade, pratik bir alan. Bir modül seç, komutu kopyala, dene. İlerlemen kaydedilir.",
+    "intro": "Denediğim, öğrendiğim ve çalıştırdığım şeyler. Bir modül seç, komutu kopyala, kendin dene. İlerlemen kaydedilir.",
     "categories": [
       {
         "id": "basics",
@@ -341,51 +292,111 @@ window.SITE_DATA = {
       }
     ]
   },
-  "projects": [
+  "toolbox": [
     {
-      "id": "arda-os",
-      "num": "01",
-      "title": "ARDA.OS",
-      "status": "live",
-      "year": "2026",
-      "type": "Digital Profile",
-      "description": "Instagram profilinin doğal devamı olan kişisel dijital alan. Link listesi değil; keşfedilen bir deneyim.",
-      "tech": [
-        "HTML",
-        "CSS",
-        "JS",
-        "Flask"
-      ],
-      "link": ""
+      "id": "termux",
+      "code": "01",
+      "title": "TERMUX",
+      "blurb": "Her şeyin başladığı yer.",
+      "action": "termux-lab"
     },
     {
-      "id": "termux-lab",
-      "num": "02",
-      "title": "TERMUX LAB",
-      "status": "wip",
-      "year": "2026",
-      "type": "Learning Tool",
-      "description": "Telefondan komut satırı öğrenmek için sade, ilerleme takipli bir referans arayüzü.",
-      "tech": [
-        "JS",
-        "UX",
-        "localStorage"
+      "id": "linux",
+      "code": "02",
+      "title": "LINUX",
+      "blurb": "Dosya, süreç ve izinleri anlamaya çalışıyorum.",
+      "sections": [
+        {
+          "h": "NEDEN",
+          "t": "Termux'un altındaki sistem. Nasıl çalıştığını anlamak her şeyi kolaylaştırıyor."
+        },
+        {
+          "h": "NASIL",
+          "t": "ls, cd, chmod, ps ile gezip deniyorum. Önce görüyorum, sonra kurcalıyorum."
+        }
       ],
-      "link": ""
+      "links": [
+        {
+          "label": "TERMUX LAB → FILE SYSTEM",
+          "action": "termux-lab"
+        }
+      ]
     },
     {
-      "id": "signal",
-      "num": "03",
-      "title": "SIGNAL",
-      "status": "concept",
-      "year": "2026",
-      "type": "Experiment",
-      "description": "Generatif görseller ve mikro etkileşimler üzerine sürekli değişen bir çalışma alanı.",
-      "tech": [
-        "Canvas",
-        "WebGL"
+      "id": "python",
+      "code": "03",
+      "title": "PYTHON",
+      "blurb": "Küçük şeyleri otomatikleştiriyorum.",
+      "sections": [
+        {
+          "h": "NEDEN",
+          "t": "İlk düzgün öğrendiğim dil. Script ve otomasyon için pratik."
+        },
+        {
+          "h": "NASIL",
+          "t": "pkg install python, sonra ufak dosyalar yazıp çalıştırıyorum."
+        }
       ],
-      "link": ""
+      "links": [
+        {
+          "label": "TERMUX LAB → PYTHON",
+          "action": "termux-lab"
+        }
+      ]
+    },
+    {
+      "id": "git",
+      "code": "04",
+      "title": "GIT",
+      "blurb": "Yaptıklarımı kaybetmemek için.",
+      "sections": [
+        {
+          "h": "NEDEN",
+          "t": "Geri dönebilmek rahatlatıyor. Her değişiklik bir kayıt."
+        },
+        {
+          "h": "NASIL",
+          "t": "init → add → commit → push. Küçük ve sık commit atmaya çalışıyorum."
+        }
+      ],
+      "links": [
+        {
+          "label": "TERMUX LAB → GIT",
+          "action": "termux-lab"
+        }
+      ]
+    },
+    {
+      "id": "ai",
+      "code": "05",
+      "title": "AI",
+      "blurb": "Öğrenmeyi hızlandıran bir araç.",
+      "sections": [
+        {
+          "h": "YAKLAŞIM",
+          "t": "Bir şey takıldığında soruyorum, ama çıktıyı hep kendim doğruluyorum."
+        },
+        {
+          "h": "PRATİK",
+          "t": "Yerime düşünsün diye değil, daha hızlı öğreneyim diye kullanıyorum."
+        }
+      ]
+    },
+    {
+      "id": "web",
+      "code": "06",
+      "title": "WEB",
+      "blurb": "Bu site de onlardan biri.",
+      "sections": [
+        {
+          "h": "TEMEL",
+          "t": "HTML/CSS/JS'i gerçekten öğrenmeye çalışıyorum. ARDA.OS bunun denemesi."
+        },
+        {
+          "h": "İLKE",
+          "t": "Önce sade ve hızlı olsun; süsleme sonra gelir."
+        }
+      ]
     }
   ],
   "connect": {
@@ -395,8 +406,8 @@ window.SITE_DATA = {
       {
         "id": "instagram",
         "label": "INSTAGRAM",
-        "meta": "profil",
-        "href": "https://instagram.com/",
+        "meta": "@lov4ardaa",
+        "href": "https://instagram.com/lov4ardaa",
         "external": true
       },
       {
