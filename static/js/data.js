@@ -17,16 +17,19 @@ window.SITE_DATA = {
     {
       "k": "LISTENING",
       "v": "Spotify",
+      "sub": "AUDIO",
       "href": ""
     },
     {
       "k": "BUILDING",
       "v": "ARDA.OS",
+      "sub": "IN PROGRESS",
       "href": ""
     },
     {
       "k": "LEARNING",
       "v": "Termux / Linux",
+      "sub": "DAILY",
       "href": ""
     }
   ],

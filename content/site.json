@@ -12,9 +12,9 @@
     "instagram": "https://instagram.com/"
   },
   "now": [
-    { "k": "LISTENING", "v": "Spotify", "href": "" },
-    { "k": "BUILDING", "v": "ARDA.OS", "href": "" },
-    { "k": "LEARNING", "v": "Termux / Linux", "href": "" }
+    { "k": "LISTENING", "v": "Spotify", "sub": "AUDIO", "href": "" },
+    { "k": "BUILDING", "v": "ARDA.OS", "sub": "IN PROGRESS", "href": "" },
+    { "k": "LEARNING", "v": "Termux / Linux", "sub": "DAILY", "href": "" }
   ],
   "music": {
     "url": "",

@@ -38,13 +38,18 @@
 
     const name = p.name || "ARDA";
     const hn = $("#hero-name"); hn.textContent = name; hn.setAttribute("data-t", name);
-    $("#hero-kicker").textContent = p.kicker || "DIGITAL SPACE";
-    $("#hero-tagline").textContent = p.tagline || "BUILD / EXPERIMENT / LEARN";
+    $("#eb-system").textContent = p.system || "ARDA.OS";
+    $("#eb-kicker").textContent = p.kicker || "DIGITAL SPACE";
     $("#brand-name").textContent = p.system || "ARDA.OS";
     $("#bio").textContent = p.bio || "";
     $("#pm-build").textContent = p.build || "2026";
     $("#foot-handle").textContent = p.handle || "";
     const ig = $("#ig-btn"); ig.href = p.instagram || "#";
+
+    // Hero ana ifade: tagline "BUILD / EXPERIMENT / LEARN" -> stacked "BUILD." vb.
+    const words = (p.tagline || "BUILD / EXPERIMENT / LEARN").split("/").map((w) => w.trim()).filter(Boolean);
+    $("#hero-statement").innerHTML = words.map((w, i) =>
+      `<span class="hs-word" style="--wd:${120 + i * 110}ms">${esc(w)}${/[.]$/.test(w) ? "" : "."}</span>`).join("");
   }
 
   // Gerçek yerel saat (browser verisi)
@@ -60,13 +65,13 @@
   }
 
   function renderNow() {
-    const arrow = `<svg class="now-arrow" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17L17 7M9 7h8v8"/></svg>`;
+    const arrow = `<svg class="now-arrow" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17L17 7M9 7h8v8"/></svg>`;
     $("#now-list").innerHTML = (DATA.now || []).map((n) => {
+      const body = `<span class="now-body"><span class="now-v">${esc(n.v)}${n.href ? arrow : ""}</span>${n.sub ? `<span class="now-sub">${esc(n.sub)}</span>` : ""}</span>`;
       const k = `<span class="now-k">${esc(n.k)}</span>`;
-      if (n.href) {
-        return `<a class="now-row" href="${esc(n.href)}" target="_blank" rel="noopener">${k}<span class="now-v">${esc(n.v)}${arrow}</span></a>`;
-      }
-      return `<div class="now-row">${k}<div class="now-v">${esc(n.v)}</div></div>`;
+      return n.href
+        ? `<a class="now-row" href="${esc(n.href)}" target="_blank" rel="noopener">${k}${body}</a>`
+        : `<div class="now-row">${k}${body}</div>`;
     }).join("");
   }
 
@@ -89,10 +94,11 @@
   }
 
   function renderTools() {
+    // Kompakt sistem öğeleri: sadece kod + başlık (açıklama modalda)
     $("#tools-grid").innerHTML = (DATA.tools || []).map((t, i) =>
-      `<button class="tool" data-i="${i}" style="transition-delay:${i * 45}ms">
-        <div><div class="tool-code">${esc(t.code)}</div><div class="tool-title">${esc(t.title)}</div></div>
-        <div class="tool-blurb">${esc(t.blurb || "")}</div>
+      `<button class="tool" data-i="${i}" style="--d:${i * 45}ms">
+        <div class="tool-code">${esc(t.code)}</div>
+        <div class="tool-title">${esc(t.title)}</div>
       </button>`).join("");
     $$("#tools-grid .tool").forEach((el) =>
       el.addEventListener("click", () => openTool(DATA.tools[+el.dataset.i])));
@@ -122,7 +128,7 @@
     const t = DATA.termux || {};
     $("#termux-intro").textContent = t.intro || "";
     $("#termux-grid").innerHTML = (t.categories || []).map((c, i) =>
-      `<button class="termux-cat" data-i="${i}" style="transition-delay:${i * 40}ms">
+      `<button class="termux-cat" data-i="${i}" style="--d:${i * 40}ms">
         <span class="tc-code">${esc(c.code)}</span>
         <span class="tc-main"><span class="tc-title">${esc(c.title)}</span><span class="tc-desc">${esc(c.desc)}</span></span>
         <span class="tc-count">0/0</span>
@@ -133,14 +139,16 @@
   }
 
   function renderProjects() {
-    const arrow = `<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>`;
+    const arrow = `<svg class="p-arrow" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17L17 7M9 7h8v8"/></svg>`;
     $("#projects-list").innerHTML = (DATA.projects || []).map((pr, i) =>
-      `<button class="project" data-i="${i}">
-        <div class="project-num">${esc(pr.num || String(i + 1).padStart(2, "0"))}</div>
-        <div class="project-title">${esc(pr.title)}</div>
-        <div class="project-meta"><span>${esc(pr.type)}</span><span>·</span><span class="st" data-s="${esc((pr.status || "").toLowerCase())}">${esc((pr.status || "").toUpperCase())}</span><span>·</span><span>${esc(pr.year)}</span></div>
-        <div class="project-desc">${esc(pr.description)}</div>
-        <div class="project-open">OPEN PROJECT ${arrow}</div>
+      `<button class="project" data-i="${i}" style="--d:${i * 60}ms">
+        <span class="p-num">${esc(pr.num || String(i + 1).padStart(2, "0"))}</span>
+        <span class="p-main">
+          <span class="p-title">${esc(pr.title)}</span>
+          <span class="p-meta"><span>${esc((pr.type || "").toUpperCase())}</span><span>·</span><span class="st" data-s="${esc((pr.status || "").toLowerCase())}">${esc((pr.status || "").toUpperCase())}</span><span>·</span><span>${esc(pr.year)}</span></span>
+        </span>
+        ${arrow}
+        <span class="p-preview" aria-hidden="true">${esc(pr.title)}</span>
       </button>`).join("");
     $$("#projects-list .project").forEach((el) =>
       el.addEventListener("click", () => openProject(DATA.projects[+el.dataset.i])));
@@ -374,10 +382,18 @@
   function scrollToSection(sel) { const el = $(sel); if (el) el.scrollIntoView({ behavior: reduceMotion ? "auto" : "smooth", block: "start" }); }
 
   function setupReveal() {
-    const sel = ".reveal, .tool, .termux-cat, .project";
+    const sel = ".reveal, .hero-statement, .tool, .termux-cat, .project";
     if (reduceMotion) { $$(sel).forEach((e) => e.classList.add("in")); return; }
     const io = new IntersectionObserver((ents) => ents.forEach((en) => { if (en.isIntersecting) { en.target.classList.add("in"); io.unobserve(en.target); } }), { threshold: 0.12, rootMargin: "0px 0px -6% 0px" });
     $$(sel).forEach((el) => io.observe(el));
+  }
+
+  // Dokunmatikte editorial preview/hareket için .touch sınıfı
+  function setupTouchStates() {
+    $$(".now-row, .project").forEach((el) => {
+      el.addEventListener("touchstart", () => el.classList.add("touch"), { passive: true });
+      el.addEventListener("touchend", () => setTimeout(() => el.classList.remove("touch"), 400), { passive: true });
+    });
   }
 
   function setupDots() {
@@ -403,31 +419,20 @@
     update();
   }
 
-  // Işık + grid parallax + magnetic
+  // Işık + çok hafif grid parallax (kendini belli etmeyecek kalitede)
   function setupPointerFX() {
     const light = $("#light"), grid = $("#grid");
+    if (reduceMotion) { light.style.display = "none"; return; }
     let raf = 0, px = 0, py = 0;
-    if (!reduceMotion) {
-      window.addEventListener("pointermove", (e) => {
-        px = e.clientX; py = e.clientY;
-        if (!raf) raf = requestAnimationFrame(() => {
-          light.style.transform = `translate3d(${px}px, ${py}px, 0)`;
-          const gx = (px / window.innerWidth - 0.5) * 16, gy = (py / window.innerHeight - 0.5) * 16;
-          grid.style.transform = `translate3d(${gx}px, ${gy}px, 0)`;
-          raf = 0;
-        });
-      }, { passive: true });
-    } else { light.style.display = "none"; }
-
-    if (isTouch) return;
-    $$(".tool, .ig-btn, .find-row").forEach((el) => {
-      el.addEventListener("pointermove", (e) => {
-        const r = el.getBoundingClientRect();
-        const mx = (e.clientX - r.left - r.width / 2) * 0.12, my = (e.clientY - r.top - r.height / 2) * 0.18;
-        el.style.transform = `translate(${mx.toFixed(1)}px, ${my.toFixed(1)}px)`;
+    window.addEventListener("pointermove", (e) => {
+      px = e.clientX; py = e.clientY;
+      if (!raf) raf = requestAnimationFrame(() => {
+        light.style.transform = `translate3d(${px}px, ${py}px, 0)`;
+        const gx = (px / window.innerWidth - 0.5) * 10, gy = (py / window.innerHeight - 0.5) * 10;
+        grid.style.transform = `translate3d(${gx.toFixed(1)}px, ${gy.toFixed(1)}px, 0)`;
+        raf = 0;
       });
-      el.addEventListener("pointerleave", () => { el.style.transform = ""; });
-    });
+    }, { passive: true });
   }
 
   function setupCoords() {
@@ -520,7 +525,7 @@
     if (!DATA) { $("#boot").innerHTML = '<div class="boot-word">içerik yüklenemedi</div>'; return; }
     renderProfile(); startClock(); renderNow(); renderMusic(); renderTools(); renderTermux(); renderProjects(); renderConnect();
     buildPaletteIndex();
-    setupReveal(); setupDots(); setupScrollBar(); setupPointerFX(); setupCoords(); setupAmbient();
+    setupReveal(); setupTouchStates(); setupDots(); setupScrollBar(); setupPointerFX(); setupCoords(); setupAmbient();
     setupContact(); setupSecrets(); boot();
   }
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", init); else init();
