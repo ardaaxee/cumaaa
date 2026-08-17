@@ -49,6 +49,13 @@ python app.py
 ```
 Gönderilen contact mesajları `content/messages.jsonl` dosyasına yazılır (git'e girmez).
 
+> ⚠️ **Production notu:** `python app.py` yalnızca **geliştirme** sunucusudur (Werkzeug);
+> internete **doğrudan açılmamalıdır**. Backend'i gerçekten yayınlayacaksan
+> **Gunicorn + reverse proxy (nginx/Caddy) + HTTPS** arkasında çalıştır
+> (ör. `gunicorn -w 2 -b 127.0.0.1:8080 app:app`). Güvenlik önlemleri: 16 KB istek
+> gövde sınırı, `/api/contact` için IP başına rate limit (dk 3 / gün 20), Origin
+> kontrolü ve güvenlik başlıkları (CSP, X-Frame-Options, nosniff) app.py içinde etkindir.
+
 ### Sunucusuz (hızlı bakış)
 `index.html`'i doğrudan açabilirsin; içerik `static/js/data.js` fallback'inden yüklenir.
 Contact formu backend olmadığında otomatik olarak **mailto** ile açılır.

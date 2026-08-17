@@ -14,8 +14,12 @@ Ortam değişkenleri:
 import json
 import os
 import re
+import time
+import threading
 import datetime
+from collections import deque
 from pathlib import Path
+from urllib.parse import urlparse
 
 from flask import Flask, jsonify, request, send_from_directory
 
@@ -27,8 +31,92 @@ MESSAGES_FILE = CONTENT_DIR / "messages.jsonl"  # contact mesajları buraya ekle
 # SPA kök index.html'den servis edilir (statik hosting ile de uyumlu tek kaynak)
 app = Flask(__name__, static_folder="static", static_url_path="/static")
 
+# İstek gövdesi üst sınırı — büyük payload'ları Flask otomatik 413 ile reddeder
+app.config["MAX_CONTENT_LENGTH"] = 16 * 1024  # 16 KB
+
 # Basit e-posta doğrulama deseni
 EMAIL_RE = re.compile(r"^[^@\s]+@[^@\s]+\.[^@\s]+$")
+
+# ---------------------------------------------------------------------------
+# Bellek-içi rate limit (harici bağımlılık yok) — /api/contact için
+#   IP başına: dakikada en fazla 3, günde en fazla 20 istek.
+# Not: tek süreç içindir; çok-işçili (gunicorn) dağıtımda süreç başına sayar.
+# ---------------------------------------------------------------------------
+RATE_MINUTE = 3
+RATE_DAY = 20
+_rate_hits = {}            # ip -> deque[timestamp]
+_rate_lock = threading.Lock()
+
+
+def _rate_check(ip):
+    """(izin_var_mı, retry_after_saniye) döndürür ve başarılıysa isteği kaydeder."""
+    now = time.time()
+    with _rate_lock:
+        dq = _rate_hits.get(ip)
+        if dq is None:
+            dq = deque()
+            _rate_hits[ip] = dq
+        # Bir günden eski kayıtları temizle
+        while dq and now - dq[0] > 86400:
+            dq.popleft()
+        # Günlük sınır
+        if len(dq) >= RATE_DAY:
+            return False, int(86400 - (now - dq[0])) + 1
+        # Dakikalık sınır
+        last_min = [t for t in dq if now - t < 60]
+        if len(last_min) >= RATE_MINUTE:
+            return False, int(60 - (now - last_min[0])) + 1
+        dq.append(now)
+        # Bellek sızıntısını önlemek için ara sıra boş IP'leri temizle
+        if len(_rate_hits) > 5000:
+            for k in [k for k, v in _rate_hits.items() if not v]:
+                _rate_hits.pop(k, None)
+        return True, 0
+
+
+def _same_origin_ok():
+    """Origin/Referer kendi host'umuzla eşleşiyor mu? Header yoksa engelleme (uyumluluk)."""
+    allowed = urlparse(request.host_url).netloc  # Host header'ından
+    localhosts = {"localhost", "127.0.0.1", "0.0.0.0"}
+    origin = request.headers.get("Origin")
+    ref = request.headers.get("Referer")
+    src = origin or ref
+    if not src:
+        return True  # tarayıcı Origin göndermediyse normal davranışı bozma
+    netloc = urlparse(src).netloc
+    if netloc == allowed:
+        return True
+    # Yalnızca *isteği yapan* origin localhost ise (geliştirme) izin ver
+    host = netloc.split(":")[0]
+    return host in localhosts
+
+
+def _client_ip():
+    """Proxy arkasındaysa gerçek IP; değilse remote_addr."""
+    fwd = request.headers.get("X-Forwarded-For", "")
+    return fwd.split(",")[0].strip() if fwd else (request.remote_addr or "unknown")
+
+
+# ---------------------------------------------------------------------------
+# Güvenlik başlıkları — tüm yanıtlara uygulanır
+# ---------------------------------------------------------------------------
+CSP = (
+    "default-src 'self'; "
+    "img-src 'self' data:; "
+    "style-src 'self' 'unsafe-inline'; "
+    "script-src 'self'; "
+    "base-uri 'none'; "
+    "frame-ancestors 'none'"
+)
+
+
+@app.after_request
+def _security_headers(resp):
+    resp.headers["X-Content-Type-Options"] = "nosniff"
+    resp.headers["X-Frame-Options"] = "DENY"
+    resp.headers["Referrer-Policy"] = "no-referrer"
+    resp.headers["Content-Security-Policy"] = CSP
+    return resp
 
 
 # ---------------------------------------------------------------------------
@@ -53,8 +141,8 @@ def site_content():
 
 @app.route("/api/health")
 def health():
-    """Basit sağlık kontrolü."""
-    return jsonify({"status": "ok", "service": "arda.os", "time": datetime.datetime.utcnow().isoformat() + "Z"})
+    """Basit sağlık kontrolü — minimal çıktı."""
+    return jsonify({"status": "ok"})
 
 
 # ---------------------------------------------------------------------------
@@ -66,6 +154,19 @@ def contact():
     Contact formu gönderimini alır, doğrular ve messages.jsonl'e ekler.
     Beklenen JSON: { name, email, message }
     """
+    # 1) Origin/Referer kontrolü — yabancı origin'den gelen POST'u reddet (header yoksa izin ver)
+    if not _same_origin_ok():
+        return jsonify({"ok": False, "errors": {"_": "Geçersiz origin."}}), 403
+
+    # 2) Rate limit — IP başına dakikada 3 / günde 20
+    ip = _client_ip()
+    allowed, retry_after = _rate_check(ip)
+    if not allowed:
+        resp = jsonify({"ok": False, "errors": {"_": "Çok fazla istek. Lütfen sonra tekrar dene."}})
+        resp.status_code = 429
+        resp.headers["Retry-After"] = str(max(1, retry_after))
+        return resp
+
     data = request.get_json(silent=True) or {}
 
     name = (data.get("name") or "").strip()
@@ -93,7 +194,7 @@ def contact():
         "name": name,
         "email": email,
         "message": message,
-        "ip": request.headers.get("X-Forwarded-For", request.remote_addr),
+        "ip": ip,
     }
 
     try:
