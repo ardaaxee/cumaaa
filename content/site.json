@@ -8,7 +8,7 @@
     "avatarImage": "",
     "bio": "Termux, Linux ve biraz kodla uğraşıyorum. Burası benim küçük dijital alanım — bir link listesi değil.",
     "build": "2026",
-    "instagram": "https://instagram.com/lov4ardaa",
+    "instagram": "https://www.instagram.com/lov4ardaa/",
     "igCta": "FOLLOW THE JOURNEY"
   },
   "hero": {
@@ -158,7 +158,7 @@
     "intro": "Bir fikir, iş ya da sadece merhaba.",
     "email": "acarcuma25@gmail.com",
     "links": [
-      { "id": "instagram", "label": "INSTAGRAM", "meta": "@lov4ardaa", "href": "https://instagram.com/lov4ardaa", "external": true },
+      { "id": "instagram", "label": "INSTAGRAM", "meta": "@lov4ardaa", "href": "https://www.instagram.com/lov4ardaa/", "external": true },
       { "id": "spotify", "label": "SPOTIFY", "meta": "müzik", "href": "", "external": true }
     ]
   },

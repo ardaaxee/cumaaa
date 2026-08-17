@@ -10,7 +10,7 @@ window.SITE_DATA = {
     "avatarImage": "",
     "bio": "Termux, Linux ve biraz kodla uğraşıyorum. Burası benim küçük dijital alanım — bir link listesi değil.",
     "build": "2026",
-    "instagram": "https://instagram.com/lov4ardaa",
+    "instagram": "https://www.instagram.com/lov4ardaa/",
     "igCta": "FOLLOW THE JOURNEY"
   },
   "hero": {
@@ -407,7 +407,7 @@ window.SITE_DATA = {
         "id": "instagram",
         "label": "INSTAGRAM",
         "meta": "@lov4ardaa",
-        "href": "https://instagram.com/lov4ardaa",
+        "href": "https://www.instagram.com/lov4ardaa/",
         "external": true
       },
       {

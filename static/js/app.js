@@ -48,11 +48,32 @@
     $("#ig-label").textContent = p.igCta || "INSTAGRAM";
 
     // Hero ana ifade: hero.statement dizisi -> stacked "BUILD." vb.
+    // Zamanlama: BUILD ~0.3s, EXPERIMENT ~0.5s, LEARN ~0.7s
     const h = DATA.hero || {};
     const words = (h.statement && h.statement.length ? h.statement : ["BUILD", "EXPERIMENT", "LEARN"]);
     $("#hero-statement").innerHTML = words.map((w, i) =>
-      `<span class="hs-word" style="--wd:${120 + i * 110}ms">${esc(w)}${/[.]$/.test(w) ? "" : "."}</span>`).join("");
+      `<span class="hs-word" style="--wd:${300 + i * 200}ms">${esc(w)}${/[.]$/.test(w) ? "" : "."}</span>`).join("");
     $("#hero-line").textContent = h.line || "";
+  }
+
+  // Gerçek oturum bilgisi — yalnızca tarayıcıdan okunabilen veriler (sahte metrik yok)
+  const SESSION_ID = Math.random().toString(16).slice(2, 6).toUpperCase();
+  function renderSession() {
+    const el = $("#session-readout"); if (!el) return;
+    const device = isTouch ? "MOBILE" : "DESKTOP";
+    const vp = `${window.innerWidth}×${window.innerHeight}`;
+    const online = navigator.onLine ? "ONLINE" : "OFFLINE";
+    el.innerHTML =
+      `<span class="sr-tag">SESSION</span>` +
+      [["DEVICE", device], ["VIEWPORT", vp], ["STATUS", online], ["ID", SESSION_ID]]
+        .map(([k, v]) => `<span class="sr-item"><b>${k}</b> ${esc(v)}</span>`).join("") +
+      `<span class="sr-note">LOCAL ONLY</span>`;
+  }
+  function setupSession() {
+    renderSession();
+    let t; window.addEventListener("resize", () => { clearTimeout(t); t = setTimeout(renderSession, 200); });
+    window.addEventListener("online", renderSession);
+    window.addEventListener("offline", renderSession);
   }
 
   // Gerçek yerel saat (browser verisi)
@@ -160,6 +181,10 @@
   function renderConnect() {
     const c = DATA.connect || {};
     $("#contact-intro").textContent = c.intro || "";
+    // Final CTA
+    const cta = $("#connect-cta");
+    cta.href = (DATA.profile && DATA.profile.instagram) || "#";
+    $("#connect-cta-label").textContent = (DATA.profile && DATA.profile.igCta) || "FOLLOW THE JOURNEY";
     const arrow = `<svg class="find-arrow" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17L17 7M9 7h8v8"/></svg>`;
     // Editorial FIND ARDA satırları: profil linkleri + copy/share/qr aksiyonları
     const rows = [];
@@ -181,14 +206,19 @@
 
   /* ===================== OVERLAY ======================================== */
   const overlay = $("#overlay"), overlayInner = $("#overlay-inner");
+  let lastFocused = null;   // modal kapanınca geri dönmek için
   function showOverlay(html) {
+    lastFocused = document.activeElement;
     overlayInner.innerHTML = html;
     overlay.classList.add("open"); overlay.setAttribute("aria-hidden", "false");
     overlay.scrollTop = 0; document.body.style.overflow = "hidden";
+    setTimeout(() => $("#overlay-close").focus(), 60);
   }
   function closeOverlay() {
+    if (!overlay.classList.contains("open")) return;
     overlay.classList.remove("open"); overlay.setAttribute("aria-hidden", "true");
     document.body.style.overflow = "";
+    if (lastFocused && lastFocused.focus) { lastFocused.focus(); lastFocused = null; }
   }
   $("#overlay-close").addEventListener("click", closeOverlay);
 
@@ -197,7 +227,9 @@
     const rows = [["STATUS", (pr.status || "").toUpperCase()], ["YEAR", pr.year], ["TYPE", pr.type]]
       .map(([k, v]) => `<div class="detail-row"><span class="k">${esc(k)}</span><span class="v">${esc(v)}</span></div>`).join("");
     const tags = (pr.tech || []).map((t) => `<span class="tech-tag">${esc(t)}</span>`).join("");
-    const link = pr.link ? `<a class="detail-link" href="${esc(pr.link)}" target="_blank" rel="noopener">PROJEYİ AÇ →</a>` : "";
+    const link = pr.link
+      ? `<a class="detail-link" href="${esc(pr.link)}" target="_blank" rel="noopener">PROJEYİ AÇ →</a>`
+      : `<span class="detail-link soon" aria-disabled="true">LINK YAKINDA</span>`;
     // Doğal anlatım: NEDİR / NEDEN / NEYLE
     const blocks = [
       pr.what ? { h: "NEDİR", t: pr.what } : null,
@@ -228,31 +260,47 @@
       b.addEventListener("click", () => { closeOverlay(); scrollToSection("#sec-termux"); }));
   }
 
+  function moduleProgressHTML(cat) {
+    const total = (cat.lessons || []).length, done = catDone(cat);
+    const pct = total ? Math.round((done / total) * 100) : 0;
+    return `<div class="lab-progress"><div class="lp-bar"><i style="width:${pct}%"></i></div><span class="lp-label">${done} / ${total} COMPLETE</span></div>`;
+  }
+  function refreshModuleProgress(cat) {
+    const total = (cat.lessons || []).length, done = catDone(cat);
+    const pct = total ? Math.round((done / total) * 100) : 0;
+    const bar = $("#overlay-inner .lp-bar i"), lab = $("#overlay-inner .lp-label");
+    if (bar) bar.style.width = pct + "%";
+    if (lab) lab.textContent = `${done} / ${total} COMPLETE`;
+  }
   function openTermux(cat) {
     if (!cat) return;
-    const copyIcon = `<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M6 15H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v1"/></svg>`;
+    const badgeDone = `<span class="lesson-badge done-badge">✓ COMPLETE</span>`;
+    const badgeTodo = `<span class="lesson-badge">TODO</span>`;
     const lessons = (cat.lessons || []).map((ls_, i) => {
       const id = cat.id + ":" + i, done = doneSet.has(id);
+      const num = String(i + 1).padStart(2, "0");
       return `<div class="lesson ${done ? "done" : ""}" data-id="${id}">
-        <div class="lesson-top"><div class="lesson-title">${esc(ls_.title)}</div><div class="lesson-badge">${done ? "DONE" : "TODO"}</div></div>
-        <div class="lab-block"><div class="lab-block-h">COMMAND</div><div class="cmd-box"><code class="cmd-text">$ ${esc(ls_.cmd)}</code><button class="copy-btn" data-cmd="${esc(ls_.cmd)}" data-id="${id}" aria-label="Kopyala">${copyIcon}</button></div></div>
+        <div class="lesson-top"><div><div class="lesson-idx">LESSON ${num}</div><div class="lesson-title">${esc(ls_.title)}</div></div>${done ? badgeDone : badgeTodo}</div>
+        <div class="lab-block"><div class="lab-block-h">COMMAND</div><div class="cmd-box"><code class="cmd-text">$ ${esc(ls_.cmd)}</code></div></div>
         <div class="lab-block"><div class="lab-block-h">WHAT IT DOES</div><div class="lab-block-p">${esc(ls_.desc)}</div></div>
         ${ls_.example ? `<div class="lab-block"><div class="lab-block-h">EXAMPLE</div><div class="lab-example">${esc(ls_.example)}</div></div>` : ""}
+        <button class="copy-cmd" data-cmd="${esc(ls_.cmd)}" data-id="${id}">COPY COMMAND</button>
       </div>`;
     }).join("");
     showOverlay(
-      `<div class="lab-head"><div class="lab-code">${esc(cat.code)} / TERMUX LAB</div><h2 class="lab-title">${esc(cat.title)}</h2><div class="lab-sub">${esc(cat.desc)}</div></div>${lessons}`);
+      `<div class="lab-head"><div class="lab-code">${esc(cat.code)} / TERMUX LAB</div><h2 class="lab-title">${esc(cat.title)}</h2><div class="lab-sub">${esc(cat.desc)}</div></div>${moduleProgressHTML(cat)}${lessons}`);
 
-    $$("#overlay-inner .copy-btn").forEach((b) => {
+    $$("#overlay-inner .copy-cmd").forEach((b) => {
       b.addEventListener("click", async () => {
         const ok = await copyText(b.getAttribute("data-cmd"));
-        if (ok) { b.classList.add("copied"); setTimeout(() => b.classList.remove("copied"), 1200); }
-        // Ders tamamlandı işaretle (ilerleme localStorage'da)
+        if (ok) { b.classList.add("copied"); b.textContent = "COPIED ✓"; setTimeout(() => { b.classList.remove("copied"); b.textContent = "COPY COMMAND"; }, 1300); }
         const id = b.getAttribute("data-id");
         if (!doneSet.has(id)) {
           doneSet.add(id); ls.set(DONE_KEY, [...doneSet]);
           const lesson = b.closest(".lesson");
-          lesson.classList.add("done"); lesson.querySelector(".lesson-badge").textContent = "DONE";
+          lesson.classList.add("done");
+          lesson.querySelector(".lesson-badge").outerHTML = badgeDone;
+          refreshModuleProgress(cat);
           updateTermuxProgress();
         }
       });
@@ -273,8 +321,15 @@
   /* ===================== SHARE / QR ==================================== */
   const shareSheet = $("#share-sheet");
   const shareURL = () => window.location.href.split("#")[0];
-  function openShare() { shareSheet.classList.add("open"); shareSheet.setAttribute("aria-hidden", "false"); }
-  function closeShare() { shareSheet.classList.remove("open"); shareSheet.setAttribute("aria-hidden", "true"); $("#qr-wrap").hidden = true; }
+  function openShare() {
+    shareSheet.classList.add("open"); shareSheet.setAttribute("aria-hidden", "false");
+    $("#share-toggle").setAttribute("aria-expanded", "true");
+    setTimeout(() => $("#btn-copy").focus(), 60);
+  }
+  function closeShare() {
+    shareSheet.classList.remove("open"); shareSheet.setAttribute("aria-hidden", "true"); $("#qr-wrap").hidden = true;
+    $("#share-toggle").setAttribute("aria-expanded", "false");
+  }
   $("#share-toggle").addEventListener("click", openShare);
   shareSheet.addEventListener("click", (e) => { if (e.target === shareSheet) closeShare(); });
 
@@ -347,24 +402,33 @@
   let paletteIndex = [], palSel = 0, palFiltered = [];
   function buildPaletteIndex() {
     const idx = [];
-    idx.push({ title: "PROFILE — " + (DATA.profile.name || "ARDA"), sub: "kimlik", cat: "PROFILE", run: () => scrollToSection("#sec-profile") });
-    idx.push({ title: "NOW", sub: "şu an", cat: "NOW", run: () => scrollToSection("#sec-now") });
-    idx.push({ title: "MUSIC", sub: DATA.music.url ? "spotify" : "yakında", cat: "MUSIC", run: () => (DATA.music.url ? window.open(DATA.music.url, "_blank") : scrollToSection("#sec-music")) });
-    (DATA.toolbox || []).forEach((t, i) => idx.push({ title: t.title, sub: t.blurb || "araç", cat: "TOOLS", run: () => openTool(DATA.toolbox[i]) }));
+    (DATA.projects || []).forEach((p, i) => idx.push({ title: p.title, sub: p.type, cat: "PROJECT", run: () => openProject(DATA.projects[i]) }));
     (DATA.termux.categories || []).forEach((c, i) => idx.push({ title: "TERMUX / " + c.title, sub: c.desc, cat: "TERMUX", run: () => { scrollToSection("#sec-termux"); setTimeout(() => openTermux(DATA.termux.categories[i]), 300); } }));
-    (DATA.projects || []).forEach((p, i) => idx.push({ title: p.title, sub: p.type, cat: "PROJECTS", run: () => openProject(DATA.projects[i]) }));
-    idx.push({ title: "CONTACT", sub: "mesaj gönder", cat: "CONNECT", run: () => scrollToSection("#sec-connect") });
-    idx.push({ title: "COPY LINK", sub: "bağlantıyı kopyala", cat: "SHARE", run: () => handleShareAction("copy") });
-    idx.push({ title: "QR", sub: "qr kod", cat: "SHARE", run: () => { openShare(); handleShareAction("qr"); } });
+    (DATA.toolbox || []).forEach((t, i) => idx.push({ title: t.title, sub: t.blurb || "araç", cat: "TOOL", run: () => openTool(DATA.toolbox[i]) }));
+    idx.push({ title: "PROFILE", sub: "kimlik", cat: "SECTION", run: () => scrollToSection("#sec-profile") });
+    idx.push({ title: "NOW", sub: "şu an", cat: "SECTION", run: () => scrollToSection("#sec-now") });
+    idx.push({ title: "MUSIC", sub: DATA.music.url ? "spotify" : "yakında", cat: "SECTION", run: () => (DATA.music.url ? window.open(DATA.music.url, "_blank") : scrollToSection("#sec-music")) });
+    idx.push({ title: "CONTACT", sub: "mesaj gönder", cat: "SECTION", run: () => scrollToSection("#sec-connect") });
+    idx.push({ title: "COPY LINK", sub: "bağlantıyı kopyala", cat: "ACTION", run: () => { openShare(); handleShareAction("copy"); } });
+    idx.push({ title: "SHARE", sub: "paylaş", cat: "ACTION", run: () => { openShare(); handleShareAction("share"); } });
+    idx.push({ title: "QR CODE", sub: "qr kod", cat: "ACTION", run: () => { openShare(); handleShareAction("qr"); } });
     paletteIndex = idx;
   }
   const palette = $("#palette"), palInput = $("#palette-input"), palResults = $("#palette-results");
+  let paletteReturn = null;
   function openPalette() {
+    paletteReturn = document.activeElement;
     palette.classList.add("open"); palette.setAttribute("aria-hidden", "false");
+    $("#search-toggle").setAttribute("aria-expanded", "true");
     palInput.value = ""; renderPalette("");
     setTimeout(() => palInput.focus(), 60);
   }
-  function closePalette() { palette.classList.remove("open"); palette.setAttribute("aria-hidden", "true"); palInput.blur(); }
+  function closePalette() {
+    if (!palette.classList.contains("open")) return;
+    palette.classList.remove("open"); palette.setAttribute("aria-hidden", "true"); palInput.blur();
+    $("#search-toggle").setAttribute("aria-expanded", "false");
+    if (paletteReturn && paletteReturn.focus) { paletteReturn.focus(); paletteReturn = null; }
+  }
   function renderPalette(q) {
     q = q.trim().toLowerCase();
     palFiltered = !q ? paletteIndex : paletteIndex.filter((it) =>
@@ -373,7 +437,7 @@
     palResults.innerHTML = palFiltered.length
       ? palFiltered.map((it, i) =>
         `<div class="pr-item ${i === 0 ? "sel" : ""}" data-i="${i}"><div class="pr-left"><div class="pr-title">${esc(it.title)}</div><div class="pr-sub">${esc(it.sub || "")}</div></div><span class="pr-cat">${esc(it.cat)}</span></div>`).join("")
-      : `<div class="pr-empty">sonuç yok</div>`;
+      : `<div class="pr-empty"><div class="pr-empty-t">NO MATCH</div><div class="pr-empty-s">TRY ANOTHER QUERY</div></div>`;
     $$("#palette-results .pr-item").forEach((el) => {
       el.addEventListener("click", () => runPalette(+el.dataset.i));
       el.addEventListener("mousemove", () => setPalSel(+el.dataset.i));
@@ -396,7 +460,25 @@
     else if (e.key === "Escape") { closePalette(); }
   });
   function scrollSel() { const el = $$("#palette-results .pr-item")[palSel]; if (el) el.scrollIntoView({ block: "nearest" }); }
-  $("#search-toggle").addEventListener("click", openPalette);
+
+  // DISCOVER: kısa "SCANNING DIGITAL SPACE → SPACE READY" geçişi (≤700ms), tekrar dokununca anında
+  let discState = 0, discT1 = 0, discT2 = 0;
+  function resetDisc() {
+    const btn = $("#search-toggle"), label = btn.querySelector(".disc-label");
+    if (label) label.textContent = "DISCOVER";
+    btn.classList.remove("scanning"); discState = 0;
+  }
+  function discover() {
+    const btn = $("#search-toggle"), label = btn.querySelector(".disc-label");
+    if (discState === 1) { clearTimeout(discT1); clearTimeout(discT2); resetDisc(); openPalette(); return; }
+    if (reduceMotion) { openPalette(); return; }
+    discState = 1; btn.classList.add("scanning");
+    const labelVisible = label && label.offsetParent !== null;
+    if (labelVisible) label.textContent = "SCANNING"; else toast("SCANNING DIGITAL SPACE");
+    discT1 = setTimeout(() => { if (labelVisible) label.textContent = "SPACE READY"; }, 400);
+    discT2 = setTimeout(() => { resetDisc(); openPalette(); }, 660);
+  }
+  $("#search-toggle").addEventListener("click", discover);
 
   /* ===================== INTERACTIONS ================================= */
   function scrollToSection(sel) { const el = $(sel); if (el) el.scrollIntoView({ behavior: reduceMotion ? "auto" : "smooth", block: "start" }); }
@@ -439,20 +521,56 @@
     update();
   }
 
-  // Işık + çok hafif grid parallax (kendini belli etmeyecek kalitede)
+  // Işık yumuşak takip (lerp) + çok hafif grid parallax + masaüstü ince cursor
+  let fxRAF = 0;
   function setupPointerFX() {
     const light = $("#light"), grid = $("#grid");
     if (reduceMotion) { light.style.display = "none"; return; }
-    let raf = 0, px = 0, py = 0;
-    window.addEventListener("pointermove", (e) => {
-      px = e.clientX; py = e.clientY;
-      if (!raf) raf = requestAnimationFrame(() => {
-        light.style.transform = `translate3d(${px}px, ${py}px, 0)`;
-        const gx = (px / window.innerWidth - 0.5) * 10, gy = (py / window.innerHeight - 0.5) * 10;
-        grid.style.transform = `translate3d(${gx.toFixed(1)}px, ${gy.toFixed(1)}px, 0)`;
-        raf = 0;
+    const fine = window.matchMedia("(pointer: fine)").matches;
+
+    // Masaüstünde ince cursor halkası (native cursor gizlenmez)
+    let ring = null;
+    if (fine) {
+      ring = document.createElement("div"); ring.id = "cursor-ring"; ring.setAttribute("aria-hidden", "true");
+      document.body.appendChild(ring);
+      document.addEventListener("mousedown", () => ring.classList.add("down"));
+      document.addEventListener("mouseup", () => ring.classList.remove("down"));
+    }
+
+    let tx = window.innerWidth / 2, ty = window.innerHeight / 2;  // hedef
+    let lx = tx, ly = ty;                                         // ışık (lerp)
+    let rx = tx, ry = ty;                                         // ring (lerp, daha hızlı)
+    let active = false;
+
+    function onMove(x, y) { tx = x; ty = y; active = true; if (!fxRAF) loop(); }
+    window.addEventListener("pointermove", (e) => onMove(e.clientX, e.clientY), { passive: true });
+    window.addEventListener("touchmove", (e) => { const t = e.touches[0]; if (t) onMove(t.clientX, t.clientY); }, { passive: true });
+
+    function loop() {
+      lx += (tx - lx) * 0.12; ly += (ty - ly) * 0.12;
+      light.style.transform = `translate3d(${lx.toFixed(1)}px, ${ly.toFixed(1)}px, 0)`;
+      const gx = (lx / window.innerWidth - 0.5) * 10, gy = (ly / window.innerHeight - 0.5) * 10;
+      grid.style.transform = `translate3d(${gx.toFixed(1)}px, ${gy.toFixed(1)}px, 0)`;
+      if (ring) { rx += (tx - rx) * 0.28; ry += (ty - ry) * 0.28; ring.style.transform = `translate3d(${rx.toFixed(1)}px, ${ry.toFixed(1)}px, 0)`; }
+      // Yerleştikçe döngüyü durdur (performans / cleanup)
+      if (Math.abs(tx - lx) < 0.4 && Math.abs(ty - ly) < 0.4) { fxRAF = 0; return; }
+      fxRAF = requestAnimationFrame(loop);
+    }
+    // Sekme gizliyken döngüyü durdur
+    document.addEventListener("visibilitychange", () => { if (document.hidden && fxRAF) { cancelAnimationFrame(fxRAF); fxRAF = 0; } });
+
+    // Proje preview parallax (yalnızca masaüstü, çok hafif)
+    if (fine) {
+      $$("#projects-list .project").forEach((el) => {
+        const prev = el.querySelector(".p-preview");
+        el.addEventListener("pointermove", (e) => {
+          const r = el.getBoundingClientRect();
+          const dx = (e.clientX - r.left - r.width / 2) / r.width;
+          prev.style.transform = `translateY(-50%) translateX(${(dx * 14).toFixed(1)}px)`;
+        });
+        el.addEventListener("pointerleave", () => { prev.style.transform = "translateY(-50%)"; });
       });
-    }, { passive: true });
+    }
   }
 
   function setupCoords() {
@@ -498,10 +616,9 @@
     const b = $("#boot");
     const go = () => b.classList.add("gone");
     if (reduceMotion) { go(); return; }
-    const timer = setTimeout(go, 800);
-    // Dokununca anında geç
-    const skip = () => { clearTimeout(timer); go(); cleanup(); };
-    function cleanup() { b.removeEventListener("pointerdown", skip); }
+    // Kısa açılış: ARDA.OS görünsün, sonra hero kademeli girsin (kullanıcıyı bekletme)
+    const timer = setTimeout(go, 340);
+    const skip = () => { clearTimeout(timer); go(); b.removeEventListener("pointerdown", skip); };
     b.addEventListener("pointerdown", skip);
   }
 
@@ -543,7 +660,7 @@
   async function init() {
     DATA = await loadData();
     if (!DATA) { $("#boot").innerHTML = '<div class="boot-word">içerik yüklenemedi</div>'; return; }
-    renderProfile(); startClock(); renderNow(); renderMusic(); renderToolbox(); renderTermux(); renderProjects(); renderConnect();
+    renderProfile(); startClock(); setupSession(); renderNow(); renderMusic(); renderToolbox(); renderTermux(); renderProjects(); renderConnect();
     buildPaletteIndex();
     setupReveal(); setupTouchStates(); setupDots(); setupScrollBar(); setupPointerFX(); setupCoords(); setupAmbient();
     setupContact(); setupSecrets(); boot();
