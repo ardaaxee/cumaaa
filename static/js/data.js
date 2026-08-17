@@ -1,86 +1,154 @@
 // OTOMATİK FALLBACK — content/site.json canonical kaynaktır.
 // Sunucu (fetch) çalışmadığında (ör. file:// ile açılışta) bu kullanılır.
-// Düzenleme yaparken content/site.json ile senkron tut.
 window.SITE_DATA = {
   "profile": {
     "name": "ARDA",
+    "system": "ARDA.OS",
     "handle": "@arda",
-    "label": "DIGITAL PROFILE / 2026",
+    "kicker": "DIGITAL SPACE",
+    "tagline": "BUILD / EXPERIMENT / LEARN",
     "avatarInitials": "AR",
     "avatarImage": "",
-    "bio": "Digital tinkerer. Termux, Python ve web ile küçük deneyler. Bu benim kişisel alanım.",
-    "status": "online",
-    "statusNote": "yeni işler için müsait",
-    "metadata": [
-      {
-        "k": "LOC",
-        "v": "TR"
-      },
-      {
-        "k": "FOCUS",
-        "v": "TERMUX · PY · WEB"
-      },
-      {
-        "k": "SINCE",
-        "v": "2026"
-      }
-    ],
+    "bio": "Termux, Python ve web ile küçük deneyler. Burası bir link listesi değil — kendi dijital alanım.",
+    "build": "2026",
     "instagram": "https://instagram.com/"
   },
-  "links": [
+  "now": [
     {
-      "id": "instagram",
-      "title": "INSTAGRAM",
-      "meta": "profile",
-      "href": "https://instagram.com/",
-      "external": true
+      "k": "LISTENING",
+      "v": "Spotify",
+      "href": ""
     },
     {
-      "id": "spotify",
-      "title": "SPOTIFY",
-      "meta": "now playing",
-      "action": "spotify"
+      "k": "BUILDING",
+      "v": "ARDA.OS",
+      "href": ""
     },
     {
-      "id": "termux",
-      "title": "TERMUX LAB",
-      "meta": "6 modül · öğren",
-      "action": "termux"
-    },
-    {
-      "id": "projects",
-      "title": "PROJECTS",
-      "meta": "seçili işler",
-      "action": "projects"
-    },
-    {
-      "id": "space",
-      "title": "DIGITAL SPACE",
-      "meta": "deneyler",
-      "href": "https://instagram.com/",
-      "external": true
-    },
-    {
-      "id": "contact",
-      "title": "CONTACT",
-      "meta": "merhaba de",
-      "action": "contact"
+      "k": "LEARNING",
+      "v": "Termux / Linux",
+      "href": ""
     }
   ],
-  "spotify": {
+  "music": {
     "url": "",
-    "track": "",
-    "artist": "",
-    "note": "Spotify bağlantısı ekle: content/site.json → spotify.url"
+    "note": "Spotify bağlantısı ekle: content/site.json → music.url"
   },
+  "tools": [
+    {
+      "id": "termux",
+      "code": "01",
+      "title": "TERMUX",
+      "blurb": "Android'de tam terminal ortamı.",
+      "action": "termux-lab"
+    },
+    {
+      "id": "linux",
+      "code": "02",
+      "title": "LINUX",
+      "blurb": "Dosya, süreç ve izinlerin mantığı.",
+      "sections": [
+        {
+          "h": "NE İŞE YARAR",
+          "t": "Termux'un altında çalışan sistem. Dosya, süreç ve izinleri anlamak her şeyin temeli."
+        },
+        {
+          "h": "BAŞLA",
+          "t": "ls, cd, pwd, chmod, ps komutlarıyla gez. Önce gör, sonra değiştir."
+        }
+      ],
+      "links": [
+        {
+          "label": "TERMUX LAB → FILE SYSTEM",
+          "action": "termux-lab"
+        }
+      ]
+    },
+    {
+      "id": "python",
+      "code": "03",
+      "title": "PYTHON",
+      "blurb": "Otomasyon ve küçük araçlar.",
+      "sections": [
+        {
+          "h": "NEDEN",
+          "t": "Script, otomasyon ve hızlı prototip için ideal ilk dil."
+        },
+        {
+          "h": "İLK ADIM",
+          "t": "pkg install python → python dosya.py. Sonra pip ile kütüphane ekle."
+        }
+      ],
+      "links": [
+        {
+          "label": "TERMUX LAB → PYTHON",
+          "action": "termux-lab"
+        }
+      ]
+    },
+    {
+      "id": "git",
+      "code": "04",
+      "title": "GIT",
+      "blurb": "Sürüm kontrolü ve iş akışı.",
+      "sections": [
+        {
+          "h": "FİKİR",
+          "t": "Her değişiklik bir anlık görüntü. Geri dönebilmek özgürlüktür."
+        },
+        {
+          "h": "AKIŞ",
+          "t": "init → add → commit → push. Küçük ve sık commit at."
+        }
+      ],
+      "links": [
+        {
+          "label": "TERMUX LAB → GIT",
+          "action": "termux-lab"
+        }
+      ]
+    },
+    {
+      "id": "ai",
+      "code": "05",
+      "title": "AI",
+      "blurb": "Modeli araç gibi kullanmak.",
+      "sections": [
+        {
+          "h": "YAKLAŞIM",
+          "t": "Prompt'u net yaz, bağlam ver, çıktıyı her zaman doğrula. Model bir asistan, karar senin."
+        },
+        {
+          "h": "PRATİK",
+          "t": "Tekrarlayan işleri otomatikleştir; öğrenmeyi hızlandır, yerine koyma."
+        }
+      ]
+    },
+    {
+      "id": "web",
+      "code": "06",
+      "title": "WEB",
+      "blurb": "Sağlam temel, sonra framework.",
+      "sections": [
+        {
+          "h": "TEMEL",
+          "t": "HTML/CSS/JS üçlüsünü gerçekten öğren. Framework bunun üstüne gelir."
+        },
+        {
+          "h": "İLKE",
+          "t": "Önce erişilebilirlik ve performans; sonra süsleme."
+        }
+      ]
+    }
+  ],
   "termux": {
-    "intro": "Küçük ve pratik bir Termux/komut satırı öğrenme alanı. Bir modül seç, komutu kopyala, dene.",
+    "intro": "Telefondan komut satırı öğrenmek için sade, pratik bir alan. Bir modül seç, komutu kopyala, dene. İlerlemen kaydedilir.",
     "categories": [
       {
         "id": "basics",
         "code": "01",
         "title": "BASICS",
-        "desc": "Termux'a ilk adımlar ve temel gezinme.",
+        "desc": "İlk adımlar ve temel gezinme.",
         "lessons": [
           {
             "title": "Bulunduğun dizin",
@@ -147,7 +215,7 @@ window.SITE_DATA = {
         "desc": "Paket kurulumu ve güncelleme.",
         "lessons": [
           {
-            "title": "Paket listesini güncelle",
+            "title": "Listeyi güncelle",
             "cmd": "pkg update",
             "desc": "Depoları günceller.",
             "example": "pkg update && pkg upgrade"
@@ -273,11 +341,12 @@ window.SITE_DATA = {
   "projects": [
     {
       "id": "arda-os",
+      "num": "01",
       "title": "ARDA.OS",
       "status": "live",
       "year": "2026",
       "type": "Digital Profile",
-      "description": "Instagram profilinin doğal devamı olan kişisel dijital alan. Link-in-bio değil; bir deneyim.",
+      "description": "Instagram profilinin doğal devamı olan kişisel dijital alan. Link listesi değil; keşfedilen bir deneyim.",
       "tech": [
         "HTML",
         "CSS",
@@ -288,24 +357,27 @@ window.SITE_DATA = {
     },
     {
       "id": "termux-lab",
+      "num": "02",
       "title": "TERMUX LAB",
       "status": "wip",
       "year": "2026",
       "type": "Learning Tool",
-      "description": "Telefondan komut satırı öğrenmek için sade, pratik bir referans arayüzü.",
+      "description": "Telefondan komut satırı öğrenmek için sade, ilerleme takipli bir referans arayüzü.",
       "tech": [
         "JS",
-        "UX"
+        "UX",
+        "localStorage"
       ],
       "link": ""
     },
     {
       "id": "signal",
+      "num": "03",
       "title": "SIGNAL",
       "status": "concept",
       "year": "2026",
       "type": "Experiment",
-      "description": "Generatif görsel deneyler ve mikro etkileşimler üzerine bir çalışma alanı.",
+      "description": "Generatif görseller ve mikro etkileşimler üzerine sürekli değişen bir çalışma alanı.",
       "tech": [
         "Canvas",
         "WebGL"
@@ -313,15 +385,32 @@ window.SITE_DATA = {
       "link": ""
     }
   ],
-  "contact": {
-    "intro": "Bir fikir, iş ya da sadece merhaba. Kısa tut, geri dönerim.",
-    "email": "acarcuma25@gmail.com"
-  },
-  "system": {
-    "boot": "ARDA.OS // digital profile",
-    "hints": [
-      "Avatara birkaç kez dokun.",
-      "Klavyede '?' dene."
+  "connect": {
+    "intro": "Bir fikir, iş ya da sadece merhaba.",
+    "email": "acarcuma25@gmail.com",
+    "links": [
+      {
+        "id": "instagram",
+        "label": "INSTAGRAM",
+        "meta": "profil",
+        "href": "https://instagram.com/",
+        "external": true
+      },
+      {
+        "id": "spotify",
+        "label": "SPOTIFY",
+        "meta": "müzik",
+        "href": "",
+        "external": true
+      }
     ]
+  },
+  "easterEggs": {
+    "logo": "system :: ARDA.OS kernel awake",
+    "avatar": "access granted",
+    "hint": "ipucu: 'arda' yaz · logoya uzun bas · en alta in",
+    "footer": "künyeyi okudun. saygı.",
+    "end": "// end of transmission — keşfettiğin için teşekkürler.",
+    "konami": "cheat mode :: unlocked"
   }
 };

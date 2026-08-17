@@ -1,17 +1,22 @@
-# ARDA.OS · Digital Profile
+# ARDA.OS · Digital Space (v2.5)
 
-Instagram profilinden gelen ziyaretçiler için tasarlanmış **premium kişisel dijital alan**.
-"Link-in-bio" klişesi değil; kişisel, karanlık, deneysel bir deneyim.
+Instagram profilinden gelen ziyaretçilerin 10-20 saniye keşfetmek isteyeceği
+**interaktif kişisel dijital alan**. Linktree değil, portfolio değil — kendi dijital dünyası.
 
-- Mobil-öncelikli (375 / 390 / 412 / 430 px'de kusursuz), iOS/Android safe-area destekli
-- Dark / premium estetik — neon terminal klişesi yok
-- Scroll ile ortaya çıkan bölümler (discover), scroll ilerleme göstergesi
-- Magnetic butonlar, ışık takibi, clip-path reveal, mikro etkileşimler
-- Termux Lab: gerçek bir mini öğrenme arayüzü (komut + açıklama + örnek + kopyala)
-- Projeler: dokununca açılan fullscreen detay
-- NOW PLAYING: sahte veri yok — sadece senin girdiğin Spotify bilgisi/bağlantısı
-- Copy / Share / QR ve gerçek contact formu
-- Tüm içerik tek dosyadan yönetilir: `content/site.json`
+- Mobil-öncelikli (375 / 390 / 412 / 430 px'de kusursuz), Android Chrome + iOS safe-area
+- Dark / premium editorial estetik — neon/terminal/matrix klişesi yok
+- 7 bölüm: **01 PROFILE · 02 NOW · 03 MUSIC · 04 TOOLBOX · 05 TERMUX · 06 PROJECTS · 07 CONNECT**
+- Güçlü açılış (grid + koordinatlar + hareketli ışık, max 0.8s, dokununca geç)
+- Gerçek browser verisi: canlı yerel saat, durum
+- **NOW**: LISTENING / BUILDING / LEARNING (editorial)
+- **DIGITAL TOOLBOX**: TERMUX / LINUX / PYTHON / GIT / AI / WEB — her biri modal açar
+- **Termux Lab**: 6 modül, COMMAND / WHAT IT DOES / EXAMPLE / COPY + **localStorage ilerleme** (`X / 24 COMPLETE`)
+- **Projeler**: editorial liste + fullscreen detay geçişi
+- **Command Palette** (⌘K / Ctrl+K / `/` · mobilde SEARCH butonu) — tüm içerikte arama
+- **NOW PLAYING**: sahte veri yok — sadece girilen Spotify bağlantısı
+- Copy / Share / QR (gömülü offline QR) + gerçek contact formu
+- 5 gizli keşif noktası (easter egg)
+- Tüm içerik tek dosyadan: `content/site.json`
 
 ---
 
@@ -23,7 +28,7 @@ Instagram profilinden gelen ziyaretçiler için tasarlanmış **premium kişisel
 ├── requirements.txt       # Flask
 ├── index.html             # Tek sayfalık uygulama (SPA kabuğu)
 ├── content/
-│   └── site.json          # TÜM içerik burada (canonical) — buradan düzenle
+│   └── site.json          # TÜM içerik (profile/now/music/tools/termux/projects/connect/easterEggs)
 └── static/
     ├── css/style.css
     └── js/
@@ -84,8 +89,10 @@ print('data.js güncellendi')
 PY
 ```
 
-Düzenlenebilir alanlar: profil (isim, bio, durum, metadata, avatar), ana bağlantılar,
-Spotify (`spotify.url`), Termux modülleri/dersleri, projeler, contact.
+Düzenlenebilir bölümler: `profile` (isim, bio, avatar, instagram, build), `now`
+(LISTENING/BUILDING/LEARNING), `music.url` (Spotify), `tools` (toolbox kartları),
+`termux` (modüller/dersler), `projects`, `connect` (contact + FIND ARDA linkleri),
+`easterEggs` (gizli mesajlar).
 
 ---
 
