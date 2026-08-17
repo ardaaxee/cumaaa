@@ -57,7 +57,7 @@
     <!-- 01 PROFILE / HERO -->
     <section class="section" id="sec-profile" data-index="01" data-name="PROFILE">
       <div class="hero">
-        <div class="reveal hero-eyebrow" style="--d:60ms"><span id="eb-system">ARDA.OS</span><span class="eb-line"></span><span id="eb-kicker">DIGITAL SPACE</span></div>
+        <div class="reveal hero-eyebrow" style="--d:60ms"><span id="eb-system">ARDA.OS</span><span class="eb-line"></span><span id="eb-kicker">DIGITAL SPACE</span><span class="eb-ts" id="eb-ts" aria-hidden="true"></span></div>
         <div class="reveal hero-id" style="--d:120ms">
           <div class="avatar" id="avatar" role="img" aria-label="Avatar"></div>
           <div class="hero-idtext">
@@ -102,6 +102,7 @@
       <div class="reveal signal-sub">kullandığım · öğrendiğim alanlar — dokun, aç</div>
       <div class="dna reveal" id="dna-map">
         <svg class="dna-lines" id="dna-lines" aria-hidden="true"></svg>
+        <div class="dna-core" id="dna-core"><span class="dna-core-dot"></span>ARDA.OS</div>
         <div class="dna-nodes" id="dna-nodes"></div>
       </div>
     </section>
@@ -111,7 +112,11 @@
       <div class="reveal section-head"><span class="idx">05</span><span class="ttl">TERMUX LAB</span><span class="rule"></span></div>
       <div class="reveal termux-kb"><span>LAB / KNOWLEDGE BASE</span><span class="termux-count" id="termux-count">24 MODULES</span></div>
       <p class="reveal termux-intro" id="termux-intro"></p>
-      <div class="reveal termux-progress"><div class="tp-bar"><i id="tp-fill"></i></div><span class="tp-label" id="tp-label">0 / 0 COMPLETE</span></div>
+      <div class="reveal termux-progress">
+        <div class="tp-count" id="tp-count">00 / 24</div>
+        <div class="tp-bar"><i id="tp-fill"></i></div>
+        <div class="tp-foot"><span class="tp-label">PROGRESS</span><span class="tp-pct" id="tp-pct">0%</span></div>
+      </div>
       <div class="termux-grid" id="termux-grid"></div>
     </section>
 
@@ -156,7 +161,7 @@
         <div class="fs-label">END OF TRANSMISSION</div>
         <div class="fs-system" id="fs-system">ARDA.OS</div>
         <div class="fs-statement" id="fs-statement"></div>
-        <div class="fs-foot"><span id="foot-handle">@lov4ardaa</span><span>·</span><span id="fs-year">ARDA.OS 2026</span></div>
+        <div class="fs-foot" id="fs-foot">© 2026 ARDA</div>
       </div>
       <div class="end-line" id="end-line"></div>
     </section>

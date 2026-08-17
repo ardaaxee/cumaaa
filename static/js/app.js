@@ -62,7 +62,7 @@
     // Final screen
     $("#fs-system").textContent = p.system || "ARDA.OS";
     $("#fs-statement").innerHTML = words.map((w) => `<span>${esc(w)}${/[.]$/.test(w) ? "" : "."}</span>`).join("");
-    $("#fs-year").textContent = `${p.system || "ARDA.OS"} ${p.build || "2026"}`;
+    $("#fs-foot").textContent = `© ${p.build || "2026"} ${p.name || "ARDA"}`;
   }
 
   // Gerçek oturum bilgisi — yalnızca tarayıcıdan okunabilen veriler (sahte metrik yok)
@@ -77,11 +77,12 @@
     const device = isTouch ? "MOBILE" : "DESKTOP";
     const vp = `${window.innerWidth}×${window.innerHeight}`;
     const online = navigator.onLine ? "ONLINE" : "OFFLINE";
+    const rows = [["SESSION", SESSION_ID], ["DEVICE", device], ["VIEWPORT", vp], ["STATUS", online], ["TIME ON SITE", timeOnSite()]];
     el.innerHTML =
-      `<span class="sr-tag">ID ${esc(SESSION_ID)}</span>` +
-      [["DEVICE", device], ["VIEWPORT", vp], ["STATUS", online], ["TIME ON SITE", timeOnSite()]]
-        .map(([k, v]) => `<span class="sr-item"><b>${k}</b> ${esc(v)}</span>`).join("") +
-      `<span class="sr-note">LOCAL ONLY</span>`;
+      `<div class="sr-top"><span class="sr-live"></span>LOCAL ONLY</div>` +
+      `<div class="sr-grid">` +
+      rows.map(([k, v]) => `<div class="sr-row"><span class="sr-k">${k}</span><span class="sr-v">${esc(v)}</span></div>`).join("") +
+      `</div>`;
   }
   function setupSession() {
     renderSession();
@@ -92,15 +93,20 @@
     setInterval(() => { if (!document.hidden) renderSession(); }, 15000);
   }
 
-  // Gerçek yerel saat (browser verisi)
+  // Gerçek yerel saat (browser verisi) + hero zaman damgası
   function startClock() {
-    const el = $("#pm-clock");
+    const el = $("#pm-clock"), ts = $("#eb-ts");
     function tick() {
       const now = new Date();
-      el.textContent = now.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", hour12: false });
+      const hhmm = now.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", hour12: false });
+      el.textContent = hhmm;
+      if (ts) {
+        const p = (n) => String(n).padStart(2, "0");
+        ts.textContent = `${now.getFullYear()}.${p(now.getMonth() + 1)}.${p(now.getDate())} · ${hhmm}`;
+      }
     }
-    tick(); setInterval(tick, 1000 * 20);
-    // Saniye hassasiyeti gerekmiyor; dakikada birkaç güncelleme yeterli + performans
+    tick();
+    // Dakikada birkaç güncelleme yeterli (performans)
     setTimeout(() => { tick(); setInterval(tick, 30000); }, (60 - new Date().getSeconds()) * 1000);
   }
 
@@ -145,21 +151,24 @@
       el.addEventListener("click", () => openTool(DATA.toolbox[+el.dataset.i])));
     drawDNALines();
   }
-  // Düğümleri merkeze bağlayan ince çizgiler (hub) — layout sonrası ölçülür
+  // Çekirdeği (ARDA.OS) düğümlere bağlayan organik eğri dallar — layout sonrası ölçülür
   function drawDNALines() {
-    const map = $("#dna-map"), svg = $("#dna-lines"); if (!map || !svg) return;
+    const map = $("#dna-map"), svg = $("#dna-lines"), core = $("#dna-core"); if (!map || !svg || !core) return;
     const r = map.getBoundingClientRect();
     if (r.width < 2) return;
     svg.setAttribute("viewBox", `0 0 ${r.width} ${r.height}`);
     svg.setAttribute("width", r.width); svg.setAttribute("height", r.height);
-    const cx = r.width / 2, cy = r.height / 2;
-    let lines = "";
+    const cb = core.getBoundingClientRect();
+    const hx = cb.left - r.left + cb.width / 2, hy = cb.bottom - r.top;   // çekirdeğin alt-orta noktası
+    let paths = "";
     $$("#dna-nodes .dna-node").forEach((n) => {
       const b = n.getBoundingClientRect();
-      const x = b.left - r.left + b.width / 2, y = b.top - r.top + b.height / 2;
-      lines += `<line x1="${cx.toFixed(1)}" y1="${cy.toFixed(1)}" x2="${x.toFixed(1)}" y2="${y.toFixed(1)}" />`;
+      const x = b.left - r.left + b.width / 2, y = b.top - r.top;          // düğümün üst-orta noktası
+      // Organik his için dikey ağırlıklı kontrol noktası
+      const cxp = hx + (x - hx) * 0.35, cyp = (hy + y) / 2;
+      paths += `<path d="M ${hx.toFixed(1)} ${hy.toFixed(1)} Q ${cxp.toFixed(1)} ${cyp.toFixed(1)} ${x.toFixed(1)} ${y.toFixed(1)}" pathLength="1" />`;
     });
-    svg.innerHTML = lines + `<circle cx="${cx.toFixed(1)}" cy="${cy.toFixed(1)}" r="2.5" class="dna-hub"/>`;
+    svg.innerHTML = paths;
   }
 
   function termuxTotal() {
@@ -170,10 +179,13 @@
   }
   function updateTermuxProgress() {
     const total = termuxTotal();
-    const done = doneSet.size;
+    // Yalnızca gerçekten var olan derslerin tamamlanmışını say (localStorage)
+    const done = (DATA.termux.categories || []).reduce((a, c) => a + catDone(c), 0);
     const pct = total ? Math.round((done / total) * 100) : 0;
+    const p2 = (n) => String(n).padStart(2, "0");
     $("#tp-fill").style.width = pct + "%";
-    $("#tp-label").textContent = `${done} / ${total} COMPLETE`;
+    if ($("#tp-count")) $("#tp-count").textContent = `${p2(done)} / ${p2(total)}`;
+    if ($("#tp-pct")) $("#tp-pct").textContent = pct + "%";
     $$("#termux-grid .termux-cat").forEach((el) => {
       const cat = DATA.termux.categories[+el.dataset.i];
       const cd = catDone(cat), cl = (cat.lessons || []).length;
@@ -589,7 +601,8 @@
     function loop() {
       lx += (tx - lx) * 0.12; ly += (ty - ly) * 0.12;
       light.style.transform = `translate3d(${lx.toFixed(1)}px, ${ly.toFixed(1)}px, 0)`;
-      const gx = (lx / window.innerWidth - 0.5) * 10, gy = (ly / window.innerHeight - 0.5) * 10;
+      // Çok ince parallax: maksimum ~5px
+      const gx = (lx / window.innerWidth - 0.5) * 5, gy = (ly / window.innerHeight - 0.5) * 5;
       grid.style.transform = `translate3d(${gx.toFixed(1)}px, ${gy.toFixed(1)}px, 0)`;
       if (ring) { rx += (tx - rx) * 0.28; ry += (ty - ry) * 0.28; ring.style.transform = `translate3d(${rx.toFixed(1)}px, ${ry.toFixed(1)}px, 0)`; }
       // Yerleştikçe döngüyü durdur (performans / cleanup)
