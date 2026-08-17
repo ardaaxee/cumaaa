@@ -1,72 +1,105 @@
-# ARDA · Kod Sanatı 🎨
+# ARDA.OS · Digital Profile
 
-Tek dosyalık, tamamen çevrimdışı çalışan interaktif bir "kod sanatı" web sayfası.
-Fare veya dokunmatik ile etkileşen, birbirine ışıltılı çizgilerle bağlanan canlı bir
-parçacık ağı (constellation) + kendi kendine yazılan tipografik karşılama içerir.
+Instagram profilinden gelen ziyaretçiler için tasarlanmış **premium kişisel dijital alan**.
+"Link-in-bio" klişesi değil; kişisel, karanlık, deneysel bir deneyim.
 
-- 🟢 **Tek dosya:** Sadece `index.html`. Harici kütüphane, CDN veya internet **gerekmez**.
-- 🌙 Karanlık, sanatsal tema.
-- 🖱️ İnteraktif: hareket ettir, dokun, tıkla — ağ tepki verir.
-- 📱 Mobil uyumlu ve dokunmatik destekli.
-- ⚡ 60 FPS hedefi: parçacık yoğunluğu ekran boyutuna göre otomatik ayarlanır.
-
----
-
-## 🚀 Nasıl Açılır (Yerel)
-
-Kurulum yok. `index.html` dosyasına çift tıklayın; varsayılan tarayıcınızda açılır.
-Alternatif olarak dosyayı bir tarayıcı sekmesine sürükleyip bırakabilirsiniz.
-
-> Not: Tamamen çevrimdışı çalışır, internet bağlantısı olmadan da açılır.
+- Mobil-öncelikli (375 / 390 / 412 / 430 px'de kusursuz), iOS/Android safe-area destekli
+- Dark / premium estetik — neon terminal klişesi yok
+- Scroll ile ortaya çıkan bölümler (discover), scroll ilerleme göstergesi
+- Magnetic butonlar, ışık takibi, clip-path reveal, mikro etkileşimler
+- Termux Lab: gerçek bir mini öğrenme arayüzü (komut + açıklama + örnek + kopyala)
+- Projeler: dokununca açılan fullscreen detay
+- NOW PLAYING: sahte veri yok — sadece senin girdiğin Spotify bilgisi/bağlantısı
+- Copy / Share / QR ve gerçek contact formu
+- Tüm içerik tek dosyadan yönetilir: `content/site.json`
 
 ---
 
-## 🌐 Nasıl Yayınlanır (Instagram linki için)
+## Dosya yapısı
 
-Instagram profilinizdeki **bağlantı (link)** bölümüne koyabileceğiniz bir URL elde etmek
-için iki kolay yol:
-
-### Yöntem 1 — Netlify Drop (en hızlı, 1 dakika)
-
-1. https://app.netlify.com/drop adresine gidin.
-2. İçinde `index.html` bulunan klasörü sayfaya **sürükleyip bırakın**.
-   (Sadece `index.html`'i de sürükleyebilirsiniz.)
-3. Netlify size anında bir URL verir (ör. `https://parlak-isim-123.netlify.app`).
-4. Bu URL'yi Instagram profilinizin link kısmına yapıştırın. Bitti! ✅
-
-> İsterseniz ücretsiz Netlify hesabı açıp site adını (subdomain) özelleştirebilirsiniz.
-
-### Yöntem 2 — GitHub Pages (kalıcı, ücretsiz)
-
-1. GitHub'da bir repo oluşturun (ör. `kod-sanati`) ve `index.html` dosyasını yükleyin.
-2. Repo sayfasında **Settings → Pages** bölümüne gidin.
-3. **Source** olarak `Deploy from a branch` seçin.
-4. Branch olarak `main` (ve klasör `/root`) seçip **Save** deyin.
-5. Birkaç dakika sonra siteniz şu adreste yayında olur:
-   `https://KULLANICI-ADINIZ.github.io/kod-sanati/`
-6. Bu URL'yi Instagram profilinizin link kısmına yapıştırın. ✅
+```
+.
+├── app.py                 # Flask backend (sayfa + /api/contact + /api/health)
+├── requirements.txt       # Flask
+├── index.html             # Tek sayfalık uygulama (SPA kabuğu)
+├── content/
+│   └── site.json          # TÜM içerik burada (canonical) — buradan düzenle
+└── static/
+    ├── css/style.css
+    └── js/
+        ├── app.js         # Uygulama mantığı
+        ├── data.js        # site.json'un offline fallback kopyası
+        └── qrcode.min.js  # Çevrimdışı QR üreticisi (MIT, gömülü)
+```
 
 ---
 
-## ✏️ Kişiselleştirme
+## Çalıştırma (yerel)
 
-`index.html` içinde kolayca değiştirebileceğiniz yerler:
+### Flask ile (contact formu gerçek çalışır)
+```bash
+pip install -r requirements.txt
+python app.py
+# http://localhost:8080
+```
+Gönderilen contact mesajları `content/messages.jsonl` dosyasına yazılır (git'e girmez).
 
-| Ne | Nerede | Nasıl |
-|----|--------|-------|
-| İsim | `<h1 class="name">ARDA</h1>` | Metni değiştirin |
-| Rozet | `<div class="badge">@arda</div>` | Kullanıcı adınızı yazın |
-| Karşılama | JS'te `const message = "MERHABA, BEN";` | Yazılan metni değiştirin |
-| Renkler | CSS `:root` içindeki `--c1 / --c2 / --c3` | Aksan renklerini değiştirin |
-| Yoğunluk | JS `targetCount()` fonksiyonu | Parçacık sayısını ayarlayın |
+### Sunucusuz (hızlı bakış)
+`index.html`'i doğrudan açabilirsin; içerik `static/js/data.js` fallback'inden yüklenir.
+Contact formu backend olmadığında otomatik olarak **mailto** ile açılır.
 
 ---
 
-## 🛠️ Teknik Notlar
+## Yayınlama (Instagram linki için)
 
-- Saf HTML + CSS + JavaScript (Canvas 2D). Derleme adımı yok.
-- Retina ekranlar için `devicePixelRatio` üst sınırı 2 ile netlik/performans dengesi.
-- `prefers-reduced-motion` tercihine saygı duyar (animasyonları sakinleştirir).
-- Ekran alanına göre parçacık sayısı ve bağlantı mesafesi dinamik hesaplanır.
+### Netlify Drop (en hızlı)
+1. https://app.netlify.com/drop adresine git.
+2. Proje klasörünü sürükleyip bırak.
+3. Verilen URL'yi Instagram profilinin link kısmına yapıştır.
 
-Keyifli kullanımlar! ✨
+> Not: Netlify statik bir hosttur; `index.html`, `static/`, `content/site.json` olduğu gibi
+> sunulur. Contact formu bu durumda mailto fallback'i kullanır. Formu gerçek şekilde
+> almak istersen Flask'ı bir sunucuda (Render, Railway, VPS) çalıştır.
+
+### GitHub Pages
+1. Repoyu GitHub'a gönder.
+2. **Settings → Pages → Deploy from a branch → `main` / root**.
+3. `https://KULLANICI.github.io/REPO/` adresini kullan.
+
+---
+
+## İçeriği düzenleme
+
+Her şey **`content/site.json`** içindedir. Düzenledikten sonra offline fallback'i
+senkron tutmak için:
+
+```bash
+python3 - <<'PY'
+import json
+d=json.load(open('content/site.json'))
+open('static/js/data.js','w').write(
+ '// OTOMATİK FALLBACK — content/site.json canonical kaynaktır.\n'
+ 'window.SITE_DATA = '+json.dumps(d,ensure_ascii=False,indent=2)+';\n')
+print('data.js güncellendi')
+PY
+```
+
+Düzenlenebilir alanlar: profil (isim, bio, durum, metadata, avatar), ana bağlantılar,
+Spotify (`spotify.url`), Termux modülleri/dersleri, projeler, contact.
+
+---
+
+## API
+
+| Method | Yol                 | Açıklama                          |
+|--------|---------------------|-----------------------------------|
+| GET    | `/`                 | Ana sayfa                         |
+| GET    | `/content/site.json`| İçerik verisi                     |
+| GET    | `/api/health`       | Sağlık kontrolü                   |
+| POST   | `/api/contact`      | Contact formu (name, email, message) |
+
+---
+
+## İpucu
+
+Site içinde birkaç küçük keşfedilebilir detay saklı. Meraklı olan bulur.

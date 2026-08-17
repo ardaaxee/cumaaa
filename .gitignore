@@ -21,3 +21,11 @@ rad.json
 *.flf
 #Test results file
 TestResults.xml
+
+### Python / Flask ###
+__pycache__/
+*.pyc
+.venv/
+venv/
+# Contact form mesajları (gizli, repoya girmesin)
+content/messages.jsonl
