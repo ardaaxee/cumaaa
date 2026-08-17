@@ -114,12 +114,15 @@
     const arrow = `<svg class="now-arrow" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17L17 7M9 7h8v8"/></svg>`;
     const items = DATA.signal || DATA.now || [];
     $("#signal-list").innerHTML = items.map((n) => {
-      const body = `<span class="now-body"><span class="now-v">${esc(n.v)}${n.href ? arrow : ""}</span>${n.sub ? `<span class="now-sub">${esc(n.sub)}</span>` : ""}</span>`;
+      const tappable = !!(n.href || n.to);
+      const body = `<span class="now-body"><span class="now-v">${esc(n.v)}${tappable ? arrow : ""}</span>${n.sub ? `<span class="now-sub">${esc(n.sub)}</span>` : ""}</span>`;
       const k = `<span class="now-k">${esc(n.k)}</span>`;
-      return n.href
-        ? `<a class="now-row" href="${esc(n.href)}" target="_blank" rel="noopener">${k}${body}</a>`
-        : `<div class="now-row">${k}${body}</div>`;
+      if (n.href) return `<a class="now-row" href="${esc(n.href)}" target="_blank" rel="noopener">${k}${body}</a>`;
+      if (n.to) return `<button class="now-row" data-to="${esc(n.to)}">${k}${body}</button>`;
+      return `<div class="now-row">${k}${body}</div>`;
     }).join("");
+    $$("#signal-list [data-to]").forEach((el) =>
+      el.addEventListener("click", () => scrollToSection(el.getAttribute("data-to"))));
   }
 
   function renderMusic() {
@@ -148,7 +151,11 @@
         <span class="dna-dot"></span><span class="dna-label">${esc(t.title)}</span>
       </button>`).join("");
     $$("#dna-nodes .dna-node").forEach((el) =>
-      el.addEventListener("click", () => openTool(DATA.toolbox[+el.dataset.i])));
+      el.addEventListener("click", () => {
+        el.classList.add("active");
+        setTimeout(() => el.classList.remove("active"), 450);
+        openTool(DATA.toolbox[+el.dataset.i]);
+      }));
     drawDNALines();
   }
   // Çekirdeği (ARDA.OS) düğümlere bağlayan organik eğri dallar — layout sonrası ölçülür

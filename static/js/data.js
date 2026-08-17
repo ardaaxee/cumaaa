@@ -25,17 +25,20 @@ window.SITE_DATA = {
     {
       "k": "BUILDING",
       "v": "ARDA.OS",
-      "sub": "IN PROGRESS"
+      "sub": "IN PROGRESS",
+      "to": "#sec-projects"
     },
     {
       "k": "LEARNING",
       "v": "Linux / Termux",
-      "sub": "DAILY"
+      "sub": "DAILY",
+      "to": "#sec-termux"
     },
     {
       "k": "EXPLORING",
       "v": "AI / Web / Automation",
-      "sub": "CURIOUS"
+      "sub": "CURIOUS",
+      "to": "#sec-tools"
     }
   ],
   "music": {

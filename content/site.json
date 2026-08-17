@@ -16,9 +16,9 @@
     "line": "Merak ettiğim şeyleri kurar, çalışana kadar uğraşırım."
   },
   "signal": [
-    { "k": "BUILDING", "v": "ARDA.OS", "sub": "IN PROGRESS" },
-    { "k": "LEARNING", "v": "Linux / Termux", "sub": "DAILY" },
-    { "k": "EXPLORING", "v": "AI / Web / Automation", "sub": "CURIOUS" }
+    { "k": "BUILDING", "v": "ARDA.OS", "sub": "IN PROGRESS", "to": "#sec-projects" },
+    { "k": "LEARNING", "v": "Linux / Termux", "sub": "DAILY", "to": "#sec-termux" },
+    { "k": "EXPLORING", "v": "AI / Web / Automation", "sub": "CURIOUS", "to": "#sec-tools" }
   ],
   "music": {
     "url": "",

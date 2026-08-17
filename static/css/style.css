@@ -634,6 +634,27 @@ a.now-row:hover .now-arrow { color: var(--accent); transform: translate(4px,-4px
 }
 
 /* =========================================================================
+   v7 — final deneyim rötuşları
+   ========================================================================= */
+
+/* SIGNAL satırları tıklanabilir (button) — tam genişlik, sola hizalı */
+.now-row { width: 100%; text-align: left; -webkit-appearance: none; appearance: none; font-family: inherit; }
+button.now-row { color: inherit; }
+#signal-list .now-row[data-to] { cursor: pointer; }
+#signal-list .now-arrow { color: var(--faint); transition: transform .4s var(--ease), color .3s; }
+#signal-list .now-row:hover .now-arrow { color: var(--accent); transform: translate(4px, -4px); }
+#signal-list .now-sub { color: var(--faint); }
+
+/* DIGITAL DNA — dokununca kısa aktif state */
+.dna-node.active { border-color: var(--accent); color: var(--ink); }
+.dna-node.active .dna-dot { opacity: 1; box-shadow: 0 0 0 3px rgba(144,150,192,0.14); }
+
+/* Tipografi kontrast/hizalama rötuşu */
+.pmeta-v { font-variant-numeric: tabular-nums; }
+.section-head .ttl { color: var(--ink); }
+.section-head .idx { font-variant-numeric: tabular-nums; }
+
+/* =========================================================================
    RESPONSIVE
    ========================================================================= */
 @media (max-width: 360px) {
