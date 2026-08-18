@@ -55,7 +55,7 @@ export function Desk() {
           <boxGeometry args={[1.5, 0.62, 0.05]} />
           <meshStandardMaterial color="#0a0c10" roughness={0.4} metalness={0.5} />
         </mesh>
-        <MonitorScreen width={1.42} height={0.54} position={[0, 0, 0.03]} />
+        <MonitorScreen width={1.42} height={0.54} position={[0, 0, 0.03]} variant="code" />
         <mesh position={[0, -0.42, 0.1]}>
           <cylinderGeometry args={[0.04, 0.06, 0.24, 8]} />
           <meshStandardMaterial color={METAL} metalness={0.7} roughness={0.3} />
@@ -72,7 +72,7 @@ export function Desk() {
           <boxGeometry args={[0.86, 0.54, 0.04]} />
           <meshStandardMaterial color="#0a0c10" roughness={0.4} metalness={0.5} />
         </mesh>
-        <MonitorScreen width={0.8} height={0.48} position={[0, 0, 0.03]} hue="#132033" />
+        <MonitorScreen width={0.8} height={0.48} position={[0, 0, 0.03]} variant="graph" />
       </group>
 
       {/* Right monitor (angled) */}
@@ -81,7 +81,7 @@ export function Desk() {
           <boxGeometry args={[0.86, 0.54, 0.04]} />
           <meshStandardMaterial color="#0a0c10" roughness={0.4} metalness={0.5} />
         </mesh>
-        <MonitorScreen width={0.8} height={0.48} position={[0, 0, 0.03]} hue="#0e2a2f" />
+        <MonitorScreen width={0.8} height={0.48} position={[0, 0, 0.03]} variant="grid" />
       </group>
 
       {/* Keyboard with glow */}

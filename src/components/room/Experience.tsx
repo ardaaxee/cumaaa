@@ -43,7 +43,7 @@ export function Experience() {
     >
       <Suspense fallback={null}>
         <Scene quality={quality} />
-        <PostFx enabled={bloomOn} />
+        <PostFx enabled={bloomOn} quality={quality} />
       </Suspense>
       <AdaptiveQuality />
     </Canvas>

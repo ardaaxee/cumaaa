@@ -1,18 +1,22 @@
 import { EffectComposer, Bloom, Vignette } from '@react-three/postprocessing'
+import type { GraphicsQuality } from '../../types'
 
-// Subtle bloom + vignette. Skipped entirely on low quality (the whole composer
-// is unmounted) to keep mid-range phones fast.
-export function PostFx({ enabled }: { enabled: boolean }) {
+// Quality-aware post-processing. The whole composer unmounts on low quality.
+// High adds multisampling and a stronger, wider bloom for a richer look; the
+// IBL environment + reflective floor carry most of the "material" realism.
+export function PostFx({ enabled, quality }: { enabled: boolean; quality: GraphicsQuality }) {
   if (!enabled) return null
+  const high = quality === 'high'
+
   return (
-    <EffectComposer>
+    <EffectComposer multisampling={high ? 4 : 0}>
       <Bloom
-        intensity={0.5}
-        luminanceThreshold={0.55}
-        luminanceSmoothing={0.2}
+        intensity={high ? 0.72 : 0.52}
+        luminanceThreshold={0.5}
+        luminanceSmoothing={0.25}
         mipmapBlur
       />
-      <Vignette eskil={false} offset={0.25} darkness={0.7} />
+      <Vignette eskil={false} offset={0.22} darkness={high ? 0.72 : 0.68} />
     </EffectComposer>
   )
 }
