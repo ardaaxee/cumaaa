@@ -11,6 +11,11 @@ import { WindowPanel } from '../pc/views/WindowPanel'
 import { BedView } from '../pc/views/BedView'
 import { SecretView } from '../pc/views/SecretView'
 import { AchievementsView } from '../pc/views/AchievementsView'
+import { ProjectsView } from '../pc/views/ProjectsView'
+import { AiView } from '../pc/views/AiView'
+import { StatsView } from '../pc/views/StatsView'
+import { TerminalView } from '../pc/views/TerminalView'
+import { FutureProjectsView } from '../pc/views/FutureProjectsView'
 
 // Renders whichever panel is active and centrally manages control state:
 // movement/look input and pointer lock are suspended while any panel is open,
@@ -76,6 +81,49 @@ export function PanelHost() {
       {activePanel === 'secret' && (
         <PanelFrame key="secret" title="Private Room" subtitle="Hidden" onClose={close} wide>
           <SecretView />
+        </PanelFrame>
+      )}
+
+      {/* ---- ARDA LAB stations ---- */}
+      {activePanel === 'labHologram' && (
+        <PanelFrame key="labHologram" title="Project Hologram" subtitle="ARDA LAB" onClose={close} wide>
+          <ProjectsView />
+        </PanelFrame>
+      )}
+
+      {activePanel === 'labTerminal' && (
+        <PanelFrame key="labTerminal" title="Code Terminal" subtitle="ARDA LAB · simulated" onClose={close} wide>
+          <TerminalView />
+        </PanelFrame>
+      )}
+
+      {activePanel === 'labAi' && (
+        <PanelFrame key="labAi" title="ARDA AI Terminal" subtitle="ARDA LAB" onClose={close} wide>
+          <AiView />
+        </PanelFrame>
+      )}
+
+      {activePanel === 'labCore' && (
+        <PanelFrame key="labCore" title="Project Core" subtitle="ARDA LAB · live stats" onClose={close} wide>
+          <StatsView />
+        </PanelFrame>
+      )}
+
+      {activePanel === 'labIdeas' && (
+        <PanelFrame key="labIdeas" title="Idea Wall" subtitle="ARDA LAB · ideas & private" onClose={close} wide>
+          <NotesView categories={['idea', 'private']} />
+        </PanelFrame>
+      )}
+
+      {activePanel === 'labAchievements' && (
+        <PanelFrame key="labAchievements" title="Achievement Core" subtitle="ARDA LAB" onClose={close} wide>
+          <AchievementsView />
+        </PanelFrame>
+      )}
+
+      {activePanel === 'labFuture' && (
+        <PanelFrame key="labFuture" title="Future Projects" subtitle="ARDA LAB · roadmap" onClose={close} wide>
+          <FutureProjectsView />
         </PanelFrame>
       )}
     </AnimatePresence>

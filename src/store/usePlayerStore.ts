@@ -27,6 +27,11 @@ interface PlayerState {
     lookAt: [number, number, number]
   }
 
+  // Cinematic look-at target: rotates the view toward a world point WITHOUT
+  // moving the player (used for the secret reveal and lab exit). Because it
+  // updates the controller's own yaw/pitch, control resumes seamlessly.
+  lookTarget: [number, number, number] | null
+
   setTouch: (v: boolean) => void
   setPointerLocked: (v: boolean) => void
   setMove: (x: number, y: number) => void
@@ -35,6 +40,7 @@ interface PlayerState {
   setInputEnabled: (v: boolean) => void
   requestInteract: () => void
   setFocusTarget: (t: PlayerState['focusTarget']) => void
+  setLookTarget: (t: [number, number, number] | null) => void
 }
 
 export const usePlayerStore = create<PlayerState>((set, get) => ({
@@ -47,6 +53,7 @@ export const usePlayerStore = create<PlayerState>((set, get) => ({
   inputEnabled: true,
   interactNonce: 0,
   focusTarget: null,
+  lookTarget: null,
 
   setTouch: (v) => set({ isTouch: v }),
   setPointerLocked: (v) => set({ pointerLocked: v }),
@@ -61,4 +68,5 @@ export const usePlayerStore = create<PlayerState>((set, get) => ({
   setInputEnabled: (v) => set({ inputEnabled: v }),
   requestInteract: () => set((s) => ({ interactNonce: s.interactNonce + 1 })),
   setFocusTarget: (t) => set({ focusTarget: t }),
+  setLookTarget: (t) => set({ lookTarget: t }),
 }))

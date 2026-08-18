@@ -200,6 +200,56 @@ export function rug(): Surface {
   return { map: cache.rugMap, normalMap: cache.rugNrm }
 }
 
+// ---- Lab tech grid floor --------------------------------------------------
+export function labGrid(): Surface {
+  if (cache.gridMap) return { map: cache.gridMap, normalMap: cache.gridNrm }
+  const size = 256
+  const base = canvas(size)
+  const h = canvas(size)
+  if (!base || !h) return fallback('#0a1016')
+  base.ctx.fillStyle = '#0a1218'
+  base.ctx.fillRect(0, 0, size, size)
+  // brushed sheen
+  noise(base.ctx, size, 8)
+  // grid lines
+  base.ctx.strokeStyle = 'rgba(57,212,230,0.5)'
+  base.ctx.lineWidth = 2
+  base.ctx.strokeRect(2, 2, size - 4, size - 4)
+  base.ctx.lineWidth = 1
+  base.ctx.strokeStyle = 'rgba(57,212,230,0.18)'
+  for (let i = 32; i < size; i += 32) {
+    base.ctx.beginPath()
+    base.ctx.moveTo(i, 0)
+    base.ctx.lineTo(i, size)
+    base.ctx.stroke()
+    base.ctx.beginPath()
+    base.ctx.moveTo(0, i)
+    base.ctx.lineTo(size, i)
+    base.ctx.stroke()
+  }
+  // corner nodes
+  base.ctx.fillStyle = 'rgba(95,224,239,0.55)'
+  ;[0, size].forEach((x) =>
+    [0, size].forEach((y) => {
+      base.ctx.beginPath()
+      base.ctx.arc(x, y, 4, 0, Math.PI * 2)
+      base.ctx.fill()
+    }),
+  )
+
+  h.ctx.fillStyle = '#808080'
+  h.ctx.fillRect(0, 0, size, size)
+  h.ctx.fillStyle = '#000'
+  for (let i = 0; i < size; i += 32) {
+    h.ctx.fillRect(i, 0, 2, size)
+    h.ctx.fillRect(0, i, size, 2)
+  }
+  cache.gridMap = finalize(base.c, 1)
+  const nrm = heightToNormal(h.c, 0.6)
+  if (nrm) cache.gridNrm = nrm
+  return { map: cache.gridMap, normalMap: cache.gridNrm }
+}
+
 function fallback(color: string): { map: THREE.Texture } {
   // Empty texture; caller still has its material color as a visual fallback.
   void color

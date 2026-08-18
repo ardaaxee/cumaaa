@@ -2,6 +2,9 @@ import { Sparkles } from '@react-three/drei'
 import { RoomShell } from './RoomShell'
 import { Lighting } from './Lighting'
 import { StudioEnvironment } from './StudioEnvironment'
+import { SecretGate } from './SecretGate'
+import { ArdaLab } from '../lab/ArdaLab'
+import { useRoomStore } from '../../store/useRoomStore'
 import { TaskBoardMesh } from './TaskBoardMesh'
 import { WindowView } from './WindowView'
 import { AchievementWallMesh } from './AchievementWallMesh'
@@ -24,6 +27,8 @@ export function Scene({ quality }: { quality: GraphicsQuality }) {
   // IBL reflections and floating dust are immersion touches reserved for
   // medium/high so low-end devices stay fast.
   const enrich = quality !== 'low'
+  // The lab is only built once the secret has been discovered (persisted).
+  const secretUnlocked = useRoomStore((s) => s.secretUnlocked)
 
   return (
     <>
@@ -31,6 +36,8 @@ export function Scene({ quality }: { quality: GraphicsQuality }) {
       {enrich && <StudioEnvironment />}
 
       <RoomShell quality={quality} />
+      <SecretGate />
+      {secretUnlocked && <ArdaLab quality={quality} />}
       <Desk />
       <Chair />
       <Bookcase />

@@ -95,6 +95,15 @@ export type InteractableKind =
   | 'secret'
   | 'achievements'
   | 'door'
+  // ARDA LAB stations (the hidden second room)
+  | 'labHologram'
+  | 'labTerminal'
+  | 'labAi'
+  | 'labCore'
+  | 'labIdeas'
+  | 'labAchievements'
+  | 'labFuture'
+  | 'labExit'
 
 export interface InteractableInfo {
   id: string

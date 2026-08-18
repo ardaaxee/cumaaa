@@ -4,6 +4,7 @@ import { pickFocus, useInteractionStore } from '../../systems/interactionSystem'
 import { useRoomStore } from '../../store/useRoomStore'
 import { usePlayerStore } from '../../store/usePlayerStore'
 import { ANCHORS } from '../../config/roomLayout'
+import { DOOR } from '../../config/labLayout'
 import { Sfx } from '../../systems/audioSystem'
 import type { InteractableInfo, InteractableKind } from '../../types'
 
@@ -89,12 +90,38 @@ function activate(kind: InteractableKind) {
       }, 620)
       break
     }
-    case 'secret':
+    case 'secret': {
+      // Physical reveal: unlock, play the door mechanism, and cinematically turn
+      // the player to face the opening passage — then hand control back so they
+      // can walk into ARDA LAB themselves (no teleport, no modal).
+      const wasLocked = !store.secretUnlocked
       store.unlockSecret()
       Sfx.door()
-      store.setActivePanel('secret')
+      if (wasLocked) store.pushToast('The bookcase slides open — a passage appears.', 'success')
+      runCinematic([DOOR.x, 1.5, DOOR.zCenter], 1700)
       break
+    }
+    case 'labExit': {
+      // Turn to face the corridor back to the room, then release control.
+      store.pushToast('Returning to ARDA ROOM…')
+      runCinematic([DOOR.x, 1.5, DOOR.zCenter], 1400)
+      break
+    }
     default:
+      // All other stations (room + lab) open their panel.
       store.setActivePanel(kind)
   }
+}
+
+// Briefly disable input and rotate the view toward a world point, then restore.
+function runCinematic(lookAt: [number, number, number], ms: number) {
+  const player = usePlayerStore.getState()
+  player.setInputEnabled(false)
+  player.setMove(0, 0)
+  player.setLookTarget(lookAt)
+  window.setTimeout(() => {
+    const p = usePlayerStore.getState()
+    p.setLookTarget(null)
+    p.setInputEnabled(true)
+  }, ms)
 }

@@ -17,7 +17,9 @@ export function Bookcase() {
   const door = useRef<THREE.Group>(null)
   const secretBook = useRef<THREE.MeshStandardMaterial>(null)
 
-  useCollider('bookcase', [x, 0, z], [0.5, 2.4, 2.6])
+  // Solid until the secret is found; once the hidden door slides aside, the
+  // collider is removed so the player can physically walk through into ARDA LAB.
+  useCollider('bookcase', [x, 0, z], [0.5, 2.4, 2.6], !secretUnlocked)
 
   useFrame((state, delta) => {
     // Secret book gently pulses to reward a close look.

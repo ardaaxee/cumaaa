@@ -55,8 +55,28 @@ Node 18+ recommended (developed on Node 22).
 - **Archive**: notes / ideas / memories with category filters — persisted.
 - **ARDA AI**: offline rule-based assistant grounded in your room data; upgrades to a
   backend proxy automatically if `VITE_AI_PROXY_URL` is set. No API key in the frontend.
-- **Hidden private room**: click the odd glowing book in the bookcase; a concealed
-  panel slides open and the private notes / future-projects panel appears.
+- **ARDA LAB — a full second 3D space**: click the odd glowing book in the bookcase;
+  the hidden door mechanism plays, the view cinematically turns to the opening, and
+  the passage becomes physically walkable. Walk through the corridor into **ARDA LAB**,
+  a colder, more technical room with its own lighting, grid floor, server racks,
+  ceiling beams and dust. Every station is real and data-driven:
+  - **Project Hologram** — a rotating holographic display of your live projects (opens
+    the Projects manager).
+  - **Project Core** — an energy orb whose brightness/scale/spin reflect real progress
+    (avg project progress + completed tasks + achievements); opens live stats.
+  - **Code Terminal** — a SAFE simulated terminal (`projects`, `tasks`, `status`,
+    `stats`, `achievements`, `whoami`, `help`) that only reads your store — no shell,
+    filesystem or network access.
+  - **ARDA AI Terminal** — the same offline/proxy AI, in the lab.
+  - **Idea Wall** — holo-cards from your ideas/private notes; adding one makes a new
+    card appear.
+  - **Achievement Core** — 3D badges that light up as unlocked, with a particle burst
+    when a new one is earned.
+  - **Future Projects** — locked/unlocked roadmap slots gated by real milestones (no
+    fake progress).
+  - **Exit portal** — “RETURN TO ROOM”; walk back through the corridor (no teleport).
+  The lab is only built once discovered (persisted via `secretUnlocked`), so it costs
+  nothing until then, and obeys the same LOW/MEDIUM/HIGH quality tiers.
 - **Window**: the scene outside (sky, city lights, stars) follows your **real local
   clock** — day / sunset / night.
 - **Clock**: live local time + date in the HUD.
@@ -79,16 +99,19 @@ Node 18+ recommended (developed on Node 22).
 ```
 src/
   components/
-    furniture/   Desk, Chair, Bookcase (+secret), Bed, Decor, MonitorScreen
+    furniture/   Desk, Chair, Bookcase (+secret door), Bed, Decor, Details, MonitorScreen
     interaction/ PlayerController, InteractionManager, InteractableTrigger
+    lab/         ArdaLab, LabShell, LabLighting, ProjectHologram, ProjectCore,
+                 IdeaWall, AchievementCore, ServerRacks, LabProps
     pc/          PcOs + views/ (Projects, Tasks, Notes, AI, Achievements, Stats,
-                 Settings, Profile, Music, Window, Bed, Secret)
-    room/        Experience (Canvas), Scene, RoomShell, Lighting, PostFx,
-                 AdaptiveQuality, TaskBoardMesh, WindowView, AchievementWallMesh
+                 Settings, Profile, Music, Window, Bed, Secret, Terminal, FutureProjects)
+    room/        Experience (Canvas), Scene, RoomShell, SecretGate, Lighting,
+                 StudioEnvironment, PostFx, AdaptiveQuality, TaskBoardMesh,
+                 WindowView, AchievementWallMesh
     system/      ErrorBoundary
     ui/          Hud, Intro, LoadingScreen, PanelHost, PanelFrame, Crosshair,
                  InteractionPrompt, MobileControls, Toast, WelcomeBack, HudClock
-  config/        roomLayout, interactables
+  config/        roomLayout, labLayout, interactables
   hooks/         useClock (clock + time-of-day)
   store/         useRoomStore (persisted), usePlayerStore, useBootStore
   systems/       interactionSystem, collisionSystem, timeSystem, audioSystem,
@@ -115,8 +138,8 @@ src/
 
 ## Known limitations / next steps
 
-- The main JS bundle is ~1.2 MB (Three.js); could be code-split / lazy-loaded.
-- The private room and archive share one note store (separated by category in the UI).
+- The main JS bundle is ~1.3 MB (Three.js); could be code-split / lazy-loaded.
+- ARDA LAB and the archive share one note store (separated by category in the UI).
 - Music tracks are session-local (object URLs); persisting them would need IndexedDB.
 - Shadows are single-light; no baked GI. A future pass could add light probes / SSAO.
 - No automated test suite yet for the React/3D app.

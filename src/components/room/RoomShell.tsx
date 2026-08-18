@@ -1,6 +1,7 @@
 import { useEffect, useMemo } from 'react'
 import { MeshReflectorMaterial } from '@react-three/drei'
 import { ROOM, HALF_W, HALF_D } from '../../config/roomLayout'
+import { DOOR } from '../../config/labLayout'
 import { registerCollider, unregisterCollider } from '../../systems/collisionSystem'
 import { woodFloor, wall as wallTex, rug as rugTex } from '../../utils/textures'
 import type { GraphicsQuality } from '../../types'
@@ -19,9 +20,15 @@ export function RoomShell({ quality }: { quality: GraphicsQuality }) {
     registerCollider('wall-front', [0, 0, -HALF_D], [ROOM.width, ROOM.height, t])
     registerCollider('wall-back', [0, 0, HALF_D], [ROOM.width, ROOM.height, t])
     registerCollider('wall-left', [-HALF_W, 0, 0], [t, ROOM.height, ROOM.depth])
-    registerCollider('wall-right', [HALF_W, 0, 0], [t, ROOM.height, ROOM.depth])
+    // Right wall is split around the hidden doorway (z ∈ [-2.9, -1.1]).
+    const frontLen = DOOR.zCenter - DOOR.halfWidth - -HALF_D // -2.9 - (-6) = 3.1
+    const backLen = HALF_D - (DOOR.zCenter + DOOR.halfWidth) // 6 - (-1.1) = 7.1
+    registerCollider('wall-right-front', [HALF_W, 0, -HALF_D + frontLen / 2], [t, ROOM.height, frontLen])
+    registerCollider('wall-right-back', [HALF_W, 0, HALF_D - backLen / 2], [t, ROOM.height, backLen])
     return () => {
-      ;['wall-front', 'wall-back', 'wall-left', 'wall-right'].forEach(unregisterCollider)
+      ;['wall-front', 'wall-back', 'wall-left', 'wall-right-front', 'wall-right-back'].forEach(
+        unregisterCollider,
+      )
     }
   }, [])
 
@@ -87,7 +94,6 @@ export function RoomShell({ quality }: { quality: GraphicsQuality }) {
           { key: 'front', pos: [0, ROOM.height / 2, -HALF_D], rot: [0, 0, 0], size: [ROOM.width, ROOM.height, ROOM.wall] },
           { key: 'back', pos: [0, ROOM.height / 2, HALF_D], rot: [0, Math.PI, 0], size: [ROOM.width, ROOM.height, ROOM.wall] },
           { key: 'left', pos: [-HALF_W, ROOM.height / 2, 0], rot: [0, Math.PI / 2, 0], size: [ROOM.depth, ROOM.height, ROOM.wall] },
-          { key: 'right', pos: [HALF_W, ROOM.height / 2, 0], rot: [0, -Math.PI / 2, 0], size: [ROOM.depth, ROOM.height, ROOM.wall] },
         ] as const
       ).map((w) => (
         <mesh key={w.key} position={w.pos as [number, number, number]} rotation={w.rot as [number, number, number]} receiveShadow>
@@ -100,6 +106,47 @@ export function RoomShell({ quality }: { quality: GraphicsQuality }) {
             metalness={0.04}
             envMapIntensity={0.35}
           />
+        </mesh>
+      ))}
+
+      {/* Right wall — carved with a hidden doorway (behind the bookcase) */}
+      {(
+        [
+          { z: -HALF_D + (DOOR.zCenter - DOOR.halfWidth - -HALF_D) / 2, len: DOOR.zCenter - DOOR.halfWidth - -HALF_D },
+          { z: HALF_D - (HALF_D - (DOOR.zCenter + DOOR.halfWidth)) / 2, len: HALF_D - (DOOR.zCenter + DOOR.halfWidth) },
+        ] as const
+      ).map((seg, i) => (
+        <mesh key={`rw${i}`} position={[HALF_W, ROOM.height / 2, seg.z]} receiveShadow>
+          <boxGeometry args={[ROOM.wall, ROOM.height, seg.len]} />
+          <meshStandardMaterial
+            color="#151a23"
+            map={walls.map}
+            normalMap={walls.normalMap}
+            roughness={0.92}
+            metalness={0.04}
+            envMapIntensity={0.35}
+          />
+        </mesh>
+      ))}
+      {/* Lintel above the doorway */}
+      <mesh
+        position={[HALF_W, (DOOR.height + ROOM.height) / 2, DOOR.zCenter]}
+        receiveShadow
+      >
+        <boxGeometry args={[ROOM.wall, ROOM.height - DOOR.height, DOOR.halfWidth * 2]} />
+        <meshStandardMaterial color="#151a23" map={walls.map} normalMap={walls.normalMap} roughness={0.92} />
+      </mesh>
+      {/* Glowing doorway frame (portal accent) */}
+      {(
+        [
+          { p: [HALF_W, DOOR.height / 2, DOOR.zCenter - DOOR.halfWidth] as const, s: [0.08, DOOR.height, 0.08] as const },
+          { p: [HALF_W, DOOR.height / 2, DOOR.zCenter + DOOR.halfWidth] as const, s: [0.08, DOOR.height, 0.08] as const },
+          { p: [HALF_W, DOOR.height, DOOR.zCenter] as const, s: [0.08, 0.08, DOOR.halfWidth * 2] as const },
+        ] as const
+      ).map((f, i) => (
+        <mesh key={`df${i}`} position={f.p as [number, number, number]}>
+          <boxGeometry args={f.s as [number, number, number]} />
+          <meshStandardMaterial color="#0a2230" emissive="#39d4e6" emissiveIntensity={0.6} toneMapped={false} />
         </mesh>
       ))}
 

@@ -97,6 +97,25 @@ export function PlayerController() {
       return
     }
 
+    // --- Cinematic look-at (secret reveal / lab exit) -----------------------
+    // Rotates toward a world point without moving the player, updating the real
+    // yaw/pitch so control resumes with no snap when released.
+    if (!p.inputEnabled && p.lookTarget) {
+      const [lx, ly, lz] = p.lookTarget
+      const dx = lx - camera.position.x
+      const dy = ly - camera.position.y
+      const dz = lz - camera.position.z
+      const h = Math.hypot(dx, dz)
+      const desiredYaw = Math.atan2(-dx, -dz) // forward = (-sin yaw, 0, -cos yaw)
+      const desiredPitch = Math.atan2(dy, h)
+      const t = Math.min(1, delta * 3.5)
+      yaw.current += shortestAngle(yaw.current, desiredYaw) * t
+      pitch.current += (desiredPitch - pitch.current) * t
+      pitch.current = clamp(pitch.current, -PITCH_LIMIT, PITCH_LIMIT)
+      applyRotation()
+      return
+    }
+
     if (!p.inputEnabled) return
 
     // --- Look (mobile touch-drag) -------------------------------------------
@@ -132,10 +151,12 @@ export function PlayerController() {
       const speed = (sprint ? PLAYER.sprintSpeed : PLAYER.speed) * delta
 
       // Move relative to yaw (ignore pitch so movement stays on the floor).
+      // Camera forward is (-sin, 0, -cos); right is (cos, 0, -sin). Movement
+      // must match the look direction so W always walks where you're facing.
       const sin = Math.sin(yaw.current)
       const cos = Math.cos(yaw.current)
-      const worldX = mx * cos - mz * sin
-      const worldZ = mx * sin + mz * cos
+      const worldX = mx * cos + mz * sin
+      const worldZ = -mx * sin + mz * cos
 
       const desiredX = camera.position.x + worldX * speed
       const desiredZ = camera.position.z + worldZ * speed
@@ -151,4 +172,12 @@ export function PlayerController() {
 
 function clamp(v: number, lo: number, hi: number): number {
   return v < lo ? lo : v > hi ? hi : v
+}
+
+// Signed shortest angular difference (target - current), wrapped to [-π, π].
+function shortestAngle(current: number, target: number): number {
+  let d = (target - current) % (Math.PI * 2)
+  if (d > Math.PI) d -= Math.PI * 2
+  if (d < -Math.PI) d += Math.PI * 2
+  return d
 }
