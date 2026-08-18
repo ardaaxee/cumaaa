@@ -21,16 +21,16 @@ export function LabLighting({ quality }: { quality: GraphicsQuality }) {
 
   return (
     <group>
-      <ambientLight color="#5f7f9a" intensity={0.4} />
-      <hemisphereLight color="#2a4a5a" groundColor="#05080c" intensity={0.35} />
+      <ambientLight color="#6a6f78" intensity={0.38} />
+      <hemisphereLight color="#41474f" groundColor="#08090c" intensity={0.3} />
 
-      {/* Cyan key light over the centre */}
+      {/* Neutral-cool key light over the centre (the holograms provide the glow) */}
       <spotLight
         position={[LAB_CX, LAB.height - 0.2, LAB_CZ]}
         angle={0.9}
         penumbra={0.7}
-        intensity={1.1}
-        color="#8fe6ff"
+        intensity={1.0}
+        color="#cdd6de"
         distance={12}
         castShadow={castShadows}
         shadow-mapSize-width={castShadows ? 1024 : 512}

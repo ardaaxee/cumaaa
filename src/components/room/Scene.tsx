@@ -2,6 +2,7 @@ import { Sparkles } from '@react-three/drei'
 import { RoomShell } from './RoomShell'
 import { Lighting } from './Lighting'
 import { StudioEnvironment } from './StudioEnvironment'
+import { ContactAO } from './ContactAO'
 import { SecretGate } from './SecretGate'
 import { ArdaLab } from '../lab/ArdaLab'
 import { useRoomStore } from '../../store/useRoomStore'
@@ -36,6 +37,7 @@ export function Scene({ quality }: { quality: GraphicsQuality }) {
       {enrich && <StudioEnvironment />}
 
       <RoomShell quality={quality} />
+      <ContactAO />
       <SecretGate />
       {secretUnlocked && <ArdaLab quality={quality} />}
       <Desk />

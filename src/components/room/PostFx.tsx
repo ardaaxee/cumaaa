@@ -10,13 +10,15 @@ export function PostFx({ enabled, quality }: { enabled: boolean; quality: Graphi
 
   return (
     <EffectComposer multisampling={high ? 4 : 0}>
+      {/* Restrained bloom — only genuine light sources (lamps, screens, sun)
+          cross the threshold, so the room doesn't wash out. */}
       <Bloom
-        intensity={high ? 0.72 : 0.52}
-        luminanceThreshold={0.5}
-        luminanceSmoothing={0.25}
+        intensity={high ? 0.4 : 0.3}
+        luminanceThreshold={0.78}
+        luminanceSmoothing={0.3}
         mipmapBlur
       />
-      <Vignette eskil={false} offset={0.22} darkness={high ? 0.72 : 0.68} />
+      <Vignette eskil={false} offset={0.28} darkness={high ? 0.6 : 0.55} />
     </EffectComposer>
   )
 }

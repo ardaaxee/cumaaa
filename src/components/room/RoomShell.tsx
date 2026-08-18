@@ -39,17 +39,17 @@ export function RoomShell({ quality }: { quality: GraphicsQuality }) {
         <planeGeometry args={[ROOM.width, ROOM.depth]} />
         {reflectiveFloor ? (
           <MeshReflectorMaterial
-            mirror={0.35}
+            mirror={0.12}
             resolution={512}
-            mixBlur={1}
-            mixStrength={2.2}
-            blur={[400, 100]}
-            roughness={0.85}
-            depthScale={0.6}
-            minDepthThreshold={0.4}
+            mixBlur={2}
+            mixStrength={0.5}
+            blur={[500, 180]}
+            roughness={0.88}
+            depthScale={0.4}
+            minDepthThreshold={0.5}
             maxDepthThreshold={1.2}
-            color="#2a2118"
-            metalness={0.3}
+            color="#3a2c1e"
+            metalness={0.05}
             map={wood.map}
             normalMap={wood.normalMap}
           />
@@ -69,23 +69,23 @@ export function RoomShell({ quality }: { quality: GraphicsQuality }) {
       <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.012, -HALF_D + 2]} receiveShadow>
         <planeGeometry args={[3.6, 2.8]} />
         <meshStandardMaterial
-          color="#16202b"
+          color="#6b5d4a"
           map={rug.map}
           normalMap={rug.normalMap}
-          roughness={0.95}
+          roughness={0.97}
           metalness={0}
         />
       </mesh>
 
-      {/* Ceiling */}
-      <mesh rotation={[Math.PI / 2, 0, 0]} position={[0, ROOM.height, 0]}>
+      {/* Ceiling — warm off-white plaster */}
+      <mesh rotation={[Math.PI / 2, 0, 0]} position={[0, ROOM.height, 0]} receiveShadow>
         <planeGeometry args={[ROOM.width, ROOM.depth]} />
-        <meshStandardMaterial color="#0c0f15" roughness={1} />
+        <meshStandardMaterial color="#2b2620" roughness={0.98} />
       </mesh>
-      {/* Ceiling recess accent */}
+      {/* Ceiling cove — a faint warm recessed light, not neon */}
       <mesh rotation={[Math.PI / 2, 0, 0]} position={[0, ROOM.height - 0.02, 0]}>
-        <ringGeometry args={[2.6, 2.75, 4]} />
-        <meshStandardMaterial color="#0a2230" emissive="#39d4e6" emissiveIntensity={0.5} />
+        <ringGeometry args={[2.5, 2.72, 48]} />
+        <meshStandardMaterial color="#241d12" emissive="#ffe2b8" emissiveIntensity={0.12} />
       </mesh>
 
       {/* Walls */}
@@ -99,7 +99,7 @@ export function RoomShell({ quality }: { quality: GraphicsQuality }) {
         <mesh key={w.key} position={w.pos as [number, number, number]} rotation={w.rot as [number, number, number]} receiveShadow>
           <boxGeometry args={w.size as [number, number, number]} />
           <meshStandardMaterial
-            color="#151a23"
+            color="#4a443a"
             map={walls.map}
             normalMap={walls.normalMap}
             roughness={0.92}
@@ -119,7 +119,7 @@ export function RoomShell({ quality }: { quality: GraphicsQuality }) {
         <mesh key={`rw${i}`} position={[HALF_W, ROOM.height / 2, seg.z]} receiveShadow>
           <boxGeometry args={[ROOM.wall, ROOM.height, seg.len]} />
           <meshStandardMaterial
-            color="#151a23"
+            color="#4a443a"
             map={walls.map}
             normalMap={walls.normalMap}
             roughness={0.92}
@@ -134,7 +134,7 @@ export function RoomShell({ quality }: { quality: GraphicsQuality }) {
         receiveShadow
       >
         <boxGeometry args={[ROOM.wall, ROOM.height - DOOR.height, DOOR.halfWidth * 2]} />
-        <meshStandardMaterial color="#151a23" map={walls.map} normalMap={walls.normalMap} roughness={0.92} />
+        <meshStandardMaterial color="#4a443a" map={walls.map} normalMap={walls.normalMap} roughness={0.92} />
       </mesh>
       {/* Glowing doorway frame (portal accent) */}
       {(
@@ -146,28 +146,22 @@ export function RoomShell({ quality }: { quality: GraphicsQuality }) {
       ).map((f, i) => (
         <mesh key={`df${i}`} position={f.p as [number, number, number]}>
           <boxGeometry args={f.s as [number, number, number]} />
-          <meshStandardMaterial color="#0a2230" emissive="#39d4e6" emissiveIntensity={0.6} toneMapped={false} />
+          <meshStandardMaterial color="#2a2018" roughness={0.6} metalness={0.15} />
         </mesh>
       ))}
 
-      {/* Baseboards around the whole room */}
+      {/* Painted wood skirting boards around the whole room (matte, off-white) */}
       {(
         [
-          { p: [0, 0.06, -HALF_D + ROOM.wall / 2 + 0.01], s: [ROOM.width, 0.12, 0.03], glow: true },
-          { p: [0, 0.06, HALF_D - ROOM.wall / 2 - 0.01], s: [ROOM.width, 0.12, 0.03], glow: false },
-          { p: [-HALF_W + ROOM.wall / 2 + 0.01, 0.06, 0], s: [0.03, 0.12, ROOM.depth], glow: false },
-          { p: [HALF_W - ROOM.wall / 2 - 0.01, 0.06, 0], s: [0.03, 0.12, ROOM.depth], glow: false },
+          { p: [0, 0.07, -HALF_D + ROOM.wall / 2 + 0.015], s: [ROOM.width, 0.14, 0.03] },
+          { p: [0, 0.07, HALF_D - ROOM.wall / 2 - 0.015], s: [ROOM.width, 0.14, 0.03] },
+          { p: [-HALF_W + ROOM.wall / 2 + 0.015, 0.07, 0], s: [0.03, 0.14, ROOM.depth] },
+          { p: [HALF_W - ROOM.wall / 2 - 0.015, 0.07, 0], s: [0.03, 0.14, ROOM.depth] },
         ] as const
       ).map((b, i) => (
-        <mesh key={i} position={b.p as [number, number, number]}>
+        <mesh key={i} position={b.p as [number, number, number]} castShadow receiveShadow>
           <boxGeometry args={b.s as [number, number, number]} />
-          <meshStandardMaterial
-            color={b.glow ? '#0b2b33' : '#0e1219'}
-            emissive={b.glow ? '#39d4e6' : '#39d4e6'}
-            emissiveIntensity={b.glow ? 0.35 : 0.12}
-            roughness={0.5}
-            metalness={0.3}
-          />
+          <meshStandardMaterial color="#cbc4b6" roughness={0.75} metalness={0} />
         </mesh>
       ))}
     </group>

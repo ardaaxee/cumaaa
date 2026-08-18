@@ -5,6 +5,7 @@ import { usePlayerStore } from '../../store/usePlayerStore'
 import { useRoomStore } from '../../store/useRoomStore'
 import { PLAYER, HALF_D } from '../../config/roomLayout'
 import { resolveCollision } from '../../systems/collisionSystem'
+import { Sfx } from '../../systems/audioSystem'
 
 const PITCH_LIMIT = Math.PI / 2 - 0.08
 const MOUSE_SENS = 0.0022
@@ -18,6 +19,8 @@ export function PlayerController() {
   const pitch = useRef(0)
   const keys = useRef<Record<string, boolean>>({})
   const tmp = useRef(new THREE.Vector3())
+  const bobPhase = useRef(0) // walk cycle for head-bob + footsteps
+  const stepArmed = useRef(false)
 
   // Start slightly back from the desk, looking toward it.
   useEffect(() => {
@@ -161,9 +164,25 @@ export function PlayerController() {
       const desiredX = camera.position.x + worldX * speed
       const desiredZ = camera.position.z + worldZ * speed
       const [rx, rz] = resolveCollision(desiredX, desiredZ, PLAYER.radius)
+      const moved = Math.hypot(rx - camera.position.x, rz - camera.position.z)
       camera.position.x = rx
       camera.position.z = rz
-      camera.position.y = PLAYER.eyeHeight
+
+      // Subtle head-bob + footsteps, scaled by distance actually moved.
+      bobPhase.current += moved * 7.5
+      const bob = Math.sin(bobPhase.current) * 0.022
+      camera.position.y = PLAYER.eyeHeight + bob
+      // Fire a footstep at the bottom of each step.
+      const s = Math.sin(bobPhase.current)
+      if (s < -0.85 && stepArmed.current) {
+        Sfx.footstep()
+        stepArmed.current = false
+      } else if (s > 0) {
+        stepArmed.current = true
+      }
+    } else {
+      // Settle the head height back to neutral when stopped.
+      camera.position.y += (PLAYER.eyeHeight - camera.position.y) * Math.min(1, delta * 8)
     }
   })
 

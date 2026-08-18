@@ -5,8 +5,8 @@ import { ANCHORS } from '../../config/roomLayout'
 import { useCollider } from './useCollider'
 import { useRoomStore } from '../../store/useRoomStore'
 
-const FRAME = '#241a12'
-const BOOK_COLORS = ['#7a2f2f', '#2f5a7a', '#3a6b3a', '#7a6a2f', '#4a2f6b', '#2f6b6b']
+const FRAME = '#3a2c1e'
+const BOOK_COLORS = ['#6e3a30', '#3a4a5c', '#4a5a3c', '#7a6a46', '#5a4560', '#8a6a4a', '#4a4a52', '#7c4436']
 
 // Bookcase on the right wall. Doubles as the digital archive and conceals the
 // secret room: one odd, glowing book is the secret panel, and once unlocked a
@@ -22,9 +22,9 @@ export function Bookcase() {
   useCollider('bookcase', [x, 0, z], [0.5, 2.4, 2.6], !secretUnlocked)
 
   useFrame((state, delta) => {
-    // Secret book gently pulses to reward a close look.
+    // Secret book: a faint warm glow between the spines — subtle, not neon.
     if (secretBook.current) {
-      secretBook.current.emissiveIntensity = 0.25 + Math.sin(state.clock.elapsedTime * 1.5) * 0.2
+      secretBook.current.emissiveIntensity = 0.18 + Math.sin(state.clock.elapsedTime * 1.2) * 0.12
     }
     // Slide the hidden door open when unlocked.
     if (door.current) {
@@ -57,23 +57,26 @@ export function Bookcase() {
           </mesh>
           {Array.from({ length: 9 }).map((_, bi) => {
             const isSecret = si === 1 && bi === 6
-            const h = 0.34 + ((bi * 7 + si * 3) % 5) * 0.02
+            const h = 0.32 + ((bi * 7 + si * 3) % 5) * 0.03
             const bx = -1.05 + bi * 0.24
+            // Natural irregularity: some books lean, some sit deeper.
+            const lean = ((bi * 5 + si * 2) % 7 === 0 ? 0.1 : 0) * (bi % 2 ? 1 : -1)
+            const depth = ((bi + si) % 4 === 0 ? 0.05 : 0)
             return (
-              <mesh key={bi} position={[bx, sy + h / 2, 0.08]} castShadow>
-                <boxGeometry args={[0.14, h, 0.28]} />
+              <mesh key={bi} position={[bx, sy + h / 2, 0.08 - depth]} rotation={[0, 0, lean]} castShadow>
+                <boxGeometry args={[0.13 + (bi % 3) * 0.01, h, 0.28]} />
                 {isSecret ? (
                   <meshStandardMaterial
                     ref={secretBook}
-                    color="#0a2a30"
-                    emissive="#39d4e6"
-                    emissiveIntensity={0.3}
-                    roughness={0.4}
+                    color="#3a2a14"
+                    emissive="#c98a3a"
+                    emissiveIntensity={0.2}
+                    roughness={0.5}
                   />
                 ) : (
                   <meshStandardMaterial
                     color={BOOK_COLORS[(bi + si) % BOOK_COLORS.length]}
-                    roughness={0.75}
+                    roughness={0.8}
                   />
                 )}
               </mesh>
@@ -82,10 +85,10 @@ export function Bookcase() {
         </group>
       ))}
 
-      {/* Hidden passage glow (revealed when door slides) */}
+      {/* Hidden passage — a dim warm light spilling from beyond (revealed on slide) */}
       <mesh position={[0.6, 1.2, -0.19]}>
         <planeGeometry args={[1.0, 2.0]} />
-        <meshStandardMaterial color="#062026" emissive="#39d4e6" emissiveIntensity={0.6} />
+        <meshStandardMaterial color="#0e0c09" emissive="#c98a3a" emissiveIntensity={0.25} />
       </mesh>
 
       {/* Sliding hidden door section (covers the passage until unlocked) */}

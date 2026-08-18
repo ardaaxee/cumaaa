@@ -35,9 +35,11 @@ export function Experience() {
       camera={{ fov: 72, near: 0.1, far: 60, position: [0, PLAYER.eyeHeight, 3] }}
       onCreated={({ gl, scene }) => {
         gl.toneMapping = THREE.ACESFilmicToneMapping
-        gl.toneMappingExposure = 1.15
-        scene.background = new THREE.Color('#07090d')
-        scene.fog = new THREE.Fog('#07090d', 10, 26)
+        gl.toneMappingExposure = 1.16
+        gl.shadowMap.type = THREE.PCFSoftShadowMap
+        // Warm-neutral dark, not blue-black — reads like a dim real room.
+        scene.background = new THREE.Color('#0d0c0b')
+        scene.fog = new THREE.Fog('#0d0c0b', 12, 30)
         useBootStore.getState().setContextReady()
       }}
     >

@@ -5,8 +5,8 @@ import { ANCHORS } from '../../config/roomLayout'
 import { useCollider } from './useCollider'
 import { MonitorScreen } from './MonitorScreen'
 
-const WOOD = '#3b2c1f'
-const METAL = '#20242c'
+const WOOD = '#5a4432'
+const METAL = '#2a2d33'
 
 // The main workstation: desk, three monitors, keyboard, mouse, headphones,
 // PC tower with a breathing fan light, mug, papers and a cable.
@@ -20,8 +20,8 @@ export function Desk() {
 
   useFrame((state) => {
     const t = state.clock.elapsedTime
-    if (fan.current) fan.current.intensity = 0.5 + Math.sin(t * 2.4) * 0.18
-    if (keyGlow.current) keyGlow.current.emissiveIntensity = 0.5 + Math.sin(t * 1.6 + 1) * 0.2
+    if (fan.current) fan.current.intensity = 0.28 + Math.sin(t * 2.4) * 0.08
+    if (keyGlow.current) keyGlow.current.emissiveIntensity = 0.22 + Math.sin(t * 1.6 + 1) * 0.08
   })
 
   return (
@@ -43,10 +43,10 @@ export function Desk() {
           <meshStandardMaterial color={METAL} roughness={0.4} metalness={0.7} />
         </mesh>
       ))}
-      {/* Under-desk LED strip */}
-      <mesh position={[0, 0.7, 0.4]}>
-        <boxGeometry args={[3.0, 0.02, 0.02]} />
-        <meshStandardMaterial color="#0b2b33" emissive="#39d4e6" emissiveIntensity={0.7} />
+      {/* Desk cross-brace (structural, no neon) */}
+      <mesh position={[0, 0.2, 0.35]}>
+        <boxGeometry args={[3.0, 0.04, 0.03]} />
+        <meshStandardMaterial color={METAL} roughness={0.5} metalness={0.6} />
       </mesh>
 
       {/* Center monitor (wide) */}
@@ -84,16 +84,25 @@ export function Desk() {
         <MonitorScreen width={0.8} height={0.48} position={[0, 0, 0.03]} variant="grid" />
       </group>
 
-      {/* Keyboard with glow */}
-      <mesh position={[0, 0.79, 0.2]} castShadow>
-        <boxGeometry args={[0.62, 0.03, 0.18]} />
+      {/* Keyboard — dark keys with a restrained backlight */}
+      <mesh position={[0, 0.785, 0.2]} castShadow>
+        <boxGeometry args={[0.62, 0.02, 0.18]} />
+        <meshStandardMaterial color="#15161a" roughness={0.6} metalness={0.2} />
+      </mesh>
+      <mesh position={[0, 0.798, 0.2]}>
+        <boxGeometry args={[0.58, 0.006, 0.15]} />
         <meshStandardMaterial
           ref={keyGlow}
-          color="#101318"
-          emissive="#39d4e6"
-          emissiveIntensity={0.5}
+          color="#0e1014"
+          emissive="#9fb3d8"
+          emissiveIntensity={0.22}
           roughness={0.5}
         />
+      </mesh>
+      {/* Mousepad */}
+      <mesh position={[0.42, 0.771, 0.22]}>
+        <boxGeometry args={[0.28, 0.004, 0.22]} />
+        <meshStandardMaterial color="#1a1a1e" roughness={0.9} />
       </mesh>
       {/* Mouse */}
       <mesh position={[0.45, 0.79, 0.22]} castShadow>
@@ -145,25 +154,38 @@ export function Desk() {
           <boxGeometry args={[0.45, 1, 0.85]} />
           <meshStandardMaterial color="#0d1117" roughness={0.4} metalness={0.5} />
         </mesh>
-        {/* Glass side glow */}
-        <mesh position={[-0.23, 0, 0]}>
-          <planeGeometry args={[0.7, 0.8]} />
-          <meshStandardMaterial
-            color="#0a2230"
-            emissive="#39d4e6"
-            emissiveIntensity={0.5}
+        {/* Tempered-glass side panel with a restrained interior glow */}
+        <mesh position={[-0.226, 0, 0]}>
+          <planeGeometry args={[0.72, 0.82]} />
+          <meshPhysicalMaterial
+            color="#0a0d12"
+            roughness={0.08}
+            metalness={0}
+            transmission={0.55}
             transparent
-            opacity={0.55}
+            opacity={0.5}
+            thickness={0.02}
           />
         </mesh>
-        <pointLight ref={fan} position={[-0.4, 0, 0]} color="#39d4e6" distance={2} intensity={0.5} />
+        {/* Internal component glow (single warm-cool accent, dim) */}
+        <mesh position={[-0.2, -0.1, 0]}>
+          <boxGeometry args={[0.02, 0.5, 0.5]} />
+          <meshStandardMaterial color="#12304a" emissive="#3a6fa0" emissiveIntensity={0.3} />
+        </mesh>
+        <pointLight ref={fan} position={[-0.4, 0, 0]} color="#6a9bcf" distance={1.8} intensity={0.28} />
       </group>
 
-      {/* Cable draped from desk */}
-      <mesh position={[1.4, 0.4, 0.3]} rotation={[0, 0, 0.3]}>
-        <cylinderGeometry args={[0.01, 0.01, 0.7, 6]} />
-        <meshStandardMaterial color="#05070a" roughness={0.8} />
-      </mesh>
+      {/* Cables draped behind the desk (power + display + peripherals) */}
+      {[
+        { x: 1.35, rot: 0.32, len: 0.72, c: '#0a0a0c' },
+        { x: 1.5, rot: 0.2, len: 0.62, c: '#161616' },
+        { x: -1.2, rot: -0.25, len: 0.5, c: '#0a0a0c' },
+      ].map((cb, i) => (
+        <mesh key={i} position={[cb.x, 0.4, 0.34]} rotation={[0, 0, cb.rot]}>
+          <cylinderGeometry args={[0.012, 0.012, cb.len, 6]} />
+          <meshStandardMaterial color={cb.c} roughness={0.85} />
+        </mesh>
+      ))}
     </group>
   )
 }

@@ -127,11 +127,34 @@ src/
   `VITE_AI_PROXY_URL` in `.env` (copy from `.env.example`); the browser only ever
   calls that URL. Real `.env` files are git-ignored.
 
+## Realism
+
+The room is lit and surfaced for a photographic, lived-in feel rather than a neon
+demo:
+
+- **Natural lighting**: a real directional "sun" through the window casts soft
+  (PCF) shadows; warm tungsten ceiling + desk lamps take over toward night; ambient
+  fill is neutral. Day / sunset / night shift the sun and interior balance.
+- **De-neoned palette**: cyan trim replaced with painted skirting, wood, matte
+  framed art and warm accents; the IBL environment is daylight/tungsten, not cyan.
+- **PBR materials with imperfections**: warm oak floor with grain, knots and scuffs;
+  greige plaster walls; woven wool rug; fabric (with normal maps) on the bed, chair
+  and curtains; tempered-glass PC panel and window glass.
+- **Fake contact AO**: soft occlusion blobs ground the large furniture (real SSAO
+  isn't available on this Three version).
+- **Camera immersion**: eye-level first-person with a subtle head-bob and footstep
+  sounds while walking; the view settles when you stop.
+- **Restrained post**: bloom only crosses the threshold on genuine light sources;
+  soft vignette; ACES tone mapping.
+
+All of this still respects the LOW/MEDIUM/HIGH tiers and the mobile auto-downgrade.
+
 ## Assets & licenses
 
 - **No external 3D models, textures, or audio are bundled.** The entire room is built
-  from Three.js primitives and procedural geometry, and all sound is synthesized at
-  runtime via the Web Audio API — so there are no third-party asset licenses to track.
+  from Three.js primitives and procedural (canvas-generated) geometry/textures, and all
+  sound is synthesized at runtime via the Web Audio API — so there are no third-party
+  asset licenses to track.
 - Fonts: **Inter** and **JetBrains Mono** loaded from Google Fonts (SIL Open Font
   License), with system fallbacks if unavailable.
 - If you later add GLTF/GLB assets, record their licenses here.

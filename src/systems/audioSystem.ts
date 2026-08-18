@@ -76,4 +76,6 @@ export const Sfx = {
   },
   door: () => blip(180, 0.4, 'sawtooth', 0.1),
   key: () => blip(1400 + Math.random() * 200, 0.03, 'square', 0.04),
+  // Soft footstep — a short low thud with a touch of randomness.
+  footstep: () => blip(70 + Math.random() * 20, 0.07, 'sine', 0.05),
 }

@@ -1,16 +1,20 @@
+import { useMemo } from 'react'
 import { ANCHORS } from '../../config/roomLayout'
 import { useCollider } from './useCollider'
+import { fabric } from '../../utils/textures'
 
-const SEAT = '#15181e'
-const FRAME = '#25292f'
+const SEAT = '#26262a'
+const FRAME = '#2a2d33'
 
 // Ergonomic workstation chair (non-interactive prop).
 export function Chair() {
   const [x, , z] = ANCHORS.chair.pos
   useCollider('chair', [x, 0, z], [0.7, 1, 0.7])
+  const cloth = useMemo(() => fabric('#2b2b30', 'chair'), [])
 
   return (
-    <group position={[x, 0, z]} rotation={[0, Math.PI, 0]}>
+    // Slightly angled, as a real chair is left.
+    <group position={[x, 0, z]} rotation={[0, Math.PI + 0.18, 0]}>
       {/* Base star */}
       {[0, 1, 2, 3, 4].map((i) => {
         const a = (i / 5) * Math.PI * 2
@@ -26,20 +30,15 @@ export function Chair() {
         <cylinderGeometry args={[0.04, 0.04, 0.5, 10]} />
         <meshStandardMaterial color={FRAME} metalness={0.7} roughness={0.3} />
       </mesh>
-      {/* Seat */}
+      {/* Padded seat (fabric) */}
       <mesh position={[0, 0.56, 0]} castShadow>
         <boxGeometry args={[0.52, 0.1, 0.5]} />
-        <meshStandardMaterial color={SEAT} roughness={0.7} />
+        <meshStandardMaterial color={SEAT} map={cloth.map} normalMap={cloth.normalMap} roughness={0.85} />
       </mesh>
-      {/* Backrest */}
+      {/* Padded backrest (fabric) */}
       <mesh position={[0, 0.95, -0.24]} rotation={[-0.12, 0, 0]} castShadow>
         <boxGeometry args={[0.5, 0.7, 0.09]} />
-        <meshStandardMaterial color={SEAT} roughness={0.7} />
-      </mesh>
-      {/* Accent edge on backrest */}
-      <mesh position={[0, 0.95, -0.19]} rotation={[-0.12, 0, 0]}>
-        <boxGeometry args={[0.46, 0.66, 0.02]} />
-        <meshStandardMaterial color="#0b2b33" emissive="#39d4e6" emissiveIntensity={0.3} />
+        <meshStandardMaterial color={SEAT} map={cloth.map} normalMap={cloth.normalMap} roughness={0.85} />
       </mesh>
       {/* Armrests */}
       {[-0.31, 0.31].map((ax, i) => (

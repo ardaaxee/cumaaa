@@ -84,8 +84,8 @@ function WallClock() {
 
 function WallArt() {
   const arts = [
-    { pos: [0.6, 2.3, HALF_D - 0.11] as const, colors: ['#1f8a99', '#0a2230', '#39d4e6'], w: 0.8, h: 1.0 },
-    { pos: [1.9, 2.3, HALF_D - 0.11] as const, colors: ['#7a2f5a', '#0a2230', '#e0794a'], w: 0.7, h: 1.0 },
+    { pos: [0.6, 2.3, HALF_D - 0.11] as const, colors: ['#6b7c74', '#3a3630', '#c9a06a'], w: 0.8, h: 1.0 },
+    { pos: [1.9, 2.3, HALF_D - 0.11] as const, colors: ['#7a5a4a', '#2e2a24', '#a88a5c'], w: 0.7, h: 1.0 },
   ]
   return (
     <group>
@@ -99,10 +99,10 @@ function WallArt() {
             <planeGeometry args={[a.w, a.h]} />
             <meshStandardMaterial color={a.colors[0]} roughness={0.6} />
           </mesh>
-          {/* abstract bands */}
+          {/* abstract bands (matte print, no glow) */}
           <mesh position={[0, a.h * 0.2, 0.031]}>
             <planeGeometry args={[a.w, a.h * 0.18]} />
-            <meshStandardMaterial color={a.colors[2]} emissive={a.colors[2]} emissiveIntensity={0.15} roughness={0.5} />
+            <meshStandardMaterial color={a.colors[2]} roughness={0.85} />
           </mesh>
           <mesh position={[a.w * 0.15, -a.h * 0.15, 0.031]}>
             <circleGeometry args={[a.w * 0.22, 24]} />
@@ -169,10 +169,10 @@ function FloatingShelf() {
         <sphereGeometry args={[0.09, 10, 10]} />
         <meshStandardMaterial color="#2f6b3a" roughness={0.7} />
       </mesh>
-      {/* small figurine glow */}
-      <mesh position={[0.42, 0.14, 0]}>
-        <boxGeometry args={[0.08, 0.14, 0.08]} />
-        <meshStandardMaterial color="#0a2230" emissive="#39d4e6" emissiveIntensity={0.5} />
+      {/* small ceramic trinket */}
+      <mesh position={[0.42, 0.15, 0]}>
+        <boxGeometry args={[0.08, 0.16, 0.08]} />
+        <meshStandardMaterial color="#b7a98e" roughness={0.5} metalness={0.1} />
       </mesh>
     </group>
   )

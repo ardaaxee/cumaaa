@@ -15,17 +15,17 @@ export function TaskBoardMesh() {
       {/* Cork board */}
       <mesh castShadow receiveShadow>
         <boxGeometry args={[2.2, 1.5, 0.06]} />
-        <meshStandardMaterial color="#5a4326" roughness={0.9} />
+        <meshStandardMaterial color="#9a7a4a" roughness={0.95} />
       </mesh>
-      {/* Frame */}
+      {/* Wooden frame */}
       <mesh position={[0, 0, 0.02]}>
         <boxGeometry args={[2.3, 1.6, 0.04]} />
-        <meshStandardMaterial color="#20242c" metalness={0.4} roughness={0.5} />
+        <meshStandardMaterial color="#3c2c1c" roughness={0.6} metalness={0.05} />
       </mesh>
-      {/* Header strip */}
+      {/* Printed "TODAY" header card */}
       <mesh position={[0, 0.62, 0.05]}>
-        <planeGeometry args={[2.0, 0.18]} />
-        <meshStandardMaterial color="#0a2230" emissive="#39d4e6" emissiveIntensity={0.4} />
+        <planeGeometry args={[0.9, 0.16]} />
+        <meshStandardMaterial color="#efe9dc" roughness={0.9} />
       </mesh>
 
       {/* Task cards (2 columns x 3 rows) */}

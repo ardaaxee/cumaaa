@@ -18,8 +18,8 @@ export function AchievementWallMesh() {
         <meshStandardMaterial color="#141922" roughness={0.7} metalness={0.2} />
       </mesh>
       <mesh position={[0, 0.55, 0.03]}>
-        <planeGeometry args={[2.2, 0.16]} />
-        <meshStandardMaterial color="#0a2230" emissive="#39d4e6" emissiveIntensity={0.4} />
+        <planeGeometry args={[2.2, 0.12]} />
+        <meshStandardMaterial color="#efe9dc" roughness={0.9} />
       </mesh>
 
       {achievements.map((a, i) => {
@@ -46,8 +46,8 @@ function Badge({ position, unlocked }: { position: [number, number, number]; unl
         <cylinderGeometry args={[0.16, 0.16, 0.03, 6]} />
         <meshStandardMaterial
           ref={mat}
-          color={unlocked ? '#0a2a30' : '#1a1f28'}
-          emissive={unlocked ? '#39d4e6' : '#000000'}
+          color={unlocked ? '#4a3a1a' : '#26241f'}
+          emissive={unlocked ? '#e0a850' : '#000000'}
           emissiveIntensity={unlocked ? 0.4 : 0}
           metalness={0.5}
           roughness={0.4}
@@ -57,8 +57,8 @@ function Badge({ position, unlocked }: { position: [number, number, number]; unl
       <mesh position={[0, 0, 0.02]} rotation={[Math.PI / 2, 0, 0]}>
         <cylinderGeometry args={[0.06, 0.06, 0.04, 5]} />
         <meshStandardMaterial
-          color={unlocked ? '#bfefff' : '#2a2f38'}
-          emissive={unlocked ? '#5fe0ef' : '#000000'}
+          color={unlocked ? '#ffe6b0' : '#2f2c26'}
+          emissive={unlocked ? '#ffcf80' : '#000000'}
           emissiveIntensity={unlocked ? 0.5 : 0}
         />
       </mesh>

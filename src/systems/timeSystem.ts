@@ -41,40 +41,54 @@ export interface SkyPalette {
   cityLights: boolean
 }
 
+// Natural, photographic palettes — daylight is warm-neutral, dusk is warm,
+// night leans on interior lamps rather than saturated ambient.
 export function skyPalette(tod: TimeOfDay): SkyPalette {
   switch (tod) {
     case 'day':
       return {
-        top: '#6fa8dc',
-        bottom: '#cfe4f5',
-        ambient: '#9bb6cf',
-        ambientIntensity: 0.72,
-        sun: '#fff4e0',
-        sunIntensity: 0.9,
+        top: '#9db8d2', // clear sky
+        bottom: '#e2e4de', // hazy horizon
+        ambient: '#aeb4bb', // neutral fill
+        ambientIntensity: 0.5,
+        sun: '#fff2d6', // warm daylight
+        sunIntensity: 1.35,
         stars: false,
         cityLights: false,
       }
     case 'sunset':
       return {
-        top: '#3a2b52',
-        bottom: '#e0794a',
-        ambient: '#b06a55',
-        ambientIntensity: 0.55,
-        sun: '#ff9d5c',
-        sunIntensity: 0.7,
+        top: '#5b4a63',
+        bottom: '#e0a05e',
+        ambient: '#8f817a', // warm neutral
+        ambientIntensity: 0.34,
+        sun: '#ff9c4d',
+        sunIntensity: 0.8,
         stars: false,
         cityLights: true,
       }
     case 'night':
       return {
-        top: '#05070f',
-        bottom: '#0d1430',
-        ambient: '#2a3350',
-        ambientIntensity: 0.42,
-        sun: '#5a6a9a',
-        sunIntensity: 0.3,
+        top: '#0a0e18',
+        bottom: '#141a2a',
+        ambient: '#454a54', // dim neutral, not blue neon
+        ambientIntensity: 0.34,
+        sun: '#748092', // moonlight
+        sunIntensity: 0.25,
         stars: true,
         cityLights: true,
       }
+  }
+}
+
+// How much the interior lamps (ceiling + desk) are "on" for a time of day.
+export function interiorLightLevel(tod: TimeOfDay): number {
+  switch (tod) {
+    case 'day':
+      return 0.25
+    case 'sunset':
+      return 0.7
+    case 'night':
+      return 1.0
   }
 }

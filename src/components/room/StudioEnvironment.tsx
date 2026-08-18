@@ -10,34 +10,34 @@ export function StudioEnvironment() {
     <Environment resolution={128} frames={1}>
       <color attach="background" args={['#05070c']} />
 
-      {/* Cool ceiling strip (the room's main light) */}
+      {/* Soft daylight from the window/ceiling (the room's main light) */}
       <Lightformer
-        intensity={1.6}
-        color="#bcd6f0"
-        position={[0, 5, -1]}
+        intensity={1.5}
+        color="#e8ecec"
+        position={[2.8, 4.5, -5]}
         rotation={[Math.PI / 2, 0, 0]}
-        scale={[8, 3, 1]}
+        scale={[6, 3, 1]}
       />
-      {/* Cyan accent from the desk side */}
+      {/* Warm interior bounce (tungsten) */}
       <Lightformer
-        intensity={1.1}
-        color="#39d4e6"
-        position={[-4, 2, -3]}
+        intensity={0.8}
+        color="#ffd9ac"
+        position={[-3, 2.2, 0]}
         rotation={[0, Math.PI / 2, 0]}
-        scale={[3, 2, 1]}
+        scale={[4, 2.4, 1]}
       />
       {/* Warm bounce from the bed corner */}
       <Lightformer
-        intensity={0.7}
-        color="#ffb877"
+        intensity={0.5}
+        color="#ffcf9a"
         position={[4, 1.6, 3]}
         rotation={[0, -Math.PI / 2, 0]}
         scale={[3, 2, 1]}
       />
-      {/* Soft front fill so front faces aren't pure black in reflections */}
+      {/* Soft neutral front fill */}
       <Lightformer
         intensity={0.5}
-        color="#3a4560"
+        color="#b8bcc2"
         position={[0, 2, 6]}
         rotation={[0, Math.PI, 0]}
         scale={[6, 3, 1]}

@@ -74,11 +74,12 @@ export function Decor() {
         </mesh>
         <mesh position={[0, -0.08, 0.11]}>
           <circleGeometry args={[0.05, 16]} />
-          <meshStandardMaterial
-            color="#0a2230"
-            emissive="#39d4e6"
-            emissiveIntensity={0.4}
-          />
+          <meshStandardMaterial color="#14161a" roughness={0.6} />
+        </mesh>
+        {/* tiny amber standby LED */}
+        <mesh position={[0.07, 0.13, 0.11]}>
+          <circleGeometry args={[0.006, 8]} />
+          <meshStandardMaterial color="#ffb060" emissive="#ffb060" emissiveIntensity={0.6} toneMapped={false} />
         </mesh>
       </group>
 
