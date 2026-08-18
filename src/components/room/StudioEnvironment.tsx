@@ -12,19 +12,27 @@ export function StudioEnvironment() {
 
       {/* Soft daylight from the window/ceiling (the room's main light) */}
       <Lightformer
-        intensity={1.5}
+        intensity={1.7}
         color="#e8ecec"
         position={[2.8, 4.5, -5]}
         rotation={[Math.PI / 2, 0, 0]}
         scale={[6, 3, 1]}
       />
-      {/* Warm interior bounce (tungsten) */}
+      {/* Warm interior bounce (tungsten) — lifts indirect fill on the walls */}
       <Lightformer
-        intensity={0.8}
+        intensity={1.0}
         color="#ffd9ac"
         position={[-3, 2.2, 0]}
         rotation={[0, Math.PI / 2, 0]}
         scale={[4, 2.4, 1]}
+      />
+      {/* Floor bounce so undersides aren't pure black */}
+      <Lightformer
+        intensity={0.35}
+        color="#6a5c4a"
+        position={[0, 0.1, 0]}
+        rotation={[-Math.PI / 2, 0, 0]}
+        scale={[7, 7, 1]}
       />
       {/* Warm bounce from the bed corner */}
       <Lightformer

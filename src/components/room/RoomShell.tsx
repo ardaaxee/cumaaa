@@ -82,10 +82,10 @@ export function RoomShell({ quality }: { quality: GraphicsQuality }) {
         <planeGeometry args={[ROOM.width, ROOM.depth]} />
         <meshStandardMaterial color="#2b2620" roughness={0.98} />
       </mesh>
-      {/* Ceiling cove — a faint warm recessed light, not neon */}
-      <mesh rotation={[Math.PI / 2, 0, 0]} position={[0, ROOM.height - 0.02, 0]}>
-        <ringGeometry args={[2.5, 2.72, 48]} />
-        <meshStandardMaterial color="#241d12" emissive="#ffe2b8" emissiveIntensity={0.12} />
+      {/* Ceiling cove — a very faint warm recess, barely visible */}
+      <mesh rotation={[Math.PI / 2, 0, 0]} position={[0, ROOM.height - 0.015, 0]}>
+        <ringGeometry args={[2.55, 2.66, 64]} />
+        <meshStandardMaterial color="#211a10" emissive="#ffe2b8" emissiveIntensity={0.05} />
       </mesh>
 
       {/* Walls */}

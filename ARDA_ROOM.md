@@ -142,10 +142,21 @@ demo:
   and curtains; tempered-glass PC panel and window glass.
 - **Fake contact AO**: soft occlusion blobs ground the large furniture (real SSAO
   isn't available on this Three version).
-- **Camera immersion**: eye-level first-person with a subtle head-bob and footstep
-  sounds while walking; the view settles when you stop.
+- **Camera immersion**: eye-level first-person with velocity-based movement
+  inertia (weighty accel/decel, no floaty glide), a subtle speed-scaled head-bob
+  and footstep sounds; the view settles when you stop.
+- **Lived-in clutter**: a hoodie over the chair, a wastebasket with crumpled
+  paper, desk books + notebook + pen, a charger brick with a coiled cable,
+  slippers by the bed, a throw blanket and books left on the floor — the room
+  reads used, not staged.
+- **Contact grounding**: soft occlusion under every large piece of furniture, on
+  top of the real PCF shadows.
 - **Restrained post**: bloom only crosses the threshold on genuine light sources;
   soft vignette; ACES tone mapping.
+- **Optional GLTF upgrades**: `GltfProp` (`src/components/furniture/`) lets you
+  drop an open-license `.glb` into `public/models/` to replace any hero object,
+  with the procedural mesh as the LOW-tier / missing-file fallback. Nothing heavy
+  is bundled — see `public/models/README.md` for why and how.
 
 All of this still respects the LOW/MEDIUM/HIGH tiers and the mobile auto-downgrade.
 

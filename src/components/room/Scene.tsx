@@ -15,6 +15,7 @@ import { Bookcase } from '../furniture/Bookcase'
 import { Bed } from '../furniture/Bed'
 import { Decor } from '../furniture/Decor'
 import { Details } from '../furniture/Details'
+import { Clutter } from '../furniture/Clutter'
 import { PlayerController } from '../interaction/PlayerController'
 import { InteractionManager } from '../interaction/InteractionManager'
 import { FirstFrameSignal } from './FirstFrameSignal'
@@ -46,20 +47,21 @@ export function Scene({ quality }: { quality: GraphicsQuality }) {
       <Bed />
       <Decor />
       <Details />
+      <Clutter />
       <TaskBoardMesh />
       <WindowView />
       <AchievementWallMesh />
 
-      {/* Floating dust motes catch the light and add depth */}
+      {/* Faint dust motes — barely-there, only really seen in the light shafts */}
       {enrich && (
         <Sparkles
-          count={quality === 'high' ? 60 : 30}
-          scale={[ROOM.width - 1, ROOM.height - 0.6, ROOM.depth - 1]}
+          count={quality === 'high' ? 40 : 22}
+          scale={[ROOM.width - 1.5, ROOM.height - 0.8, ROOM.depth - 1.5]}
           position={[0, ROOM.height / 2, 0]}
-          size={1.6}
-          speed={0.18}
-          opacity={0.35}
-          color="#bcd6f0"
+          size={0.7}
+          speed={0.1}
+          opacity={0.12}
+          color="#d8cbb2"
         />
       )}
 

@@ -21,6 +21,7 @@ export function PlayerController() {
   const tmp = useRef(new THREE.Vector3())
   const bobPhase = useRef(0) // walk cycle for head-bob + footsteps
   const stepArmed = useRef(false)
+  const vel = useRef(new THREE.Vector2(0, 0)) // world-space XZ velocity (inertia)
 
   // Start slightly back from the desk, looking toward it.
   useEffect(() => {
@@ -133,7 +134,7 @@ export function PlayerController() {
     }
     applyRotation()
 
-    // --- Movement -----------------------------------------------------------
+    // --- Movement (with inertia) --------------------------------------------
     let mx = 0
     let mz = 0
     const k = keys.current
@@ -141,38 +142,49 @@ export function PlayerController() {
     if (k['KeyS'] || k['ArrowDown']) mz += 1
     if (k['KeyA'] || k['ArrowLeft']) mx -= 1
     if (k['KeyD'] || k['ArrowRight']) mx += 1
-
-    // Joystick (mobile) overrides / adds.
     mx += p.moveX
     mz -= p.moveY
 
     const len = Math.hypot(mx, mz)
-    if (len > 0.001) {
-      mx /= Math.max(1, len)
-      mz /= Math.max(1, len)
-      const sprint = k['ShiftLeft'] || k['ShiftRight']
-      const speed = (sprint ? PLAYER.sprintSpeed : PLAYER.speed) * delta
+    const sprint = k['ShiftLeft'] || k['ShiftRight']
+    const maxSpeed = sprint ? PLAYER.sprintSpeed : PLAYER.speed
 
-      // Move relative to yaw (ignore pitch so movement stays on the floor).
-      // Camera forward is (-sin, 0, -cos); right is (cos, 0, -sin). Movement
-      // must match the look direction so W always walks where you're facing.
+    // Target world-space velocity from input (0 when idle).
+    let targetVX = 0
+    let targetVZ = 0
+    if (len > 0.001) {
+      const nmx = mx / Math.max(1, len)
+      const nmz = mz / Math.max(1, len)
+      // Camera forward is (-sin, 0, -cos); right is (cos, 0, -sin).
       const sin = Math.sin(yaw.current)
       const cos = Math.cos(yaw.current)
-      const worldX = mx * cos + mz * sin
-      const worldZ = -mx * sin + mz * cos
+      targetVX = (nmx * cos + nmz * sin) * maxSpeed
+      targetVZ = (-nmx * sin + nmz * cos) * maxSpeed
+    }
 
-      const desiredX = camera.position.x + worldX * speed
-      const desiredZ = camera.position.z + worldZ * speed
+    // Ease current velocity toward the target — snappy to start, a touch of
+    // glide to stop — so a real body's weight is felt without feeling floaty.
+    const accel = len > 0.001 ? 11 : 8
+    const f = 1 - Math.exp(-accel * delta)
+    vel.current.x += (targetVX - vel.current.x) * f
+    vel.current.y += (targetVZ - vel.current.y) * f
+
+    const speed2 = vel.current.length()
+    if (speed2 > 0.0008) {
+      const desiredX = camera.position.x + vel.current.x * delta
+      const desiredZ = camera.position.z + vel.current.y * delta
       const [rx, rz] = resolveCollision(desiredX, desiredZ, PLAYER.radius)
+      // If collision blocked an axis, kill that velocity component (no sliding buildup).
+      if (Math.abs(rx - desiredX) > 1e-4) vel.current.x = 0
+      if (Math.abs(rz - desiredZ) > 1e-4) vel.current.y = 0
       const moved = Math.hypot(rx - camera.position.x, rz - camera.position.z)
       camera.position.x = rx
       camera.position.z = rz
 
-      // Subtle head-bob + footsteps, scaled by distance actually moved.
-      bobPhase.current += moved * 7.5
-      const bob = Math.sin(bobPhase.current) * 0.022
-      camera.position.y = PLAYER.eyeHeight + bob
-      // Fire a footstep at the bottom of each step.
+      // Head-bob amplitude scales with speed; footsteps fire at each low point.
+      bobPhase.current += moved * 7.2
+      const amp = 0.012 + Math.min(1, speed2 / PLAYER.speed) * 0.014
+      camera.position.y = PLAYER.eyeHeight + Math.sin(bobPhase.current) * amp
       const s = Math.sin(bobPhase.current)
       if (s < -0.85 && stepArmed.current) {
         Sfx.footstep()
@@ -181,7 +193,7 @@ export function PlayerController() {
         stepArmed.current = true
       }
     } else {
-      // Settle the head height back to neutral when stopped.
+      vel.current.set(0, 0)
       camera.position.y += (PLAYER.eyeHeight - camera.position.y) * Math.min(1, delta * 8)
     }
   })
