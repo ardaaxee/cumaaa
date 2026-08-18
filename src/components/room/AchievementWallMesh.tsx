@@ -1,0 +1,67 @@
+import { useRef } from 'react'
+import { useFrame } from '@react-three/fiber'
+import * as THREE from 'three'
+import { ANCHORS } from '../../config/roomLayout'
+import { useRoomStore } from '../../store/useRoomStore'
+
+// Left-wall achievement display. Each achievement is a small plate; unlocked
+// ones light up. New unlocks therefore "appear" as a fresh glowing badge.
+export function AchievementWallMesh() {
+  const [x, y, z] = ANCHORS.achievements.pos
+  const achievements = useRoomStore((s) => s.achievements)
+
+  return (
+    <group position={[x, y, z]} rotation={[0, Math.PI / 2, 0]}>
+      {/* Backing panel */}
+      <mesh castShadow receiveShadow>
+        <boxGeometry args={[2.4, 1.3, 0.05]} />
+        <meshStandardMaterial color="#141922" roughness={0.7} metalness={0.2} />
+      </mesh>
+      <mesh position={[0, 0.55, 0.03]}>
+        <planeGeometry args={[2.2, 0.16]} />
+        <meshStandardMaterial color="#0a2230" emissive="#39d4e6" emissiveIntensity={0.4} />
+      </mesh>
+
+      {achievements.map((a, i) => {
+        const col = i % 4
+        const row = Math.floor(i / 4)
+        const bx = -0.82 + col * 0.55
+        const by = 0.16 - row * 0.5
+        return <Badge key={a.id} position={[bx, by, 0.04]} unlocked={a.unlocked} />
+      })}
+    </group>
+  )
+}
+
+function Badge({ position, unlocked }: { position: [number, number, number]; unlocked: boolean }) {
+  const mat = useRef<THREE.MeshStandardMaterial>(null)
+  useFrame((state) => {
+    if (unlocked && mat.current) {
+      mat.current.emissiveIntensity = 0.4 + Math.sin(state.clock.elapsedTime * 2) * 0.15
+    }
+  })
+  return (
+    <group position={position}>
+      <mesh>
+        <cylinderGeometry args={[0.16, 0.16, 0.03, 6]} />
+        <meshStandardMaterial
+          ref={mat}
+          color={unlocked ? '#0a2a30' : '#1a1f28'}
+          emissive={unlocked ? '#39d4e6' : '#000000'}
+          emissiveIntensity={unlocked ? 0.4 : 0}
+          metalness={0.5}
+          roughness={0.4}
+        />
+      </mesh>
+      {/* Star notch */}
+      <mesh position={[0, 0, 0.02]} rotation={[Math.PI / 2, 0, 0]}>
+        <cylinderGeometry args={[0.06, 0.06, 0.04, 5]} />
+        <meshStandardMaterial
+          color={unlocked ? '#bfefff' : '#2a2f38'}
+          emissive={unlocked ? '#5fe0ef' : '#000000'}
+          emissiveIntensity={unlocked ? 0.5 : 0}
+        />
+      </mesh>
+    </group>
+  )
+}
