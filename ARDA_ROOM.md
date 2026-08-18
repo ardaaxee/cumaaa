@@ -86,6 +86,20 @@ Node 18+ recommended (developed on Node 22).
 - **Dynamic room**: creating projects, finishing tasks, unlocking achievements all
   reflect in the world and the activity feed; returning after a long absence shows
   **“Welcome back, ARDA”**.
+- **Memory objects (personalization)**: the room physically reflects ARDA's real
+  data, rebuilt every load from the stores (single source of truth — create makes an
+  object appear, delete removes it, nothing is duplicated in storage):
+  - a **desk name plate**, a **Current Project** card on a little easel (pick the
+    current project in ARDA OS → Projects, or from the card's panel — persisted via
+    `currentProjectId`),
+  - **desk trophies** that grow with your achievement ratio and a special **ARDA ROOM
+    trophy** that appears only when the ARDA ROOM project hits 100%,
+  - a **Project Archive** shelf holding the 5 newest project cards with an “+N”
+    archive box for older ones,
+  - an **ARDA ACTIVITY** paper board on the wall showing recent activity,
+  - a warm (non-neon) glint on the achievement wall when a new one is earned.
+  Walk up to any of them for an **info panel** that reads the live store. All matte
+  paper / metal to match the room; capped in count and gated by tier for mobile.
 - **Settings**: graphics tier (low / med / high), bloom, sound, volume, look
   sensitivity, and full data reset.
 - **Performance**: DPR clamped per tier + device, shadows/post-fx scale with quality,

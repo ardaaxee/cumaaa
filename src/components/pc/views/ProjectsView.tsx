@@ -18,6 +18,8 @@ export function ProjectsView() {
   const projects = useRoomStore((s) => s.projects)
   const addProject = useRoomStore((s) => s.addProject)
   const removeProject = useRoomStore((s) => s.removeProject)
+  const setCurrentProject = useRoomStore((s) => s.setCurrentProject)
+  const currentProjectId = useRoomStore((s) => s.currentProjectId)
   const [open, setOpen] = useState(false)
   const [name, setName] = useState('')
   const [description, setDescription] = useState('')
@@ -152,6 +154,17 @@ export function ProjectsView() {
                   {new Date(p.createdAt).toLocaleDateString()}
                 </span>
               </div>
+
+              <button
+                onClick={() => setCurrentProject(currentProjectId === p.id ? null : p.id)}
+                className={`mt-3 w-full rounded-lg border px-2 py-1.5 text-[11px] font-medium transition ${
+                  currentProjectId === p.id
+                    ? 'border-amber-400/40 bg-amber-400/10 text-amber-200'
+                    : 'border-white/10 bg-ink-800/60 text-white/50 hover:text-white/90'
+                }`}
+              >
+                {currentProjectId === p.id ? '★ Current project (on desk)' : 'Set as current'}
+              </button>
             </motion.div>
           ))}
         </AnimatePresence>

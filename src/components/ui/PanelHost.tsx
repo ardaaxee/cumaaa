@@ -16,6 +16,9 @@ import { AiView } from '../pc/views/AiView'
 import { StatsView } from '../pc/views/StatsView'
 import { TerminalView } from '../pc/views/TerminalView'
 import { FutureProjectsView } from '../pc/views/FutureProjectsView'
+import { CurrentProjectView } from '../pc/views/CurrentProjectView'
+import { ProjectArchiveView } from '../pc/views/ProjectArchiveView'
+import { ActivityWallView } from '../pc/views/ActivityWallView'
 
 // Renders whichever panel is active and centrally manages control state:
 // movement/look input and pointer lock are suspended while any panel is open,
@@ -81,6 +84,25 @@ export function PanelHost() {
       {activePanel === 'secret' && (
         <PanelFrame key="secret" title="Private Room" subtitle="Hidden" onClose={close} wide>
           <SecretView />
+        </PanelFrame>
+      )}
+
+      {/* ---- Memory objects (personalization) ---- */}
+      {activePanel === 'currentProject' && (
+        <PanelFrame key="curProj" title="Current Project" subtitle="On the desk" onClose={close}>
+          <CurrentProjectView />
+        </PanelFrame>
+      )}
+
+      {activePanel === 'projectArchive' && (
+        <PanelFrame key="projArch" title="Project Archive" subtitle="Project history" onClose={close} wide>
+          <ProjectArchiveView />
+        </PanelFrame>
+      )}
+
+      {activePanel === 'activityWall' && (
+        <PanelFrame key="activity" title="ARDA Activity" subtitle="Recent" onClose={close}>
+          <ActivityWallView />
         </PanelFrame>
       )}
 

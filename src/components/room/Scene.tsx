@@ -16,6 +16,7 @@ import { Bed } from '../furniture/Bed'
 import { Decor } from '../furniture/Decor'
 import { Details } from '../furniture/Details'
 import { Clutter } from '../furniture/Clutter'
+import { MemoryObjects } from './MemoryObjects'
 import { PlayerController } from '../interaction/PlayerController'
 import { InteractionManager } from '../interaction/InteractionManager'
 import { FirstFrameSignal } from './FirstFrameSignal'
@@ -48,6 +49,7 @@ export function Scene({ quality }: { quality: GraphicsQuality }) {
       <Decor />
       <Details />
       <Clutter />
+      <MemoryObjects quality={quality} />
       <TaskBoardMesh />
       <WindowView />
       <AchievementWallMesh />

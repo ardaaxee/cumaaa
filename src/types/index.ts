@@ -95,6 +95,10 @@ export type InteractableKind =
   | 'secret'
   | 'achievements'
   | 'door'
+  // Personalization / memory objects in the main room
+  | 'currentProject'
+  | 'projectArchive'
+  | 'activityWall'
   // ARDA LAB stations (the hidden second room)
   | 'labHologram'
   | 'labTerminal'

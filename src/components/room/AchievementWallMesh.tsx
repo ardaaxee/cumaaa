@@ -1,14 +1,29 @@
-import { useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useFrame } from '@react-three/fiber'
+import { Sparkles } from '@react-three/drei'
 import * as THREE from 'three'
 import { ANCHORS } from '../../config/roomLayout'
 import { useRoomStore } from '../../store/useRoomStore'
 
 // Left-wall achievement display. Each achievement is a small plate; unlocked
-// ones light up. New unlocks therefore "appear" as a fresh glowing badge.
+// ones light up. New unlocks "appear" as a fresh badge with a brief warm glint.
 export function AchievementWallMesh() {
   const [x, y, z] = ANCHORS.achievements.pos
   const achievements = useRoomStore((s) => s.achievements)
+  const quality = useRoomStore((s) => s.settings.quality)
+  const unlockedCount = achievements.filter((a) => a.unlocked).length
+  const prev = useRef(unlockedCount)
+  const [burst, setBurst] = useState(false)
+
+  useEffect(() => {
+    if (unlockedCount > prev.current) {
+      setBurst(true)
+      const id = window.setTimeout(() => setBurst(false), 1800)
+      prev.current = unlockedCount
+      return () => window.clearTimeout(id)
+    }
+    prev.current = unlockedCount
+  }, [unlockedCount])
 
   return (
     <group position={[x, y, z]} rotation={[0, Math.PI / 2, 0]}>
@@ -21,6 +36,11 @@ export function AchievementWallMesh() {
         <planeGeometry args={[2.2, 0.12]} />
         <meshStandardMaterial color="#efe9dc" roughness={0.9} />
       </mesh>
+
+      {/* Warm glint when a new achievement is earned (no neon) */}
+      {burst && quality !== 'low' && (
+        <Sparkles count={quality === 'high' ? 34 : 18} scale={[2.2, 1.1, 0.4]} position={[0, 0, 0.4]} size={2} speed={0.5} color="#ffcf80" />
+      )}
 
       {achievements.map((a, i) => {
         const col = i % 4

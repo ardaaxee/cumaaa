@@ -142,6 +142,7 @@ interface RoomState {
   secretUnlocked: boolean
   activity: ActivityEntry[]
   visited: InteractableKind[]
+  currentProjectId: string | null
 
   // ephemeral (not persisted)
   hydrated: boolean
@@ -161,6 +162,7 @@ interface RoomState {
   addProject: (input: Omit<Project, 'id' | 'createdAt'>) => void
   updateProject: (id: string, patch: Partial<Project>) => void
   removeProject: (id: string) => void
+  setCurrentProject: (id: string | null) => void
 
   addTask: (title: string) => void
   toggleTask: (id: string) => void
@@ -194,6 +196,7 @@ export const useRoomStore = create<RoomState>()(
       secretUnlocked: false,
       activity: [],
       visited: [],
+      currentProjectId: null,
 
       hydrated: false,
       activePanel: null,
@@ -220,7 +223,16 @@ export const useRoomStore = create<RoomState>()(
         set((s) => ({
           projects: s.projects.map((p) => (p.id === id ? { ...p, ...patch } : p)),
         })),
-      removeProject: (id) => set((s) => ({ projects: s.projects.filter((p) => p.id !== id) })),
+      removeProject: (id) =>
+        set((s) => ({
+          projects: s.projects.filter((p) => p.id !== id),
+          currentProjectId: s.currentProjectId === id ? null : s.currentProjectId,
+        })),
+      setCurrentProject: (id) => {
+        set({ currentProjectId: id })
+        const p = get().projects.find((x) => x.id === id)
+        if (p) get().pushToast(`Current project: ${p.name}`)
+      },
 
       addTask: (title) => {
         const trimmed = title.trim()
@@ -317,6 +329,7 @@ export const useRoomStore = create<RoomState>()(
           secretUnlocked: false,
           activity: [],
           visited: [],
+          currentProjectId: null,
           activePanel: null,
           toast: null,
         }),
@@ -336,6 +349,7 @@ export const useRoomStore = create<RoomState>()(
         secretUnlocked: s.secretUnlocked,
         activity: s.activity,
         visited: s.visited,
+        currentProjectId: s.currentProjectId,
       }),
       onRehydrateStorage: () => (state) => {
         // Runs after persisted state is merged in.
