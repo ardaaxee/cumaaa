@@ -1,5 +1,9 @@
 # Geliştirme ve test bağımlılıkları
+#
+# Buradaki aralıklar, test paketinin gerçekten doğrulandığı sürümleri
+# kapsar: pytest 9.x + pytest-asyncio 1.x. Eski üst sınırlar, Python 3.14'te
+# hazır wheel'i olmayan/desteklenmeyen sürümlere düşürüyordu.
 -r requirements.txt
 
-pytest>=8.0,<9.0
-pytest-asyncio>=0.23,<1.0
+pytest>=8.2,<10                # pytest-asyncio 1.x en az 8.2 ister
+pytest-asyncio>=1.0,<2         # pytest.ini'deki asyncio_mode=auto ile uyumlu

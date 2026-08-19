@@ -66,7 +66,7 @@ söyler: *"Bu özellik mevcut API izinleriyle desteklenmiyor."*
 
 ### Gereksinimler
 
-- Python 3.10+
+- Python 3.10+ (Termux'ta **3.13 önerilir**, bkz. bölüm [3](#3-termux-kurulumu))
 - ~60 MB disk (bağımlılıklar dâhil)
 - İnternet bağlantısı
 
@@ -113,12 +113,33 @@ python run.py status    # durumu gör
 ## 3. Termux kurulumu
 
 InstaFlow, **proot/Ubuntu gerektirmeden** doğrudan Termux'un kendi Python'ı
-ile çalışacak biçimde yazıldı. Derleme gerektiren ağır paketler bilinçli
-olarak kullanılmadı.
+ile çalışacak biçimde yazıldı. Bağımlılıkların 37'sinden 33'ü saf Python'dur.
+
+### Önce bilinmesi gereken: Termux'ta wheel meselesi
+
+Android **Bionic libc** kullanır. PyPI'daki hazır wheel'ler ise `manylinux`
+(glibc) veya `musllinux` (musl) içindir — **hiçbiri Termux'ta çalışmaz**. Bu
+yüzden derlenmiş uzantısı olan paketleri pip kaynak koddan derlemek zorunda
+kalır.
+
+InstaFlow'un bağımlılıklarında durum şöyledir:
+
+| Paket | Durum Termux'ta |
+|-------|-----------------|
+| 33 paket (fastapi, starlette, uvicorn, httpx, typer, rich, apscheduler, pydantic-settings …) | Saf Python — sorunsuz |
+| **SQLAlchemy** | `py3-none-any` wheel'i var, otomatik saf Python'a düşer — sorunsuz |
+| **MarkupSafe**, **greenlet** | C uzantısı — `clang` ile derlenir, hızlı |
+| **pydantic-core** | **Rust/PyO3 — tek gerçek engel** |
+
+`pydantic-core`'un **hiçbir sürümünün** Android wheel'i yoktur (PyPI'da
+yalnızca manylinux/musllinux vardır). Yani pydantic sürümünü düşürmek bu
+sorunu çözmez; çözüm derlemek ya da Termux/topluluk deposundan kurmaktır.
+
+### Kurulum
 
 ```bash
 pkg update && pkg upgrade
-pkg install python python-pip git
+pkg install python python-pip git clang binutils
 
 # Depoyu alın
 git clone <depo-adresi>
@@ -126,6 +147,63 @@ cd cumaaa/instaflow
 
 bash install.sh
 ```
+
+`install.sh` Termux'u kendi algılar ve `ANDROID_API_LEVEL` değişkenini
+cihazınızdan okuyup ayarlar — PyO3'ün
+`"Failed to determine Android API level"` hatası bu yüzden oluşur ve böylece
+önlenir.
+
+### pydantic-core kurulamazsa
+
+`install.sh` başarısız olursa size seçenekleri listeler. Sırayla:
+
+**1) Termux'un kendi deposu** — varsa en temiz yol:
+
+```bash
+pkg install python-pydantic
+```
+
+**2) Kaynaktan derleme** — Rust gerekir, telefonda 10–20 dakika sürer ve
+bol RAM ister:
+
+```bash
+pkg install rust binutils
+export ANDROID_API_LEVEL=$(getprop ro.build.version.sdk)
+pip install -r requirements.txt
+```
+
+**3) Hazır topluluk wheel'i** — Python **3.13 ve altı** için derlenmiş
+wheel'ler vardır (Python 3.14 için **henüz yoktur**):
+
+```bash
+INSTAFLOW_EXTRA_INDEX_URL=https://eutalix.github.io/android-pydantic-core/ \
+  bash install.sh
+```
+
+> Bu **üçüncü taraf** bir depodur, Meta/PyPI/InstaFlow ile ilgisi yoktur.
+> Bu yüzden otomatik olarak eklenmez; eklemek sizin kararınızdır. Ne
+> kurduğunuzu bilerek kullanın.
+
+**4) Telefonda derlemek istemiyorsanız** InstaFlow'u bir PC veya sunucuda
+çalıştırıp panele telefon tarayıcısından bağlanın.
+
+`greenlet` derlenemezse: SQLAlchemy onu yalnızca **async** kullanım için
+ister, InstaFlow ise tamamen senkron çalışır. `pkg install clang` sonrası
+tekrar deneyin.
+
+### Python sürümü: 3.13 mü, 3.14 mü?
+
+| Sürüm | Termux'ta durum |
+|-------|-----------------|
+| **3.13 (önerilen)** | Hazır topluluk wheel'i mevcut → pydantic-core derlemeden kurulur |
+| 3.12 ve altı | Çalışır; topluluk wheel'i 3.9'a kadar mevcut |
+| 3.14 | Çalışır, ama pydantic-core'u **kaynaktan derlemeniz** gerekir |
+
+Kod tarafında InstaFlow Python 3.10+ ile çalışır ve 3.14 ile bir sorunu
+yoktur; mesele yalnızca hazır wheel bulunabilirliğidir. Termux'un Python
+sürümünü zorla değiştirmeyin — `pkg install python` sistem genelinde
+sürümü değiştirir ve başka araçlarınızı kırabilir. 3.14'te kalıp bir kez
+derlemek de tamamen geçerli bir tercihtir.
 
 ### Telefon uykuya geçince durmasın
 
@@ -771,13 +849,21 @@ tail -f logs/app.log
 
 `RUN_SCHEDULER=0` ile başlatılmış olabilir.
 
-### Termux'ta paket kurulamıyor
+### "Failed to determine Android API level"
+
+pydantic-core Rust ile derlenirken PyO3 hedef Android API seviyesini
+bulamıyor. `install.sh` bunu kendiliğinden ayarlar; elle kuruyorsanız:
 
 ```bash
-pkg install rust binutils
-export CARGO_BUILD_TARGET=$(rustc -vV | sed -n 's|host: ||p')
+export ANDROID_API_LEVEL=$(getprop ro.build.version.sdk)
 pip install -r requirements.txt
 ```
+
+### Termux'ta paket kurulamıyor / derleme çok uzun sürüyor
+
+Bölüm [3](#3-termux-kurulumu) → "pydantic-core kurulamazsa". Özetle:
+`pkg install python-pydantic` deneyin, olmazsa `pkg install rust binutils`
+ile derleyin, ya da Python 3.13 + hazır topluluk wheel deposunu kullanın.
 
 ### Saatler yanlış
 

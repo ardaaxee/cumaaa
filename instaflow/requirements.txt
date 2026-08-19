@@ -1,14 +1,19 @@
 # InstaFlow — çekirdek bağımlılıklar
-# Termux/Android'de derleme gerektirmeyen paketler seçildi.
+#
+# Termux/Android notu: Android, Bionic libc kullanır. PyPI'daki manylinux
+# (glibc) ve musllinux (musl) wheel'leri Termux'ta KULLANILAMAZ. Bu yüzden
+# derlenmiş uzantısı olan her paket kaynaktan derlenir. Aşağıdaki paketlerin
+# neredeyse tamamı saf Python'dur; tek gerçek istisna pydantic-core'dur
+# (Rust/PyO3). Ayrıntı ve çözüm için README "Termux kurulumu" bölümüne bakın.
 
+# --- saf Python (Termux'ta derleme gerektirmez) ---
 fastapi>=0.115,<1.0
-uvicorn>=0.30,<1.0
+uvicorn>=0.30,<1.0             # [standard] EKLEMEYİN: uvloop/httptools derleme ister
 jinja2>=3.1,<4.0
 python-multipart>=0.0.9        # form/dosya yükleme
 itsdangerous>=2.2,<3.0         # oturum çerezi ve CSRF imzası
 
-sqlalchemy>=2.0,<3.0
-pydantic>=2.7,<3.0
+sqlalchemy>=2.0,<3.0           # saf Python wheel'i var (py3-none-any)
 pydantic-settings>=2.3,<3.0
 python-dotenv>=1.0,<2.0
 
@@ -16,6 +21,15 @@ httpx>=0.27,<1.0               # async HTTP (Graph API ve AI sağlayıcıları)
 apscheduler>=3.10,<4.0         # zamanlanmış yayın
 
 typer>=0.12,<1.0               # CLI
-rich>=13.7,<15.0               # CLI çıktısı
+rich>=13.7,<16                 # CLI çıktısı
 
-# Testler için: pip install -r requirements-dev.txt
+# --- derlenmiş uzantı içerir ---
+# pydantic-core Rust ile yazılmıştır ve hiçbir sürümünün Android wheel'i
+# YOKTUR; Termux'ta kaynaktan derlenir (ANDROID_API_LEVEL gerekir) veya
+# Termux/üçüncü taraf bir depodan kurulur.
+#
+# Taban 2.12: Python 3.14'ü resmen destekleyen ilk pydantic sürümü budur
+# (pydantic-core 2.41.1 ile gelen ilk cp314 wheel'leri). Daha eski bir
+# pydantic, Python 3.14'te hazır wheel bulamayıp her platformda derlemeye
+# düşer.
+pydantic>=2.12,<3.0
