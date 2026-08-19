@@ -114,6 +114,8 @@ Node 18+ recommended (developed on Node 22).
 src/
   components/
     furniture/   Desk, Chair, Bookcase (+secret door), Bed, Decor, Details, MonitorScreen
+    house/       House, HouseRoomShell, props + rooms/ (Hallway, Living, Kitchen,
+                 Bedroom, Bathroom, Storage, Balcony)
     interaction/ PlayerController, InteractionManager, InteractableTrigger
     lab/         ArdaLab, LabShell, LabLighting, ProjectHologram, ProjectCore,
                  IdeaWall, AchievementCore, ServerRacks, LabProps
@@ -140,6 +142,36 @@ src/
   offline engine. To use a real model, run your **own backend proxy** and set
   `VITE_AI_PROXY_URL` in `.env` (copy from `.env.example`); the browser only ever
   calls that URL. Real `.env` files are git-ignored.
+
+## The apartment
+
+The studio is the **study** — home of the desk, PC/ARDA OS, memory objects and
+the hidden lab. A door in its (previously empty) back wall opens into a full,
+walkable apartment; you move between rooms physically, never by teleport, and
+every wall collides:
+
+- **Entrance hall** — shoe rack, coat hooks with a jacket, a console with a key
+  dish + mirror, runner rug, doormat.
+- **Living room** — 3-seat sofa, armchair, coffee table, a wall TV + unit,
+  bookshelf, floor lamp, plants, framed art.
+- **Kitchen** — matte cabinets, a stone counter run with sink + cooktop + hood,
+  tall fridge, a small dining set; tile floor.
+- **Bedroom** — a slept-in double bed, nightstands with warm lamps, a wardrobe
+  with clothes (one door ajar), dresser + mirror, laundry basket.
+- **Bathroom** (ensuite) — vanity + sink + mirror, toilet, a glass shower; tile
+  and ceramic, cool light.
+- **Storage** — deliberately messier: metal shelving, boxes, a suitcase, broom.
+- **Balcony** — decking, glass railing, a bistro set and planters.
+
+Each room has its own materials (cloth/wood, stone/metal/tile, ceramic/glass),
+its own lighting (warm bedroom, neutral kitchen/bath, lamp-lit living), and
+lived-in touches. Everything is procedural — no heavy assets bundled. Real-world
+scale throughout; the camera stays at eye level.
+
+**Performance**: room shells are cheap always-on boxes; each room's furniture +
+lights are **distance-culled** (invisible when you're far away), on top of
+three's frustum culling. The LOW/MEDIUM/HIGH tiers and mobile auto-downgrade are
+unchanged, and the cull radius tightens on LOW.
 
 ## Realism
 

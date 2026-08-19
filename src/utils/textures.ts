@@ -320,6 +320,55 @@ export function labGrid(): Surface {
   return { map: cache.gridMap, normalMap: cache.gridNrm }
 }
 
+// ---- Ceramic tile (kitchen / bathroom) ------------------------------------
+export function tile(hex = '#cdc7bd', groutHex = '#8f887c'): Surface {
+  const key = 'tile_' + hex
+  if (cache[key + 'Map']) return { map: cache[key + 'Map'], normalMap: cache[key + 'Nrm'] }
+  const size = 256
+  const base = canvas(size)
+  const h = canvas(size)
+  if (!base || !h) return fallback(hex)
+  base.ctx.fillStyle = groutHex
+  base.ctx.fillRect(0, 0, size, size)
+  const n = 4 // tiles per axis
+  const cell = size / n
+  const gap = 4
+  for (let ty = 0; ty < n; ty++) {
+    for (let tx = 0; tx < n; tx++) {
+      const shade = 8 - Math.floor(Math.random() * 16)
+      base.ctx.fillStyle = shift(hex, shade)
+      base.ctx.fillRect(tx * cell + gap / 2, ty * cell + gap / 2, cell - gap, cell - gap)
+    }
+  }
+  noise(base.ctx, size, 6)
+
+  h.ctx.fillStyle = '#000'
+  h.ctx.fillRect(0, 0, size, size)
+  for (let ty = 0; ty < n; ty++)
+    for (let tx = 0; tx < n; tx++) {
+      h.ctx.fillStyle = '#b0b0b0'
+      h.ctx.fillRect(tx * cell + gap / 2, ty * cell + gap / 2, cell - gap, cell - gap)
+    }
+  cache[key + 'Map'] = finalize(base.c, 3)
+  const nrm = heightToNormal(h.c, 1.6)
+  if (nrm) {
+    nrm.repeat.set(3, 3)
+    cache[key + 'Nrm'] = nrm
+  }
+  return { map: cache[key + 'Map'], normalMap: cache[key + 'Nrm'] }
+}
+
+function shift(hex: string, delta: number): string {
+  const n = parseInt(hex.slice(1), 16)
+  const r = clampByte(((n >> 16) & 255) + delta)
+  const g = clampByte(((n >> 8) & 255) + delta)
+  const b = clampByte((n & 255) + delta)
+  return `rgb(${r},${g},${b})`
+}
+function clampByte(v: number): number {
+  return Math.max(0, Math.min(255, v))
+}
+
 // ---- Soft contact-AO blob (fakes ambient occlusion under furniture) -------
 export function aoBlob(): THREE.Texture {
   if (cache.aoBlob) return cache.aoBlob

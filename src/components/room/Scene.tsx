@@ -5,6 +5,7 @@ import { StudioEnvironment } from './StudioEnvironment'
 import { ContactAO } from './ContactAO'
 import { SecretGate } from './SecretGate'
 import { ArdaLab } from '../lab/ArdaLab'
+import { House } from '../house/House'
 import { useRoomStore } from '../../store/useRoomStore'
 import { TaskBoardMesh } from './TaskBoardMesh'
 import { WindowView } from './WindowView'
@@ -40,6 +41,7 @@ export function Scene({ quality }: { quality: GraphicsQuality }) {
 
       <RoomShell quality={quality} />
       <ContactAO />
+      <House quality={quality} />
       <SecretGate />
       {secretUnlocked && <ArdaLab quality={quality} />}
       <Desk />

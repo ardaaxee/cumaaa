@@ -2,6 +2,7 @@ import { useEffect, useMemo } from 'react'
 import { MeshReflectorMaterial } from '@react-three/drei'
 import { ROOM, HALF_W, HALF_D } from '../../config/roomLayout'
 import { DOOR } from '../../config/labLayout'
+import { STUDY_DOOR } from '../../config/houseLayout'
 import { registerCollider, unregisterCollider } from '../../systems/collisionSystem'
 import { woodFloor, wall as wallTex, rug as rugTex } from '../../utils/textures'
 import type { GraphicsQuality } from '../../types'
@@ -18,7 +19,11 @@ export function RoomShell({ quality }: { quality: GraphicsQuality }) {
   useEffect(() => {
     const t = ROOM.wall
     registerCollider('wall-front', [0, 0, -HALF_D], [ROOM.width, ROOM.height, t])
-    registerCollider('wall-back', [0, 0, HALF_D], [ROOM.width, ROOM.height, t])
+    // Back wall (+Z) is split around the hallway doorway (centre x=0).
+    const bl = HALF_W + (STUDY_DOOR.center - STUDY_DOOR.half) // left segment length from -HALF_W
+    const br = HALF_W - (STUDY_DOOR.center + STUDY_DOOR.half) // right segment length to +HALF_W
+    registerCollider('wall-back-l', [-HALF_W + bl / 2, 0, HALF_D], [bl, ROOM.height, t])
+    registerCollider('wall-back-r', [HALF_W - br / 2, 0, HALF_D], [br, ROOM.height, t])
     registerCollider('wall-left', [-HALF_W, 0, 0], [t, ROOM.height, ROOM.depth])
     // Right wall is split around the hidden doorway (z ∈ [-2.9, -1.1]).
     const frontLen = DOOR.zCenter - DOOR.halfWidth - -HALF_D // -2.9 - (-6) = 3.1
@@ -26,7 +31,7 @@ export function RoomShell({ quality }: { quality: GraphicsQuality }) {
     registerCollider('wall-right-front', [HALF_W, 0, -HALF_D + frontLen / 2], [t, ROOM.height, frontLen])
     registerCollider('wall-right-back', [HALF_W, 0, HALF_D - backLen / 2], [t, ROOM.height, backLen])
     return () => {
-      ;['wall-front', 'wall-back', 'wall-left', 'wall-right-front', 'wall-right-back'].forEach(
+      ;['wall-front', 'wall-back-l', 'wall-back-r', 'wall-left', 'wall-right-front', 'wall-right-back'].forEach(
         unregisterCollider,
       )
     }
@@ -92,7 +97,6 @@ export function RoomShell({ quality }: { quality: GraphicsQuality }) {
       {(
         [
           { key: 'front', pos: [0, ROOM.height / 2, -HALF_D], rot: [0, 0, 0], size: [ROOM.width, ROOM.height, ROOM.wall] },
-          { key: 'back', pos: [0, ROOM.height / 2, HALF_D], rot: [0, Math.PI, 0], size: [ROOM.width, ROOM.height, ROOM.wall] },
           { key: 'left', pos: [-HALF_W, ROOM.height / 2, 0], rot: [0, Math.PI / 2, 0], size: [ROOM.depth, ROOM.height, ROOM.wall] },
         ] as const
       ).map((w) => (
@@ -128,12 +132,29 @@ export function RoomShell({ quality }: { quality: GraphicsQuality }) {
           />
         </mesh>
       ))}
-      {/* Lintel above the doorway */}
+      {/* Lintel above the lab doorway */}
       <mesh
         position={[HALF_W, (DOOR.height + ROOM.height) / 2, DOOR.zCenter]}
         receiveShadow
       >
         <boxGeometry args={[ROOM.wall, ROOM.height - DOOR.height, DOOR.halfWidth * 2]} />
+        <meshStandardMaterial color="#4a443a" map={walls.map} normalMap={walls.normalMap} roughness={0.92} />
+      </mesh>
+
+      {/* Back wall (+Z) — carved with the hallway doorway (centre x=0) */}
+      {(
+        [
+          { x: -HALF_W + (HALF_W + (STUDY_DOOR.center - STUDY_DOOR.half)) / 2, len: HALF_W + (STUDY_DOOR.center - STUDY_DOOR.half) },
+          { x: HALF_W - (HALF_W - (STUDY_DOOR.center + STUDY_DOOR.half)) / 2, len: HALF_W - (STUDY_DOOR.center + STUDY_DOOR.half) },
+        ] as const
+      ).map((seg, i) => (
+        <mesh key={`bw${i}`} position={[seg.x, ROOM.height / 2, HALF_D]} receiveShadow>
+          <boxGeometry args={[seg.len, ROOM.height, ROOM.wall]} />
+          <meshStandardMaterial color="#4a443a" map={walls.map} normalMap={walls.normalMap} roughness={0.92} metalness={0.04} />
+        </mesh>
+      ))}
+      <mesh position={[STUDY_DOOR.center, (STUDY_DOOR.height + ROOM.height) / 2, HALF_D]} receiveShadow>
+        <boxGeometry args={[STUDY_DOOR.half * 2, ROOM.height - STUDY_DOOR.height, ROOM.wall]} />
         <meshStandardMaterial color="#4a443a" map={walls.map} normalMap={walls.normalMap} roughness={0.92} />
       </mesh>
       {/* Glowing doorway frame (portal accent) */}
