@@ -63,6 +63,25 @@ def _pid_file() -> Path:
     return get_settings().data_dir / PID_FILENAME
 
 
+def _is_instaflow_process(pid: int) -> bool:
+    """PID gerçekten bir InstaFlow süreci mi?
+
+    PID'ler yeniden kullanılır: bayat bir PID dosyası yüzünden ilgisiz bir
+    sürece SIGTERM göndermemek için komut satırı doğrulanır. `/proc`
+    okunamayan sistemlerde kontrol atlanır.
+    """
+    cmdline_path = Path(f"/proc/{pid}/cmdline")
+    if not cmdline_path.exists():
+        return True  # /proc yok; başka bir doğrulama yolumuz yok
+    try:
+        cmdline = cmdline_path.read_bytes().replace(b"\0", b" ").decode(
+            "utf-8", "ignore"
+        )
+    except OSError:
+        return True
+    return "run.py" in cmdline or "instaflow" in cmdline.lower()
+
+
 def _read_pid() -> int | None:
     """Çalışan sunucunun PID'i (varsa ve süreç yaşıyorsa)."""
     path = _pid_file()
@@ -75,6 +94,12 @@ def _read_pid() -> int | None:
     try:
         os.kill(pid, 0)
     except OSError:
+        return None
+    if not _is_instaflow_process(pid):
+        console.print(
+            f"[yellow]PID {pid} InstaFlow'a ait görünmüyor; bayat PID dosyası "
+            "yok sayılıyor.[/]"
+        )
         return None
     return pid
 
@@ -607,6 +632,23 @@ def doctor() -> None:
 
     if not (BASE_DIR / ".env").exists():
         problems.append(".env dosyası yok — .env.example dosyasını kopyalayın.")
+    if settings.is_secret_key_ephemeral:
+        problems.append(
+            "SECRET_KEY tanımlı değil — her açılışta oturumlar geçersiz olur. "
+            'python -c "import secrets; print(secrets.token_urlsafe(32))"'
+        )
+    if settings.host not in ("127.0.0.1", "localhost", "::1"):
+        problems.append(
+            f"HOST={settings.host} — panelde giriş ekranı yok, ağdaki herkes erişebilir."
+        )
+    if settings.oauth_redirect_uri and not (
+        settings.oauth_redirect_uri.startswith("https://")
+        or "localhost" in settings.oauth_redirect_uri
+        or "127.0.0.1" in settings.oauth_redirect_uri
+    ):
+        problems.append(
+            "OAUTH_REDIRECT_URI https değil — Meta çoğu durumda HTTPS ister."
+        )
     if not settings.is_instagram_configured:
         problems.append("Instagram API credentials yapılandırılmamış.")
     if not settings.is_oauth_configured:

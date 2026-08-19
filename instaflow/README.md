@@ -176,9 +176,10 @@ chmod +x ~/.termux/boot/instaflow
 Varsayılan olarak sunucu yalnızca `127.0.0.1` üzerinde dinler. Telefonun
 tarayıcısından `http://127.0.0.1:8000/dashboard` adresine girin.
 
-Aynı ağdaki başka bir cihazdan erişmek isterseniz `.env` içinde
-`HOST=0.0.0.0` yapın — ama bunu yalnızca güvendiğiniz ağlarda yapın:
-panelde giriş ekranı yoktur, ağdaki herkes erişebilir.
+Aynı ağdaki başka bir cihazdan erişmek **önerilmez**: panelde giriş ekranı
+yoktur, dolayısıyla `HOST=0.0.0.0` yaptığınızda ağdaki herkes içeriklerinizi
+görebilir ve hesabınızdan gönderi yayınlayabilir. Ayrıntı için
+[Güvenlik](#18-güvenlik) bölümüne bakın.
 
 ---
 
@@ -418,6 +419,35 @@ planlar kaymaz.
 Ayrıca planlama sırasında `idempotency_key` (içerik + dakika) üretilir; aynı
 içerik için ikinci bir bekleyen plan oluşturulamaz.
 
+İki scheduler aynı anda çalışsa bile durum kilidi SQLite'ın yazma kilidi
+sayesinde yalnızca birine geçer: ikinci `UPDATE` 0 satır etkiler ve o süreç
+işi atlar.
+
+### Durum makinesi
+
+```
+draft ──┬──> scheduled ──┬──> publishing ──┬──> published   (uç durum)
+        │                │                 └──> failed ──┐
+        └────────────────┴──> publishing                 │
+                     ▲                                   │
+                     └───────────────────────────────────┘
+                          (yeniden planlanabilir)
+```
+
+Geçişler kod tarafından doğrulanır: `published` uç durumdur, oradan geri
+dönülemez ve bir içerik yayın akışını atlayarak `published` yapılamaz.
+Geçersiz bir geçiş denemesi hata verir, sessizce geçmez.
+
+### Yarıda kalan yayınlar
+
+Termux kapanır ya da Android süreci öldürürse içerik `publishing` durumunda
+kalabilir. Bu durumdaki içerikler hem uygulama açılışında hem her yayın
+turunda kontrol edilir (`STALE_LOCK_MINUTES`, varsayılan 30 dakika):
+
+- Instagram'da gönderi oluşmuşsa (`published_posts` kaydı varsa) içerik
+  `published` yapılır — mükerrer yayın olmaz.
+- Oluşmamışsa plan yeniden `pending` yapılır ve bir sonraki turda denenir.
+
 ### Başarısız yayınlar
 
 Bir yayın başarısız olursa hata `logs/app.log` ve `logs` tablosuna yazılır.
@@ -453,10 +483,29 @@ Bu tanımlıyken yüklediğiniz yerel dosyalar
 edilir ve Meta oradan indirir.
 
 `PUBLIC_BASE_URL` yoksa ve içerikte `media_url` de yoksa, yayın denemesi
-şu mesajla başarısız olur:
+şu mesajla başarısız olur ve içerik `failed` durumuna geçer (sonsuz yeniden
+deneme yapılmaz):
 
 > Instagram Content Publishing API medyayı yalnızca herkese açık bir URL'den
 > indirir; yerel dosya doğrudan yüklenemez.
+
+### `/media` ucu ne servis eder, ne servis etmez
+
+Bu uç kimlik doğrulaması **istemez** — Meta'nın sunucuları anonim indirir,
+istese çalışmazdı. Bu yüzden erişim yüzeyi bilinçli olarak dardır:
+
+| Kural | Davranış |
+|-------|----------|
+| Adres biçimi | Yalnızca `/media/<alt-dizin>/<dosya>` |
+| İzinli alt dizinler | `drafts`, `scheduled`, `published`, `failed` — başkası 404 |
+| İzinli uzantılar | Yalnızca `ALLOWED_IMAGE_EXTENSIONS` + `ALLOWED_VIDEO_EXTENSIONS` |
+| Content-Type | Uzantıdan sabit eşleme ile belirlenir, tahmin edilmez |
+| Dizin listeleme | Yok — `/media/` ve `/media/drafts/` 404 döner |
+| `../` ve kodlanmış varyantları | Yol `content/` içine sabitlenir, dışarısı 404 |
+| Medya dışı dosyalar | Dizine düşmüş bir not, yedek veya veritabanı dosyası servis edilmez |
+
+Tüm ret durumları aynı 404'ü döndürür; dosyanın var olup olmadığı belli
+edilmez.
 
 ### Medya doğrulama
 
@@ -647,7 +696,7 @@ pip install -r requirements-dev.txt
 python -m pytest
 ```
 
-201 test, %90 kod kapsamı. Kapsanan alanlar:
+258 test, %90 kod kapsamı. Kapsanan alanlar:
 
 - Yapılandırma ve veritabanı şeması/kısıtları
 - Medya doğrulama (uzantı, magic byte, boyut, path traversal)
@@ -658,7 +707,10 @@ python -m pytest
 - Scheduler: iş kaydı, tetikleyiciler, hata dayanıklılığı
 - AI provider geri düşme (fallback)
 - OAuth: `state` doğrulaması, tekrar saldırısı, hata yolları
-- Web: CSRF, XSS kaçışı, güvenlik başlıkları, gizli değer sızıntısı
+- Web: CSRF (form ve API), XSS kaçışı, güvenlik başlıkları, gizli değer sızıntısı
+- Güvenlik regresyonları: çapraz kaynaklı yazma, `/media` erişim yüzeyi,
+  path traversal, durum makinesi, yarıda kalan yayın kurtarma, akış hâlinde
+  yükleme sınırı, token maskeleme
 
 **Testler gerçek bir Instagram hesabına hiçbir istek göndermez.** Tüm HTTP
 çağrıları `httpx.MockTransport` ile karşılanır ve gerçek kimlik bilgileri
@@ -760,23 +812,42 @@ geçersiz kılın ve yeniden yetkilendirin.
 | Alan | Nasıl |
 |------|-------|
 | SQL injection | Yalnızca parametreli SQLAlchemy sorguları; hiçbir yerde dize birleştirmeyle SQL kurulmaz |
-| XSS | Jinja2 otomatik kaçış açık, `\|safe` kullanılmaz |
-| CSRF | Durum değiştiren her form imzalı, oturuma bağlı, süreli token taşır |
+| XSS | Jinja2 otomatik kaçış açık, `\|safe` kullanılmaz — AI çıktısı da aynı yoldan geçer |
+| CSRF (form) | Durum değiştiren her form imzalı, oturuma bağlı, süreli token taşır |
+| CSRF (API) | Durum değiştiren her istekte `Origin` başlığı varsa aynı kaynak olmak zorundadır; çapraz kaynaklı yazma 403 döner |
 | OAuth CSRF | `state` parametresi üretilir, oturumda saklanır, tek kullanımlıktır |
 | Path traversal | Tüm dosya yolları `content/` altına sabitlenir (`resolve_within`) |
-| Dosya yükleme | Uzantı + magic byte + MIME + boyut kontrolü; dosya ancak geçerliyse diske yazılır |
+| Arbitrary file access | `/media` yalnızca bilinen alt dizinlerden, yalnızca izinli uzantıları servis eder |
+| Dosya yükleme | Uzantı + magic byte + MIME + boyut kontrolü; dosya parça parça yazılır, sınır aşılırsa yazma durur ve yarım dosya silinir |
+| Secret sızıntısı | Token'lar yalnızca sunucuda; log ve hata metinlerinde `access_token`/`client_secret` değerleri maskelenir |
 | Clickjacking | `X-Frame-Options: DENY`, CSP `frame-ancestors 'none'` |
 | MIME sniffing | `X-Content-Type-Options: nosniff` |
 | Dış kaynak | Sıkı CSP; harici script/stil/font yok |
-| Debug sızıntısı | `/docs` ve `/openapi.json` yalnızca `DEBUG=true` iken açık |
+| Debug sızıntısı | `/docs` ve `/openapi.json` yalnızca `DEBUG=true` iken açık; hata sayfaları yığın izi göstermez |
 
-### Panelde giriş ekranı yok
+### Çapraz kaynak koruması ve curl
+
+Tarayıcı, çapraz kaynaklı bir `POST` isteğinde `Origin` başlığını gönderir
+ama özel başlık ekleyemez. InstaFlow bu yüzden: `Origin` **varsa** aynı
+kaynak olmak zorundadır, **yoksa** (curl, CLI, betik) istek geçer. Yani
+kötü niyetli bir web sayfası sizin adınıza gönderi yayınlayamaz, ama
+kendi betikleriniz çalışmaya devam eder.
+
+### Panelde giriş ekranı yok — `HOST` ayarını değiştirmeyin
 
 InstaFlow tek kullanıcılık, **yerel** bir araç olarak tasarlandı ve
-varsayılan olarak yalnızca `127.0.0.1` üzerinde dinler. `HOST=0.0.0.0`
-yaparsanız panel ağdaki herkese açılır — bunu yalnızca güvendiğiniz bir ağda
-ve tercihen bir ters vekil (reverse proxy) arkasında kimlik doğrulamayla
-yapın.
+varsayılan olarak yalnızca `127.0.0.1` üzerinde dinler. Panelde kullanıcı
+adı/parola ekranı **yoktur**.
+
+`HOST=0.0.0.0` yaparsanız aynı ağdaki **herkes**:
+
+- içeriklerinizi ve istatistiklerinizi görüntüleyebilir,
+- içerik oluşturup silebilir,
+- hesabınızdan gönderi yayınlayabilir.
+
+Bunu yalnızca güvendiğiniz bir ağda ve tercihen kimlik doğrulamalı bir ters
+vekil (reverse proxy) arkasında yapın. `python run.py doctor` bu ayarı
+tespit ederse uyarır ve sunucu açılışta loga uyarı yazar.
 
 ---
 
@@ -816,6 +887,7 @@ instaflow/
 │   ├── templating.py        Jinja2 ortamı ve filtreler
 │   ├── routes_web.py        HTML sayfaları ve formlar
 │   ├── routes_api.py        JSON API
+│   ├── routes_media.py      Medya servis ucu (izin listeli, dar yüzey)
 │   ├── routes_oauth.py      OAuth bağlantı akışı
 │   │
 │   ├── instagram/           Graph API katmanı
@@ -842,7 +914,7 @@ instaflow/
 ├── data/                    instaflow.db, yedekler, PID
 ├── logs/                    app.log, server.log
 ├── scripts/                 start.sh, stop.sh, backup.sh
-├── tests/                   201 test
+├── tests/                   258 test
 ├── install.sh
 ├── run.py                   CLI
 └── .env.example

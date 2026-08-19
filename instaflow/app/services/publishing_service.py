@@ -148,6 +148,13 @@ async def publish_due(
     """Zamanı gelmiş tüm planları işler."""
     cfg = settings or get_settings()
     with session_scope() as session:
+        # Önceki turda yarıda kalmış yayınları kurtar; yoksa o içerikler
+        # `publishing` durumunda sonsuza kadar takılı kalır.
+        recovered = content_service.recover_stale_publishing(
+            session, stale_minutes=cfg.stale_lock_minutes
+        )
+        if recovered:
+            logger.warning("%d yarıda kalmış yayın kurtarıldı.", recovered)
         due = content_service.due_schedules(session)
         content_ids = [item.content_id for item in due]
 

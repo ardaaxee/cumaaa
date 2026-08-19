@@ -40,6 +40,27 @@ class ContentStatus(str, enum.Enum):
     FAILED = "failed"
 
 
+#: İçerik durumları arasındaki izinli geçişler.
+#:
+#: Bu tablo, bir hatanın sessizce "yayınlanmış" gibi görünmesini engeller:
+#: `published` uç durumdur, `publishing` durumuna yalnızca yayın akışının
+#: kilit adımından girilir.
+ALLOWED_STATUS_TRANSITIONS: dict[str, frozenset[str]] = {
+    "draft": frozenset({"draft", "scheduled", "publishing"}),
+    "scheduled": frozenset({"draft", "scheduled", "publishing", "failed"}),
+    "publishing": frozenset({"published", "failed", "scheduled"}),
+    "published": frozenset(),
+    "failed": frozenset({"draft", "scheduled", "publishing", "failed"}),
+}
+
+
+def is_valid_transition(current: str, target: str) -> bool:
+    """`current` durumundan `target` durumuna geçilebilir mi?"""
+    if current == target:
+        return True
+    return target in ALLOWED_STATUS_TRANSITIONS.get(current, frozenset())
+
+
 class ContentType(str, enum.Enum):
     """Instagram Content Publishing API'nin desteklediği türler."""
 
@@ -97,7 +118,9 @@ class Account(Base, TimestampMixin):
     __tablename__ = "accounts"
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
-    user_id: Mapped[int] = mapped_column(ForeignKey("users.id"), nullable=False)
+    user_id: Mapped[int] = mapped_column(
+        ForeignKey("users.id"), nullable=False, index=True
+    )
     ig_user_id: Mapped[str] = mapped_column(String(64), unique=True, nullable=False)
     username: Mapped[str] = mapped_column(String(128), default="", nullable=False)
     name: Mapped[str] = mapped_column(String(255), default="", nullable=False)
@@ -132,7 +155,9 @@ class Content(Base, TimestampMixin):
     __tablename__ = "content"
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
-    user_id: Mapped[int] = mapped_column(ForeignKey("users.id"), nullable=False)
+    user_id: Mapped[int] = mapped_column(
+        ForeignKey("users.id"), nullable=False, index=True
+    )
     type: Mapped[str] = mapped_column(String(16), default=ContentType.IMAGE.value, nullable=False)
     title: Mapped[str] = mapped_column(String(255), default="", nullable=False)
     caption: Mapped[str] = mapped_column(Text, default="", nullable=False)
@@ -180,7 +205,9 @@ class ScheduledPost(Base, TimestampMixin):
     )
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
-    content_id: Mapped[int] = mapped_column(ForeignKey("content.id"), nullable=False)
+    content_id: Mapped[int] = mapped_column(
+        ForeignKey("content.id"), nullable=False, index=True
+    )
     scheduled_at: Mapped[datetime] = mapped_column(DateTime, nullable=False)
     status: Mapped[str] = mapped_column(
         String(16), default=ScheduleStatus.PENDING.value, nullable=False
@@ -213,7 +240,9 @@ class PublishedPost(Base, TimestampMixin):
     ig_container_id: Mapped[str] = mapped_column(String(64), default="", nullable=False)
     permalink: Mapped[str] = mapped_column(Text, default="", nullable=False)
     media_type: Mapped[str] = mapped_column(String(32), default="", nullable=False)
-    published_at: Mapped[datetime] = mapped_column(DateTime, default=utcnow, nullable=False)
+    published_at: Mapped[datetime] = mapped_column(
+        DateTime, default=utcnow, nullable=False, index=True
+    )
 
     content: Mapped[Content] = relationship(back_populates="published")
     metrics: Mapped[list["Analytics"]] = relationship(
@@ -237,7 +266,7 @@ class Analytics(Base):
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     published_post_id: Mapped[int | None] = mapped_column(
-        ForeignKey("published_posts.id"), nullable=True
+        ForeignKey("published_posts.id"), nullable=True, index=True
     )
     #: "media" veya "account"
     scope: Mapped[str] = mapped_column(String(16), default="media", nullable=False)
@@ -261,4 +290,6 @@ class LogEntry(Base):
     level: Mapped[str] = mapped_column(String(16), default="INFO", nullable=False, index=True)
     logger: Mapped[str] = mapped_column(String(64), default="", nullable=False)
     message: Mapped[str] = mapped_column(Text, default="", nullable=False)
-    created_at: Mapped[datetime] = mapped_column(DateTime, default=utcnow, nullable=False)
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime, default=utcnow, nullable=False, index=True
+    )

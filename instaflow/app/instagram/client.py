@@ -29,6 +29,7 @@ from ..errors import (
     NotConfiguredError,
 )
 from ..logging_setup import get_logger
+from ..security import redact_secrets
 
 logger = get_logger("instagram.client")
 
@@ -160,13 +161,13 @@ class InstagramClient:
                 last_error = InstagramAPIError(
                     "Instagram API zaman aşımına uğradı.",
                     is_retryable=True,
-                    detail=str(exc),
+                    detail=redact_secrets(str(exc)),
                 )
             except httpx.HTTPError as exc:
                 last_error = InstagramAPIError(
                     "Instagram API'ye bağlanılamadı (ağ hatası).",
                     is_retryable=True,
-                    detail=str(exc),
+                    detail=redact_secrets(str(exc)),
                 )
             else:
                 if response.status_code < 400:
@@ -235,7 +236,7 @@ def _parse_json(response: httpx.Response) -> dict[str, Any]:
         raise InstagramAPIError(
             "Instagram API beklenmedik bir yanıt döndürdü (JSON değil).",
             status_code=response.status_code,
-            detail=response.text[:500],
+            detail=redact_secrets(response.text[:500]),
         ) from exc
     if isinstance(payload, dict):
         return payload
@@ -252,7 +253,7 @@ def _map_error(response: httpx.Response) -> InstagramAPIError:
     error = payload.get("error", {}) if isinstance(payload, dict) else {}
     code = error.get("code")
     subcode = error.get("error_subcode")
-    api_message = error.get("message", "") or response.text[:300]
+    api_message = redact_secrets(error.get("message", "") or response.text[:300])
 
     retry_after = _retry_after_seconds(response)
     common = {

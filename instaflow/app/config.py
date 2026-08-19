@@ -108,6 +108,9 @@ class Settings(BaseSettings):
     container_poll_attempts: int = 30
     container_poll_interval_seconds: float = 5.0
     daily_publish_guard: int = DEFAULT_DAILY_PUBLISH_GUARD
+    #: `publishing` durumunda bu kadar dakika takılı kalan içerik, süreç
+    #: çökmüş sayılır ve yeniden denenebilir duruma çekilir.
+    stale_lock_minutes: int = 30
     analytics_sync_hour: int = 3
     token_check_hour: int = 4
 
@@ -195,6 +198,16 @@ class Settings(BaseSettings):
     @property
     def account_metrics(self) -> tuple[str, ...]:
         return _split_csv(self.account_insight_metrics)
+
+    @property
+    def is_secret_key_ephemeral(self) -> bool:
+        """SECRET_KEY verilmemiş mi?
+
+        Verilmemişse her açılışta yeni bir anahtar üretilir; bu da tüm
+        oturumları ve bekleyen CSRF token'larını geçersiz kılar. Üretimde
+        mutlaka `.env` üzerinden sabitlenmelidir.
+        """
+        return "secret_key" not in self.model_fields_set
 
     @property
     def is_instagram_configured(self) -> bool:

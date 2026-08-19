@@ -7,6 +7,7 @@ Tüm durum değiştiren istekler POST'tur ve CSRF token'ı doğrulanır.
 from __future__ import annotations
 
 from fastapi import APIRouter, Depends, File, Form, Request, UploadFile
+from fastapi.concurrency import run_in_threadpool
 from fastapi.responses import RedirectResponse
 from sqlalchemy.orm import Session
 
@@ -16,7 +17,7 @@ from .ai import hashtags as ai_hashtags
 from .config import get_settings
 from .database import get_db
 from .errors import InstaFlowError, MediaValidationError
-from .instagram.media import store_upload
+from .instagram.media import store_upload_stream
 from .logging_setup import get_logger
 from .models import ContentStatus, ContentType
 from .scheduler import jobs as scheduler_jobs
@@ -154,8 +155,12 @@ async def create_content(
 
     if media_file is not None and media_file.filename:
         try:
-            info = store_upload(
-                media_file.filename, await media_file.read(), settings=settings
+            # Dosyanın tamamını belleğe almadan, parça parça diske yaz.
+            info = await run_in_threadpool(
+                store_upload_stream,
+                media_file.filename,
+                media_file.file,
+                settings=settings,
             )
             media_path = info.path.relative_to(settings.content_dir.resolve()).as_posix()
         except MediaValidationError as exc:

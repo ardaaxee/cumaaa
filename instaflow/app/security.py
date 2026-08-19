@@ -12,6 +12,7 @@ import re
 import secrets
 import unicodedata
 from pathlib import Path
+from urllib.parse import urlsplit
 
 from itsdangerous import BadSignature, URLSafeTimedSerializer
 
@@ -112,6 +113,49 @@ def verify_csrf_token(token: str | None, session_id: str) -> bool:
 def new_session_id() -> str:
     """Yeni bir oturum kimliği."""
     return secrets.token_urlsafe(24)
+
+
+#: Log ve hata metinlerinde asla görünmemesi gereken sorgu parametreleri.
+_SECRET_QUERY_PARAMS = ("access_token", "client_secret", "input_token", "api_key")
+_SECRET_PATTERN = re.compile(
+    r"\b(" + "|".join(_SECRET_QUERY_PARAMS) + r")=([^&\s\"']+)", re.IGNORECASE
+)
+
+
+def redact_secrets(text: str) -> str:
+    """Metindeki token/secret değerlerini maskeler.
+
+    Graph API çağrılarında token bir sorgu parametresidir; bir istisna
+    metnine URL sızarsa token da sızar. Loga veya arayüze giden her metin
+    buradan geçirilir.
+    """
+    if not text:
+        return text
+    return _SECRET_PATTERN.sub(r"\1=***", text)
+
+
+def same_origin(origin: str, base_url: str) -> bool:
+    """`Origin` başlığı isteğin kendi kaynağıyla aynı mı?
+
+    Şema, ana makine ve port birlikte karşılaştırılır; biri bile farklıysa
+    istek çapraz kaynaklıdır.
+    """
+    if not origin:
+        return False
+    request_parts = urlsplit(base_url)
+    origin_parts = urlsplit(origin)
+    if not origin_parts.scheme or not origin_parts.netloc:
+        return False
+    return (
+        origin_parts.scheme == request_parts.scheme
+        and origin_parts.hostname == request_parts.hostname
+        and (origin_parts.port or _default_port(origin_parts.scheme))
+        == (request_parts.port or _default_port(request_parts.scheme))
+    )
+
+
+def _default_port(scheme: str) -> int:
+    return 443 if scheme == "https" else 80
 
 
 def mask_secret(value: str, visible: int = 4) -> str:

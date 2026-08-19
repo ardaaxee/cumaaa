@@ -26,6 +26,9 @@ from ..services import account_service, analytics_service, publishing_service
 
 logger = get_logger("scheduler")
 
+#: Veritabanındaki log kayıtları bu kadar gün saklanır (telefon diski dostu).
+LOG_RETENTION_DAYS = 30
+
 JOB_PUBLISH = "publish_due"
 JOB_ANALYTICS = "sync_analytics"
 JOB_TOKEN = "token_check"
@@ -49,7 +52,15 @@ async def publish_due_job() -> None:
 
 
 async def sync_analytics_job() -> None:
-    """Gönderi ve hesap istatistiklerini çeker."""
+    """Gönderi ve hesap istatistiklerini çeker, eski logları temizler."""
+    try:
+        with session_scope() as session:
+            removed = account_service.prune_logs(session, keep_days=LOG_RETENTION_DAYS)
+        if removed:
+            logger.info("%d eski log kaydı temizlendi.", removed)
+    except Exception as exc:  # noqa: BLE001 - temizlik asıl işi engellememeli
+        logger.warning("Log temizliği başarısız: %s", exc)
+
     try:
         report = await analytics_service.sync_insights()
     except Exception as exc:  # noqa: BLE001

@@ -10,6 +10,7 @@ from collections.abc import Iterator
 from contextlib import contextmanager
 
 from sqlalchemy import Engine, create_engine, event, select
+from sqlalchemy.exc import OperationalError
 from sqlalchemy.orm import Session, sessionmaker
 
 from .config import get_settings
@@ -90,12 +91,29 @@ def init_db() -> None:
     """Tabloları oluştur ve varsayılan yerel kullanıcıyı garanti et."""
     settings = get_settings()
     settings.ensure_directories()
-    Base.metadata.create_all(bind=get_engine())
+    engine = get_engine()
+    Base.metadata.create_all(bind=engine)
+    _ensure_indexes(engine)
     with session_scope() as session:
         exists = session.scalar(select(User).where(User.username == DEFAULT_USERNAME))
         if exists is None:
             session.add(User(username=DEFAULT_USERNAME, display_name="Yerel kullanıcı"))
             logger.info("Varsayılan yerel kullanıcı oluşturuldu.")
+
+
+def _ensure_indexes(engine: Engine) -> None:
+    """Eksik indeksleri oluşturur.
+
+    `create_all` yalnızca eksik **tabloları** oluşturur; var olan bir tabloya
+    sonradan eklenen indeksleri kurmaz. Bu yüzden indeksler ayrıca ve
+    `checkfirst` ile geçilir — böylece mevcut kurulumlar da güncellenir.
+    """
+    for table in Base.metadata.tables.values():
+        for index in table.indexes:
+            try:
+                index.create(bind=engine, checkfirst=True)
+            except OperationalError as exc:  # pragma: no cover - savunma amaçlı
+                logger.warning("İndeks oluşturulamadı (%s): %s", index.name, exc)
 
 
 def get_default_user(session: Session) -> User:

@@ -32,6 +32,7 @@ import httpx
 from ..config import Settings, get_settings
 from ..errors import InstagramAPIError, NotConfiguredError
 from ..logging_setup import get_logger
+from ..security import redact_secrets
 from ..timeutils import utcnow
 
 logger = get_logger("instagram.auth")
@@ -372,7 +373,8 @@ async def _call(
             response = await client.post(url, data=data)
     except httpx.HTTPError as exc:
         raise InstagramAPIError(
-            "Meta kimlik doğrulama sunucusuna ulaşılamadı.", detail=str(exc)
+            "Meta kimlik doğrulama sunucusuna ulaşılamadı.",
+            detail=redact_secrets(str(exc)),
         ) from exc
     finally:
         if owns_client:
@@ -384,7 +386,7 @@ async def _call(
         raise InstagramAPIError(
             "Kimlik doğrulama yanıtı okunamadı.",
             status_code=response.status_code,
-            detail=response.text[:300],
+            detail=redact_secrets(response.text[:300]),
         ) from exc
 
     if response.status_code >= 400 or "error" in payload or "error_message" in payload:

@@ -25,6 +25,7 @@ from ..models import (
     PublishedPost,
     ScheduledPost,
     ScheduleStatus,
+    is_valid_transition,
 )
 from ..schemas import ContentCreate, ContentUpdate
 from ..security import resolve_within
@@ -145,6 +146,97 @@ def delete_content(session: Session, content_id: int) -> None:
     logger.info("İçerik silindi: id=%s", content_id)
 
 
+def set_status(content: Content, new_status: str) -> None:
+    """İçeriğin durumunu, geçiş kurallarını doğrulayarak değiştirir.
+
+    Durum makinesi:
+
+        draft ─┬─> scheduled ─┬─> publishing ─┬─> published (uç durum)
+               │              │               └─> failed ──> (yeniden planla)
+               └──────────────┴─> publishing
+
+    Raises:
+        InstaFlowError: Geçiş izinli değilse (örn. yayınlanmış bir içeriği
+            tekrar taslağa çekmek).
+    """
+    if not is_valid_transition(content.status, new_status):
+        raise InstaFlowError(
+            f"Geçersiz durum geçişi: {content.status} → {new_status}"
+        )
+    content.status = new_status
+
+
+def recover_stale_publishing(
+    session: Session, *, stale_minutes: int, now: datetime | None = None
+) -> int:
+    """Yarıda kalmış yayınları kurtarır.
+
+    Süreç yayın sırasında öldürülürse (Termux kapanması, pil optimizasyonu)
+    içerik `publishing` durumunda kalır ve scheduler onu bir daha ele almaz.
+    Bu işlev, kilidi belirtilen süreden eski olan kayıtları yeniden
+    denenebilir duruma çeker.
+
+    Gerçekten yayınlanmış olanlara dokunulmaz: `published_posts` kaydı olan
+    içerik `published` yapılır, çünkü yayın Instagram tarafında tamamlanmış
+    ama veritabanı güncellenememiş olabilir.
+
+    Returns:
+        Kurtarılan içerik sayısı.
+    """
+    moment = now or utcnow()
+    cutoff = moment - timedelta(minutes=stale_minutes)
+
+    stuck = list(
+        session.scalars(
+            select(Content).where(
+                Content.status == ContentStatus.PUBLISHING.value,
+                Content.updated_at < cutoff,
+            )
+        )
+    )
+    if not stuck:
+        return 0
+
+    recovered = 0
+    for content in stuck:
+        published = session.scalar(
+            select(PublishedPost).where(PublishedPost.content_id == content.id)
+        )
+        if published is not None:
+            # Yayın tamamlanmış, yalnızca durum güncellenememiş.
+            content.status = ContentStatus.PUBLISHED.value
+            content.published_at = content.published_at or published.published_at
+            logger.warning(
+                "Yarıda kalan yayın tamamlanmış olarak işaretlendi: içerik %s",
+                content.id,
+            )
+        else:
+            content.status = ContentStatus.SCHEDULED.value
+            content.error_message = (
+                "Önceki yayın denemesi yarıda kaldı; yeniden denenecek."
+            )
+            logger.warning(
+                "Yarıda kalan yayın yeniden kuyruğa alındı: içerik %s", content.id
+            )
+
+        for schedule in session.scalars(
+            select(ScheduledPost).where(
+                ScheduledPost.content_id == content.id,
+                ScheduledPost.status == ScheduleStatus.RUNNING.value,
+            )
+        ):
+            schedule.status = (
+                ScheduleStatus.DONE.value
+                if published is not None
+                else ScheduleStatus.PENDING.value
+            )
+            schedule.locked_at = None
+        recovered += 1
+
+    session.flush()
+    return recovered
+
+
 def get_content(session: Session, content_id: int) -> Content | None:
     """İçeriği getirir."""
     return session.get(Content, content_id)
@@ -210,26 +302,38 @@ def schedule_content(
     if when_utc <= utcnow() - timedelta(minutes=1):
         raise InstaFlowError("Planlanan zaman geçmişte olamaz.")
 
-    existing = session.scalar(
+    key = make_idempotency_key(content_id, when_utc)
+
+    # Bekleyen bir plan varsa saati güncellenir. Yoksa aynı anahtara sahip
+    # eski bir kayıt (iptal edilmiş ya da başarısız olmuş) aranır: anahtar
+    # benzersiz olduğu için yeni satır eklemek çakışma hatası verirdi.
+    schedule = session.scalar(
         select(ScheduledPost).where(
             ScheduledPost.content_id == content_id,
             ScheduledPost.status == ScheduleStatus.PENDING.value,
         )
+    ) or session.scalar(
+        select(ScheduledPost).where(ScheduledPost.idempotency_key == key)
     )
-    if existing is not None:
-        existing.scheduled_at = when_utc
-        existing.idempotency_key = make_idempotency_key(content_id, when_utc)
-        schedule = existing
-    else:
+
+    if schedule is None:
         schedule = ScheduledPost(
             content_id=content_id,
             scheduled_at=when_utc,
             status=ScheduleStatus.PENDING.value,
-            idempotency_key=make_idempotency_key(content_id, when_utc),
+            idempotency_key=key,
         )
         session.add(schedule)
+    else:
+        schedule.content_id = content_id
+        schedule.scheduled_at = when_utc
+        schedule.idempotency_key = key
+        schedule.status = ScheduleStatus.PENDING.value
+        schedule.attempts = 0
+        schedule.last_error = ""
+        schedule.locked_at = None
 
-    content.status = ContentStatus.SCHEDULED.value
+    set_status(content, ContentStatus.SCHEDULED.value)
     content.scheduled_at = when_utc
     content.error_message = ""
     session.flush()
@@ -259,7 +363,7 @@ def cancel_schedule(session: Session, content_id: int) -> None:
 
     content = require_content(session, content_id)
     if content.status == ContentStatus.SCHEDULED.value:
-        content.status = ContentStatus.DRAFT.value
+        set_status(content, ContentStatus.DRAFT.value)
         content.scheduled_at = None
     session.flush()
     logger.info("Plan iptal edildi: içerik=%s", content_id)

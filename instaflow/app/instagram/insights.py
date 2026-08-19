@@ -17,6 +17,7 @@ from typing import Any
 from ..config import Settings, get_settings
 from ..errors import InstagramAPIError, InstagramAuthError, InstagramRateLimitError
 from ..logging_setup import get_logger
+from ..security import redact_secrets
 from .client import InstagramClient
 
 logger = get_logger("instagram.insights")
@@ -126,7 +127,7 @@ class InsightsService:
             except (InstagramAuthError, InstagramRateLimitError):
                 raise
             except InstagramAPIError as exc:
-                result.unsupported[metric] = exc.detail or exc.message
+                result.unsupported[metric] = redact_secrets(exc.detail or exc.message)
                 continue
             single = _parse_insights(payload, (metric,))
             result.values.update(single.values)

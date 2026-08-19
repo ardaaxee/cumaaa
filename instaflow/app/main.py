@@ -9,6 +9,7 @@ from __future__ import annotations
 import os
 from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
+from pathlib import Path
 
 from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse, RedirectResponse
@@ -17,13 +18,18 @@ from starlette.middleware.sessions import SessionMiddleware
 
 from . import __version__
 from .config import get_settings
-from .database import init_db
+from .database import init_db, session_scope
 from .errors import InstaFlowError
 from .logging_setup import get_logger, setup_logging
 from .scheduler import jobs as scheduler_jobs
+from .security import same_origin
+from .services import content_service
 from .templating import templates
 
 logger = get_logger("main")
+
+#: Durum değiştiren yöntemler — çapraz kaynak kontrolüne tabidir.
+UNSAFE_METHODS = frozenset({"POST", "PUT", "PATCH", "DELETE"})
 
 #: Sıkı bir CSP: sayfa hiçbir dış kaynağa çıkmaz, satır içi stil/script
 #: yalnızca kendi şablonlarımızdan gelir.
@@ -59,6 +65,27 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     setup_logging(settings.logs_dir, debug=settings.debug)
     init_db()
     logger.info("%s %s başlatılıyor (%s).", settings.app_name, __version__, settings.app_env)
+
+    if settings.is_secret_key_ephemeral:
+        logger.warning(
+            "SECRET_KEY tanımlı değil; geçici bir anahtar üretildi. Her yeniden "
+            "başlatmada oturumlar geçersiz olur. Üretimde .env içine sabit bir "
+            "SECRET_KEY yazın."
+        )
+    if settings.host not in ("127.0.0.1", "localhost", "::1"):
+        logger.warning(
+            "Sunucu %s adresinde dinliyor; panelde giriş ekranı yoktur ve "
+            "ağdaki herkes erişebilir.",
+            settings.host,
+        )
+
+    # Süreç yayın ortasında öldürülmüşse takılı kalan içerikleri kurtar.
+    with session_scope() as session:
+        recovered = content_service.recover_stale_publishing(
+            session, stale_minutes=settings.stale_lock_minutes
+        )
+    if recovered:
+        logger.warning("Açılışta %d yarıda kalmış yayın kurtarıldı.", recovered)
 
     if _scheduler_enabled():
         scheduler_jobs.start_scheduler(settings)
@@ -97,7 +124,37 @@ def create_app() -> FastAPI:
     )
 
     @app.middleware("http")
-    async def add_security_headers(request: Request, call_next):
+    async def block_cross_origin_writes(request: Request, call_next):
+        """Çapraz kaynaklı durum değiştiren istekleri reddeder.
+
+        Form tabanlı CSRF saldırılarında tarayıcı `Origin` başlığını gönderir
+        ama özel başlık ekleyemez. Bu yüzden `Origin` varsa aynı kaynak
+        olmak zorundadır. `Origin` hiç yoksa (curl, CLI, sunucu-sunucu)
+        istek geçer — tarayıcı kaynaklı bir saldırı değildir.
+
+        Web formları ayrıca imzalı CSRF token'ı taşır; bu katman JSON API
+        uçlarını da kapsayan ikinci savunmadır.
+        """
+        origin = request.headers.get("origin", "")
+        if (
+            request.method in UNSAFE_METHODS
+            and origin
+            and not same_origin(origin, str(request.base_url))
+        ):
+            logger.warning(
+                "Çapraz kaynaklı yazma isteği reddedildi: %s %s (origin=%s)",
+                request.method,
+                request.url.path,
+                origin,
+            )
+            message = "Çapraz kaynaklı istekler kabul edilmiyor."
+            if request.url.path.startswith("/api/"):
+                return JSONResponse(
+                    status_code=403,
+                    content={"success": False, "data": None, "error": message},
+                )
+            return JSONResponse(status_code=403, content={"detail": message})
+
         response = await call_next(request)
         for header, value in SECURITY_HEADERS.items():
             response.headers.setdefault(header, value)
@@ -119,20 +176,17 @@ def create_app() -> FastAPI:
             status_code=400,
         )
 
-    static_dir = settings.data_dir.parent / "app" / "static"
-    static_dir.mkdir(parents=True, exist_ok=True)
+    # Statik dosyalar paketin yanındadır; veri dizini taşınsa da değişmez.
+    static_dir = Path(__file__).resolve().parent / "static"
     app.mount("/static", StaticFiles(directory=str(static_dir)), name="static")
-    app.mount(
-        "/media",
-        StaticFiles(directory=str(settings.content_dir)),
-        name="media",
-    )
 
     from .routes_api import router as api_router
+    from .routes_media import router as media_router
     from .routes_oauth import router as oauth_router
     from .routes_web import router as web_router
 
     app.include_router(web_router)
+    app.include_router(media_router)
     app.include_router(oauth_router)
     app.include_router(api_router)
 

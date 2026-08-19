@@ -11,7 +11,9 @@ from __future__ import annotations
 import mimetypes
 from dataclasses import dataclass
 from enum import Enum
+from io import BytesIO
 from pathlib import Path
+from typing import BinaryIO
 
 from ..config import Settings, get_settings
 from ..errors import MediaValidationError
@@ -28,6 +30,9 @@ _JPEG_MAGIC = b"\xff\xd8\xff"
 _PNG_MAGIC = b"\x89PNG\r\n\x1a\n"
 _ISO_BMFF_BOX = b"ftyp"
 _HEADER_BYTES = 16
+
+#: Akış hâlinde yazarken kullanılan parça boyutu (düşük bellek kullanımı).
+CHUNK_SIZE = 1024 * 1024
 
 
 class MediaKind(str, Enum):
@@ -156,10 +161,34 @@ def store_upload(
     subdir: str = "drafts",
     settings: Settings | None = None,
 ) -> MediaInfo:
-    """Yüklenen baytları güvenli bir adla `content/<subdir>/` altına yazar.
+    """Bellekteki baytları güvenli bir adla kaydeder.
 
-    Önce boyut ve içerik imzası kontrol edilir; dosya ancak geçerliyse
-    diske yazılır.
+    Küçük yüklemeler ve testler için pratik; büyük dosyalar için
+    `store_upload_stream` tercih edilmelidir.
+
+    Raises:
+        MediaValidationError: Dosya kabul edilemezse.
+    """
+    return store_upload_stream(
+        filename, BytesIO(data), subdir=subdir, settings=settings
+    )
+
+
+def store_upload_stream(
+    filename: str,
+    stream: BinaryIO,
+    *,
+    subdir: str = "drafts",
+    settings: Settings | None = None,
+) -> MediaInfo:
+    """Yüklenen akışı parça parça `content/<subdir>/` altına yazar.
+
+    Dosyanın tamamı belleğe alınmaz: 100 MB'lık bir video Termux'ta belleği
+    tüketebilir. Parçalar okunurken boyut sınırı sürekli denetlenir; sınır
+    aşılırsa yazma anında durdurulur ve yarım dosya silinir.
+
+    İçerik imzası ilk parçadan doğrulanır, yani geçersiz bir dosyanın
+    tamamı diske yazılmaz.
 
     Raises:
         MediaValidationError: Dosya kabul edilemezse.
@@ -181,23 +210,44 @@ def store_upload(
             f"İzin verilenler: {allowed}"
         )
 
-    if not data:
-        raise MediaValidationError("Dosya boş.")
-    if len(data) > limit_mb * MB:
-        raise MediaValidationError(
-            f"Dosya çok büyük: {len(data) / MB:.1f} MB (sınır {limit_mb:.0f} MB)."
-        )
-    if detect_kind_from_bytes(data[:_HEADER_BYTES]) is not kind:
-        raise MediaValidationError(
-            "Dosya içeriği uzantısıyla uyuşmuyor; yükleme reddedildi."
-        )
-
+    limit_bytes = int(limit_mb * MB)
     directory = resolve_within(cfg.content_dir, subdir)
     directory.mkdir(parents=True, exist_ok=True)
     destination = unique_filename(directory, safe_name)
-    destination.write_bytes(data)
-    logger.info("Medya kaydedildi: %s (%.1f MB)", destination.name, len(data) / MB)
 
+    written = 0
+    checked_signature = False
+    try:
+        with destination.open("wb") as handle:
+            while True:
+                chunk = stream.read(CHUNK_SIZE)
+                if not chunk:
+                    break
+
+                if not checked_signature:
+                    if detect_kind_from_bytes(chunk[:_HEADER_BYTES]) is not kind:
+                        raise MediaValidationError(
+                            "Dosya içeriği uzantısıyla uyuşmuyor; yükleme reddedildi."
+                        )
+                    checked_signature = True
+
+                written += len(chunk)
+                if written > limit_bytes:
+                    raise MediaValidationError(
+                        f"Dosya çok büyük (sınır {limit_mb:.0f} MB); yükleme durduruldu."
+                    )
+                handle.write(chunk)
+
+        if written == 0:
+            raise MediaValidationError("Dosya boş.")
+    except MediaValidationError:
+        destination.unlink(missing_ok=True)
+        raise
+    except OSError as exc:
+        destination.unlink(missing_ok=True)
+        raise MediaValidationError(f"Dosya yazılamadı: {exc}") from exc
+
+    logger.info("Medya kaydedildi: %s (%.1f MB)", destination.name, written / MB)
     return validate_media_file(destination, expected=kind, settings=cfg)
 
 
