@@ -1,0 +1,137 @@
+{% extends "base.html" %}
+{% block title %}Panel — {{ app_name }}{% endblock %}
+
+{% block content %}
+<div class="card">
+  <h2>Instagram bağlantısı</h2>
+  <div class="status-line">
+    <span class="dot {{ 'on' if status.instagram.connected else 'off' }}"></span>
+    <strong>
+      {% if status.instagram.connected %}
+        Bağlı{% if status.instagram.username %} — @{{ status.instagram.username }}{% endif %}
+      {% elif status.instagram.configured %}
+        Yapılandırıldı, doğrulanmadı
+      {% else %}
+        Instagram API credentials yapılandırılmamış
+      {% endif %}
+    </strong>
+  </div>
+  <p class="note">{{ status.instagram.message }}</p>
+  <p class="note">
+    Kip: <code>{{ status.instagram.login_mode }}</code> ·
+    API: <code>{{ status.instagram.api_version }}</code> ·
+    Saat dilimi: <code>{{ status.timezone }}</code>
+    {% if status.instagram.token_days_left is not none %}
+      · Token: {{ status.instagram.token_days_left }} gün
+    {% endif %}
+  </p>
+  <div class="status-line">
+    <span class="dot {{ 'on' if status.scheduler_running else 'off' }}"></span>
+    Scheduler {{ 'çalışıyor' if status.scheduler_running else 'durdu' }}
+    · AI: <code>{{ status.ai_provider }}</code>
+    {{ '(hazır)' if status.ai_configured else '(anahtar yok)' }}
+  </div>
+</div>
+
+<div class="grid">
+  <div class="stat"><span class="value">{{ status.counts.total }}</span><span class="label">Toplam</span></div>
+  <div class="stat"><span class="value">{{ status.counts.scheduled }}</span><span class="label">Planlanan</span></div>
+  <div class="stat"><span class="value">{{ status.counts.published }}</span><span class="label">Yayınlanan</span></div>
+  <div class="stat"><span class="value">{{ status.counts.failed }}</span><span class="label">Başarısız</span></div>
+</div>
+
+<div class="card">
+  <h2>Bugün ({{ buckets.today|length }})</h2>
+  {% if buckets.today %}
+    <ul class="list">
+      {% for item in buckets.today %}
+        <li>
+          <span>#{{ item.id }} {{ item.title or item.caption[:40] or 'Başlıksız' }}</span>
+          <span class="badge {{ item.status }}">{{ item.status|status_label }}</span>
+          <span class="meta">{{ item.scheduled_at|localtime }} · {{ item.type|type_label }}</span>
+        </li>
+      {% endfor %}
+    </ul>
+  {% else %}
+    <p class="empty">Bugün planlanmış içerik yok.</p>
+  {% endif %}
+</div>
+
+<div class="card">
+  <h2>Yarın ({{ buckets.tomorrow|length }})</h2>
+  {% if buckets.tomorrow %}
+    <ul class="list">
+      {% for item in buckets.tomorrow %}
+        <li>
+          <span>#{{ item.id }} {{ item.title or 'Başlıksız' }}</span>
+          <span class="meta">{{ item.scheduled_at|localtime }}</span>
+        </li>
+      {% endfor %}
+    </ul>
+  {% else %}
+    <p class="empty">Yarın planlanmış içerik yok.</p>
+  {% endif %}
+</div>
+
+<div class="card">
+  <h2>Bu hafta ({{ buckets.week|length }})</h2>
+  {% if buckets.week %}
+    <ul class="list">
+      {% for item in buckets.week %}
+        <li>
+          <span>#{{ item.id }} {{ item.title or 'Başlıksız' }}</span>
+          <span class="meta">{{ item.scheduled_at|localtime }} · {{ item.type|type_label }}</span>
+        </li>
+      {% endfor %}
+    </ul>
+  {% else %}
+    <p class="empty">Bu hafta planlanmış içerik yok.</p>
+  {% endif %}
+</div>
+
+<div class="card">
+  <h2>Son gönderiler</h2>
+  {% if recent_published %}
+    <ul class="list">
+      {% for post in recent_published %}
+        <li>
+          <span>{{ post.media_type or 'Gönderi' }}</span>
+          <span class="meta">
+            {{ post.published_at|localtime }}
+            {% if post.permalink %} · <a href="{{ post.permalink }}" rel="noopener noreferrer nofollow" target="_blank">Instagram'da aç</a>{% endif %}
+          </span>
+        </li>
+      {% endfor %}
+    </ul>
+  {% else %}
+    <p class="empty">Henüz yayınlanan gönderi yok.</p>
+  {% endif %}
+</div>
+
+<div class="card">
+  <h2>Son hatalar</h2>
+  {% if recent_errors %}
+    <ul class="list">
+      {% for entry in recent_errors %}
+        <li>
+          <span class="badge failed">{{ entry.level }}</span>
+          <span class="meta">{{ entry.created_at|localtime }} — {{ entry.message[:180] }}</span>
+        </li>
+      {% endfor %}
+    </ul>
+  {% else %}
+    <p class="empty">Kayıtlı hata yok.</p>
+  {% endif %}
+</div>
+
+{% if jobs %}
+<div class="card">
+  <h2>Zamanlanmış işler</h2>
+  <ul class="list">
+    {% for job in jobs %}
+      <li><span>{{ job.name }}</span><span class="meta">Sonraki: {{ job.next_run }}</span></li>
+    {% endfor %}
+  </ul>
+</div>
+{% endif %}
+{% endblock %}

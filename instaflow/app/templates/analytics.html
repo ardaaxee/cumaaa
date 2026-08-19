@@ -1,0 +1,74 @@
+{% extends "base.html" %}
+{% block title %}İstatistik — {{ app_name }}{% endblock %}
+
+{% block content %}
+<div class="card">
+  <h2>İstatistikleri güncelle</h2>
+  <form method="post" action="/analytics/sync">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+    <div class="actions"><button type="submit">Şimdi çek</button></div>
+  </form>
+  <p class="note">
+    Yalnızca API'nin döndürdüğü metrikler kaydedilir. Meta 2025'te
+    <code>impressions</code>, <code>plays</code> ve <code>video_views</code>
+    metriklerini kaldırdı; yerlerine <code>views</code> geldi. İstenen metrik
+    listesi <code>.env</code> içindeki <code>MEDIA_INSIGHT_METRICS</code> ile
+    değiştirilebilir.
+  </p>
+  <p class="note">İstenen metrikler: {% for metric in metrics %}<code>{{ metric }}</code> {% endfor %}</p>
+</div>
+
+{% if not has_data %}
+<div class="card">
+  <p class="empty">
+    Henüz istatistik toplanmamış. Instagram bağlantısı kurulduktan ve en az bir
+    gönderi yayınlandıktan sonra veriler burada görünecek.
+  </p>
+</div>
+{% else %}
+<div class="card">
+  <h2>Toplam (son ölçümler)</h2>
+  {% for metric, value in totals.items() %}
+    <p>
+      <strong>{{ metric }}</strong> — {{ value|number }}
+    </p>
+    <div class="bar">
+      <span style="width: {{ (value / max_value * 100) if max_value else 0 }}%"></span>
+    </div>
+  {% endfor %}
+</div>
+
+<div class="card">
+  <h2>Gönderi bazında</h2>
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Yayın</th>
+          <th>Tür</th>
+          {% for metric in metrics %}<th>{{ metric }}</th>{% endfor %}
+          <th>Bağlantı</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for post, values in posts %}
+          <tr>
+            <td>{{ post.published_at|localtime }}</td>
+            <td>{{ post.media_type or '-' }}</td>
+            {% for metric in metrics %}
+              <td>{{ values.get(metric)|number if values.get(metric) is not none else '—' }}</td>
+            {% endfor %}
+            <td>
+              {% if post.permalink %}
+                <a href="{{ post.permalink }}" rel="noopener noreferrer nofollow" target="_blank">aç</a>
+              {% else %}—{% endif %}
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  <p class="note">"—" işareti, API'nin o metriği bu gönderi için döndürmediğini gösterir.</p>
+</div>
+{% endif %}
+{% endblock %}

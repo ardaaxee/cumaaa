@@ -1,0 +1,29 @@
+# Gizli değerler — asla depoya girmemeli
+.env
+.env.*
+!.env.example
+
+# Veritabanı
+*.db
+*.db-wal
+*.db-shm
+data/
+
+# Loglar
+logs/
+
+# Kullanıcı medyası
+content/
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Süreç dosyaları
+*.pid

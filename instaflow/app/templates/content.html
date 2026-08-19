@@ -1,0 +1,127 @@
+{% extends "base.html" %}
+{% block title %}İçerik — {{ app_name }}{% endblock %}
+
+{% block content %}
+<div class="card">
+  <h2>Yeni içerik</h2>
+  <form method="post" action="/content/create" enctype="multipart/form-data">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+
+    <label for="content_type">Tür</label>
+    <select id="content_type" name="content_type">
+      {% for value in types %}
+        <option value="{{ value }}">{{ value|type_label }}</option>
+      {% endfor %}
+    </select>
+
+    <label for="title">Başlık</label>
+    <input type="text" id="title" name="title" maxlength="255" placeholder="Kısa başlık">
+
+    <label for="caption">Açıklama</label>
+    <textarea id="caption" name="caption" maxlength="2200" placeholder="Gönderi açıklaması"></textarea>
+
+    <label for="hashtags">Hashtag'ler</label>
+    <input type="text" id="hashtags" name="hashtags" placeholder="#örnek #etiket">
+
+    <label for="media_url">Medya adresi (herkese açık https URL)</label>
+    <input type="url" id="media_url" name="media_url" placeholder="https://...">
+
+    <label for="media_file">veya yerel dosya yükle</label>
+    <input type="file" id="media_file" name="media_file">
+    <p class="note">
+      Instagram medyayı yalnızca herkese açık bir adresten indirir. Yerel
+      dosyanın yayınlanabilmesi için <code>PUBLIC_BASE_URL</code> tanımlı olmalıdır.
+    </p>
+
+    <div class="actions">
+      <button type="submit">Taslak olarak kaydet</button>
+    </div>
+  </form>
+</div>
+
+<div class="card">
+  <h2>AI ile üret</h2>
+  <form method="post" action="/ai/generate">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+    <label for="topic">Konu</label>
+    <input type="text" id="topic" name="topic" required placeholder="yeni teknoloji setup videom">
+    <label for="action">Ne üretilsin?</label>
+    <select id="action" name="action">
+      <option value="caption">Açıklama + başlık + hashtag (taslak oluşturur)</option>
+      <option value="hashtags">Sadece hashtag önerisi</option>
+      <option value="ideas">İçerik fikirleri (taslak oluşturur)</option>
+    </select>
+    <div class="actions"><button type="submit">Üret</button></div>
+    <p class="note">Üretilen içerik otomatik yayınlanmaz; her zaman taslak olarak kaydedilir.</p>
+  </form>
+</div>
+
+<div class="card">
+  <h2>Filtre</h2>
+  <div class="actions">
+    <a class="btn secondary small" href="/content">Tümü ({{ counts.total }})</a>
+    {% for value in statuses %}
+      <a class="btn secondary small" href="/content?status={{ value }}">
+        {{ value|status_label }} ({{ counts[value] }})
+      </a>
+    {% endfor %}
+  </div>
+</div>
+
+<div class="card">
+  <h2>İçerikler{% if active_status %} — {{ active_status|status_label }}{% endif %}</h2>
+  {% if items %}
+    {% for item in items %}
+      <details>
+        <summary>
+          #{{ item.id }} · {{ item.title or item.caption[:40] or 'Başlıksız' }}
+          <span class="badge {{ item.status }}">{{ item.status|status_label }}</span>
+        </summary>
+        <p class="meta">
+          {{ item.type|type_label }} · oluşturma {{ item.created_at|localtime }}
+          {% if item.scheduled_at %} · plan {{ item.scheduled_at|localtime }}{% endif %}
+          {% if item.published_at %} · yayın {{ item.published_at|localtime }}{% endif %}
+        </p>
+        {% if item.error_message %}
+          <div class="flash error">{{ item.error_message }}</div>
+        {% endif %}
+
+        <form method="post" action="/content/{{ item.id }}/update">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+          <label for="title-{{ item.id }}">Başlık</label>
+          <input type="text" id="title-{{ item.id }}" name="title" value="{{ item.title }}">
+          <label for="caption-{{ item.id }}">Açıklama</label>
+          <textarea id="caption-{{ item.id }}" name="caption">{{ item.caption }}</textarea>
+          <label for="tags-{{ item.id }}">Hashtag'ler</label>
+          <input type="text" id="tags-{{ item.id }}" name="hashtags" value="{{ item.hashtags }}">
+          <label for="url-{{ item.id }}">Medya adresi</label>
+          <input type="url" id="url-{{ item.id }}" name="media_url" value="{{ item.media_url }}">
+          {% if item.media_path %}
+            <p class="note">Yerel dosya: <code>{{ item.media_path }}</code></p>
+          {% endif %}
+          <div class="actions">
+            <button type="submit" class="small"
+              {% if item.status == 'published' %}disabled{% endif %}>Kaydet</button>
+          </div>
+        </form>
+
+        <div class="actions">
+          <form method="post" action="/content/{{ item.id }}/publish">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+            <button type="submit" class="small"
+              {% if item.status in ('published', 'publishing') %}disabled{% endif %}>Şimdi yayınla</button>
+          </form>
+          <form method="post" action="/content/{{ item.id }}/delete"
+                onsubmit="return confirm('İçerik #{{ item.id }} silinsin mi?');">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+            <button type="submit" class="small danger"
+              {% if item.status == 'published' %}disabled{% endif %}>Sil</button>
+          </form>
+        </div>
+      </details>
+    {% endfor %}
+  {% else %}
+    <p class="empty">Bu filtrede içerik yok.</p>
+  {% endif %}
+</div>
+{% endblock %}

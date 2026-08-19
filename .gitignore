@@ -29,3 +29,7 @@ __pycache__/
 build/
 dist/
 cikti-ag/
+
+# Sanal ortamlar
+.venv/
+venv/

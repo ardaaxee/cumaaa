@@ -1,0 +1,106 @@
+{% extends "base.html" %}
+{% block title %}Ayarlar — {{ app_name }}{% endblock %}
+
+{% block content %}
+<div class="card">
+  <h2>Instagram bağlantısı</h2>
+  <div class="status-line">
+    <span class="dot {{ 'on' if status.connected else 'off' }}"></span>
+    <strong>
+      {% if status.connected %}Bağlı{% elif status.configured %}Yapılandırıldı{% else %}Bağlı değil{% endif %}
+    </strong>
+  </div>
+  <p class="note">{{ status.message }}</p>
+
+  {% if account %}
+    <ul class="list">
+      <li><span>Kullanıcı adı</span><span class="meta">@{{ account.username or '—' }}</span></li>
+      <li><span>Hesap kimliği</span><span class="meta">{{ account.ig_user_id }}</span></li>
+      <li><span>Hesap türü</span><span class="meta">{{ account.account_type or '—' }}</span></li>
+      <li><span>Takipçi</span><span class="meta">{{ account.followers_count|number }}</span></li>
+      <li><span>Gönderi</span><span class="meta">{{ account.media_count|number }}</span></li>
+      <li><span>Token</span><span class="meta">{{ account.masked_token() or '—' }}</span></li>
+      <li>
+        <span>Token bitişi</span>
+        <span class="meta">
+          {{ account.token_expires_at|localtime }}
+          {% if status.token_days_left is not none %}({{ status.token_days_left }} gün){% endif %}
+        </span>
+      </li>
+    </ul>
+  {% endif %}
+
+  <div class="actions">
+    <a class="btn" href="/connect">Instagram hesabı bağla (OAuth)</a>
+    <form method="post" action="/settings/verify">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+      <button type="submit" class="secondary">Bağlantıyı doğrula</button>
+    </form>
+  </div>
+  <p class="note">
+    Bağlantı yalnızca Meta'nın resmî OAuth akışıyla kurulur. InstaFlow hiçbir
+    zaman Instagram parolanızı istemez, saklamaz veya kullanmaz.
+  </p>
+</div>
+
+<div class="card">
+  <h2>Yapılandırma</h2>
+  <ul class="list">
+    <li><span>Ortam</span><span class="meta">{{ settings.app_env }}</span></li>
+    <li><span>Giriş kipi</span><span class="meta">{{ settings.instagram_login_mode }}</span></li>
+    <li><span>API sürümü</span><span class="meta">{{ settings.instagram_api_version }}</span></li>
+    <li><span>Graph adresi</span><span class="meta">{{ settings.graph_base_url }}</span></li>
+    <li><span>Saat dilimi</span><span class="meta">{{ settings.timezone }}</span></li>
+    <li><span>AI sağlayıcı</span><span class="meta">{{ settings.ai_provider }}</span></li>
+    <li><span>Scheduler</span><span class="meta">{{ 'çalışıyor' if scheduler_running else 'durdu' }}</span></li>
+  </ul>
+</div>
+
+<div class="card">
+  <h2>Ortam değişkenleri</h2>
+  <p class="note">
+    Değerler burada <strong>gösterilmez</strong>; yalnızca tanımlı olup
+    olmadıkları bildirilir. Değişiklik için <code>.env</code> dosyasını
+    düzenleyip uygulamayı yeniden başlatın.
+  </p>
+  <ul class="list">
+    {% for name, is_set in secrets.items() %}
+      <li>
+        <span><code>{{ name }}</code></span>
+        <span class="badge {{ 'published' if is_set else 'failed' }}">
+          {{ 'tanımlı' if is_set else 'eksik' }}
+        </span>
+      </li>
+    {% endfor %}
+  </ul>
+</div>
+
+{% if jobs %}
+<div class="card">
+  <h2>Zamanlanmış işler</h2>
+  <ul class="list">
+    {% for job in jobs %}
+      <li><span>{{ job.name }}</span><span class="meta">Sonraki: {{ job.next_run }}</span></li>
+    {% endfor %}
+  </ul>
+</div>
+{% endif %}
+
+<div class="card">
+  <h2>Sınırlar ve kapsam</h2>
+  <ul class="list">
+    <li><span class="meta">
+      Instagram medyayı yalnızca herkese açık bir URL'den indirir; uygulamadan
+      doğrudan ikili dosya yüklenemez.
+    </span></li>
+    <li><span class="meta">
+      Content Publishing API 24 saatte 50 gönderi ile sınırlıdır (Meta'nın
+      kotası). InstaFlow ayrıca yerel bir güvenlik sınırı uygular.
+    </span></li>
+    <li><span class="meta">
+      Takipçi artırma, otomatik takip/takipten çıkma, toplu DM veya sahte
+      etkileşim özellikleri bu projede yoktur ve eklenmeyecektir.
+    </span></li>
+  </ul>
+</div>
+{% endblock %}

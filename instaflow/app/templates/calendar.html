@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+{% block title %}Takvim — {{ app_name }}{% endblock %}
+
+{% block content %}
+<div class="card">
+  <h2>İçerik planla</h2>
+  {% if schedulable %}
+    <form method="post" action="/content/0/schedule" id="schedule-form">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+      <label for="content-select">İçerik</label>
+      <select id="content-select" name="content_select"
+              onchange="document.getElementById('schedule-form').action='/content/'+this.value+'/schedule';">
+        {% for item in schedulable %}
+          <option value="{{ item.id }}">
+            #{{ item.id }} — {{ item.title or item.caption[:40] or 'Başlıksız' }} ({{ item.type|type_label }})
+          </option>
+        {% endfor %}
+      </select>
+
+      <label for="scheduled_at">Tarih ve saat ({{ settings.timezone }})</label>
+      <input type="datetime-local" id="scheduled_at" name="scheduled_at" required>
+
+      <div class="actions"><button type="submit">Planla</button></div>
+      <p class="note">Scheduler her dakika kontrol eder; zamanı gelen içerik otomatik yayınlanır.</p>
+    </form>
+  {% else %}
+    <p class="empty">Planlanabilecek taslak içerik yok. Önce içerik oluşturun.</p>
+  {% endif %}
+</div>
+
+<div class="grid">
+  <div class="stat"><span class="value">{{ buckets.today|length }}</span><span class="label">Bugün</span></div>
+  <div class="stat"><span class="value">{{ buckets.tomorrow|length }}</span><span class="label">Yarın</span></div>
+  <div class="stat"><span class="value">{{ buckets.week|length }}</span><span class="label">Bu hafta</span></div>
+  <div class="stat"><span class="value">{{ buckets.failed|length }}</span><span class="label">Başarısız</span></div>
+</div>
+
+<div class="card">
+  <h2>Önümüzdeki 30 gün</h2>
+  {% if days %}
+    {% for day, items in days %}
+      <div class="day">
+        <h3>{{ day }}</h3>
+        <ul class="list">
+          {% for item in items %}
+            <li>
+              <span>#{{ item.id }} {{ item.title or 'Başlıksız' }}</span>
+              <span class="badge {{ item.status }}">{{ item.status|status_label }}</span>
+              <span class="meta">
+                {{ item.scheduled_at|localtime }} · {{ item.type|type_label }}
+              </span>
+              {% if item.status in ('scheduled', 'publishing') %}
+                <form method="post" action="/content/{{ item.id }}/cancel">
+                  <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+                  <button type="submit" class="small secondary">Planı iptal et</button>
+                </form>
+              {% endif %}
+            </li>
+          {% endfor %}
+        </ul>
+      </div>
+    {% endfor %}
+  {% else %}
+    <p class="empty">Önümüzdeki 30 günde planlanmış içerik yok.</p>
+  {% endif %}
+</div>
+{% endblock %}

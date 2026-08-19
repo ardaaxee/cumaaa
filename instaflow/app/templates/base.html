@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="color-scheme" content="light dark">
+  <title>{% block title %}{{ app_name }}{% endblock %}</title>
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+  <header class="topbar">
+    <h1><span class="brand">Insta</span>Flow</h1>
+    {% block topbar_extra %}{% endblock %}
+  </header>
+
+  <main>
+    {% for flash in flashes %}
+      <div class="flash {{ flash.level }}">{{ flash.text }}</div>
+    {% endfor %}
+
+    {% block content %}{% endblock %}
+  </main>
+
+  <nav class="tabbar">
+    <a href="/dashboard" class="{{ 'active' if active_page == 'dashboard' }}">
+      <span class="icon">◎</span>Panel</a>
+    <a href="/content" class="{{ 'active' if active_page == 'content' }}">
+      <span class="icon">▤</span>İçerik</a>
+    <a href="/calendar" class="{{ 'active' if active_page == 'calendar' }}">
+      <span class="icon">▦</span>Takvim</a>
+    <a href="/analytics" class="{{ 'active' if active_page == 'analytics' }}">
+      <span class="icon">◔</span>İstatistik</a>
+    <a href="/settings" class="{{ 'active' if active_page == 'settings' }}">
+      <span class="icon">⚙</span>Ayarlar</a>
+  </nav>
+</body>
+</html>

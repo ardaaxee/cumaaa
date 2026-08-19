@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+{% block title %}Hata — {{ app_name }}{% endblock %}
+
+{% block content %}
+<div class="card">
+  <h2>İşlem tamamlanamadı</h2>
+  <p>{{ message }}</p>
+  <div class="actions">
+    <a class="btn secondary" href="/dashboard">Panele dön</a>
+  </div>
+</div>
+{% endblock %}
