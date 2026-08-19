@@ -2,6 +2,7 @@ import { useMemo } from 'react'
 import { useCollider } from '../../furniture/useCollider'
 import { fabric } from '../../../utils/textures'
 import { CeilingLamp, Rug, FramedArt } from '../props'
+import { WindowDaylight } from '../Window'
 
 // Bedroom — a made-but-slept-in double bed, nightstands with warm lamps, a
 // wardrobe with clothes, a dresser + mirror. Cloth + wood, soft warm light.
@@ -21,6 +22,8 @@ export function Bedroom() {
   return (
     <group>
       <CeilingLamp position={[bx, 2.78, 18]} intensity={0.85} />
+      {/* Morning daylight through the west window */}
+      <WindowDaylight position={[-5.35, 1.65, 19.5]} />
       <Rug position={[bx, 0.02, 19.2]} size={[2.6, 2.0]} color="#5a4f42" />
 
       {/* Double bed against the north wall */}

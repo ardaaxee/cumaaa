@@ -1,5 +1,6 @@
 import { useCollider } from '../../furniture/useCollider'
 import { CeilingLamp } from '../props'
+import { WindowDaylight } from '../Window'
 
 const CERAMIC = '#e6e3dc'
 const METAL = '#c9ccd0'
@@ -14,6 +15,8 @@ export function Bathroom() {
   return (
     <group>
       <CeilingLamp position={[3.5, 2.48, 16.5]} color="#eef1f4" intensity={0.75} shade="#f0f2f5" />
+      {/* Soft diffuse daylight through the frosted north window */}
+      <WindowDaylight position={[3.7, 1.75, 18.4]} />
 
       {/* Vanity + sink + mirror on the north wall */}
       <group position={[2.6, 0, 18.62]}>

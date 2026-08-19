@@ -1,5 +1,6 @@
 import { useCollider } from '../../furniture/useCollider'
 import { CeilingLamp, Plant } from '../props'
+import { WindowDaylight } from '../Window'
 
 const CAB = '#c9c4ba' // matte cabinet
 const STONE = '#3a3d42' // dark stone counter
@@ -16,6 +17,8 @@ export function Kitchen() {
     <group>
       <CeilingLamp position={[5.5, 2.58, 10]} color="#fff2df" intensity={0.85} shade="#e8e6e0" />
       <CeilingLamp position={[4.6, 2.58, 8.6]} color="#fff2df" intensity={0.5} shade="#e8e6e0" />
+      {/* Daylight through the east window */}
+      <WindowDaylight position={[8.85, 1.6, 8.4]} />
 
       {/* Counter run along the north wall (facing -Z) */}
       <group position={[4.4, 0, 13.55]}>

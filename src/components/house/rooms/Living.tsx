@@ -4,6 +4,7 @@ import * as THREE from 'three'
 import { useCollider } from '../../furniture/useCollider'
 import { fabric } from '../../../utils/textures'
 import { CeilingLamp, FloorLamp, Rug, Plant, FramedArt } from '../props'
+import { WindowDaylight } from '../Window'
 
 // Living room — soft seating around a coffee table, a TV on the wall, warm
 // ambient light. Cloth + wood, distinct from the study's wood + metal.
@@ -22,6 +23,8 @@ export function LivingRoom() {
     <group>
       <CeilingLamp position={[cx, 2.78, cz]} intensity={1.0} />
       <FloorLamp position={[cx + 3.6, 0, 12.6]} on={0.7} />
+      {/* Daylight through the south window */}
+      <WindowDaylight position={[-7.5, 1.6, 6.7]} />
       <Rug position={[cx, 0.02, 11]} size={[3.4, 2.6]} color="#5a4f40" />
 
       {/* 3-seat sofa against the north wall, facing south */}

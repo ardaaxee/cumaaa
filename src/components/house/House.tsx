@@ -2,6 +2,7 @@ import { useMemo, useRef } from 'react'
 import { useFrame } from '@react-three/fiber'
 import * as THREE from 'three'
 import { HouseRoomShell } from './HouseRoomShell'
+import { HouseLighting } from './HouseLighting'
 import { roomById } from '../../config/houseLayout'
 import { woodFloor, wall as wallTex, tile } from '../../utils/textures'
 import { Door } from './props'
@@ -43,27 +44,33 @@ export function House({ quality }: { quality: GraphicsQuality }) {
   const floorTile = useMemo(() => tile('#cdc7bd'), [])
   const bathTile = useMemo(() => tile('#dce0de'), [])
   const cull = quality === 'low' ? 11 : 15
+  const winDetail = quality === 'low' ? 0 : 1
 
   const woodFloorMat = { color: '#3a2c1e', map: wood.map, normalMap: wood.normalMap, roughness: 0.78, metalness: 0.06 }
   const plasterWallMat = { color: '#4a443a', map: plaster.map, normalMap: plaster.normalMap, roughness: 0.92, metalness: 0.03 }
 
   return (
     <group>
+      {/* Directional daylight for the apartment (soft PCF shadows on HIGH) */}
+      <HouseLighting quality={quality} />
+
       {/* ---- Shells (always rendered) ---- */}
       <HouseRoomShell room={roomById('hallway')} floor={woodFloorMat} wall={plasterWallMat} />
-      <HouseRoomShell room={roomById('living')} floor={woodFloorMat} wall={{ ...plasterWallMat, color: '#514a3f' }} />
+      <HouseRoomShell room={roomById('living')} floor={woodFloorMat} wall={{ ...plasterWallMat, color: '#514a3f' }} windowDetail={winDetail} />
       <HouseRoomShell
         room={roomById('kitchen')}
         floor={{ color: '#cdc7bd', map: floorTile.map, normalMap: floorTile.normalMap, roughness: 0.55, metalness: 0.05 }}
         wall={{ ...plasterWallMat, color: '#565044' }}
+        windowDetail={winDetail}
       />
-      <HouseRoomShell room={roomById('bedroom')} floor={woodFloorMat} wall={{ ...plasterWallMat, color: '#4f463c' }} ceilingColor="#2a251f" />
+      <HouseRoomShell room={roomById('bedroom')} floor={woodFloorMat} wall={{ ...plasterWallMat, color: '#4f463c' }} ceilingColor="#2a251f" windowDetail={winDetail} />
       <HouseRoomShell
         room={roomById('bathroom')}
         floor={{ color: '#dce0de', map: bathTile.map, normalMap: bathTile.normalMap, roughness: 0.4, metalness: 0.05 }}
         wall={{ color: '#c7ccca', map: bathTile.map, normalMap: bathTile.normalMap, roughness: 0.45, metalness: 0.05 }}
         ceilingColor="#e6e8e6"
         skirting="#b6bbb9"
+        windowDetail={winDetail}
       />
       <HouseRoomShell
         room={roomById('storage')}

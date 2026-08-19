@@ -3,6 +3,8 @@ import { registerCollider, unregisterCollider } from '../../../systems/collision
 import { woodFloor } from '../../../utils/textures'
 import { useMemo } from 'react'
 import { Plant } from '../props'
+import { WindowDaylight } from '../Window'
+import { Exterior } from '../Exterior'
 import { BALCONY as B } from '../../../config/houseLayout'
 
 // An open balcony off the living room: decking, railing, a bistro set and
@@ -27,6 +29,21 @@ export function Balcony() {
 
   return (
     <group>
+      {/* Real surroundings beyond the railings: a wide view west plus the two
+          open side views, all following the local time-of-day. */}
+      <group position={[B.minX - 0.3, 1.6, cz]} rotation={[0, -Math.PI / 2, 0]}>
+        <Exterior w={4.6} h={3.4} seed={4242} detail={1} />
+      </group>
+      <group position={[cx, 1.6, B.minZ - 0.3]} rotation={[0, Math.PI, 0]}>
+        <Exterior w={2.8} h={3.4} seed={733} detail={0} />
+      </group>
+      <group position={[cx, 1.6, B.maxZ + 0.3]} rotation={[0, 0, 0]}>
+        <Exterior w={2.8} h={3.4} seed={915} detail={0} />
+      </group>
+
+      {/* Open-air daylight on the balcony */}
+      <WindowDaylight position={[cx, 1.8, cz]} />
+
       {/* decking */}
       <mesh rotation={[-Math.PI / 2, 0, 0]} position={[cx, 0.02, cz]} receiveShadow>
         <planeGeometry args={[B.maxX - B.minX, B.maxZ - B.minZ]} />

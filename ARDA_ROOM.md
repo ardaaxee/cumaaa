@@ -114,8 +114,9 @@ Node 18+ recommended (developed on Node 22).
 src/
   components/
     furniture/   Desk, Chair, Bookcase (+secret door), Bed, Decor, Details, MonitorScreen
-    house/       House, HouseRoomShell, props + rooms/ (Hallway, Living, Kitchen,
-                 Bedroom, Bathroom, Storage, Balcony)
+    house/       House, HouseRoomShell, HouseLighting, Window, Exterior, props +
+                 rooms/ (Hallway, Living, Kitchen, Bedroom, Bathroom, Storage,
+                 Balcony)
     interaction/ PlayerController, InteractionManager, InteractableTrigger
     lab/         ArdaLab, LabShell, LabLighting, ProjectHologram, ProjectCore,
                  IdeaWall, AchievementCore, ServerRacks, LabProps
@@ -167,6 +168,38 @@ Each room has its own materials (cloth/wood, stone/metal/tile, ceramic/glass),
 its own lighting (warm bedroom, neutral kitchen/bath, lamp-lit living), and
 lived-in touches. Everything is procedural — no heavy assets bundled. Real-world
 scale throughout; the camera stays at eye level.
+
+### Windows, daylight & the world outside
+
+Every main room has a real window onto a real exterior — never a flat coloured
+rectangle:
+
+- **Reusable `Window`** — painted frame + mullions, a sill, a metal handle,
+  low-cost glass (reflection + roughness + light transmission — not invisible,
+  not a mirror) and per-room dressing: the living room's big sheer panels, the
+  bedroom's thick drapes with a valance, the kitchen's half-lowered roller
+  blind, and the bathroom's **frosted privacy** glass. The window is punched
+  into the wall mesh, but the wall keeps its full collider, so the glass is
+  impassable — you can't walk through it.
+- **Reusable `Exterior`** — a believable view beyond the glass: a gradient sky,
+  a receding road/sidewalk, low-poly building silhouettes with aerial-perspective
+  haze and warm lit windows, a few trees and a street lamp, all sized to the
+  opening and seeded so each skyline is stable. The **balcony** opens onto a
+  wider version of the same world — a real facade + skyline + surroundings.
+- **Daylight that follows your clock** — one directional "sun" rakes the whole
+  apartment (soft PCF shadows on HIGH), and each window spills a tinted fill
+  light into its room. By **day** it's bright and neutral; toward **evening**
+  the sun lowers and warms, facades catch the sunset; at **night** the sky goes
+  deep blue with stars, distant building + street lamp lights glow (city
+  ambiance, no cyberpunk neon), and the rooms lean on their own warm lamps.
+- **Orientation is real** — living faces south, the bedroom west, the kitchen
+  east, the bathroom north; each looks onto open exterior, never into the next
+  room.
+
+Windows live in the always-on shell (so there's never a void behind the glass),
+while the daylight fill lights ride in the distance-culled room groups (so they
+cost nothing until you're in the room). LOW drops the apartment sun and thins
+the skyline; MEDIUM adds the directional daylight; HIGH adds its PCF shadows.
 
 **Performance**: room shells are cheap always-on boxes; each room's furniture +
 lights are **distance-culled** (invisible when you're far away), on top of
