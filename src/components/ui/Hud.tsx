@@ -15,6 +15,7 @@ import { WelcomeBack } from './WelcomeBack'
 import { MobileControls } from './MobileControls'
 import { OrientationGate } from './OrientationGate'
 import { ClickToLook } from './ClickToLook'
+import { HomeMap } from './HomeMap'
 import { Sfx } from '../../systems/audioSystem'
 
 // The in-world heads-up display. Only the movement HUD (crosshair, joystick,
@@ -28,6 +29,7 @@ export function Hud() {
 
   const panelOpen = activePanel !== null
   const [coopOpen, setCoopOpen] = useState(false)
+  const [mapOpen, setMapOpen] = useState(false)
   const netPhase = useMultiplayerStore((s) => s.phase)
   const inHome = useMultiplayerStore((s) => s.roomId !== null)
   const netConnected = netPhase === 'open' && inHome
@@ -89,7 +91,7 @@ export function Hud() {
               setActivePanel('pc')
             }}
           >
-            ⌂ ARDA OS
+            ▤ CUMA OS
           </button>
           <button
             className="hud-btn relative !px-2 !py-1 text-[11px]"
@@ -104,6 +106,24 @@ export function Hud() {
                 {unreadChat > 9 ? '9+' : unreadChat}
               </span>
             )}
+          </button>
+          <button
+            className="hud-btn hidden !px-2 !py-1 text-[11px] sm:block"
+            onClick={() => {
+              Sfx.open()
+              useAppStore.getState().openMenu('profile')
+            }}
+          >
+            ◉ PROFILE
+          </button>
+          <button
+            className="hud-btn hidden !px-2 !py-1 text-[11px] sm:block"
+            onClick={() => {
+              Sfx.open()
+              useAppStore.getState().openMenu('settings')
+            }}
+          >
+            ⚙ SETTINGS
           </button>
           <button
             className="hud-btn !px-2 !py-1 text-[11px]"
@@ -127,6 +147,13 @@ export function Hud() {
       <AnimatePresence>{coopOpen && <CoopPanel key="coop" onClose={() => setCoopOpen(false)} />}</AnimatePresence>
       <AnimatePresence>{moviePanelOpen && <MovieNightPanel key="movie" />}</AnimatePresence>
       <AnimatePresence>{chatOpen && <ChatPanel key="chat" onClose={() => { Sfx.close(); setChatOpen(false) }} />}</AnimatePresence>
+
+      {/* Home map — top right under the clock, collapsible on small screens */}
+      {!panelOpen && !moviePanelOpen && !chatOpen && (
+        <div className="absolute right-4 top-20 z-20">
+          <HomeMap expanded={mapOpen} onToggle={() => setMapOpen((v) => !v)} />
+        </div>
+      )}
 
       {/* Bottom-left profile / controls hint */}
       <div className="absolute bottom-4 left-4 hidden font-mono text-[10px] leading-relaxed text-white/35 sm:block">

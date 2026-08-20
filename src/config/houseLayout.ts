@@ -168,7 +168,7 @@ export const ROOMS: RoomBox[] = [
 export const SPAWN_POINTS: Record<string, [number, number]> = {
   study: [0, 3],
   hallway: [0, 10],
-  living: [-5.75, 10],
+  living: [-3.5, 10], // clear of the coffee table at the room's centre
   kitchen: [5.5, 9.5],
   bedroom: [-2.25, 18],
   bathroom: [3.4, 16.5],

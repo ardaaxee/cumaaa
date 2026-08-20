@@ -130,7 +130,17 @@ export function PlayerController() {
       return
     }
 
-    if (!p.inputEnabled) return
+    if (!p.inputEnabled) {
+      // Movement is parked, but the player still HAS a position: keep publishing
+      // it so the map, ambience and footstep systems don't read a stale spot
+      // while a panel or menu is open.
+      playerMotion.x = camera.position.x
+      playerMotion.z = camera.position.z
+      playerMotion.speed = 0
+      playerMotion.moving = false
+      playerMotion.running = false
+      return
+    }
 
     // --- Look (mobile touch-drag) -------------------------------------------
     if (p.isTouch) {
