@@ -4,6 +4,7 @@ import * as THREE from 'three'
 import { aoBlob } from '../../utils/textures'
 import { playerMotion } from '../../systems/playerMotion'
 import type { GraphicsQuality } from '../../types'
+import { isHighTier } from '../../utils/device'
 
 // A soft contact shadow that follows the player, so you feel physically present
 // in the room (you see it under you when you look down). It shrinks/fades a
@@ -13,7 +14,7 @@ export function PlayerShadow({ quality }: { quality: GraphicsQuality }) {
   const tex = useMemo(() => aoBlob(), [])
   const ref = useRef<THREE.Mesh>(null)
   const matRef = useRef<THREE.MeshBasicMaterial>(null)
-  const base = quality === 'high' ? 0.42 : quality === 'medium' ? 0.32 : 0.2
+  const base = isHighTier(quality) ? 0.42 : quality === 'medium' ? 0.32 : 0.2
 
   useFrame(() => {
     const mesh = ref.current

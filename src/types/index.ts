@@ -38,7 +38,7 @@ export interface Achievement {
   unlockedAt?: number
 }
 
-export type GraphicsQuality = 'low' | 'medium' | 'high'
+export type GraphicsQuality = 'low' | 'medium' | 'high' | 'ultra'
 
 export interface Settings {
   quality: GraphicsQuality

@@ -3,6 +3,7 @@ import { useFrame, useThree } from '@react-three/fiber'
 import * as THREE from 'three'
 import { peerStates } from '../../store/useMultiplayerStore'
 import type { GraphicsQuality } from '../../types'
+import { isUltra } from '../../utils/device'
 
 const EYE = 1.62
 
@@ -25,7 +26,7 @@ export function RemotePlayer({ id, name, quality }: { id: string; name: string; 
   const phase = useRef(0)
   const { camera } = useThree()
 
-  const seg = quality === 'low' ? 8 : quality === 'medium' ? 12 : 18
+  const seg = quality === 'low' ? 8 : quality === 'medium' ? 12 : isUltra(quality) ? 24 : 18
   // Distinguish players by name (CUMA vs ZEYNEP) while keeping equal quality.
   const look = useMemo(() => paletteFor(name), [name])
   const { skin, shirt, pants, hair } = look

@@ -3,6 +3,7 @@ import { MeshReflectorMaterial } from '@react-three/drei'
 import { useCollider } from '../../furniture/useCollider'
 import { fabric } from '../../../utils/textures'
 import { useRoomStore } from '../../../store/useRoomStore'
+import { isHighTier } from '../../../utils/device'
 import { CeilingLamp, Rug, FramedArt } from '../props'
 import { WindowDaylight } from '../Window'
 import { Panel } from '../../furniture/Panel'
@@ -199,7 +200,7 @@ export function Bedroom() {
         </mesh>
         <mesh position={[0, 1.7, 0.041]}>
           <planeGeometry args={[0.56, 0.8]} />
-          {quality === 'high' ? (
+          {isHighTier(quality) ? (
             <MeshReflectorMaterial
               mirror={1}
               resolution={256}

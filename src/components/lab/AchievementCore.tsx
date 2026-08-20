@@ -5,10 +5,12 @@ import * as THREE from 'three'
 import { useRoomStore } from '../../store/useRoomStore'
 import { LAB_ANCHORS } from '../../config/labLayout'
 import type { Achievement } from '../../types'
+import { isHighTier } from '../../utils/device'
+import type { GraphicsQuality } from '../../types'
 
 // Front-wall achievement hologram. Unlocked achievements glow as 3D badges; a
 // short particle burst plays when the unlocked count increases.
-export function AchievementCore({ quality }: { quality: 'low' | 'medium' | 'high' }) {
+export function AchievementCore({ quality }: { quality: GraphicsQuality }) {
   const achievements = useRoomStore((s) => s.achievements)
   const [x, y, z] = LAB_ANCHORS.achWall
   const unlockedCount = achievements.filter((a) => a.unlocked).length
@@ -45,7 +47,7 @@ export function AchievementCore({ quality }: { quality: 'low' | 'medium' | 'high
       })}
 
       {burst && quality !== 'low' && (
-        <Sparkles count={quality === 'high' ? 50 : 26} scale={[3, 1.4, 0.6]} position={[0, 0, 0.4]} size={3} speed={0.6} color="#8fe6ff" />
+        <Sparkles count={isHighTier(quality) ? 50 : 26} scale={[3, 1.4, 0.6]} position={[0, 0, 0.4]} size={3} speed={0.6} color="#8fe6ff" />
       )}
     </group>
   )

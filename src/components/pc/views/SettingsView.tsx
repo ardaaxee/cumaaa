@@ -2,7 +2,7 @@ import { useRoomStore } from '../../../store/useRoomStore'
 import { setAudioEnabled, setMasterVolume } from '../../../systems/audioSystem'
 import type { GraphicsQuality } from '../../../types'
 
-const QUALITIES: GraphicsQuality[] = ['low', 'medium', 'high']
+const QUALITIES: GraphicsQuality[] = ['low', 'medium', 'high', 'ultra']
 
 // Settings: graphics, sound, sensitivity, and a data reset.
 export function SettingsView() {

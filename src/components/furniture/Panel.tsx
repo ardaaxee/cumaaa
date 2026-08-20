@@ -1,5 +1,6 @@
 import { RoundedBox } from '@react-three/drei'
 import { useRoomStore } from '../../store/useRoomStore'
+import { isHighTier, isUltra } from '../../utils/device'
 import type { ReactNode } from 'react'
 
 // A furniture "panel" — the shared building block for every cabinet, seat,
@@ -51,8 +52,8 @@ export function Panel({
     <RoundedBox
       args={args}
       radius={r}
-      smoothness={quality === 'high' ? 2 : 1}
-      bevelSegments={1}
+      smoothness={isUltra(quality) ? 3 : isHighTier(quality) ? 2 : 1}
+      bevelSegments={isUltra(quality) ? 2 : 1}
       steps={1}
       creaseAngle={0.5}
       castShadow={castShadow}

@@ -12,8 +12,22 @@ export function isTouchDevice(): boolean {
   )
 }
 
-// Pick a sensible default graphics tier based on the device. Mid-range
-// Android phones (e.g. Redmi 10 5G) should land on low/medium.
+// Tier helpers — use these instead of `quality === 'high'` so ULTRA always
+// inherits every HIGH feature rather than silently falling back to the
+// medium/low branch of a ternary.
+export function isHighTier(quality: GraphicsQuality): boolean {
+  return quality === 'high' || quality === 'ultra'
+}
+export function isUltra(quality: GraphicsQuality): boolean {
+  return quality === 'ultra'
+}
+
+// Rank used by the adaptive-quality watchdog to step up/down.
+export const QUALITY_ORDER: GraphicsQuality[] = ['low', 'medium', 'high', 'ultra']
+
+// Pick a sensible *starting* graphics tier. We deliberately start conservative
+// (never ULTRA) and let the adaptive watchdog promote a device that proves it
+// can hold a high frame rate — mobile is not automatically LOW.
 export function detectQuality(): GraphicsQuality {
   if (typeof navigator === 'undefined') return 'medium'
   const cores = navigator.hardwareConcurrency ?? 4
@@ -33,11 +47,13 @@ export function dprRange(quality: GraphicsQuality, touch: boolean): [number, num
   if (touch) {
     if (quality === 'low') return [0.6, 1]
     if (quality === 'medium') return [0.8, 1.3]
-    return [1, 1.6]
+    if (quality === 'high') return [1, 1.6]
+    return [1, 2] // ultra
   }
   if (quality === 'low') return [0.8, 1.2]
   if (quality === 'medium') return [1, 1.6]
-  return [1, 2]
+  if (quality === 'high') return [1, 2]
+  return [1, 2.5] // ultra
 }
 
 export function shadowsEnabled(quality: GraphicsQuality): boolean {
@@ -45,6 +61,7 @@ export function shadowsEnabled(quality: GraphicsQuality): boolean {
 }
 
 export function shadowMapSize(quality: GraphicsQuality): number {
+  if (quality === 'ultra') return 4096
   if (quality === 'high') return 2048
   if (quality === 'medium') return 1024
   return 512

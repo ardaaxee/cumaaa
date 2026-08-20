@@ -5,7 +5,7 @@ import { ROOM, HALF_D } from '../../config/roomLayout'
 import { ANCHORS } from '../../config/roomLayout'
 import { useTimeOfDay } from '../../hooks/useClock'
 import { skyPalette, interiorLightLevel } from '../../systems/timeSystem'
-import { shadowsEnabled, shadowMapSize } from '../../utils/device'
+import { shadowsEnabled, shadowMapSize, isHighTier } from '../../utils/device'
 import type { GraphicsQuality } from '../../types'
 
 // Photographic lighting: a real directional "sun" through the window casts soft
@@ -69,7 +69,7 @@ export function Lighting({ quality }: { quality: GraphicsQuality }) {
         color="#ffdcae"
         distance={13}
         decay={1.6}
-        castShadow={castShadows && quality === 'high'}
+        castShadow={castShadows && isHighTier(quality)}
         shadow-mapSize-width={mapSize}
         shadow-mapSize-height={mapSize}
         shadow-bias={-0.0006}

@@ -1,4 +1,7 @@
+import { MeshReflectorMaterial } from '@react-three/drei'
 import { useCollider } from '../../furniture/useCollider'
+import { useRoomStore } from '../../../store/useRoomStore'
+import { isHighTier } from '../../../utils/device'
 import { CeilingLamp } from '../props'
 import { WindowDaylight } from '../Window'
 import { Panel } from '../../furniture/Panel'
@@ -9,6 +12,7 @@ const METAL = '#c9ccd0'
 // Bathroom — vanity + sink + mirror, toilet, a glass shower enclosure. Ceramic,
 // glass and metal with a cool-neutral light. Small and tidy but used (a towel).
 export function Bathroom() {
+  const quality = useRoomStore((s) => s.settings.quality)
   useCollider('bath-vanity', [2.6, 0, 18.6], [1.4, 0.9, 0.5])
   useCollider('bath-toilet', [5.1, 0, 15.0], [0.6, 0.8, 0.7])
   useCollider('bath-shower', [4.5, 0, 17.6], [1.6, 2, 2.2])
@@ -54,7 +58,11 @@ export function Bathroom() {
         </Panel>
         <mesh position={[0, 1.6, 0.238]}>
           <planeGeometry args={[0.82, 0.62]} />
-          <meshStandardMaterial color="#9aa8b0" metalness={0.9} roughness={0.06} envMapIntensity={1.2} />
+          {isHighTier(quality) ? (
+            <MeshReflectorMaterial mirror={1} resolution={256} mixBlur={1} mixStrength={1.15} blur={[120, 60]} roughness={0.1} metalness={0.6} color="#aeb9c0" />
+          ) : (
+            <meshStandardMaterial color="#9aa8b0" metalness={0.9} roughness={0.06} envMapIntensity={1.2} />
+          )}
         </mesh>
         {/* toothbrush cup + soap */}
         <mesh position={[0.4, 0.95, 0.05]}>

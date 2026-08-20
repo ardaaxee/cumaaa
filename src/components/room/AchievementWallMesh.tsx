@@ -4,6 +4,7 @@ import { Sparkles } from '@react-three/drei'
 import * as THREE from 'three'
 import { ANCHORS } from '../../config/roomLayout'
 import { useRoomStore } from '../../store/useRoomStore'
+import { isHighTier } from '../../utils/device'
 
 // Left-wall achievement display. Each achievement is a small plate; unlocked
 // ones light up. New unlocks "appear" as a fresh badge with a brief warm glint.
@@ -39,7 +40,7 @@ export function AchievementWallMesh() {
 
       {/* Warm glint when a new achievement is earned (no neon) */}
       {burst && quality !== 'low' && (
-        <Sparkles count={quality === 'high' ? 34 : 18} scale={[2.2, 1.1, 0.4]} position={[0, 0, 0.4]} size={2} speed={0.5} color="#ffcf80" />
+        <Sparkles count={isHighTier(quality) ? 34 : 18} scale={[2.2, 1.1, 0.4]} position={[0, 0, 0.4]} size={2} speed={0.5} color="#ffcf80" />
       )}
 
       {achievements.map((a, i) => {

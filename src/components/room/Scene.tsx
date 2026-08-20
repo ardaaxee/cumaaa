@@ -29,6 +29,7 @@ import { InteractableTrigger } from '../interaction/InteractableTrigger'
 import { INTERACTABLES } from '../../config/interactables'
 import { ROOM } from '../../config/roomLayout'
 import type { GraphicsQuality } from '../../types'
+import { isHighTier } from '../../utils/device'
 
 // Assembles the entire 3D world plus the control + interaction systems.
 export function Scene({ quality }: { quality: GraphicsQuality }) {
@@ -63,7 +64,7 @@ export function Scene({ quality }: { quality: GraphicsQuality }) {
       {/* Faint dust motes — barely-there, only really seen in the light shafts */}
       {enrich && (
         <Sparkles
-          count={quality === 'high' ? 40 : 22}
+          count={isHighTier(quality) ? 40 : 22}
           scale={[ROOM.width - 1.5, ROOM.height - 0.8, ROOM.depth - 1.5]}
           position={[0, ROOM.height / 2, 0]}
           size={0.7}

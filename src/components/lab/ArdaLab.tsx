@@ -10,6 +10,7 @@ import { LabProps } from './LabProps'
 import { InteractableTrigger } from '../interaction/InteractableTrigger'
 import { LAB, LAB_CX, LAB_CZ, LAB_W, LAB_D, LAB_ANCHORS } from '../../config/labLayout'
 import type { GraphicsQuality, InteractableInfo } from '../../types'
+import { isHighTier } from '../../utils/device'
 
 // Trigger volumes for the lab's interactive stations.
 const STATIONS: { info: InteractableInfo; position: [number, number, number]; radius: number }[] = [
@@ -75,7 +76,7 @@ export function ArdaLab({ quality }: { quality: GraphicsQuality }) {
 
       {enrich && (
         <Sparkles
-          count={quality === 'high' ? 50 : 26}
+          count={isHighTier(quality) ? 50 : 26}
           scale={[LAB_W - 1, LAB.height - 0.6, LAB_D - 1]}
           position={[LAB_CX, LAB.height / 2, LAB_CZ]}
           size={1.5}

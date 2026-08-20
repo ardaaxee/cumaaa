@@ -5,11 +5,12 @@ import { useRoomStore } from '../../store/useRoomStore'
 import { LAB_ANCHORS } from '../../config/labLayout'
 import { useCollider } from '../furniture/useCollider'
 import type { Project } from '../../types'
+import type { GraphicsQuality } from '../../types'
 
 // A rotating holographic display of the user's real projects. Cards are drawn
 // with CanvasTextures (no network fonts) and refresh whenever the Projects
 // store changes, so adding a project in ARDA OS updates the hologram here.
-export function ProjectHologram({ quality }: { quality: 'low' | 'medium' | 'high' }) {
+export function ProjectHologram({ quality }: { quality: GraphicsQuality }) {
   const projects = useRoomStore((s) => s.projects)
   const ring = useRef<THREE.Group>(null)
   const beam = useRef<THREE.Mesh>(null)

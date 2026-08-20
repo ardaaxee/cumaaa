@@ -1,14 +1,18 @@
-import { Suspense, useMemo } from 'react'
+import { Suspense, lazy, useMemo } from 'react'
 import { Canvas } from '@react-three/fiber'
 import * as THREE from 'three'
 import { Scene } from './Scene'
-import { PostFx } from './PostFx'
 import { AdaptiveQuality } from './AdaptiveQuality'
 import { useRoomStore } from '../../store/useRoomStore'
 import { usePlayerStore } from '../../store/usePlayerStore'
 import { useBootStore } from '../../store/useBootStore'
-import { dprRange, shadowsEnabled } from '../../utils/device'
+import { dprRange, shadowsEnabled, isHighTier } from '../../utils/device'
 import { PLAYER } from '../../config/roomLayout'
+
+// Post-processing (bloom, N8AO, grain, grading) is a heavy chunk that only
+// MEDIUM+ ever renders, so it is code-split: a LOW-tier phone never downloads
+// it at all. Suspense below already covers the async boundary.
+const PostFx = lazy(() => import('./PostFx').then((m) => ({ default: m.PostFx })))
 
 // The WebGL host. Camera, renderer options, fog and post-processing all scale
 // with the current graphics tier. Fully unmounts post-fx on low quality.
@@ -26,7 +30,7 @@ export function Experience() {
       shadows={castShadows}
       dpr={dpr}
       gl={{
-        antialias: quality === 'high',
+        antialias: isHighTier(quality),
         powerPreference: 'high-performance',
         alpha: false,
         stencil: false,
@@ -46,7 +50,7 @@ export function Experience() {
     >
       <Suspense fallback={null}>
         <Scene quality={quality} />
-        <PostFx enabled={bloomOn} quality={quality} />
+        {bloomOn && <PostFx enabled quality={quality} />}
       </Suspense>
       <AdaptiveQuality />
     </Canvas>

@@ -6,6 +6,7 @@ import { STUDY_DOOR } from '../../config/houseLayout'
 import { registerCollider, unregisterCollider } from '../../systems/collisionSystem'
 import { woodFloor, wall as wallTex, rug as rugTex } from '../../utils/textures'
 import type { GraphicsQuality } from '../../types'
+import { isHighTier } from '../../utils/device'
 
 // The physical shell of the room: floor, four walls, ceiling. Walls register
 // perimeter colliders so the player stays inside. Materials use procedural PBR
@@ -14,7 +15,7 @@ export function RoomShell({ quality }: { quality: GraphicsQuality }) {
   const wood = useMemo(() => woodFloor(), [])
   const walls = useMemo(() => wallTex(), [])
   const rug = useMemo(() => rugTex(), [])
-  const reflectiveFloor = quality === 'high'
+  const reflectiveFloor = isHighTier(quality)
 
   useEffect(() => {
     const t = ROOM.wall
