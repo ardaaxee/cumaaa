@@ -76,9 +76,44 @@ export const INTERACTABLES: InteractableDef[] = [
     position: [-2.0, 1.3, 8.4],
     radius: 1.6,
   },
+  // Living-room TV — opens the shared Movie Night panel.
   {
-    info: { id: 'tvToggle', kind: 'tvToggle', label: 'TV', prompt: 'Turn on / off' },
+    info: { id: 'movieNight', kind: 'movieNight', label: 'TV', prompt: 'Watch together' },
     position: [-5.75, 1.35, 6.9],
-    radius: 2.0,
+    radius: 2.2,
+  },
+  // Two sofa seats so CUMA and ZEYNEP can sit side by side for movie night.
+  {
+    info: { id: 'sofaLeft', kind: 'sofaSit', label: 'Sofa', prompt: 'Sit (left)' },
+    position: [-6.45, 0.6, 12.9],
+    radius: 1.2,
+  },
+  {
+    info: { id: 'sofaRight', kind: 'sofaSit', label: 'Sofa', prompt: 'Sit (right)' },
+    position: [-5.05, 0.6, 12.9],
+    radius: 1.2,
+  },
+  // Shared snacks on the coffee table.
+  {
+    info: { id: 'popcorn', kind: 'snackTake', label: 'Popcorn', prompt: 'Take' },
+    position: [-6.1, 0.5, 10.5],
+    radius: 1.1,
+  },
+  {
+    info: { id: 'chips', kind: 'snackTake', label: 'Chips', prompt: 'Take' },
+    position: [-5.75, 0.5, 10.7],
+    radius: 1.1,
+  },
+  {
+    info: { id: 'drink', kind: 'snackTake', label: 'Drink', prompt: 'Take' },
+    position: [-5.4, 0.5, 10.5],
+    radius: 1.1,
   },
 ]
+
+// Seated poses for the two sofa seats, keyed by interactable id. Facing the TV
+// (south, yaw 0). Used by the sit interaction — each player sits locally.
+export const SOFA_SEATS: Record<string, { x: number; z: number; yaw: number }> = {
+  sofaLeft: { x: -6.45, z: 12.75, yaw: 0 },
+  sofaRight: { x: -5.05, z: 12.75, yaw: 0 },
+}

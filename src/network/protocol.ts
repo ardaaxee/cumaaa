@@ -28,14 +28,36 @@ export interface PeerInfo {
 }
 
 // World state changes are event-based so future systems (market, film night,
-// decoration…) can extend the union without reworking the transport.
-export type WorldEventKind = 'DOOR_TOGGLED' | 'LIGHT_TOGGLED' | 'TV_TOGGLED' | 'CURTAIN_TOGGLED'
+// decoration…) can extend the union without reworking the transport. NOTE: none
+// of these touch player movement — each client owns its own controller. These
+// only mutate SHARED home state (doors/lights/curtains/tv/movie/snacks).
+export type WorldEventKind =
+  | 'DOOR_TOGGLED'
+  | 'LIGHT_TOGGLED'
+  | 'TV_TOGGLED'
+  | 'CURTAIN_TOGGLED'
+  | 'TV_MEDIA_CHANGED'
+  | 'TV_PLAY'
+  | 'TV_PAUSE'
+  | 'TV_SEEK'
+  | 'MOVIE_MODE_CHANGED'
+  | 'SNACK_TAKEN'
 
 export interface WorldEvent {
   kind: WorldEventKind
-  id: string // which door/light/tv/curtain
-  value: boolean // on/open = true
+  id: string // which door/light/tv/curtain/snack (or 'living' for the movie TV)
+  value: boolean // on/open/taken = true
+  media?: string // TV_MEDIA_CHANGED: media id/name
+  time?: number // TV_PLAY/PAUSE/SEEK: playback position (seconds)
   by?: string // player id that caused it (optional)
+}
+
+// Shared movie/TV playback state (synced, throttled — never per-frame video).
+export interface MovieState {
+  media: string | null // selected media id, or null
+  playing: boolean
+  time: number // playback position at `updatedAt`
+  updatedAt: number // server clock when time was set
 }
 
 // Authoritative-ish shared world state kept per room (NOT ARDA OS data).
@@ -45,25 +67,71 @@ export interface RoomState {
   lights: Record<string, boolean>
   tv: Record<string, boolean>
   curtains: Record<string, boolean>
+  snacks: Record<string, boolean> // id -> taken
+  movie: MovieState
+  movieMode: boolean // cinematic living-room mode
   timestamp: number
 }
 
+export function emptyMovieState(): MovieState {
+  return { media: null, playing: false, time: 0, updatedAt: Date.now() }
+}
+
 export function emptyRoomState(roomId: string): RoomState {
-  return { roomId, doors: {}, lights: {}, tv: {}, curtains: {}, timestamp: Date.now() }
+  return {
+    roomId,
+    doors: {},
+    lights: {},
+    tv: {},
+    curtains: {},
+    snacks: {},
+    movie: emptyMovieState(),
+    movieMode: false,
+    timestamp: Date.now(),
+  }
 }
 
 // Apply an event to a room state in-place (used on both server and client).
 export function applyEvent(room: RoomState, e: WorldEvent): void {
-  const bucket =
-    e.kind === 'DOOR_TOGGLED'
-      ? room.doors
-      : e.kind === 'LIGHT_TOGGLED'
-        ? room.lights
-        : e.kind === 'TV_TOGGLED'
-          ? room.tv
-          : room.curtains
-  bucket[e.id] = e.value
+  switch (e.kind) {
+    case 'DOOR_TOGGLED':
+      room.doors[e.id] = e.value
+      break
+    case 'LIGHT_TOGGLED':
+      room.lights[e.id] = e.value
+      break
+    case 'TV_TOGGLED':
+      room.tv[e.id] = e.value
+      break
+    case 'CURTAIN_TOGGLED':
+      room.curtains[e.id] = e.value
+      break
+    case 'SNACK_TAKEN':
+      room.snacks[e.id] = e.value
+      break
+    case 'MOVIE_MODE_CHANGED':
+      room.movieMode = e.value
+      break
+    case 'TV_MEDIA_CHANGED':
+      room.movie = { media: e.media ?? null, playing: false, time: 0, updatedAt: Date.now() }
+      break
+    case 'TV_PLAY':
+      room.movie = { ...room.movie, playing: true, time: e.time ?? room.movie.time, updatedAt: Date.now() }
+      break
+    case 'TV_PAUSE':
+      room.movie = { ...room.movie, playing: false, time: e.time ?? room.movie.time, updatedAt: Date.now() }
+      break
+    case 'TV_SEEK':
+      room.movie = { ...room.movie, time: e.time ?? room.movie.time, updatedAt: Date.now() }
+      break
+  }
   room.timestamp = Date.now()
+}
+
+// Playback position implied by the movie state at a given wall-clock time.
+export function expectedMovieTime(movie: MovieState, now = Date.now()): number {
+  if (!movie.playing) return movie.time
+  return movie.time + (now - movie.updatedAt) / 1000
 }
 
 // ---- Wire messages --------------------------------------------------------
@@ -133,12 +201,27 @@ export function sanitizeState(raw: unknown): PlayerNetState | null {
   return { x, y, z, ry, run: !!r.run, jump: !!r.jump, sit: !!r.sit }
 }
 
-const EVENT_KINDS: WorldEventKind[] = ['DOOR_TOGGLED', 'LIGHT_TOGGLED', 'TV_TOGGLED', 'CURTAIN_TOGGLED']
+const EVENT_KINDS: WorldEventKind[] = [
+  'DOOR_TOGGLED',
+  'LIGHT_TOGGLED',
+  'TV_TOGGLED',
+  'CURTAIN_TOGGLED',
+  'TV_MEDIA_CHANGED',
+  'TV_PLAY',
+  'TV_PAUSE',
+  'TV_SEEK',
+  'MOVIE_MODE_CHANGED',
+  'SNACK_TAKEN',
+]
 
 export function sanitizeEvent(raw: unknown): WorldEvent | null {
   if (!raw || typeof raw !== 'object') return null
   const r = raw as Record<string, unknown>
-  if (!EVENT_KINDS.includes(r.kind as WorldEventKind)) return null
+  const kind = r.kind as WorldEventKind
+  if (!EVENT_KINDS.includes(kind)) return null
   if (typeof r.id !== 'string' || r.id.length === 0 || r.id.length > 40) return null
-  return { kind: r.kind as WorldEventKind, id: r.id, value: !!r.value }
+  const out: WorldEvent = { kind, id: r.id, value: !!r.value }
+  if (typeof r.media === 'string' && r.media.length <= 80) out.media = r.media
+  if (typeof r.time === 'number' && Number.isFinite(r.time)) out.time = Math.max(0, Math.min(60 * 60 * 6, r.time))
+  return out
 }

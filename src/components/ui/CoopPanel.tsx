@@ -17,7 +17,7 @@ export function CoopPanel({ onClose }: { onClose: () => void }) {
   const leaveHome = useMultiplayerStore((s) => s.leaveHome)
 
   const [mode, setMode] = useState<'menu' | 'join'>('menu')
-  const [name, setName] = useState('ARDA')
+  const [name, setName] = useState('CUMA')
   const [code, setCode] = useState('')
   const [copied, setCopied] = useState(false)
 

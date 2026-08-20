@@ -7,8 +7,10 @@ import { ANCHORS } from '../../config/roomLayout'
 import { DOOR } from '../../config/labLayout'
 import { Sfx } from '../../systems/audioSystem'
 import { triggerReach } from '../../systems/playerMotion'
-import { toggleWorldFlag, WORLD_FLAGS } from '../../systems/world'
-import type { InteractableInfo, InteractableKind } from '../../types'
+import { toggleWorldFlag, WORLD_FLAGS, takeSnack } from '../../systems/world'
+import { useMultiplayerStore } from '../../store/useMultiplayerStore'
+import { SOFA_SEATS } from '../../config/interactables'
+import type { InteractableInfo } from '../../types'
 
 // Central hub: each frame it figures out what the player is looking at, mirrors
 // that focus into the HUD store, and turns an interact request (click / tap /
@@ -74,13 +76,14 @@ export function InteractionManager() {
     const focus = focusRef.current
     if (!focus) return
     triggerReach() // a short first-person hand reach on every interaction
-    activate(focus.kind)
+    activate(focus)
   }
 
   return null
 }
 
-function activate(kind: InteractableKind) {
+function activate(info: InteractableInfo) {
+  const kind = info.kind
   const store = useRoomStore.getState()
   const player = usePlayerStore.getState()
   Sfx.open()
@@ -122,6 +125,23 @@ function activate(kind: InteractableKind) {
       // and locks movement; look stays free. Press E again to stand.
       const [cx, , cz] = ANCHORS.chair.pos
       player.setSeatPose({ x: cx, z: cz + 0.05, yaw: 0 })
+      break
+    }
+    case 'sofaSit': {
+      // Sit on a specific sofa seat (this is per-player LOCAL state — CUMA and
+      // ZEYNEP each sit on their own seat; the partner sees it via the avatar).
+      const seat = SOFA_SEATS[info.id]
+      if (seat) player.setSeatPose(seat)
+      break
+    }
+    case 'snackTake': {
+      // Take a shared snack — synced so it disappears for both players.
+      takeSnack(info.id)
+      break
+    }
+    case 'movieNight': {
+      // Open the (local-UI) Movie Night panel; playback state is shared.
+      useMultiplayerStore.getState().setMoviePanel(true)
       break
     }
     // Synced world toggles: apply locally + broadcast to a co-op partner.

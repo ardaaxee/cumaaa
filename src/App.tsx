@@ -7,6 +7,7 @@ import { Intro } from './components/ui/Intro'
 import { Hud } from './components/ui/Hud'
 import { PanelHost } from './components/ui/PanelHost'
 import { RoomAudio } from './components/room/RoomAudio'
+import { MovieController } from './components/movie/MovieController'
 import { useRoomStore } from './store/useRoomStore'
 import { usePlayerStore } from './store/usePlayerStore'
 import { useBootStore } from './store/useBootStore'
@@ -53,6 +54,7 @@ export default function App() {
             <Hud />
             <PanelHost />
             <RoomAudio />
+            <MovieController />
           </>
         )}
 

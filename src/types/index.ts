@@ -100,6 +100,10 @@ export type InteractableKind =
   | 'doorToggle'
   | 'lightToggle'
   | 'tvToggle'
+  // Movie night / social (co-op)
+  | 'sofaSit'
+  | 'snackTake'
+  | 'movieNight'
   // Personalization / memory objects in the main room
   | 'currentProject'
   | 'projectArchive'

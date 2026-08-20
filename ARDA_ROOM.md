@@ -210,6 +210,67 @@ and can be checked with `npm run typecheck:server`.
 Two browser tabs on one computer work the same way (Tab 1 create, Tab 2 join)
 for quick desktop testing.
 
+### Two independent players — CUMA & ZEYNEP
+
+Each device controls **only its own** character: the local player is **CUMA**,
+the partner you see is **ZEYNEP** (and vice-versa on the other device). The
+local controller (joystick / touch / WASD / mouse / RUN / JUMP / E) moves only
+the local camera; `NetworkBridge` just *reads* that transform and sends it up,
+and `RemotePlayer` renders the partner by interpolation — it never touches your
+camera or input. Multi-touch only ever affects the local player. Sitting is
+per-player local state, so CUMA on the left sofa and ZEYNEP on the right are
+fully independent. Only **shared world state** (doors, lights, curtains, TV,
+movie playback, snacks) is synchronized — ARDA OS, Projects, Tasks, Notes and
+achievements stay private to each player.
+
+### Movie Night 🎬
+
+The living room is the shared social space. Walk up to the **two sofa seats**
+(`Sit (left)` / `Sit (right)`) so both of you can sit, then interact with the
+**TV → Watch together** to open the **Movie Night** panel (select a clip, play,
+pause, end). Playback is synchronized through tiny typed world events — never by
+streaming video over the network:
+
+- `TV_MEDIA_CHANGED`, `TV_PLAY`, `TV_PAUSE`, `TV_SEEK`, `MOVIE_MODE_CHANGED`,
+  `SNACK_TAKEN` (alongside the existing `DOOR_/LIGHT_/TV_/CURTAIN_TOGGLED`).
+- The server stores the movie state (`media`, `playing`, `time`, `updatedAt`)
+  and each client drift-corrects its own `<video>` toward the expected position,
+  so pausing on one device pauses on the other within a moment.
+- Starting a movie flips the room into **cinematic mode** (synced): the ceiling
+  light dims, the window curtain draws, and the TV's screen light spills onto
+  the sofa — no neon. Ending the movie restores normal lighting.
+- Shared **snacks** (popcorn / chips / drink) sit on the coffee table; when one
+  player takes a snack it disappears for both.
+
+**Media:** no copyrighted video is bundled. Drop small clips you own into
+`public/media/` (`demo-1.mp4` … see `public/media/README.md`); with no file the
+TV shows a cinematic placeholder, so everything runs fine offline.
+
+## Graphics quality
+
+The world targets a photographic, lived-in look while staying mobile-first —
+everything is procedural geometry + canvas-generated textures, with **no heavy
+GLB or 4K textures bundled**. Quality scales per tier and the adaptive-quality
+watchdog drops a tier if the framerate can't keep up:
+
+- **HIGH** — PCF soft shadows, a real reflective mirror, richer environment
+  lighting, denser first-person hands.
+- **MEDIUM** — directional daylight without a second shadow map, lighter
+  reflections.
+- **LOW** — mobile-safe lighting, thinned exterior skyline, no player-sun.
+
+Lived-in imperfection is **deterministic** (seeded) so the home looks the same
+on every reload rather than re-shuffling.
+
+## Mobile multiplayer
+
+Both CUMA and ZEYNEP can play from separate phones/tablets over the same Wi-Fi
+(see the LAN steps above). The mobile controls are unchanged — left joystick,
+right-side touch look, multi-touch, RUN / JUMP, and the contextual **E** button
+— and every co-op interaction (sit, TV, lights, snacks) works from the on-screen
+E button. Opening a panel (Movie Night, ARDA OS) locks movement; multi-touch on
+each device only ever moves that device's own character.
+
 ## AI configuration & security
 
 - The frontend never embeds a provider API key. By default ARDA AI runs a local,

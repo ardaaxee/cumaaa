@@ -37,11 +37,15 @@ interface MultiplayerState {
   world: RoomState
   lastError: ServerErrorCode | null
 
+  // UI: is the Movie Night panel open on THIS client (local UI only).
+  moviePanelOpen: boolean
+
   createHome: (name: string) => void
   joinHome: (roomId: string, name: string) => void
   leaveHome: () => void
   sendState: (p: PlayerNetState) => void
   toggleWorld: (event: WorldEvent) => void
+  setMoviePanel: (open: boolean) => void
   clearError: () => void
 }
 
@@ -92,7 +96,7 @@ export const useMultiplayerStore = create<MultiplayerState>((set, get) => {
       }
       case 'event': {
         set((s) => {
-          const world = { ...s.world, doors: { ...s.world.doors }, lights: { ...s.world.lights }, tv: { ...s.world.tv }, curtains: { ...s.world.curtains } }
+          const world = { ...s.world, doors: { ...s.world.doors }, lights: { ...s.world.lights }, tv: { ...s.world.tv }, curtains: { ...s.world.curtains }, snacks: { ...s.world.snacks } }
           applyEvent(world, msg.event)
           return { world }
         })
@@ -127,20 +131,21 @@ export const useMultiplayerStore = create<MultiplayerState>((set, get) => {
     roomId: null,
     playerId: null,
     role: null,
-    selfName: 'ARDA',
+    selfName: 'CUMA',
     peers: [],
     world: emptyRoomState(''),
     lastError: null,
+    moviePanelOpen: false,
 
     createHome: (name) => {
-      const self = name.trim() || 'ARDA'
+      const self = name.trim() || 'CUMA'
       set({ selfName: self, lastError: null })
       intent = { type: 'create', name: self }
       ensureClient().connect()
     },
     joinHome: (roomId, name) => {
       const code = normalizeRoomCode(roomId)
-      const self = name.trim() || 'GUEST'
+      const self = name.trim() || 'ZEYNEP'
       if (!code) {
         set({ lastError: 'HOME_NOT_FOUND', selfName: self })
         return
@@ -161,12 +166,13 @@ export const useMultiplayerStore = create<MultiplayerState>((set, get) => {
     toggleWorld: (event) => {
       // Optimistic local apply, then tell the server (which echoes to everyone).
       set((s) => {
-        const world = { ...s.world, doors: { ...s.world.doors }, lights: { ...s.world.lights }, tv: { ...s.world.tv }, curtains: { ...s.world.curtains } }
+        const world = { ...s.world, doors: { ...s.world.doors }, lights: { ...s.world.lights }, tv: { ...s.world.tv }, curtains: { ...s.world.curtains }, snacks: { ...s.world.snacks } }
         applyEvent(world, event)
         return { world }
       })
       client?.send({ t: 'event', event })
     },
+    setMoviePanel: (open) => set({ moviePanelOpen: open }),
     clearError: () => set({ lastError: null }),
   }
 })

@@ -84,4 +84,7 @@ export const InteractableKinds: InteractableKind[] = [
   'doorToggle',
   'lightToggle',
   'tvToggle',
+  'sofaSit',
+  'snackTake',
+  'movieNight',
 ]

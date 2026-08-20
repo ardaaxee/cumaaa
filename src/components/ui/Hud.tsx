@@ -4,6 +4,7 @@ import { usePlayerStore } from '../../store/usePlayerStore'
 import { useRoomStore } from '../../store/useRoomStore'
 import { useMultiplayerStore } from '../../store/useMultiplayerStore'
 import { CoopPanel } from './CoopPanel'
+import { MovieNightPanel } from '../movie/MovieNightPanel'
 import { HudClock } from './HudClock'
 import { Crosshair } from './Crosshair'
 import { InteractionPrompt } from './InteractionPrompt'
@@ -28,6 +29,7 @@ export function Hud() {
   const netPhase = useMultiplayerStore((s) => s.phase)
   const inHome = useMultiplayerStore((s) => s.roomId !== null)
   const netConnected = netPhase === 'open' && inHome
+  const moviePanelOpen = useMultiplayerStore((s) => s.moviePanelOpen)
 
   return (
     <div className="pointer-events-none absolute inset-0 z-20">
@@ -66,6 +68,7 @@ export function Hud() {
       </div>
 
       <AnimatePresence>{coopOpen && <CoopPanel key="coop" onClose={() => setCoopOpen(false)} />}</AnimatePresence>
+      <AnimatePresence>{moviePanelOpen && <MovieNightPanel key="movie" />}</AnimatePresence>
 
       {/* Bottom-left profile / controls hint */}
       <div className="absolute bottom-4 left-4 hidden font-mono text-[10px] leading-relaxed text-white/35 sm:block">
@@ -75,7 +78,7 @@ export function Hud() {
       </div>
 
       {/* Center reticle + prompt (movement HUD) */}
-      {!panelOpen && (
+      {!panelOpen && !moviePanelOpen && (
         <>
           <Crosshair />
           <InteractionPrompt />
