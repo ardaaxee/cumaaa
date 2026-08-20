@@ -63,7 +63,7 @@ export function SettingsView() {
       {/* Sensitivity */}
       <Section title="Controls">
         <Slider
-          label={`Look sensitivity · ${settings.sensitivity.toFixed(1)}×`}
+          label={`Look sensitivity (mouse & touch) · ${settings.sensitivity.toFixed(1)}×`}
           value={settings.sensitivity}
           min={0.2}
           max={2.5}
@@ -71,8 +71,9 @@ export function SettingsView() {
           onChange={(v) => setSettings({ sensitivity: v })}
         />
         <p className="text-xs text-white/40">
-          Desktop: WASD to move, mouse to look, E or click to interact. Mobile: left joystick to
-          move, drag to look, ⊙ to interact.
+          Desktop: WASD to move, mouse to look, Shift to run, Space to jump, E or click to interact.
+          Mobile: left joystick to move, drag the right side to look, RUN / JUMP buttons, and E to
+          interact.
         </p>
       </Section>
 

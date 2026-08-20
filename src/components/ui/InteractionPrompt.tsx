@@ -21,7 +21,7 @@ export function InteractionPrompt() {
           >
             <div className="text-sm font-semibold text-white">{focus.label}</div>
             <div className="mt-0.5 font-mono text-[10px] uppercase tracking-[0.2em] text-accent-soft">
-              {isTouch ? `Tap ⊙ — ${focus.prompt}` : `[E] / Click — ${focus.prompt}`}
+              {isTouch ? `Tap E — ${focus.prompt}` : `[E] / Click — ${focus.prompt}`}
             </div>
           </motion.div>
         )}

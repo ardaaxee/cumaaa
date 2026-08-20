@@ -18,6 +18,12 @@ interface PlayerState {
   // Camera should ignore input while a panel/cinematic owns the screen.
   inputEnabled: boolean
 
+  // Sprint intent held down (mobile RUN button; desktop uses Shift directly).
+  sprintHeld: boolean
+
+  // Bumped to request a jump (mobile JUMP button / Space key).
+  jumpNonce: number
+
   // Bumped to request an interaction (mobile button / E key).
   interactNonce: number
 
@@ -38,6 +44,8 @@ interface PlayerState {
   addLook: (yaw: number, pitch: number) => void
   consumeLook: () => { yaw: number; pitch: number }
   setInputEnabled: (v: boolean) => void
+  setSprintHeld: (v: boolean) => void
+  requestJump: () => void
   requestInteract: () => void
   setFocusTarget: (t: PlayerState['focusTarget']) => void
   setLookTarget: (t: [number, number, number] | null) => void
@@ -51,6 +59,8 @@ export const usePlayerStore = create<PlayerState>((set, get) => ({
   lookYaw: 0,
   lookPitch: 0,
   inputEnabled: true,
+  sprintHeld: false,
+  jumpNonce: 0,
   interactNonce: 0,
   focusTarget: null,
   lookTarget: null,
@@ -66,6 +76,8 @@ export const usePlayerStore = create<PlayerState>((set, get) => ({
     return { yaw: lookYaw, pitch: lookPitch }
   },
   setInputEnabled: (v) => set({ inputEnabled: v }),
+  setSprintHeld: (v) => set({ sprintHeld: v }),
+  requestJump: () => set((s) => ({ jumpNonce: s.jumpNonce + 1 })),
   requestInteract: () => set((s) => ({ interactNonce: s.interactNonce + 1 })),
   setFocusTarget: (t) => set({ focusTarget: t }),
   setLookTarget: (t) => set({ lookTarget: t }),

@@ -33,12 +33,20 @@ Node 18+ recommended (developed on Node 22).
 
 ## Controls
 
-| | Desktop | Mobile |
+| | Desktop | Mobile (landscape) |
 |---|---|---|
-| Move | `WASD` / arrows (`Shift` = sprint) | left virtual joystick |
-| Look | mouse (click to capture) | drag anywhere |
-| Interact | `E` or click | ⊙ button |
+| Move | `WASD` / arrows | left analog joystick (dead zone + smooth accel/release) |
+| Look | mouse (click to capture) | drag the right ~58% of the screen |
+| Run | hold `Shift` | hold the **RUN** button |
+| Jump | `Space` | tap the **JUMP** button |
+| Interact | `E` or click | contextual **E** button (appears only near an object) |
 | Close panel | `Esc` | ✕ button |
+
+On phones the controls are first-person and multi-touch: you can steer with the
+left joystick and look with the right thumb at the same time, and tap RUN / JUMP
+/ E without either finger interrupting the others. Held in portrait, a soft
+"rotate your device" overlay suggests landscape. Look sensitivity (shared by
+mouse and touch) lives in **Settings → Controls**.
 
 ## What actually works
 

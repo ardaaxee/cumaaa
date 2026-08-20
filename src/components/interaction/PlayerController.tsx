@@ -7,9 +7,11 @@ import { PLAYER, HALF_D } from '../../config/roomLayout'
 import { resolveCollision } from '../../systems/collisionSystem'
 import { Sfx } from '../../systems/audioSystem'
 
-const PITCH_LIMIT = Math.PI / 2 - 0.08
+const PITCH_LIMIT = 1.396 // ~80° — can't fully flip the head over
 const MOUSE_SENS = 0.0022
 const TOUCH_SENS = 0.0045
+const GRAVITY = 16 // m/s² — a grounded, non-arcade fall
+const JUMP_V0 = 3.0 // ≈ 0.28 m hop, uses the same collision floor
 
 // First-person controller. Desktop = pointer-lock mouse look + WASD.
 // Mobile = joystick move + touch-drag look (fed via usePlayerStore).
@@ -22,6 +24,9 @@ export function PlayerController() {
   const bobPhase = useRef(0) // walk cycle for head-bob + footsteps
   const stepArmed = useRef(false)
   const vel = useRef(new THREE.Vector2(0, 0)) // world-space XZ velocity (inertia)
+  const jumpOffset = useRef(0) // vertical offset above eye height (jump arc)
+  const velY = useRef(0) // vertical velocity for the jump/gravity integration
+  const lastJump = useRef(0) // last consumed jump nonce
 
   // Start slightly back from the desk, looking toward it.
   useEffect(() => {
@@ -41,6 +46,8 @@ export function PlayerController() {
   useEffect(() => {
     const down = (e: KeyboardEvent) => {
       keys.current[e.code] = true
+      // Space = jump (desktop). Ignore auto-repeat so holding it doesn't spam.
+      if (e.code === 'Space' && !e.repeat) usePlayerStore.getState().requestJump()
     }
     const up = (e: KeyboardEvent) => {
       keys.current[e.code] = false
@@ -146,8 +153,33 @@ export function PlayerController() {
     mz -= p.moveY
 
     const len = Math.hypot(mx, mz)
-    const sprint = k['ShiftLeft'] || k['ShiftRight']
+    const sprint = k['ShiftLeft'] || k['ShiftRight'] || p.sprintHeld
     const maxSpeed = sprint ? PLAYER.sprintSpeed : PLAYER.speed
+
+    // --- Jump / gravity (shared by desktop Space + mobile JUMP button) -------
+    const grounded = jumpOffset.current <= 1e-4 && velY.current <= 0
+    if (p.jumpNonce !== lastJump.current) {
+      lastJump.current = p.jumpNonce
+      if (grounded) velY.current = JUMP_V0
+    }
+    if (jumpOffset.current > 0 || velY.current !== 0) {
+      velY.current -= GRAVITY * delta
+      jumpOffset.current += velY.current * delta
+      if (jumpOffset.current <= 0) {
+        jumpOffset.current = 0
+        velY.current = 0
+      }
+    }
+
+    // Subtle sprint FOV widening (kept small to avoid motion sickness).
+    const cam = camera as THREE.PerspectiveCamera
+    if (cam.isPerspectiveCamera) {
+      const targetFov = sprint && vel.current.length() > 0.5 ? 75 : 72
+      if (Math.abs(cam.fov - targetFov) > 0.05) {
+        cam.fov += (targetFov - cam.fov) * Math.min(1, delta * 4)
+        cam.updateProjectionMatrix()
+      }
+    }
 
     // Target world-space velocity from input (0 when idle).
     let targetVX = 0
@@ -184,7 +216,7 @@ export function PlayerController() {
       // Head-bob amplitude scales with speed; footsteps fire at each low point.
       bobPhase.current += moved * 7.2
       const amp = 0.012 + Math.min(1, speed2 / PLAYER.speed) * 0.014
-      camera.position.y = PLAYER.eyeHeight + Math.sin(bobPhase.current) * amp
+      camera.position.y = PLAYER.eyeHeight + Math.sin(bobPhase.current) * amp + jumpOffset.current
       const s = Math.sin(bobPhase.current)
       if (s < -0.85 && stepArmed.current) {
         Sfx.footstep()
@@ -194,7 +226,12 @@ export function PlayerController() {
       }
     } else {
       vel.current.set(0, 0)
-      camera.position.y += (PLAYER.eyeHeight - camera.position.y) * Math.min(1, delta * 8)
+      if (jumpOffset.current > 1e-4) {
+        // Airborne while standing still: follow the jump arc directly.
+        camera.position.y = PLAYER.eyeHeight + jumpOffset.current
+      } else {
+        camera.position.y += (PLAYER.eyeHeight - camera.position.y) * Math.min(1, delta * 8)
+      }
     }
   })
 

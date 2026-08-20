@@ -6,6 +6,7 @@ import { InteractionPrompt } from './InteractionPrompt'
 import { Toast } from './Toast'
 import { WelcomeBack } from './WelcomeBack'
 import { MobileControls } from './MobileControls'
+import { OrientationGate } from './OrientationGate'
 import { ClickToLook } from './ClickToLook'
 import { Sfx } from '../../systems/audioSystem'
 
@@ -60,6 +61,7 @@ export function Hud() {
 
       <WelcomeBack />
       <Toast />
+      <OrientationGate />
     </div>
   )
 }
