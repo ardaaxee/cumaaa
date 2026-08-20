@@ -65,4 +65,20 @@ export const INTERACTABLES: InteractableDef[] = [
     position: [chair[0], 0.9, chair[2]],
     radius: 1.5,
   },
+  // Synced world toggles (shared with a co-op partner)
+  {
+    info: { id: 'doorToggle', kind: 'doorToggle', label: 'Door', prompt: 'Open / close' },
+    position: [0, 1.4, 6],
+    radius: 1.7,
+  },
+  {
+    info: { id: 'lightToggle', kind: 'lightToggle', label: 'Living Light', prompt: 'Toggle light' },
+    position: [-2.0, 1.3, 8.4],
+    radius: 1.6,
+  },
+  {
+    info: { id: 'tvToggle', kind: 'tvToggle', label: 'TV', prompt: 'Turn on / off' },
+    position: [-5.75, 1.35, 6.9],
+    radius: 2.0,
+  },
 ]

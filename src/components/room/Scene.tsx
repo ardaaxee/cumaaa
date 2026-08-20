@@ -21,6 +21,8 @@ import { MemoryObjects } from './MemoryObjects'
 import { PlayerController } from '../interaction/PlayerController'
 import { FirstPersonBody } from './FirstPersonBody'
 import { PlayerShadow } from './PlayerShadow'
+import { RemotePlayers } from '../multiplayer/RemotePlayers'
+import { NetworkBridge } from '../multiplayer/NetworkBridge'
 import { InteractionManager } from '../interaction/InteractionManager'
 import { FirstFrameSignal } from './FirstFrameSignal'
 import { InteractableTrigger } from '../interaction/InteractableTrigger'
@@ -83,6 +85,8 @@ export function Scene({ quality }: { quality: GraphicsQuality }) {
       <PlayerController />
       <FirstPersonBody quality={quality} />
       <PlayerShadow quality={quality} />
+      <RemotePlayers quality={quality} />
+      <NetworkBridge />
       <InteractionManager />
       <FirstFrameSignal />
     </>

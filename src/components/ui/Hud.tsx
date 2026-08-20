@@ -1,5 +1,9 @@
+import { useState } from 'react'
+import { AnimatePresence } from 'framer-motion'
 import { usePlayerStore } from '../../store/usePlayerStore'
 import { useRoomStore } from '../../store/useRoomStore'
+import { useMultiplayerStore } from '../../store/useMultiplayerStore'
+import { CoopPanel } from './CoopPanel'
 import { HudClock } from './HudClock'
 import { Crosshair } from './Crosshair'
 import { InteractionPrompt } from './InteractionPrompt'
@@ -20,6 +24,10 @@ export function Hud() {
   const setActivePanel = useRoomStore((s) => s.setActivePanel)
 
   const panelOpen = activePanel !== null
+  const [coopOpen, setCoopOpen] = useState(false)
+  const netPhase = useMultiplayerStore((s) => s.phase)
+  const inHome = useMultiplayerStore((s) => s.roomId !== null)
+  const netConnected = netPhase === 'open' && inHome
 
   return (
     <div className="pointer-events-none absolute inset-0 z-20">
@@ -38,9 +46,26 @@ export function Hud() {
           >
             ⌂ ARDA OS
           </button>
+          <button
+            className="hud-btn !px-2 !py-1 text-[11px]"
+            onClick={() => {
+              Sfx.open()
+              setCoopOpen(true)
+            }}
+          >
+            {inHome ? (
+              <span className={netConnected ? 'text-green-300' : 'text-amber-300'}>
+                {netConnected ? '●' : '○'} CO-OP
+              </span>
+            ) : (
+              '◐ CO-OP'
+            )}
+          </button>
         </div>
         <HudClock />
       </div>
+
+      <AnimatePresence>{coopOpen && <CoopPanel key="coop" onClose={() => setCoopOpen(false)} />}</AnimatePresence>
 
       {/* Bottom-left profile / controls hint */}
       <div className="absolute bottom-4 left-4 hidden font-mono text-[10px] leading-relaxed text-white/35 sm:block">

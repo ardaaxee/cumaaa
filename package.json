@@ -8,7 +8,10 @@
     "dev": "vite",
     "build": "tsc --noEmit && vite build",
     "preview": "vite preview",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "server": "tsx server/index.ts",
+    "typecheck:server": "tsc --noEmit -p server/tsconfig.json",
+    "dev:all": "concurrently -n client,server -c cyan,magenta \"npm:dev\" \"npm:server\""
   },
   "dependencies": {
     "@react-three/drei": "^9.99.0",
@@ -21,14 +24,19 @@
     "zustand": "^4.5.2"
   },
   "devDependencies": {
+    "@types/node": "^20.14.0",
     "@types/react": "^18.3.3",
     "@types/react-dom": "^18.3.0",
     "@types/three": "^0.163.0",
+    "@types/ws": "^8.5.10",
     "@vitejs/plugin-react": "^4.3.1",
     "autoprefixer": "^10.4.19",
+    "concurrently": "^8.2.2",
     "postcss": "^8.4.38",
     "tailwindcss": "^3.4.4",
+    "tsx": "^4.19.2",
     "typescript": "^5.4.5",
-    "vite": "^5.2.13"
+    "vite": "^5.2.13",
+    "ws": "^8.18.0"
   }
 }

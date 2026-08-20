@@ -96,6 +96,10 @@ export type InteractableKind =
   | 'achievements'
   | 'door'
   | 'chairSit'
+  // Synced world toggles (co-op)
+  | 'doorToggle'
+  | 'lightToggle'
+  | 'tvToggle'
   // Personalization / memory objects in the main room
   | 'currentProject'
   | 'projectArchive'

@@ -5,12 +5,15 @@ import { useCollider } from '../../furniture/useCollider'
 import { fabric } from '../../../utils/textures'
 import { CeilingLamp, FloorLamp, Rug, Plant, FramedArt } from '../props'
 import { WindowDaylight } from '../Window'
+import { useWorldFlag, WORLD_FLAGS } from '../../../systems/world'
 
 // Living room — soft seating around a coffee table, a TV on the wall, warm
 // ambient light. Cloth + wood, distinct from the study's wood + metal.
 export function LivingRoom() {
   const sofa = useMemo(() => fabric('#6b6f74', 'sofa'), [])
   const chair = useMemo(() => fabric('#7a5f48', 'lchair'), [])
+  const lightOn = useWorldFlag(WORLD_FLAGS.livingLight)
+  const tvOn = useWorldFlag(WORLD_FLAGS.livingTv)
   const cx = -5.75
   const cz = 10
 
@@ -21,7 +24,7 @@ export function LivingRoom() {
 
   return (
     <group>
-      <CeilingLamp position={[cx, 2.78, cz]} intensity={1.0} />
+      <CeilingLamp position={[cx, 2.78, cz]} intensity={lightOn ? 1.0 : 0} />
       <FloorLamp position={[cx + 3.6, 0, 12.6]} on={0.7} />
       {/* Daylight through the south window */}
       <WindowDaylight position={[-7.5, 1.6, 6.7]} />
@@ -107,7 +110,7 @@ export function LivingRoom() {
           <boxGeometry args={[2.4, 0.5, 0.42]} />
           <meshStandardMaterial color="#3a2c1c" roughness={0.55} metalness={0.05} />
         </mesh>
-        <Tv position={[0, 1.35, -0.16]} />
+        <Tv position={[0, 1.35, -0.16]} on={tvOn} />
         <Plant position={[1.05, 0.53, 0]} scale={0.5} />
       </group>
 
@@ -134,11 +137,11 @@ export function LivingRoom() {
   )
 }
 
-function Tv({ position }: { position: [number, number, number] }) {
+function Tv({ position, on = false }: { position: [number, number, number]; on?: boolean }) {
   const mat = useRef<THREE.MeshStandardMaterial>(null)
   useFrame((s) => {
-    // very subtle screen shift so it reads as "on" but calm
-    if (mat.current) mat.current.emissiveIntensity = 0.5 + Math.sin(s.clock.elapsedTime * 0.5) * 0.06
+    // Subtle screen shimmer while on; dark and flat while off.
+    if (mat.current) mat.current.emissiveIntensity = on ? 0.5 + Math.sin(s.clock.elapsedTime * 0.5) * 0.06 : 0
   })
   return (
     <group position={position}>
@@ -148,7 +151,7 @@ function Tv({ position }: { position: [number, number, number] }) {
       </mesh>
       <mesh position={[0, 0, 0.032]}>
         <planeGeometry args={[1.62, 0.9]} />
-        <meshStandardMaterial ref={mat} color="#22303c" emissive="#33506a" emissiveIntensity={0.5} roughness={0.3} />
+        <meshStandardMaterial ref={mat} color={on ? '#22303c' : '#0c0f12'} emissive="#33506a" emissiveIntensity={on ? 0.5 : 0} roughness={0.3} />
       </mesh>
     </group>
   )

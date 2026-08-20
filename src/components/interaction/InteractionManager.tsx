@@ -7,6 +7,7 @@ import { ANCHORS } from '../../config/roomLayout'
 import { DOOR } from '../../config/labLayout'
 import { Sfx } from '../../systems/audioSystem'
 import { triggerReach } from '../../systems/playerMotion'
+import { toggleWorldFlag, WORLD_FLAGS } from '../../systems/world'
 import type { InteractableInfo, InteractableKind } from '../../types'
 
 // Central hub: each frame it figures out what the player is looking at, mirrors
@@ -121,6 +122,20 @@ function activate(kind: InteractableKind) {
       // and locks movement; look stays free. Press E again to stand.
       const [cx, , cz] = ANCHORS.chair.pos
       player.setSeatPose({ x: cx, z: cz + 0.05, yaw: 0 })
+      break
+    }
+    // Synced world toggles: apply locally + broadcast to a co-op partner.
+    case 'doorToggle': {
+      Sfx.door()
+      toggleWorldFlag(WORLD_FLAGS.mainDoor)
+      break
+    }
+    case 'lightToggle': {
+      toggleWorldFlag(WORLD_FLAGS.livingLight)
+      break
+    }
+    case 'tvToggle': {
+      toggleWorldFlag(WORLD_FLAGS.livingTv)
       break
     }
     default:

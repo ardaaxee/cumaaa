@@ -4,6 +4,7 @@ import * as THREE from 'three'
 import { HouseRoomShell } from './HouseRoomShell'
 import { HouseLighting } from './HouseLighting'
 import { roomById } from '../../config/houseLayout'
+import { useWorldFlag, WORLD_FLAGS } from '../../systems/world'
 import { woodFloor, wall as wallTex, tile } from '../../utils/textures'
 import { Door } from './props'
 import { Hallway } from './rooms/Hallway'
@@ -45,6 +46,7 @@ export function House({ quality }: { quality: GraphicsQuality }) {
   const bathTile = useMemo(() => tile('#dce0de'), [])
   const cull = quality === 'low' ? 11 : 15
   const winDetail = quality === 'low' ? 0 : 1
+  const mainDoorOpen = useWorldFlag(WORLD_FLAGS.mainDoor)
 
   const woodFloorMat = { color: '#3a2c1e', map: wood.map, normalMap: wood.normalMap, roughness: 0.78, metalness: 0.06 }
   const plasterWallMat = { color: '#4a443a', map: plaster.map, normalMap: plaster.normalMap, roughness: 0.92, metalness: 0.03 }
@@ -81,7 +83,7 @@ export function House({ quality }: { quality: GraphicsQuality }) {
       />
 
       {/* Decorative door leaves in the main doorways */}
-      <Door position={[0, 0, 6]} rotation={[0, 0, 0]} width={1.2} height={2.25} open={0.75} />
+      <Door position={[0, 0, 6]} rotation={[0, 0, 0]} width={1.2} height={2.25} open={mainDoorOpen ? 0.75 : 0.02} />
       <Door position={[-1.5, 0, 8.6]} rotation={[0, Math.PI / 2, 0]} open={0.6} />
       <Door position={[1.5, 0, 8.6]} rotation={[0, -Math.PI / 2, 0]} open={0.6} />
       <Door position={[-0.6, 0, 14]} rotation={[0, Math.PI, 0]} open={0.5} />

@@ -145,6 +145,71 @@ src/
   utils/         device (quality/DPR), uid
 ```
 
+## Co-op multiplayer (ARDA HOME)
+
+Two people can share the same home in real time — walk around together, run,
+jump, sit, and toggle the door / living-room light / TV, all synced. It's an
+opt-in layer: the game stays fully single-player until you open a home, and
+**ARDA OS and all personal data remain local** (only presence + world toggles
+are shared).
+
+### Architecture
+
+```
+server/            Node WebSocket co-op server (rooms, player sync, world events)
+src/network/       protocol.ts (shared typed messages) + NetworkClient (reconnect)
+src/store/         useMultiplayerStore (roster + shared world state)
+src/components/multiplayer/  RemotePlayer (avatar), RemotePlayers, NetworkBridge
+```
+
+The server keeps only runtime state per room — player transforms and a small
+world state (`doors` / `lights` / `tv` / `curtains`). World changes are typed
+events (`DOOR_TOGGLED`, `LIGHT_TOGGLED`, `TV_TOGGLED`, `CURTAIN_TOGGLED`) so the
+next passes (market, film night, decoration…) extend the union without touching
+the transport. Player transforms broadcast at 15 Hz and remote avatars are
+interpolated client-side (no teleport jitter). Incoming data is validated and
+clamped — NaN / out-of-range positions are rejected.
+
+### Running it
+
+```bash
+npm run server   # co-op server on ws://0.0.0.0:8787
+npm run dev       # client on http://localhost:5173
+# or both at once:
+npm run dev:all
+```
+
+The existing `npm run dev` / `npm run build` are unchanged. The server is typed
+and can be checked with `npm run typecheck:server`.
+
+### Testing across two devices on the same Wi-Fi (LAN)
+
+1. On the machine that will host the server, find its LAN IP:
+   - macOS/Linux: `ipconfig getifaddr en0` or `ip addr` (look for `192.168.x.x`)
+   - Windows: `ipconfig` (IPv4 Address)
+2. Start the server and the client with `--host` so they're reachable on the LAN:
+   `npm run server` and `npm run dev -- --host` (or `npm run dev:all`).
+3. On each phone/tablet (same Wi-Fi), open **`http://<LAN-IP>:5173`** in the
+   browser — e.g. `http://192.168.1.42:5173`. Do **not** use `localhost` on the
+   other device.
+4. The client auto-targets the co-op server at `ws://<page-host>:8787`, so
+   serving the page from the same machine that runs the server just works. If
+   the server runs elsewhere, set `VITE_MULTIPLAYER_URL` in `.env` (see
+   `.env.example`) — e.g. `VITE_MULTIPLAYER_URL=ws://192.168.1.42:8787`.
+
+### Creating / joining a home
+
+- Tap **CO-OP** in the top bar → **CREATE HOME**. You get a 6-character code
+  (e.g. `ARDA42`) with a **COPY** button — that's `● Connected` when green.
+- On the second device, tap **CO-OP → JOIN HOME**, enter the code, **CONNECT**.
+- A wrong code shows **HOME NOT FOUND**; a lost link shows **RECONNECTING…** and
+  retries automatically, restoring the room state when it comes back.
+- You'll see your partner's avatar (with their name above) walking the home in
+  real time, and a toast when they join or leave.
+
+Two browser tabs on one computer work the same way (Tab 1 create, Tab 2 join)
+for quick desktop testing.
+
 ## AI configuration & security
 
 - The frontend never embeds a provider API key. By default ARDA AI runs a local,
