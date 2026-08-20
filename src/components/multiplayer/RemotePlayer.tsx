@@ -84,6 +84,11 @@ export function RemotePlayer({ id, name, quality }: { id: string; name: string; 
           <capsuleGeometry args={[0.17, 0.4, 2, seg]} />
           <meshStandardMaterial color={shirt} roughness={0.85} />
         </mesh>
+        {/* Shoulders — widen the top of the torso so it reads human */}
+        <mesh position={[0, 1.26, 0]} rotation={[0, 0, Math.PI / 2]} castShadow>
+          <capsuleGeometry args={[0.088, 0.3, 2, seg]} />
+          <meshStandardMaterial color={shirt} roughness={0.86} />
+        </mesh>
         {/* Neck */}
         <mesh position={[0, 1.34, 0]}>
           <cylinderGeometry args={[0.06, 0.07, 0.1, seg]} />
@@ -128,17 +133,25 @@ export function RemotePlayer({ id, name, quality }: { id: string; name: string; 
           </mesh>
         </group>
       </group>
-      {/* Legs (hip-pivoted) */}
+      {/* Legs (hip-pivoted) with shoes so the figure meets the floor properly */}
       <group ref={legL} position={[-0.1, 0.82, 0]}>
         <mesh position={[0, -0.4, 0]} castShadow>
-          <capsuleGeometry args={[0.07, 0.5, 2, seg]} />
+          <capsuleGeometry args={[0.072, 0.5, 2, seg]} />
           <meshStandardMaterial color={pants} roughness={0.9} />
+        </mesh>
+        <mesh position={[0, -0.76, 0.04]} rotation={[Math.PI / 2, 0, 0]} castShadow>
+          <capsuleGeometry args={[0.058, 0.13, 2, seg]} />
+          <meshStandardMaterial color={look.shoe} roughness={0.65} />
         </mesh>
       </group>
       <group ref={legR} position={[0.1, 0.82, 0]}>
         <mesh position={[0, -0.4, 0]} castShadow>
-          <capsuleGeometry args={[0.07, 0.5, 2, seg]} />
+          <capsuleGeometry args={[0.072, 0.5, 2, seg]} />
           <meshStandardMaterial color={pants} roughness={0.9} />
+        </mesh>
+        <mesh position={[0, -0.76, 0.04]} rotation={[Math.PI / 2, 0, 0]} castShadow>
+          <capsuleGeometry args={[0.058, 0.13, 2, seg]} />
+          <meshStandardMaterial color={look.shoe} roughness={0.65} />
         </mesh>
       </group>
       {/* Name label */}
@@ -151,13 +164,13 @@ export function RemotePlayer({ id, name, quality }: { id: string; name: string; 
 
 // Per-player look derived from the display name — equal quality, distinct
 // silhouette/colours so CUMA and ZEYNEP are easy to tell apart.
-function paletteFor(name: string): { skin: string; shirt: string; pants: string; hair: string; longHair: boolean } {
+function paletteFor(name: string): { skin: string; shirt: string; pants: string; hair: string; shoe: string; longHair: boolean } {
   const n = name.trim().toUpperCase()
   if (n.startsWith('ZEYNEP') || n.startsWith('Z')) {
-    return { skin: '#e0b48f', shirt: '#a86f86', pants: '#4a4450', hair: '#2a1c18', longHair: true }
+    return { skin: '#e0b48f', shirt: '#a86f86', pants: '#4a4450', hair: '#2a1c18', shoe: '#6b5f68', longHair: true }
   }
   // CUMA (and default)
-  return { skin: '#d3a67c', shirt: '#586274', pants: '#3a4250', hair: '#241d18', longHair: false }
+  return { skin: '#d3a67c', shirt: '#586274', pants: '#3a4250', hair: '#241d18', shoe: '#4a4a52', longHair: false }
 }
 
 function shortestAngle(current: number, target: number): number {

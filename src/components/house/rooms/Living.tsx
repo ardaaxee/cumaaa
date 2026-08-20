@@ -9,6 +9,7 @@ import { useWorldFlag, WORLD_FLAGS, useMovie, useMovieMode } from '../../../syst
 import { getMovieTexture } from '../../../systems/movieVideo'
 import { Snacks } from '../../movie/Snacks'
 import { seeded, jitter, shadeVary } from '../../../systems/imperfections'
+import { Panel } from '../../furniture/Panel'
 
 // Living room — soft seating around a coffee table, a TV on the wall, warm
 // ambient light. The main social space: two sofa seats, shared snacks, and a
@@ -40,66 +41,122 @@ export function LivingRoom() {
       <Snacks />
       <Rug position={[cx, 0.02, 11]} size={[3.4, 2.6]} color="#5a4f40" />
 
-      {/* 3-seat sofa against the north wall, facing south */}
+      {/* 3-seat sofa against the north wall, facing the room (-Z). Built like
+          real upholstery: feet, an inset plinth, rounded arms, and separate
+          seat + back cushions that overhang the frame — never one big block.
+          Seat height ~0.44 m, arm top ~0.63 m, back ~0.88 m (human scale). */}
       <group position={[cx, 0, 13]}>
-        <mesh position={[0, 0.28, 0]} castShadow receiveShadow>
-          <boxGeometry args={[2.5, 0.4, 0.95]} />
-          <meshStandardMaterial color="#6b6f74" map={sofa.map} normalMap={sofa.normalMap} roughness={0.95} />
-        </mesh>
-        <mesh position={[0, 0.62, -0.4]} castShadow>
-          <boxGeometry args={[2.5, 0.6, 0.2]} />
-          <meshStandardMaterial color="#63676c" map={sofa.map} normalMap={sofa.normalMap} roughness={0.95} />
-        </mesh>
+        {/* wooden feet */}
+        {[[-1.1, -0.36], [1.1, -0.36], [-1.1, 0.36], [1.1, 0.36]].map(([fx, fz], i) => (
+          <mesh key={i} position={[fx, 0.06, fz]} castShadow>
+            <cylinderGeometry args={[0.035, 0.028, 0.12, 8]} />
+            <meshStandardMaterial color="#4a3826" roughness={0.6} />
+          </mesh>
+        ))}
+        {/* inset plinth (recessed, so the seat visually floats above it) */}
+        <Panel args={[2.34, 0.2, 0.8]} position={[0, 0.22, 0]} receiveShadow>
+          <meshStandardMaterial color="#565a5f" map={sofa.map} normalMap={sofa.normalMap} roughness={0.96} />
+        </Panel>
+        {/* rounded arms, proud of the seat */}
         {[-1, 1].map((s) => (
-          <mesh key={s} position={[s * 1.2, 0.5, 0]} castShadow>
-            <boxGeometry args={[0.18, 0.4, 0.95]} />
-            <meshStandardMaterial color="#5c6065" map={sofa.map} normalMap={sofa.normalMap} roughness={0.95} />
-          </mesh>
+          <Panel key={s} args={[0.24, 0.42, 0.98]} radius={0.1} position={[s * 1.19, 0.42, 0]}>
+            <meshStandardMaterial color="#5f6368" map={sofa.map} normalMap={sofa.normalMap} roughness={0.95} />
+          </Panel>
         ))}
-        {/* seat cushions (one nudged out of place) */}
-        {[-0.75, 0.05, 0.8].map((x, i) => (
-          <mesh key={i} position={[x, 0.5, i === 1 ? 0.06 : 0]} rotation={[0, i === 1 ? 0.08 : 0, 0]} castShadow>
-            <boxGeometry args={[0.76, 0.14, 0.85]} />
-            <meshStandardMaterial color="#72767b" map={sofa.map} normalMap={sofa.normalMap} roughness={0.95} />
-          </mesh>
-        ))}
-        {/* throw pillows */}
-        <mesh position={[-0.9, 0.62, 0.2]} rotation={[0, 0.3, 0.1]} castShadow>
-          <boxGeometry args={[0.34, 0.34, 0.12]} />
+        {/* back frame */}
+        <Panel args={[2.5, 0.5, 0.18]} radius={0.07} position={[0, 0.63, 0.4]}>
+          <meshStandardMaterial color="#5a5e63" map={sofa.map} normalMap={sofa.normalMap} roughness={0.95} />
+        </Panel>
+        {/* seat cushions — overhang the frame, each slightly settled/rotated */}
+        {[-0.71, 0.0, 0.71].map((x, i) => {
+          const r = seeded(`sofaseat${i}`)
+          return (
+            <Panel
+              key={i}
+              args={[0.68, 0.17, 0.8]}
+              radius={0.07}
+              position={[x + jitter(r, 0.012), 0.44 - jitter(r, 0.006), -0.04 + jitter(r, 0.02)]}
+              rotation={[0, jitter(r, 0.045), 0]}
+            >
+              <meshStandardMaterial color={shadeVary('#6f7378', r, 0.05)} map={sofa.map} normalMap={sofa.normalMap} roughness={0.95} />
+            </Panel>
+          )
+        })}
+        {/* back cushions — tilted back, softer and a touch lighter */}
+        {[-0.71, 0.0, 0.71].map((x, i) => {
+          const r = seeded(`sofaback${i}`)
+          return (
+            <Panel
+              key={i}
+              args={[0.66, 0.44, 0.2]}
+              radius={0.08}
+              position={[x + jitter(r, 0.014), 0.66, 0.26 + jitter(r, 0.012)]}
+              rotation={[-0.16 + jitter(r, 0.03), jitter(r, 0.03), 0]}
+            >
+              <meshStandardMaterial color={shadeVary('#74787d', r, 0.05)} map={sofa.map} normalMap={sofa.normalMap} roughness={0.95} />
+            </Panel>
+          )
+        })}
+        {/* throw pillows, propped at an angle against the arms */}
+        <Panel args={[0.32, 0.32, 0.13]} radius={0.06} position={[-0.92, 0.63, 0.1]} rotation={[0.22, 0.34, 0.12]}>
           <meshStandardMaterial color="#8a5a44" map={chair.map} normalMap={chair.normalMap} roughness={0.95} />
-        </mesh>
-        {/* draped throw blanket */}
-        <mesh position={[0.85, 0.5, 0.25]} rotation={[0.3, 0, 0]} castShadow>
-          <boxGeometry args={[0.7, 0.5, 0.06]} />
-          <meshStandardMaterial color="#7a5f48" map={chair.map} normalMap={chair.normalMap} roughness={0.95} />
-        </mesh>
+        </Panel>
+        <Panel args={[0.3, 0.3, 0.12]} radius={0.055} position={[0.95, 0.62, 0.12]} rotation={[0.18, -0.4, -0.1]}>
+          <meshStandardMaterial color="#6b7360" map={chair.map} normalMap={chair.normalMap} roughness={0.95} />
+        </Panel>
+        {/* throw blanket draped over the right arm */}
+        <Panel args={[0.46, 0.1, 0.62]} radius={0.045} position={[0.86, 0.52, -0.06]} rotation={[0, 0.08, 0.04]}>
+          <meshStandardMaterial color="#7a5f48" map={chair.map} normalMap={chair.normalMap} roughness={0.97} />
+        </Panel>
+        <Panel args={[0.4, 0.3, 0.08]} radius={0.035} position={[0.86, 0.36, -0.36]} rotation={[0.25, 0.06, 0]}>
+          <meshStandardMaterial color="#755a44" map={chair.map} normalMap={chair.normalMap} roughness={0.97} />
+        </Panel>
       </group>
 
-      {/* armchair */}
+      {/* armchair — feet, rounded arms, a settled seat cushion */}
       <group position={[cx - 2.6, 0, 10.4]} rotation={[0, 0.7, 0]}>
-        <mesh position={[0, 0.28, 0]} castShadow receiveShadow>
-          <boxGeometry args={[0.9, 0.4, 0.9]} />
-          <meshStandardMaterial color="#7a5f48" map={chair.map} normalMap={chair.normalMap} roughness={0.95} />
-        </mesh>
-        <mesh position={[0, 0.62, -0.38]} castShadow>
-          <boxGeometry args={[0.9, 0.6, 0.16]} />
+        {[[-0.34, -0.32], [0.34, -0.32], [-0.34, 0.32], [0.34, 0.32]].map(([fx, fz], i) => (
+          <mesh key={i} position={[fx, 0.06, fz]} castShadow>
+            <cylinderGeometry args={[0.03, 0.024, 0.12, 8]} />
+            <meshStandardMaterial color="#4a3826" roughness={0.6} />
+          </mesh>
+        ))}
+        <Panel args={[0.84, 0.2, 0.8]} position={[0, 0.22, 0]} receiveShadow>
+          <meshStandardMaterial color="#6d543e" map={chair.map} normalMap={chair.normalMap} roughness={0.96} />
+        </Panel>
+        {[-1, 1].map((s) => (
+          <Panel key={s} args={[0.2, 0.4, 0.86]} radius={0.085} position={[s * 0.41, 0.42, 0]}>
+            <meshStandardMaterial color="#755a42" map={chair.map} normalMap={chair.normalMap} roughness={0.95} />
+          </Panel>
+        ))}
+        <Panel args={[0.86, 0.46, 0.18]} radius={0.075} position={[0, 0.64, -0.36]} rotation={[0.14, 0, 0]}>
           <meshStandardMaterial color="#72583f" map={chair.map} normalMap={chair.normalMap} roughness={0.95} />
-        </mesh>
-        <mesh position={[0, 0.5, 0.06]} castShadow>
-          <boxGeometry args={[0.78, 0.14, 0.78]} />
+        </Panel>
+        <Panel args={[0.72, 0.16, 0.74]} radius={0.065} position={[0, 0.44, 0.03]} rotation={[0, 0.03, 0]}>
           <meshStandardMaterial color="#82684f" map={chair.map} normalMap={chair.normalMap} roughness={0.95} />
-        </mesh>
+        </Panel>
       </group>
 
-      {/* coffee table */}
+      {/* coffee table — chamfered top with a lower shelf */}
       <group position={[cx, 0, 10.6]}>
-        <mesh position={[0, 0.4, 0]} castShadow receiveShadow>
-          <boxGeometry args={[1.2, 0.06, 0.68]} />
-          <meshStandardMaterial color="#4a3826" roughness={0.5} metalness={0.05} />
-        </mesh>
+        <Panel args={[1.2, 0.055, 0.68]} radius={0.018} position={[0, 0.4, 0]} receiveShadow>
+          <meshStandardMaterial color="#5a4632" roughness={0.48} metalness={0.05} />
+        </Panel>
+        {/* lower shelf with magazines */}
+        <Panel args={[1.0, 0.03, 0.54]} radius={0.012} position={[0, 0.16, 0]}>
+          <meshStandardMaterial color="#4a3826" roughness={0.6} />
+        </Panel>
+        {[0, 1].map((i) => {
+          const r = seeded(`mag${i}`)
+          return (
+            <Panel key={i} args={[0.24, 0.012, 0.3]} radius={0.004} position={[-0.2 + i * 0.06 + jitter(r, 0.03), 0.185 + i * 0.014, jitter(r, 0.04)]} rotation={[0, jitter(r, 0.3), 0]}>
+              <meshStandardMaterial color={i ? '#8a6a4a' : '#5c6b7a'} roughness={0.85} />
+            </Panel>
+          )
+        })}
         {[[-0.52, -0.28], [0.52, -0.28], [-0.52, 0.28], [0.52, 0.28]].map(([x, z], i) => (
-          <mesh key={i} position={[x, 0.2, z]}>
-            <boxGeometry args={[0.05, 0.4, 0.05]} />
+          <mesh key={i} position={[x, 0.2, z]} castShadow>
+            <cylinderGeometry args={[0.022, 0.026, 0.4, 8]} />
             <meshStandardMaterial color="#2a2d33" metalness={0.6} roughness={0.4} />
           </mesh>
         ))}
@@ -138,22 +195,44 @@ export function LivingRoom() {
         </group>
       </group>
 
-      {/* TV + unit on the south wall */}
+      {/* TV + unit on the south wall — carcass, drawer fronts, handles, feet */}
       <group position={[cx, 0, 6.55]}>
-        <mesh position={[0, 0.28, 0]} castShadow receiveShadow>
-          <boxGeometry args={[2.4, 0.5, 0.42]} />
-          <meshStandardMaterial color="#3a2c1c" roughness={0.55} metalness={0.05} />
-        </mesh>
+        <Panel args={[2.4, 0.44, 0.42]} radius={0.016} position={[0, 0.32, 0]} receiveShadow>
+          <meshStandardMaterial color="#5a4632" roughness={0.52} metalness={0.05} />
+        </Panel>
+        {/* two drawer fronts, proud of the carcass with a shadow gap */}
+        {[-0.58, 0.58].map((x, i) => (
+          <group key={i}>
+            <Panel args={[1.12, 0.34, 0.03]} radius={0.01} position={[x, 0.32, 0.222]}>
+              <meshStandardMaterial color="#63503a" roughness={0.5} />
+            </Panel>
+            <mesh position={[x, 0.32, 0.245]} rotation={[0, 0, Math.PI / 2]} castShadow>
+              <cylinderGeometry args={[0.011, 0.011, 0.36, 8]} />
+              <meshStandardMaterial color="#b8ae96" metalness={0.75} roughness={0.32} />
+            </mesh>
+          </group>
+        ))}
+        {/* feet */}
+        {[-1.05, 1.05].map((x, i) => (
+          <mesh key={i} position={[x, 0.05, 0.12]} castShadow>
+            <cylinderGeometry args={[0.026, 0.02, 0.1, 8]} />
+            <meshStandardMaterial color="#3a2c1c" roughness={0.6} />
+          </mesh>
+        ))}
         <Tv position={[0, 1.35, -0.16]} movie={movie} movieMode={movieMode} />
         <Plant position={[1.05, 0.53, 0]} scale={0.5} />
       </group>
 
-      {/* small bookshelf on the west wall */}
+      {/* small bookshelf on the west wall — carcass with real shelf boards */}
       <group position={[-9.7, 0, 10]} rotation={[0, Math.PI / 2, 0]}>
-        <mesh position={[0, 0.9, 0]} castShadow receiveShadow>
-          <boxGeometry args={[1.6, 1.8, 0.3]} />
-          <meshStandardMaterial color="#4a3826" roughness={0.6} />
-        </mesh>
+        <Panel args={[1.6, 1.8, 0.3]} radius={0.014} position={[0, 0.9, 0]} receiveShadow>
+          <meshStandardMaterial color="#5a4632" roughness={0.6} />
+        </Panel>
+        {[0.24, 0.74, 1.24, 1.72].map((y, i) => (
+          <Panel key={i} args={[1.56, 0.03, 0.32]} radius={0.01} position={[0, y, 0.01]}>
+            <meshStandardMaterial color="#4a3826" roughness={0.62} />
+          </Panel>
+        ))}
         {[0.4, 0.9, 1.4].map((y, r) =>
           Array.from({ length: 6 }).map((_, i) => {
             // Deterministic lived-in variation: stable per book across reloads.

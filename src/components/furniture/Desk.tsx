@@ -4,6 +4,7 @@ import * as THREE from 'three'
 import { ANCHORS } from '../../config/roomLayout'
 import { useCollider } from './useCollider'
 import { MonitorScreen } from './MonitorScreen'
+import { Panel } from './Panel'
 
 const WOOD = '#5a4432'
 const METAL = '#2a2d33'
@@ -26,11 +27,10 @@ export function Desk() {
 
   return (
     <group position={[dx, 0, dz]}>
-      {/* Desk top */}
-      <mesh position={[0, 0.75, 0]} castShadow receiveShadow>
-        <boxGeometry args={[3.2, 0.06, 0.85]} />
+      {/* Desk top — a real 4 cm board with an eased edge (top at 0.75 m) */}
+      <Panel args={[3.2, 0.06, 0.85]} radius={0.014} position={[0, 0.75, 0]} receiveShadow>
         <meshStandardMaterial color={WOOD} roughness={0.55} metalness={0.1} />
-      </mesh>
+      </Panel>
       {/* Legs */}
       {[
         [-1.5, -0.35],
@@ -51,10 +51,9 @@ export function Desk() {
 
       {/* Center monitor (wide) */}
       <group position={[0, 1.36, -0.28]}>
-        <mesh castShadow>
-          <boxGeometry args={[1.5, 0.62, 0.05]} />
+        <Panel args={[1.5, 0.62, 0.05]} radius={0.014}>
           <meshStandardMaterial color="#0a0c10" roughness={0.4} metalness={0.5} />
-        </mesh>
+        </Panel>
         <MonitorScreen width={1.42} height={0.54} position={[0, 0, 0.03]} variant="code" />
         <mesh position={[0, -0.42, 0.1]}>
           <cylinderGeometry args={[0.04, 0.06, 0.24, 8]} />
@@ -68,27 +67,24 @@ export function Desk() {
 
       {/* Left monitor (angled) */}
       <group position={[-1.02, 1.32, -0.12]} rotation={[0, 0.5, 0]}>
-        <mesh castShadow>
-          <boxGeometry args={[0.86, 0.54, 0.04]} />
+        <Panel args={[0.86, 0.54, 0.04]} radius={0.012}>
           <meshStandardMaterial color="#0a0c10" roughness={0.4} metalness={0.5} />
-        </mesh>
+        </Panel>
         <MonitorScreen width={0.8} height={0.48} position={[0, 0, 0.03]} variant="graph" />
       </group>
 
       {/* Right monitor (angled) */}
       <group position={[1.02, 1.32, -0.12]} rotation={[0, -0.5, 0]}>
-        <mesh castShadow>
-          <boxGeometry args={[0.86, 0.54, 0.04]} />
+        <Panel args={[0.86, 0.54, 0.04]} radius={0.012}>
           <meshStandardMaterial color="#0a0c10" roughness={0.4} metalness={0.5} />
-        </mesh>
+        </Panel>
         <MonitorScreen width={0.8} height={0.48} position={[0, 0, 0.03]} variant="grid" />
       </group>
 
       {/* Keyboard — dark keys with a restrained backlight */}
-      <mesh position={[0, 0.785, 0.2]} castShadow>
-        <boxGeometry args={[0.62, 0.02, 0.18]} />
+      <Panel args={[0.62, 0.022, 0.18]} radius={0.006} position={[0, 0.785, 0.2]}>
         <meshStandardMaterial color="#15161a" roughness={0.6} metalness={0.2} />
-      </mesh>
+      </Panel>
       <mesh position={[0, 0.798, 0.2]}>
         <boxGeometry args={[0.58, 0.006, 0.15]} />
         <meshStandardMaterial
@@ -105,10 +101,9 @@ export function Desk() {
         <meshStandardMaterial color="#1a1a1e" roughness={0.9} />
       </mesh>
       {/* Mouse */}
-      <mesh position={[0.45, 0.79, 0.22]} castShadow>
-        <boxGeometry args={[0.08, 0.03, 0.12]} />
+      <Panel args={[0.07, 0.028, 0.115]} radius={0.013} position={[0.45, 0.788, 0.22]}>
         <meshStandardMaterial color="#12161c" roughness={0.4} />
-      </mesh>
+      </Panel>
 
       {/* Headphones on a stand */}
       <group position={[-1.35, 0.78, 0.15]}>
@@ -150,10 +145,9 @@ export function Desk() {
 
       {/* PC tower + breathing fan light */}
       <group position={[1.85, 0.5, 0]}>
-        <mesh castShadow receiveShadow>
-          <boxGeometry args={[0.45, 1, 0.85]} />
+        <Panel args={[0.45, 1, 0.85]} radius={0.012} receiveShadow>
           <meshStandardMaterial color="#0d1117" roughness={0.4} metalness={0.5} />
-        </mesh>
+        </Panel>
         {/* Tempered-glass side panel with a restrained interior glow */}
         <mesh position={[-0.226, 0, 0]}>
           <planeGeometry args={[0.72, 0.82]} />
