@@ -11,9 +11,12 @@ import {
   sanitizeState,
   sanitizeEvent,
   sanitizeChatText,
+  sanitizeHomeName,
   CHAT_HISTORY,
   CHAT_MIN_GAP_MS,
   type ChatMessage,
+  type HomeInfo,
+  type LobbyPlayer,
   type ClientMessage,
   type ServerMessage,
   type PlayerNetState,
@@ -38,6 +41,7 @@ interface Player {
   state: PlayerNetState
   alive: boolean
   lastChatAt: number
+  ready: boolean
 }
 
 interface Room {
@@ -45,6 +49,9 @@ interface Room {
   players: Map<string, Player>
   state: RoomState
   chat: ChatMessage[]
+  name: string
+  hostId: string | null
+  started: boolean
   emptySince: number | null
 }
 
@@ -76,12 +83,33 @@ function peerList(room: Room, exceptId?: string): PeerInfo[] {
   return out
 }
 
-function createRoom(): Room {
+function createRoom(name: string): Room {
   let code = generateRoomCode()
   while (rooms.has(code)) code = generateRoomCode()
-  const room: Room = { id: code, players: new Map(), state: emptyRoomState(code), chat: [], emptySince: null }
+  const room: Room = {
+    id: code,
+    players: new Map(),
+    state: emptyRoomState(code),
+    chat: [],
+    name,
+    hostId: null,
+    started: false,
+    emptySince: null,
+  }
   rooms.set(code, room)
   return room
+}
+
+function homeInfo(room: Room): HomeInfo {
+  return { code: room.id, name: room.name, hostId: room.hostId ?? '', started: room.started }
+}
+
+function lobbyList(room: Room): LobbyPlayer[] {
+  return [...room.players.values()].map((p) => ({ id: p.id, name: p.name, role: p.role, ready: p.ready }))
+}
+
+function broadcastLobby(room: Room): void {
+  broadcast(room, { t: 'lobby', home: homeInfo(room), players: lobbyList(room) })
 }
 
 function joinRoom(room: Room, ws: WebSocket, name: string): Player | null {
@@ -95,8 +123,12 @@ function joinRoom(room: Room, ws: WebSocket, name: string): Player | null {
     state: { x: 0, y: 1.62, z: 4, ry: 0, run: false, jump: false, sit: false },
     alive: true,
     lastChatAt: 0,
+    ready: false,
   }
   room.players.set(player.id, player)
+  // The first player in becomes host; if the host leaves and someone is still
+  // here, hosting passes to them so the home never becomes unstartable.
+  if (!room.hostId || !room.players.has(room.hostId)) room.hostId = player.id
   room.emptySince = null
   return player
 }
@@ -113,7 +145,13 @@ wss.on('connection', (ws) => {
     if (!room) return
     room.players.delete(playerId)
     broadcast(room, { t: 'peer_leave', playerId })
-    if (room.players.size === 0) room.emptySince = Date.now()
+    if (room.hostId === playerId) room.hostId = room.players.keys().next().value ?? null
+    if (room.players.size === 0) {
+      room.emptySince = Date.now()
+      room.started = false // a home nobody is in is back to being un-started
+    } else {
+      broadcastLobby(room)
+    }
     roomId = null
     playerId = null
   }
@@ -130,11 +168,11 @@ wss.on('connection', (ws) => {
     switch (msg.t) {
       case 'create': {
         if (roomId) leave()
-        const room = createRoom()
+        const room = createRoom(sanitizeHomeName(msg.homeName))
         const player = joinRoom(room, ws, sanitizeName(msg.name))!
         roomId = room.id
         playerId = player.id
-        send(ws, { t: 'welcome', roomId: room.id, playerId: player.id, role: player.role, peers: peerList(room, player.id), room: room.state, chat: room.chat })
+        send(ws, { t: 'welcome', roomId: room.id, playerId: player.id, role: player.role, peers: peerList(room, player.id), room: room.state, chat: room.chat, home: homeInfo(room), lobby: lobbyList(room) })
         break
       }
       case 'join': {
@@ -147,8 +185,9 @@ wss.on('connection', (ws) => {
         if (!player) return send(ws, { t: 'error', code: 'ROOM_FULL' })
         roomId = room.id
         playerId = player.id
-        send(ws, { t: 'welcome', roomId: room.id, playerId: player.id, role: player.role, peers: peerList(room, player.id), room: room.state, chat: room.chat })
+        send(ws, { t: 'welcome', roomId: room.id, playerId: player.id, role: player.role, peers: peerList(room, player.id), room: room.state, chat: room.chat, home: homeInfo(room), lobby: lobbyList(room) })
         broadcast(room, { t: 'peer_join', peer: { id: player.id, name: player.name, role: player.role } }, player.id)
+        broadcastLobby(room)
         break
       }
       case 'state': {
@@ -191,6 +230,26 @@ wss.on('connection', (ws) => {
         room.chat.push(message)
         if (room.chat.length > CHAT_HISTORY) room.chat.splice(0, room.chat.length - CHAT_HISTORY)
         broadcast(room, { t: 'chat', message }) // echo to all incl. sender
+        break
+      }
+      case 'ready': {
+        if (!roomId || !playerId) return
+        const room = rooms.get(roomId)
+        const player = room?.players.get(playerId)
+        if (!room || !player) return
+        player.ready = !!msg.ready
+        broadcastLobby(room)
+        break
+      }
+      case 'start': {
+        if (!roomId || !playerId) return
+        const room = rooms.get(roomId)
+        if (!room) return
+        // Only the host starts, and only once everyone present is ready.
+        if (room.hostId !== playerId) return
+        if (![...room.players.values()].every((p) => p.ready)) return
+        room.started = true
+        broadcastLobby(room)
         break
       }
       case 'ping': {

@@ -3,6 +3,7 @@ import { AnimatePresence } from 'framer-motion'
 import { usePlayerStore } from '../../store/usePlayerStore'
 import { useRoomStore } from '../../store/useRoomStore'
 import { useMultiplayerStore } from '../../store/useMultiplayerStore'
+import { useAppStore } from '../../store/useAppStore'
 import { CoopPanel } from './CoopPanel'
 import { ChatPanel } from './ChatPanel'
 import { MovieNightPanel } from '../movie/MovieNightPanel'
@@ -71,9 +72,16 @@ export function Hud() {
       {/* Top bar */}
       <div className="absolute inset-x-0 top-0 flex items-start justify-between p-4 sm:p-5">
         <div className="pointer-events-auto flex items-center gap-3">
-          <div className="font-mono text-sm font-bold tracking-[0.3em] text-white">
-            ARDA<span className="text-accent"> ROOM</span>
-          </div>
+          <button
+            className="hud-btn !px-2 !py-1 text-[11px]"
+            onClick={() => {
+              Sfx.open()
+              useAppStore.getState().openMenu('main')
+            }}
+            title="Back to the main menu"
+          >
+            ⌂ HOME
+          </button>
           <button
             className="hud-btn hidden !px-2 !py-1 text-[11px] sm:block"
             onClick={() => {

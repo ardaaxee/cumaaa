@@ -27,6 +27,33 @@ export interface PeerInfo {
   role: PlayerRole
 }
 
+// ---- Home + lobby ---------------------------------------------------------
+
+export const HOME_NAME_MAX = 24
+
+// A home is the shared session two people meet in. It exists before anyone
+// enters the house: players gather in the lobby, mark themselves ready, and the
+// host starts it.
+export interface HomeInfo {
+  code: string
+  name: string
+  hostId: string
+  started: boolean
+}
+
+export interface LobbyPlayer {
+  id: string
+  name: string
+  role: PlayerRole
+  ready: boolean
+}
+
+export function sanitizeHomeName(raw: unknown): string {
+  if (typeof raw !== 'string') return 'HOME'
+  const cleaned = raw.replace(/[^\p{L}\p{N} _\-.']/gu, '').trim().slice(0, HOME_NAME_MAX)
+  return cleaned.length ? cleaned : 'HOME'
+}
+
 // World state changes are event-based so future systems (market, film night,
 // decoration…) can extend the union without reworking the transport. NOTE: none
 // of these touch player movement — each client owns its own controller. These
@@ -161,17 +188,30 @@ export const QUICK_MESSAGES = [
 // ---- Wire messages --------------------------------------------------------
 
 export type ClientMessage =
-  | { t: 'create'; name: string }
+  | { t: 'create'; name: string; homeName?: string }
   | { t: 'join'; roomId: string; name: string }
   | { t: 'state'; p: PlayerNetState }
   | { t: 'event'; event: WorldEvent }
   | { t: 'chat'; text: string }
+  | { t: 'ready'; ready: boolean }
+  | { t: 'start' }
   | { t: 'ping' }
 
 export type ServerErrorCode = 'HOME_NOT_FOUND' | 'ROOM_FULL' | 'BAD_REQUEST'
 
 export type ServerMessage =
-  | { t: 'welcome'; roomId: string; playerId: string; role: PlayerRole; peers: PeerInfo[]; room: RoomState; chat: ChatMessage[] }
+  | {
+      t: 'welcome'
+      roomId: string
+      playerId: string
+      role: PlayerRole
+      peers: PeerInfo[]
+      room: RoomState
+      chat: ChatMessage[]
+      home: HomeInfo
+      lobby: LobbyPlayer[]
+    }
+  | { t: 'lobby'; home: HomeInfo; players: LobbyPlayer[] }
   | { t: 'chat'; message: ChatMessage }
   | { t: 'error'; code: ServerErrorCode }
   | { t: 'peer_join'; peer: PeerInfo }

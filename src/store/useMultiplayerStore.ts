@@ -7,6 +7,8 @@ import {
   CHAT_HISTORY,
   sanitizeChatText,
   type ChatMessage,
+  type HomeInfo,
+  type LobbyPlayer,
   type PeerInfo,
   type PlayerNetState,
   type PlayerRole,
@@ -40,6 +42,10 @@ interface MultiplayerState {
   world: RoomState
   lastError: ServerErrorCode | null
 
+  // Home + lobby (pre-entry): who is in, who is ready, has the host started.
+  home: HomeInfo | null
+  lobby: LobbyPlayer[]
+
   // Chat: history is shared, but `chatOpen` / `unreadChat` are local UI.
   chat: ChatMessage[]
   chatOpen: boolean
@@ -48,8 +54,10 @@ interface MultiplayerState {
   // UI: is the Movie Night panel open on THIS client (local UI only).
   moviePanelOpen: boolean
 
-  createHome: (name: string) => void
+  createHome: (name: string, homeName?: string) => void
   joinHome: (roomId: string, name: string) => void
+  setReady: (ready: boolean) => void
+  startHome: () => void
   leaveHome: () => void
   sendState: (p: PlayerNetState) => void
   toggleWorld: (event: WorldEvent) => void
@@ -61,7 +69,7 @@ interface MultiplayerState {
 
 let client: NetworkClient | null = null
 // What to (re)send on (re)connect so a dropped link restores the room.
-let intent: { type: 'create' | 'join'; roomId?: string; name: string } | null = null
+let intent: { type: 'create' | 'join'; roomId?: string; name: string; homeName?: string } | null = null
 
 export const useMultiplayerStore = create<MultiplayerState>((set, get) => {
   const handleMessage = (msg: ServerMessage) => {
@@ -77,6 +85,8 @@ export const useMultiplayerStore = create<MultiplayerState>((set, get) => {
           world: msg.room,
           chat: msg.chat,
           unreadChat: 0,
+          home: msg.home,
+          lobby: msg.lobby,
           lastError: null,
         })
         // After a successful create/join, always reconnect by JOINING this room.
@@ -114,6 +124,10 @@ export const useMultiplayerStore = create<MultiplayerState>((set, get) => {
         })
         break
       }
+      case 'lobby': {
+        set({ home: msg.home, lobby: msg.players })
+        break
+      }
       case 'chat': {
         set((s) => {
           const chat = [...s.chat, msg.message].slice(-CHAT_HISTORY)
@@ -141,7 +155,7 @@ export const useMultiplayerStore = create<MultiplayerState>((set, get) => {
       onOpen: () => {
         // (Re)assert our intent so a reconnect restores the room + roster.
         if (!intent || !client) return
-        if (intent.type === 'create') client.send({ t: 'create', name: intent.name })
+        if (intent.type === 'create') client.send({ t: 'create', name: intent.name, homeName: intent.homeName })
         else if (intent.roomId) client.send({ t: 'join', roomId: intent.roomId, name: intent.name })
       },
     })
@@ -157,15 +171,17 @@ export const useMultiplayerStore = create<MultiplayerState>((set, get) => {
     peers: [],
     world: emptyRoomState(''),
     lastError: null,
+    home: null,
+    lobby: [],
     chat: [],
     chatOpen: false,
     unreadChat: 0,
     moviePanelOpen: false,
 
-    createHome: (name) => {
+    createHome: (name, homeName) => {
       const self = name.trim() || 'CUMA'
       set({ selfName: self, lastError: null })
-      intent = { type: 'create', name: self }
+      intent = { type: 'create', name: self, homeName }
       ensureClient().connect()
     },
     joinHome: (roomId, name) => {
@@ -183,7 +199,7 @@ export const useMultiplayerStore = create<MultiplayerState>((set, get) => {
       intent = null
       client?.close()
       peerStates.clear()
-      set({ phase: 'idle', roomId: null, playerId: null, role: null, peers: [], world: emptyRoomState(''), lastError: null, chat: [], unreadChat: 0, chatOpen: false })
+      set({ phase: 'idle', roomId: null, playerId: null, role: null, peers: [], world: emptyRoomState(''), lastError: null, home: null, lobby: [], chat: [], unreadChat: 0, chatOpen: false })
     },
     sendState: (p) => {
       client?.send({ t: 'state', p })
@@ -196,6 +212,12 @@ export const useMultiplayerStore = create<MultiplayerState>((set, get) => {
         return { world }
       })
       client?.send({ t: 'event', event })
+    },
+    setReady: (ready) => {
+      client?.send({ t: 'ready', ready })
+    },
+    startHome: () => {
+      client?.send({ t: 'start' })
     },
     sendChat: (text) => {
       // The server re-sanitises and stamps the message, then echoes it back —
