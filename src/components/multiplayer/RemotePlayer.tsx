@@ -25,10 +25,10 @@ export function RemotePlayer({ id, name, quality }: { id: string; name: string; 
   const phase = useRef(0)
   const { camera } = useThree()
 
-  const seg = quality === 'low' ? 6 : quality === 'medium' ? 10 : 16
-  const skin = '#c99a76'
-  const shirt = '#6a6f77'
-  const pants = '#39414d'
+  const seg = quality === 'low' ? 8 : quality === 'medium' ? 12 : 18
+  // Distinguish players by name (CUMA vs ZEYNEP) while keeping equal quality.
+  const look = useMemo(() => paletteFor(name), [name])
+  const { skin, shirt, pants, hair } = look
 
   const nameTex = useMemo(() => makeNameTexture(name), [name])
 
@@ -84,16 +84,28 @@ export function RemotePlayer({ id, name, quality }: { id: string; name: string; 
           <capsuleGeometry args={[0.17, 0.4, 2, seg]} />
           <meshStandardMaterial color={shirt} roughness={0.85} />
         </mesh>
+        {/* Neck */}
+        <mesh position={[0, 1.34, 0]}>
+          <cylinderGeometry args={[0.06, 0.07, 0.1, seg]} />
+          <meshStandardMaterial color={skin} roughness={0.7} />
+        </mesh>
         {/* Head */}
-        <mesh position={[0, 1.52, 0]} castShadow>
+        <mesh position={[0, 1.52, 0]} scale={[1, 1.08, 1]} castShadow>
           <sphereGeometry args={[0.135, seg, seg]} />
           <meshStandardMaterial color={skin} roughness={0.7} />
         </mesh>
         {/* Hair cap */}
         <mesh position={[0, 1.57, -0.01]}>
-          <sphereGeometry args={[0.14, seg, seg, 0, Math.PI * 2, 0, Math.PI * 0.55]} />
-          <meshStandardMaterial color="#2a2420" roughness={0.9} />
+          <sphereGeometry args={[0.145, seg, seg, 0, Math.PI * 2, 0, Math.PI * 0.55]} />
+          <meshStandardMaterial color={hair} roughness={0.9} />
         </mesh>
+        {/* Longer hair at the back (distinguishes ZEYNEP) */}
+        {look.longHair && (
+          <mesh position={[0, 1.42, -0.09]}>
+            <capsuleGeometry args={[0.11, 0.22, 2, seg]} />
+            <meshStandardMaterial color={hair} roughness={0.9} />
+          </mesh>
+        )}
         {/* Arms (shoulder-pivoted) */}
         <group ref={armL} position={[-0.24, 1.28, 0]}>
           <mesh position={[0, -0.22, 0]} castShadow>
@@ -135,6 +147,17 @@ export function RemotePlayer({ id, name, quality }: { id: string; name: string; 
       </sprite>
     </group>
   )
+}
+
+// Per-player look derived from the display name — equal quality, distinct
+// silhouette/colours so CUMA and ZEYNEP are easy to tell apart.
+function paletteFor(name: string): { skin: string; shirt: string; pants: string; hair: string; longHair: boolean } {
+  const n = name.trim().toUpperCase()
+  if (n.startsWith('ZEYNEP') || n.startsWith('Z')) {
+    return { skin: '#e0b48f', shirt: '#a86f86', pants: '#4a4450', hair: '#2a1c18', longHair: true }
+  }
+  // CUMA (and default)
+  return { skin: '#d3a67c', shirt: '#586274', pants: '#3a4250', hair: '#241d18', longHair: false }
 }
 
 function shortestAngle(current: number, target: number): number {

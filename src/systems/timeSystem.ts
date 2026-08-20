@@ -49,10 +49,10 @@ export function skyPalette(tod: TimeOfDay): SkyPalette {
       return {
         top: '#9db8d2', // clear sky
         bottom: '#e2e4de', // hazy horizon
-        ambient: '#aeb4bb', // neutral fill
-        ambientIntensity: 0.5,
+        ambient: '#bcc2ca', // neutral fill
+        ambientIntensity: 0.72,
         sun: '#fff2d6', // warm daylight
-        sunIntensity: 1.35,
+        sunIntensity: 1.5,
         stars: false,
         cityLights: false,
       }
@@ -60,10 +60,10 @@ export function skyPalette(tod: TimeOfDay): SkyPalette {
       return {
         top: '#5b4a63',
         bottom: '#e0a05e',
-        ambient: '#8f817a', // warm neutral
-        ambientIntensity: 0.34,
+        ambient: '#a29387', // warm neutral
+        ambientIntensity: 0.6,
         sun: '#ff9c4d',
-        sunIntensity: 0.8,
+        sunIntensity: 0.95,
         stars: false,
         cityLights: true,
       }
@@ -71,10 +71,11 @@ export function skyPalette(tod: TimeOfDay): SkyPalette {
       return {
         top: '#0a0e18',
         bottom: '#141a2a',
-        ambient: '#454a54', // dim neutral, not blue neon
-        ambientIntensity: 0.34,
-        sun: '#748092', // moonlight
-        sunIntensity: 0.25,
+        // Lifted so a night room reads as a real dim room, not a black void.
+        ambient: '#6c7280',
+        ambientIntensity: 0.82,
+        sun: '#8895aa', // moonlight
+        sunIntensity: 0.4,
         stars: true,
         cityLights: true,
       }

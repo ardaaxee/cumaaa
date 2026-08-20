@@ -24,7 +24,7 @@ export function Bedroom() {
 
   return (
     <group>
-      <CeilingLamp position={[bx, 2.78, 18]} intensity={0.85} />
+      <CeilingLamp position={[bx, 2.78, 18]} intensity={1.3} />
       {/* Morning daylight through the west window */}
       <WindowDaylight position={[-5.35, 1.65, 19.5]} />
       <Rug position={[bx, 0.02, 19.2]} size={[2.6, 2.0]} color="#5a4f42" />

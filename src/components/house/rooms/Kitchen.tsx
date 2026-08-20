@@ -15,8 +15,8 @@ export function Kitchen() {
 
   return (
     <group>
-      <CeilingLamp position={[5.5, 2.58, 10]} color="#fff2df" intensity={0.85} shade="#e8e6e0" />
-      <CeilingLamp position={[4.6, 2.58, 8.6]} color="#fff2df" intensity={0.5} shade="#e8e6e0" />
+      <CeilingLamp position={[5.5, 2.58, 10]} color="#fff2df" intensity={1.3} shade="#e8e6e0" />
+      <CeilingLamp position={[4.6, 2.58, 8.6]} color="#fff2df" intensity={0.85} shade="#e8e6e0" />
       {/* Daylight through the east window */}
       <WindowDaylight position={[8.85, 1.6, 8.4]} />
 

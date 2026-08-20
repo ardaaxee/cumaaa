@@ -34,7 +34,7 @@ export function CeilingLamp({
         <sphereGeometry args={[0.06, 12, 12]} />
         <meshStandardMaterial color="#fff4e0" emissive={color} emissiveIntensity={0.7} toneMapped={false} />
       </mesh>
-      <pointLight position={[0, -0.2, 0]} color={color} intensity={intensity} distance={9} decay={1.7} castShadow={castShadow} />
+      <pointLight position={[0, -0.2, 0]} color={color} intensity={intensity} distance={20} decay={1.05} castShadow={castShadow} />
     </group>
   )
 }

@@ -13,12 +13,13 @@ export function PostFx({ enabled, quality }: { enabled: boolean; quality: Graphi
       {/* Restrained bloom — only genuine light sources (lamps, screens, sun)
           cross the threshold, so the room doesn't wash out. */}
       <Bloom
-        intensity={high ? 0.4 : 0.3}
-        luminanceThreshold={0.78}
+        intensity={high ? 0.32 : 0.24}
+        luminanceThreshold={0.82}
         luminanceSmoothing={0.3}
         mipmapBlur
       />
-      <Vignette eskil={false} offset={0.28} darkness={high ? 0.6 : 0.55} />
+      {/* Soft vignette only — nothing that crushes the room's edges to black. */}
+      <Vignette eskil={false} offset={0.36} darkness={high ? 0.34 : 0.3} />
     </EffectComposer>
   )
 }

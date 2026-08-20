@@ -20,7 +20,7 @@ export function LivingRoom() {
   const movie = useMovie()
   const movieMode = useMovieMode()
   // Cinematic mode dims the room; the TV glow takes over.
-  const ceilingIntensity = movieMode ? 0.12 : lightOn ? 1.0 : 0
+  const ceilingIntensity = movieMode ? 0.18 : lightOn ? 1.7 : 0
   const cx = -5.75
   const cz = 10
 

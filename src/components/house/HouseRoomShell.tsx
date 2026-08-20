@@ -24,7 +24,7 @@ export function HouseRoomShell({
   room,
   floor,
   wall,
-  ceilingColor = '#2b2620',
+  ceilingColor = '#3c372f',
   skirting = '#c9c2b6',
   windowDetail = 1,
 }: {

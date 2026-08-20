@@ -9,8 +9,8 @@ export function Hallway() {
 
   return (
     <group>
-      <CeilingLamp position={[0, 2.58, 8]} color="#ffdcae" intensity={0.5} />
-      <CeilingLamp position={[0, 2.58, 12]} color="#ffdcae" intensity={0.4} />
+      <CeilingLamp position={[0, 2.58, 8]} color="#ffdcae" intensity={0.9} />
+      <CeilingLamp position={[0, 2.58, 12]} color="#ffdcae" intensity={0.7} />
       <Rug position={[0, 0.02, 10]} size={[1.2, 5.0]} color="#5a4a3a" />
 
       {/* Doormat by the study door */}

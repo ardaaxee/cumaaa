@@ -21,6 +21,15 @@ export function Lighting({ quality }: { quality: GraphicsQuality }) {
   const sun = useRef<THREE.DirectionalLight>(null)
   const [wx, , wz] = ANCHORS.window.pos
 
+  // Hemisphere sky/ground per time of day — never black, so ceilings/floors
+  // always carry a soft, directional fill (this is the main "indirect" cue).
+  const hemi =
+    tod === 'day'
+      ? { sky: '#e6ecf2', ground: '#524a3c', intensity: 0.85 }
+      : tod === 'sunset'
+        ? { sky: '#d0a678', ground: '#503f31', intensity: 0.7 }
+        : { sky: '#5c6880', ground: '#443d33', intensity: 0.72 }
+
   // Aim the sun from just outside the window into the room.
   useFrame(() => {
     if (sun.current) {
@@ -32,7 +41,7 @@ export function Lighting({ quality }: { quality: GraphicsQuality }) {
   return (
     <>
       <ambientLight color={palette.ambient} intensity={palette.ambientIntensity} />
-      <hemisphereLight color={palette.top} groundColor="#26221c" intensity={0.45} />
+      <hemisphereLight color={hemi.sky} groundColor={hemi.ground} intensity={hemi.intensity} />
 
       {/* Sunlight / moonlight through the window */}
       <directionalLight

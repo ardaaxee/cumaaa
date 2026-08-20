@@ -15,13 +15,13 @@ export function ContactAO() {
   const [px, , pz] = ANCHORS.plant.pos
 
   const blobs: { p: [number, number, number]; s: [number, number]; o: number }[] = [
-    { p: [dx, 0.02, dz + 0.15], s: [3.9, 1.7], o: 0.5 }, // desk
-    { p: [dx + 1.85, 0.02, dz], s: [1.2, 1.5], o: 0.55 }, // pc tower
-    { p: [bx, 0.02, bz], s: [2.2, 2.9], o: 0.5 }, // bed
-    { p: [bx + 0.95, 0.02, bz - 0.9], s: [0.9, 0.9], o: 0.45 }, // nightstand
-    { p: [kx, 0.02, kz], s: [1.15, 1.15], o: 0.5 }, // chair
-    { p: [cx - 0.1, 0.02, cz], s: [1.3, 3.0], o: 0.5 }, // bookcase
-    { p: [px, 0.02, pz], s: [0.95, 0.95], o: 0.45 }, // plant
+    { p: [dx, 0.02, dz + 0.15], s: [3.9, 1.7], o: 0.34 }, // desk
+    { p: [dx + 1.85, 0.02, dz], s: [1.2, 1.5], o: 0.38 }, // pc tower
+    { p: [bx, 0.02, bz], s: [2.2, 2.9], o: 0.34 }, // bed
+    { p: [bx + 0.95, 0.02, bz - 0.9], s: [0.9, 0.9], o: 0.3 }, // nightstand
+    { p: [kx, 0.02, kz], s: [1.15, 1.15], o: 0.34 }, // chair
+    { p: [cx - 0.1, 0.02, cz], s: [1.3, 3.0], o: 0.34 }, // bookcase
+    { p: [px, 0.02, pz], s: [0.95, 0.95], o: 0.3 }, // plant
   ]
 
   return (

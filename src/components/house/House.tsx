@@ -48,8 +48,8 @@ export function House({ quality }: { quality: GraphicsQuality }) {
   const winDetail = quality === 'low' ? 0 : 1
   const mainDoorOpen = useWorldFlag(WORLD_FLAGS.mainDoor)
 
-  const woodFloorMat = { color: '#3a2c1e', map: wood.map, normalMap: wood.normalMap, roughness: 0.78, metalness: 0.06 }
-  const plasterWallMat = { color: '#4a443a', map: plaster.map, normalMap: plaster.normalMap, roughness: 0.92, metalness: 0.03 }
+  const woodFloorMat = { color: '#5a4632', map: wood.map, normalMap: wood.normalMap, roughness: 0.76, metalness: 0.05 }
+  const plasterWallMat = { color: '#7a7264', map: plaster.map, normalMap: plaster.normalMap, roughness: 0.94, metalness: 0.02 }
 
   return (
     <group>
@@ -58,14 +58,14 @@ export function House({ quality }: { quality: GraphicsQuality }) {
 
       {/* ---- Shells (always rendered) ---- */}
       <HouseRoomShell room={roomById('hallway')} floor={woodFloorMat} wall={plasterWallMat} />
-      <HouseRoomShell room={roomById('living')} floor={woodFloorMat} wall={{ ...plasterWallMat, color: '#514a3f' }} windowDetail={winDetail} />
+      <HouseRoomShell room={roomById('living')} floor={woodFloorMat} wall={{ ...plasterWallMat, color: '#817868' }} windowDetail={winDetail} />
       <HouseRoomShell
         room={roomById('kitchen')}
         floor={{ color: '#cdc7bd', map: floorTile.map, normalMap: floorTile.normalMap, roughness: 0.55, metalness: 0.05 }}
-        wall={{ ...plasterWallMat, color: '#565044' }}
+        wall={{ ...plasterWallMat, color: '#867c6c' }}
         windowDetail={winDetail}
       />
-      <HouseRoomShell room={roomById('bedroom')} floor={woodFloorMat} wall={{ ...plasterWallMat, color: '#4f463c' }} ceilingColor="#2a251f" windowDetail={winDetail} />
+      <HouseRoomShell room={roomById('bedroom')} floor={woodFloorMat} wall={{ ...plasterWallMat, color: '#7c7365' }} ceilingColor="#3a352d" windowDetail={winDetail} />
       <HouseRoomShell
         room={roomById('bathroom')}
         floor={{ color: '#dce0de', map: bathTile.map, normalMap: bathTile.normalMap, roughness: 0.4, metalness: 0.05 }}

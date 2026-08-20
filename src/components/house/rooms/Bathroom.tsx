@@ -14,7 +14,7 @@ export function Bathroom() {
 
   return (
     <group>
-      <CeilingLamp position={[3.5, 2.48, 16.5]} color="#eef1f4" intensity={0.75} shade="#f0f2f5" />
+      <CeilingLamp position={[3.5, 2.48, 16.5]} color="#eef1f4" intensity={1.15} shade="#f0f2f5" />
       {/* Soft diffuse daylight through the frosted north window */}
       <WindowDaylight position={[3.7, 1.75, 18.4]} />
 

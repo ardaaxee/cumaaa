@@ -13,8 +13,8 @@ import type { GraphicsQuality } from '../../types'
 // shooter. Cheap (a handful of boxes) and hidden while a panel/cinematic owns
 // the view. LOW tier keeps them but simpler; hands never cast shadows (avoids
 // near-camera shadow artefacts — the body's floor shadow is the blob below).
-const SKIN = '#c99a76'
-const SLEEVE = '#43474d' // ARDA's dark hoodie
+const SKIN = '#d3a67c'
+const SLEEVE = '#525863' // dark hoodie — dark but never pure black
 
 export function FirstPersonBody({ quality }: { quality: GraphicsQuality }) {
   const { camera } = useThree()
