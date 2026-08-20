@@ -10,6 +10,7 @@ export interface InteractableDef {
 }
 
 const monitor = ANCHORS.monitor.pos
+const chair = ANCHORS.chair.pos
 const taskboard = ANCHORS.taskboard.pos
 const bookcase = ANCHORS.bookcase.pos
 const secret = ANCHORS.secret.pos
@@ -58,5 +59,10 @@ export const INTERACTABLES: InteractableDef[] = [
     info: { id: 'achievements', kind: 'achievements', label: 'Achievements', prompt: 'View wall' },
     position: [ach[0] + 0.5, ach[1], ach[2]],
     radius: 2.4,
+  },
+  {
+    info: { id: 'chairSit', kind: 'chairSit', label: 'Desk Chair', prompt: 'Sit' },
+    position: [chair[0], 0.9, chair[2]],
+    radius: 1.5,
   },
 ]

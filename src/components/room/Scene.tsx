@@ -19,6 +19,8 @@ import { Details } from '../furniture/Details'
 import { Clutter } from '../furniture/Clutter'
 import { MemoryObjects } from './MemoryObjects'
 import { PlayerController } from '../interaction/PlayerController'
+import { FirstPersonBody } from './FirstPersonBody'
+import { PlayerShadow } from './PlayerShadow'
 import { InteractionManager } from '../interaction/InteractionManager'
 import { FirstFrameSignal } from './FirstFrameSignal'
 import { InteractableTrigger } from '../interaction/InteractableTrigger'
@@ -79,6 +81,8 @@ export function Scene({ quality }: { quality: GraphicsQuality }) {
       ))}
 
       <PlayerController />
+      <FirstPersonBody quality={quality} />
+      <PlayerShadow quality={quality} />
       <InteractionManager />
       <FirstFrameSignal />
     </>

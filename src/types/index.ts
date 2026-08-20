@@ -95,6 +95,7 @@ export type InteractableKind =
   | 'secret'
   | 'achievements'
   | 'door'
+  | 'chairSit'
   // Personalization / memory objects in the main room
   | 'currentProject'
   | 'projectArchive'

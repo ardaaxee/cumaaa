@@ -6,6 +6,7 @@ import { usePlayerStore } from '../../store/usePlayerStore'
 import { ANCHORS } from '../../config/roomLayout'
 import { DOOR } from '../../config/labLayout'
 import { Sfx } from '../../systems/audioSystem'
+import { triggerReach } from '../../systems/playerMotion'
 import type { InteractableInfo, InteractableKind } from '../../types'
 
 // Central hub: each frame it figures out what the player is looking at, mirrors
@@ -43,12 +44,13 @@ export function InteractionManager() {
       if (p.isTouch) return
       // Desktop: only interact while pointer-locked (the first click just locks).
       if (!document.pointerLockElement) return
-      if (focusRef.current) usePlayerStore.getState().requestInteract()
+      if (focusRef.current || p.seatPose) usePlayerStore.getState().requestInteract()
     }
     window.addEventListener('click', onClick)
     const onKey = (e: KeyboardEvent) => {
       if (e.key === 'e' || e.key === 'E') {
-        if (focusRef.current) usePlayerStore.getState().requestInteract()
+        const p = usePlayerStore.getState()
+        if (focusRef.current || p.seatPose) usePlayerStore.getState().requestInteract()
       }
     }
     window.addEventListener('keydown', onKey)
@@ -62,8 +64,15 @@ export function InteractionManager() {
     const nonce = usePlayerStore.getState().interactNonce
     if (nonce === lastNonce.current) return
     lastNonce.current = nonce
+    // Seated: any interact stands the player up (even with nothing in focus).
+    if (usePlayerStore.getState().seatPose) {
+      usePlayerStore.getState().setSeatPose(null)
+      Sfx.close()
+      return
+    }
     const focus = focusRef.current
     if (!focus) return
+    triggerReach() // a short first-person hand reach on every interaction
     activate(focus.kind)
   }
 
@@ -105,6 +114,13 @@ function activate(kind: InteractableKind) {
       // Turn to face the corridor back to the room, then release control.
       store.pushToast('Returning to ARDA ROOM…')
       runCinematic([DOOR.x, 1.5, DOOR.zCenter], 1400)
+      break
+    }
+    case 'chairSit': {
+      // Sit in the desk chair: the controller settles the player onto the seat
+      // and locks movement; look stays free. Press E again to stand.
+      const [cx, , cz] = ANCHORS.chair.pos
+      player.setSeatPose({ x: cx, z: cz + 0.05, yaw: 0 })
       break
     }
     default:

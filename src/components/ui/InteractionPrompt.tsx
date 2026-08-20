@@ -6,22 +6,28 @@ import { usePlayerStore } from '../../store/usePlayerStore'
 export function InteractionPrompt() {
   const focus = useInteractionStore((s) => s.focus)
   const isTouch = usePlayerStore((s) => s.isTouch)
+  const seated = usePlayerStore((s) => s.seatPose !== null)
+
+  // While seated, always offer to stand (even with nothing else in focus).
+  const label = seated ? 'Desk Chair' : focus?.label
+  const prompt = seated ? 'Stand up' : focus?.prompt
+  const show = seated || !!focus
 
   return (
     <div className="pointer-events-none absolute left-1/2 top-[58%] z-10 -translate-x-1/2">
       <AnimatePresence>
-        {focus && (
+        {show && (
           <motion.div
-            key={focus.id}
+            key={seated ? 'seated' : focus?.id}
             initial={{ opacity: 0, y: 8 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 4 }}
             transition={{ duration: 0.18 }}
             className="hud-panel px-4 py-2 text-center"
           >
-            <div className="text-sm font-semibold text-white">{focus.label}</div>
+            <div className="text-sm font-semibold text-white">{label}</div>
             <div className="mt-0.5 font-mono text-[10px] uppercase tracking-[0.2em] text-accent-soft">
-              {isTouch ? `Tap E — ${focus.prompt}` : `[E] / Click — ${focus.prompt}`}
+              {isTouch ? `Tap E — ${prompt}` : `[E] / Click — ${prompt}`}
             </div>
           </motion.div>
         )}

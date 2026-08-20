@@ -245,7 +245,34 @@ demo:
   with the procedural mesh as the LOW-tier / missing-file fallback. Nothing heavy
   is bundled — see `public/models/README.md` for why and how.
 
-All of this still respects the LOW/MEDIUM/HIGH tiers and the mobile auto-downgrade.
+### First-person presence & immersion
+
+You're not a floating camera — you're a person in the room:
+
+- **Body**: low-poly forearms + hands (ARDA's dark hoodie sleeves) ride with the
+  view, lit by the real room lights. They breathe at idle, swing while walking,
+  swing harder when running, and make a short reach when you interact — no
+  weapon-style animation. A soft contact shadow follows you on the floor (you
+  see it under you when you look down), scaled by quality tier.
+- **Movement feel**: the existing inertia/head-bob gains a very subtle lateral
+  sway (a body shifting weight), a small sprint FOV, and a smooth settle when
+  you stop. Camera pitch is clamped to ~±80°.
+- **Sit**: walk up to the desk chair for **E · Sit** — the view eases down to a
+  seated height and movement locks; **E · Stand up** returns you. (The bed keeps
+  its Rest panel.)
+- **Footsteps** now respond to the floor — wood, carpet (rugs), tile
+  (kitchen/bath) and the balcony deck each sound different, with per-step
+  variation and a louder/brisker cadence when running.
+- **Audio ambience**: a barely-there environmental bed (distant air/city) tracks
+  the time of day — livelier by day, quieter at night — and a light per-room
+  reverb makes the tiled kitchen/bath ring a touch while the bedroom stays soft.
+  All synthesized, no audio files shipped.
+- **Mirror**: the bedroom mirror shows a real reflection of the room on HIGH,
+  and a simple polished plane on MEDIUM/LOW to keep mobile fast.
+
+The hands hide while a panel or cinematic owns the view, everything reads from a
+tiny ref-based motion channel (no per-frame React state), and it all still obeys
+the LOW/MEDIUM/HIGH tiers and mobile auto-downgrade.
 
 ## Assets & licenses
 

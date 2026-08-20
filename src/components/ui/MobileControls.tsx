@@ -136,6 +136,9 @@ function LookArea() {
 
 function ActionButtons() {
   const focus = useInteractionStore((s) => s.focus)
+  const seated = usePlayerStore((s) => s.seatPose !== null)
+  const prompt = seated ? 'Stand up' : focus?.prompt
+  const showInteract = seated || !!focus
 
   return (
     <div
@@ -145,8 +148,8 @@ function ActionButtons() {
         bottom: 'max(1.25rem, env(safe-area-inset-bottom))',
       }}
     >
-      {/* Contextual interact — only visible when something is in focus */}
-      {focus && (
+      {/* Contextual interact — visible only near an object, or to stand up */}
+      {showInteract && (
         <button
           className="pointer-events-auto flex flex-col items-center rounded-2xl border border-accent/50 bg-accent/20 px-5 py-2 backdrop-blur-sm transition active:scale-95 active:bg-accent/30"
           onPointerDown={(e) => {
@@ -155,11 +158,11 @@ function ActionButtons() {
             haptic(12)
             usePlayerStore.getState().requestInteract()
           }}
-          aria-label={focus.prompt}
+          aria-label={prompt}
         >
           <span className="font-mono text-base font-bold text-accent-soft">E</span>
           <span className="mt-0.5 font-mono text-[9px] uppercase tracking-[0.15em] text-white/70">
-            {focus.prompt}
+            {prompt}
           </span>
         </button>
       )}

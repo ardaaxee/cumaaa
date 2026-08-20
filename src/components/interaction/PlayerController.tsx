@@ -6,12 +6,15 @@ import { useRoomStore } from '../../store/useRoomStore'
 import { PLAYER, HALF_D } from '../../config/roomLayout'
 import { resolveCollision } from '../../systems/collisionSystem'
 import { Sfx } from '../../systems/audioSystem'
+import { playerMotion } from '../../systems/playerMotion'
+import { surfaceAt } from '../../systems/surfaces'
 
 const PITCH_LIMIT = 1.396 // ~80° — can't fully flip the head over
 const MOUSE_SENS = 0.0022
 const TOUCH_SENS = 0.0045
 const GRAVITY = 16 // m/s² — a grounded, non-arcade fall
 const JUMP_V0 = 3.0 // ≈ 0.28 m hop, uses the same collision floor
+const SIT_EYE = 1.18 // sitting eye height
 
 // First-person controller. Desktop = pointer-lock mouse look + WASD.
 // Mobile = joystick move + touch-drag look (fed via usePlayerStore).
@@ -141,6 +144,22 @@ export function PlayerController() {
     }
     applyRotation()
 
+    // --- Seated: lock movement, settle to a sitting eye height --------------
+    // Look still works; the player eases into the seat and back out on stand.
+    if (p.seatPose) {
+      const e = Math.min(1, delta * 6)
+      camera.position.x += (p.seatPose.x - camera.position.x) * e
+      camera.position.z += (p.seatPose.z - camera.position.z) * e
+      camera.position.y += (SIT_EYE - camera.position.y) * e
+      vel.current.set(0, 0)
+      playerMotion.speed = 0
+      playerMotion.moving = false
+      playerMotion.running = false
+      playerMotion.x = camera.position.x
+      playerMotion.z = camera.position.z
+      return
+    }
+
     // --- Movement (with inertia) --------------------------------------------
     let mx = 0
     let mz = 0
@@ -217,9 +236,14 @@ export function PlayerController() {
       bobPhase.current += moved * 7.2
       const amp = 0.012 + Math.min(1, speed2 / PLAYER.speed) * 0.014
       camera.position.y = PLAYER.eyeHeight + Math.sin(bobPhase.current) * amp + jumpOffset.current
+      // Very subtle lateral sway (half the bob rate) so it reads as a body
+      // shifting weight, not a floating camera. Applied along the view-right.
+      const sway = Math.sin(bobPhase.current * 0.5) * amp * 0.6
+      camera.position.x += Math.cos(yaw.current) * sway
+      camera.position.z += -Math.sin(yaw.current) * sway
       const s = Math.sin(bobPhase.current)
       if (s < -0.85 && stepArmed.current) {
-        Sfx.footstep()
+        Sfx.footstep(surfaceAt(camera.position.x, camera.position.z), sprint)
         stepArmed.current = false
       } else if (s > 0) {
         stepArmed.current = true
@@ -233,6 +257,15 @@ export function PlayerController() {
         camera.position.y += (PLAYER.eyeHeight - camera.position.y) * Math.min(1, delta * 8)
       }
     }
+
+    // Publish motion for the first-person body, footstep pacing + blob shadow.
+    playerMotion.x = camera.position.x
+    playerMotion.z = camera.position.z
+    playerMotion.speed = speed2
+    playerMotion.bobPhase = bobPhase.current
+    playerMotion.running = sprint && speed2 > 0.5
+    playerMotion.moving = speed2 > 0.4
+    playerMotion.grounded = grounded
   })
 
   return null

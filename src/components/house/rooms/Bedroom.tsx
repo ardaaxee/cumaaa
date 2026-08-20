@@ -1,6 +1,8 @@
 import { useMemo } from 'react'
+import { MeshReflectorMaterial } from '@react-three/drei'
 import { useCollider } from '../../furniture/useCollider'
 import { fabric } from '../../../utils/textures'
+import { useRoomStore } from '../../../store/useRoomStore'
 import { CeilingLamp, Rug, FramedArt } from '../props'
 import { WindowDaylight } from '../Window'
 
@@ -11,6 +13,7 @@ export function Bedroom() {
   const sheet = useMemo(() => fabric('#c4bcae', 'bd_sheet'), [])
   const pillow = useMemo(() => fabric('#d4ccbe', 'bd_pillow'), [])
   const clothes = useMemo(() => fabric('#5a6b7a', 'bd_clothes'), [])
+  const quality = useRoomStore((s) => s.settings.quality)
 
   const bx = -2.25
   const bedZ = 20.9
@@ -121,14 +124,28 @@ export function Bedroom() {
             <meshStandardMaterial color="#3a2c1c" roughness={0.6} />
           </mesh>
         ))}
-        {/* wall mirror above */}
+        {/* wall mirror above — a real reflection on HIGH, a simple polished
+            plane on MEDIUM/LOW to keep mobile fast */}
         <mesh position={[0, 1.7, 0.02]}>
           <boxGeometry args={[0.66, 0.9, 0.04]} />
           <meshStandardMaterial color="#2a241c" roughness={0.5} />
         </mesh>
         <mesh position={[0, 1.7, 0.041]}>
           <planeGeometry args={[0.56, 0.8]} />
-          <meshStandardMaterial color="#8fa0a8" metalness={0.9} roughness={0.08} envMapIntensity={1} />
+          {quality === 'high' ? (
+            <MeshReflectorMaterial
+              mirror={1}
+              resolution={256}
+              mixBlur={1}
+              mixStrength={1.1}
+              blur={[120, 60]}
+              roughness={0.12}
+              metalness={0.55}
+              color="#aab4bb"
+            />
+          ) : (
+            <meshStandardMaterial color="#8fa0a8" metalness={0.9} roughness={0.08} envMapIntensity={1} />
+          )}
         </mesh>
         {/* small perfume/box on top */}
         <mesh position={[0.4, 1.06, 0]} castShadow>

@@ -21,6 +21,10 @@ interface PlayerState {
   // Sprint intent held down (mobile RUN button; desktop uses Shift directly).
   sprintHeld: boolean
 
+  // Seated pose (sitting in the desk chair), or null when standing. While set,
+  // movement is locked and the camera settles to a sitting eye height.
+  seatPose: { x: number; z: number; yaw: number } | null
+
   // Bumped to request a jump (mobile JUMP button / Space key).
   jumpNonce: number
 
@@ -45,6 +49,7 @@ interface PlayerState {
   consumeLook: () => { yaw: number; pitch: number }
   setInputEnabled: (v: boolean) => void
   setSprintHeld: (v: boolean) => void
+  setSeatPose: (p: PlayerState['seatPose']) => void
   requestJump: () => void
   requestInteract: () => void
   setFocusTarget: (t: PlayerState['focusTarget']) => void
@@ -60,6 +65,7 @@ export const usePlayerStore = create<PlayerState>((set, get) => ({
   lookPitch: 0,
   inputEnabled: true,
   sprintHeld: false,
+  seatPose: null,
   jumpNonce: 0,
   interactNonce: 0,
   focusTarget: null,
@@ -77,6 +83,7 @@ export const usePlayerStore = create<PlayerState>((set, get) => ({
   },
   setInputEnabled: (v) => set({ inputEnabled: v }),
   setSprintHeld: (v) => set({ sprintHeld: v }),
+  setSeatPose: (p) => set({ seatPose: p }),
   requestJump: () => set((s) => ({ jumpNonce: s.jumpNonce + 1 })),
   requestInteract: () => set((s) => ({ interactNonce: s.interactNonce + 1 })),
   setFocusTarget: (t) => set({ focusTarget: t }),
