@@ -19,7 +19,6 @@ import { Details } from '../furniture/Details'
 import { Clutter } from '../furniture/Clutter'
 import { MemoryObjects } from './MemoryObjects'
 import { PlayerController } from '../interaction/PlayerController'
-import { FirstPersonBody } from './FirstPersonBody'
 import { PlayerShadow } from './PlayerShadow'
 import { RemotePlayers } from '../multiplayer/RemotePlayers'
 import { NetworkBridge } from '../multiplayer/NetworkBridge'
@@ -84,7 +83,6 @@ export function Scene({ quality }: { quality: GraphicsQuality }) {
       ))}
 
       <PlayerController />
-      <FirstPersonBody quality={quality} />
       <PlayerShadow quality={quality} />
       <RemotePlayers quality={quality} />
       <NetworkBridge />

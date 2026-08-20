@@ -1,9 +1,10 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { AnimatePresence } from 'framer-motion'
 import { usePlayerStore } from '../../store/usePlayerStore'
 import { useRoomStore } from '../../store/useRoomStore'
 import { useMultiplayerStore } from '../../store/useMultiplayerStore'
 import { CoopPanel } from './CoopPanel'
+import { ChatPanel } from './ChatPanel'
 import { MovieNightPanel } from '../movie/MovieNightPanel'
 import { HudClock } from './HudClock'
 import { Crosshair } from './Crosshair'
@@ -30,6 +31,40 @@ export function Hud() {
   const inHome = useMultiplayerStore((s) => s.roomId !== null)
   const netConnected = netPhase === 'open' && inHome
   const moviePanelOpen = useMultiplayerStore((s) => s.moviePanelOpen)
+  const chatOpen = useMultiplayerStore((s) => s.chatOpen)
+  const unreadChat = useMultiplayerStore((s) => s.unreadChat)
+  const setChatOpen = useMultiplayerStore((s) => s.setChatOpen)
+
+  // ENTER opens chat, ESC closes it — the shortcut people already expect. Only
+  // while no other panel owns the screen, and never mid-typing.
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      const el = document.activeElement
+      const typing = el instanceof HTMLInputElement || el instanceof HTMLTextAreaElement
+      if (e.code === 'Escape' && useMultiplayerStore.getState().chatOpen) {
+        setChatOpen(false)
+        return
+      }
+      if (e.code !== 'Enter' || typing) return
+      if (useRoomStore.getState().activePanel !== null) return
+      if (useMultiplayerStore.getState().moviePanelOpen) return
+      setChatOpen(true)
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [setChatOpen])
+
+  // Park movement while the chat panel is up, driven by the flag (not by the
+  // panel's unmount) so closing always restores control immediately. Input is
+  // only handed back if no other panel still owns the screen.
+  useEffect(() => {
+    if (!chatOpen) return
+    usePlayerStore.getState().setInputEnabled(false)
+    return () => {
+      const busy = useRoomStore.getState().activePanel !== null || useMultiplayerStore.getState().moviePanelOpen
+      if (!busy) usePlayerStore.getState().setInputEnabled(true)
+    }
+  }, [chatOpen])
 
   return (
     <div className="pointer-events-none absolute inset-0 z-20">
@@ -47,6 +82,20 @@ export function Hud() {
             }}
           >
             ⌂ ARDA OS
+          </button>
+          <button
+            className="hud-btn relative !px-2 !py-1 text-[11px]"
+            onClick={() => {
+              Sfx.open()
+              setChatOpen(true)
+            }}
+          >
+            ✉ CHAT
+            {unreadChat > 0 && (
+              <span className="absolute -right-1.5 -top-1.5 min-w-[16px] rounded-full bg-accent px-1 text-[9px] font-bold leading-4 text-black">
+                {unreadChat > 9 ? '9+' : unreadChat}
+              </span>
+            )}
           </button>
           <button
             className="hud-btn !px-2 !py-1 text-[11px]"
@@ -69,6 +118,7 @@ export function Hud() {
 
       <AnimatePresence>{coopOpen && <CoopPanel key="coop" onClose={() => setCoopOpen(false)} />}</AnimatePresence>
       <AnimatePresence>{moviePanelOpen && <MovieNightPanel key="movie" />}</AnimatePresence>
+      <AnimatePresence>{chatOpen && <ChatPanel key="chat" onClose={() => { Sfx.close(); setChatOpen(false) }} />}</AnimatePresence>
 
       {/* Bottom-left profile / controls hint */}
       <div className="absolute bottom-4 left-4 hidden font-mono text-[10px] leading-relaxed text-white/35 sm:block">
@@ -78,7 +128,7 @@ export function Hud() {
       </div>
 
       {/* Center reticle + prompt (movement HUD) */}
-      {!panelOpen && !moviePanelOpen && (
+      {!panelOpen && !moviePanelOpen && !chatOpen && (
         <>
           <Crosshair />
           <InteractionPrompt />

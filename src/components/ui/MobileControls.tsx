@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
+import { useMultiplayerStore } from '../../store/useMultiplayerStore'
 import { usePlayerStore } from '../../store/usePlayerStore'
 import { useInteractionStore } from '../../systems/interactionSystem'
 import { Sfx } from '../../systems/audioSystem'
@@ -168,6 +169,7 @@ function ActionButtons() {
       )}
 
       <div className="flex items-end gap-3">
+        <ChatButton />
         <RunButton />
         <HoldlessButton
           label="JUMP"
@@ -178,6 +180,31 @@ function ActionButtons() {
         />
       </div>
     </div>
+  )
+}
+
+// CHAT: opens the message panel, with the unread count on the badge.
+function ChatButton() {
+  const unread = useMultiplayerStore((s) => s.unreadChat)
+  const setChatOpen = useMultiplayerStore((s) => s.setChatOpen)
+  return (
+    <button
+      className="pointer-events-auto relative flex h-16 w-16 items-center justify-center rounded-full border border-white/20 bg-black/25 font-mono text-[10px] font-bold uppercase tracking-wider text-white/80 backdrop-blur-sm transition active:scale-90 active:bg-white/10"
+      onPointerDown={(e) => {
+        e.stopPropagation()
+        Sfx.open()
+        haptic(10)
+        setChatOpen(true)
+      }}
+      aria-label="Open chat"
+    >
+      CHAT
+      {unread > 0 && (
+        <span className="absolute -right-0.5 -top-0.5 min-w-[18px] rounded-full bg-accent px-1 text-[10px] font-bold leading-[18px] text-black">
+          {unread > 9 ? '9+' : unread}
+        </span>
+      )}
+    </button>
   )
 }
 

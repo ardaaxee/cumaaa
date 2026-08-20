@@ -134,6 +134,30 @@ export function expectedMovieTime(movie: MovieState, now = Date.now()): number {
   return movie.time + (now - movie.updatedAt) / 1000
 }
 
+// ---- Chat -----------------------------------------------------------------
+
+export const CHAT_MAX_LEN = 220
+export const CHAT_HISTORY = 60 // messages kept per home (server + client)
+export const CHAT_MIN_GAP_MS = 350 // per-player flood guard
+
+export interface ChatMessage {
+  id: string
+  from: string // sender's player id
+  name: string // display name at send time
+  text: string
+  at: number // server clock (ms)
+}
+
+// The one-tap phrases in the chat panel — the things you actually say while
+// moving around a shared home.
+export const QUICK_MESSAGES = [
+  'Buraya gel',
+  'Salona geçelim',
+  'Film açalım',
+  'Mutfaktayım',
+  'Geliyorum',
+] as const
+
 // ---- Wire messages --------------------------------------------------------
 
 export type ClientMessage =
@@ -141,12 +165,14 @@ export type ClientMessage =
   | { t: 'join'; roomId: string; name: string }
   | { t: 'state'; p: PlayerNetState }
   | { t: 'event'; event: WorldEvent }
+  | { t: 'chat'; text: string }
   | { t: 'ping' }
 
 export type ServerErrorCode = 'HOME_NOT_FOUND' | 'ROOM_FULL' | 'BAD_REQUEST'
 
 export type ServerMessage =
-  | { t: 'welcome'; roomId: string; playerId: string; role: PlayerRole; peers: PeerInfo[]; room: RoomState }
+  | { t: 'welcome'; roomId: string; playerId: string; role: PlayerRole; peers: PeerInfo[]; room: RoomState; chat: ChatMessage[] }
+  | { t: 'chat'; message: ChatMessage }
   | { t: 'error'; code: ServerErrorCode }
   | { t: 'peer_join'; peer: PeerInfo }
   | { t: 'peer_leave'; playerId: string }
@@ -213,6 +239,17 @@ const EVENT_KINDS: WorldEventKind[] = [
   'MOVIE_MODE_CHANGED',
   'SNACK_TAKEN',
 ]
+
+// Chat is user text going straight to another person's screen, so it is
+// stripped of control characters, collapsed and length-capped here — on the
+// SERVER as well as the client. Rendering is plain text (React escapes it), so
+// no markup can survive this path.
+export function sanitizeChatText(raw: unknown): string | null {
+  if (typeof raw !== 'string') return null
+  // eslint-disable-next-line no-control-regex
+  const cleaned = raw.replace(/[\u0000-\u001f\u007f-\u009f]/g, ' ').replace(/\s+/g, ' ').trim().slice(0, CHAT_MAX_LEN)
+  return cleaned.length ? cleaned : null
+}
 
 export function sanitizeEvent(raw: unknown): WorldEvent | null {
   if (!raw || typeof raw !== 'object') return null

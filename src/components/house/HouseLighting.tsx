@@ -35,6 +35,16 @@ const bounces: { pos: [number, number, number]; color: string; intensity: number
   { pos: [-2.25, 2.7, 18.5], color: '#8d93a3', intensity: 0.2, distance: 11 },
   // bathroom
   { pos: [3.5, 0.6, 16.5], color: '#9fa6ab', intensity: 0.26, distance: 8 },
+  // north wing: corridor, bedrooms 2-4, family bathroom, laundry
+  // the corridor is 16 m long — one bounce left its west end black
+  { pos: [-4, 0.5, 23.5], color: '#a9855e', intensity: 0.24, distance: 12 },
+  { pos: [4, 0.5, 23.5], color: '#a9855e', intensity: 0.24, distance: 12 },
+  { pos: [-9, 0.5, 24.5], color: '#a9855e', intensity: 0.28, distance: 10 },
+  { pos: [-9, 2.6, 24.5], color: '#8d93a3', intensity: 0.18, distance: 10 },
+  { pos: [-3, 0.5, 28], color: '#a9855e', intensity: 0.28, distance: 10 },
+  { pos: [3, 0.5, 28], color: '#a9855e', intensity: 0.28, distance: 10 },
+  { pos: [12, 0.6, 23.2], color: '#9fa6ab', intensity: 0.24, distance: 8 },
+  { pos: [12, 0.6, 27.2], color: '#a3a69f', intensity: 0.24, distance: 8 },
 ]
 
 export function HouseLighting({ quality }: { quality: GraphicsQuality }) {
@@ -58,7 +68,7 @@ export function HouseLighting({ quality }: { quality: GraphicsQuality }) {
 
   useFrame(() => {
     if (sun.current) {
-      sun.current.target.position.set(-1, 0.4, 14)
+      sun.current.target.position.set(0, 0.4, 16)
       sun.current.target.updateMatrixWorld()
     }
     if (fill.current) {
@@ -80,11 +90,11 @@ export function HouseLighting({ quality }: { quality: GraphicsQuality }) {
         shadow-bias={-0.0004}
         shadow-normalBias={0.03}
         shadow-camera-near={0.5}
-        shadow-camera-far={40}
-        shadow-camera-left={-14}
-        shadow-camera-right={14}
-        shadow-camera-top={12}
-        shadow-camera-bottom={-12}
+        shadow-camera-far={60}
+        shadow-camera-left={-20}
+        shadow-camera-right={20}
+        shadow-camera-top={22}
+        shadow-camera-bottom={-22}
       />
       {/* cool window/exterior fill (no shadow) */}
       <directionalLight ref={fill} position={[-9, 3, 10]} color="#8aa2c4" intensity={fillIntensity} />

@@ -10,6 +10,10 @@ import {
   sanitizeName,
   sanitizeState,
   sanitizeEvent,
+  sanitizeChatText,
+  CHAT_HISTORY,
+  CHAT_MIN_GAP_MS,
+  type ChatMessage,
   type ClientMessage,
   type ServerMessage,
   type PlayerNetState,
@@ -33,12 +37,14 @@ interface Player {
   ws: WebSocket
   state: PlayerNetState
   alive: boolean
+  lastChatAt: number
 }
 
 interface Room {
   id: string
   players: Map<string, Player>
   state: RoomState
+  chat: ChatMessage[]
   emptySince: number | null
 }
 
@@ -73,7 +79,7 @@ function peerList(room: Room, exceptId?: string): PeerInfo[] {
 function createRoom(): Room {
   let code = generateRoomCode()
   while (rooms.has(code)) code = generateRoomCode()
-  const room: Room = { id: code, players: new Map(), state: emptyRoomState(code), emptySince: null }
+  const room: Room = { id: code, players: new Map(), state: emptyRoomState(code), chat: [], emptySince: null }
   rooms.set(code, room)
   return room
 }
@@ -88,6 +94,7 @@ function joinRoom(room: Room, ws: WebSocket, name: string): Player | null {
     ws,
     state: { x: 0, y: 1.62, z: 4, ry: 0, run: false, jump: false, sit: false },
     alive: true,
+    lastChatAt: 0,
   }
   room.players.set(player.id, player)
   room.emptySince = null
@@ -127,7 +134,7 @@ wss.on('connection', (ws) => {
         const player = joinRoom(room, ws, sanitizeName(msg.name))!
         roomId = room.id
         playerId = player.id
-        send(ws, { t: 'welcome', roomId: room.id, playerId: player.id, role: player.role, peers: peerList(room, player.id), room: room.state })
+        send(ws, { t: 'welcome', roomId: room.id, playerId: player.id, role: player.role, peers: peerList(room, player.id), room: room.state, chat: room.chat })
         break
       }
       case 'join': {
@@ -140,7 +147,7 @@ wss.on('connection', (ws) => {
         if (!player) return send(ws, { t: 'error', code: 'ROOM_FULL' })
         roomId = room.id
         playerId = player.id
-        send(ws, { t: 'welcome', roomId: room.id, playerId: player.id, role: player.role, peers: peerList(room, player.id), room: room.state })
+        send(ws, { t: 'welcome', roomId: room.id, playerId: player.id, role: player.role, peers: peerList(room, player.id), room: room.state, chat: room.chat })
         broadcast(room, { t: 'peer_join', peer: { id: player.id, name: player.name, role: player.role } }, player.id)
         break
       }
@@ -162,6 +169,28 @@ wss.on('connection', (ws) => {
         clean.by = playerId
         applyEvent(room.state, clean)
         broadcast(room, { t: 'event', event: clean }) // echo to all incl. sender
+        break
+      }
+      case 'chat': {
+        if (!roomId || !playerId) return
+        const room = rooms.get(roomId)
+        const player = room?.players.get(playerId)
+        if (!room || !player) return
+        const text = sanitizeChatText(msg.text)
+        if (!text) return
+        const now = Date.now()
+        if (now - player.lastChatAt < CHAT_MIN_GAP_MS) return // flood guard
+        player.lastChatAt = now
+        const message: ChatMessage = {
+          id: `m_${now.toString(36)}_${Math.random().toString(36).slice(2, 7)}`,
+          from: player.id,
+          name: player.name,
+          text,
+          at: now,
+        }
+        room.chat.push(message)
+        if (room.chat.length > CHAT_HISTORY) room.chat.splice(0, room.chat.length - CHAT_HISTORY)
+        broadcast(room, { t: 'chat', message }) // echo to all incl. sender
         break
       }
       case 'ping': {

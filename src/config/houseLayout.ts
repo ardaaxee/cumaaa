@@ -92,6 +92,7 @@ export const ROOMS: RoomBox[] = [
     openings: [
       { side: 'south', center: -0.6, half: GAP, height: DOOR_H },
       { side: 'east', center: 15.8, half: GAP, height: DOOR_H }, // to bathroom
+      { side: 'north', center: 0.4, half: GAP, height: DOOR_H }, // to the sleeping-wing corridor (clear of the bed)
     ],
     windows: [{ side: 'west', center: 19.5, width: 1.9, sillY: 0.9, height: 1.5, curtain: 'thick' }],
   },
@@ -108,7 +109,77 @@ export const ROOMS: RoomBox[] = [
     minX: 6, maxX: 9.5, minZ: 14, maxZ: 17, height: 2.5,
     openings: [{ side: 'south', center: 7.5, half: 0.5, height: DOOR_H }],
   },
+
+  // ---- North (sleeping) wing — what makes this a real 4+1 ------------------
+  // A cross corridor runs east–west behind the first bedroom and feeds three
+  // more bedrooms, the second bathroom and the laundry.
+  {
+    id: 'corridor',
+    minX: -6, maxX: 10, minZ: 22, maxZ: 25, height: 2.7,
+    openings: [
+      { side: 'south', center: 0.4, half: GAP, height: DOOR_H }, // to bedroom 1
+      { side: 'west', center: 23.5, half: GAP, height: DOOR_H }, // to bedroom 2
+      { side: 'north', center: -3, half: GAP, height: DOOR_H }, // to bedroom 3
+      { side: 'north', center: 3, half: GAP, height: DOOR_H }, // to bedroom 4
+      { side: 'east', center: 23.5, half: GAP, height: DOOR_H }, // to bathroom 2
+    ],
+  },
+  // Bedroom 2 — west end of the corridor, window facing west.
+  {
+    id: 'bedroom2',
+    minX: -12, maxX: -6, minZ: 21, maxZ: 28, height: 2.85,
+    openings: [{ side: 'east', center: 23.5, half: GAP, height: DOOR_H }],
+    windows: [{ side: 'west', center: 24.5, width: 1.7, sillY: 0.9, height: 1.45, curtain: 'thick' }],
+  },
+  // Bedroom 3 — north-west, window facing north.
+  {
+    id: 'bedroom3',
+    minX: -6, maxX: 0, minZ: 25, maxZ: 31, height: 2.85,
+    openings: [{ side: 'south', center: -3, half: GAP, height: DOOR_H }],
+    windows: [{ side: 'north', center: -3, width: 1.7, sillY: 0.9, height: 1.45, curtain: 'sheer' }],
+  },
+  // Bedroom 4 — north-east, window facing north.
+  {
+    id: 'bedroom4',
+    minX: 0, maxX: 6, minZ: 25, maxZ: 31, height: 2.85,
+    openings: [{ side: 'south', center: 3, half: GAP, height: DOOR_H }],
+    windows: [{ side: 'north', center: 3, width: 1.7, sillY: 0.9, height: 1.45, curtain: 'sheer' }],
+  },
+  // Second (family) bathroom — off the east end of the corridor.
+  {
+    id: 'bathroom2',
+    minX: 10, maxX: 14, minZ: 21, maxZ: 25.5, height: 2.6,
+    openings: [
+      { side: 'west', center: 23.5, half: GAP, height: DOOR_H },
+      { side: 'north', center: 12, half: 0.5, height: DOOR_H }, // to laundry
+    ],
+    windows: [{ side: 'east', center: 23.2, width: 0.8, sillY: 1.35, height: 0.85, curtain: 'frosted', frosted: true }],
+  },
+  // Laundry / utility — behind the second bathroom.
+  {
+    id: 'laundry',
+    minX: 10, maxX: 14, minZ: 25.5, maxZ: 29, height: 2.55,
+    openings: [{ side: 'south', center: 12, half: 0.5, height: DOOR_H }],
+  },
 ]
+
+// Where a player can be placed when joining, per room id. Used for spawns and
+// as the anchor each room's furniture is laid out around.
+export const SPAWN_POINTS: Record<string, [number, number]> = {
+  study: [0, 3],
+  hallway: [0, 10],
+  living: [-5.75, 10],
+  kitchen: [5.5, 9.5],
+  bedroom: [-2.25, 18],
+  bathroom: [3.4, 16.5],
+  storage: [7.75, 15.5],
+  corridor: [2, 23.5],
+  bedroom2: [-9, 24.5],
+  bedroom3: [-3, 28],
+  bedroom4: [3, 28],
+  bathroom2: [12, 23],
+  laundry: [12, 27],
+}
 
 // Balcony hangs off the living room's west wall — open railing, no full walls.
 export const BALCONY = { minX: -12.6, maxX: -10, minZ: 8, maxZ: 12, height: 2.9 }

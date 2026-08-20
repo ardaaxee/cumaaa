@@ -1,7 +1,7 @@
 import { useEffect, useMemo } from 'react'
 import * as THREE from 'three'
 import { registerCollider, unregisterCollider } from '../../systems/collisionSystem'
-import { WALL_T, type RoomBox, type WindowSpec } from '../../config/houseLayout'
+import { WALL_T, type Opening, type RoomBox, type WindowSpec } from '../../config/houseLayout'
 import { Window } from './Window'
 
 export interface SurfaceMat {
@@ -135,8 +135,26 @@ function computeWalls(room: RoomBox): { colliders: BoxSpec[]; panels: BoxSpec[];
   const colliders: BoxSpec[] = []
   const panels: BoxSpec[] = []
   const lintels: BoxSpec[] = []
-  const opening = (side: string) => room.openings.find((o) => o.side === side)
+  // A wall may carry SEVERAL doorways (the sleeping-wing corridor feeds two
+  // bedrooms off one wall), so openings are collected and sorted, not just
+  // "find the first one".
+  const openingsOf = (side: string) =>
+    room.openings.filter((o) => o.side === side).sort((a, b) => a.center - b.center)
   const winsOf = (side: string) => (room.windows ?? []).filter((w) => w.side === side)
+
+  // Split a wall run [lo, hi] into the solid segments left between its doorways.
+  const solidSegments = (lo: number, hi: number, ops: Opening[]): [number, number][] => {
+    const segs: [number, number][] = []
+    let cursor = lo
+    for (const o of ops) {
+      const gL = o.center - o.half
+      const gR = o.center + o.half
+      if (gL > cursor) segs.push([cursor, gL])
+      cursor = Math.max(cursor, gR)
+    }
+    if (hi > cursor) segs.push([cursor, hi])
+    return segs
+  }
 
   // Carve a wall segment (along one axis) into panels, punching any window whose
   // centre falls inside [a, b]. `makeBox(along, span, y, yh)` builds a mesh box
@@ -162,16 +180,9 @@ function computeWalls(room: RoomBox): { colliders: BoxSpec[]; panels: BoxSpec[];
     const z = zEdge + inset * (t / 2)
     const wins = winsOf(side)
     const box = (x: number, span: number, y: number, yh: number): BoxSpec => ({ pos: [x, y, z], size: [span, yh, t] })
-    const o = opening(side)
-    let segs: [number, number][]
-    if (!o) {
-      segs = [[minX, maxX]]
-    } else {
-      const gL = o.center - o.half
-      const gR = o.center + o.half
-      segs = []
-      if (gL > minX) segs.push([minX, gL])
-      if (maxX > gR) segs.push([gR, maxX])
+    const ops = openingsOf(side)
+    const segs = solidSegments(minX, maxX, ops)
+    for (const o of ops) {
       lintels.push({ pos: [o.center, (o.height + H) / 2, z], size: [o.half * 2, H - o.height, t] })
     }
     for (const [a, b] of segs) {
@@ -183,16 +194,9 @@ function computeWalls(room: RoomBox): { colliders: BoxSpec[]; panels: BoxSpec[];
     const x = xEdge + inset * (t / 2)
     const wins = winsOf(side)
     const box = (zc: number, span: number, y: number, yh: number): BoxSpec => ({ pos: [x, y, zc], size: [t, yh, span] })
-    const o = opening(side)
-    let segs: [number, number][]
-    if (!o) {
-      segs = [[minZ, maxZ]]
-    } else {
-      const gL = o.center - o.half
-      const gR = o.center + o.half
-      segs = []
-      if (gL > minZ) segs.push([minZ, gL])
-      if (maxZ > gR) segs.push([gR, maxZ])
+    const ops = openingsOf(side)
+    const segs = solidSegments(minZ, maxZ, ops)
+    for (const o of ops) {
       lintels.push({ pos: [x, (o.height + H) / 2, o.center], size: [t, H - o.height, o.half * 2] })
     }
     for (const [a, b] of segs) {

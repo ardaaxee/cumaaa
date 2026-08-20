@@ -4,6 +4,9 @@ import {
   emptyRoomState,
   applyEvent,
   normalizeRoomCode,
+  CHAT_HISTORY,
+  sanitizeChatText,
+  type ChatMessage,
   type PeerInfo,
   type PlayerNetState,
   type PlayerRole,
@@ -37,6 +40,11 @@ interface MultiplayerState {
   world: RoomState
   lastError: ServerErrorCode | null
 
+  // Chat: history is shared, but `chatOpen` / `unreadChat` are local UI.
+  chat: ChatMessage[]
+  chatOpen: boolean
+  unreadChat: number
+
   // UI: is the Movie Night panel open on THIS client (local UI only).
   moviePanelOpen: boolean
 
@@ -45,6 +53,8 @@ interface MultiplayerState {
   leaveHome: () => void
   sendState: (p: PlayerNetState) => void
   toggleWorld: (event: WorldEvent) => void
+  sendChat: (text: string) => void
+  setChatOpen: (open: boolean) => void
   setMoviePanel: (open: boolean) => void
   clearError: () => void
 }
@@ -65,6 +75,8 @@ export const useMultiplayerStore = create<MultiplayerState>((set, get) => {
           role: msg.role,
           peers: msg.peers,
           world: msg.room,
+          chat: msg.chat,
+          unreadChat: 0,
           lastError: null,
         })
         // After a successful create/join, always reconnect by JOINING this room.
@@ -102,6 +114,16 @@ export const useMultiplayerStore = create<MultiplayerState>((set, get) => {
         })
         break
       }
+      case 'chat': {
+        set((s) => {
+          const chat = [...s.chat, msg.message].slice(-CHAT_HISTORY)
+          // Only a partner's message can be unread, and only while the panel is
+          // closed — your own echo never raises the badge.
+          const isOwn = msg.message.from === get().playerId
+          return { chat, unreadChat: isOwn || s.chatOpen ? s.unreadChat : s.unreadChat + 1 }
+        })
+        break
+      }
       case 'room': {
         set({ world: msg.room })
         break
@@ -135,6 +157,9 @@ export const useMultiplayerStore = create<MultiplayerState>((set, get) => {
     peers: [],
     world: emptyRoomState(''),
     lastError: null,
+    chat: [],
+    chatOpen: false,
+    unreadChat: 0,
     moviePanelOpen: false,
 
     createHome: (name) => {
@@ -158,7 +183,7 @@ export const useMultiplayerStore = create<MultiplayerState>((set, get) => {
       intent = null
       client?.close()
       peerStates.clear()
-      set({ phase: 'idle', roomId: null, playerId: null, role: null, peers: [], world: emptyRoomState(''), lastError: null })
+      set({ phase: 'idle', roomId: null, playerId: null, role: null, peers: [], world: emptyRoomState(''), lastError: null, chat: [], unreadChat: 0, chatOpen: false })
     },
     sendState: (p) => {
       client?.send({ t: 'state', p })
@@ -172,6 +197,14 @@ export const useMultiplayerStore = create<MultiplayerState>((set, get) => {
       })
       client?.send({ t: 'event', event })
     },
+    sendChat: (text) => {
+      // The server re-sanitises and stamps the message, then echoes it back —
+      // so we deliberately do NOT append optimistically (no duplicate bubbles).
+      const clean = sanitizeChatText(text)
+      if (!clean) return
+      client?.send({ t: 'chat', text: clean })
+    },
+    setChatOpen: (open) => set({ chatOpen: open, unreadChat: open ? 0 : get().unreadChat }),
     setMoviePanel: (open) => set({ moviePanelOpen: open }),
     clearError: () => set({ lastError: null }),
   }
