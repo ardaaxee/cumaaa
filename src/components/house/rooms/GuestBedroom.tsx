@@ -1,10 +1,13 @@
-import { useMemo } from 'react'
+import { useMemo, useRef } from 'react'
+import { useFrame } from '@react-three/fiber'
+import * as THREE from 'three'
 import { useCollider } from '../../furniture/useCollider'
 import { fabric } from '../../../utils/textures'
 import { CeilingLamp, Rug, FramedArt } from '../props'
 import { WindowDaylight } from '../Window'
 import { Panel } from '../../furniture/Panel'
 import { seeded, jitter, shadeVary } from '../../../systems/imperfections'
+import { useOpenable } from '../../../systems/world'
 import { center as roomCenter, type RoomBox } from '../../../config/houseLayout'
 
 export interface BedroomStyle {
@@ -135,17 +138,7 @@ export function GuestBedroom({
         <Panel args={[0.6, 2, 1.5]} radius={0.016} position={[0, 1, 0]} receiveShadow>
           <meshStandardMaterial color={style.wood} roughness={0.62} />
         </Panel>
-        {[-0.37, 0.37].map((dz, i) => (
-          <group key={i}>
-            <Panel args={[0.03, 1.9, 0.7]} radius={0.008} position={[0.305, 1, dz]}>
-              <meshStandardMaterial color={shadeVary(style.wood, seeded(`${id}wd${i}`), 0.08)} roughness={0.6} />
-            </Panel>
-            <mesh position={[0.325, 1, dz + (i ? -0.28 : 0.28)]}>
-              <cylinderGeometry args={[0.009, 0.009, 0.16, 8]} />
-              <meshStandardMaterial color="#b8ae96" metalness={0.75} roughness={0.32} />
-            </mesh>
-          </group>
-        ))}
+        <WardrobeDoors id={id} wood={style.wood} accent={style.accent} />
         {/* A little life: folded clothes and a book dropped by the wardrobe */}
         <Panel args={[0.26, 0.05, 0.2]} radius={0.016} position={[0.55, 0.03, 0.5]} rotation={[0, 0.3, 0]}>
           <meshStandardMaterial color={style.accent} map={cloth.map} normalMap={cloth.normalMap} roughness={0.95} />
@@ -156,6 +149,62 @@ export function GuestBedroom({
       </group>
 
       <FramedArt position={art.pos} rotation={[0, art.rotY, 0]} w={0.45} h={0.55} tone={[style.accent, '#2e2a24', '#c9a06a']} />
+    </group>
+  )
+}
+
+// Two doors hinged at the wardrobe's outer edges. Opening reveals a hanging
+// rail with clothes on it rather than an empty box — an empty cupboard reads as
+// unfinished the moment you open it.
+function WardrobeDoors({ id, wood, accent }: { id: string; wood: string; accent: string }) {
+  const open = useOpenable(`${id}-wardrobe`)
+  const left = useRef<THREE.Group>(null)
+  const right = useRef<THREE.Group>(null)
+  const swing = useRef(0)
+
+  useFrame((_, delta) => {
+    swing.current += ((open ? 1 : 0) - swing.current) * Math.min(1, delta * 7)
+    const a = swing.current * 1.9
+    if (left.current) left.current.rotation.y = -a
+    if (right.current) right.current.rotation.y = a
+  })
+
+  return (
+    <group>
+      {open && (
+        <group position={[0.02, 1, 0]}>
+          {/* hanging rail + clothes */}
+          <mesh position={[0, 0.62, 0]} rotation={[Math.PI / 2, 0, 0]}>
+            <cylinderGeometry args={[0.012, 0.012, 1.36, 8]} />
+            <meshStandardMaterial color="#b8ae96" metalness={0.7} roughness={0.35} />
+          </mesh>
+          {[-0.5, -0.28, -0.06, 0.16, 0.4].map((z, i) => (
+            <Panel key={i} args={[0.36, 0.72, 0.07]} radius={0.02} position={[0.04, 0.2, z]} rotation={[0, jitter(seeded(`${id}cl${i}`), 0.14), 0]}>
+              <meshStandardMaterial color={shadeVary(i % 2 ? accent : wood, seeded(`${id}c${i}`), 0.18)} roughness={0.92} />
+            </Panel>
+          ))}
+          {/* folded stack on the base shelf */}
+          {[0, 1, 2].map((i) => (
+            <Panel key={i} args={[0.4, 0.06, 0.3]} radius={0.02} position={[0.02, -0.72 + i * 0.07, 0.42]}>
+              <meshStandardMaterial color={shadeVary('#b9b2a4', seeded(`${id}f${i}`), 0.1)} roughness={0.95} />
+            </Panel>
+          ))}
+        </group>
+      )}
+      {[
+        { ref: left, dz: -0.37, handleZ: -0.1 },
+        { ref: right, dz: 0.37, handleZ: 0.1 },
+      ].map((d, i) => (
+        <group key={i} ref={d.ref} position={[0.29, 1, d.dz + (i ? 0.37 : -0.37)]}>
+          <Panel args={[0.03, 1.9, 0.7]} radius={0.008} position={[0.015, 0, i ? -0.37 : 0.37]} castShadow>
+            <meshStandardMaterial color={shadeVary(wood, seeded(`${id}wd${i}`), 0.08)} roughness={0.6} />
+          </Panel>
+          <mesh position={[0.035, 0, d.handleZ + (i ? -0.37 : 0.37)]}>
+            <cylinderGeometry args={[0.009, 0.009, 0.16, 8]} />
+            <meshStandardMaterial color="#b8ae96" metalness={0.75} roughness={0.32} />
+          </mesh>
+        </group>
+      ))}
     </group>
   )
 }

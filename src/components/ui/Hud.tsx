@@ -16,6 +16,7 @@ import { MobileControls } from './MobileControls'
 import { OrientationGate } from './OrientationGate'
 import { ClickToLook } from './ClickToLook'
 import { HomeMap } from './HomeMap'
+import { WeatherControl } from './WeatherControl'
 import { Sfx } from '../../systems/audioSystem'
 
 // The in-world heads-up display. Only the movement HUD (crosshair, joystick,
@@ -93,6 +94,7 @@ export function Hud() {
           >
             ▤ CUMA OS
           </button>
+          <WeatherControl />
           <button
             className="hud-btn relative !px-2 !py-1 text-[11px]"
             onClick={() => {

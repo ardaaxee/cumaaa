@@ -23,6 +23,45 @@ import { useRoomStore } from './useRoomStore'
 // a re-render. RemotePlayer reads its target from here each frame.
 export const peerStates = new Map<string, PlayerNetState>()
 
+// A shallow copy with every mutable bucket duplicated, so applyEvent's in-place
+// writes never touch the object React is already rendering. Written generically
+// on purpose: adding a bucket to RoomState used to mean remembering to extend
+// two hand-written spreads, and forgetting silently shared state.
+// The server's room state arrives as-is and REPLACES ours. A server running an
+// older build sends an object without the newer buckets, and every reader then
+// does `world.openables[id]` on undefined. Filling the gaps on arrival keeps a
+// version skew from crashing the client.
+function adoptWorld(w: RoomState): RoomState {
+  const base = emptyRoomState(w?.roomId ?? '')
+  return {
+    ...base,
+    ...w,
+    doors: { ...base.doors, ...w?.doors },
+    lights: { ...base.lights, ...w?.lights },
+    tv: { ...base.tv, ...w?.tv },
+    curtains: { ...base.curtains, ...w?.curtains },
+    snacks: { ...base.snacks, ...w?.snacks },
+    openables: { ...base.openables, ...w?.openables },
+    appliances: { ...base.appliances, ...w?.appliances },
+    weather: w?.weather ?? base.weather,
+    movie: { ...base.movie, ...w?.movie },
+  }
+}
+
+function cloneWorld(w: RoomState): RoomState {
+  return {
+    ...w,
+    doors: { ...w.doors },
+    lights: { ...w.lights },
+    tv: { ...w.tv },
+    curtains: { ...w.curtains },
+    snacks: { ...w.snacks },
+    openables: { ...w.openables },
+    appliances: { ...w.appliances },
+    movie: { ...w.movie },
+  }
+}
+
 function multiplayerUrl(): string {
   const env = (import.meta.env.VITE_MULTIPLAYER_URL as string | undefined)?.trim()
   if (env) return env
@@ -82,7 +121,7 @@ export const useMultiplayerStore = create<MultiplayerState>((set, get) => {
           playerId: msg.playerId,
           role: msg.role,
           peers: msg.peers,
-          world: msg.room,
+          world: adoptWorld(msg.room),
           chat: msg.chat,
           unreadChat: 0,
           home: msg.home,
@@ -119,7 +158,7 @@ export const useMultiplayerStore = create<MultiplayerState>((set, get) => {
       }
       case 'event': {
         set((s) => {
-          const world = { ...s.world, doors: { ...s.world.doors }, lights: { ...s.world.lights }, tv: { ...s.world.tv }, curtains: { ...s.world.curtains }, snacks: { ...s.world.snacks } }
+          const world = cloneWorld(s.world)
           applyEvent(world, msg.event)
           return { world }
         })
@@ -144,7 +183,7 @@ export const useMultiplayerStore = create<MultiplayerState>((set, get) => {
         break
       }
       case 'room': {
-        set({ world: msg.room })
+        set({ world: adoptWorld(msg.room) })
         break
       }
       case 'pong':
@@ -222,7 +261,7 @@ export const useMultiplayerStore = create<MultiplayerState>((set, get) => {
     toggleWorld: (event) => {
       // Optimistic local apply, then tell the server (which echoes to everyone).
       set((s) => {
-        const world = { ...s.world, doors: { ...s.world.doors }, lights: { ...s.world.lights }, tv: { ...s.world.tv }, curtains: { ...s.world.curtains }, snacks: { ...s.world.snacks } }
+        const world = cloneWorld(s.world)
         applyEvent(world, event)
         return { world }
       })

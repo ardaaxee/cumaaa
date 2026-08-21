@@ -1,4 +1,8 @@
+import { useRef } from 'react'
+import { useFrame } from '@react-three/fiber'
+import * as THREE from 'three'
 import { useCollider } from '../../furniture/useCollider'
+import { useOpenable } from '../../../systems/world'
 import { CeilingLamp, FramedArt, Plant } from '../props'
 import { WindowDaylight } from '../Window'
 import { Panel } from '../../furniture/Panel'
@@ -107,6 +111,40 @@ export function Bathroom2() {
   )
 }
 
+// The washer's porthole, hinged on its far edge so it swings clear of the
+// machine. Opening reveals the drum rather than a flat disc.
+function WasherDoor() {
+  const open = useOpenable('laundry-washer')
+  const door = useRef<THREE.Group>(null)
+  const swing = useRef(0)
+
+  useFrame((_, delta) => {
+    swing.current += ((open ? 1 : 0) - swing.current) * Math.min(1, delta * 7)
+    if (door.current) door.current.rotation.y = -swing.current * 2.0
+  })
+
+  return (
+    <group>
+      {open && (
+        <mesh position={[0.26, 0.5, 0]} rotation={[0, 0, Math.PI / 2]}>
+          <cylinderGeometry args={[0.17, 0.17, 0.34, 20, 1, true]} />
+          <meshStandardMaterial color="#9aa3a8" metalness={0.5} roughness={0.45} side={THREE.DoubleSide} />
+        </mesh>
+      )}
+      <group ref={door} position={[0.31, 0.5, -0.19]}>
+        <mesh position={[0, 0, 0.19]} rotation={[0, Math.PI / 2, 0]}>
+          <cylinderGeometry args={[0.19, 0.19, 0.03, 20]} />
+          <meshStandardMaterial color="#2a2e33" metalness={0.4} roughness={0.35} />
+        </mesh>
+        <mesh position={[0.017, 0, 0.19]} rotation={[0, Math.PI / 2, 0]}>
+          <cylinderGeometry args={[0.14, 0.14, 0.02, 20]} />
+          <meshPhysicalMaterial color="#8fa2ab" transparent opacity={0.35} roughness={0.15} transmission={0.6} thickness={0.02} />
+        </mesh>
+      </group>
+    </group>
+  )
+}
+
 // Laundry / utility room: washer, dryer stack, a folding counter, a basket and
 // a drying rack — the room that makes a house feel actually lived in.
 export function Laundry() {
@@ -125,15 +163,21 @@ export function Laundry() {
           <Panel args={[0.62, 0.85, 0.62]} radius={0.02} position={[0, 0.43, 0]} receiveShadow>
             <meshStandardMaterial color="#dcdfe2" metalness={0.35} roughness={0.4} />
           </Panel>
-          {/* porthole door */}
-          <mesh position={[0.315, 0.5, 0]} rotation={[0, Math.PI / 2, 0]}>
-            <cylinderGeometry args={[0.19, 0.19, 0.03, 20]} />
-            <meshStandardMaterial color="#2a2e33" metalness={0.4} roughness={0.35} />
-          </mesh>
-          <mesh position={[0.332, 0.5, 0]} rotation={[0, Math.PI / 2, 0]}>
-            <cylinderGeometry args={[0.14, 0.14, 0.02, 20]} />
-            <meshPhysicalMaterial color="#8fa2ab" transparent opacity={0.35} roughness={0.15} transmission={0.6} thickness={0.02} />
-          </mesh>
+          {/* The washer's porthole opens for real; the dryer's is fixed. */}
+          {i === 0 ? (
+            <WasherDoor />
+          ) : (
+            <group>
+              <mesh position={[0.315, 0.5, 0]} rotation={[0, Math.PI / 2, 0]}>
+                <cylinderGeometry args={[0.19, 0.19, 0.03, 20]} />
+                <meshStandardMaterial color="#2a2e33" metalness={0.4} roughness={0.35} />
+              </mesh>
+              <mesh position={[0.332, 0.5, 0]} rotation={[0, Math.PI / 2, 0]}>
+                <cylinderGeometry args={[0.14, 0.14, 0.02, 20]} />
+                <meshPhysicalMaterial color="#8fa2ab" transparent opacity={0.35} roughness={0.15} transmission={0.6} thickness={0.02} />
+              </mesh>
+            </group>
+          )}
           {/* control panel */}
           <Panel args={[0.56, 0.1, 0.02]} radius={0.006} position={[0, 0.8, 0.3]}>
             <meshStandardMaterial color="#b9bec2" roughness={0.5} />

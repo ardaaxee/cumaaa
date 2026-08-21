@@ -7,7 +7,7 @@ import { ANCHORS } from '../../config/roomLayout'
 import { DOOR } from '../../config/labLayout'
 import { Sfx } from '../../systems/audioSystem'
 import { triggerReach } from '../../systems/playerMotion'
-import { toggleWorldFlag, WORLD_FLAGS, takeSnack } from '../../systems/world'
+import { toggleWorldFlag, toggleOpenable, toggleAppliance, WORLD_FLAGS, takeSnack } from '../../systems/world'
 import { useMultiplayerStore } from '../../store/useMultiplayerStore'
 import { SOFA_SEATS } from '../../config/interactables'
 import type { InteractableInfo } from '../../types'
@@ -156,6 +156,22 @@ function activate(info: InteractableInfo) {
     }
     case 'tvToggle': {
       toggleWorldFlag(WORLD_FLAGS.livingTv)
+      break
+    }
+    case 'curtainToggle': {
+      toggleWorldFlag(WORLD_FLAGS.livingCurtain)
+      break
+    }
+    // Daily life: doors on furniture, and appliances that are simply on or off.
+    // Both ride the shared world channel, so the partner sees them move.
+    case 'openable': {
+      Sfx.door()
+      toggleOpenable(info.id)
+      break
+    }
+    case 'appliance': {
+      Sfx.click()
+      toggleAppliance(info.id)
       break
     }
     default:

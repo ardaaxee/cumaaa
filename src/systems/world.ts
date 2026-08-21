@@ -24,7 +24,54 @@ export const SNACK_IDS = ['popcorn', 'chips', 'drink'] as const
 export type SnackId = (typeof SNACK_IDS)[number]
 
 function bucket(world: RoomState, kind: WorldEventKind): Record<string, boolean> {
-  return kind === 'DOOR_TOGGLED' ? world.doors : kind === 'LIGHT_TOGGLED' ? world.lights : kind === 'TV_TOGGLED' ? world.tv : world.curtains
+  switch (kind) {
+    case 'DOOR_TOGGLED':
+      return world.doors
+    case 'LIGHT_TOGGLED':
+      return world.lights
+    case 'TV_TOGGLED':
+      return world.tv
+    case 'APPLIANCE_TOGGLED':
+      return world.appliances
+    case 'OPENABLE_TOGGLED':
+      return world.openables
+    case 'SNACK_TAKEN':
+      return world.snacks
+    default:
+      return world.curtains
+  }
+}
+
+// ---- Daily-life objects ----------------------------------------------------
+// Anything with a door (fridge, cabinets, drawers, wardrobes, the washing
+// machine) and anything that is simply on or off (kettle, stove, shower, a
+// lamp). Both ride the SAME shared-world channel as doors and lights, so they
+// sync to the partner and survive a rejoin without a second system.
+
+export function useOpenable(id: string, def = false): boolean {
+  return useMultiplayerStore((s) => {
+    const v = s.world.openables[id]
+    return v === undefined ? def : v
+  })
+}
+
+export function toggleOpenable(id: string, def = false): void {
+  const s = useMultiplayerStore.getState()
+  const cur = s.world.openables[id]
+  s.toggleWorld({ kind: 'OPENABLE_TOGGLED', id, value: !(cur === undefined ? def : cur) })
+}
+
+export function useAppliance(id: string, def = false): boolean {
+  return useMultiplayerStore((s) => {
+    const v = s.world.appliances[id]
+    return v === undefined ? def : v
+  })
+}
+
+export function toggleAppliance(id: string, def = false): void {
+  const s = useMultiplayerStore.getState()
+  const cur = s.world.appliances[id]
+  s.toggleWorld({ kind: 'APPLIANCE_TOGGLED', id, value: !(cur === undefined ? def : cur) })
 }
 
 export function worldValue(world: RoomState, flag: WorldFlag): boolean {

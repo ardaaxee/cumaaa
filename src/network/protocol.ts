@@ -58,6 +58,10 @@ export function sanitizeHomeName(raw: unknown): string {
 // decoration…) can extend the union without reworking the transport. NOTE: none
 // of these touch player movement — each client owns its own controller. These
 // only mutate SHARED home state (doors/lights/curtains/tv/movie/snacks).
+// Sky conditions, shared so both players stand in the same weather.
+export type Weather = 'sunny' | 'cloudy' | 'rain'
+export const WEATHERS: Weather[] = ['sunny', 'cloudy', 'rain']
+
 export type WorldEventKind =
   | 'DOOR_TOGGLED'
   | 'LIGHT_TOGGLED'
@@ -69,6 +73,9 @@ export type WorldEventKind =
   | 'TV_SEEK'
   | 'MOVIE_MODE_CHANGED'
   | 'SNACK_TAKEN'
+  | 'WEATHER_CHANGED'
+  | 'APPLIANCE_TOGGLED'
+  | 'OPENABLE_TOGGLED'
 
 export interface WorldEvent {
   kind: WorldEventKind
@@ -76,6 +83,7 @@ export interface WorldEvent {
   value: boolean // on/open/taken = true
   media?: string // TV_MEDIA_CHANGED: media id/name
   time?: number // TV_PLAY/PAUSE/SEEK: playback position (seconds)
+  weather?: Weather // WEATHER_CHANGED
   by?: string // player id that caused it (optional)
 }
 
@@ -95,6 +103,11 @@ export interface RoomState {
   tv: Record<string, boolean>
   curtains: Record<string, boolean>
   snacks: Record<string, boolean> // id -> taken
+  // Doors on furniture (fridge, cabinets, drawers, wardrobes, washing machine)
+  // and appliances that are simply on or off (kettle, stove, shower).
+  openables: Record<string, boolean>
+  appliances: Record<string, boolean>
+  weather: Weather
   movie: MovieState
   movieMode: boolean // cinematic living-room mode
   timestamp: number
@@ -112,6 +125,9 @@ export function emptyRoomState(roomId: string): RoomState {
     tv: {},
     curtains: {},
     snacks: {},
+    openables: {},
+    appliances: {},
+    weather: 'sunny',
     movie: emptyMovieState(),
     movieMode: false,
     timestamp: Date.now(),
@@ -135,6 +151,15 @@ export function applyEvent(room: RoomState, e: WorldEvent): void {
       break
     case 'SNACK_TAKEN':
       room.snacks[e.id] = e.value
+      break
+    case 'WEATHER_CHANGED':
+      if (e.weather) room.weather = e.weather
+      break
+    case 'APPLIANCE_TOGGLED':
+      room.appliances[e.id] = e.value
+      break
+    case 'OPENABLE_TOGGLED':
+      room.openables[e.id] = e.value
       break
     case 'MOVIE_MODE_CHANGED':
       room.movieMode = e.value
@@ -183,6 +208,11 @@ export const QUICK_MESSAGES = [
   'Film açalım',
   'Mutfaktayım',
   'Geliyorum',
+  'Balkondayım',
+  'Yemek hazır',
+  'Kapıyı açıyorum',
+  'Film başladı',
+  'Markete gidelim',
 ] as const
 
 // ---- Wire messages --------------------------------------------------------
@@ -281,6 +311,9 @@ const EVENT_KINDS: WorldEventKind[] = [
   'TV_SEEK',
   'MOVIE_MODE_CHANGED',
   'SNACK_TAKEN',
+  'WEATHER_CHANGED',
+  'APPLIANCE_TOGGLED',
+  'OPENABLE_TOGGLED',
 ]
 
 // Chat is user text going straight to another person's screen, so it is
@@ -303,5 +336,6 @@ export function sanitizeEvent(raw: unknown): WorldEvent | null {
   const out: WorldEvent = { kind, id: r.id, value: !!r.value }
   if (typeof r.media === 'string' && r.media.length <= 80) out.media = r.media
   if (typeof r.time === 'number' && Number.isFinite(r.time)) out.time = Math.max(0, Math.min(60 * 60 * 6, r.time))
+  if (WEATHERS.includes(r.weather as Weather)) out.weather = r.weather as Weather
   return out
 }

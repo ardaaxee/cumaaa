@@ -3,6 +3,8 @@ import { useFrame } from '@react-three/fiber'
 import * as THREE from 'three'
 import { HouseRoomShell } from './HouseRoomShell'
 import { HouseLighting } from './HouseLighting'
+import { SkyDome } from './SkyDome'
+import { Rain } from '../weather/Rain'
 import { roomById } from '../../config/houseLayout'
 import { useWorldFlag, WORLD_FLAGS } from '../../systems/world'
 import { woodFloor, wall as wallTex, tile } from '../../utils/textures'
@@ -57,6 +59,8 @@ export function House({ quality }: { quality: GraphicsQuality }) {
     <group>
       {/* Directional daylight for the apartment (soft PCF shadows on HIGH) */}
       <HouseLighting quality={quality} />
+      <SkyDome />
+      <Rain quality={quality} />
 
       {/* ---- Shells (always rendered) ---- */}
       <HouseRoomShell room={roomById('hallway')} floor={woodFloorMat} wall={plasterWallMat} />

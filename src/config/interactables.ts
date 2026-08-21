@@ -76,6 +76,42 @@ export const INTERACTABLES: InteractableDef[] = [
     position: [-2.0, 1.3, 8.4],
     radius: 1.6,
   },
+  // Living-room curtain — closing it cuts the daylight coming in.
+  {
+    info: { id: 'livingCurtain', kind: 'curtainToggle', label: 'Curtain', prompt: 'Open / close' },
+    position: [-7.5, 1.5, 6.5],
+    radius: 1.8,
+  },
+
+  // ---- Daily life -------------------------------------------------------
+  // Generic openables and appliances. The id is the shared-world key, so these
+  // are entries in a list rather than new code paths.
+  {
+    info: { id: 'kitchen-fridge', kind: 'openable', label: 'Fridge', prompt: 'Open fridge' },
+    position: [8.5, 1.2, 12.6],
+    radius: 1.8,
+  },
+  {
+    info: { id: 'laundry-washer', kind: 'openable', label: 'Washing machine', prompt: 'Open door' },
+    position: [11.4, 0.6, 25.9],
+    radius: 1.6,
+  },
+  {
+    info: { id: 'bd2-wardrobe', kind: 'openable', label: 'Wardrobe', prompt: 'Open wardrobe' },
+    position: [-11.0, 1.2, 22.2],
+    radius: 1.7,
+  },
+  {
+    info: { id: 'bd3-wardrobe', kind: 'openable', label: 'Wardrobe', prompt: 'Open wardrobe' },
+    position: [-0.95, 1.2, 29.4],
+    radius: 1.7,
+  },
+  {
+    info: { id: 'bd4-wardrobe', kind: 'openable', label: 'Wardrobe', prompt: 'Open wardrobe' },
+    position: [0.95, 1.2, 29.4],
+    radius: 1.7,
+  },
+
   // Living-room TV — opens the shared Movie Night panel.
   {
     info: { id: 'movieNight', kind: 'movieNight', label: 'TV', prompt: 'Watch together' },

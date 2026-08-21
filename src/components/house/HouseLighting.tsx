@@ -3,6 +3,7 @@ import { useFrame } from '@react-three/fiber'
 import * as THREE from 'three'
 import { useTimeOfDay } from '../../hooks/useClock'
 import { skyPalette } from '../../systems/timeSystem'
+import { useWeather, skyLightFactor, sunFactor } from '../../systems/weatherSystem'
 import { shadowMapSize, isHighTier } from '../../utils/device'
 import type { GraphicsQuality } from '../../types'
 
@@ -49,7 +50,12 @@ const bounces: { pos: [number, number, number]; color: string; intensity: number
 
 export function HouseLighting({ quality }: { quality: GraphicsQuality }) {
   const tod = useTimeOfDay()
+  const weather = useWeather()
   const p = skyPalette(tod)
+  // A cloud deck kills direct sun first and diffuse fill second, so the two are
+  // scaled separately rather than by one blanket multiplier.
+  const wSun = sunFactor(weather)
+  const wSky = skyLightFactor(weather)
   const sun = useRef<THREE.DirectionalLight>(null)
   const fill = useRef<THREE.DirectionalLight>(null)
   const castShadow = isHighTier(quality)
@@ -61,10 +67,15 @@ export function HouseLighting({ quality }: { quality: GraphicsQuality }) {
   const reach = tod === 'day' ? 6 : 10 // lower sun casts from further out
   // Cool exterior fill — subtle by day (windows already bright), a touch more
   // present at night so the room keeps a believable cool spill near windows.
-  const fillIntensity = tod === 'day' ? 0.12 : tod === 'sunset' ? 0.16 : 0.24
+  // Daylight arriving through the windows. This was far too weak: at midday the
+  // living room measured 35/255 mean while the view through its own window was
+  // bright sky. Overcast trades direct sun for MORE of this diffuse fill, which
+  // is what an overcast day actually looks like indoors.
+  const fillIntensity =
+    (tod === 'day' ? 0.85 : tod === 'sunset' ? 0.3 : 0.24) * (weather === 'sunny' ? 1 : 1.35) * wSky
   // Bounce light is strongest by day (lots of energy entering the windows) and
   // weakest at night, when the lamps do the work.
-  const bounceScale = tod === 'day' ? 1 : tod === 'sunset' ? 0.8 : 0.55
+  const bounceScale = (tod === 'day' ? 1.7 : tod === 'sunset' ? 0.85 : 0.55) * wSky
 
   useFrame(() => {
     if (sun.current) {
@@ -83,7 +94,7 @@ export function HouseLighting({ quality }: { quality: GraphicsQuality }) {
         ref={sun}
         position={[-1 + reach, elev, 14 - reach]}
         color={p.sun}
-        intensity={p.sunIntensity * (tod === 'day' ? 0.7 : 0.55)}
+        intensity={p.sunIntensity * (tod === 'day' ? 0.7 : 0.55) * wSun}
         castShadow={castShadow}
         shadow-mapSize-width={mapSize}
         shadow-mapSize-height={mapSize}
@@ -96,8 +107,22 @@ export function HouseLighting({ quality }: { quality: GraphicsQuality }) {
         shadow-camera-top={22}
         shadow-camera-bottom={-22}
       />
-      {/* cool window/exterior fill (no shadow) */}
-      <directionalLight ref={fill} position={[-9, 3, 10]} color="#8aa2c4" intensity={fillIntensity} />
+      {/* Window/exterior fill (no shadow). Two of them by day, from opposite
+          sides, so a room with one window is not lit from a single hard angle
+          the way a single fill light makes it. */}
+      <directionalLight ref={fill} position={[-9, 3, 10]} color={tod === 'day' ? '#cfe0f2' : '#8aa2c4'} intensity={fillIntensity} />
+      {tod === 'day' && (
+        <directionalLight position={[12, 6, 26]} color="#dfe7f0" intensity={fillIntensity * 0.6} />
+      )}
+
+      {/* Daylight sky/ground fill for the apartment. The study's rig supplies
+          one for the original room; the house needs its own so big rooms are
+          not left to their lamps at midday. */}
+      <hemisphereLight
+        color={tod === 'day' ? '#e8eef5' : tod === 'sunset' ? '#d3ab80' : '#5f6b82'}
+        groundColor={tod === 'day' ? '#6a5f4d' : '#463d31'}
+        intensity={(tod === 'day' ? 0.95 : tod === 'sunset' ? 0.5 : 0.3) * wSky}
+      />
 
       {/* --- Lightweight GI approximation ------------------------------------
           Real-time global illumination is far too expensive here, so we fake the

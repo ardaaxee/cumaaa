@@ -110,6 +110,11 @@ export type InteractableKind =
   | 'doorToggle'
   | 'lightToggle'
   | 'tvToggle'
+  | 'curtainToggle'
+  // Daily life. Both are generic: the object's own `id` names what is being
+  // opened or switched, so a new drawer needs a registry entry, not a new kind.
+  | 'openable'
+  | 'appliance'
   // Movie night / social (co-op)
   | 'sofaSit'
   | 'snackTake'

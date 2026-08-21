@@ -71,6 +71,36 @@ function heightToNormal(height: HTMLCanvasElement, strength: number): THREE.Text
   return tex
 }
 
+// Rescales a generated albedo map so its AVERAGE brightness lands near white,
+// keeping the relative grain/blotch/weave variation intact.
+//
+// Why this matters: three.js multiplies `material.color` by `map`. These maps
+// were painted at the surface's real colour AND the call sites also set that
+// colour, so every textured surface was being darkened twice — a plaster wall
+// ended up at ~0.20 albedo, about the reflectance of dark chocolate, which is
+// why daylit rooms read as night. Normalising here makes the map a DETAIL layer
+// and lets the material colour be the albedo, which is what the call sites
+// always intended.
+function normalizeAlbedo(c: HTMLCanvasElement, target = 0.93): void {
+  const ctx = c.getContext('2d')
+  if (!ctx) return
+  const img = ctx.getImageData(0, 0, c.width, c.height)
+  const d = img.data
+  let sum = 0
+  for (let i = 0; i < d.length; i += 4) sum += (d[i] * 0.2126 + d[i + 1] * 0.7152 + d[i + 2] * 0.0722)
+  const mean = sum / (d.length / 4) / 255
+  if (mean <= 0.001) return
+  // Cap the boost so an intentionally very dark map (the lab grid) is not
+  // blown out into a white sheet.
+  const gain = Math.min(target / mean, 4)
+  for (let i = 0; i < d.length; i += 4) {
+    d[i] = Math.min(255, d[i] * gain)
+    d[i + 1] = Math.min(255, d[i + 1] * gain)
+    d[i + 2] = Math.min(255, d[i + 2] * gain)
+  }
+  ctx.putImageData(img, 0, 0)
+}
+
 function finalize(c: HTMLCanvasElement, repeat: number, srgb = true): THREE.Texture {
   const tex = new THREE.CanvasTexture(c)
   tex.wrapS = tex.wrapT = THREE.RepeatWrapping
@@ -151,6 +181,7 @@ export function woodFloor(): Surface {
   }
   noise(h.ctx, size, 40)
 
+  normalizeAlbedo(base.c)
   cache.woodMap = finalize(base.c, 3)
   const nrm = heightToNormal(h.c, 2.2)
   if (nrm) {
@@ -189,6 +220,7 @@ export function wall(): Surface {
   h.ctx.fillRect(0, 0, size, size)
   noise(h.ctx, size, 55)
 
+  normalizeAlbedo(base.c)
   cache.wallMap = finalize(base.c, 4)
   const nrm = heightToNormal(h.c, 0.8)
   if (nrm) {
@@ -229,6 +261,7 @@ export function rug(): Surface {
     h.ctx.fillRect(x, y, 2, 2)
   }
   noise(h.ctx, size, 40)
+  normalizeAlbedo(base.c)
   cache.rugMap = finalize(base.c, 1)
   const nrm = heightToNormal(h.c, 1.4)
   if (nrm) cache.rugNrm = nrm
@@ -264,6 +297,7 @@ export function fabric(hex: string, key: string): Surface {
     h.ctx.fillRect(x, y, 1, 1)
   }
   noise(h.ctx, size, 30)
+  normalizeAlbedo(base.c)
   cache[mk] = finalize(base.c, 2)
   const nrm = heightToNormal(h.c, 0.9)
   if (nrm) { nrm.repeat.set(2, 2); cache[nk] = nrm }
@@ -349,6 +383,7 @@ export function tile(hex = '#cdc7bd', groutHex = '#8f887c'): Surface {
       h.ctx.fillStyle = '#b0b0b0'
       h.ctx.fillRect(tx * cell + gap / 2, ty * cell + gap / 2, cell - gap, cell - gap)
     }
+  normalizeAlbedo(base.c)
   cache[key + 'Map'] = finalize(base.c, 3)
   const nrm = heightToNormal(h.c, 1.6)
   if (nrm) {

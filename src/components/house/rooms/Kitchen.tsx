@@ -1,4 +1,8 @@
+import { useRef } from 'react'
+import { useFrame } from '@react-three/fiber'
+import * as THREE from 'three'
 import { useCollider } from '../../furniture/useCollider'
+import { useOpenable } from '../../../systems/world'
 import { CeilingLamp, Plant } from '../props'
 import { WindowDaylight } from '../Window'
 import { Panel } from '../../furniture/Panel'
@@ -6,6 +10,80 @@ import { Panel } from '../../furniture/Panel'
 const CAB = '#c9c4ba' // matte cabinet
 const STONE = '#3a3d42' // dark stone counter
 const METAL = '#c9ccd0'
+
+// The fridge opens for real: the door swings on its hinge, a cold interior
+// light comes up, and what is inside is only built while it is open. The open
+// state lives in the SHARED world, so if CUMA opens it ZEYNEP sees it standing
+// open — and it is still open when either of them comes back.
+function Fridge() {
+  const open = useOpenable('kitchen-fridge')
+  const door = useRef<THREE.Group>(null)
+  const swing = useRef(0)
+
+  useFrame((_, delta) => {
+    const target = open ? -1.95 : 0 // radians; opens toward the room
+    swing.current += (target - swing.current) * Math.min(1, delta * 7)
+    if (door.current) door.current.rotation.y = swing.current
+  })
+
+  return (
+    <group position={[9.0, 0, 12.6]}>
+      {/* carcass */}
+      <Panel args={[0.78, 2, 0.76]} radius={0.02} position={[0, 1, -0.02]} receiveShadow>
+        <meshStandardMaterial color="#c8ccd0" metalness={0.45} roughness={0.4} />
+      </Panel>
+      {/* interior — only built while the door is open */}
+      {open && (
+        <group position={[0, 1, 0]}>
+          <mesh position={[0, 0, -0.02]}>
+            <boxGeometry args={[0.68, 1.84, 0.62]} />
+            <meshStandardMaterial color="#e8edf0" roughness={0.55} />
+          </mesh>
+          {[-0.55, -0.1, 0.36].map((y, i) => (
+            <mesh key={i} position={[0, y, 0]}>
+              <boxGeometry args={[0.66, 0.02, 0.6]} />
+              <meshPhysicalMaterial color="#dfe8ec" transparent opacity={0.5} roughness={0.15} transmission={0.5} thickness={0.02} />
+            </mesh>
+          ))}
+          {/* what is actually in it */}
+          <mesh position={[-0.18, -0.44, 0.04]}>
+            <cylinderGeometry args={[0.045, 0.045, 0.2, 12]} />
+            <meshStandardMaterial color="#8fb6d8" roughness={0.3} />
+          </mesh>
+          <mesh position={[-0.04, -0.44, 0.04]}>
+            <cylinderGeometry args={[0.04, 0.04, 0.18, 12]} />
+            <meshStandardMaterial color="#eceae2" roughness={0.5} />
+          </mesh>
+          <mesh position={[0.16, 0.02, 0.02]}>
+            <boxGeometry args={[0.16, 0.1, 0.14]} />
+            <meshStandardMaterial color="#c9a04a" roughness={0.6} />
+          </mesh>
+          {[[-0.2, 0.06], [-0.08, 0.44], [0.12, 0.46]].map(([x, y], i) => (
+            <mesh key={i} position={[x, y, -0.06]}>
+              <sphereGeometry args={[0.05, 10, 10]} />
+              <meshStandardMaterial color={['#b8474a', '#7ba24c', '#d8952f'][i]} roughness={0.65} />
+            </mesh>
+          ))}
+          <pointLight position={[0, 0.3, 0.1]} color="#dff0ff" intensity={0.5} distance={2.2} decay={2} />
+        </group>
+      )}
+      {/* door, hinged on its left edge */}
+      <group ref={door} position={[-0.39, 1, 0.34]}>
+        <Panel args={[0.78, 1.98, 0.07]} radius={0.02} position={[0.39, 0, 0]} castShadow>
+          <meshStandardMaterial color="#d0d3d6" metalness={0.5} roughness={0.35} />
+        </Panel>
+        <mesh position={[0.72, 0.4, 0.06]}>
+          <boxGeometry args={[0.03, 0.5, 0.03]} />
+          <meshStandardMaterial color={METAL} metalness={0.8} roughness={0.3} />
+        </mesh>
+        <mesh position={[0.72, -0.4, 0.06]}>
+          <boxGeometry args={[0.03, 0.5, 0.03]} />
+          <meshStandardMaterial color={METAL} metalness={0.8} roughness={0.3} />
+        </mesh>
+      </group>
+    </group>
+  )
+}
 
 // Kitchen — matte cabinets, a stone counter run with sink + cooktop + hood, a
 // tall fridge, a small dining set. Neutral working light. Stone/metal/wood.
@@ -108,20 +186,7 @@ export function Kitchen() {
         </group>
       ))}
 
-      {/* tall fridge (east wall) */}
-      <group position={[9.0, 0, 12.6]}>
-        <Panel args={[0.78, 2, 0.76]} radius={0.02} position={[0, 1, 0]} receiveShadow>
-          <meshStandardMaterial color="#d0d3d6" metalness={0.5} roughness={0.35} />
-        </Panel>
-        <mesh position={[-0.4, 1.4, 0.02]}>
-          <boxGeometry args={[0.03, 0.5, 0.02]} />
-          <meshStandardMaterial color={METAL} metalness={0.8} roughness={0.3} />
-        </mesh>
-        <mesh position={[-0.4, 0.6, 0.02]}>
-          <boxGeometry args={[0.03, 0.5, 0.02]} />
-          <meshStandardMaterial color={METAL} metalness={0.8} roughness={0.3} />
-        </mesh>
-      </group>
+      <Fridge />
 
       {/* dining set */}
       <group position={[4.6, 0, 8.6]}>
