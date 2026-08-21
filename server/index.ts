@@ -120,7 +120,7 @@ function joinRoom(room: Room, ws: WebSocket, name: string): Player | null {
     name,
     role,
     ws,
-    state: { x: 0, y: 1.62, z: 4, ry: 0, run: false, jump: false, sit: false },
+    state: { x: 0, y: 1.62, z: 4, ry: 0, run: false, jump: false, sit: false, act: 'idle' },
     alive: true,
     lastChatAt: 0,
     ready: false,

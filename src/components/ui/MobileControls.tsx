@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { useMultiplayerStore } from '../../store/useMultiplayerStore'
+import { playAction } from '../characters/actions'
 import { usePlayerStore } from '../../store/usePlayerStore'
 import { useInteractionStore } from '../../systems/interactionSystem'
 import { Sfx } from '../../systems/audioSystem'
@@ -169,6 +170,7 @@ function ActionButtons() {
       )}
 
       <div className="flex items-end gap-3">
+        <WaveButton />
         <ChatButton />
         <RunButton />
         <HoldlessButton
@@ -180,6 +182,23 @@ function ActionButtons() {
         />
       </div>
     </div>
+  )
+}
+
+// WAVE: the one emote worth a thumb on a phone. The partner sees it.
+function WaveButton() {
+  return (
+    <button
+      className="pointer-events-auto flex h-16 w-16 items-center justify-center rounded-full border border-white/20 bg-black/25 text-xl backdrop-blur-sm transition active:scale-90 active:bg-white/10"
+      onPointerDown={(e) => {
+        e.stopPropagation()
+        haptic(10)
+        playAction('wave')
+      }}
+      aria-label="Wave"
+    >
+      👋
+    </button>
   )
 }
 

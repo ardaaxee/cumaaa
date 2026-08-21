@@ -18,6 +18,7 @@ import {
   type WorldEvent,
 } from '../network/protocol'
 import { useRoomStore } from './useRoomStore'
+import { resetActions } from '../components/characters/actions'
 
 // Per-frame remote transforms live OUTSIDE React so 15 Hz updates never trigger
 // a re-render. RemotePlayer reads its target from here each frame.
@@ -249,6 +250,7 @@ export const useMultiplayerStore = create<MultiplayerState>((set, get) => {
       ensureClient().connect()
     },
     leaveHome: () => {
+      resetActions()
       intent = null
       client?.send({ t: 'leave' }) // so the partner sees "left", not "connection lost"
       client?.close()

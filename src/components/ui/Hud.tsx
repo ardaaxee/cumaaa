@@ -17,6 +17,7 @@ import { OrientationGate } from './OrientationGate'
 import { ClickToLook } from './ClickToLook'
 import { HomeMap } from './HomeMap'
 import { WeatherControl } from './WeatherControl'
+import { playAction } from '../characters/actions'
 import { Sfx } from '../../systems/audioSystem'
 
 // The in-world heads-up display. Only the movement HUD (crosshair, joystick,
@@ -38,6 +39,20 @@ export function Hud() {
   const chatOpen = useMultiplayerStore((s) => s.chatOpen)
   const unreadChat = useMultiplayerStore((s) => s.unreadChat)
   const setChatOpen = useMultiplayerStore((s) => s.setChatOpen)
+
+  // Emotes: G waves, T points. Deliberately plain letters rather than a menu —
+  // you use them in passing, and the partner sees them on your avatar.
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      const el = document.activeElement
+      if (el instanceof HTMLInputElement || el instanceof HTMLTextAreaElement) return
+      if (useRoomStore.getState().activePanel !== null) return
+      if (e.code === 'KeyG') playAction('wave')
+      if (e.code === 'KeyT') playAction('point')
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [])
 
   // ENTER opens chat, ESC closes it — the shortcut people already expect. Only
   // while no other panel owns the screen, and never mid-typing.

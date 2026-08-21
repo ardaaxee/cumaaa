@@ -7,7 +7,8 @@ import { ANCHORS } from '../../config/roomLayout'
 import { DOOR } from '../../config/labLayout'
 import { Sfx } from '../../systems/audioSystem'
 import { triggerReach } from '../../systems/playerMotion'
-import { toggleWorldFlag, toggleOpenable, toggleAppliance, WORLD_FLAGS, takeSnack } from '../../systems/world'
+import { playAction, holdAction } from '../characters/actions'
+import { worldValue, toggleWorldFlag, toggleOpenable, toggleAppliance, WORLD_FLAGS, takeSnack } from '../../systems/world'
 import { useMultiplayerStore } from '../../store/useMultiplayerStore'
 import { SOFA_SEATS } from '../../config/interactables'
 import type { InteractableInfo } from '../../types'
@@ -70,6 +71,7 @@ export function InteractionManager() {
     // Seated: any interact stands the player up (even with nothing in focus).
     if (usePlayerStore.getState().seatPose) {
       usePlayerStore.getState().setSeatPose(null)
+      holdAction(null) // standing up releases whatever pose the seat implied
       Sfx.close()
       return
     }
@@ -132,6 +134,9 @@ function activate(info: InteractableInfo) {
       // ZEYNEP each sit on their own seat; the partner sees it via the avatar).
       const seat = SOFA_SEATS[info.id]
       if (seat) player.setSeatPose(seat)
+      // Sitting down in front of a running TV is watching TV, and the partner
+      // should see that rather than a generic sit.
+      holdAction(worldValue(useMultiplayerStore.getState().world, WORLD_FLAGS.livingTv) ? 'watchTv' : null)
       break
     }
     case 'snackTake': {
@@ -147,18 +152,22 @@ function activate(info: InteractableInfo) {
     // Synced world toggles: apply locally + broadcast to a co-op partner.
     case 'doorToggle': {
       Sfx.door()
+      playAction('open')
       toggleWorldFlag(WORLD_FLAGS.mainDoor)
       break
     }
     case 'lightToggle': {
+      playAction('use')
       toggleWorldFlag(WORLD_FLAGS.livingLight)
       break
     }
     case 'tvToggle': {
+      playAction('use')
       toggleWorldFlag(WORLD_FLAGS.livingTv)
       break
     }
     case 'curtainToggle': {
+      playAction('use')
       toggleWorldFlag(WORLD_FLAGS.livingCurtain)
       break
     }
@@ -166,11 +175,13 @@ function activate(info: InteractableInfo) {
     // Both ride the shared world channel, so the partner sees them move.
     case 'openable': {
       Sfx.door()
+      playAction('open')
       toggleOpenable(info.id)
       break
     }
     case 'appliance': {
       Sfx.click()
+      playAction('use')
       toggleAppliance(info.id)
       break
     }

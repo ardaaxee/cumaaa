@@ -68,6 +68,7 @@ export function RemotePlayer({ id, name, quality }: { id: string; name: string; 
         sit: cur.current.sit,
         phase: phase.current,
         time: (performance.now() - born.current) / 1000,
+        action: target.act ?? 'idle',
       })
     }
 

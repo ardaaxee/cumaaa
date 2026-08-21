@@ -5,6 +5,8 @@ import { useMultiplayerStore } from '../../store/useMultiplayerStore'
 import { usePlayerStore } from '../../store/usePlayerStore'
 import { playerMotion } from '../../systems/playerMotion'
 import { NET_SEND_MS } from '../../network/protocol'
+import { resolveAction } from '../characters/actions'
+import { useMultiplayerStore as mpStore } from '../../store/useMultiplayerStore'
 
 // Publishes the LOCAL player's transform + state to the server at a fixed tick
 // (not every frame). Does nothing until we're actually in a home. The local
@@ -23,6 +25,15 @@ export function NetworkBridge() {
 
     camera.getWorldDirection(dir.current)
     const ry = Math.atan2(-dir.current.x, -dir.current.z)
+    const player = usePlayerStore.getState()
+    const act = resolveAction({
+      speed: playerMotion.speed,
+      running: playerMotion.running,
+      grounded: playerMotion.grounded,
+      seated: player.seatPose !== null,
+      talking: mpStore.getState().chatOpen,
+      holdingItem: false, // set once the item system lands (PHASE C)
+    })
     mp.sendState({
       x: camera.position.x,
       y: camera.position.y,
@@ -30,7 +41,8 @@ export function NetworkBridge() {
       ry,
       run: playerMotion.running,
       jump: !playerMotion.grounded,
-      sit: usePlayerStore.getState().seatPose !== null,
+      sit: player.seatPose !== null,
+      act,
     })
   })
 

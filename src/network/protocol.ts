@@ -10,6 +10,20 @@ export const ROOM_CODE_LEN = 6
 
 export type PlayerRole = 'host' | 'guest'
 
+// What a character is doing, mirrored from src/components/characters/actions.
+// Kept as a plain string union here so the protocol has no import into the
+// component tree — the server must be able to validate it without React.
+export type PlayerAction =
+  | 'idle' | 'walk' | 'run' | 'jump' | 'land' | 'sit' | 'stand' | 'wave' | 'point'
+  | 'talk' | 'read' | 'use' | 'hold' | 'drink' | 'eat' | 'phone' | 'sleep'
+  | 'cook' | 'shower' | 'watchTv' | 'open' | 'close' | 'pickUp' | 'drop' | 'carry'
+
+export const PLAYER_ACTIONS: PlayerAction[] = [
+  'idle', 'walk', 'run', 'jump', 'land', 'sit', 'stand', 'wave', 'point', 'talk',
+  'read', 'use', 'hold', 'drink', 'eat', 'phone', 'sleep', 'cook', 'shower',
+  'watchTv', 'open', 'close', 'pickUp', 'drop', 'carry',
+]
+
 // The minimal per-frame state we sync for a remote avatar.
 export interface PlayerNetState {
   x: number
@@ -19,6 +33,8 @@ export interface PlayerNetState {
   run: boolean
   jump: boolean
   sit: boolean
+  /** What they are doing, so the other player sees it and not just movement. */
+  act: PlayerAction
 }
 
 export interface PeerInfo {
@@ -297,7 +313,11 @@ export function sanitizeState(raw: unknown): PlayerNetState | null {
   const z = clampNum(r.z, NUM_MIN, NUM_MAX)
   const ry = clampNum(r.ry, -Math.PI * 4, Math.PI * 4)
   if (x === null || y === null || z === null || ry === null) return null
-  return { x, y, z, ry, run: !!r.run, jump: !!r.jump, sit: !!r.sit }
+  // An unknown action is coerced rather than rejected: a client on a newer
+  // build sending an action this server has never heard of should still be
+  // able to walk around.
+  const act = PLAYER_ACTIONS.includes(r.act as PlayerAction) ? (r.act as PlayerAction) : 'idle'
+  return { x, y, z, ry, run: !!r.run, jump: !!r.jump, sit: !!r.sit, act }
 }
 
 const EVENT_KINDS: WorldEventKind[] = [
