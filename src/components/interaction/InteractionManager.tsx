@@ -13,7 +13,7 @@ import { worldValue, toggleWorldFlag, toggleOpenable, toggleAppliance, WORLD_FLA
 import { useMultiplayerStore } from '../../store/useMultiplayerStore'
 import { SOFA_SEATS } from '../../config/interactables'
 import { itemUidFromInteractable, spotIdFromInteractable } from '../items/ItemInteractables'
-import { takeItem, placeItem, dropItem, consumeItem, currentHeld } from '../../systems/items'
+import { takeItem, placeItem, dropItem, consumeItem, fillItem, currentHeld } from '../../systems/items'
 import { itemDefOr } from '../../config/items'
 import type { InteractableInfo } from '../../types'
 
@@ -248,6 +248,20 @@ function activate(info: InteractableInfo) {
       break
     }
     case 'appliance': {
+      // At the tap with a vessel in hand, the tap fills it rather than just
+      // running. Anything else — or an empty hand — switches it as before.
+      if (info.id === 'kitchen-tap') {
+        const held = currentHeld()
+        const def = held && itemDefOr(held.def)
+        if (held && def && def.capacity) {
+          if (fillItem(held.uid, 'water')) {
+            playAction('use')
+            Sfx.click()
+            useRoomStore.getState().pushToast(`${def.name} dolduruldu`)
+            break
+          }
+        }
+      }
       Sfx.click()
       playAction('use')
       toggleAppliance(info.id)

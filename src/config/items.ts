@@ -172,6 +172,7 @@ export function isItemId(v: unknown): v is string {
 export const ITEM_RULES = {
   capacity: (defId: string) => BY_ID.get(defId)?.capacity,
   isEdible: (defId: string) => BY_ID.get(defId)?.edible === true,
+  isCookware: (defId: string) => BY_ID.get(defId)?.cookware === true,
 }
 
 /** How full a vessel reads as, 0..1, for drawing the liquid inside it. */

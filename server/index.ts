@@ -16,6 +16,7 @@ import {
   applyItemAction,
   seedHomeItems,
   ITEM_RULES_SERVER,
+  cookTick,
   type ItemAction,
   CHAT_HISTORY,
   CHAT_MIN_GAP_MS,
@@ -310,6 +311,23 @@ setInterval(() => {
     }
   }
 }, NET_SEND_MS)
+
+// Cooking. The server owns it: a pan browns on a lit hob and an oven only
+// cooks with the door shut, whether or not anyone is looking, and both players
+// see the same dinner. Clients cannot send COOK — sanitizeItemAction refuses
+// it — so nobody can fast-forward their food.
+const COOK_TICK_MS = 2000
+setInterval(() => {
+  for (const room of rooms.values()) {
+    if (room.players.size === 0) continue
+    const actions = cookTick(room.state, COOK_TICK_MS / 1000, ITEM_RULES_SERVER)
+    for (const a of actions) {
+      if (applyItemAction(room.state, a, ITEM_RULES_SERVER, null)) {
+        broadcast(room, { t: 'item', action: a })
+      }
+    }
+  }
+}, COOK_TICK_MS)
 
 // Reap rooms that have been empty past the grace window.
 setInterval(() => {

@@ -113,6 +113,11 @@ export const INTERACTABLES: InteractableDef[] = [
     radius: 1.4,
   },
   {
+    info: { id: 'kitchen-oven-heat', kind: 'appliance', label: 'Oven heat', prompt: 'Turn oven on / off' },
+    position: [5.7, 0.79, 13.16],
+    radius: 1.3,
+  },
+  {
     info: { id: 'kitchen-hob', kind: 'appliance', label: 'Hob', prompt: 'Turn hob on / off' },
     position: [5.7, 0.95, 13.3],
     radius: 1.4,

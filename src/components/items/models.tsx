@@ -1,6 +1,8 @@
+import { useRef } from 'react'
+import { useFrame } from '@react-three/fiber'
 import * as THREE from 'three'
 import { itemDefOr, fillRatio } from '../../config/items'
-import type { WorldItem } from '../../network/protocol'
+import { HOB_SPOT, type WorldItem } from '../../network/protocol'
 
 // The world models. One per item definition, built from primitives but built as
 // the object actually is — a mug has a handle, a fork has tines, a pot has a rim
@@ -26,6 +28,38 @@ function fluidColor(fluid: string | undefined): string {
     case 'coffee': return '#4a2c1c'
     default: return '#a9cfe0'
   }
+}
+
+// Rising steam off something on the heat. Only drawn while it is actually on a
+// hob and has started to cook, so it is a readout of the cooking state rather
+// than decoration bolted to a pan.
+function Steam({ item, y }: { item: WorldItem; y: number }) {
+  const g = useRef<THREE.Group>(null)
+  const t = useRef(0)
+  const cooking = item.loc.at === 'spot' && item.loc.id === HOB_SPOT && (item.cooked ?? 0) > 0.04
+  useFrame((_, delta) => {
+    t.current += delta
+    const grp = g.current
+    if (!grp) return
+    grp.children.forEach((c, i) => {
+      const p = (t.current * 0.3 + i * 0.34) % 1
+      c.position.y = y + p * 0.3
+      c.scale.setScalar(0.4 + p * 1.5)
+      const m = (c as THREE.Mesh).material as THREE.MeshStandardMaterial
+      m.opacity = 0.2 * (1 - p)
+    })
+  })
+  if (!cooking) return null
+  return (
+    <group ref={g}>
+      {[0, 1, 2].map((i) => (
+        <mesh key={i} position={[0, y, 0]}>
+          <sphereGeometry args={[0.035, 6, 6]} />
+          <meshStandardMaterial color="#e8eef2" transparent opacity={0.18} depthWrite={false} />
+        </mesh>
+      ))}
+    </group>
+  )
 }
 
 // A vessel's contents: a short cylinder whose height follows the fill level.
@@ -171,6 +205,7 @@ function Pot({ item, seg }: ModelProps) {
           />
         </mesh>
       )}
+      <Steam item={item} y={0.16} />
     </group>
   )
 }
@@ -198,6 +233,7 @@ function Pan({ item, seg }: ModelProps) {
           <meshStandardMaterial color={cooked > 1.3 ? '#2c1f16' : cooked > 0.6 ? '#b56a34' : '#d8b48a'} roughness={0.55} />
         </mesh>
       )}
+      <Steam item={item} y={0.06} />
     </group>
   )
 }

@@ -8,6 +8,7 @@ import {
   heldItem,
   itemsAt,
   seedHomeItems,
+  cookTick,
   type ItemAction,
   type RoomState,
   type WorldItem,
@@ -144,4 +145,19 @@ export function ensureItemsSeeded(): void {
 
 export function applyLocally(world: RoomState, action: ItemAction): boolean {
   return applyItemAction(world, action, ITEM_RULES, null)
+}
+
+// ---- Cooking (offline only) -----------------------------------------------
+
+/**
+ * In a home the SERVER runs the cooking clock and echoes the result, so this
+ * does nothing. Single player has no server, so the client runs the identical
+ * function — the pan browns at the same rate either way rather than only
+ * cooking when someone else is watching.
+ */
+export function tickCookingOffline(dtSeconds: number): void {
+  const store = useMultiplayerStore.getState()
+  if (store.playerId) return
+  const actions = cookTick(store.world, dtSeconds, ITEM_RULES)
+  for (const a of actions) store.applyItem(a, null)
 }

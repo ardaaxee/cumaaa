@@ -1,6 +1,7 @@
-import { useEffect } from 'react'
+import { useEffect, useRef } from 'react'
+import { useFrame } from '@react-three/fiber'
 import { useMultiplayerStore } from '../../store/useMultiplayerStore'
-import { ensureItemsSeeded } from '../../systems/items'
+import { ensureItemsSeeded, tickCookingOffline } from '../../systems/items'
 import { SpotItems, LooseItems, itemSeg } from './ItemViews'
 import { ItemInteractables } from './ItemInteractables'
 import { ITEM_SPOTS } from '../../network/protocol'
@@ -26,6 +27,15 @@ export function WorldItems({ quality }: { quality: GraphicsQuality }) {
   // Single player has no server to stock the kitchen; in a home the server's
   // seed has already arrived and this does nothing.
   useEffect(() => { ensureItemsSeeded() }, [])
+
+  // Offline cooking clock, at the same 2 s cadence the server uses.
+  const acc = useRef(0)
+  useFrame((_, delta) => {
+    acc.current += delta
+    if (acc.current < 2) return
+    tickCookingOffline(acc.current)
+    acc.current = 0
+  })
 
   return (
     <group>

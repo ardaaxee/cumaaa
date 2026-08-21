@@ -379,6 +379,44 @@ export interface ItemRules {
   /** Vessel capacity by definition id, and which defs are cookware/edible. */
   capacity(defId: string): number | undefined
   isEdible(defId: string): boolean
+  /** Pots and pans: things that hold a cooking state on a lit hob. */
+  isCookware(defId: string): boolean
+}
+
+// Cooking. A pan on a lit hob browns what is in it; an oven only cooks with the
+// door SHUT. Both take about forty seconds to come up to done, and keep going
+// to burnt if you walk away — which is the point of a cooking state rather than
+// a "cooked!" flag.
+export const HOB_SPOT = 'kitchen-hob'
+export const OVEN_SPOT = 'kitchen-oven'
+export const OVEN_HEAT = 'kitchen-oven-heat' // appliance id for the oven's knobs
+export const COOK_SECONDS = 40
+export const COOKED = 1 // done
+export const BURNT = 1.35
+
+/**
+ * What is cooking right now, as a list of actions to apply and broadcast.
+ *
+ * Pure and shared: the server runs it on a timer as the authority, and a
+ * single-player client runs the identical function so an offline kitchen
+ * behaves the same. Returning actions rather than mutating keeps it on the same
+ * path as every other item change — the server still validates and echoes.
+ */
+export function cookTick(room: RoomState, dtSeconds: number, rules: ItemRules): ItemAction[] {
+  const hobOn = room.appliances[HOB_SPOT] === true
+  const ovenOn = room.appliances[OVEN_HEAT] === true && room.openables[OVEN_SPOT] !== true
+  if (!hobOn && !ovenOn) return []
+  const amount = dtSeconds / COOK_SECONDS
+  const out: ItemAction[] = []
+  for (const it of Object.values(room.items)) {
+    if (it.loc.at !== 'spot') continue
+    const onHob = hobOn && it.loc.id === HOB_SPOT && rules.isCookware(it.def)
+    const inOven = ovenOn && it.loc.id === OVEN_SPOT
+    if (!onHob && !inOven) continue
+    if ((it.cooked ?? 0) >= BURNT) continue // already ruined; stop there
+    out.push({ kind: 'COOK', uid: it.uid, by: 'server', amount })
+  }
+  return out
 }
 
 function inReach(item: WorldItem, near: [number, number, number] | null): boolean {
@@ -481,6 +519,8 @@ export function applyItemAction(
     }
     case 'COOK': {
       // Server-driven: advances whatever is on a lit hob or in a hot oven.
+      // sanitizeItemAction refuses COOK from the wire, so a client cannot
+      // fast-forward its dinner.
       if (typeof a.amount !== 'number') return false
       item.cooked = Math.max(0, Math.min(1.6, (item.cooked ?? 0) + a.amount))
       break
@@ -536,10 +576,12 @@ const SERVER_CAPACITY: Record<string, number> = {
   glass: 0.3, mug: 0.25, pot: 2, kettle: 1.2, bottle: 0.5, milk: 1,
 }
 const SERVER_EDIBLE = new Set(['tomato', 'apple', 'bread', 'cheese', 'egg'])
+const SERVER_COOKWARE = new Set(['pot', 'pan'])
 
 export const ITEM_RULES_SERVER: ItemRules = {
   capacity: (defId) => SERVER_CAPACITY[defId],
   isEdible: (defId) => SERVER_EDIBLE.has(defId),
+  isCookware: (defId) => SERVER_COOKWARE.has(defId),
 }
 
 export function sanitizeItemAction(raw: unknown): Omit<ItemAction, 'by'> | null {
