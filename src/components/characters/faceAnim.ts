@@ -1,4 +1,5 @@
 import * as THREE from 'three'
+import type { AvatarRig } from './Avatar'
 import type { FaceRig } from './Face'
 import type { HairRig } from './Hair'
 
@@ -80,6 +81,10 @@ export interface FaceMemory {
   hairLag: number
   hairLagV: number
   lastHeadYaw: number
+  /** The look-at turn already taken up by the head and the chest. */
+  headYaw: number
+  headPitch: number
+  chestYaw: number
   // Rest positions, read once from the built geometry so the PROFILE stays the
   // source of where a feature sits and the animator only ever adds to it.
   browBaseL?: number
@@ -105,6 +110,9 @@ export function newFaceMemory(): FaceMemory {
     hairLag: 0,
     hairLagV: 0,
     lastHeadYaw: 0,
+    headYaw: 0,
+    headPitch: 0,
+    chestYaw: 0,
   }
 }
 
@@ -127,9 +135,13 @@ export function animateFace(
   rig: FaceRig,
   mem: FaceMemory,
   state: FaceState,
-  head: THREE.Object3D | null,
+  /** The whole body, so a look-at can travel up the chain rather than stopping
+      at the eyes. Passing only the head is what made characters track people
+      with their pupils while their skull stayed bolted forward. */
+  body: Pick<AvatarRig, 'root' | 'head' | 'chest'> | null,
   delta: number,
 ): void {
+  const head = body?.head ?? null
   const k = Math.min(1, delta * 9)
 
   // ---- Expression blend ----------------------------------------------------

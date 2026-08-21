@@ -122,12 +122,28 @@ export function animateAvatar(rig: AvatarRig, p: AvatarPose): void {
 
   if (rig.chest) {
     rig.chest.scale.setScalar(1 + breath * 0.012 * idle)
-    rig.chest.rotation.y = lerp(-swing * 0.12 * gait + sway * 0.035, post.chestYaw ?? 0, w)
-    rig.chest.rotation.x = lerp(0.04 * gait * (p.running ? 2.2 : 1) + sit * 0.12, post.chestPitch ?? 0, w)
+    rig.chest.rotation.y = lerp(-swing * 0.26 * gait + sway * 0.035, post.chestYaw ?? 0, w)
+    rig.chest.rotation.x = lerp(0.05 * gait * (p.running ? 3.4 : 1) + sit * 0.12, post.chestPitch ?? 0, w)
   }
   if (rig.head) {
     rig.head.rotation.y = lerp(sway * 0.06, post.headYaw ?? 0, w)
-    rig.head.rotation.x = lerp(-0.02 * gait, post.headPitch ?? 0, w)
+    // Counters the chest's forward lean, so the eyes stay on the horizon
+    // instead of the whole figure pitching down as it speeds up.
+    const stabilise = -0.05 * gait * (p.running ? 3.4 : 1)
+    rig.head.rotation.x = lerp(-0.02 * gait + stabilise, post.headPitch ?? 0, w)
+  }
+
+  // --- Pelvis and spine ----------------------------------------------------
+  // A walk is not the legs alone: the pelvis rotates toward the leading leg,
+  // the shoulders counter-rotate against it, and the pelvis drops on the side
+  // whose leg is swinging. Without those three the gait reads as a doll being
+  // walked, however correct the leg swing is.
+  if (rig.pelvis) {
+    rig.pelvis.rotation.y = swing * 0.16 * gait
+    // Lateral tilt: the hip drops on the unsupported side.
+    rig.pelvis.rotation.z = -swing * 0.07 * gait
+    // Two rises per stride, as the body vaults over each straight leg.
+    rig.pelvis.position.y = Math.abs(swing2) * 0.016 * gait
   }
 
   // --- Legs ---------------------------------------------------------------
@@ -144,11 +160,24 @@ export function animateAvatar(rig: AvatarRig, p: AvatarPose): void {
   if (rig.kneeL) rig.kneeL.rotation.x = lerp(lerp(-kneeLift, kneeBase, w), -1.5, sit)
   if (rig.kneeR) rig.kneeR.rotation.x = lerp(lerp(-kneeLift2, kneeBase, w), -1.5, sit)
 
+  // --- Ankles ---------------------------------------------------------------
+  // The foot lands heel first, rolls flat, then pushes off the toe. This is the
+  // one detail that stops a walk looking like a character sliding on skates.
+  const ankle = (a: THREE.Group | null, phaseOffset: number) => {
+    if (!a) return
+    const ph = p.phase + phaseOffset
+    // Toes down through the swing, heel down as the foot lands.
+    const roll = Math.sin(ph - 0.7) * 0.36 + Math.max(0, Math.sin(ph + 1.3)) * 0.22
+    a.rotation.x = lerp(0, roll, gait) + sit * 0.25
+  }
+  ankle(rig.ankleL, 0)
+  ankle(rig.ankleR, Math.PI)
+
   // --- Arms ---------------------------------------------------------------
   // Arms swing opposite the legs. At rest they hang with a natural bend rather
   // than hanging perfectly straight.
-  const armSwing = -swing * amp * 0.75
-  const restBend = -0.22
+  const armSwing = -swing * amp * (p.running ? 1.15 : 0.8)
+  const restBend = -0.26 - gait * 0.22
   const restElbow = restBend - Math.abs(swing) * amp * 0.5
 
   if (rig.shoulderL) {

@@ -28,6 +28,11 @@ export interface AvatarRig {
       instead of being flown alongside the character. */
   handL: THREE.Group | null
   handR: THREE.Group | null
+  /** Rotates against the shoulders through the stride. */
+  pelvis: THREE.Group | null
+  /** Heel strike and toe off. */
+  ankleL: THREE.Group | null
+  ankleR: THREE.Group | null
   /** Face and hair, for expressions, blinking, looking at things and lag. */
   face: FaceRig | null
   hair: HairRig | null
@@ -68,6 +73,9 @@ export const Avatar = forwardRef<
   const handR = useRef<THREE.Group>(null)
   const face = useRef<FaceRig>(null)
   const hair = useRef<HairRig>(null)
+  const pelvis = useRef<THREE.Group>(null)
+  const ankleL = useRef<THREE.Group>(null)
+  const ankleR = useRef<THREE.Group>(null)
 
   useImperativeHandle(ref, () => ({
     get root() { return root.current },
@@ -86,6 +94,9 @@ export const Avatar = forwardRef<
     get handR() { return handR.current },
     get face() { return face.current },
     get hair() { return hair.current },
+    get pelvis() { return pelvis.current },
+    get ankleL() { return ankleL.current },
+    get ankleR() { return ankleR.current },
   }))
 
   const { top, bottom, shoes, skin, build } = profile
@@ -123,7 +134,12 @@ export const Avatar = forwardRef<
   }
 
   // One leg, built downward from the hip so rotations bend at real joints.
-  const leg = (side: -1 | 1, hipRef: React.RefObject<THREE.Group>, kneeRef: React.RefObject<THREE.Group>) => (
+  const leg = (
+    side: -1 | 1,
+    hipRef: React.RefObject<THREE.Group>,
+    kneeRef: React.RefObject<THREE.Group>,
+    ankleRef: React.RefObject<THREE.Group>,
+  ) => (
     <group ref={hipRef} position={[side * build.hip, RIG.hipY, 0]}>
       <mesh geometry={geom.thigh} castShadow>
         <meshStandardMaterial color={bottom.color} {...legCloth} />
@@ -144,7 +160,8 @@ export const Avatar = forwardRef<
         </mesh>
         {/* Shoe: a swept last with a heel, an arch and a toe box, plus a sole
             under it — not a box with a ball stuck on the front. */}
-        <group position={[0, -RIG.shin + 0.034, 0.012]}>
+        {/* Ankle: the foot pivots here for heel strike and toe off. */}
+        <group ref={ankleRef} position={[0, -RIG.shin + 0.034, 0.012]}>
           <mesh geometry={geom.foot} castShadow>
             <meshStandardMaterial color={shoes.color} roughness={0.62} metalness={0.04} />
           </mesh>
@@ -222,6 +239,9 @@ export const Avatar = forwardRef<
           you walked toward someone and they saw you reversing at them. Turning
           the model here, once, keeps both conventions intact. */}
       <group rotation={[0, Math.PI, 0]}>
+        {/* Pelvis. Everything above and below hangs off it, so the stride's
+            pelvic rotation carries the legs with it and the chest counters. */}
+        <group ref={pelvis}>
         <group ref={body}>
           {/* Pelvis through ribcage to the base of the neck, as ONE surface:
               iliac crest, waist, the flare of the lower ribs, chest, and the
@@ -279,8 +299,9 @@ export const Avatar = forwardRef<
 
         {/* Legs sit outside `body` so a seated pose can drop the torso onto a
             chair without the feet sinking through the floor with it. */}
-        {leg(-1, hipL, kneeL)}
-        {leg(1, hipR, kneeR)}
+        {leg(-1, hipL, kneeL, ankleL)}
+        {leg(1, hipR, kneeR, ankleR)}
+        </group>
       </group>
     </group>
   )

@@ -124,7 +124,7 @@ export function RemotePlayer({ id, name, look, quality }: { id: string; name: st
           lookAt: meets ? lookTarget.current : null,
           time: (performance.now() - born.current) / 1000,
         },
-        rigNow.head,
+        rigNow,
         delta,
       )
       if (rigNow.hair) animateHair(rigNow.hair, faceMem.current, cur.current.ry, delta)

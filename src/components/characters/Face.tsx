@@ -95,7 +95,7 @@ export const Face = forwardRef<FaceRig, FaceProps>(function Face({ profile, seg,
   const lp = profile.lips
 
   // Face resolution follows the tier: this is the one mesh worth spending on.
-  const headSeg = detail ? seg * 3 : Math.max(14, seg * 2)
+  const headSeg = detail ? Math.round(seg * 2) : Math.max(14, Math.round(seg * 1.4))
   const seed = profile.id === 'zeynep' ? 3 : 7
   const head = useMemo(() => buildHeadGeometry(profile, R, headSeg, seed), [profile, headSeg, seed])
   useEffect(() => () => head.dispose(), [head])
@@ -103,7 +103,7 @@ export const Face = forwardRef<FaceRig, FaceProps>(function Face({ profile, seg,
     () =>
       profile.facialHair === 'none'
         ? null
-        : buildBeardGeometry(profile, R, Math.max(12, Math.round(headSeg * 0.7)), profile.facialHair === 'beard'),
+        : buildBeardGeometry(profile, R, Math.max(10, Math.round(headSeg * 0.6)), profile.facialHair === 'beard'),
     [profile, headSeg],
   )
   useEffect(() => () => beard?.dispose(), [beard])
