@@ -386,33 +386,35 @@ export function Tap({ id, position }: { id: string; position: [number, number, n
 
   return (
     <group position={position}>
-      {/* base flange where it meets the worktop */}
-      <mesh position={[0, 0.01, 0.06]}>
-        <cylinderGeometry args={[0.035, 0.038, 0.03, 14]} />
+      {/* The riser stands on the strip of worktop BEHIND the bowl and the
+          gooseneck arches forward over it, so the stream lands in the sink. */}
+      <mesh position={[0, 0.015, 0]}>
+        <cylinderGeometry args={[0.035, 0.04, 0.03, 14]} />
         <meshStandardMaterial color={METAL} metalness={0.8} roughness={0.28} />
       </mesh>
-      {/* riser, then a gooseneck arching forward over the bowl */}
-      <mesh position={[0, 0.11, 0.06]}>
-        <cylinderGeometry args={[0.018, 0.021, 0.2, 12]} />
+      <mesh position={[0, 0.145, 0]}>
+        <cylinderGeometry args={[0.019, 0.023, 0.26, 12]} />
         <meshStandardMaterial color={METAL} metalness={0.85} roughness={0.22} />
       </mesh>
-      <mesh position={[0, 0.21, 0]} rotation={[0, Math.PI / 2, 0]}>
-        <torusGeometry args={[0.06, 0.018, 8, 18, Math.PI]} />
+      {/* half-torus in the YZ plane: rises off the riser and comes down 0.18
+          further into the room */}
+      <mesh position={[0, 0.27, -0.09]} rotation={[0, Math.PI / 2, 0]}>
+        <torusGeometry args={[0.09, 0.018, 8, 20, Math.PI]} />
         <meshStandardMaterial color={METAL} metalness={0.85} roughness={0.22} />
       </mesh>
       {/* spout tip, pointing down into the bowl */}
-      <mesh position={[0, 0.185, -0.06]}>
-        <cylinderGeometry args={[0.014, 0.017, 0.06, 10]} />
+      <mesh position={[0, 0.235, -0.18]}>
+        <cylinderGeometry args={[0.014, 0.017, 0.08, 10]} />
         <meshStandardMaterial color={METAL} metalness={0.85} roughness={0.22} />
       </mesh>
       {/* mixer lever — it actually lifts when the tap is running */}
-      <mesh position={[0.02, 0.2, 0.09]} rotation={[on ? -0.6 : 0, 0, 0.35]}>
-        <cylinderGeometry args={[0.009, 0.009, 0.09, 8]} />
+      <mesh position={[0.035, 0.26, 0.02]} rotation={[on ? -0.7 : 0, 0, 0.4]}>
+        <cylinderGeometry args={[0.009, 0.009, 0.1, 8]} />
         <meshStandardMaterial color={METAL} metalness={0.8} roughness={0.3} />
       </mesh>
-      <mesh ref={water} position={[0, 0.0, -0.06]} visible={false}>
-        <cylinderGeometry args={[0.008, 0.012, 0.32, 8]} />
-        <meshPhysicalMaterial color="#cfe4ee" transparent opacity={0.42} roughness={0.06} transmission={0.8} thickness={0.02} />
+      <mesh ref={water} position={[0, 0.03, -0.18]} visible={false}>
+        <cylinderGeometry args={[0.011, 0.017, 0.32, 10]} />
+        <meshPhysicalMaterial color="#dceef6" transparent opacity={0.58} roughness={0.06} transmission={0.8} thickness={0.02} />
       </mesh>
     </group>
   )

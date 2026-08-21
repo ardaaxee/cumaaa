@@ -16,7 +16,7 @@ const METAL = '#c9ccd0'
 // The counter run against the north wall. It stops at x 6.9, short of the
 // storage doorway at 7.0. Every span of it is either a working unit or a fixed
 // door bay: a bare carcass front reads as one blank slab.
-const RUN = { x: 4.3, z: 13.55, w: 5.2, d: 0.6 } // 1.70 .. 6.90
+const RUN = { x: 4.3, z: 13.5, w: 5.2, d: 0.6 } // 1.70 .. 6.90; back at 13.80, the wall's inner face
 const FRONT_Z = RUN.z + FRONT // world z of the door plane
 
 // Working units sit in VOIDS in the carcass and bring their own liner, so
@@ -43,9 +43,9 @@ const FIXED_BAYS: [number, number, 'doors' | 'drawers'][] = [
 // Sink cut-out, and the four worktop slabs that go round it. There is no CSG
 // here, so a hole in the stone has to be built as the gap between segments —
 // otherwise the slab caps the bowl and the tap pours onto a solid surface.
-const SINK = { x: 3.0, z: 13.57, w: 0.58, d: 0.44 }
-const TOP_Z0 = RUN.z - 0.02 - (RUN.d + 0.06) / 2
-const TOP_Z1 = RUN.z - 0.02 + (RUN.d + 0.06) / 2
+const SINK = { x: 3.0, z: 13.45, w: 0.58, d: 0.42 }
+const TOP_Z0 = RUN.z - 0.03 - (RUN.d + 0.06) / 2
+const TOP_Z1 = RUN.z - 0.03 + (RUN.d + 0.06) / 2
 const TOP_X0 = RUN.x - RUN.w / 2 - 0.05
 const TOP_X1 = RUN.x + RUN.w / 2 + 0.05
 const span = (a: number, b: number): [number, number] => [(a + b) / 2, b - a]
@@ -106,7 +106,7 @@ function HoodLights() {
   return (
     <group>
       {[-0.2, 0.2].map((x, i) => (
-        <mesh key={i} position={[x, 1.482, 0]}>
+        <mesh key={i} position={[x, 1.47, 0]}>
           <cylinderGeometry args={[0.035, 0.035, 0.008, 12]} />
           <meshStandardMaterial
             color={cooking ? '#ffe9c4' : '#8e949a'}
@@ -270,14 +270,14 @@ export function Kitchen() {
       </group>
 
       {/* chopping board left out on the worktop */}
-      <mesh position={[4.0, 0.945, 13.5]} rotation={[0, 0.3, 0]}>
+      <mesh position={[4.05, 0.945, 13.44]} rotation={[0, 0.3, 0]}>
         <boxGeometry args={[0.3, 0.024, 0.2]} />
         <meshStandardMaterial color="#8a6a4a" roughness={0.7} />
       </mesh>
 
       {/* Tiled splashback: the wall behind a worktop is never bare plaster, and
           it breaks up the largest flat span in the room. */}
-      <group position={[RUN.x, 1.19, 13.965]}>
+      <group position={[RUN.x, 1.19, 13.792]}>
         <mesh>
           <boxGeometry args={[RUN.w, 0.52, 0.014]} />
           <meshStandardMaterial color="#b9beb9" roughness={0.28} metalness={0.06} />
@@ -296,7 +296,7 @@ export function Kitchen() {
 
       {/* Extractor hood over the hob: a tapered canopy on a chimney that
           actually reaches the ceiling, with a filter and two downlights. */}
-      <group position={[OVEN_X, 0, 13.7]}>
+      <group position={[OVEN_X, 0, 13.55]}>
         <mesh position={[0, 1.62, 0]} castShadow>
           <cylinderGeometry args={[0.28, 0.44, 0.22, 4, 1, false, Math.PI / 4]} />
           <meshStandardMaterial color="#b9bcc0" metalness={0.7} roughness={0.32} />
@@ -312,7 +312,7 @@ export function Kitchen() {
           </mesh>
         ))}
         {/* chimney, running all the way up to the 2.7 ceiling */}
-        <mesh position={[0, 2.21, 0.07]}>
+        <mesh position={[0, 2.21, 0.06]}>
           <boxGeometry args={[0.3, 0.96, 0.26]} />
           <meshStandardMaterial color="#b9bcc0" metalness={0.7} roughness={0.32} />
         </mesh>
@@ -320,19 +320,19 @@ export function Kitchen() {
       </group>
 
       {/* Wall units, backs against the wall rather than floating off it */}
-      <Panel args={[2.5, 0.62, 0.34]} radius={0.012} position={[3.0, 1.78, 13.8]}>
+      <Panel args={[2.5, 0.62, 0.34]} radius={0.012} position={[3.0, 1.78, 13.63]}>
         <meshStandardMaterial color={CAB} roughness={0.68} />
       </Panel>
-      <mesh position={[3.0, 2.11, 13.79]}>
+      <mesh position={[3.0, 2.11, 13.62]}>
         <boxGeometry args={[2.56, 0.05, 0.38]} />
         <meshStandardMaterial color="#9a948a" roughness={0.7} />
       </mesh>
-      {[2.4, 3.6].map((x, i) => (
+      {[2.395, 3.605].map((x, i) => (
         <group key={i}>
-          <Panel args={[1.22, 0.58, 0.022]} radius={0.008} position={[x, 1.78, 13.622]}>
+          <Panel args={[1.17, 0.58, 0.022]} radius={0.008} position={[x, 1.78, 13.452]}>
             <meshStandardMaterial color={DOOR} roughness={0.58} />
           </Panel>
-          <mesh position={[x + (i ? -0.53 : 0.53), 1.62, 13.6]}>
+          <mesh position={[x + (i ? -0.5 : 0.5), 1.62, 13.43]}>
             <cylinderGeometry args={[0.008, 0.008, 0.16, 8]} />
             <meshStandardMaterial color="#b0aa9c" metalness={0.8} roughness={0.3} />
           </mesh>
@@ -340,19 +340,19 @@ export function Kitchen() {
       ))}
       {/* open shelving beside them, rather than a second identical white box */}
       {[1.5, 1.86].map((y, i) => (
-        <mesh key={i} position={[6.4, y, 13.82]} receiveShadow>
+        <mesh key={i} position={[6.4, y, 13.66]} receiveShadow>
           <boxGeometry args={[0.9, 0.035, 0.28]} />
           <meshStandardMaterial color="#6b5540" roughness={0.7} />
         </mesh>
       ))}
       {[-0.28, -0.1, 0.08].map((dx, i) => (
-        <mesh key={i} position={[6.4 + dx, 1.565, 13.82]}>
+        <mesh key={i} position={[6.4 + dx, 1.565, 13.66]}>
           <cylinderGeometry args={[0.042, 0.038, 0.09, 12]} />
           <meshStandardMaterial color={['#c8c2b4', '#9aa8ae', '#c2a48a'][i]} roughness={0.55} />
         </mesh>
       ))}
       {[-0.24, -0.02, 0.2].map((dx, i) => (
-        <mesh key={i} position={[6.4 + dx, 1.948, 13.82]}>
+        <mesh key={i} position={[6.4 + dx, 1.948, 13.66]}>
           <cylinderGeometry args={[0.05, 0.05, 0.14, 12]} />
           <meshStandardMaterial color="#8f9a86" roughness={0.4} metalness={0.05} />
         </mesh>
@@ -365,7 +365,7 @@ export function Kitchen() {
       <Hob id="kitchen-hob" position={[OVEN_X, 0.945, RUN.z - 0.02]} />
       <Microwave id="kitchen-microwave" position={[6.45, 1.11, RUN.z + 0.06]} />
       <Kettle id="kitchen-kettle" position={[2.1, 1.04, RUN.z]} />
-      <Tap id="kitchen-tap" position={[SINK.x, 0.93, RUN.z + 0.16]} />
+      <Tap id="kitchen-tap" position={[SINK.x, 0.93, 13.73]} />
 
       <Fridge />
 
