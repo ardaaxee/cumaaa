@@ -1,10 +1,11 @@
-import { forwardRef, useImperativeHandle, useRef } from 'react'
+import { forwardRef, useEffect, useImperativeHandle, useMemo, useRef } from 'react'
 import * as THREE from 'three'
 import { RIG } from './looks'
 import { Face, type FaceRig } from './Face'
 import { Hair, type HairRig } from './Hair'
 import { Glasses } from './Glasses'
 import { Hand, type HandPose } from './Hand'
+import { buildFoot, buildJoint, buildLimb, buildTorso } from './geometry/body'
 import type { AvatarProfile } from '../../config/appearance'
 
 // The joints the animator drives. Exposed through a ref so the animation lives
@@ -93,6 +94,25 @@ export const Avatar = forwardRef<
   const arms = build.shoulder / 0.2
   const legs = build.hip / 0.108
   const handPose: HandPose = 'relaxed'
+
+  // Continuous swept surfaces, built once per look. Capsules gave every limb
+  // one radius from end to end and a hemisphere on each cap, which is the
+  // "kapsül kol" silhouette; these change girth AND cross section along their
+  // length the way an arm or a leg actually does.
+  const radial = Math.max(8, seg)
+  const geom = useMemo(() => ({
+    torso: buildTorso(profile, radial, 'top'),
+    hips: buildTorso(profile, radial, 'bottom'),
+    upperArm: buildLimb('upperArm', arms, radial),
+    foreArm: buildLimb('foreArm', arms, radial),
+    thigh: buildLimb('thigh', legs, radial),
+    calf: buildLimb('calf', legs, radial),
+    shoulder: buildJoint(0.048 * arms, radial, 0.88),
+    elbow: buildJoint(0.036 * arms, radial, 0.86),
+    knee: buildJoint(0.056 * legs, radial, 0.92),
+    foot: buildFoot(legs, radial),
+  }), [profile, radial, arms, legs])
+  useEffect(() => () => Object.values(geom).forEach((g) => g.dispose()), [geom])
   const cloth = { roughness: top.roughness, metalness: 0.02 }
   const legCloth = { roughness: bottom.roughness, metalness: 0.02 }
   const skinMat = {
@@ -105,47 +125,37 @@ export const Avatar = forwardRef<
   // One leg, built downward from the hip so rotations bend at real joints.
   const leg = (side: -1 | 1, hipRef: React.RefObject<THREE.Group>, kneeRef: React.RefObject<THREE.Group>) => (
     <group ref={hipRef} position={[side * build.hip, RIG.hipY, 0]}>
-      <mesh position={[0, -RIG.thigh / 2 + 0.02, 0]} castShadow>
-        <cylinderGeometry args={[0.082 * legs, 0.056 * legs, RIG.thigh - 0.02, seg]} />
+      <mesh geometry={geom.thigh} castShadow>
         <meshStandardMaterial color={bottom.color} {...legCloth} />
       </mesh>
       <group ref={kneeRef} position={[0, -RIG.thigh, 0]}>
-        <mesh position={[0, 0.006, 0.004]}>
-          <sphereGeometry args={[0.054 * legs, seg, seg]} />
+        {/* The knee volume fills the gap between thigh and calf, so the leg is
+            one form rather than two tubes meeting. */}
+        <mesh geometry={geom.knee} position={[0, 0.004, 0.004]}>
           <meshStandardMaterial color={bottom.color} {...legCloth} />
         </mesh>
-        <mesh position={[0, -RIG.shin / 2 + 0.01, 0]} castShadow>
-          <cylinderGeometry args={[0.053 * legs, 0.034 * legs, RIG.shin - 0.02, seg]} />
-          <meshStandardMaterial color={bottom.color} {...legCloth} />
-        </mesh>
-        {/* calf, which sits high and at the back */}
-        <mesh position={[0, -RIG.shin * 0.34, -0.012]} scale={[0.9, 1.5, 0.9]}>
-          <sphereGeometry args={[0.042 * legs, seg, seg]} />
+        <mesh geometry={geom.calf} castShadow>
           <meshStandardMaterial color={bottom.color} {...legCloth} />
         </mesh>
         {/* turn-up at the ankle, so the trousers end rather than just stopping */}
         <mesh position={[0, -RIG.shin + 0.05, 0]}>
-          <cylinderGeometry args={[0.04 * legs, 0.037 * legs, 0.03, seg]} />
+          <cylinderGeometry args={[0.038 * legs, 0.034 * legs, 0.032, seg]} />
           <meshStandardMaterial color={bottom.trim} {...legCloth} />
         </mesh>
-        {/* shoe: a sole, an upper with a rounded toe, and a tongue */}
-        <group position={[0, -RIG.shin + 0.04, 0.02]}>
-          <mesh position={[0, -0.025, 0.028]} castShadow>
-            <boxGeometry args={[0.079, 0.058, 0.185]} />
-            <meshStandardMaterial color={shoes.color} roughness={0.6} metalness={0.05} />
+        {/* Shoe: a swept last with a heel, an arch and a toe box, plus a sole
+            under it — not a box with a ball stuck on the front. */}
+        <group position={[0, -RIG.shin + 0.034, 0.012]}>
+          <mesh geometry={geom.foot} castShadow>
+            <meshStandardMaterial color={shoes.color} roughness={0.62} metalness={0.04} />
           </mesh>
-          <mesh position={[0, -0.05, 0.028]}>
-            <boxGeometry args={[0.083, 0.017, 0.19]} />
-            <meshStandardMaterial color={shoes.sole} roughness={0.85} />
-          </mesh>
-          <mesh position={[0, -0.021, 0.116]} scale={[0.94, 0.86, 1]}>
-            <sphereGeometry args={[0.04, seg, seg]} />
-            <meshStandardMaterial color={shoes.color} roughness={0.6} />
+          <mesh position={[0, -0.026 * legs, 0.028 * legs]} scale={[1.02, 1, 1.01]}>
+            <boxGeometry args={[0.076 * legs, 0.016, 0.2 * legs]} />
+            <meshStandardMaterial color={shoes.sole} roughness={0.88} />
           </mesh>
           {detail && (
-            <mesh position={[0, 0.006, 0.055]} rotation={[0.25, 0, 0]}>
-              <boxGeometry args={[0.05, 0.03, 0.07]} />
-              <meshStandardMaterial color={shoes.sole} roughness={0.7} />
+            <mesh position={[0, 0.012 * legs, -0.008 * legs]} rotation={[0.3, 0, 0]}>
+              <boxGeometry args={[0.042 * legs, 0.026, 0.05 * legs]} />
+              <meshStandardMaterial color={shoes.sole} roughness={0.72} />
             </mesh>
           )}
         </group>
@@ -161,37 +171,30 @@ export const Avatar = forwardRef<
     handRef: React.RefObject<THREE.Group>,
   ) => (
     <group ref={shoulderRef} position={[side * build.shoulder, RIG.shoulderY, 0]}>
-      {/* Deltoid: the muscle that caps the shoulder. Flattened against the
-          body rather than a ball, or the figure gets balloon sleeves. */}
-      <mesh position={[side * 0.004, -0.024, 0]} scale={[0.86, 1.05, 0.82]} castShadow>
-        <sphereGeometry args={[0.048 * arms, seg, seg]} />
+      {/* Deltoid, filling the shoulder so the arm grows out of the torso
+          instead of being socketed into it. */}
+      <mesh geometry={geom.shoulder} position={[side * 0.006, -0.012, 0]} castShadow>
         <meshStandardMaterial color={top.color} {...cloth} />
       </mesh>
       {detail && (
-        <mesh position={[0, -0.016, 0]} rotation={[0, 0, side * 0.2]}>
-          <torusGeometry args={[0.046 * arms, 0.002, 4, 12]} />
+        <mesh position={[0, -0.014, 0]} rotation={[0, 0, side * 0.2]}>
+          <torusGeometry args={[0.045 * arms, 0.002, 4, 12]} />
           <meshStandardMaterial color={top.trim} roughness={0.95} />
         </mesh>
       )}
-      {/* Upper arm, tapering from the deltoid to the elbow. A uniform tube is
-          the single clearest tell of a puppet limb. */}
-      <mesh position={[0, -RIG.upperArm / 2 + 0.01, 0]} castShadow>
-        <cylinderGeometry args={[0.044 * arms, 0.036 * arms, RIG.upperArm - 0.02, seg]} />
+      <mesh geometry={geom.upperArm} castShadow>
         <meshStandardMaterial color={top.color} {...cloth} />
       </mesh>
       <group ref={elbowRef} position={[0, -RIG.upperArm, 0]}>
-        <mesh position={[0, 0.004, 0]}>
-          <sphereGeometry args={[0.036 * arms, seg, seg]} />
+        <mesh geometry={geom.elbow} position={[0, 0.002, -0.002]}>
           <meshStandardMaterial color={top.color} {...cloth} />
         </mesh>
-        {/* Forearm: thickest just below the elbow, narrowest at the wrist. */}
-        <mesh position={[0, -RIG.forearm / 2 + 0.012, 0]} castShadow>
-          <cylinderGeometry args={[0.037 * arms, 0.026 * arms, RIG.forearm - 0.024, seg]} />
+        <mesh geometry={geom.foreArm} castShadow>
           <meshStandardMaterial color={top.color} {...cloth} />
         </mesh>
         {/* cuff at the wrist */}
-        <mesh position={[0, -RIG.forearm + 0.024, 0]}>
-          <cylinderGeometry args={[0.029 * arms, 0.027 * arms, 0.036, seg]} />
+        <mesh position={[0, -RIG.forearm + 0.022, 0]}>
+          <cylinderGeometry args={[0.027 * arms, 0.025 * arms, 0.034, seg]} />
           <meshStandardMaterial color={top.trim} {...cloth} />
         </mesh>
         {/* Wrist. The hand and anything it is holding hang off this, so the
@@ -220,24 +223,21 @@ export const Avatar = forwardRef<
           the model here, once, keeps both conventions intact. */}
       <group rotation={[0, Math.PI, 0]}>
         <group ref={body}>
-          {/* Pelvis */}
-          <mesh position={[0, (RIG.hipY + RIG.waistY) / 2, 0]} scale={[1, 1, 0.72]} castShadow>
-            <capsuleGeometry args={[build.hip + 0.018, 0.1, 2, seg]} />
+          {/* Pelvis through ribcage to the base of the neck, as ONE surface:
+              iliac crest, waist, the flare of the lower ribs, chest, and the
+              trapezius sloping to the neck. The chest group still pivots for
+              breathing and counter-rotation; the mesh hangs off the body so a
+              seated pose drops it as a piece. */}
+          {/* Hips and seat, in the trousers. Cut from the SAME torso profile
+              as the shirt above it, so the two meet without a step. */}
+          <mesh geometry={geom.hips} castShadow receiveShadow>
             <meshStandardMaterial color={bottom.color} {...legCloth} />
           </mesh>
+          <mesh geometry={geom.torso} castShadow receiveShadow>
+            <meshStandardMaterial color={top.color} {...cloth} />
+          </mesh>
 
-          {/* Chest group — breathing and torso counter-rotation pivot here */}
           <group ref={chest} position={[0, RIG.chestBottom, 0]}>
-            {/* torso: tapered, wider at the chest than the waist */}
-            <mesh position={[0, (RIG.chestTop - RIG.chestBottom) / 2, 0]} scale={[1, 1, 0.68]} castShadow>
-              <capsuleGeometry args={[build.waist + 0.016, RIG.chestTop - RIG.chestBottom - 0.16, 2, seg]} />
-              <meshStandardMaterial color={top.color} {...cloth} />
-            </mesh>
-            {/* hem, where the garment ends */}
-            <mesh position={[0, -0.015, 0]}>
-              <cylinderGeometry args={[build.waist + 0.02, build.waist + 0.024, 0.032, seg]} />
-              <meshStandardMaterial color={top.trim} {...cloth} />
-            </mesh>
             {/* Folds across the body of the garment. Cloth does not hang flat,
                 and a couple of soft creases are most of what says "fabric". */}
             {detail &&
@@ -252,11 +252,6 @@ export const Avatar = forwardRef<
                   <meshStandardMaterial color={top.trim} roughness={top.roughness} transparent opacity={0.45} />
                 </mesh>
               ))}
-            {/* shoulder yoke spanning between the arms */}
-            <mesh position={[0, RIG.shoulderY - RIG.chestBottom - 0.01, 0]} rotation={[0, 0, Math.PI / 2]} scale={[1, 1, 0.62]} castShadow>
-              <capsuleGeometry args={[0.072, build.shoulder * 1.6, 2, seg]} />
-              <meshStandardMaterial color={top.color} {...cloth} />
-            </mesh>
             {/* collar, standing round the neck */}
             <mesh position={[0, RIG.neckBase - RIG.chestBottom, 0]}>
               <cylinderGeometry args={[0.072, 0.09, 0.05, seg, 1, true]} />
