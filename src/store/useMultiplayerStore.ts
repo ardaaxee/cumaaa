@@ -16,7 +16,11 @@ import {
   type ServerMessage,
   type ServerErrorCode,
   type WorldEvent,
+  applyItemAction,
+  type ItemAction,
+  type WorldItem,
 } from '../network/protocol'
+import { ITEM_RULES } from '../config/items'
 import { useRoomStore } from './useRoomStore'
 import { resetActions } from '../components/characters/actions'
 
@@ -44,6 +48,7 @@ function adoptWorld(w: RoomState): RoomState {
     snacks: { ...base.snacks, ...w?.snacks },
     openables: { ...base.openables, ...w?.openables },
     appliances: { ...base.appliances, ...w?.appliances },
+    items: { ...base.items, ...w?.items },
     weather: w?.weather ?? base.weather,
     movie: { ...base.movie, ...w?.movie },
   }
@@ -59,6 +64,8 @@ function cloneWorld(w: RoomState): RoomState {
     snacks: { ...w.snacks },
     openables: { ...w.openables },
     appliances: { ...w.appliances },
+    // Items are mutated in place by the reducer, so each one is copied too.
+    items: Object.fromEntries(Object.entries(w.items).map(([k, v]) => [k, { ...v, loc: { ...v.loc } }])),
     movie: { ...w.movie },
   }
 }
@@ -101,6 +108,11 @@ interface MultiplayerState {
   leaveHome: () => void
   sendState: (p: PlayerNetState) => void
   toggleWorld: (event: WorldEvent) => void
+  /** Run an item action against the local world. Returns whether it was valid. */
+  applyItem: (action: ItemAction) => boolean
+  sendItem: (action: Omit<ItemAction, 'by'>) => void
+  /** Offline only: stock an empty home. */
+  seedItems: (items: Record<string, WorldItem>) => void
   sendChat: (text: string) => void
   setChatOpen: (open: boolean) => void
   setMoviePanel: (open: boolean) => void
@@ -161,6 +173,16 @@ export const useMultiplayerStore = create<MultiplayerState>((set, get) => {
         set((s) => {
           const world = cloneWorld(s.world)
           applyEvent(world, msg.event)
+          return { world }
+        })
+        break
+      }
+      case 'item': {
+        // The server is the authority: it has already validated this. Applying
+        // the same reducer keeps both clients byte-identical.
+        set((s) => {
+          const world = cloneWorld(s.world)
+          applyItemAction(world, msg.action, ITEM_RULES, null)
           return { world }
         })
         break
@@ -268,6 +290,20 @@ export const useMultiplayerStore = create<MultiplayerState>((set, get) => {
         return { world }
       })
       client?.send({ t: 'event', event })
+    },
+    applyItem: (action) => {
+      // The reducer mutates, so it runs on a copy; if it refuses, nothing is
+      // committed and the caller can stay silent rather than mime success.
+      const world = cloneWorld(get().world)
+      const ok = applyItemAction(world, action, ITEM_RULES, null)
+      if (ok) set({ world })
+      return ok
+    },
+    sendItem: (action) => {
+      client?.send({ t: 'item', action })
+    },
+    seedItems: (items) => {
+      set((s) => ({ world: { ...cloneWorld(s.world), items } }))
     },
     setReady: (ready) => {
       client?.send({ t: 'ready', ready })

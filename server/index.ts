@@ -12,6 +12,11 @@ import {
   sanitizeEvent,
   sanitizeChatText,
   sanitizeHomeName,
+  sanitizeItemAction,
+  applyItemAction,
+  seedHomeItems,
+  ITEM_RULES_SERVER,
+  type ItemAction,
   CHAT_HISTORY,
   CHAT_MIN_GAP_MS,
   type ChatMessage,
@@ -32,6 +37,7 @@ import {
 // can reconnect and get the room state back.
 
 const PORT = Number(process.env.PORT || process.env.MULTIPLAYER_PORT || 8787)
+const ITEM_MIN_GAP_MS = 120 // an item action per player per ~8th of a second
 
 interface Player {
   id: string
@@ -41,6 +47,7 @@ interface Player {
   state: PlayerNetState
   alive: boolean
   lastChatAt: number
+  lastItemAt: number
   ready: boolean
 }
 
@@ -89,7 +96,7 @@ function createRoom(name: string): Room {
   const room: Room = {
     id: code,
     players: new Map(),
-    state: emptyRoomState(code),
+    state: { ...emptyRoomState(code), items: seedHomeItems() },
     chat: [],
     name,
     hostId: null,
@@ -123,6 +130,7 @@ function joinRoom(room: Room, ws: WebSocket, name: string): Player | null {
     state: { x: 0, y: 1.62, z: 4, ry: 0, run: false, jump: false, sit: false, act: 'idle' },
     alive: true,
     lastChatAt: 0,
+    lastItemAt: 0,
     ready: false,
   }
   room.players.set(player.id, player)
@@ -197,6 +205,27 @@ wss.on('connection', (ws) => {
         if (!player) return
         const clean = sanitizeState(msg.p)
         if (clean) player.state = clean
+        break
+      }
+      // Items are the one place a client could try to claim something it is not
+      // near, or take what another player is already holding. The server runs
+      // the SAME reducer the client did — but with the position IT last saw for
+      // that player, so reach cannot be faked — and only broadcasts if the
+      // action was actually legal. A refused action is simply not echoed.
+      case 'item': {
+        if (!roomId || !playerId) return
+        const room = rooms.get(roomId)
+        const player = room?.players.get(playerId)
+        if (!room || !player) return
+        const clean = sanitizeItemAction(msg.action)
+        if (!clean) return
+        const now = Date.now()
+        if (now - player.lastItemAt < ITEM_MIN_GAP_MS) return // flood guard
+        player.lastItemAt = now
+        const action: ItemAction = { ...clean, by: playerId }
+        const at: [number, number, number] = [player.state.x, player.state.y, player.state.z]
+        if (!applyItemAction(room.state, action, ITEM_RULES_SERVER, at)) return
+        broadcast(room, { t: 'item', action })
         break
       }
       case 'event': {

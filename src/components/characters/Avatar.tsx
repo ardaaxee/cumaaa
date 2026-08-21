@@ -18,13 +18,26 @@ export interface AvatarRig {
   shoulderR: THREE.Group | null
   elbowL: THREE.Group | null
   elbowR: THREE.Group | null
+  /** Wrist anchors. Anything carried is parented here, so it follows the arm
+      instead of being flown alongside the character. */
+  handL: THREE.Group | null
+  handR: THREE.Group | null
 }
 
 // A procedural person: hips → knees → feet and shoulders → elbows → hands, so
 // walking bends where a leg actually bends. No character asset is loaded; every
 // part is a primitive, and segment counts follow the quality tier.
-export const Avatar = forwardRef<AvatarRig, { look: CharacterLook; seg: number; faces: boolean }>(
-  function Avatar({ look, seg, faces }, ref) {
+export const Avatar = forwardRef<
+  AvatarRig,
+  {
+    look: CharacterLook
+    seg: number
+    faces: boolean
+    /** Rendered inside the right/left wrist group — a carried item. */
+    rightHand?: React.ReactNode
+    leftHand?: React.ReactNode
+  }
+>(function Avatar({ look, seg, faces, rightHand, leftHand }, ref) {
     const root = useRef<THREE.Group>(null)
     const body = useRef<THREE.Group>(null)
     const chest = useRef<THREE.Group>(null)
@@ -37,6 +50,8 @@ export const Avatar = forwardRef<AvatarRig, { look: CharacterLook; seg: number; 
     const shoulderR = useRef<THREE.Group>(null)
     const elbowL = useRef<THREE.Group>(null)
     const elbowR = useRef<THREE.Group>(null)
+    const handL = useRef<THREE.Group>(null)
+    const handR = useRef<THREE.Group>(null)
 
     useImperativeHandle(ref, () => ({
       get root() { return root.current },
@@ -51,6 +66,8 @@ export const Avatar = forwardRef<AvatarRig, { look: CharacterLook; seg: number; 
       get shoulderR() { return shoulderR.current },
       get elbowL() { return elbowL.current },
       get elbowR() { return elbowR.current },
+      get handL() { return handL.current },
+      get handR() { return handR.current },
     }))
 
     const cloth = { roughness: 0.88, metalness: 0.02 }
@@ -98,7 +115,12 @@ export const Avatar = forwardRef<AvatarRig, { look: CharacterLook; seg: number; 
     )
 
     // One arm, built downward from the shoulder.
-    const arm = (side: -1 | 1, shoulderRef: React.RefObject<THREE.Group>, elbowRef: React.RefObject<THREE.Group>) => (
+    const arm = (
+      side: -1 | 1,
+      shoulderRef: React.RefObject<THREE.Group>,
+      elbowRef: React.RefObject<THREE.Group>,
+      handRef: React.RefObject<THREE.Group>,
+    ) => (
       <group ref={shoulderRef} position={[side * look.shoulder, RIG.shoulderY, 0]}>
         {/* sleeve cap, so the shoulder doesn't read as a stuck-on stick */}
         <mesh position={[0, -0.02, 0]} castShadow>
@@ -122,11 +144,31 @@ export const Avatar = forwardRef<AvatarRig, { look: CharacterLook; seg: number; 
             <cylinderGeometry args={[0.043, 0.041, 0.04, seg]} />
             <meshStandardMaterial color={look.topTrim} {...cloth} />
           </mesh>
-          {/* hand: flattened, not a ball */}
-          <mesh position={[0, -RIG.forearm - 0.03, 0]} scale={[1, 1.25, 0.62]} castShadow>
-            <sphereGeometry args={[0.047, seg, seg]} />
-            <meshStandardMaterial color={look.skinShade} {...skinMat} />
-          </mesh>
+          {/* Wrist. The hand and anything it is holding hang off this, so the
+              grip transform is expressed once, in the wrist's own frame. */}
+          <group ref={handRef} position={[0, -RIG.forearm, 0]}>
+            {/* hand: flattened, not a ball */}
+            <mesh position={[0, -0.03, 0]} scale={[1, 1.25, 0.62]} castShadow>
+              <sphereGeometry args={[0.047, seg, seg]} />
+              <meshStandardMaterial color={look.skinShade} {...skinMat} />
+            </mesh>
+            {/* the basic silhouette of fingers, so a hand holding something
+                does not read as a mitten */}
+            {seg >= 12 &&
+              [-0.021, -0.007, 0.007, 0.021].map((x, i) => (
+                <mesh key={i} position={[x, -0.058 - Math.abs(x) * 0.25, 0.004]} rotation={[0.2, 0, 0]}>
+                  <capsuleGeometry args={[0.0085, 0.026 - Math.abs(x) * 0.3, 2, 6]} />
+                  <meshStandardMaterial color={look.skinShade} {...skinMat} />
+                </mesh>
+              ))}
+            {seg >= 12 && (
+              <mesh position={[side * -0.03, -0.036, 0.012]} rotation={[0.1, 0, side * 0.6]}>
+                <capsuleGeometry args={[0.0095, 0.02, 2, 6]} />
+                <meshStandardMaterial color={look.skinShade} {...skinMat} />
+              </mesh>
+            )}
+            {side === 1 ? rightHand : leftHand}
+          </group>
         </group>
       </group>
     )
@@ -223,8 +265,8 @@ export const Avatar = forwardRef<AvatarRig, { look: CharacterLook; seg: number; 
             </group>
           </group>
 
-          {arm(-1, shoulderL, elbowL)}
-          {arm(1, shoulderR, elbowR)}
+          {arm(-1, shoulderL, elbowL, handL)}
+          {arm(1, shoulderR, elbowR, handR)}
         </group>
 
         {/* Legs sit outside `body` so a seated pose can drop the torso onto a

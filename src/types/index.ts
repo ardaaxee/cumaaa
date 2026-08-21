@@ -115,6 +115,10 @@ export type InteractableKind =
   // opened or switched, so a new drawer needs a registry entry, not a new kind.
   | 'openable'
   | 'appliance'
+  // Items. Generated from the item map, not declared: the id carries the item
+  // uid or the spot id it refers to.
+  | 'itemTake'
+  | 'itemPlace'
   // Movie night / social (co-op)
   | 'sofaSit'
   | 'snackTake'

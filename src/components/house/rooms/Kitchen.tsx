@@ -155,25 +155,7 @@ function Fridge() {
               <meshPhysicalMaterial color="#dfe8ec" transparent opacity={0.5} roughness={0.15} transmission={0.5} thickness={0.02} />
             </mesh>
           ))}
-          {/* what is actually in it */}
-          <mesh position={[-0.18, -0.44, 0.04]}>
-            <cylinderGeometry args={[0.045, 0.045, 0.2, 12]} />
-            <meshStandardMaterial color="#8fb6d8" roughness={0.3} />
-          </mesh>
-          <mesh position={[-0.04, -0.44, 0.04]}>
-            <cylinderGeometry args={[0.04, 0.04, 0.18, 12]} />
-            <meshStandardMaterial color="#eceae2" roughness={0.5} />
-          </mesh>
-          <mesh position={[0.16, 0.02, 0.02]}>
-            <boxGeometry args={[0.16, 0.1, 0.14]} />
-            <meshStandardMaterial color="#c9a04a" roughness={0.6} />
-          </mesh>
-          {[[-0.2, 0.06], [-0.08, 0.44], [0.12, 0.46]].map(([x, y], i) => (
-            <mesh key={i} position={[x, y, -0.06]}>
-              <sphereGeometry args={[0.05, 10, 10]} />
-              <meshStandardMaterial color={['#b8474a', '#7ba24c', '#d8952f'][i]} roughness={0.65} />
-            </mesh>
-          ))}
+          {/* What is on the shelves is made of real items, drawn by WorldItems. */}
           <pointLight position={[0, 0.3, 0.1]} color="#dff0ff" intensity={0.5} distance={2.2} decay={2} />
         </group>
       )}
@@ -270,7 +252,7 @@ export function Kitchen() {
       </group>
 
       {/* chopping board left out on the worktop */}
-      <mesh position={[4.05, 0.945, 13.44]} rotation={[0, 0.3, 0]}>
+      <mesh position={[5.15, 0.945, 13.44]} rotation={[0, 0.3, 0]}>
         <boxGeometry args={[0.3, 0.024, 0.2]} />
         <meshStandardMaterial color="#8a6a4a" roughness={0.7} />
       </mesh>
@@ -345,12 +327,6 @@ export function Kitchen() {
           <meshStandardMaterial color="#6b5540" roughness={0.7} />
         </mesh>
       ))}
-      {[-0.28, -0.1, 0.08].map((dx, i) => (
-        <mesh key={i} position={[6.4 + dx, 1.565, 13.66]}>
-          <cylinderGeometry args={[0.042, 0.038, 0.09, 12]} />
-          <meshStandardMaterial color={['#c8c2b4', '#9aa8ae', '#c2a48a'][i]} roughness={0.55} />
-        </mesh>
-      ))}
       {[-0.24, -0.02, 0.2].map((dx, i) => (
         <mesh key={i} position={[6.4 + dx, 1.948, 13.66]}>
           <cylinderGeometry args={[0.05, 0.05, 0.14, 12]} />
@@ -397,15 +373,6 @@ export function Kitchen() {
             ))}
           </group>
         ))}
-        {/* plates + fruit bowl on the table */}
-        <mesh position={[0, 0.76, 0]}>
-          <cylinderGeometry args={[0.16, 0.14, 0.04, 20]} />
-          <meshStandardMaterial color="#b9b3a5" roughness={0.4} />
-        </mesh>
-        <mesh position={[0, 0.8, 0]}>
-          <sphereGeometry args={[0.05, 10, 10]} />
-          <meshStandardMaterial color="#b5642f" roughness={0.6} />
-        </mesh>
       </group>
 
       <Plant position={[8.8, 0, 7.0]} scale={0.9} />

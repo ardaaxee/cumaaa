@@ -26,6 +26,8 @@ import { InteractionManager } from '../interaction/InteractionManager'
 import { FirstFrameSignal } from './FirstFrameSignal'
 import { InteractableTrigger } from '../interaction/InteractableTrigger'
 import { INTERACTABLES } from '../../config/interactables'
+import { WorldItems } from '../items/WorldItems'
+import { LocalHeldItem } from '../items/ItemViews'
 import { ROOM } from '../../config/roomLayout'
 import type { GraphicsQuality } from '../../types'
 import { isHighTier } from '../../utils/device'
@@ -81,6 +83,11 @@ export function Scene({ quality }: { quality: GraphicsQuality }) {
           radius={it.radius}
         />
       ))}
+
+      {/* Items: what is in the cupboards and on the counters, plus whatever
+          this player is carrying. */}
+      <WorldItems quality={quality} />
+      <LocalHeldItem quality={quality} />
 
       <PlayerController />
       <PlayerShadow quality={quality} />

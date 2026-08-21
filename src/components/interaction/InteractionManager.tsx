@@ -1,4 +1,5 @@
 import { useEffect, useRef } from 'react'
+import * as THREE from 'three'
 import { useFrame, useThree } from '@react-three/fiber'
 import { pickFocus, useInteractionStore } from '../../systems/interactionSystem'
 import { useRoomStore } from '../../store/useRoomStore'
@@ -11,6 +12,9 @@ import { playAction, holdAction } from '../characters/actions'
 import { worldValue, toggleWorldFlag, toggleOpenable, toggleAppliance, WORLD_FLAGS, takeSnack } from '../../systems/world'
 import { useMultiplayerStore } from '../../store/useMultiplayerStore'
 import { SOFA_SEATS } from '../../config/interactables'
+import { itemUidFromInteractable, spotIdFromInteractable } from '../items/ItemInteractables'
+import { takeItem, placeItem, dropItem, consumeItem, currentHeld } from '../../systems/items'
+import { itemDefOr } from '../../config/items'
 import type { InteractableInfo } from '../../types'
 
 // Central hub: each frame it figures out what the player is looking at, mirrors
@@ -52,9 +56,22 @@ export function InteractionManager() {
     }
     window.addEventListener('click', onClick)
     const onKey = (e: KeyboardEvent) => {
+      const p = usePlayerStore.getState()
+      if (!p.inputEnabled) return
       if (e.key === 'e' || e.key === 'E') {
-        const p = usePlayerStore.getState()
         if (focusRef.current || p.seatPose) usePlayerStore.getState().requestInteract()
+        return
+      }
+      // F uses whatever is in your hand — drink from the glass, bite the apple,
+      // open the book. Separate from E so a full hand does not steal the
+      // prompt for the cupboard you are standing in front of.
+      if (e.key === 'f' || e.key === 'F') {
+        useHeldItem()
+        return
+      }
+      // G puts it down where you stand.
+      if (e.key === 'g' || e.key === 'G') {
+        dropHeld(camera)
       }
     }
     window.addEventListener('keydown', onKey)
@@ -62,7 +79,7 @@ export function InteractionManager() {
       window.removeEventListener('click', onClick)
       window.removeEventListener('keydown', onKey)
     }
-  }, [])
+  }, [camera])
 
   const handleInteractRequest = () => {
     const nonce = usePlayerStore.getState().interactNonce
@@ -82,6 +99,57 @@ export function InteractionManager() {
   }
 
   return null
+}
+
+// Use what is in your hand. What that means comes from the item definition:
+// a glass with water in it is drunk from, an apple is eaten, a book is read.
+function useHeldItem(): void {
+  const held = currentHeld()
+  if (!held) return
+  const def = itemDefOr(held.def)
+  switch (def.interaction) {
+    case 'drink': {
+      if (!held.fill) {
+        useRoomStore.getState().pushToast(`${def.name} boş`)
+        return
+      }
+      if (!consumeItem(held.uid)) return
+      playAction('drink')
+      Sfx.click()
+      break
+    }
+    case 'eat': {
+      if (!consumeItem(held.uid)) return
+      playAction('eat')
+      Sfx.click()
+      break
+    }
+    case 'read':
+      playAction('read')
+      break
+    case 'phone':
+      playAction('phone')
+      break
+    case 'use':
+      playAction('use')
+      Sfx.click()
+      break
+    default:
+      break
+  }
+}
+
+// Put down what you are carrying, at your feet, facing the way you are.
+function dropHeld(camera: THREE.Camera): void {
+  const held = currentHeld()
+  if (!held) return
+  const dir = new THREE.Vector3()
+  camera.getWorldDirection(dir)
+  const x = camera.position.x + dir.x * 0.55
+  const z = camera.position.z + dir.z * 0.55
+  if (!dropItem(held.uid, x, z, Math.atan2(-dir.x, -dir.z))) return
+  playAction('drop')
+  Sfx.close()
 }
 
 function activate(info: InteractableInfo) {
@@ -183,6 +251,25 @@ function activate(info: InteractableInfo) {
       Sfx.click()
       playAction('use')
       toggleAppliance(info.id)
+      break
+    }
+    // Items. The prompt carries the uid (or the spot id) it refers to, so
+    // taking the tomato takes THAT tomato and not "an item from the fridge".
+    case 'itemTake': {
+      const uid = itemUidFromInteractable(info.id)
+      if (!uid) break
+      if (!takeItem(uid)) break // hands full, or someone else got there first
+      playAction('pickUp')
+      Sfx.click()
+      break
+    }
+    case 'itemPlace': {
+      const spot = spotIdFromInteractable(info.id)
+      const held = currentHeld()
+      if (!spot || !held) break
+      if (!placeItem(held.uid, spot)) break
+      playAction('drop')
+      Sfx.click()
       break
     }
     default:

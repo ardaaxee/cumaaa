@@ -4,6 +4,7 @@ import * as THREE from 'three'
 import { Panel } from '../../furniture/Panel'
 import { useSwing } from '../../furniture/useSwing'
 import { useOpenable, useAppliance } from '../../../systems/world'
+import { SpotItems } from '../../items/ItemViews'
 
 const CAB_DOOR = '#c3bdaf'
 const CARCASS_IN = '#a49e93'
@@ -54,27 +55,10 @@ export function LowerCupboard({ id, position }: { id: string; position: [number,
             <boxGeometry args={[1.28, 0.02, 0.5]} />
             <meshStandardMaterial color="#b3ada2" roughness={0.7} />
           </mesh>
-          {/* a stacked pan and a pot — what is actually in a base unit */}
-          <group position={[-0.32, 0.53, 0.02]}>
-            <mesh>
-              <cylinderGeometry args={[0.15, 0.13, 0.11, 18]} />
-              <meshStandardMaterial color="#4a4d52" metalness={0.6} roughness={0.4} />
-            </mesh>
-            <mesh position={[0, -0.01, -0.24]} rotation={[Math.PI / 2, 0, 0]}>
-              <cylinderGeometry args={[0.012, 0.012, 0.18, 8]} />
-              <meshStandardMaterial color="#2b2d31" roughness={0.6} />
-            </mesh>
-          </group>
-          <mesh position={[0.3, 0.19, 0.02]}>
-            <cylinderGeometry args={[0.17, 0.16, 0.16, 18]} />
-            <meshStandardMaterial color="#5a5d62" metalness={0.55} roughness={0.45} />
-          </mesh>
-          <mesh position={[0.3, 0.29, 0.02]}>
-            <cylinderGeometry args={[0.165, 0.165, 0.015, 18]} />
-            <meshStandardMaterial color={METAL} metalness={0.8} roughness={0.3} />
-          </mesh>
-          {/* washing-up bottle and a cloth, because this is the sink base */}
-          <mesh position={[-0.05, 0.6, 0.02]}>
+          {/* Washing-up bottle: fixed to the sink base, not an item — you do
+              not carry it around, so it is furniture. The pans that used to be
+              modelled here are real items now and live in the item map. */}
+          <mesh position={[-0.5, 0.11, 0.02]}>
             <cylinderGeometry args={[0.038, 0.045, 0.2, 12]} />
             <meshStandardMaterial color="#5f9c7a" roughness={0.4} />
           </mesh>
@@ -118,22 +102,14 @@ export function Drawer({ id, position }: { id: string; position: [number, number
           <meshStandardMaterial color="#b3ada2" roughness={0.8} side={THREE.BackSide} />
         </mesh>
         {open && (
-          <group position={[0, -0.03, -0.06]}>
-            {/* a cutlery tray with knives, forks and spoons in their slots */}
-            <mesh>
+          <group>
+            {/* The tray is part of the drawer; the cutlery in it is made of real
+                items, drawn here so they slide out with it. */}
+            <mesh position={[0, -0.03, -0.06]}>
               <boxGeometry args={[0.52, 0.03, 0.38]} />
               <meshStandardMaterial color="#8d8578" roughness={0.9} />
             </mesh>
-            {[-0.17, -0.06, 0.06, 0.17].map((x, i) => (
-              <group key={i}>
-                {[0, 1, 2].map((j) => (
-                  <mesh key={j} position={[x + (j - 1) * 0.012, 0.03, -0.03 + j * 0.01]} rotation={[0, 0.04 * j, 0]}>
-                    <boxGeometry args={[0.014, 0.008, 0.16]} />
-                    <meshStandardMaterial color={METAL} metalness={0.85} roughness={0.28} />
-                  </mesh>
-                ))}
-              </group>
-            ))}
+            <SpotItems spotId={id} seg={10} local={[position[0], position[1] + 0.7, position[2]]} />
           </group>
         )}
         {/* front */}

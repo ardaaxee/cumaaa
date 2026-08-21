@@ -8,6 +8,8 @@ import { isHighTier, isUltra } from '../../utils/device'
 import { Avatar, type AvatarRig } from '../characters/Avatar'
 import { animateAvatar } from '../characters/animate'
 import { lookFor } from '../characters/looks'
+import { usePeerHeld } from '../../systems/items'
+import { HeldInHand, itemSeg } from '../items/ItemViews'
 
 const EYE = 1.62
 
@@ -31,6 +33,9 @@ export function RemotePlayer({ id, name, quality }: { id: string; name: string; 
   const showNames = useRoomStore((s) => s.settings.showPlayerNames)
   const seg = quality === 'low' ? 8 : quality === 'medium' ? 12 : isUltra(quality) ? 20 : 16
   const look = useMemo(() => lookFor(name), [name])
+  // What they are carrying comes from the shared item map, not from their
+  // transform packet: the item is already synced, so the hand just reads it.
+  const held = usePeerHeld(id)
   const nameTex = useMemo(() => makeNameTexture(name), [name])
 
   useFrame((_, rawDelta) => {
@@ -80,7 +85,13 @@ export function RemotePlayer({ id, name, quality }: { id: string; name: string; 
 
   return (
     <group ref={root}>
-      <Avatar ref={rig} look={look} seg={seg} faces={isHighTier(quality)} />
+      <Avatar
+        ref={rig}
+        look={look}
+        seg={seg}
+        faces={isHighTier(quality)}
+        rightHand={held ? <HeldInHand item={held} seg={itemSeg(quality)} /> : null}
+      />
       {showNames && (
         <sprite ref={label} position={[0, 1.95, 0]} scale={[0.9, 0.225, 1]}>
           <spriteMaterial ref={labelMat} map={nameTex} transparent depthTest={false} />

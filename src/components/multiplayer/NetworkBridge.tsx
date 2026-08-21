@@ -4,6 +4,7 @@ import * as THREE from 'three'
 import { useMultiplayerStore } from '../../store/useMultiplayerStore'
 import { usePlayerStore } from '../../store/usePlayerStore'
 import { playerMotion } from '../../systems/playerMotion'
+import { currentHeld } from '../../systems/items'
 import { NET_SEND_MS } from '../../network/protocol'
 import { resolveAction } from '../characters/actions'
 import { useMultiplayerStore as mpStore } from '../../store/useMultiplayerStore'
@@ -32,7 +33,7 @@ export function NetworkBridge() {
       grounded: playerMotion.grounded,
       seated: player.seatPose !== null,
       talking: mpStore.getState().chatOpen,
-      holdingItem: false, // set once the item system lands (PHASE C)
+      holdingItem: currentHeld() !== null,
     })
     mp.sendState({
       x: camera.position.x,
