@@ -41,6 +41,18 @@ export interface PeerInfo {
   id: string
   name: string
   role: PlayerRole
+  /** Which appearance preset they chose. The SERVER decides what this is
+      allowed to be, so a client cannot hand its partner an unknown look. */
+  look: string
+}
+
+// Appearance presets the server will accept. Kept here rather than imported
+// from the client catalogue so the protocol stays loadable by Node on its own.
+export const LOOK_IDS = ['zeynep', 'cuma'] as const
+export const DEFAULT_LOOK = 'cuma'
+
+export function sanitizeLook(raw: unknown): string {
+  return typeof raw === 'string' && (LOOK_IDS as readonly string[]).includes(raw) ? raw : DEFAULT_LOOK
 }
 
 // ---- Home + lobby ---------------------------------------------------------
@@ -62,6 +74,7 @@ export interface LobbyPlayer {
   name: string
   role: PlayerRole
   ready: boolean
+  look: string
 }
 
 export function sanitizeHomeName(raw: unknown): string {
@@ -643,8 +656,8 @@ export const QUICK_MESSAGES = [
 // ---- Wire messages --------------------------------------------------------
 
 export type ClientMessage =
-  | { t: 'create'; name: string; homeName?: string }
-  | { t: 'join'; roomId: string; name: string }
+  | { t: 'create'; name: string; homeName?: string; look?: string }
+  | { t: 'join'; roomId: string; name: string; look?: string }
   | { t: 'state'; p: PlayerNetState }
   | { t: 'event'; event: WorldEvent }
   | { t: 'chat'; text: string }

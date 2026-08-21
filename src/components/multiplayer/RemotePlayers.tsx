@@ -10,7 +10,7 @@ export function RemotePlayers({ quality }: { quality: GraphicsQuality }) {
   return (
     <>
       {peers.map((p) => (
-        <RemotePlayer key={p.id} id={p.id} name={p.name} quality={quality} />
+        <RemotePlayer key={p.id} id={p.id} name={p.name} look={p.look} quality={quality} />
       ))}
     </>
   )

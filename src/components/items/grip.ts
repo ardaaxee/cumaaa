@@ -35,6 +35,15 @@ export const GRIPS: Record<HoldPose, Grip> = {
   twoHand: { pos: [-0.16, -0.09, 0.1], rot: [UPRIGHT_X, 0, 0], twoHanded: true },
 }
 
+/** How the fingers close around each kind of grip. */
+export const HAND_FOR_POSE: Record<HoldPose, 'relaxed' | 'open' | 'grab' | 'point' | 'cup'> = {
+  grip: 'grab',
+  pinch: 'point',
+  cup: 'cup',
+  flat: 'open',
+  twoHand: 'grab',
+}
+
 /**
  * The action a character should be playing while holding this. Carrying a pot
  * two-handed is a different posture from carrying a fork, and the animation

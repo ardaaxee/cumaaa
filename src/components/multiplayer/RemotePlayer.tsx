@@ -1,4 +1,4 @@
-import { useMemo, useRef } from 'react'
+import { useMemo, useRef, useState } from 'react'
 import { useFrame, useThree } from '@react-three/fiber'
 import * as THREE from 'three'
 import { peerStates } from '../../store/useMultiplayerStore'
@@ -7,9 +7,12 @@ import type { GraphicsQuality } from '../../types'
 import { isHighTier, isUltra } from '../../utils/device'
 import { Avatar, type AvatarRig } from '../characters/Avatar'
 import { animateAvatar } from '../characters/animate'
-import { lookFor } from '../characters/looks'
+import { profileById, profileFor } from '../../config/appearance'
+import { animateFace, animateHair, newFaceMemory, type Expression } from '../characters/faceAnim'
 import { usePeerHeld } from '../../systems/items'
 import { HeldInHand, itemSeg } from '../items/ItemViews'
+import { HAND_FOR_POSE } from '../items/grip'
+import { itemDefOr } from '../../config/items'
 
 const EYE = 1.62
 
@@ -19,20 +22,31 @@ const EYE = 1.62
 // movement, however irregular the packets are.
 //
 // This component owns NO input. It moves only from network state.
-export function RemotePlayer({ id, name, quality }: { id: string; name: string; quality: GraphicsQuality }) {
+export function RemotePlayer({ id, name, look, quality }: { id: string; name: string; look?: string; quality: GraphicsQuality }) {
   const root = useRef<THREE.Group>(null)
   const rig = useRef<AvatarRig>(null)
   const label = useRef<THREE.Sprite>(null)
   const labelMat = useRef<THREE.SpriteMaterial>(null)
 
   const cur = useRef({ x: 0, z: 0, ry: 0, lift: 0, sit: 0, speed: 0 })
+  const faceMem = useRef(newFaceMemory())
+  const lookTarget = useRef(new THREE.Vector3())
   const phase = useRef(0)
   const born = useRef(performance.now())
   const { camera } = useThree()
 
   const showNames = useRoomStore((s) => s.settings.showPlayerNames)
-  const seg = quality === 'low' ? 8 : quality === 'medium' ? 12 : isUltra(quality) ? 20 : 16
-  const look = useMemo(() => lookFor(name), [name])
+  // Tier sets the ceiling; distance decides how much of it is spent. A partner
+  // across the flat does not need individually posed fingers.
+  const [lod, setLod] = useState(0)
+  const lodRef = useRef(0)
+  const tierSeg = quality === 'low' ? 8 : quality === 'medium' ? 12 : isUltra(quality) ? 20 : 16
+  const seg = Math.max(6, tierSeg - lod * 4)
+  const detail = isHighTier(quality) && lod === 0
+  // Their appearance comes from the id the SERVER gave us, not from parsing
+  // their display name. Falling back to the name keeps single-player and older
+  // servers working.
+  const profile = useMemo(() => (look && profileById(look)) || profileFor(name), [look, name])
   // What they are carrying comes from the shared item map, not from their
   // transform packet: the item is already synced, so the hand just reads it.
   const held = usePeerHeld(id)
@@ -77,6 +91,45 @@ export function RemotePlayer({ id, name, quality }: { id: string; name: string; 
       })
     }
 
+    // ---- Face --------------------------------------------------------------
+    // They look at whoever is watching them: the camera is the other player's
+    // eyes, so meeting it IS eye contact. Beyond a few metres they look ahead
+    // instead, which is what people actually do.
+    const rigNow = rig.current
+    const dist = camera.position.distanceTo(g.position)
+    // LOD0 near, then coarser meshes further out. Hysteresis-free bands are
+    // fine here because the levels differ by a few segments, not by a model.
+    const wantLod = dist < 4 ? 0 : dist < 8 ? 1 : dist < 14 ? 2 : 3
+    if (wantLod !== lodRef.current) {
+      lodRef.current = wantLod
+      setLod(wantLod)
+    }
+    if (rigNow?.face && wantLod < 3) {
+      const meets = dist < 6
+      lookTarget.current.copy(camera.position)
+      const act = target.act ?? 'idle'
+      const talking = act === 'talk' ? 1 : 0
+      const expression: Expression =
+        act === 'talk' ? 'happy'
+          : act === 'wave' ? 'happy'
+            : act === 'eat' || act === 'drink' ? 'neutral'
+              : act === 'jump' ? 'surprised'
+                : 'neutral'
+      animateFace(
+        rigNow.face,
+        faceMem.current,
+        {
+          expression,
+          talking,
+          lookAt: meets ? lookTarget.current : null,
+          time: (performance.now() - born.current) / 1000,
+        },
+        rigNow.head,
+        delta,
+      )
+      if (rigNow.hair) animateHair(rigNow.hair, faceMem.current, cur.current.ry, delta)
+    }
+
     if (label.current && labelMat.current) {
       const dist = camera.position.distanceTo(g.position)
       labelMat.current.opacity = THREE.MathUtils.clamp(1.4 - dist / 12, 0.12, 0.95)
@@ -87,10 +140,11 @@ export function RemotePlayer({ id, name, quality }: { id: string; name: string; 
     <group ref={root}>
       <Avatar
         ref={rig}
-        look={look}
+        profile={profile}
         seg={seg}
-        faces={isHighTier(quality)}
+        detail={detail}
         rightHand={held ? <HeldInHand item={held} seg={itemSeg(quality)} /> : null}
+        rightPose={held ? HAND_FOR_POSE[itemDefOr(held.def).holdPose] : 'relaxed'}
       />
       {showNames && (
         <sprite ref={label} position={[0, 1.95, 0]} scale={[0.9, 0.225, 1]}>

@@ -13,6 +13,7 @@ import {
   sanitizeChatText,
   sanitizeHomeName,
   sanitizeItemAction,
+  sanitizeLook,
   applyItemAction,
   seedHomeItems,
   ITEM_RULES_SERVER,
@@ -47,6 +48,7 @@ interface Player {
   ws: WebSocket
   state: PlayerNetState
   alive: boolean
+  look: string
   lastChatAt: number
   lastItemAt: number
   ready: boolean
@@ -86,7 +88,7 @@ function peerList(room: Room, exceptId?: string): PeerInfo[] {
   const out: PeerInfo[] = []
   for (const p of room.players.values()) {
     if (p.id === exceptId) continue
-    out.push({ id: p.id, name: p.name, role: p.role })
+    out.push({ id: p.id, name: p.name, role: p.role, look: p.look })
   }
   return out
 }
@@ -113,20 +115,21 @@ function homeInfo(room: Room): HomeInfo {
 }
 
 function lobbyList(room: Room): LobbyPlayer[] {
-  return [...room.players.values()].map((p) => ({ id: p.id, name: p.name, role: p.role, ready: p.ready }))
+  return [...room.players.values()].map((p) => ({ id: p.id, name: p.name, role: p.role, ready: p.ready, look: p.look }))
 }
 
 function broadcastLobby(room: Room): void {
   broadcast(room, { t: 'lobby', home: homeInfo(room), players: lobbyList(room) })
 }
 
-function joinRoom(room: Room, ws: WebSocket, name: string): Player | null {
+function joinRoom(room: Room, ws: WebSocket, name: string, look: string): Player | null {
   if (room.players.size >= MAX_PLAYERS) return null
   const role: PlayerRole = room.players.size === 0 ? 'host' : 'guest'
   const player: Player = {
     id: newPlayerId(),
     name,
     role,
+    look,
     ws,
     state: { x: 0, y: 1.62, z: 4, ry: 0, run: false, jump: false, sit: false, act: 'idle' },
     alive: true,
@@ -178,7 +181,7 @@ wss.on('connection', (ws) => {
       case 'create': {
         if (roomId) leave('left')
         const room = createRoom(sanitizeHomeName(msg.homeName))
-        const player = joinRoom(room, ws, sanitizeName(msg.name))!
+        const player = joinRoom(room, ws, sanitizeName(msg.name), sanitizeLook(msg.look))!
         roomId = room.id
         playerId = player.id
         send(ws, { t: 'welcome', roomId: room.id, playerId: player.id, role: player.role, peers: peerList(room, player.id), room: room.state, chat: room.chat, home: homeInfo(room), lobby: lobbyList(room) })
@@ -190,12 +193,12 @@ wss.on('connection', (ws) => {
         const room = rooms.get(code)
         if (!room) return send(ws, { t: 'error', code: 'HOME_NOT_FOUND' })
         if (roomId) leave('left')
-        const player = joinRoom(room, ws, sanitizeName(msg.name))
+        const player = joinRoom(room, ws, sanitizeName(msg.name), sanitizeLook(msg.look))
         if (!player) return send(ws, { t: 'error', code: 'ROOM_FULL' })
         roomId = room.id
         playerId = player.id
         send(ws, { t: 'welcome', roomId: room.id, playerId: player.id, role: player.role, peers: peerList(room, player.id), room: room.state, chat: room.chat, home: homeInfo(room), lobby: lobbyList(room) })
-        broadcast(room, { t: 'peer_join', peer: { id: player.id, name: player.name, role: player.role } }, player.id)
+        broadcast(room, { t: 'peer_join', peer: { id: player.id, name: player.name, role: player.role, look: player.look } }, player.id)
         broadcastLobby(room)
         break
       }

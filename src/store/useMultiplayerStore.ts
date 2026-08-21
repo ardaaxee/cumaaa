@@ -21,6 +21,7 @@ import {
   type WorldItem,
 } from '../network/protocol'
 import { ITEM_RULES } from '../config/items'
+import { profileFor } from '../config/appearance'
 import { useRoomStore } from './useRoomStore'
 import { resetActions } from '../components/characters/actions'
 
@@ -117,6 +118,12 @@ interface MultiplayerState {
   setChatOpen: (open: boolean) => void
   setMoviePanel: (open: boolean) => void
   clearError: () => void
+}
+
+// Which appearance this client is wearing. The server validates it and hands
+// it to the partner, so nobody has to guess a look from a display name.
+function myLook(): string {
+  return profileFor(useRoomStore.getState().profile.name).id
 }
 
 let client: NetworkClient | null = null
@@ -231,8 +238,8 @@ export const useMultiplayerStore = create<MultiplayerState>((set, get) => {
       onOpen: () => {
         // (Re)assert our intent so a reconnect restores the room + roster.
         if (!intent || !client) return
-        if (intent.type === 'create') client.send({ t: 'create', name: intent.name, homeName: intent.homeName })
-        else if (intent.roomId) client.send({ t: 'join', roomId: intent.roomId, name: intent.name })
+        if (intent.type === 'create') client.send({ t: 'create', name: intent.name, homeName: intent.homeName, look: myLook() })
+        else if (intent.roomId) client.send({ t: 'join', roomId: intent.roomId, name: intent.name, look: myLook() })
       },
     })
     return client
