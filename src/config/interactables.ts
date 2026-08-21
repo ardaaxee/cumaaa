@@ -91,6 +91,42 @@ export const INTERACTABLES: InteractableDef[] = [
     position: [8.5, 1.2, 12.6],
     radius: 1.8,
   },
+  // The working kitchen. Each of these moves real geometry and syncs.
+  {
+    info: { id: 'kitchen-cupboard', kind: 'openable', label: 'Cupboard', prompt: 'Open cupboard' },
+    position: [2.65, 0.6, 13.2],
+    radius: 1.5,
+  },
+  {
+    info: { id: 'kitchen-drawer', kind: 'openable', label: 'Drawer', prompt: 'Open drawer' },
+    position: [4.3, 0.7, 13.2],
+    radius: 1.4,
+  },
+  {
+    info: { id: 'kitchen-oven', kind: 'openable', label: 'Oven', prompt: 'Open oven' },
+    position: [5.7, 0.45, 13.2],
+    radius: 1.5,
+  },
+  {
+    info: { id: 'kitchen-microwave', kind: 'openable', label: 'Microwave', prompt: 'Open microwave' },
+    position: [6.45, 1.11, 13.3],
+    radius: 1.4,
+  },
+  {
+    info: { id: 'kitchen-hob', kind: 'appliance', label: 'Hob', prompt: 'Turn hob on / off' },
+    position: [5.7, 0.95, 13.3],
+    radius: 1.4,
+  },
+  {
+    info: { id: 'kitchen-kettle', kind: 'appliance', label: 'Kettle', prompt: 'Switch kettle on / off' },
+    position: [2.1, 1.04, 13.3],
+    radius: 1.4,
+  },
+  {
+    info: { id: 'kitchen-tap', kind: 'appliance', label: 'Tap', prompt: 'Turn tap on / off' },
+    position: [3.0, 0.95, 13.25],
+    radius: 1.4,
+  },
   {
     info: { id: 'laundry-washer', kind: 'openable', label: 'Washing machine', prompt: 'Open door' },
     position: [11.4, 0.6, 25.9],
