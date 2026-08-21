@@ -26,27 +26,35 @@ export function HeldInHand({ item, seg }: { item: WorldItem; seg: number }) {
 /**
  * What the LOCAL player is carrying.
  *
- * First person draws no arms, but the thing in your hand still has to be in
- * your hand: this parents the item to the camera at the position the player's
- * own right hand occupies — low, right, and forward of the hip. Look down and
- * you see what you are carrying; look ahead and it is out of the way. It is
- * deliberately NOT centred in front of the lens, which is what makes a held
- * object read as a floating HUD prop instead of something you are holding.
+ * First person draws no arms, but the thing in your hand still has to BE in
+ * your hand. The item is anchored to the player's BODY, not to their head:
+ * it follows the camera's position and yaw and ignores its pitch, because your
+ * hand does not tilt when you glance up. So looking straight ahead leaves it
+ * below the view — exactly as it is in life — and looking down brings it into
+ * frame at hand height.
+ *
+ * That is the difference between carrying something and having a prop welded to
+ * the lens. It is deliberately never centred in front of the camera.
  */
 export function LocalHeldItem({ quality }: { quality: GraphicsQuality }) {
   const item = useHeldItem()
   const { camera } = useThree()
   const group = useRef<THREE.Group>(null)
-  const bob = useRef(0)
+  const yaw = useRef(0)
+  const t = useRef(0)
   const seg = itemSeg(quality)
 
   useFrame((_, delta) => {
     const g = group.current
     if (!g || !item) return
-    // Follow the camera, but a beat behind it: a hand does not snap to the head.
+    t.current += delta
+    // Yaw only — the hand turns with the body, not with the head's pitch.
+    const e = _tmpEuler.setFromQuaternion(camera.quaternion, 'YXZ')
+    yaw.current += shortest(yaw.current, e.y) * Math.min(1, delta * 12)
     g.position.copy(camera.position)
-    g.quaternion.slerp(camera.quaternion, Math.min(1, delta * 14))
-    bob.current += delta
+    // A little sway as you walk, so it is carried rather than bolted on.
+    g.position.y += Math.sin(t.current * 6) * 0.006
+    g.rotation.set(0, yaw.current, 0)
   })
 
   if (!item) return null
@@ -58,6 +66,15 @@ export function LocalHeldItem({ quality }: { quality: GraphicsQuality }) {
       </group>
     </group>
   )
+}
+
+const _tmpEuler = new THREE.Euler(0, 0, 0, 'YXZ')
+
+function shortest(current: number, target: number): number {
+  let d = (target - current) % (Math.PI * 2)
+  if (d > Math.PI) d -= Math.PI * 2
+  if (d < -Math.PI) d += Math.PI * 2
+  return d
 }
 
 /**

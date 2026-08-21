@@ -131,23 +131,37 @@ function Fridge() {
   const swing = useRef(0)
 
   useFrame((_, delta) => {
-    const target = open ? -1.95 : 0 // radians; opens toward the room
+    const target = open ? 1.95 : 0 // radians; opens toward the room (-Z)
     swing.current += (target - swing.current) * Math.min(1, delta * 7)
     if (door.current) door.current.rotation.y = swing.current
   })
 
   return (
     <group position={[9.0, 0, 12.6]}>
-      {/* carcass */}
-      <Panel args={[0.78, 2, 0.76]} radius={0.02} position={[0, 1, -0.02]} receiveShadow>
-        <meshStandardMaterial color="#c8ccd0" metalness={0.45} roughness={0.4} />
-      </Panel>
+      {/* Carcass as a real shell — sides, back, top and base — with the SOUTH
+          face left open. It used to be one solid box, so opening the door
+          revealed the outside of that box: the shelves and everything on them
+          were sealed inside where nothing could ever see them. */}
+      {([
+        [[-0.365, 1, -0.02], [0.05, 2, 0.76]],
+        [[0.365, 1, -0.02], [0.05, 2, 0.76]],
+        [[0, 1, 0.335], [0.78, 2, 0.05]],
+        [[0, 1.975, -0.02], [0.78, 0.05, 0.76]],
+        [[0, 0.025, -0.02], [0.78, 0.05, 0.76]],
+      ] as [[number, number, number], [number, number, number]][]).map(([p, sz], i) => (
+        <Panel key={i} args={sz} radius={0.014} position={p} receiveShadow>
+          <meshStandardMaterial color="#c8ccd0" metalness={0.45} roughness={0.4} />
+        </Panel>
+      ))}
       {/* interior — only built while the door is open */}
       {open && (
         <group position={[0, 1, 0]}>
+          {/* Lining, not a block: BackSide shows the inside faces. As a solid
+              box it filled the cavity and hid the shelves and the food. */}
+          {/* Lining, inset just inside the shell so the two do not z-fight. */}
           <mesh position={[0, 0, -0.02]}>
-            <boxGeometry args={[0.68, 1.84, 0.62]} />
-            <meshStandardMaterial color="#e8edf0" roughness={0.55} />
+            <boxGeometry args={[0.665, 1.83, 0.6]} />
+            <meshStandardMaterial color="#e8edf0" roughness={0.55} side={THREE.BackSide} />
           </mesh>
           {[-0.55, -0.1, 0.36].map((y, i) => (
             <mesh key={i} position={[0, y, 0]}>
@@ -159,19 +173,20 @@ function Fridge() {
           <pointLight position={[0, 0.3, 0.1]} color="#dff0ff" intensity={0.5} distance={2.2} decay={2} />
         </group>
       )}
-      {/* door, hinged on its left edge */}
-      <group ref={door} position={[-0.39, 1, 0.34]}>
+      {/* Door on the SOUTH face, hinged on its left edge and swinging into the
+          room. It used to face north, into the 0.8 m gap between the fridge and
+          the wall: the leaf had nowhere to go and there was nowhere to stand to
+          look inside. */}
+      <group ref={door} position={[-0.39, 1, -0.34]}>
         <Panel args={[0.78, 1.98, 0.07]} radius={0.02} position={[0.39, 0, 0]} castShadow>
           <meshStandardMaterial color="#d0d3d6" metalness={0.5} roughness={0.35} />
         </Panel>
-        <mesh position={[0.72, 0.4, 0.06]}>
-          <boxGeometry args={[0.03, 0.5, 0.03]} />
-          <meshStandardMaterial color={METAL} metalness={0.8} roughness={0.3} />
-        </mesh>
-        <mesh position={[0.72, -0.4, 0.06]}>
-          <boxGeometry args={[0.03, 0.5, 0.03]} />
-          <meshStandardMaterial color={METAL} metalness={0.8} roughness={0.3} />
-        </mesh>
+        {[0.4, -0.4].map((y, i) => (
+          <mesh key={i} position={[0.72, y, -0.06]}>
+            <boxGeometry args={[0.03, 0.5, 0.03]} />
+            <meshStandardMaterial color={METAL} metalness={0.8} roughness={0.3} />
+          </mesh>
+        ))}
       </group>
     </group>
   )

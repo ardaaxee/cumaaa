@@ -49,10 +49,11 @@ export function carryAction(pose: HoldPose, moving: boolean): AvatarAction {
 // same place their right hand would be — down and to the right, in front of the
 // hip — so looking down shows what you are carrying and looking ahead does not
 // fill the screen with it.
+// Offsets are from the EYE, in a body-aligned frame (yaw only). -Z is forward.
 export const FIRST_PERSON_GRIP: Record<HoldPose, Grip> = {
-  grip: { pos: [0.26, -0.44, -0.34], rot: [0.35, -0.3, 0] },
-  pinch: { pos: [0.24, -0.4, -0.3], rot: [0.5, -0.3, 0.2] },
-  cup: { pos: [0.26, -0.4, -0.32], rot: [0.1, -0.25, 0] },
-  flat: { pos: [0.25, -0.42, -0.36], rot: [0.1, -0.25, 0] },
-  twoHand: { pos: [0.1, -0.5, -0.42], rot: [0.12, 0, 0], twoHanded: true },
+  grip: { pos: [0.28, -0.62, -0.36], rot: [0, -0.35, 0] },
+  pinch: { pos: [0.26, -0.58, -0.34], rot: [0.35, -0.35, 0.2] },
+  cup: { pos: [0.28, -0.58, -0.36], rot: [0, -0.3, 0] },
+  flat: { pos: [0.27, -0.6, -0.4], rot: [0, -0.3, 0] },
+  twoHand: { pos: [0.06, -0.66, -0.44], rot: [0, 0, 0], twoHanded: true },
 }

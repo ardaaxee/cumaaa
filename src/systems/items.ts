@@ -1,5 +1,6 @@
 import { useMultiplayerStore } from '../store/useMultiplayerStore'
 import { ITEM_RULES } from '../config/items'
+import { playerMotion } from './playerMotion'
 import {
   applyItemAction,
   bagItems,
@@ -21,6 +22,20 @@ import {
 // Offline (no home joined) the same code path runs with nothing to send, which
 // is why single-player and co-op behave identically instead of being two
 // implementations of the same kitchen.
+
+/**
+ * Where the acting player is standing, for the reach check.
+ *
+ * The client MUST apply the same range rule the server does. Skipping it here
+ * looked harmless — the server would just refuse — but it silently split the
+ * two views: your hand appeared to fill while the server still had the glass on
+ * the shelf, and every later action on it failed for reasons you could not see.
+ * Checking locally means an out-of-reach take simply does nothing, on both
+ * sides, for the same reason.
+ */
+function here(): [number, number, number] {
+  return [playerMotion.x, 0, playerMotion.z]
+}
 
 /** Who "I" am for item ownership. Offline there is still exactly one of us. */
 export function localPlayerId(): string {
@@ -78,7 +93,7 @@ export function firstFreeSlot(spotId: string): number {
 export function doItem(action: Omit<ItemAction, 'by'>): boolean {
   const store = useMultiplayerStore.getState()
   const full: ItemAction = { ...action, by: store.playerId ?? 'local' }
-  const ok = store.applyItem(full)
+  const ok = store.applyItem(full, here())
   if (ok && store.playerId) store.sendItem(action)
   return ok
 }

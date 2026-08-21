@@ -175,6 +175,13 @@ export const Avatar = forwardRef<
 
     return (
       <group ref={root}>
+        {/* The figure is BUILT facing +Z (toes, nose and eyes all point that
+            way, and the animator's "lift the arm forward" means +Z). The camera
+            convention is the opposite: yaw 0 looks toward -Z. Without this the
+            avatar stood with its back to whatever its player was looking at —
+            you walked toward someone and they saw you reversing at them. Turning
+            the model here, once, keeps both conventions intact. */}
+        <group rotation={[0, Math.PI, 0]}>
         <group ref={body}>
           {/* Pelvis */}
           <mesh position={[0, (RIG.hipY + RIG.waistY) / 2, 0]} castShadow>
@@ -273,6 +280,7 @@ export const Avatar = forwardRef<
             chair without the feet sinking through the floor with it. */}
         {leg(-1, hipL, kneeL)}
         {leg(1, hipR, kneeR)}
+        </group>
       </group>
     )
   },

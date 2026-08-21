@@ -109,7 +109,7 @@ interface MultiplayerState {
   sendState: (p: PlayerNetState) => void
   toggleWorld: (event: WorldEvent) => void
   /** Run an item action against the local world. Returns whether it was valid. */
-  applyItem: (action: ItemAction) => boolean
+  applyItem: (action: ItemAction, near?: [number, number, number] | null) => boolean
   sendItem: (action: Omit<ItemAction, 'by'>) => void
   /** Offline only: stock an empty home. */
   seedItems: (items: Record<string, WorldItem>) => void
@@ -291,11 +291,11 @@ export const useMultiplayerStore = create<MultiplayerState>((set, get) => {
       })
       client?.send({ t: 'event', event })
     },
-    applyItem: (action) => {
+    applyItem: (action, near = null) => {
       // The reducer mutates, so it runs on a copy; if it refuses, nothing is
       // committed and the caller can stay silent rather than mime success.
       const world = cloneWorld(get().world)
-      const ok = applyItemAction(world, action, ITEM_RULES, null)
+      const ok = applyItemAction(world, action, ITEM_RULES, near)
       if (ok) set({ world })
       return ok
     },

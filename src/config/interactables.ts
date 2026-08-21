@@ -88,7 +88,7 @@ export const INTERACTABLES: InteractableDef[] = [
   // are entries in a list rather than new code paths.
   {
     info: { id: 'kitchen-fridge', kind: 'openable', label: 'Fridge', prompt: 'Open fridge' },
-    position: [8.5, 1.2, 12.6],
+    position: [9.0, 1.2, 12.1],
     radius: 1.8,
   },
   // The working kitchen. Each of these moves real geometry and syncs.
