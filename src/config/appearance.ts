@@ -199,7 +199,7 @@ export const CUMA_PROFILE: AvatarProfile = {
     foreheadRound: 0.94,
   },
   skin: { base: '#cf9f79', shade: '#b98a64', blush: '#bd7a63', translucency: 0.4 },
-  eyes: { iris: '#2e2118', size: 0.0121, spacing: 0.0325, tilt: 0.015, lidCover: 0.16, lashes: false },
+  eyes: { iris: '#2e2118', size: 0.0121, spacing: 0.0325, tilt: 0.015, lidCover: 0.3, lashes: false },
   brows: { color: '#1e1712', thickness: 0.0072, arch: 0.2, length: 0.039, lift: 0.034 },
   nose: { bridgeWidth: 0.017, bridgeDepth: 0.028, length: 0.056, tipRound: 0.9, nostrilWidth: 0.0145 },
   lips: { color: '#a86f62', upper: 0.0068, lower: 0.0086, width: 0.0265 },

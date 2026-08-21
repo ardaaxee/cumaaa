@@ -119,24 +119,24 @@ export const Hair = forwardRef<HairRig, { profile: AvatarProfile; seg: number; d
       } else {
         // Back mass: the length. Wraps well down the skull before falling, so
         // the back of the head is covered rather than fringed with tubes.
-        const back = detail ? 11 : 7
+        const back = detail ? 20 : 10
         for (let i = 0; i < back; i++) {
           const az = Math.PI - 1.25 + (i / (back - 1)) * 2.5
           const fall = h.length * (0.78 + 0.3 * Math.sin(i * 1.27 + 0.4))
-          specs.push({ az, phi0: 0.3, phiEnd: 1.62, fall, out: 0.02 * V, radius: 0.031 * V, seed: i * 2.1 })
+          specs.push({ az, phi0: 0.28, phiEnd: 1.64, fall, out: 0.022 * V, radius: 0.0165 * V, seed: i * 2.1 })
         }
         // Locks that frame the face: down past the ear, in front of the
         // shoulder. Kept clear of the cheeks so they never cross the face.
         for (const s of [-1, 1]) {
-          const n = detail ? 3 : 2
+          const n = detail ? 5 : 3
           for (let i = 0; i < n; i++) {
             specs.push({
-              az: s * (1.12 + i * 0.2),
-              phi0: 0.42,
-              phiEnd: 1.5,
-              fall: h.length * (0.5 + i * 0.13),
+              az: s * (1.02 + i * 0.15),
+              phi0: 0.4,
+              phiEnd: 1.48 + i * 0.04,
+              fall: h.length * (0.46 + i * 0.09),
               out: 0.008 * V,
-              radius: 0.023 * V,
+              radius: 0.0135 * V,
               seed: s * (3 + i) * 1.9,
             })
           }
@@ -144,7 +144,7 @@ export const Hair = forwardRef<HairRig, { profile: AvatarProfile; seg: number; d
         if (h.fringe) {
           // Across the forehead and swept to one side. It stops at the brow —
           // hair over the eyes is a bug, not a hairstyle.
-          const n = detail ? 6 : 4
+          const n = detail ? 9 : 5
           for (let i = 0; i < n; i++) {
             const t = i / (n - 1)
             specs.push({
@@ -153,7 +153,7 @@ export const Hair = forwardRef<HairRig, { profile: AvatarProfile; seg: number; d
               phiEnd: 0.94 + t * 0.2 + Math.sin(i * 2.3) * 0.06,
               fall: 0.008 + Math.abs(Math.sin(i * 1.9)) * 0.022,
               out: 0.004,
-              radius: 0.016 * V,
+              radius: 0.0105 * V,
               seed: 10 + i * 1.4,
             })
           }
@@ -175,7 +175,7 @@ export const Hair = forwardRef<HairRig, { profile: AvatarProfile; seg: number; d
     const strands = useMemo(() => {
       if (!detail || h.strands <= 0 || h.style === 'bald') return []
       const out: THREE.TubeGeometry[] = []
-      const n = Math.min(h.strands, 18)
+      const n = Math.min(h.strands, 26)
       for (let i = 0; i < n; i++) {
         const az = Math.PI - 1.5 + (i / (n - 1)) * 3.0
         const fall = h.length * (0.45 + 0.55 * (((i * 37) % 11) / 11))
@@ -183,7 +183,7 @@ export const Hair = forwardRef<HairRig, { profile: AvatarProfile; seg: number; d
           new THREE.TubeGeometry(
             lockCurve({ az, phi0: 0.34, phiEnd: 1.6, fall, out: 0.024, radius: 0.0028, seed: i * 0.9 }, h.wave * 1.35),
             10,
-            0.0028,
+            0.0024,
             4,
             false,
           ),
