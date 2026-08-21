@@ -5,6 +5,7 @@ import { HouseRoomShell } from './HouseRoomShell'
 import { HouseLighting } from './HouseLighting'
 import { SkyDome } from './SkyDome'
 import { Rain } from '../weather/Rain'
+import { Neighbourhood } from '../exterior/Neighbourhood'
 import { roomById } from '../../config/houseLayout'
 import { useWorldFlag, WORLD_FLAGS } from '../../systems/world'
 import { woodFloor, wall as wallTex, tile } from '../../utils/textures'
@@ -61,6 +62,7 @@ export function House({ quality }: { quality: GraphicsQuality }) {
       <HouseLighting quality={quality} />
       <SkyDome />
       <Rain quality={quality} />
+      <Neighbourhood quality={quality} />
 
       {/* ---- Shells (always rendered) ---- */}
       <HouseRoomShell room={roomById('hallway')} floor={woodFloorMat} wall={plasterWallMat} />

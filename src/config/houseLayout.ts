@@ -182,7 +182,9 @@ export const SPAWN_POINTS: Record<string, [number, number]> = {
 }
 
 // Balcony hangs off the living room's west wall — open railing, no full walls.
-export const BALCONY = { minX: -12.6, maxX: -10, minZ: 8, maxZ: 12, height: 2.9 }
+// A full-width terrace rather than a ledge: 3.4 m deep and 7 m long, so two
+// people can pass each other and a table and chairs still leave a walkway.
+export const BALCONY = { minX: -13.4, maxX: -10, minZ: 6.5, maxZ: 13.5, height: 2.9 }
 
 export function roomById(id: string): RoomBox {
   const r = ROOMS.find((x) => x.id === id)
