@@ -25,6 +25,7 @@ export function Hud() {
   const activePanel = useRoomStore((s) => s.activePanel)
   const name = useRoomStore((s) => s.profile.name)
   const quality = useRoomStore((s) => s.settings.quality)
+  const showMiniMap = useRoomStore((s) => s.settings.showMiniMap)
   const setActivePanel = useRoomStore((s) => s.setActivePanel)
 
   const panelOpen = activePanel !== null
@@ -32,7 +33,6 @@ export function Hud() {
   const [mapOpen, setMapOpen] = useState(false)
   const netPhase = useMultiplayerStore((s) => s.phase)
   const inHome = useMultiplayerStore((s) => s.roomId !== null)
-  const netConnected = netPhase === 'open' && inHome
   const moviePanelOpen = useMultiplayerStore((s) => s.moviePanelOpen)
   const chatOpen = useMultiplayerStore((s) => s.chatOpen)
   const unreadChat = useMultiplayerStore((s) => s.unreadChat)
@@ -132,12 +132,14 @@ export function Hud() {
               setCoopOpen(true)
             }}
           >
-            {inHome ? (
-              <span className={netConnected ? 'text-green-300' : 'text-amber-300'}>
-                {netConnected ? '●' : '○'} CO-OP
-              </span>
-            ) : (
+            {!inHome ? (
               '◐ CO-OP'
+            ) : netPhase === 'open' ? (
+              <span className="text-green-300">● ONLINE</span>
+            ) : netPhase === 'reconnecting' ? (
+              <span className="text-amber-300">● RECONNECTING</span>
+            ) : (
+              <span className="text-white/45">○ OFFLINE</span>
             )}
           </button>
         </div>
@@ -149,7 +151,7 @@ export function Hud() {
       <AnimatePresence>{chatOpen && <ChatPanel key="chat" onClose={() => { Sfx.close(); setChatOpen(false) }} />}</AnimatePresence>
 
       {/* Home map — top right under the clock, collapsible on small screens */}
-      {!panelOpen && !moviePanelOpen && !chatOpen && (
+      {showMiniMap && !panelOpen && !moviePanelOpen && !chatOpen && (
         <div className="absolute right-4 top-20 z-20">
           <HomeMap expanded={mapOpen} onToggle={() => setMapOpen((v) => !v)} />
         </div>

@@ -112,11 +112,19 @@ function seedNotes(): Note[] {
 }
 
 const DEFAULT_SETTINGS: Settings = {
+  qualityMode: 'auto',
   quality: 'medium',
   sensitivity: 1,
+  touchSensitivity: 1,
   soundEnabled: true,
   volume: 0.5,
+  sfxVolume: 0.8,
+  ambientVolume: 0.6,
   bloom: true,
+  showPlayerNames: true,
+  showMiniMap: true,
+  chatNotifications: true,
+  reducedMotion: false,
 }
 
 const DEFAULT_PROFILE: Profile = {
@@ -336,7 +344,25 @@ export const useRoomStore = create<RoomState>()(
     }),
     {
       name: STORAGE_KEY,
-      version: 1,
+      version: 2,
+      // v1 saves predate the extra settings (quality mode, split volumes, HUD
+      // toggles). Persisted objects REPLACE the defaults wholesale, so a save
+      // from v1 would otherwise arrive with those keys missing entirely.
+      migrate: (persisted, from) => {
+        const state = persisted as Partial<RoomState> | undefined
+        if (!state) return persisted as RoomState
+        if (from < 2) {
+          const old = (state.settings ?? {}) as Partial<Settings>
+          state.settings = {
+            ...DEFAULT_SETTINGS,
+            ...old,
+            // Someone who had picked a tier keeps it as an explicit choice
+            // rather than being silently switched to AUTO.
+            qualityMode: old.quality ?? DEFAULT_SETTINGS.qualityMode,
+          }
+        }
+        return state as RoomState
+      },
       partialize: (s) => ({
         projects: s.projects,
         tasks: s.tasks,
@@ -365,6 +391,7 @@ export const useRoomStore = create<RoomState>()(
           state.settings = { ...state.settings, quality: detectQuality() as GraphicsQuality }
           localStorage.setItem(STORAGE_KEY + '-quality-init', '1')
         }
+        state.settings = { ...DEFAULT_SETTINGS, ...state.settings }
         state.markHydrated()
       },
     },

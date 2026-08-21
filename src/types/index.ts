@@ -41,11 +41,21 @@ export interface Achievement {
 export type GraphicsQuality = 'low' | 'medium' | 'high' | 'ultra'
 
 export interface Settings {
+  /** Manual tier, or 'auto' to let the adaptive system pick and adjust. */
+  qualityMode: GraphicsQuality | 'auto'
+  /** The tier actually in force right now (what the renderer reads). */
   quality: GraphicsQuality
-  sensitivity: number // 0.2 .. 2.5
+  sensitivity: number // mouse, 0.2 .. 2.5
+  touchSensitivity: number // touch look, 0.2 .. 2.5
   soundEnabled: boolean
-  volume: number // 0..1
+  volume: number // master, 0..1
+  sfxVolume: number // 0..1
+  ambientVolume: number // 0..1
   bloom: boolean
+  showPlayerNames: boolean
+  showMiniMap: boolean
+  chatNotifications: boolean
+  reducedMotion: boolean
 }
 
 export interface Profile {

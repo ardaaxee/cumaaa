@@ -106,7 +106,8 @@ export const useMultiplayerStore = create<MultiplayerState>((set, get) => {
         const leaving = get().peers.find((p) => p.id === msg.playerId)
         peerStates.delete(msg.playerId)
         set((s) => ({ peers: s.peers.filter((p) => p.id !== msg.playerId) }))
-        toast(`${leaving?.name ?? 'Partner'} left home`)
+        const who = leaving?.name ?? 'Partner'
+        toast(msg.reason === 'lost' ? `${who} connection lost` : `${who} left home`)
         break
       }
       case 'states': {
@@ -129,13 +130,17 @@ export const useMultiplayerStore = create<MultiplayerState>((set, get) => {
         break
       }
       case 'chat': {
+        const isOwn = msg.message.from === get().playerId
+        const wasOpen = get().chatOpen
         set((s) => {
           const chat = [...s.chat, msg.message].slice(-CHAT_HISTORY)
           // Only a partner's message can be unread, and only while the panel is
           // closed — your own echo never raises the badge.
-          const isOwn = msg.message.from === get().playerId
           return { chat, unreadChat: isOwn || s.chatOpen ? s.unreadChat : s.unreadChat + 1 }
         })
+        if (!isOwn && !wasOpen && useRoomStore.getState().settings.chatNotifications) {
+          toast(`${msg.message.name}: ${msg.message.text.slice(0, 48)}`)
+        }
         break
       }
       case 'room': {
@@ -150,7 +155,16 @@ export const useMultiplayerStore = create<MultiplayerState>((set, get) => {
   const ensureClient = () => {
     if (client) return client
     client = new NetworkClient(multiplayerUrl(), {
-      onPhase: (phase) => set({ phase }),
+      onPhase: (phase) => {
+        const prev = get().phase
+        set({ phase })
+        // Only worth saying once we are actually in a home; connecting for the
+        // first time is not a "reconnect".
+        if (!get().roomId) return
+        const toast = useRoomStore.getState().pushToast
+        if (phase === 'reconnecting' && prev === 'open') toast('Connection lost — reconnecting…')
+        if (phase === 'open' && prev === 'reconnecting') toast('Reconnected', 'success')
+      },
       onMessage: handleMessage,
       onOpen: () => {
         // (Re)assert our intent so a reconnect restores the room + roster.
@@ -197,6 +211,7 @@ export const useMultiplayerStore = create<MultiplayerState>((set, get) => {
     },
     leaveHome: () => {
       intent = null
+      client?.send({ t: 'leave' }) // so the partner sees "left", not "connection lost"
       client?.close()
       peerStates.clear()
       set({ phase: 'idle', roomId: null, playerId: null, role: null, peers: [], world: emptyRoomState(''), lastError: null, home: null, lobby: [], chat: [], unreadChat: 0, chatOpen: false })

@@ -139,12 +139,12 @@ wss.on('connection', (ws) => {
   let roomId: string | null = null
   let playerId: string | null = null
 
-  const leave = () => {
+  const leave = (reason: 'left' | 'lost' = 'lost') => {
     if (!roomId || !playerId) return
     const room = rooms.get(roomId)
     if (!room) return
     room.players.delete(playerId)
-    broadcast(room, { t: 'peer_leave', playerId })
+    broadcast(room, { t: 'peer_leave', playerId, reason })
     if (room.hostId === playerId) room.hostId = room.players.keys().next().value ?? null
     if (room.players.size === 0) {
       room.emptySince = Date.now()
@@ -167,7 +167,7 @@ wss.on('connection', (ws) => {
 
     switch (msg.t) {
       case 'create': {
-        if (roomId) leave()
+        if (roomId) leave('left')
         const room = createRoom(sanitizeHomeName(msg.homeName))
         const player = joinRoom(room, ws, sanitizeName(msg.name))!
         roomId = room.id
@@ -180,7 +180,7 @@ wss.on('connection', (ws) => {
         if (!code) return send(ws, { t: 'error', code: 'BAD_REQUEST' })
         const room = rooms.get(code)
         if (!room) return send(ws, { t: 'error', code: 'HOME_NOT_FOUND' })
-        if (roomId) leave()
+        if (roomId) leave('left')
         const player = joinRoom(room, ws, sanitizeName(msg.name))
         if (!player) return send(ws, { t: 'error', code: 'ROOM_FULL' })
         roomId = room.id
@@ -232,6 +232,10 @@ wss.on('connection', (ws) => {
         broadcast(room, { t: 'chat', message }) // echo to all incl. sender
         break
       }
+      case 'leave': {
+        leave('left')
+        break
+      }
       case 'ready': {
         if (!roomId || !playerId) return
         const room = rooms.get(roomId)
@@ -259,8 +263,8 @@ wss.on('connection', (ws) => {
     }
   })
 
-  ws.on('close', leave)
-  ws.on('error', leave)
+  ws.on('close', () => leave('lost'))
+  ws.on('error', () => leave('lost'))
 })
 
 // Fixed-rate broadcast of every room's player transforms (others only).

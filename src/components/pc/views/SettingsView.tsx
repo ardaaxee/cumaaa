@@ -1,26 +1,42 @@
 import { useRoomStore } from '../../../store/useRoomStore'
-import { setAudioEnabled, setMasterVolume } from '../../../systems/audioSystem'
+import { usePlayerStore } from '../../../store/usePlayerStore'
+import { setAudioEnabled, setMasterVolume, setSfxVolume, setAmbientVolume } from '../../../systems/audioSystem'
+import { isTouchDevice } from '../../../utils/device'
 import type { GraphicsQuality } from '../../../types'
 
-const QUALITIES: GraphicsQuality[] = ['low', 'medium', 'high', 'ultra']
+type QualityMode = GraphicsQuality | 'auto'
+const QUALITY_MODES: QualityMode[] = ['auto', 'low', 'medium', 'high', 'ultra']
+
+// Tiers a phone/tablet is unlikely to sustain. Choosing one is allowed — the
+// app just says plainly what to expect rather than silently overriding it.
+function warnsAbout(mode: QualityMode): boolean {
+  return isTouchDevice() && (mode === 'ultra' || mode === 'high')
+}
 
 // Settings: graphics, sound, sensitivity, and a data reset.
 export function SettingsView() {
   const settings = useRoomStore((s) => s.settings)
   const setSettings = useRoomStore((s) => s.setSettings)
   const resetAll = useRoomStore((s) => s.resetAll)
+  const isTouch = usePlayerStore((s) => s.isTouch)
 
   return (
     <div className="space-y-6">
       {/* Graphics */}
       <Section title="Graphics">
-        <div className="flex gap-2">
-          {QUALITIES.map((q) => (
+        <div className="flex flex-wrap gap-2">
+          {QUALITY_MODES.map((q) => (
             <button
               key={q}
-              onClick={() => setSettings({ quality: q, bloom: q !== 'low' && settings.bloom })}
-              className={`flex-1 rounded-lg border px-3 py-2 text-sm capitalize transition ${
-                settings.quality === q
+              onClick={() =>
+                setSettings(
+                  q === 'auto'
+                    ? { qualityMode: 'auto' }
+                    : { qualityMode: q, quality: q, bloom: q !== 'low' && settings.bloom },
+                )
+              }
+              className={`min-w-[68px] flex-1 rounded-lg border px-3 py-2 text-sm uppercase transition ${
+                settings.qualityMode === q
                   ? 'border-accent/50 bg-accent/15 text-accent-soft'
                   : 'border-white/10 bg-ink-800/60 text-white/60 hover:text-white'
               }`}
@@ -29,6 +45,16 @@ export function SettingsView() {
             </button>
           ))}
         </div>
+        <p className="text-xs text-white/40">
+          {settings.qualityMode === 'auto'
+            ? `Auto — currently running at ${settings.quality.toUpperCase()}, adjusted to keep the frame rate steady.`
+            : `Locked to ${settings.qualityMode.toUpperCase()}. Auto adjustment is off.`}
+        </p>
+        {warnsAbout(settings.qualityMode) && (
+          <p className="rounded-lg border border-amber-400/25 bg-amber-400/[0.07] px-3 py-2 text-xs text-amber-200/90">
+            Your device may reduce performance.
+          </p>
+        )}
         <Toggle
           label="Bloom & post-processing"
           checked={settings.bloom}
@@ -48,7 +74,7 @@ export function SettingsView() {
           }}
         />
         <Slider
-          label={`Volume · ${Math.round(settings.volume * 100)}%`}
+          label={`Master volume · ${Math.round(settings.volume * 100)}%`}
           value={settings.volume}
           min={0}
           max={1}
@@ -58,22 +84,82 @@ export function SettingsView() {
             setMasterVolume(v)
           }}
         />
+        <Slider
+          label={`Effects · ${Math.round(settings.sfxVolume * 100)}%`}
+          value={settings.sfxVolume}
+          min={0}
+          max={1}
+          step={0.05}
+          onChange={(v) => {
+            setSettings({ sfxVolume: v })
+            setSfxVolume(v)
+          }}
+        />
+        <Slider
+          label={`Ambience · ${Math.round(settings.ambientVolume * 100)}%`}
+          value={settings.ambientVolume}
+          min={0}
+          max={1}
+          step={0.05}
+          onChange={(v) => {
+            setSettings({ ambientVolume: v })
+            setAmbientVolume(v)
+          }}
+        />
       </Section>
 
       {/* Sensitivity */}
       <Section title="Controls">
         <Slider
-          label={`Look sensitivity (mouse & touch) · ${settings.sensitivity.toFixed(1)}×`}
+          label={`Mouse sensitivity · ${settings.sensitivity.toFixed(1)}×`}
           value={settings.sensitivity}
           min={0.2}
           max={2.5}
           step={0.1}
           onChange={(v) => setSettings({ sensitivity: v })}
         />
+        <Slider
+          label={`Touch sensitivity · ${settings.touchSensitivity.toFixed(1)}×`}
+          value={settings.touchSensitivity}
+          min={0.2}
+          max={2.5}
+          step={0.1}
+          onChange={(v) => setSettings({ touchSensitivity: v })}
+        />
+        <p className="text-xs text-white/40">
+          Detected input: {isTouch ? 'touch' : 'keyboard & mouse'}.
+        </p>
         <p className="text-xs text-white/40">
           Desktop: WASD to move, mouse to look, Shift to run, Space to jump, E or click to interact.
           Mobile: left joystick to move, drag the right side to look, RUN / JUMP buttons, and E to
           interact.
+        </p>
+      </Section>
+
+      {/* Interface */}
+      <Section title="Interface">
+        <Toggle
+          label="Show player names"
+          checked={settings.showPlayerNames}
+          onChange={(v) => setSettings({ showPlayerNames: v })}
+        />
+        <Toggle
+          label="Show mini map"
+          checked={settings.showMiniMap}
+          onChange={(v) => setSettings({ showMiniMap: v })}
+        />
+        <Toggle
+          label="Chat notifications"
+          checked={settings.chatNotifications}
+          onChange={(v) => setSettings({ chatNotifications: v })}
+        />
+        <Toggle
+          label="Reduced motion"
+          checked={settings.reducedMotion}
+          onChange={(v) => setSettings({ reducedMotion: v })}
+        />
+        <p className="text-xs text-white/40">
+          Reduced motion removes the walking head-bob and the camera lean while running.
         </p>
       </Section>
 

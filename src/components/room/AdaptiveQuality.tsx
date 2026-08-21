@@ -10,8 +10,8 @@ import type { GraphicsQuality } from '../../types'
 // down when it is genuinely struggling, up when it has proven headroom. A single
 // slow frame never changes anything (see FpsMonitor's multi-window logic), and
 // the tier is only ever auto-raised as far as the device earns — mobile is not
-// pinned to LOW. A manual choice in Settings stops the watchdog from fighting
-// the user: we only auto-adjust until they take control.
+// pinned to LOW. The watchdog runs ONLY while Settings is on AUTO; picking a
+// tier by hand is a decision the app must not quietly overrule.
 export function AdaptiveQuality() {
   const monitor = useRef(new FpsMonitor())
   // Auto-promotion ceiling: phones/tablets top out at HIGH, desktops may reach
@@ -25,6 +25,7 @@ export function AdaptiveQuality() {
     if (!usePlayerStore.getState().inputEnabled) return
 
     const store = useRoomStore.getState()
+    if (store.settings.qualityMode !== 'auto') return // user picked a tier
     const current = store.settings.quality
     const idx = QUALITY_ORDER.indexOf(current)
     if (idx < 0) return

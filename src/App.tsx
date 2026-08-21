@@ -16,7 +16,7 @@ import { useMultiplayerStore } from './store/useMultiplayerStore'
 import { MainMenu } from './components/menu/MainMenu'
 import { LobbyScreen } from './components/menu/LobbyScreen'
 import { isTouchDevice } from './utils/device'
-import { setAudioEnabled, setMasterVolume } from './systems/audioSystem'
+import { setAudioEnabled, setMasterVolume, setSfxVolume, setAmbientVolume } from './systems/audioSystem'
 
 export default function App() {
   const introDone = useRoomStore((s) => s.introDone)
@@ -35,9 +35,11 @@ export default function App() {
   useEffect(() => {
     if (!hydrated) return
     useBootStore.getState().setHydrated()
-    const { soundEnabled, volume } = useRoomStore.getState().settings
+    const { soundEnabled, volume, sfxVolume, ambientVolume } = useRoomStore.getState().settings
     setAudioEnabled(soundEnabled)
     setMasterVolume(volume)
+    setSfxVolume(sfxVolume)
+    setAmbientVolume(ambientVolume)
   }, [hydrated])
 
   // Safety net: if hydration callback never fires, unblock after a short beat.

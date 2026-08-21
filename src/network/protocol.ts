@@ -193,6 +193,7 @@ export type ClientMessage =
   | { t: 'state'; p: PlayerNetState }
   | { t: 'event'; event: WorldEvent }
   | { t: 'chat'; text: string }
+  | { t: 'leave' }
   | { t: 'ready'; ready: boolean }
   | { t: 'start' }
   | { t: 'ping' }
@@ -215,7 +216,9 @@ export type ServerMessage =
   | { t: 'chat'; message: ChatMessage }
   | { t: 'error'; code: ServerErrorCode }
   | { t: 'peer_join'; peer: PeerInfo }
-  | { t: 'peer_leave'; playerId: string }
+  // `reason` distinguishes a deliberate exit from a dropped socket, so the UI
+  // can say which actually happened instead of guessing.
+  | { t: 'peer_leave'; playerId: string; reason: 'left' | 'lost' }
   | { t: 'states'; players: (PlayerNetState & { id: string })[] }
   | { t: 'event'; event: WorldEvent }
   | { t: 'room'; room: RoomState }

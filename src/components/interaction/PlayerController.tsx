@@ -146,7 +146,7 @@ export function PlayerController() {
     if (p.isTouch) {
       const look = usePlayerStore.getState().consumeLook()
       if (look.yaw !== 0 || look.pitch !== 0) {
-        const sens = useRoomStore.getState().settings.sensitivity
+        const sens = useRoomStore.getState().settings.touchSensitivity
         yaw.current -= look.yaw * TOUCH_SENS * sens
         pitch.current -= look.pitch * TOUCH_SENS * sens
         pitch.current = clamp(pitch.current, -PITCH_LIMIT, PITCH_LIMIT)
@@ -243,8 +243,11 @@ export function PlayerController() {
       camera.position.z = rz
 
       // Head-bob amplitude scales with speed; footsteps fire at each low point.
+      // The phase keeps advancing under reduced motion so footsteps stay in
+      // time with the stride — only the visible movement is removed.
       bobPhase.current += moved * 7.2
-      const amp = 0.012 + Math.min(1, speed2 / PLAYER.speed) * 0.014
+      const motionScale = useRoomStore.getState().settings.reducedMotion ? 0 : 1
+      const amp = (0.012 + Math.min(1, speed2 / PLAYER.speed) * 0.014) * motionScale
       camera.position.y = PLAYER.eyeHeight + Math.sin(bobPhase.current) * amp + jumpOffset.current
       // Very subtle lateral sway (half the bob rate) so it reads as a body
       // shifting weight, not a floating camera. Applied along the view-right.

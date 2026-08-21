@@ -67,7 +67,27 @@ export function setAudioEnabled(value: boolean): void {
 }
 
 export function setMasterVolume(value: number): void {
-  if (masterGain) masterGain.gain.value = Math.max(0, Math.min(1, value))
+  if (masterGain) masterGain.gain.value = clamp01(value)
+}
+
+// Per-bus trims sitting under the master fader. SFX is applied at the moment a
+// blip is made; ambient scales the looped bed, whose base level is still chosen
+// by the time of day.
+let sfxTrim = 0.8
+let ambientTrim = 0.6
+let ambientBase = 0.04
+
+function clamp01(v: number): number {
+  return Math.max(0, Math.min(1, v))
+}
+
+export function setSfxVolume(value: number): void {
+  sfxTrim = clamp01(value)
+}
+
+export function setAmbientVolume(value: number): void {
+  ambientTrim = clamp01(value)
+  if (ambientGain && ctx) ambientGain.gain.setTargetAtTime(ambientBase * ambientTrim, ctx.currentTime, 0.4)
 }
 
 function blip(freq: number, duration: number, type: OscillatorType, gain: number): void {
@@ -79,7 +99,7 @@ function blip(freq: number, duration: number, type: OscillatorType, gain: number
   osc.type = type
   osc.frequency.value = freq
   g.gain.setValueAtTime(0, c.currentTime)
-  g.gain.linearRampToValueAtTime(gain, c.currentTime + 0.01)
+  g.gain.linearRampToValueAtTime(gain * sfxTrim, c.currentTime + 0.01)
   g.gain.exponentialRampToValueAtTime(0.0001, c.currentTime + duration)
   osc.connect(g)
   g.connect(masterGain)
@@ -104,7 +124,7 @@ function noiseStep(freq: number, q: number, dur: number, gain: number, type: Biq
   filter.frequency.value = freq
   filter.Q.value = q
   const g = c.createGain()
-  g.gain.setValueAtTime(gain, c.currentTime)
+  g.gain.setValueAtTime(gain * sfxTrim, c.currentTime)
   g.gain.exponentialRampToValueAtTime(0.0001, c.currentTime + dur)
   src.connect(filter)
   filter.connect(g)
@@ -204,8 +224,8 @@ export function startAmbient(): void {
 // Set the ambient character for the time of day (kept very quiet throughout).
 export function setAmbientLevel(tod: 'day' | 'sunset' | 'night'): void {
   if (!ambientGain || !ambientFilter || !ctx) return
-  const level = tod === 'day' ? 0.05 : tod === 'sunset' ? 0.04 : 0.028
+  ambientBase = tod === 'day' ? 0.05 : tod === 'sunset' ? 0.04 : 0.028
   const cutoff = tod === 'night' ? 360 : tod === 'sunset' ? 440 : 560
-  ambientGain.gain.setTargetAtTime(level, ctx.currentTime, 1.2)
+  ambientGain.gain.setTargetAtTime(ambientBase * ambientTrim, ctx.currentTime, 1.2)
   ambientFilter.frequency.setTargetAtTime(cutoff, ctx.currentTime, 1.2)
 }
