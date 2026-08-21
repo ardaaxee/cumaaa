@@ -73,7 +73,7 @@ export function House({ quality }: { quality: GraphicsQuality }) {
         wall={{ ...plasterWallMat, color: '#867c6c' }}
         windowDetail={winDetail}
       />
-      <HouseRoomShell room={roomById('bedroom')} floor={woodFloorMat} wall={{ ...plasterWallMat, color: '#7c7365' }} ceilingColor="#3a352d" windowDetail={winDetail} />
+      <HouseRoomShell room={roomById('bedroom')} floor={woodFloorMat} wall={{ ...plasterWallMat, color: '#7c7365' }} ceilingColor="#d7d1c5" windowDetail={winDetail} />
       <HouseRoomShell
         room={roomById('bathroom')}
         floor={{ color: '#dce0de', map: bathTile.map, normalMap: bathTile.normalMap, roughness: 0.4, metalness: 0.05 }}
@@ -86,12 +86,12 @@ export function House({ quality }: { quality: GraphicsQuality }) {
         room={roomById('storage')}
         floor={{ color: '#5a5650', roughness: 0.95, metalness: 0.02 }}
         wall={{ color: '#4a463e', roughness: 0.98 }}
-        ceilingColor="#28241e"
+        ceilingColor="#b8b2a6"
         skirting="#5a544a"
       />
 
       {/* ---- North (sleeping) wing: corridor, 3 bedrooms, bathroom, laundry ---- */}
-      <HouseRoomShell room={roomById('corridor')} floor={woodFloorMat} wall={{ ...plasterWallMat, color: '#8d8477' }} ceilingColor="#4a453c" />
+      <HouseRoomShell room={roomById('corridor')} floor={woodFloorMat} wall={{ ...plasterWallMat, color: '#8d8477' }} ceilingColor="#ded9ce" />
       <HouseRoomShell room={roomById('bedroom2')} floor={woodFloorMat} wall={{ ...plasterWallMat, color: '#7a7263' }} windowDetail={winDetail} />
       <HouseRoomShell room={roomById('bedroom3')} floor={woodFloorMat} wall={{ ...plasterWallMat, color: '#807768' }} windowDetail={winDetail} />
       <HouseRoomShell room={roomById('bedroom4')} floor={woodFloorMat} wall={{ ...plasterWallMat, color: '#7b7264' }} windowDetail={winDetail} />

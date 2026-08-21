@@ -83,15 +83,17 @@ export function RoomShell({ quality }: { quality: GraphicsQuality }) {
         />
       </mesh>
 
-      {/* Ceiling — warm off-white plaster */}
+      {/* Ceiling — warm off-white plaster. The colour used to be near-black
+          while the comment claimed off-white; it only read acceptably because
+          the whole room was dark. */}
       <mesh rotation={[Math.PI / 2, 0, 0]} position={[0, ROOM.height, 0]} receiveShadow>
         <planeGeometry args={[ROOM.width, ROOM.depth]} />
-        <meshStandardMaterial color="#2b2620" roughness={0.98} />
+        <meshStandardMaterial color="#d6d1c6" roughness={0.98} />
       </mesh>
       {/* Ceiling cove — a very faint warm recess, barely visible */}
       <mesh rotation={[Math.PI / 2, 0, 0]} position={[0, ROOM.height - 0.015, 0]}>
         <ringGeometry args={[2.55, 2.66, 64]} />
-        <meshStandardMaterial color="#211a10" emissive="#ffe2b8" emissiveIntensity={0.05} />
+        <meshStandardMaterial color="#c9c2b4" emissive="#ffe2b8" emissiveIntensity={0.05} />
       </mesh>
 
       {/* Walls */}

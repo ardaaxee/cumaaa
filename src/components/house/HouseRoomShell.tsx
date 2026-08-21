@@ -24,13 +24,17 @@ export function HouseRoomShell({
   room,
   floor,
   wall,
-  ceilingColor = '#3c372f',
+  ceilingColor = '#dbd6cb',
   skirting = '#c9c2b6',
   windowDetail = 1,
 }: {
   room: RoomBox
   floor: SurfaceMat
   wall: SurfaceMat
+  /** Ceilings are painted white in real rooms and are usually the BRIGHTEST
+   *  surface. They were left dark here, which stopped mattering only while the
+   *  whole flat was dark — once daylight was fixed, a near-black ceiling over
+   *  bright walls became the most obviously wrong thing in every shot. */
   ceilingColor?: string
   skirting?: string
   windowDetail?: number
