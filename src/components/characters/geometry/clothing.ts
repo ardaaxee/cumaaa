@@ -147,14 +147,19 @@ function limbGarment(
   const end = kept[0]
   kept[0] = { ...end, w: end.w + thick * (flare - 1), d: end.d + thick * (flare - 1) }
   if (cap > 0) {
-    // Over the shoulder: the sleeve continues up and out across the deltoid and
-    // closes there. A separate cap mesh reads as a shoulder pad.
+    // Over the shoulder: the sleeve continues up across the deltoid and closes
+    // there. It has to stop AT the shoulder line — reaching 6 cm above it, as
+    // this did, gives every garment pointed epaulettes.
+    // It swells over the deltoid and then narrows again so its last sections —
+    // and the disc that closes them — end up INSIDE the body of the garment.
+    // Ending wide leaves a visible rim on top of each shoulder, which reads as
+    // an epaulette however small it is.
     const shoulder = kept[kept.length - 1]
     kept.push(
-      { ...shoulder, y: shoulder.y + 0.016, w: shoulder.w + cap * 0.7, d: shoulder.d + cap * 0.7 },
-      { ...shoulder, y: shoulder.y + 0.034, w: shoulder.w + cap, d: shoulder.d + cap },
-      { ...shoulder, y: shoulder.y + 0.05, w: shoulder.w + cap * 0.72, d: shoulder.d + cap * 0.72 },
-      { ...shoulder, y: shoulder.y + 0.058, w: shoulder.w + cap * 0.3, d: shoulder.d + cap * 0.3 },
+      { ...shoulder, y: shoulder.y + 0.009, w: shoulder.w + cap * 0.8, d: shoulder.d + cap * 0.8 },
+      { ...shoulder, y: shoulder.y + 0.019, w: shoulder.w + cap * 0.45, d: shoulder.d + cap * 0.45 },
+      { ...shoulder, y: shoulder.y + 0.028, w: shoulder.w * 0.78, d: shoulder.d * 0.78 },
+      { ...shoulder, y: shoulder.y + 0.034, w: shoulder.w * 0.42, d: shoulder.d * 0.42 },
     )
   }
   // Rolled at the cuff, closed over the shoulder when it has a cap.
@@ -173,7 +178,13 @@ export function buildClothing(profile: AvatarProfile, radial: number): ClothingB
   // ---- Top body ----------------------------------------------------------
   // Up over the trapezius, not stopping at the shoulder line: cut at neckBase
   // the top came out as an off-shoulder garment with bare collarbones.
-  const bodyRange = between(torso, T.hemY, RIG.neckBase + 0.022).map((s) => grow(s, T.thick))
+  // Cloth HANGS. The body's own sections are strongly flattened at the back
+  // (that is what a spine and shoulder blades do), and a garment that inherits
+  // all of it reads as a board strapped across the back rather than a jumper.
+  const bodyRange = between(torso, T.hemY, RIG.neckBase + 0.022).map((s) => ({
+    ...grow(s, T.thick),
+    flat: Math.min(s.flat ?? 0, 0.28),
+  }))
   if (bodyRange.length >= 2) {
     const hem = bodyRange[0]
     bodyRange[0] = { ...hem, w: hem.w + T.thick * (T.flare - 1), d: hem.d + T.thick * (T.flare - 1) }
@@ -181,7 +192,7 @@ export function buildClothing(profile: AvatarProfile, radial: number): ClothingB
   const top = bodyRange.length >= 2 ? buildSweep(roll(bodyRange, T.thick, false, -1), radial, false, false) : null
 
   // ---- Sleeves -----------------------------------------------------------
-  const sleeveUpper = limbGarment('upperArm', arms, T.thick, T.sleeve, 1.5, radial, 0.02)
+  const sleeveUpper = limbGarment('upperArm', arms, T.thick, T.sleeve, 1.5, radial, 0.011)
   const sleeveFore = T.sleeve > 1 ? limbGarment('foreArm', arms, T.thick, T.sleeve - 1, 1.7, radial) : null
 
   // ---- Bottom ------------------------------------------------------------
