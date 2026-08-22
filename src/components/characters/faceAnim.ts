@@ -2,6 +2,7 @@ import * as THREE from 'three'
 import type { AvatarRig } from './Avatar'
 import type { FaceRig } from './Face'
 import type { HairRig } from './Hair'
+import { LID } from './Eyes'
 
 // What the face is doing. Deliberately small: a mood, how much the character is
 // speaking, and something to look at. Everything else is derived.
@@ -38,11 +39,13 @@ interface FacePose {
   cornerDrop: number
   jawOpen: number
   cheekRaise: number
+  /** Lips pushed forward and drawn in — an "oo" shape, and part of talking. */
+  pucker: number
 }
 
 const NEUTRAL: FacePose = {
   browLift: 0, browTilt: 0, browAsym: 0, lidNarrow: 0, lidWide: 0,
-  cornerLift: 0, cornerDrop: 0, jawOpen: 0, cheekRaise: 0,
+  cornerLift: 0, cornerDrop: 0, jawOpen: 0, cheekRaise: 0, pucker: 0,
 }
 
 const POSES: Record<Expression, Partial<FacePose>> = {
@@ -69,6 +72,8 @@ function poseFor(e: Expression): FacePose {
 export interface FaceMemory {
   pose: FacePose
   blink: number // 0 open, 1 shut
+  /** Smoothed lip rounding, so speech does not snap between shapes. */
+  pucker: number
   nextBlink: number
   blinkPhase: number
   eyeYaw: number
@@ -99,6 +104,7 @@ export function newFaceMemory(): FaceMemory {
   return {
     pose: { ...NEUTRAL },
     blink: 0,
+    pucker: 0,
     nextBlink: 1.5 + Math.random() * 3,
     blinkPhase: 0,
     eyeYaw: 0,
@@ -181,6 +187,11 @@ export function animateFace(
     ? Math.max(0, Math.sin(t * 11.5) * 0.55 + Math.sin(t * 7.3 + 1.1) * 0.35 + 0.18) * state.talking
     : 0
   mem.jaw = approach(mem.jaw, clamp(p.jawOpen + speech * 0.5, 0, 1), Math.min(1, delta * 18))
+  // Speech is not only the jaw. Rounded vowels pull the lips forward on their
+  // own rhythm, which is why a talking mouth that only opens and shuts reads as
+  // a puppet's.
+  const round = state.talking > 0.01 ? Math.max(0, Math.sin(t * 6.1 + 2.2)) * 0.5 * state.talking : 0
+  mem.pucker = approach(mem.pucker, clamp(p.pucker + round, 0, 1), Math.min(1, delta * 13))
 
   // ---- Look-at -------------------------------------------------------------
   // Eyes are never still. With nothing to look at they flick to a new spot
@@ -216,13 +227,16 @@ export function animateFace(
   }
 
   // ---- Lids ----------------------------------------------------------------
-  // Base opening, narrowed by a squint, widened by surprise, then the blink on
-  // top. The lower lid rides up a little when the eyes narrow, which is what a
-  // genuine smile does.
-  const openTop = 0.42 + p.lidNarrow * 0.3 - p.lidWide * 0.2
-  const closedTop = 1.45
-  const topRot = lerp(openTop, closedTop, mem.blink)
-  const botRot = lerp(-0.36 - p.lidNarrow * 0.14 + p.lidWide * 0.1, -0.82, mem.blink)
+  // The open and shut angles come from Eyes.tsx, which derives them from the
+  // lid caps' own aperture. Hard-coding them here is what made the "open" eye a
+  // shut one: the numbers stopped agreeing with the geometry.
+  // The lid meshes are BUILT in their neutral open pose, so a squint, a stare
+  // and a blink are all just deltas from zero. The profile's lidCover shapes the
+  // aperture in the geometry itself, where it belongs.
+  const openTop = p.lidNarrow * LID.narrowTop + p.lidWide * LID.wideTop
+  const openBot = p.lidNarrow * LID.narrowBot + p.lidWide * LID.wideBot
+  const topRot = lerp(openTop, LID.shutTop, mem.blink)
+  const botRot = lerp(openBot, LID.shutBot, mem.blink)
   if (rig.lidTopL) rig.lidTopL.rotation.x = topRot
   if (rig.lidTopR) rig.lidTopR.rotation.x = topRot
   if (rig.lidBotL) rig.lidBotL.rotation.x = botRot
@@ -233,18 +247,19 @@ export function animateFace(
   applyBrow(rig.browL, mem, 'L', browY, p)
   applyBrow(rig.browR, mem, 'R', browY, p)
 
-  // ---- Mouth ---------------------------------------------------------------
-  if (rig.jaw) rig.jaw.rotation.x = mem.jaw * 0.2
-  const cornerY = p.cornerLift * 0.006 - p.cornerDrop * 0.005
-  const cornerZ = p.cornerLift * 0.002
-  if (rig.cornerL) { rig.cornerL.position.y = (mem.cornerBaseL ?? (mem.cornerBaseL = rig.cornerL.position.y)) + cornerY; rig.cornerL.position.z = cornerZ }
-  if (rig.cornerR) { rig.cornerR.position.y = (mem.cornerBaseR ?? (mem.cornerBaseR = rig.cornerR.position.y)) + cornerY; rig.cornerR.position.z = cornerZ }
-  if (rig.mouth) rig.mouth.scale.x = 1 + p.cornerLift * 0.09 - p.cornerDrop * 0.03
-
-  // ---- Cheeks --------------------------------------------------------------
-  const cheekS = 1 + p.cheekRaise * 0.07
-  if (rig.cheekL) { rig.cheekL.scale.setScalar(cheekS); rig.cheekL.position.y = (mem.cheekBaseL ?? (mem.cheekBaseL = rig.cheekL.position.y)) + p.cheekRaise * 0.004 }
-  if (rig.cheekR) { rig.cheekR.scale.setScalar(cheekS); rig.cheekR.position.y = (mem.cheekBaseR ?? (mem.cheekBaseR = rig.cheekR.position.y)) + p.cheekRaise * 0.004 }
+  // ---- Mouth, cheeks and jaw ------------------------------------------------
+  // All three are the same surface now, so all three are blend shapes on it.
+  // The jaw GROUP still turns, but only to carry the teeth and the tongue with
+  // the jawOpen shape — the face itself opens because the shape opens it.
+  rig.morph('jawOpen', mem.jaw)
+  if (rig.jaw) rig.jaw.rotation.x = mem.jaw * 0.3
+  rig.morph('smile', p.cornerLift)
+  rig.morph('frown', p.cornerDrop)
+  rig.morph('cheekPuff', p.cheekRaise * 0.35)
+  rig.morph('squint', p.lidNarrow * 0.8)
+  rig.morph('browRaise', Math.max(0, p.browLift))
+  rig.morph('sneer', Math.max(0, -p.browTilt) * 0.3)
+  rig.morph('pucker', mem.pucker)
 }
 
 // Brow bases are read once from the built geometry, so the profile stays the

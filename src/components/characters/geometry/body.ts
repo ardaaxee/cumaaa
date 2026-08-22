@@ -41,13 +41,29 @@ export function buildSweep(slices: Slice[], radial: number, closeTop = false, cl
   const rows = slices.length
   const cols = radial
   const positions: number[] = []
+  const uvs: number[] = []
   const indices: number[] = []
 
+  // Arc length along the sweep, so the V coordinate is proportional to real
+  // distance. Without that a long thigh and a short knee get the same slice of
+  // texture and the pore density visibly changes from one to the next.
+  const arc: number[] = [0]
+  for (let i = 1; i < rows; i++) {
+    const a = slices[i - 1]
+    const b = slices[i]
+    arc.push(arc[i - 1] + Math.hypot(b.y - a.y, (b.cx ?? 0) - (a.cx ?? 0), (b.cz ?? 0) - (a.cz ?? 0)))
+  }
+  const total = arc[rows - 1] || 1
+
+  // The seam runs down the BACK of the sweep (j = 0 is +x, the seam closes at
+  // the far side), which is where a real garment's seam goes too.
   for (let i = 0; i < rows; i++) {
     const s = slices[i]
     const flat = s.flat ?? 0
-    for (let j = 0; j < cols; j++) {
-      const a = (j / cols) * Math.PI * 2
+    // Duplicate the first column at the end so the U coordinate can reach 1
+    // instead of wrapping back to 0 across the last quad.
+    for (let j = 0; j <= cols; j++) {
+      const a = ((j % cols) / cols) * Math.PI * 2
       const ca = Math.cos(a)
       const sa = Math.sin(a)
       // Flattening pulls the BACK of the section (negative z) inward, leaving
@@ -55,15 +71,18 @@ export function buildSweep(slices: Slice[], radial: number, closeTop = false, cl
       const back = Math.max(0, -sa)
       const depth = s.d * (1 - flat * back * 0.45)
       positions.push((s.cx ?? 0) + ca * s.w, s.y, (s.cz ?? 0) + sa * depth)
+      // Girth-proportional U keeps the texel size even round the section.
+      uvs.push((j / cols) * Math.max(s.w, s.d) * 6, arc[i] / total)
     }
   }
 
+  const stride = cols + 1
   for (let i = 0; i < rows - 1; i++) {
     for (let j = 0; j < cols; j++) {
-      const a = i * cols + j
-      const b = i * cols + ((j + 1) % cols)
-      const c = (i + 1) * cols + j
-      const d = (i + 1) * cols + ((j + 1) % cols)
+      const a = i * stride + j
+      const b = i * stride + j + 1
+      const c = (i + 1) * stride + j
+      const d = (i + 1) * stride + j + 1
       indices.push(a, c, b, b, c, d)
     }
   }
@@ -72,9 +91,10 @@ export function buildSweep(slices: Slice[], radial: number, closeTop = false, cl
     const s = slices[rowIndex]
     const centre = positions.length / 3
     positions.push(s.cx ?? 0, s.y, s.cz ?? 0)
+    uvs.push(0.5, arc[rowIndex] / total)
     for (let j = 0; j < cols; j++) {
-      const a = rowIndex * cols + j
-      const b = rowIndex * cols + ((j + 1) % cols)
+      const a = rowIndex * stride + j
+      const b = rowIndex * stride + j + 1
       if (upward) indices.push(centre, a, b)
       else indices.push(centre, b, a)
     }
@@ -84,8 +104,24 @@ export function buildSweep(slices: Slice[], radial: number, closeTop = false, cl
 
   const geo = new THREE.BufferGeometry()
   geo.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3))
+  geo.setAttribute('uv', new THREE.Float32BufferAttribute(uvs, 2))
   geo.setIndex(indices)
   geo.computeVertexNormals()
+  // The seam column is duplicated so U can run 0→1, which means those two
+  // coincident vertices each saw only half the surrounding faces and came out
+  // with different normals — a bright line down the sweep. Average them back.
+  const nrm = geo.attributes.normal as THREE.BufferAttribute
+  for (let i = 0; i < rows; i++) {
+    const a = i * stride
+    const b = i * stride + cols
+    const x = (nrm.getX(a) + nrm.getX(b)) / 2
+    const y = (nrm.getY(a) + nrm.getY(b)) / 2
+    const z = (nrm.getZ(a) + nrm.getZ(b)) / 2
+    const len = Math.hypot(x, y, z) || 1
+    nrm.setXYZ(a, x / len, y / len, z / len)
+    nrm.setXYZ(b, x / len, y / len, z / len)
+  }
+  nrm.needsUpdate = true
   return geo
 }
 

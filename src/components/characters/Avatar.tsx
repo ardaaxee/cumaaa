@@ -6,6 +6,8 @@ import { Hair, type HairRig } from './Hair'
 import { Glasses } from './Glasses'
 import { Hand, type HandPose } from './Hand'
 import { buildFoot, buildJoint, buildLimb, buildTorso } from './geometry/body'
+import { buildNeck } from './geometry/features'
+import { bodySkinMaterial } from '../../systems/materials/skin'
 import type { AvatarProfile } from '../../config/appearance'
 
 // The joints the animator drives. Exposed through a ref so the animation lives
@@ -99,7 +101,7 @@ export const Avatar = forwardRef<
     get ankleR() { return ankleR.current },
   }))
 
-  const { top, bottom, shoes, skin, build } = profile
+  const { top, bottom, shoes, build } = profile
   // Limb girth follows the build, so a narrower frame has narrower arms rather
   // than the same arms in a different colour.
   const arms = build.shoulder / 0.2
@@ -122,16 +124,15 @@ export const Avatar = forwardRef<
     elbow: buildJoint(0.036 * arms, radial, 0.86),
     knee: buildJoint(0.056 * legs, radial, 0.92),
     foot: buildFoot(legs, radial),
+    neck: buildNeck(profile, radial),
   }), [profile, radial, arms, legs])
   useEffect(() => () => Object.values(geom).forEach((g) => g.dispose()), [geom])
   const cloth = { roughness: top.roughness, metalness: 0.02 }
   const legCloth = { roughness: bottom.roughness, metalness: 0.02 }
-  const skinMat = {
-    roughness: detail ? 0.58 : 0.66,
-    metalness: 0.02,
-    emissive: skin.base,
-    emissiveIntensity: 0.11 * skin.translucency + 0.05,
-  }
+  // Skin no longer glows to rescue itself from overhead-only lighting: it is a
+  // real material with a pore normal map and a roughness break-up, and the
+  // bounce light that the emissive was standing in for is now an actual light.
+  const skinMat = bodySkinMaterial(profile, detail)
 
   // One leg, built downward from the hip so rotations bend at real joints.
   const leg = (
@@ -277,10 +278,12 @@ export const Avatar = forwardRef<
               <cylinderGeometry args={[0.072, 0.09, 0.05, seg, 1, true]} />
               <meshStandardMaterial color={top.trim} {...cloth} side={THREE.DoubleSide} />
             </mesh>
-            {/* neck */}
-            <mesh position={[0, (RIG.neckBase + RIG.neckTop) / 2 - RIG.chestBottom, 0]}>
-              <cylinderGeometry args={[0.052, 0.062, RIG.neckTop - RIG.neckBase, seg]} />
-              <meshStandardMaterial color={skin.shade} {...skinMat} />
+            {/* Neck. A swept surface that starts inside the trapezius and ends
+                inside the skull, so neither end can show a cap — the old
+                cylinder stopped below the jaw and left a flat disc hanging in
+                the gap under the chin. */}
+            <mesh geometry={geom.neck} castShadow receiveShadow>
+              <meshStandardMaterial {...skinMat} />
             </mesh>
 
             {/* Head group: face, hair and glasses all hang off this, so they

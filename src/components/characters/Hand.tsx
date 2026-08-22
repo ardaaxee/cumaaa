@@ -1,4 +1,5 @@
 import type { AvatarProfile } from '../../config/appearance'
+import { bodySkinMaterial } from '../../systems/materials/skin'
 
 // A hand with a palm and five fingers, each with its own segments and its own
 // knuckle — not a mitten, and not a sphere with four bumps on it.
@@ -57,15 +58,9 @@ export function Hand({
   detail: boolean
   pose?: HandPose
 }) {
-  const skin = profile.skin
-  const mat = {
-    color: skin.base,
-    roughness: detail ? 0.6 : 0.68,
-    metalness: 0.0,
-    emissive: skin.base,
-    emissiveIntensity: 0.1 * skin.translucency + 0.04,
-  }
-  const knuckleMat = { ...mat, color: skin.shade }
+  // Real skin material: pores and creases in the normal map, no emissive.
+  const mat = bodySkinMaterial(profile, detail)
+  const knuckleMat = bodySkinMaterial(profile, detail, true)
   const c = POSE_CURL[pose]
 
   // Below MEDIUM the fingers merge into one mass — still hand-SHAPED, with a

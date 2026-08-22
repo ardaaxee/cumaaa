@@ -16,6 +16,16 @@ import type { AvatarProfile } from '../../../config/appearance'
 // two blend into each other because they are the same surface. Normals are
 // recomputed at the end, so the shading is continuous everywhere.
 
+/**
+ * Height of the base cranium, as a multiple of the head radius.
+ *
+ * At 1.02 the head measured 24 cm menton to vertex and every face read as an
+ * egg however good its features were; 0.96 puts it at 22.5 cm, which is an
+ * adult head. Everything that samples the surface reads this, so the value can
+ * only be changed in one place.
+ */
+const BASE_Y = 0.96
+
 /** A smooth bump: 1 at the centre, 0 beyond `radius`, no hard edge. */
 function falloff(d: number, radius: number): number {
   if (d >= radius) return 0
@@ -52,8 +62,12 @@ function fieldsFor(p: AvatarProfile): Field[] {
     { at: [0, 0.28, 0.96], radius: 0.3, amount: 0.02, mirror: false },
 
     // --- eyes -------------------------------------------------------------
-    // The socket the eyeball sits in. Without this the eyes sit ON the face.
-    { at: [0.4, 0.06, 0.88], radius: 0.4, amount: -0.056, scale: [0.85, 1.25, 1], mirror: true },
+    // The socket the eyeball sits in. It has to be a real cavity: too shallow
+    // and the eyeball plus its lids stand proud of the face and read as
+    // goggles, however well the lids themselves are shaped.
+    { at: [0.4, 0.06, 0.88], radius: 0.44, amount: -0.082, scale: [0.8, 1.15, 1], mirror: true },
+    // The orbital rim: bone standing round that cavity, below and outside it.
+    { at: [0.62, -0.12, 0.78], radius: 0.3, amount: 0.024, mirror: true },
 
     // --- mid face ---------------------------------------------------------
     // Cheekbone: high, wide, and swept back toward the ear.
@@ -75,6 +89,22 @@ function fieldsFor(p: AvatarProfile): Field[] {
     // The crease above the chin.
     { at: [0, -0.74, 0.86], radius: 0.26, amount: -0.02 },
 
+    // --- mouth ------------------------------------------------------------
+    // The lips are part of THIS surface. They used to be two tubes floating in
+    // front of the face, and no amount of repositioning fixes that: a lip is a
+    // roll of the same skin as the chin above and below it, and the vermilion
+    // is a colour boundary, not a separate object. So: two ridges with a crease
+    // between them, a philtrum above, and a dimple at each corner.
+    { at: [0, -0.435, 1.0], radius: 0.34, amount: 0.044, scale: [0.72, 2.6, 1], mirror: false },
+    { at: [0, -0.505, 1.0], radius: 0.22, amount: -0.04, scale: [0.7, 3.4, 1], mirror: false },
+    { at: [0, -0.585, 0.99], radius: 0.34, amount: 0.05, scale: [0.72, 2.3, 1], mirror: false },
+    // Philtrum: the shallow groove from the nose to the lip.
+    { at: [0, -0.365, 1.0], radius: 0.13, amount: -0.012, scale: [2.8, 1, 1] },
+    // The corner of the mouth tucks in, at the profile's own mouth width.
+    { at: [p.lips.width / (0.113 * 0.7), -0.5, 0.86], radius: 0.16, amount: -0.02, mirror: true },
+    // Mentolabial sulcus, the crease under the lower lip.
+    { at: [0, -0.685, 0.93], radius: 0.22, amount: -0.02, scale: [1, 2.2, 1] },
+
     // Nasolabial fold: the crease from the nose wing to the mouth corner.
     { at: [0.28, -0.42, 0.86], radius: 0.3, amount: -0.026, scale: [1.6, 0.8, 1], mirror: true },
     // The hollow at the outer eye corner, under the brow tail.
@@ -88,8 +118,82 @@ function fieldsFor(p: AvatarProfile): Field[] {
   ]
 }
 
+// ---- Expressions, as morph targets -----------------------------------------
+//
+// With the lips part of the surface, an expression can no longer be "move the
+// little sphere that stands for a mouth corner". It has to move the SURFACE,
+// which is what blend shapes are for: each one is a full copy of the head's
+// vertices in a deformed pose, and the renderer mixes between them.
+//
+// Each shape here is expressed as a handful of pulls — a centre, a radius and a
+// direction — applied to the finished head, so they are written in the same
+// anatomical language as the head itself.
+
+export const MORPHS = [
+  'jawOpen',
+  'smile',
+  'frown',
+  'pucker',
+  'sneer',
+  'browRaise',
+  'squint',
+  'cheekPuff',
+] as const
+export type MorphName = (typeof MORPHS)[number]
+
+interface Pull {
+  at: [number, number, number]
+  radius: number
+  move: [number, number, number]
+  mirror?: boolean
+  /** Mirrored copies move the opposite way along x (a smile pulls outward). */
+  mirrorX?: boolean
+}
+
+/** Pulls are in METRES, in the head's own frame. */
+function pullsFor(name: MorphName, mouthY: number, lipHalfWidth: number): Pull[] {
+  const cx = lipHalfWidth
+  switch (name) {
+    case 'smile':
+      return [
+        { at: [cx, mouthY, 0.078], radius: 0.03, move: [0.005, 0.008, -0.003], mirror: true, mirrorX: true },
+        { at: [0.046, mouthY + 0.036, 0.072], radius: 0.038, move: [0.002, 0.006, 0.002], mirror: true, mirrorX: true },
+        { at: [0, mouthY - 0.006, 0.09], radius: 0.026, move: [0, 0.001, -0.0025] },
+      ]
+    case 'frown':
+      return [
+        { at: [cx, mouthY, 0.078], radius: 0.03, move: [0.001, -0.007, -0.002], mirror: true, mirrorX: true },
+        { at: [0, mouthY - 0.022, 0.086], radius: 0.03, move: [0, -0.003, 0.001] },
+      ]
+    case 'pucker':
+      return [
+        { at: [cx, mouthY, 0.078], radius: 0.032, move: [-0.006, 0, 0.003], mirror: true, mirrorX: true },
+        { at: [0, mouthY - 0.008, 0.09], radius: 0.03, move: [0, 0, 0.006] },
+      ]
+    case 'sneer':
+      return [
+        { at: [0.014, mouthY + 0.016, 0.088], radius: 0.024, move: [0, 0.005, 0.001], mirror: true },
+        { at: [0.021, mouthY + 0.03, 0.084], radius: 0.022, move: [0, 0.004, 0], mirror: true },
+      ]
+    case 'browRaise':
+      return [
+        { at: [0.032, 0.03, 0.086], radius: 0.05, move: [0, 0.008, 0.001], mirror: true },
+        { at: [0, 0.055, 0.09], radius: 0.05, move: [0, 0.004, 0] },
+      ]
+    case 'squint':
+      return [
+        { at: [0.032, -0.008, 0.082], radius: 0.03, move: [0, 0.005, 0.001], mirror: true },
+        { at: [0.05, 0.006, 0.072], radius: 0.028, move: [-0.002, 0.002, 0], mirror: true },
+      ]
+    case 'cheekPuff':
+      return [{ at: [0.05, mouthY + 0.012, 0.062], radius: 0.045, move: [0.007, 0, 0.005], mirror: true, mirrorX: true }]
+    default:
+      return []
+  }
+}
+
 /**
- * Build the head.
+ * Build the head, with its expression shapes.
  *
  * `seed` drives a small low-frequency asymmetry: real faces are not mirrored,
  * and a perfectly symmetric one is quietly wrong in a way people notice without
@@ -100,13 +204,16 @@ export function buildHeadGeometry(
   radius: number,
   segments: number,
   seed = 1,
+  withMorphs = true,
 ): THREE.BufferGeometry {
   const geo = new THREE.SphereGeometry(1, segments, Math.round(segments * 0.85))
   const pos = geo.attributes.position as THREE.BufferAttribute
   const f = profile.face
 
   // The base cranium: narrower than it is tall, and deeper than it is wide.
-  const base: [number, number, number] = [0.7, 1.02 * f.length, 0.88]
+  // Menton to vertex lands at ~22.5 cm, which is an adult head. At 1.02 it was
+  // 24 cm and every face read as an egg however good its features were.
+  const base: [number, number, number] = [0.7, BASE_Y * f.length, 0.88]
 
   const fields = fieldsFor(profile)
   const expanded: Field[] = []
@@ -141,62 +248,91 @@ export function buildHeadGeometry(
   }
 
   pos.needsUpdate = true
+
+  if (withMorphs) buildMorphs(geo, pos, profile, radius)
+
   // Recomputed from the displaced surface, so the shading follows the anatomy
   // instead of the sphere it started as.
   geo.computeVertexNormals()
-  geo.setAttribute('color', new THREE.BufferAttribute(skinTint(pos, base, radius), 3))
+  // The sphere's own UVs survive the displacement, and systems/materials/skin.ts
+  // paints in exactly that space — so regional tone, pores and roughness now
+  // come from a texture at the tier's resolution instead of from vertex
+  // colours, which could never vary faster than the mesh itself.
   return geo
 }
 
-/**
- * Regional skin variation, as vertex colours multiplied into the base tone.
- *
- * Skin is not one flat value: cheeks and nose run warmer and redder, the
- * forehead and the bridge catch more light, the jaw and under the chin are
- * cooler and darker, and the skin around the eyes is thinner and duller. This
- * is that, without a texture — it costs three floats a vertex and it is the
- * difference between skin and painted plastic.
- */
-function skinTint(pos: THREE.BufferAttribute, base: [number, number, number], radius: number): Float32Array {
-  const out = new Float32Array(pos.count * 3)
-  for (let i = 0; i < pos.count; i++) {
-    const x = pos.getX(i) / radius
-    const y = pos.getY(i) / radius
-    const z = pos.getZ(i) / radius
-    let r = 1
-    let g = 1
-    let b = 1
-    const front = Math.max(0, z / base[2])
+function buildMorphs(
+  geo: THREE.BufferGeometry,
+  pos: THREE.BufferAttribute,
+  profile: AvatarProfile,
+  radius: number,
+): void {
+  const mouthY = -0.505 * BASE_Y * profile.face.length * radius
+  const lipHalf = profile.lips.width * 0.94
+  const targets: THREE.BufferAttribute[] = []
 
-    // Cheeks and nose: warmer, redder, only on the front of the face.
-    const cheek = falloff(Math.hypot(Math.abs(x) - 0.42 * base[0], y + 0.26 * base[1]), 0.42) * front
-    r += cheek * 0.1
-    g -= cheek * 0.035
-    b -= cheek * 0.055
-
-    // Forehead and the bridge of the nose: lighter, where skin sits on bone.
-    const shine = falloff(Math.hypot(x, y - 0.6 * base[1]), 0.55) * front
-    r += shine * 0.045
-    g += shine * 0.04
-    b += shine * 0.035
-
-    // Around the eyes: thinner skin, duller and a touch cooler.
-    const orbit = falloff(Math.hypot(Math.abs(x) - 0.3 * base[0], y - 0.04 * base[1]), 0.3) * front
-    r -= orbit * 0.06
-    g -= orbit * 0.05
-    b -= orbit * 0.02
-
-    // Under the jaw and at the nape: in shadow almost all the time.
-    const under = falloff(Math.hypot(x * 0.6, y + 0.85 * base[1]), 0.55)
-    r -= under * 0.09
-    g -= under * 0.08
-    b -= under * 0.07
-
-    out[i * 3] = r
-    out[i * 3 + 1] = g
-    out[i * 3 + 2] = b
+  for (const name of MORPHS) {
+    const out = new Float32Array(pos.count * 3)
+    if (name === 'jawOpen') {
+      // The jaw is a hinge, not a pull: everything below the mouth swings about
+      // the condyle, just in front of and below the ear.
+      const pivotY = mouthY + 0.075
+      const pivotZ = -0.03
+      const angle = 0.3
+      for (let i = 0; i < pos.count; i++) {
+        const x = pos.getX(i)
+        const y = pos.getY(i)
+        const z = pos.getZ(i)
+        // Weight: nothing above the mouth line, everything by the chin, and
+        // only on the front and underside of the head.
+        const below = smooth01((mouthY + 0.004 - y) / 0.05)
+        const front = smooth01((z + 0.05) / 0.09)
+        const w = below * front
+        if (w <= 0) {
+          out[i * 3] = x; out[i * 3 + 1] = y; out[i * 3 + 2] = z
+          continue
+        }
+        const a = angle * w
+        const dy = y - pivotY
+        const dz = z - pivotZ
+        out[i * 3] = x
+        out[i * 3 + 1] = pivotY + dy * Math.cos(a) - dz * Math.sin(a)
+        out[i * 3 + 2] = pivotZ + dy * Math.sin(a) + dz * Math.cos(a)
+      }
+    } else {
+      const pulls: Pull[] = []
+      for (const p of pullsFor(name, mouthY, lipHalf)) {
+        pulls.push(p)
+        if (p.mirror)
+          pulls.push({
+            ...p,
+            at: [-p.at[0], p.at[1], p.at[2]],
+            move: [p.mirrorX ? -p.move[0] : p.move[0], p.move[1], p.move[2]],
+          })
+      }
+      for (let i = 0; i < pos.count; i++) {
+        let x = pos.getX(i)
+        let y = pos.getY(i)
+        let z = pos.getZ(i)
+        for (const p of pulls) {
+          const d = Math.hypot(x - p.at[0], y - p.at[1], z - p.at[2])
+          const w = falloff(d, p.radius)
+          if (w <= 0) continue
+          x += p.move[0] * w
+          y += p.move[1] * w
+          z += p.move[2] * w
+        }
+        out[i * 3] = x; out[i * 3 + 1] = y; out[i * 3 + 2] = z
+      }
+    }
+    targets.push(new THREE.BufferAttribute(out, 3))
   }
-  return out
+  geo.morphAttributes.position = targets
+}
+
+function smooth01(t: number): number {
+  const c = Math.max(0, Math.min(1, t))
+  return c * c * (3 - 2 * c)
 }
 
 /**
@@ -213,9 +349,11 @@ export function buildBeardGeometry(
   segments: number,
   full: boolean,
 ): THREE.BufferGeometry {
-  const geo = buildHeadGeometry(profile, radius * 1.008, segments, 5)
+  // Morphs on the shell too, so a beard follows the jaw and the smile instead
+  // of hanging in the air where the face used to be.
+  const geo = buildHeadGeometry(profile, radius * 1.008, segments, 5, true)
   const pos = geo.attributes.position as THREE.BufferAttribute
-  const base: [number, number, number] = [0.7, 1.02 * profile.face.length, 0.88]
+  const base: [number, number, number] = [0.7, BASE_Y * profile.face.length, 0.88]
   const col = new Float32Array(pos.count * 4)
   for (let i = 0; i < pos.count; i++) {
     const x = pos.getX(i) / radius
@@ -223,8 +361,13 @@ export function buildBeardGeometry(
     const z = pos.getZ(i) / radius
     // Jaw, chin and upper lip; nothing above the mouth line at the sides.
     const jawline = falloff(Math.hypot(x * 0.75, (y + 0.72 * base[1]) * 1.15), 0.62)
-    const moustache = falloff(Math.hypot(x * 1.5, (y + 0.46 * base[1]) * 2.4), 0.3) * Math.max(0, z)
-    const a = Math.min(1, (jawline + moustache) * (full ? 1.25 : 0.55))
+    // A moustache grows ABOVE the lip, not on it.
+    const moustache = falloff(Math.hypot(x * 1.5, (y + 0.4 * base[1]) * 2.6), 0.26) * Math.max(0, z)
+    // Hair does not grow on the vermilion. Without this cut-out the shell laid
+    // a near-black veil straight over the mouth, which is why the lips read as
+    // a dark scribble however well they were modelled and painted.
+    const lipCut = 1 - falloff(Math.hypot(x * 0.85, (y + 0.53 * base[1]) * 2.4), 0.36) * Math.max(0, z * 1.1)
+    const a = Math.min(1, (jawline + moustache) * Math.max(0, lipCut) * (full ? 1.25 : 0.55))
     col[i * 4] = 1
     col[i * 4 + 1] = 1
     col[i * 4 + 2] = 1
@@ -239,13 +382,38 @@ export function buildBeardGeometry(
  * features (eyes, nose, ears) ON the skull rather than at guessed coordinates
  * that drift whenever the head shape changes.
  */
+/**
+ * Where the face's surface is, at a given HEIGHT on the centre line.
+ *
+ * Features get placed relative to this rather than at typed-in z values. That
+ * was the bug behind lips standing a centimetre off the face and eyebrows
+ * buried inside the skull: every one of those numbers was guessed once against
+ * an older head shape and never moved again.
+ */
+export function surfaceZAtHeight(profile: AvatarProfile, radius: number, y: number, x = 0): number {
+  // Solve for the RAY whose surface point lands at (x, y) — both coordinates,
+  // not just the height. Solving for y alone returned the surface much nearer
+  // the centre line than the eye actually sits, which is why the eyeballs
+  // ended up a centimetre proud of the face.
+  const dir = new THREE.Vector3(x, y, radius)
+  for (let i = 0; i < 14; i++) {
+    const p = headSurface(profile, radius, dir)
+    const ey = p.y - y
+    const ex = p.x - x
+    if (Math.abs(ey) < 0.0002 && Math.abs(ex) < 0.0002) break
+    dir.y -= ey * 1.5
+    dir.x -= ex * 1.5
+  }
+  return headSurface(profile, radius, dir).z
+}
+
 export function headSurface(
   profile: AvatarProfile,
   radius: number,
   dir: THREE.Vector3,
 ): THREE.Vector3 {
   const f = profile.face
-  const base: [number, number, number] = [0.7, 1.02 * f.length, 0.88]
+  const base: [number, number, number] = [0.7, BASE_Y * f.length, 0.88]
   const n = dir.clone().normalize()
   const px = n.x * base[0]
   const py = n.y * base[1]

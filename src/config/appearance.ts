@@ -156,7 +156,7 @@ export const ZEYNEP_PROFILE: AvatarProfile = {
   },
   skin: { base: '#e8c0a2', shade: '#d3a687', blush: '#d98f81', translucency: 0.5 },
   eyes: { iris: '#3b2317', size: 0.0119, spacing: 0.0315, tilt: 0.045, lidCover: 0.24, lashes: true },
-  brows: { color: '#2a1c14', thickness: 0.0058, arch: 0.42, length: 0.036, lift: 0.036 },
+  brows: { color: '#2a1c14', thickness: 0.0042, arch: 0.42, length: 0.034, lift: 0.023 },
   nose: { bridgeWidth: 0.014, bridgeDepth: 0.024, length: 0.05, tipRound: 1.0, nostrilWidth: 0.0125 },
   lips: { color: '#c07a76', upper: 0.0072, lower: 0.0098, width: 0.024 },
   hair: {
@@ -200,7 +200,7 @@ export const CUMA_PROFILE: AvatarProfile = {
   },
   skin: { base: '#cf9f79', shade: '#b98a64', blush: '#bd7a63', translucency: 0.4 },
   eyes: { iris: '#2e2118', size: 0.0121, spacing: 0.0325, tilt: 0.015, lidCover: 0.3, lashes: false },
-  brows: { color: '#1e1712', thickness: 0.0072, arch: 0.2, length: 0.039, lift: 0.034 },
+  brows: { color: '#1e1712', thickness: 0.0052, arch: 0.2, length: 0.037, lift: 0.025 },
   nose: { bridgeWidth: 0.017, bridgeDepth: 0.028, length: 0.056, tipRound: 0.9, nostrilWidth: 0.0145 },
   lips: { color: '#a86f62', upper: 0.0068, lower: 0.0086, width: 0.0265 },
   hair: {
