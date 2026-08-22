@@ -35,14 +35,15 @@ export const GRIPS: Record<HoldPose, Grip> = {
   twoHand: { pos: [-0.16, -0.09, 0.1], rot: [UPRIGHT_X, 0, 0], twoHanded: true },
 }
 
-/** How the fingers close around each kind of grip. */
-export const HAND_FOR_POSE: Record<HoldPose, 'relaxed' | 'open' | 'grab' | 'point' | 'cup'> = {
-  grip: 'grab',
-  pinch: 'point',
-  cup: 'cup',
-  flat: 'open',
-  twoHand: 'grab',
-}
+/**
+ * How the fingers close around a held item.
+ *
+ * Keyed on the item's OWN id, not only on how it is carried: a glass is a
+ * cylinder the fingers wrap, a mug is two fingers hooked through a handle, a
+ * fork is a tripod, a phone sits on the fingertips with the thumb free. Giving
+ * all of them one "grab" is exactly what makes hands read as mittens.
+ */
+export { gripForItem } from '../characters/handPose'
 
 /**
  * The action a character should be playing while holding this. Carrying a pot

@@ -4,10 +4,13 @@ import { RIG } from './looks'
 import { Face, type FaceRig } from './Face'
 import { Hair, type HairRig } from './Hair'
 import { Glasses } from './Glasses'
-import { Hand, type HandPose } from './Hand'
+import { Hand, type HandRig } from './Hand'
+import type { GripName } from './handPose'
 import { buildFoot, buildJoint, buildLimb, buildTorso } from './geometry/body'
 import { buildNeck } from './geometry/features'
+import { buildClothing } from './geometry/clothing'
 import { bodySkinMaterial } from '../../systems/materials/skin'
+import { fabric } from '../../utils/textures'
 import type { AvatarProfile } from '../../config/appearance'
 
 // The joints the animator drives. Exposed through a ref so the animation lives
@@ -35,6 +38,9 @@ export interface AvatarRig {
   /** Heel strike and toe off. */
   ankleL: THREE.Group | null
   ankleR: THREE.Group | null
+  /** Per-finger joints, for grips and for hand IK. */
+  fingersL: HandRig | null
+  fingersR: HandRig | null
   /** Face and hair, for expressions, blinking, looking at things and lag. */
   face: FaceRig | null
   hair: HairRig | null
@@ -56,7 +62,8 @@ export const Avatar = forwardRef<
     rightHand?: React.ReactNode
     leftHand?: React.ReactNode
     /** How the right hand closes; follows what it is holding. */
-    rightPose?: HandPose
+    /** How the right hand closes; comes from what it is holding. */
+    rightPose?: GripName
   }
 >(function Avatar({ profile, seg, detail, rightHand, leftHand, rightPose }, ref) {
   const root = useRef<THREE.Group>(null)
@@ -78,6 +85,8 @@ export const Avatar = forwardRef<
   const pelvis = useRef<THREE.Group>(null)
   const ankleL = useRef<THREE.Group>(null)
   const ankleR = useRef<THREE.Group>(null)
+  const handRigL = useRef<HandRig>(null)
+  const handRigR = useRef<HandRig>(null)
 
   useImperativeHandle(ref, () => ({
     get root() { return root.current },
@@ -99,6 +108,8 @@ export const Avatar = forwardRef<
     get pelvis() { return pelvis.current },
     get ankleL() { return ankleL.current },
     get ankleR() { return ankleR.current },
+    get fingersL() { return handRigL.current },
+    get fingersR() { return handRigR.current },
   }))
 
   const { top, bottom, shoes, build } = profile
@@ -106,7 +117,7 @@ export const Avatar = forwardRef<
   // than the same arms in a different colour.
   const arms = build.shoulder / 0.2
   const legs = build.hip / 0.108
-  const handPose: HandPose = 'relaxed'
+  const handPose: GripName = 'relaxed'
 
   // Continuous swept surfaces, built once per look. Capsules gave every limb
   // one radius from end to end and a hemisphere on each cap, which is the
@@ -123,12 +134,43 @@ export const Avatar = forwardRef<
     shoulder: buildJoint(0.048 * arms, radial, 0.88),
     elbow: buildJoint(0.036 * arms, radial, 0.86),
     knee: buildJoint(0.056 * legs, radial, 0.92),
+    // Cloth over the knee. Without it the thigh and calf pieces separate the
+    // moment the leg bends and the trouser opens at the joint.
+    kneeCloth: buildJoint(0.056 * legs + 0.009, radial, 0.92),
+    elbowCloth: buildJoint(0.036 * arms + 0.008, radial, 0.86),
     foot: buildFoot(legs, radial),
     neck: buildNeck(profile, radial),
   }), [profile, radial, arms, legs])
   useEffect(() => () => Object.values(geom).forEach((g) => g.dispose()), [geom])
-  const cloth = { roughness: top.roughness, metalness: 0.02 }
-  const legCloth = { roughness: bottom.roughness, metalness: 0.02 }
+
+  // Clothes are their own surfaces, cut from the BODY'S sections and pushed
+  // outward by the fabric's thickness — which is why they cannot clip through
+  // it. Until now they WERE the body, coloured differently, so a sleeve could
+  // only ever end at a joint and bare arms were impossible.
+  const wear = useMemo(() => buildClothing(profile, radial), [profile, radial])
+  useEffect(() => () => wear.all().forEach((g) => g.dispose()), [wear])
+
+  const topTex = fabric(top.color, `top:${profile.id}`, top.fabric)
+  const botTex = fabric(bottom.color, `bot:${profile.id}`, bottom.fabric)
+  // The fabric map is a DETAIL layer — the pipeline normalises its brightness so
+  // the material colour is the albedo. Passing white here made every garment a
+  // pale grey sheet.
+  const cloth = {
+    color: top.color,
+    map: topTex.map,
+    normalMap: detail ? topTex.normalMap : undefined,
+    roughnessMap: topTex.roughnessMap,
+    roughness: top.roughness,
+    metalness: 0.02,
+  }
+  const legCloth = {
+    color: bottom.color,
+    map: botTex.map,
+    normalMap: detail ? botTex.normalMap : undefined,
+    roughnessMap: botTex.roughnessMap,
+    roughness: bottom.roughness,
+    metalness: 0.02,
+  }
   // Skin no longer glows to rescue itself from overhead-only lighting: it is a
   // real material with a pore normal map and a roughness break-up, and the
   // bounce light that the emissive was standing in for is now an actual light.
@@ -142,23 +184,34 @@ export const Avatar = forwardRef<
     ankleRef: React.RefObject<THREE.Group>,
   ) => (
     <group ref={hipRef} position={[side * build.hip, RIG.hipY, 0]}>
+      {/* The leg itself is SKIN. What shows below a pair of shorts is a leg. */}
       <mesh geometry={geom.thigh} castShadow>
-        <meshStandardMaterial color={bottom.color} {...legCloth} />
+        <meshStandardMaterial {...skinMat} />
       </mesh>
+      {wear.legThigh && (
+        <mesh geometry={wear.legThigh} castShadow receiveShadow>
+          <meshStandardMaterial {...legCloth} />
+        </mesh>
+      )}
       <group ref={kneeRef} position={[0, -RIG.thigh, 0]}>
         {/* The knee volume fills the gap between thigh and calf, so the leg is
             one form rather than two tubes meeting. */}
         <mesh geometry={geom.knee} position={[0, 0.004, 0.004]}>
-          <meshStandardMaterial color={bottom.color} {...legCloth} />
+          <meshStandardMaterial {...skinMat} />
         </mesh>
+        {wear.legCalf && (
+          <mesh geometry={geom.kneeCloth} position={[0, 0.004, 0.004]} castShadow receiveShadow>
+            <meshStandardMaterial {...legCloth} />
+          </mesh>
+        )}
         <mesh geometry={geom.calf} castShadow>
-          <meshStandardMaterial color={bottom.color} {...legCloth} />
+          <meshStandardMaterial {...skinMat} />
         </mesh>
-        {/* turn-up at the ankle, so the trousers end rather than just stopping */}
-        <mesh position={[0, -RIG.shin + 0.05, 0]}>
-          <cylinderGeometry args={[0.038 * legs, 0.034 * legs, 0.032, seg]} />
-          <meshStandardMaterial color={bottom.trim} {...legCloth} />
-        </mesh>
+        {wear.legCalf && (
+          <mesh geometry={wear.legCalf} castShadow receiveShadow>
+            <meshStandardMaterial {...legCloth} />
+          </mesh>
+        )}
         {/* Shoe: a swept last with a heel, an arch and a toe box, plus a sole
             under it — not a box with a ball stuck on the front. */}
         {/* Ankle: the foot pivots here for heel strike and toe off. */}
@@ -192,29 +245,33 @@ export const Avatar = forwardRef<
       {/* Deltoid, filling the shoulder so the arm grows out of the torso
           instead of being socketed into it. */}
       <mesh geometry={geom.shoulder} position={[side * 0.006, -0.012, 0]} castShadow>
-        <meshStandardMaterial color={top.color} {...cloth} />
+        <meshStandardMaterial {...skinMat} />
       </mesh>
-      {detail && (
-        <mesh position={[0, -0.014, 0]} rotation={[0, 0, side * 0.2]}>
-          <torusGeometry args={[0.045 * arms, 0.002, 4, 12]} />
-          <meshStandardMaterial color={top.trim} roughness={0.95} />
+      <mesh geometry={geom.upperArm} castShadow>
+        <meshStandardMaterial {...skinMat} />
+      </mesh>
+      {wear.sleeveUpper && (
+        <mesh geometry={wear.sleeveUpper} castShadow receiveShadow>
+          <meshStandardMaterial {...cloth} />
         </mesh>
       )}
-      <mesh geometry={geom.upperArm} castShadow>
-        <meshStandardMaterial color={top.color} {...cloth} />
-      </mesh>
       <group ref={elbowRef} position={[0, -RIG.upperArm, 0]}>
         <mesh geometry={geom.elbow} position={[0, 0.002, -0.002]}>
-          <meshStandardMaterial color={top.color} {...cloth} />
+          <meshStandardMaterial {...skinMat} />
         </mesh>
+        {wear.sleeveFore && (
+          <mesh geometry={geom.elbowCloth} position={[0, 0.002, -0.002]} castShadow receiveShadow>
+            <meshStandardMaterial {...cloth} />
+          </mesh>
+        )}
         <mesh geometry={geom.foreArm} castShadow>
-          <meshStandardMaterial color={top.color} {...cloth} />
+          <meshStandardMaterial {...skinMat} />
         </mesh>
-        {/* cuff at the wrist */}
-        <mesh position={[0, -RIG.forearm + 0.022, 0]}>
-          <cylinderGeometry args={[0.027 * arms, 0.025 * arms, 0.034, seg]} />
-          <meshStandardMaterial color={top.trim} {...cloth} />
-        </mesh>
+        {wear.sleeveFore && (
+          <mesh geometry={wear.sleeveFore} castShadow receiveShadow>
+            <meshStandardMaterial {...cloth} />
+          </mesh>
+        )}
         {/* Wrist. The hand and anything it is holding hang off this, so the
             grip transform is expressed once, in the wrist's own frame. */}
         <group ref={handRef} position={[0, -RIG.forearm, 0]}>
@@ -223,7 +280,8 @@ export const Avatar = forwardRef<
             side={side}
             seg={seg}
             detail={detail}
-            pose={side === 1 ? rightPose ?? handPose : handPose}
+            ref={side === 1 ? handRigR : handRigL}
+            grip={side === 1 ? rightPose ?? handPose : handPose}
           />
           {side === 1 ? rightHand : leftHand}
         </group>
@@ -251,33 +309,37 @@ export const Avatar = forwardRef<
               seated pose drops it as a piece. */}
           {/* Hips and seat, in the trousers. Cut from the SAME torso profile
               as the shirt above it, so the two meet without a step. */}
+          {/* The torso is a BODY now; the clothes go over it. */}
           <mesh geometry={geom.hips} castShadow receiveShadow>
-            <meshStandardMaterial color={bottom.color} {...legCloth} />
+            <meshStandardMaterial {...skinMat} />
           </mesh>
           <mesh geometry={geom.torso} castShadow receiveShadow>
-            <meshStandardMaterial color={top.color} {...cloth} />
+            <meshStandardMaterial {...skinMat} />
           </mesh>
+          {wear.hips && (
+            <mesh geometry={wear.hips} castShadow receiveShadow>
+              <meshStandardMaterial {...legCloth} />
+            </mesh>
+          )}
+          {wear.top && (
+            <mesh geometry={wear.top} castShadow receiveShadow>
+              <meshStandardMaterial {...cloth} />
+            </mesh>
+          )}
 
           <group ref={chest} position={[0, RIG.chestBottom, 0]}>
-            {/* Folds across the body of the garment. Cloth does not hang flat,
-                and a couple of soft creases are most of what says "fabric". */}
-            {detail &&
-              [0.1, 0.21].map((y, i) => (
-                <mesh
-                  key={i}
-                  position={[0, y, build.waist * 0.66]}
-                  rotation={[0, 0, i ? 0.14 : -0.18]}
-                  scale={[1, 0.35, 0.3]}
-                >
-                  <capsuleGeometry args={[0.013, build.waist * 1.05, 2, 6]} />
-                  <meshStandardMaterial color={top.trim} roughness={top.roughness} transparent opacity={0.45} />
-                </mesh>
-              ))}
-            {/* collar, standing round the neck */}
-            <mesh position={[0, RIG.neckBase - RIG.chestBottom, 0]}>
-              <cylinderGeometry args={[0.072, 0.09, 0.05, seg, 1, true]} />
-              <meshStandardMaterial color={top.trim} {...cloth} side={THREE.DoubleSide} />
-            </mesh>
+            {/* Collar and hood are real garment pieces now, cut from the same
+                profile as the rest of the top. */}
+            {wear.collar && (
+              <mesh geometry={wear.collar} position={[0, -RIG.chestBottom, 0]} castShadow>
+                <meshStandardMaterial {...cloth} color={top.trim} side={THREE.DoubleSide} />
+              </mesh>
+            )}
+            {wear.hood && (
+              <mesh geometry={wear.hood} position={[0, -RIG.chestBottom, 0]} castShadow receiveShadow>
+                <meshStandardMaterial {...cloth} />
+              </mesh>
+            )}
             {/* Neck. A swept surface that starts inside the trapezius and ends
                 inside the skull, so neither end can show a cap — the old
                 cylinder stopped below the jaw and left a flat disc hanging in

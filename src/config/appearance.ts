@@ -110,8 +110,14 @@ export interface ClothingSpec {
   /** Collar, cuffs and hems, a shade off the body of the garment. */
   trim: string
   roughness: number
-  /** Knit, jersey, denim… drives the normal detail and how folds read. */
-  fabric: 'knit' | 'jersey' | 'denim' | 'cotton'
+  /** Knit, jersey, denim… drives the weave in the texture and how it wears. */
+  fabric: 'knit' | 'jersey' | 'denim' | 'cotton' | 'linen' | 'leather'
+  /**
+   * Which garment this is. Real geometry: a t-shirt's sleeve ends mid-upper-arm
+   * with bare skin below it, a coat falls past the hip, a hoodie has a hood.
+   * Tops take a TopKind and bottoms a BottomKind (geometry/clothing.ts).
+   */
+  garment: string
 }
 
 export interface AvatarProfile {
@@ -178,8 +184,8 @@ export const ZEYNEP_PROFILE: AvatarProfile = {
     lens: '#dfe8ee',
     lensOpacity: 0.1,
   },
-  top: { color: '#a52a33', trim: '#8d2029', roughness: 0.9, fabric: 'knit' },
-  bottom: { color: '#3f3a45', trim: '#332f38', roughness: 0.88, fabric: 'denim' },
+  top: { color: '#a52a33', trim: '#8d2029', roughness: 0.9, fabric: 'knit', garment: 'sweater' },
+  bottom: { color: '#3f3a45', trim: '#332f38', roughness: 0.88, fabric: 'denim', garment: 'jeans' },
   shoes: { color: '#4a434c', sole: '#26222a' },
   accessories: ['glasses'],
 }
@@ -215,8 +221,8 @@ export const CUMA_PROFILE: AvatarProfile = {
   },
   facialHair: 'stubble',
   glasses: null,
-  top: { color: '#55606f', trim: '#46505e', roughness: 0.86, fabric: 'cotton' },
-  bottom: { color: '#39404c', trim: '#2f3540', roughness: 0.87, fabric: 'denim' },
+  top: { color: '#55606f', trim: '#46505e', roughness: 0.86, fabric: 'cotton', garment: 'tshirt' },
+  bottom: { color: '#39404c', trim: '#2f3540', roughness: 0.87, fabric: 'denim', garment: 'jeans' },
   shoes: { color: '#3d3d44', sole: '#22222a' },
   accessories: [],
 }

@@ -7,11 +7,12 @@ import type { GraphicsQuality } from '../../types'
 import { isHighTier, isUltra } from '../../utils/device'
 import { Avatar, type AvatarRig } from '../characters/Avatar'
 import { animateAvatar } from '../characters/animate'
+import { applyFootIk, applyMicroAnimation, newMicroState } from '../characters/microAnim'
 import { profileById, profileFor } from '../../config/appearance'
 import { animateFace, animateHair, newFaceMemory, type Expression } from '../characters/faceAnim'
 import { usePeerHeld } from '../../systems/items'
 import { HeldInHand, itemSeg } from '../items/ItemViews'
-import { HAND_FOR_POSE } from '../items/grip'
+import { gripForItem } from '../items/grip'
 import { itemDefOr } from '../../config/items'
 
 const EYE = 1.62
@@ -30,6 +31,7 @@ export function RemotePlayer({ id, name, look, quality }: { id: string; name: st
 
   const cur = useRef({ x: 0, z: 0, ry: 0, lift: 0, sit: 0, speed: 0 })
   const faceMem = useRef(newFaceMemory())
+  const micro = useRef(newMicroState())
   const lookTarget = useRef(new THREE.Vector3())
   const phase = useRef(0)
   const born = useRef(performance.now())
@@ -89,6 +91,17 @@ export function RemotePlayer({ id, name, look, quality }: { id: string; name: st
         time: (performance.now() - born.current) / 1000,
         action: target.act ?? 'idle',
       })
+      // Breathing, weight shift and finger drift go ON TOP of the pose, and
+      // fade out as the character starts moving. Skipped entirely at distance,
+      // where none of it is visible and all of it still costs.
+      if (lodRef.current < 2) {
+        applyMicroAnimation(rig.current, micro.current, {
+          speed: cur.current.speed,
+          sit: cur.current.sit,
+          delta,
+        })
+        applyFootIk(rig.current, 0.85, profile.build.hip / 0.108)
+      }
     }
 
     // ---- Face --------------------------------------------------------------
@@ -144,7 +157,7 @@ export function RemotePlayer({ id, name, look, quality }: { id: string; name: st
         seg={seg}
         detail={detail}
         rightHand={held ? <HeldInHand item={held} seg={itemSeg(quality)} /> : null}
-        rightPose={held ? HAND_FOR_POSE[itemDefOr(held.def).holdPose] : 'relaxed'}
+        rightPose={held ? gripForItem(held.def, itemDefOr(held.def).holdPose) : 'relaxed'}
       />
       {showNames && (
         <sprite ref={label} position={[0, 1.95, 0]} scale={[0.9, 0.225, 1]}>

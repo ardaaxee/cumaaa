@@ -37,7 +37,19 @@ export interface Slice {
  * `closeTop`/`closeBottom` cap the ends. Limb ends that live inside a joint are
  * left open — there is nothing to see and the cap would z-fight with the joint.
  */
-export function buildSweep(slices: Slice[], radial: number, closeTop = false, closeBottom = false): THREE.BufferGeometry {
+export function buildSweep(
+  input: Slice[],
+  radial: number,
+  closeTop = false,
+  closeBottom = false,
+): THREE.BufferGeometry {
+  // Winding follows the ARRAY order, so a stack given top-to-bottom comes out
+  // inside-out: every face points into the body, and what you see from outside
+  // is the far wall of the tube. Limbs and joints were being built that way —
+  // the sections were listed from the joint downward — which is a large part of
+  // why arms and legs looked waxy and why clothing built the same way was
+  // invisible except at its silhouette.
+  const slices = input.length > 1 && input[0].y > input[input.length - 1].y ? [...input].reverse() : input
   const rows = slices.length
   const cols = radial
   const positions: number[] = []
@@ -239,14 +251,17 @@ export function torsoSlices(profile: AvatarProfile): Slice[] {
   ], 26)
 }
 
-/** A limb's cross-sections, in the limb's own frame (hanging down from -Y). */
+/**
+ * A limb's cross-sections, in the limb's own frame (hanging down from -Y),
+ * ordered from the far end UP to the joint so the surface winds outward.
+ */
 export function limbSlices(kind: LimbKind, scale: number): Slice[] {
   return resample(limbControl(kind).map((s) => ({
     ...s,
     w: s.w * scale,
     d: s.d * scale,
     cz: (s.cz ?? 0) * scale,
-  })), 16)
+  })), 16).reverse()
 }
 
 /** Public so clothing and trims can find the same landmarks the body uses. */
