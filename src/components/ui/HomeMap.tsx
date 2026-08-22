@@ -75,7 +75,10 @@ export function HomeMap({ expanded, onToggle }: { expanded: boolean; onToggle: (
   const others = peers.map((p) => ({ name: p.name, s: peerStates.get(p.id) })).filter((o) => o.s)
   const here = roomAt(me.x, me.z)
 
-  const size = expanded ? 'w-[min(70vw,300px)]' : 'w-[min(38vw,150px)]'
+  // Sized against the SHORT axis too. Width alone made the map ~38vw of a
+  // landscape phone — several hundred pixels tall on a 430px-high viewport, so
+  // it ran off the bottom and sat on top of the RUN/JUMP buttons.
+  const size = expanded ? 'w-[min(70vw,52vh,300px)]' : 'w-[min(38vw,30vh,150px)]'
 
   return (
     <div className={`pointer-events-auto ${size}`}>
