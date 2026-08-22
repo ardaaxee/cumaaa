@@ -1,5 +1,10 @@
-import { useMemo } from 'react'
+import { useMemo, useRef } from 'react'
+import { useFrame } from '@react-three/fiber'
+import * as THREE from 'three'
 import { Instance, Instances } from '@react-three/drei'
+import { Vehicle, type VehicleRig, type VehicleStyle } from './Vehicle'
+import { laneAt, newTraffic, prepareLane, stepTraffic, type LaneState } from '../../systems/traffic'
+import { M } from '../../systems/materials/library'
 import { useTimeOfDay } from '../../hooks/useClock'
 import { useWeather } from '../../systems/weatherSystem'
 import { isHighTier } from '../../utils/device'
@@ -61,9 +66,11 @@ export function Neighbourhood({ quality }: { quality: GraphicsQuality }) {
   // Wet asphalt after rain: darker and much glossier. Cheap — a material
   // change, not a second surface.
   const wet = weather === 'rain'
-  const asphalt = wet ? '#26282c' : '#3a3d42'
-  const asphaltRough = wet ? 0.28 : 0.86
-  const walkColor = wet ? '#6e6f6c' : '#86867f'
+  // Real surfaces rather than flat colours: aggregate in the asphalt, air holes
+  // in the pavement concrete, and a roughness map that makes a wet road shine in
+  // the ruts and stay matte on the crown.
+  const road = M.asphalt(wet ? 0.9 : 0)
+  const walk = M.concrete(wet ? '#6f706d' : '#8a8a83')
 
   const lamps = useMemo(() => scatter('lamp', detail > 0 ? 6 : 4, -16.4, -16.4, Z0 + 6, Z1 - 6), [detail])
   const trees = useMemo(() => scatter('tree', detail > 0 ? 7 : 4, -15.4, -14.6, Z0 + 3, Z1 - 3), [detail])
@@ -75,7 +82,7 @@ export function Neighbourhood({ quality }: { quality: GraphicsQuality }) {
       {/* ---- Ground ------------------------------------------------------ */}
       <mesh rotation={[-Math.PI / 2, 0, 0]} position={[(ROAD.x0 + ROAD.x1) / 2, STREET_Y, (Z0 + Z1) / 2]} receiveShadow>
         <planeGeometry args={[ROAD.x1 - ROAD.x0, Z1 - Z0]} />
-        <meshStandardMaterial color={asphalt} roughness={asphaltRough} metalness={0.05} />
+        <meshStandardMaterial {...road} />
       </mesh>
       {/* lane markings */}
       {Array.from({ length: detail > 0 ? 14 : 8 }).map((_, i) => (
@@ -93,7 +100,7 @@ export function Neighbourhood({ quality }: { quality: GraphicsQuality }) {
         <group key={i}>
           <mesh rotation={[-Math.PI / 2, 0, 0]} position={[(w.x0 + w.x1) / 2, STREET_Y + 0.14, (Z0 + Z1) / 2]} receiveShadow>
             <planeGeometry args={[w.x1 - w.x0, Z1 - Z0]} />
-            <meshStandardMaterial color={walkColor} roughness={wet ? 0.5 : 0.95} />
+            <meshStandardMaterial {...walk} />
           </mesh>
           {/* kerb face onto the road */}
           <mesh position={[i === 0 ? w.x0 + 0.06 : w.x1 - 0.06, STREET_Y + 0.07, (Z0 + Z1) / 2]}>
@@ -172,8 +179,11 @@ export function Neighbourhood({ quality }: { quality: GraphicsQuality }) {
         <StreetLamp key={i} x={l.x} z={l.z} lit={dusk} />
       ))}
       {cars.map((c, i) => (
-        <Car key={i} x={c.x} z={c.z} v={c.v} rand={c.rand} night={night} />
+        <ParkedCar key={i} x={c.x} z={c.z} v={c.v} rand={c.rand} detail={detail > 0} />
       ))}
+      {/* Moving traffic: cars that see each other, brake for the one in front,
+          steer into the bend and indicate before it. */}
+      <Traffic count={detail > 1 ? 4 : detail > 0 ? 3 : 2} detail={detail > 0} night={night} />
       {bins.map((bn, i) => (
         <group key={i} position={[bn.x, STREET_Y + 0.14, bn.z]}>
           <mesh position={[0, 0.55, 0]} castShadow>
@@ -295,43 +305,90 @@ function StreetLamp({ x, z, lit }: { x: number; z: number; lit: boolean }) {
   )
 }
 
-function Car({ x, z, v, rand, night }: { x: number; z: number; v: number; rand: () => number; night: boolean }) {
-  const body = ['#8e939a', '#3d4650', '#7a3b38', '#2f3336', '#b3b6b8'][Math.floor(v * 5) % 5]
+// ---- Traffic ---------------------------------------------------------------
+
+const CAR_STYLES: VehicleStyle[] = [
+  { body: '#8e939a', kind: 'hatch' },
+  { body: '#3d4650', kind: 'saloon' },
+  { body: '#7a3b38', kind: 'estate' },
+  { body: '#2f3336', kind: 'hatch' },
+  { body: '#c8ccce', kind: 'van' },
+]
+
+/** The lane cars drive: up the near side, round the end, back down the far side. */
+function trafficLanes(): Map<string, LaneState> {
+  const y = STREET_Y + 0.02
+  const mid = (ROAD.x0 + ROAD.x1) / 2
+  const near = mid + 3.4
+  const far = mid - 3.4
+  const m = new Map<string, LaneState>()
+  m.set(
+    'loop',
+    prepareLane({
+      id: 'loop',
+      y,
+      speed: 7.5,
+      points: [
+        [near, Z0 - 30],
+        [near, Z1 + 26],
+        [near - 1.6, Z1 + 32],
+        [far, Z1 + 34],
+        [far, Z0 - 34],
+        [far + 1.6, Z0 - 36],
+        [near, Z0 - 30],
+      ],
+    }),
+  )
+  return m
+}
+
+function Traffic({ count, detail, night }: { count: number; detail: boolean; night: boolean }) {
+  const lanes = useMemo(() => trafficLanes(), [])
+  const cars = useMemo(() => newTraffic('loop', count, lanes.get('loop')?.length ?? 100, 3), [count, lanes])
+  const groups = useRef<THREE.Group[]>([])
+  const rigs = useRef<(VehicleRig | null)[]>([])
+  const blink = useRef(0)
+
+  useFrame((_, delta) => {
+    stepTraffic(cars, lanes, delta)
+    blink.current += delta
+    const on = Math.sin(blink.current * 6.2) > 0
+    const lane = lanes.get('loop')
+    if (!lane) return
+    for (let i = 0; i < cars.length; i++) {
+      const c = cars[i]
+      const g = groups.current[i]
+      const rig = rigs.current[i]
+      const at = laneAt(lane, c.s)
+      if (g) {
+        g.position.set(at.x, lane.lane.y, at.z)
+        g.rotation.y = at.yaw
+      }
+      if (rig) {
+        rig.setWheelSpin(c.spin)
+        rig.setSteer(c.steer)
+        rig.setBrake(c.brake)
+        rig.setIndicator(c.indicator, on)
+        rig.setHeadlights(night)
+      }
+    }
+  })
+
   return (
-    <group position={[x, STREET_Y + 0.14, z]} rotation={[0, jitter(rand, 0.05), 0]}>
-      <mesh position={[0, 0.52, 0]} castShadow>
-        <boxGeometry args={[1.82, 0.62, 4.2]} />
-        <meshStandardMaterial color={body} metalness={0.55} roughness={0.42} />
-      </mesh>
-      {/* cabin, set back and narrower so it isn't a plain brick */}
-      <mesh position={[0, 1.0, -0.15]} castShadow>
-        <boxGeometry args={[1.6, 0.56, 2.1]} />
-        <meshStandardMaterial color={body} metalness={0.5} roughness={0.45} />
-      </mesh>
-      <mesh position={[0, 1.02, -0.16]}>
-        <boxGeometry args={[1.63, 0.4, 2.0]} />
-        <meshStandardMaterial color="#1d2228" metalness={0.4} roughness={0.2} />
-      </mesh>
-      {[-0.72, 0.72].map((sx) =>
-        [-1.45, 1.45].map((sz) => (
-          <mesh key={`${sx}${sz}`} position={[sx, 0.3, sz]} rotation={[0, 0, Math.PI / 2]}>
-            <cylinderGeometry args={[0.3, 0.3, 0.2, 10]} />
-            <meshStandardMaterial color="#1a1c1f" roughness={0.9} />
-          </mesh>
-        )),
-      )}
-      {/* tail lights catch the eye at night without becoming neon */}
-      {[-0.6, 0.6].map((sx) => (
-        <mesh key={sx} position={[sx, 0.62, 2.11]}>
-          <boxGeometry args={[0.34, 0.14, 0.04]} />
-          <meshStandardMaterial
-            color="#7a2b2b"
-            emissive={night ? '#8a2020' : '#000000'}
-            emissiveIntensity={night ? 0.7 : 0}
-            roughness={0.4}
-          />
-        </mesh>
+    <group>
+      {cars.map((c, i) => (
+        <group key={i} ref={(g) => { if (g) groups.current[i] = g }}>
+          <Vehicle ref={(r) => { rigs.current[i] = r }} style={CAR_STYLES[c.style % CAR_STYLES.length]} detail={detail} />
+        </group>
       ))}
+    </group>
+  )
+}
+
+function ParkedCar({ x, z, v, rand, detail }: { x: number; z: number; v: number; rand: () => number; detail: boolean }) {
+  return (
+    <group position={[x, STREET_Y + 0.02, z]} rotation={[0, jitter(rand, 0.05), 0]}>
+      <Vehicle style={CAR_STYLES[Math.floor(v * 5) % CAR_STYLES.length]} detail={detail} />
     </group>
   )
 }
