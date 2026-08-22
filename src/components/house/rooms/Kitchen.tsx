@@ -7,6 +7,7 @@ import { LowerCupboard, Drawer, Oven, Hob, Microwave, Kettle, Tap, FRONT } from 
 import { CeilingLamp, Plant } from '../props'
 import { WindowDaylight } from '../Window'
 import { Panel } from '../../furniture/Panel'
+import { M } from '../../../systems/materials/library'
 
 const CAB = '#aca69a' // carcass, a shade darker than the doors so seams read
 const DOOR = '#c3bdaf' // matte door front
@@ -222,7 +223,9 @@ export function Kitchen() {
       {/* stone worktop in four slabs around the sink cut-out */}
       {WORKTOP.map(([x, z, w, d], i) => (
         <Panel key={i} args={[w, 0.06, d]} radius={0.012} position={[x, 0.9, z]} receiveShadow>
-          <meshStandardMaterial color={STONE} roughness={0.35} metalness={0.1} />
+          {/* Engineered quartz: a hard polish with mineral flecks and faint
+              veining under it, not a flat grey slab. */}
+          <meshStandardMaterial {...M.quartz(STONE)} />
         </Panel>
       ))}
       {/* lighter front edge, to catch the light along the whole run */}

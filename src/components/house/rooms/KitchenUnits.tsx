@@ -6,6 +6,8 @@ import { useSwing } from '../../furniture/useSwing'
 import { useOpenable, useAppliance } from '../../../systems/world'
 import { SpotItems } from '../../items/ItemViews'
 
+import { M } from '../../../systems/materials/library'
+
 const CAB_DOOR = '#c3bdaf'
 const CARCASS_IN = '#a49e93'
 const METAL = '#c9ccd0'
@@ -67,20 +69,20 @@ export function LowerCupboard({ id, position }: { id: string; position: [number,
       {/* doors: hinged at the outer edge of each leaf, swinging into the room */}
       <group ref={left} position={[-0.65, BODY_Y, FRONT]}>
         <Panel args={[0.62, 0.72, 0.022]} radius={0.008} position={[0.33, 0, 0]} castShadow>
-          <meshStandardMaterial color={CAB_DOOR} roughness={0.58} metalness={0.04} />
+          <meshStandardMaterial {...M.painted(CAB_DOOR, 'cabDoor', 0.55)} />
         </Panel>
         <mesh position={[0.58, 0, -0.02]}>
           <cylinderGeometry args={[0.008, 0.008, 0.16, 8]} />
-          <meshStandardMaterial color={HANDLE} metalness={0.8} roughness={0.3} />
+          <meshStandardMaterial {...M.steel()} color={HANDLE} />
         </mesh>
       </group>
       <group ref={right} position={[0.65, BODY_Y, FRONT]}>
         <Panel args={[0.62, 0.72, 0.022]} radius={0.008} position={[-0.33, 0, 0]} castShadow>
-          <meshStandardMaterial color={CAB_DOOR} roughness={0.58} metalness={0.04} />
+          <meshStandardMaterial {...M.painted(CAB_DOOR, 'cabDoor', 0.55)} />
         </Panel>
         <mesh position={[-0.58, 0, -0.02]}>
           <cylinderGeometry args={[0.008, 0.008, 0.16, 8]} />
-          <meshStandardMaterial color={HANDLE} metalness={0.8} roughness={0.3} />
+          <meshStandardMaterial {...M.steel()} color={HANDLE} />
         </mesh>
       </group>
     </group>
@@ -114,20 +116,20 @@ export function Drawer({ id, position }: { id: string; position: [number, number
         )}
         {/* front */}
         <Panel args={[0.62, 0.2, 0.022]} radius={0.008} position={[0, 0, FRONT + 0.01]} castShadow>
-          <meshStandardMaterial color={CAB_DOOR} roughness={0.58} metalness={0.04} />
+          <meshStandardMaterial {...M.painted(CAB_DOOR, 'cabDoor', 0.55)} />
         </Panel>
         <mesh position={[0, 0, FRONT - 0.015]} rotation={[0, 0, Math.PI / 2]}>
           <cylinderGeometry args={[0.008, 0.008, 0.3, 8]} />
-          <meshStandardMaterial color={HANDLE} metalness={0.8} roughness={0.3} />
+          <meshStandardMaterial {...M.steel()} color={HANDLE} />
         </mesh>
       </group>
       {/* fixed door below the drawer, so the bay is not half-open carcass */}
       <Panel args={[0.62, 0.48, 0.022]} radius={0.008} position={[0, 0.34, FRONT]}>
-        <meshStandardMaterial color={CAB_DOOR} roughness={0.58} metalness={0.04} />
+        <meshStandardMaterial {...M.painted(CAB_DOOR, 'cabDoor', 0.55)} />
       </Panel>
       <mesh position={[0, 0.52, FRONT - 0.02]} rotation={[0, 0, Math.PI / 2]}>
         <cylinderGeometry args={[0.008, 0.008, 0.28, 8]} />
-        <meshStandardMaterial color={HANDLE} metalness={0.8} roughness={0.3} />
+        <meshStandardMaterial {...M.steel()} color={HANDLE} />
       </mesh>
     </group>
   )
@@ -184,7 +186,7 @@ export function Oven({ id, position }: { id: string; position: [number, number, 
         </mesh>
         <mesh position={[0, 0.58, -0.05]} rotation={[0, 0, Math.PI / 2]}>
           <cylinderGeometry args={[0.014, 0.014, 0.54, 10]} />
-          <meshStandardMaterial color={METAL} metalness={0.85} roughness={0.28} />
+          <meshStandardMaterial {...M.steel()} color={METAL} />
         </mesh>
       </group>
       {/* fixed control fascia above the door, with real knobs */}
@@ -366,7 +368,7 @@ export function Tap({ id, position }: { id: string; position: [number, number, n
           gooseneck arches forward over it, so the stream lands in the sink. */}
       <mesh position={[0, 0.015, 0]}>
         <cylinderGeometry args={[0.035, 0.04, 0.03, 14]} />
-        <meshStandardMaterial color={METAL} metalness={0.8} roughness={0.28} />
+        <meshStandardMaterial {...M.steel()} color={METAL} />
       </mesh>
       <mesh position={[0, 0.145, 0]}>
         <cylinderGeometry args={[0.019, 0.023, 0.26, 12]} />
