@@ -5,6 +5,7 @@ import { Instance, Instances } from '@react-three/drei'
 import { Vehicle, type VehicleRig, type VehicleStyle } from './Vehicle'
 import { laneAt, newTraffic, prepareLane, stepTraffic, type LaneState } from '../../systems/traffic'
 import { M } from '../../systems/materials/library'
+import { Pedestrians } from './Pedestrians'
 import { useTimeOfDay } from '../../hooks/useClock'
 import { useWeather } from '../../systems/weatherSystem'
 import { isHighTier } from '../../utils/device'
@@ -184,6 +185,19 @@ export function Neighbourhood({ quality }: { quality: GraphicsQuality }) {
       {/* Moving traffic: cars that see each other, brake for the one in front,
           steer into the bend and indicate before it. */}
       <Traffic count={detail > 1 ? 4 : detail > 0 ? 3 : 2} detail={detail > 0} night={night} />
+      {/* People on the pavement, each generated from a seed — different height,
+          build, face, hair and clothes, not one model recoloured. */}
+      {detail > 0 && (
+        <Pedestrians
+          quality={quality}
+          y={STREET_Y + 0.14}
+          x0={NEAR_WALK.x0 + 1.2}
+          x1={NEAR_WALK.x1 - 1.2}
+          z0={Z0 + 6}
+          z1={Z1 - 6}
+          count={detail > 1 ? 3 : 2}
+        />
+      )}
       {bins.map((bn, i) => (
         <group key={i} position={[bn.x, STREET_Y + 0.14, bn.z]}>
           <mesh position={[0, 0.55, 0]} castShadow>

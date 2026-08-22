@@ -86,11 +86,16 @@ export const Vehicle = forwardRef<VehicleRig, { style: VehicleStyle; detail: boo
 
     const geom = useMemo(() => {
       const radial = detail ? 16 : 10
-      const body = buildSweep(bodySlices(style.kind), radial, true, true)
-      // Built along Y; lay it down so it runs nose-to-tail along Z.
-      body.rotateX(Math.PI / 2)
-      const roof = buildSweep(roofSlices(style.kind), radial, true, true)
-      roof.rotateX(Math.PI / 2)
+      // The sweep runs along its own Y with the section's `cz` as its centre.
+      // Standing it up needs rotateX(-PI/2), which maps (x,y,z) -> (x, z, -y):
+      // the section's cz becomes HEIGHT and the sweep axis becomes -Z. Rotating
+      // the other way puts the car underground and upside down, which is what it
+      // was doing. Negating the slice Y first puts the nose back at +Z.
+      const flip = (ss: Slice[]) => ss.map((sl) => ({ ...sl, y: -sl.y }))
+      const body = buildSweep(flip(bodySlices(style.kind)), radial, true, true)
+      body.rotateX(-Math.PI / 2)
+      const roof = buildSweep(flip(roofSlices(style.kind)), radial, true, true)
+      roof.rotateX(-Math.PI / 2)
       return { body, roof }
     }, [style.kind, detail])
     useEffect(() => () => { geom.body.dispose(); geom.roof.dispose() }, [geom])
