@@ -39,7 +39,7 @@ function paintIris(p: Paint, iris: string): void {
 
   // Fibres: hundreds of fine radial strands of varying length and brightness.
   // In this space they are vertical lines, and they wrap at the edges for free.
-  const strands = Math.round(520 * (size / 1024))
+  const strands = Math.round(520 * (size / 1024))  // a 1-D feature: linear is right
   for (let i = 0; i < strands; i++) {
     const x = rnd() * size
     const from = (PUPIL_EDGE + rnd() * 0.12) * size
@@ -69,7 +69,7 @@ function paintIris(p: Paint, iris: string): void {
   ctx.stroke()
 
   // Crypts: the dark pits either side of the collarette.
-  for (let i = 0; i < Math.round(34 * (size / 1024)); i++) {
+  for (let i = 0; i < Math.round(34 * (size / 1024) ** 2); i++) {
     const x = rnd() * size
     const y = (0.4 + rnd() * 0.3) * size
     ctx.fillStyle = `rgba(12,8,5,${0.14 + rnd() * 0.24})`

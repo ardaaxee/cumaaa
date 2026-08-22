@@ -208,9 +208,12 @@ export function buildNose(profile: AvatarProfile, radial: number): THREE.BufferG
   const last = control[control.length - 1]
   positions.push(0, last.y, last.cz)
   uvs.push(0.5, 1)
+  // Wound to face DOWN. The other way round it was back-facing, so the base of
+  // every nose was a hole you could see into the skull through — the black bar
+  // that has been sitting under the nose in every screenshot.
   for (let j = 0; j < radial; j++) {
     const a = (rows - 1) * stride + j
-    indices.push(centre, a, a + 1)
+    indices.push(centre, a + 1, a)
   }
 
   const geo = new THREE.BufferGeometry()

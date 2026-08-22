@@ -207,13 +207,20 @@ export function buildTorso(
 
 /** Half-width and half-depth of the torso at a given height, for trims. */
 export function torsoAt(profile: AvatarProfile, y: number): { w: number; d: number } {
-  const geo = buildTorsoSlices(profile)
+  const geo = torsoSlices(profile)
   let best = geo[0]
   for (const s of geo) if (Math.abs(s.y - y) < Math.abs(best.y - y)) best = s
   return { w: best.w, d: best.d }
 }
 
-function buildTorsoSlices(profile: AvatarProfile): Slice[] {
+/**
+ * The torso's cross-sections, resampled.
+ *
+ * Exported because CLOTHING is built from the same profile pushed outward: a
+ * garment that is the body's own silhouette plus a thickness cannot clip
+ * through it, which is the whole problem with modelling one separately.
+ */
+export function torsoSlices(profile: AvatarProfile): Slice[] {
   const b = profile.build
   const fem = profile.presentation === 'feminine'
   const sh = b.shoulder
@@ -232,6 +239,19 @@ function buildTorsoSlices(profile: AvatarProfile): Slice[] {
   ], 26)
 }
 
+/** A limb's cross-sections, in the limb's own frame (hanging down from -Y). */
+export function limbSlices(kind: LimbKind, scale: number): Slice[] {
+  return resample(limbControl(kind).map((s) => ({
+    ...s,
+    w: s.w * scale,
+    d: s.d * scale,
+    cz: (s.cz ?? 0) * scale,
+  })), 16)
+}
+
+/** Public so clothing and trims can find the same landmarks the body uses. */
+export { resample }
+
 // ---- Limbs -----------------------------------------------------------------
 
 export type LimbKind = 'upperArm' | 'foreArm' | 'thigh' | 'calf'
@@ -241,6 +261,10 @@ export type LimbKind = 'upperArm' | 'foreArm' | 'thigh' | 'calf'
  * the rig hangs. Girth and cross section both change along the length.
  */
 export function buildLimb(kind: LimbKind, scale: number, radial: number): THREE.BufferGeometry {
+  return buildSweep(limbSlices(kind, scale), radial, false, false)
+}
+
+function limbControl(kind: LimbKind): Slice[] {
   let control: Slice[]
   switch (kind) {
     case 'upperArm':
@@ -281,13 +305,7 @@ export function buildLimb(kind: LimbKind, scale: number, radial: number): THREE.
       ]
       break
   }
-  const scaled = control.map((s) => ({
-    ...s,
-    w: s.w * scale,
-    d: s.d * scale,
-    cz: (s.cz ?? 0) * scale,
-  }))
-  return buildSweep(resample(scaled, 16), radial, false, false)
+  return control
 }
 
 /**

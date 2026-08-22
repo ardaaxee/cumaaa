@@ -74,6 +74,11 @@ export interface FaceMemory {
   blink: number // 0 open, 1 shut
   /** Smoothed lip rounding, so speech does not snap between shapes. */
   pucker: number
+  /** Per-clump hair springs. Sized on first use from the rig. */
+  clumpX: Float32Array
+  clumpZ: Float32Array
+  clumpVX: Float32Array
+  clumpVZ: Float32Array
   nextBlink: number
   blinkPhase: number
   eyeYaw: number
@@ -105,6 +110,10 @@ export function newFaceMemory(): FaceMemory {
     pose: { ...NEUTRAL },
     blink: 0,
     pucker: 0,
+    clumpX: new Float32Array(0),
+    clumpZ: new Float32Array(0),
+    clumpVX: new Float32Array(0),
+    clumpVZ: new Float32Array(0),
     nextBlink: 1.5 + Math.random() * 3,
     blinkPhase: 0,
     eyeYaw: 0,
@@ -285,18 +294,70 @@ function applyBrow(
  * point is that a turn of the head does not carry the whole mass with it as one
  * rigid piece.
  */
-export function animateHair(hair: HairRig, mem: FaceMemory, headYaw: number, delta: number): void {
+/**
+ * Hair motion.
+ *
+ * Two layers. The whole mass LAGS the head on a spring, which is what stops
+ * hair looking welded to the skull. Then each clump swings on its own root with
+ * its own spring, driven by the same kick plus the bob of walking plus the
+ * wind — so the hair does not move as one rigid piece, which is the other half
+ * of the wig problem.
+ *
+ * `opts.speed` is ground speed in m/s and `opts.wind` a 0..1 exposure (0 indoors).
+ */
+export function animateHair(
+  hair: HairRig,
+  mem: FaceMemory,
+  headYaw: number,
+  delta: number,
+  opts: { speed?: number; wind?: number; time?: number } = {},
+): void {
   const g = hair.root
   if (!g) return
   const dYaw = shortest(mem.lastHeadYaw, headYaw)
   mem.lastHeadYaw = headYaw
   // Spring toward zero, kicked by how fast the head turned.
   const kick = -dYaw * 2.2
-  mem.hairLagV += (kick - mem.hairLag * 9 - mem.hairLagV * 2.4) * Math.min(delta * 60, 1.6)
+  const step = Math.min(delta * 60, 1.6)
+  mem.hairLagV += (kick - mem.hairLag * 9 - mem.hairLagV * 2.4) * step
   mem.hairLag += mem.hairLagV * delta
   mem.hairLag = clamp(mem.hairLag, -0.16, 0.16)
   g.rotation.y = mem.hairLag
   g.rotation.x = mem.hairLag * 0.12
+
+  const clumps = hair.clumps
+  if (!clumps.length) return
+  const speed = opts.speed ?? 0
+  const wind = opts.wind ?? 0
+  const t = opts.time ?? 0
+  // One spring per clump. Only the state is per-clump; the forcing is shared,
+  // which keeps this a handful of floats however much hair there is.
+  if (mem.clumpX.length !== clumps.length) {
+    mem.clumpX = new Float32Array(clumps.length)
+    mem.clumpZ = new Float32Array(clumps.length)
+    mem.clumpVX = new Float32Array(clumps.length)
+    mem.clumpVZ = new Float32Array(clumps.length)
+  }
+  const bob = Math.min(1, speed / 1.4)
+  for (let i = 0; i < clumps.length; i++) {
+    const reach = hair.reach[i] ?? 0.1
+    // Longer clumps swing further and slower — that is what length looks like.
+    const stiffness = 34 - Math.min(22, reach * 55)
+    const damping = 5.2
+    // Forcing: the head's turn throws the tips outward, walking bounces them,
+    // and wind pushes them one way with a gust on top.
+    const phase = i * 0.7
+    const driveX = kick * 0.9 + Math.sin(t * 9.4 + phase) * 0.10 * bob + wind * (0.12 + Math.sin(t * 1.7 + phase) * 0.07)
+    const driveZ = Math.sin(t * 8.1 + phase * 1.3) * 0.07 * bob + wind * 0.05 * Math.sin(t * 2.3 + phase)
+    mem.clumpVX[i] += (driveX * 8 - mem.clumpX[i] * stiffness - mem.clumpVX[i] * damping) * delta
+    mem.clumpVZ[i] += (driveZ * 8 - mem.clumpZ[i] * stiffness - mem.clumpVZ[i] * damping) * delta
+    mem.clumpX[i] = clamp(mem.clumpX[i] + mem.clumpVX[i] * delta, -0.3, 0.3)
+    mem.clumpZ[i] = clamp(mem.clumpZ[i] + mem.clumpVZ[i] * delta, -0.24, 0.24)
+    const c = clumps[i]
+    if (!c) continue
+    c.rotation.z = mem.clumpX[i]
+    c.rotation.x = mem.clumpZ[i]
+  }
 }
 
 function shortest(current: number, target: number): number {

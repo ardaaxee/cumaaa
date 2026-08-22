@@ -121,7 +121,9 @@ export const Face = forwardRef<FaceRig, FaceProps>(function Face({ profile, seg,
       browZ: faceZ(browY, profile.eyes.spacing * 0.7) - profile.brows.thickness * 0.35,
       // The ear attaches where the skull's own surface is, at ear height.
       earX: headSurface(profile, R, new THREE.Vector3(1, -0.04, -0.12)).x - 0.002,
-      noseBaseY: -0.0432 * (profile.nose.length / 0.053),
+      // Same normalisation buildNose() uses; when these two disagree the
+      // nostrils end up somewhere that is not the base of the nose.
+      noseBaseY: -0.0455 * (profile.nose.length / 0.0775),
     }
   }, [profile, lp.upper, lp.lower])
   const JAW_AT = useMemo(() => new THREE.Vector3(0, 0.01, -0.028), [])

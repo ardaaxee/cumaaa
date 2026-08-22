@@ -210,7 +210,7 @@ function paintLips(p: Paint, profile: AvatarProfile, L: Landmarks, mode: 'albedo
       ctx.clip(path)
       const x0 = L.cornerL.u * size
       const x1 = L.cornerR.u * size
-      for (let i = 0; i < Math.round(90 * (size / 2048)) + 30; i++) {
+      for (let i = 0; i < Math.round(90 * (size / 2048) ** 2) + 30; i++) {
         const x = x0 + rnd() * (x1 - x0)
         const y = (1 - L.mouth.v) * size + (rnd() - 0.5) * size * 0.05
         ctx.strokeStyle = rnd() > 0.5 ? 'rgba(0,0,0,0.11)' : 'rgba(255,255,255,0.09)'
@@ -347,7 +347,10 @@ function paintAlbedo(p: Paint, profile: AvatarProfile): void {
   paintLips(p, profile, L, 'albedo')
 
   // Freckles and small marks. Sparse, only where sun reaches.
-  const marks = Math.round(46 * (size / 1024))
+  // Counts of point features scale with AREA. Scaling them with the edge
+  // length made a 512 map four times denser than a 2048 one, which is why the
+  // low tier came out looking scratched.
+  const marks = Math.round(46 * (size / 1024) ** 2)
   for (let i = 0; i < marks; i++) {
     const u = 0.13 + rnd() * 0.24
     const v = 0.3 + rnd() * 0.36
@@ -362,7 +365,7 @@ function paintAlbedo(p: Paint, profile: AvatarProfile): void {
   // FINE: pores, as colour as well as relief. Only worth drawing once there
   // are pixels to hold them.
   if (size >= 1024) {
-    const n = Math.round(26000 * (size / 2048))
+    const n = Math.round(26000 * (size / 2048) ** 2)
     for (let i = 0; i < n; i++) {
       const u = rnd()
       const v = rnd()
@@ -415,7 +418,7 @@ function paintHeight(p: Paint, profile: AvatarProfile): void {
 
   // Pores as relief. This is what the normal map is actually for.
   if (size >= 512) {
-    const n = Math.round(34000 * (size / 2048))
+    const n = Math.round(34000 * (size / 2048) ** 2)
     for (let i = 0; i < n; i++) {
       const u = rnd()
       const v = rnd()
@@ -439,7 +442,7 @@ function paintHeight(p: Paint, profile: AvatarProfile): void {
 
   // Beard stubble relief.
   if (profile.facialHair !== 'none') {
-    const n = Math.round(9000 * (size / 2048)) * (profile.facialHair === 'beard' ? 2 : 1)
+    const n = Math.round(9000 * (size / 2048) ** 2) * (profile.facialHair === 'beard' ? 2 : 1)
     for (let i = 0; i < n; i++) {
       const u = rnd()
       const v = rnd()
@@ -481,7 +484,7 @@ function paintRoughness(p: Paint, profile: AvatarProfile): void {
     blob(p, L.jawR, 0.13, 0.09, '#ffffff', 0.5)
   }
   // Break up the remaining flatness so highlights are never a clean oval.
-  for (let i = 0; i < Math.round(300 * (size / 1024)); i++) {
+  for (let i = 0; i < Math.round(300 * (size / 1024) ** 2); i++) {
     const r = (6 + rnd() * 26) * (size / 1024)
     const x = rnd() * size
     const y = rnd() * size
@@ -550,7 +553,7 @@ export function skinDetailSurface(): PbrSurface {
       const { ctx, size, rnd } = p
       ctx.fillStyle = grey(128)
       ctx.fillRect(0, 0, size, size)
-      const n = Math.round(9000 * (size / 1024))
+      const n = Math.round(9000 * (size / 1024) ** 2)
       for (let i = 0; i < n; i++) {
         const x = rnd() * size
         const y = rnd() * size
@@ -562,7 +565,7 @@ export function skinDetailSurface(): PbrSurface {
         ctx.beginPath(); ctx.arc(x, y, r * 1.8, 0, Math.PI * 2); ctx.stroke()
       }
       // Fine creases, the way skin folds over anything that bends.
-      for (let i = 0; i < Math.round(180 * (size / 1024)); i++) {
+      for (let i = 0; i < Math.round(180 * (size / 1024) ** 2); i++) {
         const x = rnd() * size
         const y = rnd() * size
         ctx.strokeStyle = `rgba(0,0,0,${0.1 + rnd() * 0.14})`
@@ -577,7 +580,7 @@ export function skinDetailSurface(): PbrSurface {
       const { ctx, size, rnd } = p
       ctx.fillStyle = grey(186)
       ctx.fillRect(0, 0, size, size)
-      for (let i = 0; i < Math.round(220 * (size / 1024)); i++) {
+      for (let i = 0; i < Math.round(220 * (size / 1024) ** 2); i++) {
         const r = (8 + rnd() * 40) * (size / 1024)
         const x = rnd() * size
         const y = rnd() * size
