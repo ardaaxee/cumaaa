@@ -1,0 +1,370 @@
+import * as THREE from 'three'
+import type { AvatarProfile } from '../../../config/appearance'
+import { RIG } from '../looks'
+
+// Bodies as continuous swept surfaces, not stacked capsules.
+//
+// A capsule has one radius all the way along and a hemisphere on each end. Two
+// of them meeting at a joint is a pinch and a bulge with a seam between, which
+// is exactly what "kapsül kol" looks like. A real limb changes girth AND cross
+// section along its length: an upper arm is round at the deltoid and flattens
+// toward the elbow, a forearm is broad below the elbow and narrow and oval at
+// the wrist, a calf carries its mass high and behind.
+//
+// So: describe a limb (or a torso) as a stack of cross sections and sweep a
+// surface through them. One mesh, continuous normals, real silhouette.
+
+/** One cross section along the sweep. */
+export interface Slice {
+  /** Distance along the limb axis. For the torso this is world Y. */
+  y: number
+  /** Half-width (x) and half-depth (z) of the section. */
+  w: number
+  d: number
+  /** Shift of the section's centre, for things that are not straight. */
+  cx?: number
+  cz?: number
+  /**
+   * Back flattening, 0..1. A torso and a shin are flatter behind than in
+   * front; a pure ellipse everywhere is what makes a body look inflated.
+   */
+  flat?: number
+}
+
+/**
+ * Sweep a surface through the given sections.
+ *
+ * `closeTop`/`closeBottom` cap the ends. Limb ends that live inside a joint are
+ * left open — there is nothing to see and the cap would z-fight with the joint.
+ */
+export function buildSweep(
+  input: Slice[],
+  radial: number,
+  closeTop = false,
+  closeBottom = false,
+): THREE.BufferGeometry {
+  // Winding follows the ARRAY order, so a stack given top-to-bottom comes out
+  // inside-out: every face points into the body, and what you see from outside
+  // is the far wall of the tube. Limbs and joints were being built that way —
+  // the sections were listed from the joint downward — which is a large part of
+  // why arms and legs looked waxy and why clothing built the same way was
+  // invisible except at its silhouette.
+  const slices = input.length > 1 && input[0].y > input[input.length - 1].y ? [...input].reverse() : input
+  const rows = slices.length
+  const cols = radial
+  const positions: number[] = []
+  const uvs: number[] = []
+  const indices: number[] = []
+
+  // Arc length along the sweep, so the V coordinate is proportional to real
+  // distance. Without that a long thigh and a short knee get the same slice of
+  // texture and the pore density visibly changes from one to the next.
+  const arc: number[] = [0]
+  for (let i = 1; i < rows; i++) {
+    const a = slices[i - 1]
+    const b = slices[i]
+    arc.push(arc[i - 1] + Math.hypot(b.y - a.y, (b.cx ?? 0) - (a.cx ?? 0), (b.cz ?? 0) - (a.cz ?? 0)))
+  }
+  const total = arc[rows - 1] || 1
+
+  // The seam runs down the BACK of the sweep (j = 0 is +x, the seam closes at
+  // the far side), which is where a real garment's seam goes too.
+  for (let i = 0; i < rows; i++) {
+    const s = slices[i]
+    const flat = s.flat ?? 0
+    // Duplicate the first column at the end so the U coordinate can reach 1
+    // instead of wrapping back to 0 across the last quad.
+    for (let j = 0; j <= cols; j++) {
+      const a = ((j % cols) / cols) * Math.PI * 2
+      const ca = Math.cos(a)
+      const sa = Math.sin(a)
+      // Flattening pulls the BACK of the section (negative z) inward, leaving
+      // the front round.
+      const back = Math.max(0, -sa)
+      const depth = s.d * (1 - flat * back * 0.45)
+      positions.push((s.cx ?? 0) + ca * s.w, s.y, (s.cz ?? 0) + sa * depth)
+      // Girth-proportional U keeps the texel size even round the section.
+      uvs.push((j / cols) * Math.max(s.w, s.d) * 6, arc[i] / total)
+    }
+  }
+
+  const stride = cols + 1
+  for (let i = 0; i < rows - 1; i++) {
+    for (let j = 0; j < cols; j++) {
+      const a = i * stride + j
+      const b = i * stride + j + 1
+      const c = (i + 1) * stride + j
+      const d = (i + 1) * stride + j + 1
+      indices.push(a, c, b, b, c, d)
+    }
+  }
+
+  const cap = (rowIndex: number, upward: boolean) => {
+    const s = slices[rowIndex]
+    const centre = positions.length / 3
+    positions.push(s.cx ?? 0, s.y, s.cz ?? 0)
+    uvs.push(0.5, arc[rowIndex] / total)
+    for (let j = 0; j < cols; j++) {
+      const a = rowIndex * stride + j
+      const b = rowIndex * stride + j + 1
+      if (upward) indices.push(centre, a, b)
+      else indices.push(centre, b, a)
+    }
+  }
+  if (closeBottom) cap(0, false)
+  if (closeTop) cap(rows - 1, true)
+
+  const geo = new THREE.BufferGeometry()
+  geo.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3))
+  geo.setAttribute('uv', new THREE.Float32BufferAttribute(uvs, 2))
+  geo.setIndex(indices)
+  geo.computeVertexNormals()
+  // The seam column is duplicated so U can run 0→1, which means those two
+  // coincident vertices each saw only half the surrounding faces and came out
+  // with different normals — a bright line down the sweep. Average them back.
+  const nrm = geo.attributes.normal as THREE.BufferAttribute
+  for (let i = 0; i < rows; i++) {
+    const a = i * stride
+    const b = i * stride + cols
+    const x = (nrm.getX(a) + nrm.getX(b)) / 2
+    const y = (nrm.getY(a) + nrm.getY(b)) / 2
+    const z = (nrm.getZ(a) + nrm.getZ(b)) / 2
+    const len = Math.hypot(x, y, z) || 1
+    nrm.setXYZ(a, x / len, y / len, z / len)
+    nrm.setXYZ(b, x / len, y / len, z / len)
+  }
+  nrm.needsUpdate = true
+  return geo
+}
+
+/** Smooth interpolation through a handful of control sections. */
+function resample(control: Slice[], count: number): Slice[] {
+  const out: Slice[] = []
+  for (let i = 0; i < count; i++) {
+    const t = (i / (count - 1)) * (control.length - 1)
+    const lo = Math.min(control.length - 1, Math.floor(t))
+    const hi = Math.min(control.length - 1, lo + 1)
+    const f = t - lo
+    // Smoothstep between control sections, so the surface has no corners where
+    // one section hands over to the next.
+    const k = f * f * (3 - 2 * f)
+    const a = control[lo]
+    const b = control[hi]
+    out.push({
+      y: a.y + (b.y - a.y) * k,
+      w: a.w + (b.w - a.w) * k,
+      d: a.d + (b.d - a.d) * k,
+      cx: (a.cx ?? 0) + ((b.cx ?? 0) - (a.cx ?? 0)) * k,
+      cz: (a.cz ?? 0) + ((b.cz ?? 0) - (a.cz ?? 0)) * k,
+      flat: (a.flat ?? 0) + ((b.flat ?? 0) - (a.flat ?? 0)) * k,
+    })
+  }
+  return out
+}
+
+// ---- Torso -----------------------------------------------------------------
+
+/**
+ * Pelvis through ribcage to the base of the neck, as one surface.
+ *
+ * The landmarks are real: the iliac crest, the waist above it, the flare of the
+ * lower ribs, the chest, and the trapezius sloping up to the neck. The male and
+ * female presets differ in where those land — a wider chest and narrower hips
+ * against a narrower waist and wider hips — rather than in colour.
+ */
+export function buildTorso(
+  profile: AvatarProfile,
+  radial: number,
+  /**
+   * Which garment the section belongs to. Both halves are cut from the SAME
+   * profile with a two-slice overlap, so the shirt sits on the trousers with no
+   * step between them — the previous hem was sized from the old capsule and
+   * stood 5 cm proud of the waist, which read as a funnel.
+   */
+  part: 'top' | 'bottom' = 'top',
+): THREE.BufferGeometry {
+  const b = profile.build
+  const fem = profile.presentation === 'feminine'
+  // Shoulder and hip half-widths come from the profile; the rest is shaped
+  // around them.
+  const sh = b.shoulder
+  const hip = b.hip + (fem ? 0.042 : 0.03)
+  const waist = b.waist * (fem ? 0.88 : 1.0)
+
+  const control: Slice[] = [
+    // seat / glutes
+    { y: 0.8, w: hip * 0.96, d: hip * 0.82, cz: -0.012, flat: 0.2 },
+    // iliac crest — the widest point of the pelvis
+    { y: 0.9, w: hip, d: hip * 0.74, cz: -0.004, flat: 0.35 },
+    // waist
+    { y: 1.02, w: waist, d: waist * 0.86, flat: 0.45 },
+    // lower ribs flaring out again
+    { y: 1.12, w: waist * 1.08, d: waist * 0.92, flat: 0.5 },
+    // chest
+    { y: 1.24, w: sh * 0.8, d: waist * 1.0, cz: fem ? 0.008 : 0.004, flat: 0.55 },
+    // upper chest, just below the collarbones
+    { y: 1.34, w: sh * 0.86, d: waist * 0.94, flat: 0.55 },
+    // across the shoulders
+    { y: 1.41, w: sh * 0.92, d: waist * 0.84, cz: -0.006, flat: 0.5 },
+    // trapezius, sloping in to the neck over a real distance rather than a step
+    { y: 1.44, w: sh * 0.74, d: waist * 0.74, cz: -0.008, flat: 0.45 },
+    { y: 1.47, w: sh * 0.46, d: waist * 0.6, cz: -0.01, flat: 0.4 },
+  ]
+  const full = resample(control, 26)
+  // The waist is where the garments meet.
+  const waistIdx = full.findIndex((s) => s.y >= 1.0)
+  const range = part === 'bottom' ? full.slice(0, waistIdx + 3) : full.slice(Math.max(0, waistIdx - 1))
+  return buildSweep(range, radial, part === 'top', part === 'bottom')
+}
+
+/** Half-width and half-depth of the torso at a given height, for trims. */
+export function torsoAt(profile: AvatarProfile, y: number): { w: number; d: number } {
+  const geo = torsoSlices(profile)
+  let best = geo[0]
+  for (const s of geo) if (Math.abs(s.y - y) < Math.abs(best.y - y)) best = s
+  return { w: best.w, d: best.d }
+}
+
+/**
+ * The torso's cross-sections, resampled.
+ *
+ * Exported because CLOTHING is built from the same profile pushed outward: a
+ * garment that is the body's own silhouette plus a thickness cannot clip
+ * through it, which is the whole problem with modelling one separately.
+ */
+export function torsoSlices(profile: AvatarProfile): Slice[] {
+  const b = profile.build
+  const fem = profile.presentation === 'feminine'
+  const sh = b.shoulder
+  const hip = b.hip + (fem ? 0.042 : 0.03)
+  const waist = b.waist * (fem ? 0.88 : 1.0)
+  return resample([
+    { y: 0.8, w: hip * 0.96, d: hip * 0.82, cz: -0.012, flat: 0.2 },
+    { y: 0.9, w: hip, d: hip * 0.74, cz: -0.004, flat: 0.35 },
+    { y: 1.02, w: waist, d: waist * 0.86, flat: 0.45 },
+    { y: 1.12, w: waist * 1.08, d: waist * 0.92, flat: 0.5 },
+    { y: 1.24, w: sh * 0.8, d: waist * 1.0, cz: fem ? 0.008 : 0.004, flat: 0.55 },
+    { y: 1.34, w: sh * 0.86, d: waist * 0.94, flat: 0.55 },
+    { y: 1.41, w: sh * 0.92, d: waist * 0.84, cz: -0.006, flat: 0.5 },
+    { y: 1.44, w: sh * 0.74, d: waist * 0.74, cz: -0.008, flat: 0.45 },
+    { y: 1.47, w: sh * 0.46, d: waist * 0.6, cz: -0.01, flat: 0.4 },
+  ], 26)
+}
+
+/**
+ * A limb's cross-sections, in the limb's own frame (hanging down from -Y),
+ * ordered from the far end UP to the joint so the surface winds outward.
+ */
+export function limbSlices(kind: LimbKind, scale: number): Slice[] {
+  return resample(limbControl(kind).map((s) => ({
+    ...s,
+    w: s.w * scale,
+    d: s.d * scale,
+    cz: (s.cz ?? 0) * scale,
+  })), 16).reverse()
+}
+
+/** Public so clothing and trims can find the same landmarks the body uses. */
+export { resample }
+
+// ---- Limbs -----------------------------------------------------------------
+
+export type LimbKind = 'upperArm' | 'foreArm' | 'thigh' | 'calf'
+
+/**
+ * One limb segment, built downward from its joint (local -Y), matching the way
+ * the rig hangs. Girth and cross section both change along the length.
+ */
+export function buildLimb(kind: LimbKind, scale: number, radial: number): THREE.BufferGeometry {
+  return buildSweep(limbSlices(kind, scale), radial, false, false)
+}
+
+function limbControl(kind: LimbKind): Slice[] {
+  let control: Slice[]
+  switch (kind) {
+    case 'upperArm':
+      // Round and full at the deltoid, flattening and narrowing to the elbow.
+      control = [
+        { y: 0.01, w: 0.049, d: 0.049 },
+        { y: -0.08, w: 0.046, d: 0.044 },
+        { y: -0.17, w: 0.04, d: 0.037 },
+        { y: -RIG.upperArm + 0.01, w: 0.035, d: 0.031 },
+      ]
+      break
+    case 'foreArm':
+      // Broad just below the elbow where the muscle bellies sit, then a narrow
+      // oval wrist.
+      control = [
+        { y: 0.005, w: 0.036, d: 0.033 },
+        { y: -0.06, w: 0.038, d: 0.033 },
+        { y: -0.15, w: 0.031, d: 0.026 },
+        { y: -RIG.forearm + 0.005, w: 0.025, d: 0.019 },
+      ]
+      break
+    case 'thigh':
+      control = [
+        { y: 0.02, w: 0.085, d: 0.082, flat: 0.15 },
+        { y: -0.12, w: 0.079, d: 0.075, flat: 0.2 },
+        { y: -0.28, w: 0.066, d: 0.063, flat: 0.25 },
+        { y: -RIG.thigh + 0.01, w: 0.054, d: 0.052 },
+      ]
+      break
+    case 'calf':
+      // The calf carries its mass HIGH and BEHIND, then runs to a narrow ankle.
+      control = [
+        { y: 0.01, w: 0.053, d: 0.052 },
+        { y: -0.07, w: 0.055, d: 0.06, cz: -0.012 },
+        { y: -0.17, w: 0.045, d: 0.047, cz: -0.008 },
+        { y: -0.28, w: 0.036, d: 0.036, cz: -0.002 },
+        { y: -RIG.shin + 0.02, w: 0.031, d: 0.03 },
+      ]
+      break
+  }
+  return control
+}
+
+/**
+ * A joint: the volume that fills the gap between two segments so the elbow or
+ * the knee reads as one continuous arm rather than two tubes meeting.
+ */
+export function buildJoint(r: number, radial: number, squashZ = 1): THREE.BufferGeometry {
+  const control: Slice[] = [
+    { y: r * 0.95, w: r * 0.35, d: r * 0.35 * squashZ },
+    { y: r * 0.5, w: r * 0.86, d: r * 0.86 * squashZ },
+    { y: 0, w: r, d: r * squashZ },
+    { y: -r * 0.5, w: r * 0.86, d: r * 0.86 * squashZ },
+    { y: -r * 0.95, w: r * 0.35, d: r * 0.35 * squashZ },
+  ]
+  return buildSweep(resample(control, 11), radial, true, true)
+}
+
+// ---- Foot ------------------------------------------------------------------
+
+/**
+ * A foot, from the ankle to the toes: a heel, an arch that lifts off the floor,
+ * a ball and a toe box. Built as a sweep along Z so the sole is a real shape
+ * rather than a box with a sphere on the front.
+ */
+export function buildFoot(scale: number, radial: number): THREE.BufferGeometry {
+  // Here the sweep axis is Z (heel to toe), so the sections are built in the
+  // local frame and then rotated into place.
+  const control: Slice[] = [
+    { y: -0.055, w: 0.028, d: 0.03, cz: 0.03 },
+    { y: -0.03, w: 0.036, d: 0.038, cz: 0.026 },
+    { y: 0.02, w: 0.039, d: 0.031, cz: 0.018 },
+    { y: 0.08, w: 0.041, d: 0.027, cz: 0.016 },
+    { y: 0.13, w: 0.038, d: 0.024, cz: 0.016 },
+    { y: 0.155, w: 0.028, d: 0.019, cz: 0.016 },
+  ]
+  const scaled = control.map((s) => ({
+    y: s.y * scale,
+    w: s.w * scale,
+    d: s.d * scale,
+    cz: (s.cz ?? 0) * scale,
+    flat: 0.25,
+  }))
+  const geo = buildSweep(resample(scaled, 14), radial, true, true)
+  // Sweep built along Y; stand it up so it runs heel-to-toe along Z.
+  geo.rotateX(Math.PI / 2)
+  return geo
+}
