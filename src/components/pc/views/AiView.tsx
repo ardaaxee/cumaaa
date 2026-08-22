@@ -19,7 +19,19 @@ export function AiView() {
   ])
   const [value, setValue] = useState('')
   const [busy, setBusy] = useState(false)
+  // Where the last answer actually came from. A configured proxy URL says
+  // nothing about whether the proxy replied, so the status has to be observed
+  // rather than assumed — otherwise an outage reads as "connected".
+  const [lastSource, setLastSource] = useState<'proxy' | 'local' | null>(null)
   const listRef = useRef<HTMLDivElement>(null)
+
+  const status = !aiIsProxyBacked
+    ? 'offline mode'
+    : lastSource === 'proxy'
+      ? 'proxy connected'
+      : lastSource === 'local'
+        ? 'proxy unreachable · local'
+        : 'proxy configured'
 
   const send = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -34,6 +46,7 @@ export function AiView() {
 
     const reply = await askAi(text)
     setMessages((m) => [...m, { id: uid(), role: 'ai', text: reply.text }])
+    setLastSource(reply.source)
     setBusy(false)
     requestAnimationFrame(() => {
       listRef.current?.scrollTo({ top: listRef.current.scrollHeight, behavior: 'smooth' })
@@ -46,9 +59,7 @@ export function AiView() {
         <div className="font-mono text-[11px] uppercase tracking-[0.2em] text-accent-soft/80">
           ARDA AI
         </div>
-        <span className="font-mono text-[10px] text-white/30">
-          {aiIsProxyBacked ? 'proxy connected' : 'offline mode'}
-        </span>
+        <span className="font-mono text-[10px] text-white/30">{status}</span>
       </div>
 
       <div ref={listRef} className="scroll-thin flex-1 space-y-3 overflow-y-auto pr-1">

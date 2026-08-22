@@ -17,6 +17,7 @@ import type {
 } from '../types'
 import { uid } from '../utils/uid'
 import { detectQuality } from '../utils/device'
+import { applyAudioSettings } from '../systems/audioSystem'
 
 const STORAGE_KEY = 'cuma-room-v1'
 
@@ -325,13 +326,14 @@ export const useRoomStore = create<RoomState>()(
       setProfile: (patch) => set((s) => ({ profile: { ...s.profile, ...patch } })),
       finishIntro: () => set({ introDone: true }),
 
-      resetAll: () =>
+      resetAll: () => {
+        const settings = { ...DEFAULT_SETTINGS, quality: detectQuality() }
         set({
           projects: seedProjects(),
           tasks: seedTasks(),
           notes: seedNotes(),
           achievements: seedAchievements(),
-          settings: { ...DEFAULT_SETTINGS, quality: detectQuality() },
+          settings,
           profile: DEFAULT_PROFILE,
           introDone: false,
           secretUnlocked: false,
@@ -340,7 +342,12 @@ export const useRoomStore = create<RoomState>()(
           currentProjectId: null,
           activePanel: null,
           toast: null,
-        }),
+        })
+        // The audio system holds its own state, so restoring the defaults in the
+        // store is not enough — without this the sliders read as reset while the
+        // running context keeps the old mute and volume.
+        applyAudioSettings(settings)
+      },
     }),
     {
       name: STORAGE_KEY,

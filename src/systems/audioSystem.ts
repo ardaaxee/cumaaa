@@ -10,6 +10,10 @@ let reverbWet: GainNode | null = null // wet return for room acoustics
 let convolver: ConvolverNode | null = null
 let unlocked = false
 let enabled = true
+// The master fader lives here rather than only on the gain node: preferences are
+// restored during hydration, long before a user gesture creates the context, so
+// the value has to survive until there is a node to put it on.
+let masterVolume = 0.5
 
 function ensureContext(): AudioContext | null {
   if (typeof window === 'undefined') return null
@@ -21,7 +25,7 @@ function ensureContext(): AudioContext | null {
     if (!Ctor) return null
     ctx = new Ctor()
     masterGain = ctx.createGain()
-    masterGain.gain.value = 0.5
+    masterGain.gain.value = masterVolume
     masterGain.connect(ctx.destination)
     // A small, cheap reverb bus (synthetic impulse) for per-room acoustics.
     convolver = ctx.createConvolver()
@@ -67,7 +71,8 @@ export function setAudioEnabled(value: boolean): void {
 }
 
 export function setMasterVolume(value: number): void {
-  if (masterGain) masterGain.gain.value = clamp01(value)
+  masterVolume = clamp01(value)
+  if (masterGain) masterGain.gain.value = masterVolume
 }
 
 // Per-bus trims sitting under the master fader. SFX is applied at the moment a
@@ -88,6 +93,23 @@ export function setSfxVolume(value: number): void {
 export function setAmbientVolume(value: number): void {
   ambientTrim = clamp01(value)
   if (ambientGain && ctx) ambientGain.gain.setTargetAtTime(ambientBase * ambientTrim, ctx.currentTime, 0.4)
+}
+
+export interface AudioSettings {
+  soundEnabled: boolean
+  volume: number
+  sfxVolume: number
+  ambientVolume: number
+}
+
+// One entry point for restoring the whole set. Hydration and a data reset both
+// need every fader applied, and applying them one call site at a time is how
+// the two drift apart.
+export function applyAudioSettings(s: AudioSettings): void {
+  setAudioEnabled(s.soundEnabled)
+  setMasterVolume(s.volume)
+  setSfxVolume(s.sfxVolume)
+  setAmbientVolume(s.ambientVolume)
 }
 
 function blip(freq: number, duration: number, type: OscillatorType, gain: number): void {

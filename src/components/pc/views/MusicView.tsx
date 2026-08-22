@@ -16,12 +16,15 @@ export function MusicView() {
   const [playing, setPlaying] = useState(false)
   const [volume, setVolume] = useState(0.7)
 
-  // Revoke object URLs on unmount to avoid leaks.
+  // Revoke object URLs on unmount. The cleanup has to read a ref rather than
+  // the state it closed over: an unmount-only effect captures the empty array
+  // it started with, so every uploaded file would be held for the page's life.
+  const tracksRef = useRef<Track[]>([])
+  tracksRef.current = tracks
   useEffect(() => {
     return () => {
-      tracks.forEach((t) => URL.revokeObjectURL(t.url))
+      tracksRef.current.forEach((t) => URL.revokeObjectURL(t.url))
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   useEffect(() => {

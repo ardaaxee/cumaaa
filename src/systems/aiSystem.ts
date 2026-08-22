@@ -7,6 +7,10 @@ import { useRoomStore } from '../store/useRoomStore'
 
 const PROXY_URL = import.meta.env.VITE_AI_PROXY_URL as string | undefined
 
+// A proxy that accepts the connection and then never answers would otherwise
+// leave the chat disabled for the rest of the session. Past this, fall back.
+const PROXY_TIMEOUT_MS = 12000
+
 export interface AiReply {
   text: string
   source: 'proxy' | 'local'
@@ -17,11 +21,14 @@ export async function askAi(prompt: string): Promise<AiReply> {
   if (!clean) return { text: 'Ask me anything about your room, tasks or projects.', source: 'local' }
 
   if (PROXY_URL) {
+    const abort = new AbortController()
+    const timer = window.setTimeout(() => abort.abort(), PROXY_TIMEOUT_MS)
     try {
       const res = await fetch(PROXY_URL, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ prompt: clean }),
+        signal: abort.signal,
       })
       if (res.ok) {
         const data = (await res.json()) as { text?: string; reply?: string }
@@ -29,7 +36,9 @@ export async function askAi(prompt: string): Promise<AiReply> {
         if (text) return { text, source: 'proxy' }
       }
     } catch {
-      // Fall through to the local engine on any network error.
+      // Fall through to the local engine on any network error or a timeout.
+    } finally {
+      window.clearTimeout(timer)
     }
   }
 
