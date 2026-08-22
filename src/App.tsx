@@ -16,6 +16,7 @@ import { useMultiplayerStore } from './store/useMultiplayerStore'
 import { MainMenu } from './components/menu/MainMenu'
 import { LobbyScreen } from './components/menu/LobbyScreen'
 import { isTouchDevice } from './utils/device'
+import { setTextureTier } from './systems/materials/pipeline'
 import { setAudioEnabled, setMasterVolume, setSfxVolume, setAmbientVolume } from './systems/audioSystem'
 
 export default function App() {
@@ -25,6 +26,14 @@ export default function App() {
   const stage = useAppStore((s) => s.stage)
   const inHome = useMultiplayerStore((s) => s.roomId !== null)
   const started = useMultiplayerStore((s) => s.home?.started ?? false)
+  const quality = useRoomStore((s) => s.settings.quality)
+
+  // Texture resolution follows the graphics tier. The master painters do not
+  // change — only how many pixels they are asked for — and the new maps stream
+  // in behind the scenes rather than stalling the frame they are requested on.
+  useEffect(() => {
+    setTextureTier(quality)
+  }, [quality])
 
   // One-time device + audio setup.
   useEffect(() => {
