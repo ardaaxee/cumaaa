@@ -4,7 +4,8 @@ import { useAppStore } from '../../store/useAppStore'
 import { useAuthStore } from '../../auth/useAuthStore'
 import { useMultiplayerStore } from '../../store/useMultiplayerStore'
 import { useRoomStore } from '../../store/useRoomStore'
-import { MenuShell, MenuButton } from './MenuShell'
+import { MenuShell } from './MenuShell'
+import { MenuStage, Rail, StageAction, StageLine } from './MenuStage'
 import { AuthScreen } from './AuthScreen'
 import { ProfileScreen } from './ProfileScreen'
 import { CreateHomeScreen, JoinHomeScreen } from './HomeScreens'
@@ -50,6 +51,12 @@ export function MainMenu() {
 
   const signedIn = status === 'signed-in' && !!user
 
+  const handleSignOut = () => {
+    Sfx.close()
+    if (roomId) leaveHome()
+    signOut()
+  }
+
   if (screen === 'auth') return <AuthScreen mode={authMode} />
   if (screen === 'profile') return <ProfileScreen />
   if (screen === 'create') return <CreateHomeScreen />
@@ -94,54 +101,113 @@ export function MainMenu() {
   }
 
   // ---- main ----
+  // The house is built for two, so the two ways into a shared one lead and get
+  // the space. Playing alone is real and stays available, but it is the quiet
+  // line underneath rather than the headline the menu used to open with.
+  const inHome = !!roomId
+
   return (
     <AnimatePresence mode="wait">
-      <MenuShell
+      <MenuStage
         key="main"
+        eyebrow={signedIn ? 'A HOME FOR TWO' : 'WELCOME'}
         title="CUMA HOME"
-        subtitle={signedIn ? `Signed in as ${user!.displayName}` : 'A home for two, online.'}
+        subtitle={
+          signedIn
+            ? 'Open a home and share the code, or enter the code you were given. Lights, doors, the film — everything stays in sync.'
+            : 'A house you and one other person walk around together, in the same rooms at the same time.'
+        }
+        footer={signedIn ? <Footer name={user!.displayName} onSignOut={handleSignOut} /> : undefined}
       >
-        <div className="space-y-2">
-          {signedIn ? (
-            <>
-              <MenuButton
-                variant="primary"
+        {signedIn ? (
+          <div className="space-y-4">
+            <Rail delay={0.1}>
+              <div className="space-y-2">
+                <StageAction
+                  glyph="⌂"
+                  title="OPEN A HOME"
+                  note="Start a house and get a code to share"
+                  primary
+                  onClick={() => {
+                    Sfx.click()
+                    setScreen('create')
+                  }}
+                />
+                <StageAction
+                  glyph="⇥"
+                  title="JOIN A HOME"
+                  note="Enter the 6-character code you were given"
+                  onClick={() => {
+                    Sfx.click()
+                    setScreen('join')
+                  }}
+                />
+              </div>
+            </Rail>
+
+            <Rail delay={0.16}>
+              <div className="border-t border-white/[0.07] pt-2">
+                <StageLine
+                  label={inHome ? '↩  Back into the house' : '◇  Walk it alone'}
+                  onClick={() => {
+                    Sfx.click()
+                    setStage('playing')
+                  }}
+                />
+                <StageLine label="◉  Profile" onClick={() => { Sfx.click(); setScreen('profile') }} />
+                <StageLine label="⚙  Settings" onClick={() => { Sfx.click(); setScreen('settings') }} />
+                <StageLine label="?  How to play" onClick={() => { Sfx.click(); setScreen('howto') }} />
+              </div>
+            </Rail>
+          </div>
+        ) : (
+          <Rail delay={0.1}>
+            <div className="space-y-2">
+              <StageAction
+                glyph="→"
+                title="SIGN IN"
+                note="Pick up where you left off"
+                primary
                 onClick={() => {
                   Sfx.click()
-                  setStage('playing')
+                  openAuth('signin')
                 }}
-              >
-                PLAY <span className="ml-2 text-[11px] text-white/40">on your own</span>
-              </MenuButton>
-              <MenuButton onClick={() => { Sfx.click(); setScreen('create') }}>CREATE HOME</MenuButton>
-              <MenuButton onClick={() => { Sfx.click(); setScreen('join') }}>JOIN HOME</MenuButton>
-              <MenuButton onClick={() => { Sfx.click(); setScreen('profile') }}>PROFILE</MenuButton>
-              <MenuButton onClick={() => { Sfx.click(); setScreen('settings') }}>SETTINGS</MenuButton>
-              <MenuButton onClick={() => { Sfx.click(); setScreen('howto') }}>HOW TO PLAY</MenuButton>
-              <MenuButton
-                variant="quiet"
+              />
+              <StageAction
+                glyph="+"
+                title="CREATE ACCOUNT"
+                note="Your name is how your partner finds you"
                 onClick={() => {
-                  Sfx.close()
-                  if (roomId) leaveHome()
-                  signOut()
+                  Sfx.click()
+                  openAuth('register')
                 }}
-              >
-                LOG OUT
-              </MenuButton>
-            </>
-          ) : (
-            <>
-              <MenuButton variant="primary" onClick={() => { Sfx.click(); openAuth('signin') }}>
-                SIGN IN
-              </MenuButton>
-              <MenuButton onClick={() => { Sfx.click(); openAuth('register') }}>CREATE ACCOUNT</MenuButton>
-              <MenuButton onClick={() => { Sfx.click(); setScreen('settings') }}>SETTINGS</MenuButton>
-              <MenuButton onClick={() => { Sfx.click(); setScreen('howto') }}>HOW TO PLAY</MenuButton>
-            </>
-          )}
-        </div>
-      </MenuShell>
+              />
+              <div className="border-t border-white/[0.07] pt-2">
+                <StageLine label="⚙  Settings" onClick={() => { Sfx.click(); setScreen('settings') }} />
+                <StageLine label="?  How to play" onClick={() => { Sfx.click(); setScreen('howto') }} />
+              </div>
+            </div>
+          </Rail>
+        )}
+      </MenuStage>
     </AnimatePresence>
+  )
+}
+
+function Footer({ name, onSignOut }: { name: string; onSignOut: () => void }) {
+  return (
+    <div className="flex items-center justify-between gap-3 border-t border-white/[0.07] pt-3">
+      <div className="min-w-0">
+        <div className="font-mono text-[9px] uppercase tracking-[0.3em] text-white/25">Signed in</div>
+        <div className="truncate font-mono text-[12px] text-white/70">{name}</div>
+      </div>
+      <button
+        className="shrink-0 rounded-lg px-2 py-1 font-mono text-[10px] uppercase tracking-[0.2em] text-white/30 transition hover:bg-white/[0.06] hover:text-white/70 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent/70"
+        onClick={onSignOut}
+      >
+        Log out
+      </button>
+    </div>
   )
 }
 
