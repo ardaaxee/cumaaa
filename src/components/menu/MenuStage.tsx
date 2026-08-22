@@ -151,13 +151,16 @@ export function StageLine({
   onClick: () => void
   tone?: 'normal' | 'quiet'
 }) {
+  const isTouch = usePlayerStore((s) => s.isTouch)
   return (
     <button
       type="button"
       onClick={onClick}
-      className={`w-full rounded-lg px-2 py-2 text-left font-mono text-[11px] uppercase tracking-[0.2em] transition hover:bg-white/[0.06] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent/70 ${
-        tone === 'quiet' ? 'text-white/30 hover:text-white/60' : 'text-white/55 hover:text-white'
-      }`}
+      // Never wrap: a two-line item in the handset's two-column grid pushed the
+      // row below it off the bottom of the rail.
+      className={`w-full truncate whitespace-nowrap rounded-lg text-left font-mono uppercase transition hover:bg-white/[0.06] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent/70 ${
+        isTouch ? 'px-1.5 py-1.5 text-[10px] tracking-[0.14em]' : 'px-2 py-2 text-[11px] tracking-[0.2em]'
+      } ${tone === 'quiet' ? 'text-white/30 hover:text-white/60' : 'text-white/55 hover:text-white'}`}
     >
       {label}
     </button>

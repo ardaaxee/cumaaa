@@ -3,6 +3,7 @@ import { AnimatePresence } from 'framer-motion'
 import { useAppStore } from '../../store/useAppStore'
 import { useAuthStore } from '../../auth/useAuthStore'
 import { useMultiplayerStore } from '../../store/useMultiplayerStore'
+import { usePlayerStore } from '../../store/usePlayerStore'
 import { useRoomStore } from '../../store/useRoomStore'
 import { MenuShell } from './MenuShell'
 import { MenuStage, Rail, StageAction, StageLine } from './MenuStage'
@@ -50,6 +51,7 @@ export function MainMenu() {
   }, [user])
 
   const signedIn = status === 'signed-in' && !!user
+  const isTouch = usePlayerStore((s) => s.isTouch)
 
   const handleSignOut = () => {
     Sfx.close()
@@ -114,7 +116,9 @@ export function MainMenu() {
         title="CUMA HOME"
         subtitle={
           signedIn
-            ? 'Open a home and share the code, or enter the code you were given. Lights, doors, the film — everything stays in sync.'
+            ? isTouch
+              ? 'Share a code and walk the same rooms together.'
+              : 'Open a home and share the code, or enter the code you were given. Lights, doors, the film — everything stays in sync.'
             : 'A house you and one other person walk around together, in the same rooms at the same time.'
         }
         footer={signedIn ? <Footer name={user!.displayName} onSignOut={handleSignOut} /> : undefined}
@@ -146,9 +150,11 @@ export function MainMenu() {
             </Rail>
 
             <Rail delay={0.16}>
-              <div className="border-t border-white/[0.07] pt-2">
+              {/* Two columns on a handset: four stacked lines ran past the
+                  bottom of a 400px-tall landscape screen. */}
+              <div className={`border-t border-white/[0.07] pt-2 ${isTouch ? 'grid grid-cols-2 gap-x-2' : ''}`}>
                 <StageLine
-                  label={inHome ? '↩  Back into the house' : '◇  Walk it alone'}
+                  label={inHome ? '↩  Back inside' : isTouch ? '◇  Alone' : '◇  Walk it alone'}
                   onClick={() => {
                     Sfx.click()
                     setStage('playing')
@@ -156,7 +162,10 @@ export function MainMenu() {
                 />
                 <StageLine label="◉  Profile" onClick={() => { Sfx.click(); setScreen('profile') }} />
                 <StageLine label="⚙  Settings" onClick={() => { Sfx.click(); setScreen('settings') }} />
-                <StageLine label="?  How to play" onClick={() => { Sfx.click(); setScreen('howto') }} />
+                <StageLine
+                  label={isTouch ? '?  Help' : '?  How to play'}
+                  onClick={() => { Sfx.click(); setScreen('howto') }}
+                />
               </div>
             </Rail>
           </div>
