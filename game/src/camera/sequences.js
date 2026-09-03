@@ -172,25 +172,33 @@ export function meridianAfterRainSequence(crownSpire) {
       },
       {
         // The city stands up: the spire clears the rooftops out of the fog.
+        //
+        // The spire's crown sits about 25 degrees above the horizon from the
+        // market. A scenic rig sits six metres above Cuma, so pitching up to
+        // the spire from there drops him out of frame whatever the lens does.
+        // This beat therefore stays on the low, wide rig and lifts the look
+        // only slightly: Cuma holds the lower third, the spire the upper.
         t: 7.4,
-        mode: MODE.SCENIC,
+        mode: MODE.WIDE,
         blend: 2.1,
-        yaw: -1.24,
-        pitch: -0.07,
+        // A modest orbit, not a swing round: a wide yaw offset pushes Cuma out
+        // of frame sideways while the look tilts toward the spire.
+        yaw: -0.58,
+        pitch: -0.02,
         pivotX: 1.2,
-        pivotY: 3.1,
-        fov: -7,
-        lookWeight: 0.74,
+        pivotY: 0.8,
+        fov: 6,
+        lookWeight: 0.55,
         look: crownSpire,
       },
       {
         t: 9.6,
-        yaw: -1.02,
-        pitch: -0.05,
+        yaw: -0.48,
+        pitch: -0.02,
         pivotX: -0.8,
-        pivotY: 2.5,
-        fov: -5,
-        lookWeight: 0.6,
+        pivotY: 0.7,
+        fov: 5,
+        lookWeight: 0.45,
         look: crownSpire,
       },
       {

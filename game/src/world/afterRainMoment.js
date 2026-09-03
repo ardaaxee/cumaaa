@@ -1,5 +1,6 @@
 import { meridianAfterRainSequence } from '../camera/sequences.js';
 import { WEATHER } from './weatherSystem.js';
+import { primaryLandmark } from './landmarks.js';
 
 /**
  * MERIDIAN AFTER RAIN.
@@ -29,7 +30,20 @@ const SETTLE_REQUIRED = 1.4;
 /** Nothing fires until the opening cinematic is well out of the way. */
 const ARM_DELAY = 4;
 
-export function createAfterRainMoment(director, world, spireFocus, { onStart, onEnd } = {}) {
+/**
+ * The point the shot frames toward.
+ *
+ * Deliberately the spire's mid-height, not its crown: the look target is a
+ * *point*, so aiming at the beacon 78m up tilts the camera steeply enough to
+ * push Cuma out of frame however wide the lens goes. Framing lower keeps him in
+ * the lower third with the whole spire standing in the upper.
+ */
+const framingPoint = () => {
+  const spire = primaryLandmark();
+  return [spire.position.x, spire.height * 0.2, spire.position.z];
+};
+
+export function createAfterRainMoment(director, world, { onStart, onEnd } = {}) {
   let fired = false;
   let armTimer = 0;
   let settled = 0;
@@ -52,7 +66,7 @@ export function createAfterRainMoment(director, world, spireFocus, { onStart, on
       if (fired) return false;
       fired = true;
       onStart?.();
-      director.play(meridianAfterRainSequence(spireFocus), {
+      director.play(meridianAfterRainSequence(framingPoint()), {
         retainControl: true,
         onComplete: () => onEnd?.(),
       });

@@ -128,7 +128,7 @@ function boot() {
     if (open) refreshMap();
   };
 
-  const afterRain = createAfterRainMoment(director, world, skyline.spireFocus, {
+  const afterRain = createAfterRainMoment(director, world, {
     onStart: () => {
       hud.setObjective('Meridian Market · after the rain');
       hud.setCameraMode('CINEMATIC');
@@ -513,6 +513,23 @@ function boot() {
         wasStaggered = staggered;
       }
     });
+    // Projects Cuma's chest into normalised device coordinates, so a test can
+    // assert he is actually in frame rather than the shot being eyeballed.
+    const probePoint = new THREE.Vector3();
+    const playerOnScreen = () => {
+      probePoint.set(
+        character.state.position.x,
+        character.state.position.y + 1.2,
+        character.state.position.z,
+      );
+      probePoint.project(context.camera);
+      return (
+        probePoint.z < 1 &&
+        Math.abs(probePoint.x) < 1 &&
+        Math.abs(probePoint.y) < 1
+      );
+    };
+
     window.__cumaProbe = () => {
       const dx = context.camera.position.x - character.state.position.x;
       const dz = context.camera.position.z - character.state.position.z;
@@ -558,6 +575,7 @@ function boot() {
         activeEvent: world.events.active?.id ?? null,
         eventStarts: eventStarts.slice(),
         afterRainPlayed: afterRain.hasFired,
+        playerOnScreen: playerOnScreen(),
         mapRegionCount: document.querySelectorAll('#mapRegions li').length,
         statesSeen: statesSeen.slice(),
         postureMin,
