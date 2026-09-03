@@ -5,16 +5,7 @@ import { createProceduralAnimator } from './proceduralAnimator.js';
 
 /**
  * The seam between locomotion and animation.
- *
- * Every driver implements `update(rig, locomotionState, dt)`. Today the
- * procedural driver poses the placeholder rig from code; when authored clips
- * arrive, `createClipAnimator` drives the same rig from an AnimationMixer and
- * nothing else in the game changes.
- */
-
-/**
- * Clip names a future GLB is expected to provide. Locomotion state maps onto
- * these weights identically in both drivers, which is what makes the swap safe.
+ * Every driver implements update(rig, locomotionState, dt).
  */
 export const CLIPS = {
   IDLE: 'idle',
@@ -29,12 +20,6 @@ export const CLIPS = {
   LAND: 'land',
 };
 
-/**
- * Derives normalised blend weights from a locomotion state.
- *
- * Shared by both drivers: the procedural animator uses them as pose weights, the
- * clip animator as `AnimationAction.weight`. Pure, so it is unit tested.
- */
 export function computeClipWeights(state) {
   const weights = {
     [CLIPS.IDLE]: 0,
@@ -46,6 +31,7 @@ export function computeClipWeights(state) {
     [CLIPS.STRAFE_RIGHT]: 0,
     [CLIPS.DODGE]: 0,
     [CLIPS.JUMP]: 0,
+    [CLIPS.LAND]: 0,
   };
 
   if (state.isDodging) {
@@ -92,41 +78,57 @@ export function computeClipWeights(state) {
 }
 
 /**
- * Drives the rig from authored clips.
- *
- * Unused until a GLB ships; kept here so the architecture is real rather than
- * promised. `clips` maps a CLIPS key to a THREE.AnimationClip.
+ * Authored-clip driver. animationRoot can be an imported GLB scene nested under
+ * the character anchor; that keeps gameplay/world transform separate from the
+ * skeleton and prevents root-motion clips from moving the authoritative player.
  */
-export function createClipAnimator(rig, clips) {
-  const mixer = new THREE.AnimationMixer(rig.root);
+export function createClipAnimator(rig, clips, {
+  animationRoot = rig.root,
+  weightSharpness = 14,
+} = {}) {
+  const mixer = new THREE.AnimationMixer(animationRoot);
   const actions = new Map();
+  const weightsNow = new Map();
+
   for (const [name, clip] of Object.entries(clips)) {
-    const action = mixer.clipAction(clip);
+    if (!clip) continue;
+    const action = mixer.clipAction(clip, animationRoot);
+    action.enabled = true;
     action.play();
     action.setEffectiveWeight(0);
     actions.set(name, action);
+    weightsNow.set(name, 0);
   }
 
   return {
+    source: 'clips',
     update(_rig, state, dt) {
-      const weights = computeClipWeights(state);
+      const targets = computeClipWeights(state);
+      const blend = 1 - Math.exp(-weightSharpness * dt);
       for (const [name, action] of actions) {
-        action.setEffectiveWeight(weights[name] ?? 0);
+        const current = weightsNow.get(name) ?? 0;
+        const next = current + ((targets[name] ?? 0) - current) * blend;
+        weightsNow.set(name, next);
+        action.setEffectiveWeight(next);
       }
       mixer.update(dt);
     },
     dispose() {
       mixer.stopAllAction();
-      mixer.uncacheRoot(rig.root);
+      mixer.uncacheRoot(animationRoot);
+      actions.clear();
+      weightsNow.clear();
     },
   };
 }
 
-/**
- * @param {object} options `{ clips }` selects the clip driver; omitting it keeps
- *   the procedural driver.
- */
 export function createAnimationDriver(rig, options = {}) {
-  if (options.clips) return createClipAnimator(rig, options.clips);
-  return createProceduralAnimator();
+  if (options.clips) {
+    return createClipAnimator(rig, options.clips, {
+      animationRoot: options.animationRoot ?? rig.root,
+      weightSharpness: options.weightSharpness,
+    });
+  }
+  const procedural = createProceduralAnimator();
+  return { source: 'procedural', ...procedural };
 }
