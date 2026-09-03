@@ -117,14 +117,5 @@ export const PERFORMANCE = {
   RAIN_STREAKS: 1600,
 };
 
-export const COMBAT = {
-  ATTACK_RANGE: 6.5,
-  ATTACK_DAMAGE: 8,
-  HIT_STOP: 0.05,
-  HIT_SHAKE: 0.13,
-  DODGE_SHAKE: 0.05,
-  PARRY_WINDOW: 0.28,
-  BOSS_TRIGGER_Z: -38,
-  BOSS_PHASE_TWO_HP: 65,
-  BOSS_PHASE_THREE_HP: 30,
-};
+// Combat tuning lives in `src/combat/attackData.js`, alongside the move set it
+// describes, so the encounter can be balanced in one place.

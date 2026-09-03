@@ -87,7 +87,9 @@ export const CAMERA_MODES = {
     lookHeight: 1.7,
   },
   [MODE.BOSS_FRAME]: {
-    distance: 6.3,
+    // Further back than the shoulder: the Warden is a large silhouette and the
+    // fight is read from the space between the two of them.
+    distance: 7.4,
     height: 1.15,
     shoulder: 0.92,
     fov: 57,

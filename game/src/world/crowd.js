@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import { PERFORMANCE } from '../core/settings.js';
-import { createRandom, range } from './random.js';
+import { createRandom, range } from '../core/random.js';
 
 /**
  * Meridian Market's pedestrians.

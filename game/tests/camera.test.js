@@ -1,7 +1,13 @@
 import { describe, expect, test } from 'vitest';
 import { CAMERA_MODES, MODE, blendParams, cloneParams } from '../src/camera/cameraModes.js';
 import { sampleSequence } from '../src/camera/director.js';
-import { heroMomentSequence, introSequence, bossRevealSequence } from '../src/camera/sequences.js';
+import {
+  heroMomentSequence,
+  introSequence,
+  bossRevealSequence,
+  perfectParrySequence,
+  phaseTransitionSequence,
+} from '../src/camera/sequences.js';
 import { HERO_MOMENT } from '../src/core/settings.js';
 
 describe('camera modes', () => {
@@ -124,6 +130,8 @@ describe('sequences', () => {
     introSequence([0, 1.6, -4]),
     heroMomentSequence([-34, 74, -212]),
     bossRevealSequence([0, 2.4, -54]),
+    perfectParrySequence([0, 2.3, -50]),
+    phaseTransitionSequence([0, 2.4, -50]),
   ];
 
   test('every sequence has strictly increasing keyframe times', () => {
@@ -173,6 +181,27 @@ describe('sequences', () => {
     const sequence = heroMomentSequence([-34, 74, -212]);
     const last = sequence.keyframes[sequence.keyframes.length - 1];
     expect(last.alignYaw).toBe(1);
+  });
+
+  test('the perfect-parry hero moment is short enough to stay in gameplay', () => {
+    const sequence = perfectParrySequence([0, 2.3, -50]);
+    const duration = sequence.keyframes[sequence.keyframes.length - 1].t;
+    expect(duration).toBeGreaterThan(2.5);
+    expect(duration).toBeLessThanOrEqual(4.5);
+  });
+
+  test('a phase transition is contextual motion, not a cutscene', () => {
+    const sequence = phaseTransitionSequence([0, 2.4, -50]);
+    const duration = sequence.keyframes[sequence.keyframes.length - 1].t;
+    expect(duration).toBeLessThanOrEqual(2.5);
+  });
+
+  test('both combat sequences start and end in a gameplay boss mode', () => {
+    for (const sequence of [perfectParrySequence([0, 2, 0]), phaseTransitionSequence([0, 2, 0])]) {
+      const modes = sequence.keyframes.filter((k) => k.mode).map((k) => k.mode);
+      expect(modes[0]).toBe(MODE.BOSS_FRAME);
+      expect(modes[modes.length - 1]).toBe(MODE.BOSS_FRAME);
+    }
   });
 
   test('every mode referenced by a sequence exists', () => {

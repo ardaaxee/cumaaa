@@ -43,6 +43,32 @@ body {
   box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.14);
 }
 
+/* In capture mode the renderer letterboxes to a centred 9:16 column. The HUD
+   and the controls are pinned to that same column, otherwise on a wide screen
+   they would sit outside the frame that is actually being recorded. */
+body.capture #hud,
+body.capture #controls,
+body.capture #captureFrame {
+  inset: auto;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: min(100vw, calc(100vh * 9 / 16));
+  height: min(100vh, calc(100vw * 16 / 9));
+}
+
+/* Trim the frame to what matters while recording. */
+body.capture .region small,
+body.capture #cameraMode,
+body.capture #playerVitals {
+  display: none;
+}
+
+body.capture #boss {
+  top: calc(96px + env(safe-area-inset-top));
+  width: 72%;
+}
+
 #hud {
   position: fixed;
   inset: 0;
@@ -122,7 +148,7 @@ body {
 .meter {
   height: 4px;
   background: rgba(255, 255, 255, 0.13);
-  margin: 8px 0;
+  margin: 8px 0 0;
 }
 
 .meter i {
@@ -131,6 +157,93 @@ body {
   width: 100%;
   background: #dfe6ef;
   transition: width 0.16s ease-out;
+}
+
+/* Posture reads as a thinner, cooler bar under health, so the two are never
+   confused at a glance. */
+.meter.posture {
+  height: 2px;
+  margin: 3px 0 8px;
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.meter.posture i {
+  background: #7fb2e8;
+  transition: width 0.12s linear;
+}
+
+/* The bar flares white just before it breaks. */
+.meter.posture.critical i {
+  background: #ffffff;
+  box-shadow: 0 0 8px rgba(190, 220, 255, 0.9);
+}
+
+#nameCard {
+  position: absolute;
+  left: 50%;
+  top: 40%;
+  transform: translate(-50%, -50%);
+  text-align: center;
+  opacity: 0;
+  transition: opacity 0.7s ease, letter-spacing 1.4s ease;
+  letter-spacing: 0.24em;
+}
+
+#nameCard.show {
+  opacity: 1;
+  letter-spacing: 0.34em;
+}
+
+#nameCard .rank {
+  display: block;
+  font-size: 9px;
+  letter-spacing: 0.3em;
+  opacity: 0.55;
+  margin-bottom: 10px;
+}
+
+#nameCard b {
+  font-size: 21px;
+  font-weight: 400;
+}
+
+/* Player vitals: one thin bar, low and unobtrusive. */
+#playerVitals {
+  position: absolute;
+  left: 50%;
+  bottom: 12%;
+  transform: translateX(-50%);
+  width: min(200px, 34vw);
+  height: 2px;
+  background: rgba(255, 255, 255, 0.1);
+}
+
+#playerVitals i {
+  display: block;
+  height: 100%;
+  width: 100%;
+  background: #e6d2b4;
+  transition: width 0.2s ease-out;
+}
+
+/* A red edge vignette on damage instead of any on-screen gore. */
+#damageFlash {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 7;
+  opacity: 0;
+  transition: opacity 0.4s ease-out;
+  background: radial-gradient(
+    ellipse at center,
+    rgba(0, 0, 0, 0) 45%,
+    rgba(150, 30, 30, 0.42) 100%
+  );
+}
+
+#damageFlash.active {
+  opacity: 1;
+  transition: opacity 0.06s ease-in;
 }
 
 #msg {

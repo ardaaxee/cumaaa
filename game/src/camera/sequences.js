@@ -130,6 +130,88 @@ export function heroMomentSequence(crownSpire) {
 }
 
 /**
+ * A phase change. Deliberately about a second and a half of contextual camera
+ * motion — a small push and settle — rather than a cutscene.
+ */
+export function phaseTransitionSequence(bossPosition) {
+  return {
+    name: 'phaseTransition',
+    keyframes: [
+      { t: 0, mode: MODE.BOSS_FRAME, blend: 0.8 },
+      {
+        t: 0.55,
+        yaw: 0.28,
+        pitch: -0.05,
+        pivotY: 0.75,
+        fov: -6,
+        lookWeight: 0.62,
+        look: bossPosition,
+      },
+      {
+        t: 1.4,
+        mode: MODE.BOSS_FRAME,
+        blend: 0.9,
+        yaw: 0.08,
+        lookWeight: 0.2,
+        look: bossPosition,
+        alignYaw: 0.5,
+      },
+      { t: 1.9, alignYaw: 0.8 },
+    ],
+  };
+}
+
+/**
+ * THE PERFECT PARRY — the M02 hero moment.
+ *
+ * Fires the first time the player turns the Warden aside cleanly. The camera
+ * swings round the locked pair while the Warden loses its composure, then
+ * settles back into boss framing. The player keeps control the whole way, and
+ * the counter window stays open underneath it.
+ */
+export function perfectParrySequence(bossPosition) {
+  return {
+    name: 'perfectParry',
+    keyframes: [
+      { t: 0, mode: MODE.BOSS_FRAME, blend: 0.8 },
+      {
+        t: 0.5,
+        yaw: -0.62,
+        pitch: -0.04,
+        pivotX: 0.9,
+        pivotY: 0.5,
+        fov: -9,
+        lookWeight: 0.6,
+        look: bossPosition,
+      },
+      {
+        t: 1.7,
+        mode: MODE.LOW_TRACK,
+        blend: 1.0,
+        yaw: -1.05,
+        pitch: 0.05,
+        pivotX: 1.4,
+        pivotY: -0.15,
+        fov: -5,
+        lookWeight: 0.7,
+        look: bossPosition,
+      },
+      {
+        t: 2.8,
+        mode: MODE.BOSS_FRAME,
+        blend: 1.1,
+        yaw: -0.4,
+        pivotY: 0.35,
+        lookWeight: 0.35,
+        look: bossPosition,
+        alignYaw: 0.55,
+      },
+      { t: 3.6, alignYaw: 0.95 },
+    ],
+  };
+}
+
+/**
  * The Glass Warden reveal. Same rules: the rig orbits into boss framing and
  * hands control back without ever cutting.
  */

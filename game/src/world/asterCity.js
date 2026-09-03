@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { createRandom, range } from './random.js';
+import { createRandom, range } from '../core/random.js';
 import { createReflectionStreak, createWetRoadRoughness } from './textures.js';
 
 /**

@@ -3,7 +3,6 @@ import './style.css';
 
 import { createLoop } from './core/loop.js';
 import { createRenderContext } from './core/renderer.js';
-import { COMBAT } from './core/settings.js';
 
 import { createIntent } from './input/intent.js';
 import { createKeyboardSource } from './input/keyboard.js';
@@ -14,7 +13,12 @@ import { createCharacter } from './character/character.js';
 import { createCameraRig } from './camera/cameraRig.js';
 import { createDirector } from './camera/director.js';
 import { MODE } from './camera/cameraModes.js';
-import { bossRevealSequence, introSequence } from './camera/sequences.js';
+import {
+  bossRevealSequence,
+  introSequence,
+  perfectParrySequence,
+  phaseTransitionSequence,
+} from './camera/sequences.js';
 
 import { createEnvironment } from './world/environment.js';
 import { createAsterCity } from './world/asterCity.js';
@@ -23,15 +27,35 @@ import { createRain } from './world/rain.js';
 import { createCrowd } from './world/crowd.js';
 import { createHeroMomentTrigger } from './world/heroMoment.js';
 
-import { createBoss } from './combat/boss.js';
+import { createCombatSystem } from './combat/combatSystem.js';
+import { createBossPresenter } from './combat/bossPresenter.js';
+import { ATTACK, COMBAT_RULES } from './combat/attackData.js';
+import { OUTCOME } from './combat/hitResolution.js';
+import { applyHitStop } from './combat/timeDilation.js';
+import { createImpactFx, FX } from './fx/impactFx.js';
+import { createAudioManager } from './audio/audioManager.js';
 import { createHud } from './ui/hud.js';
 
 /**
  * CUMA WORLD — Aster City vertical slice.
  *
- * Boot order: render context, world, character, camera, input, then the single
- * update loop. Nothing else in the project calls requestAnimationFrame.
+ * Boot order: render context, world, character, camera, combat, input, then the
+ * single update loop. Nothing else in the project calls requestAnimationFrame.
  */
+
+const BOSS_TRIGGER_Z = -38;
+const BOSS_START = { x: 0, z: -54 };
+
+/** Impact response, by significance. A poke must not shake the city. */
+const IMPACT = {
+  [OUTCOME.HIT]: { hitStop: 0.05, shake: 0.16, fov: 1.5 },
+  [OUTCOME.PARRIED]: { hitStop: 0.06, shake: 0.1, fov: 1.0 },
+  [OUTCOME.PERFECT_PARRIED]: { hitStop: 0.13, shake: 0.26, fov: 4.5 },
+  PLAYER_ATTACK: { hitStop: 0.035, shake: 0.1, fov: 0.8 },
+  COUNTER: { hitStop: 0.07, shake: 0.2, fov: 2.4 },
+  POSTURE_BREAK: { hitStop: 0.16, shake: 0.34, fov: 6.0 },
+};
+
 function boot() {
   const canvas = document.querySelector('#game');
   const context = createRenderContext(canvas);
@@ -43,7 +67,8 @@ function boot() {
   const skyline = createSkyline(scene);
   const rain = createRain(scene);
   const crowd = createCrowd(scene);
-  const boss = createBoss(scene);
+  const impactFx = createImpactFx(scene);
+  const audio = createAudioManager();
 
   // Spawned facing north, up the market toward the crossroads.
   const character = createCharacter(scene, {
@@ -57,6 +82,9 @@ function boot() {
 
   const director = createDirector(cameraRig, character);
 
+  const combat = createCombatSystem({ x: BOSS_START.x, z: BOSS_START.z, seed: 0x63756d61 });
+  const bossPresenter = createBossPresenter(scene, BOSS_START);
+
   const hud = createHud();
   const intent = createIntent();
   const sources = [
@@ -69,10 +97,13 @@ function boot() {
 
   // --- Session state -----------------------------------------------------
   const session = {
+    /** Presentation-only time freeze; combat itself runs on its own clock. */
     hitStop: 0,
-    parryWindow: 0,
     shake: 0,
+    fovPunch: 0,
+    bossStarted: false,
     bossEngaged: false,
+    heroParryPlayed: false,
   };
 
   hud.onToggleCapture = (enabled) => context.setCaptureMode(enabled);
@@ -121,46 +152,188 @@ function boot() {
   const releaseShoulderButton = () =>
     shoulderButton?.removeEventListener('click', cycleCamera);
 
-  // --- Gameplay actions --------------------------------------------------
-  function performAttack() {
-    if (!boss.state.started || boss.state.hp <= 0) return;
-    const dx = character.state.position.x - boss.group.position.x;
-    const dz = character.state.position.z - boss.group.position.z;
-    if (Math.hypot(dx, dz) > COMBAT.ATTACK_RANGE) {
-      hud.say('TARGET OUT OF RANGE');
-      return;
-    }
-    const change = boss.damage(COMBAT.ATTACK_DAMAGE);
-    hud.setBossHp(boss.state.hp);
-    session.hitStop = COMBAT.HIT_STOP;
-    session.shake = COMBAT.HIT_SHAKE;
+  // --- Impact presentation ----------------------------------------------
+  function applyImpact(profile) {
+    session.hitStop = Math.max(session.hitStop, profile.hitStop);
+    session.shake = Math.max(session.shake, profile.shake);
+    session.fovPunch = Math.max(session.fovPunch, profile.fov);
+  }
 
-    if (change?.phase === 2) {
-      hud.setBossPhase(2);
-      hud.say('PHASE II · PRESSURE');
-    } else if (change?.phase === 3) {
-      hud.setBossPhase(3);
-      hud.say('PHASE III · REVELATION');
+  const bossPoint = { x: 0, y: 1.9, z: 0 };
+  const bossAt = (y = 1.9) => {
+    bossPoint.x = combat.bossState.x;
+    bossPoint.y = y;
+    bossPoint.z = combat.bossState.z;
+    return bossPoint;
+  };
+
+  /**
+   * Everything the combat core reports, turned into sound, light and camera.
+   * The gameplay result was already decided; this layer only presents it.
+   */
+  combat.on((event) => {
+    switch (event.type) {
+      case 'anticipation':
+        audio.play(event.attackId === ATTACK.HEAVY_IMPACT ? 'heavyMove' : 'anticipation');
+        break;
+
+      case 'attackActive':
+        if (event.attackId === ATTACK.HEAVY_IMPACT) {
+          impactFx.play(FX.GROUND_SLAM, bossAt(0.3), combat.bossState.facing);
+          audio.play('impact');
+          applyImpact({ hitStop: 0.04, shake: 0.24, fov: 2.0 });
+        }
+        break;
+
+      case 'outcome':
+        presentOutcome(event);
+        break;
+
+      case 'playerHit':
+        hud.flashDamage();
+        hud.setPlayerHealth(event.health);
+        if (event.health <= 0) {
+          // No death screen in this slice: the Warden backs off and the fight
+          // resets rather than ending the session.
+          hud.say('OVERWHELMED · RECOVERING');
+          hud.setPlayerHealth(COMBAT_RULES.PLAYER_MAX_HEALTH);
+          combat.player.health = COMBAT_RULES.PLAYER_MAX_HEALTH;
+        }
+        break;
+
+      case 'playerAttackLanded':
+        audio.play('playerHit');
+        impactFx.play(FX.HIT, bossAt(2.2), character.state.facing);
+        applyImpact(event.counter ? IMPACT.COUNTER : IMPACT.PLAYER_ATTACK);
+        hud.setBossHp(event.hp);
+        hud.setBossPosture(combat.bossState.posture);
+        if (event.counter) hud.say('COUNTER');
+        break;
+
+      case 'attackWhiffed':
+        if (event.reason === 'range') hud.say('TARGET OUT OF RANGE');
+        break;
+
+      case 'postureBreak':
+        audio.play('postureBreak');
+        impactFx.play(FX.POSTURE_BREAK, bossAt(2.4), combat.bossState.facing);
+        bossPresenter.punch(1.0);
+        applyImpact(IMPACT.POSTURE_BREAK);
+        hud.say('POSTURE BROKEN · STRIKE');
+        hud.setBossPosture(0);
+        break;
+
+      case 'phase':
+        audio.play('phase');
+        impactFx.play(FX.PHASE, bossAt(2.6), combat.bossState.facing);
+        bossPresenter.punch(0.8);
+        hud.setBossPhase(event.phase);
+        hud.say(event.phase === 2 ? 'PHASE II · PRESSURE' : 'PHASE III · REVELATION');
+        // A short contextual move, never a cutscene.
+        if (!director.isPlaying) {
+          director.play(phaseTransitionSequence([combat.bossState.x, 2.4, combat.bossState.z]), {
+            retainControl: true,
+          });
+        }
+        break;
+
+      case 'defeated':
+        hud.showBoss(false);
+        hud.setObjective('Encounter complete');
+        cameraRig.setMode(MODE.SHOULDER_RIGHT, 1.4);
+        hud.setCameraMode('SHOULDER R');
+        bossPresenter.punch(1.0);
+        applyImpact(IMPACT.POSTURE_BREAK);
+        break;
+
+      default:
+        break;
     }
-    if (boss.state.hp <= 0) {
-      hud.showBoss(false);
-      hud.setObjective('Encounter complete');
-      cameraRig.setMode(MODE.SHOULDER_RIGHT, 1.4);
-      hud.setCameraMode('SHOULDER R');
+  });
+
+  function presentOutcome(event) {
+    const at = bossAt(1.9);
+    switch (event.outcome) {
+      case OUTCOME.PERFECT_PARRIED:
+        audio.play('perfectParry');
+        impactFx.play(FX.PERFECT_PARRY, at, character.state.facing);
+        applyImpact(IMPACT[OUTCOME.PERFECT_PARRIED]);
+        hud.say('PERFECT PARRY');
+        hud.setBossPosture(combat.bossState.posture);
+        playHeroParry();
+        break;
+      case OUTCOME.PARRIED:
+        audio.play('parry');
+        impactFx.play(FX.PARRY, at, character.state.facing);
+        applyImpact(IMPACT[OUTCOME.PARRIED]);
+        hud.say('PARRY');
+        hud.setBossPosture(combat.bossState.posture);
+        break;
+      case OUTCOME.DODGED:
+        audio.play('dodge');
+        hud.say('DODGED');
+        break;
+      case OUTCOME.HIT:
+        audio.play('impact');
+        impactFx.play(FX.HIT, {
+          x: character.state.position.x,
+          y: 1.4,
+          z: character.state.position.z,
+        }, combat.bossState.facing);
+        applyImpact(IMPACT[OUTCOME.HIT]);
+        break;
+      default:
+        break;
+    }
+  }
+
+  /** The M02 hero moment: the first clean parry gets a camera. */
+  function playHeroParry() {
+    if (session.heroParryPlayed || director.isPlaying) return;
+    session.heroParryPlayed = true;
+    hud.setCameraMode('CINEMATIC');
+    director.play(perfectParrySequence([combat.bossState.x, 2.3, combat.bossState.z]), {
+      retainControl: true,
+      onComplete: () => hud.setCameraMode('BOSS FRAME'),
+    });
+  }
+
+  // Cached so the HUD is only written when a bar has visibly moved.
+  const shownBars = { hp: -1, posture: -1, health: -1 };
+
+  function refreshBossBars() {
+    const boss = combat.bossState;
+    if (Math.abs(boss.hp - shownBars.hp) > 0.4) {
+      shownBars.hp = boss.hp;
+      hud.setBossHp(boss.hp);
+    }
+    if (Math.abs(boss.posture - shownBars.posture) > 0.4) {
+      shownBars.posture = boss.posture;
+      hud.setBossPosture(boss.posture);
+    }
+    if (Math.abs(combat.player.health - shownBars.health) > 0.4) {
+      shownBars.health = combat.player.health;
+      hud.setPlayerHealth(combat.player.health);
     }
   }
 
   function startBossEncounter() {
-    boss.start();
-    session.bossEngaged = false;
+    session.bossStarted = true;
+    bossPresenter.setVisible(true);
     hud.setObjective('Observe the Glass Warden');
     hud.setCameraMode('BOSS FRAME');
-    director.play(bossRevealSequence([boss.group.position.x, 2.4, boss.group.position.z]), {
+    hud.showNameCard();
+    audio.play('phase');
+
+    director.play(bossRevealSequence([BOSS_START.x, 2.4, BOSS_START.z]), {
       retainControl: true,
       onComplete: () => {
         session.bossEngaged = true;
+        combat.engage();
         hud.showBoss(true);
-        hud.setBossHp(boss.state.hp);
+        hud.setBossHp(combat.bossState.hp);
+        hud.setBossPosture(combat.bossState.posture);
+        hud.setPlayerHealth(combat.player.health);
         hud.setObjective('Read its timing · Parry or dodge');
       },
     });
@@ -168,13 +341,14 @@ function boot() {
 
   // --- The single update loop -------------------------------------------
   loop.add((dt) => {
-    // Hit-stop scales gameplay time only; the camera, rain and input keep real
-    // time so the freeze reads as impact rather than as a stutter.
-    let gameplayDt = dt;
-    if (session.hitStop > 0) {
-      session.hitStop -= dt;
-      gameplayDt = dt * 0.08;
-    }
+    // Hit-stop dilates gameplay time. The character and the combat core must
+    // both see the *same* dilated time, or a freeze would advance the Warden's
+    // attack while slowing the player's dodge window.
+    //
+    // The frozen portion of the frame is measured exactly rather than scaling
+    // the whole frame, so the total time a hit-stop consumes does not depend on
+    // how many frames it happens to span.
+    const gameplayDt = applyHitStop(session, dt);
 
     intent.beginFrame();
     for (const source of sources) source.update(dt);
@@ -192,26 +366,27 @@ function boot() {
     const controlEnabled = director.allowsControl && !hud.isMapOpen;
 
     if (controlEnabled) {
-      if (intent.consume('action')) performAttack();
-      if (intent.consume('parry')) {
-        session.parryWindow = COMBAT.PARRY_WINDOW;
-        hud.say('PARRY WINDOW');
-      }
+      if (intent.consume('action')) combat.requestAttack();
+      if (intent.consume('parry')) combat.requestParry();
       if (intent.consume('focus')) hud.say('FIELD FOCUS · KNOWN INTEL ONLY');
     } else {
       intent.clearActions();
     }
-    session.parryWindow = Math.max(0, session.parryWindow - dt);
 
     // Locked onto the Warden, Cuma keeps facing the camera, so circling reads as
     // a real strafe and backing off reads as a backpedal.
-    const strafeMode = session.bossEngaged && boss.state.hp > 0;
+    const strafeMode = session.bossEngaged && combat.bossState.hp > 0;
     character.update(intent, cameraRig.yaw, gameplayDt, controlEnabled, strafeMode);
 
-    if (!boss.state.started && character.state.position.z < COMBAT.BOSS_TRIGGER_Z) {
+    if (!session.bossStarted && character.state.position.z < BOSS_TRIGGER_Z) {
       startBossEncounter();
     }
-    boss.update(gameplayDt, character.state.position, session.bossEngaged);
+
+    // Combat runs on the same gameplay clock as the character, at a fixed
+    // internal step: identical outcomes at 30 fps, at 60 fps and on an uneven
+    // frame sequence.
+    combat.update(gameplayDt, character.state);
+    bossPresenter.update(dt, combat.bossState);
 
     heroMoment.update(dt, character.state.position);
     director.update(dt);
@@ -222,7 +397,19 @@ function boot() {
       context.camera.position.x += (Math.random() - 0.5) * session.shake;
       context.camera.position.y += (Math.random() - 0.5) * session.shake * 0.5;
     }
+    if (session.fovPunch > 0) {
+      // A brief widening on impact, decayed fast so it reads as a jolt.
+      session.fovPunch = Math.max(0, session.fovPunch - dt * 14);
+      context.camera.fov += session.fovPunch;
+      context.camera.updateProjectionMatrix();
+    }
 
+    // Posture regenerates continuously, so the bars are refreshed here rather
+    // than only on events — but only when the value has actually moved, to keep
+    // it off the per-frame DOM write path.
+    if (session.bossEngaged) refreshBossBars();
+
+    impactFx.update(dt);
     rain.update(dt, character.state.position.x, character.state.position.z);
     crowd.update(dt, character.state.position.x, character.state.position.z);
 
@@ -233,16 +420,40 @@ function boot() {
   // strips this block from production builds.
   if (import.meta.env.DEV) {
     let speedPeak = 0;
+    let postureMin = COMBAT_RULES.POSTURE_MAX;
+    let staggerCount = 0;
+    let wasStaggered = false;
+    const recentOutcomes = [];
+    const statesSeen = [];
+    // Cumulative tallies: the rolling list above can drop entries between two
+    // polls, so a test cannot count from it reliably.
+    const outcomeCounts = Object.create(null);
+
+    combat.on((event) => {
+      if (event.type === 'outcome') {
+        outcomeCounts[event.outcome] = (outcomeCounts[event.outcome] ?? 0) + 1;
+        recentOutcomes.push(event.outcome);
+        while (recentOutcomes.length > 12) recentOutcomes.shift();
+      }
+      if (event.type === 'state') {
+        if (statesSeen[statesSeen.length - 1] !== event.state) statesSeen.push(event.state);
+        while (statesSeen.length > 40) statesSeen.shift();
+      }
+    });
+
     loop.add(() => {
       speedPeak = Math.max(speedPeak, character.state.speed);
+      if (session.bossEngaged) {
+        postureMin = Math.min(postureMin, combat.bossState.posture);
+        const staggered = combat.isStaggered;
+        if (staggered && !wasStaggered) staggerCount += 1;
+        wasStaggered = staggered;
+      }
     });
     window.__cumaProbe = () => {
       const dx = context.camera.position.x - character.state.position.x;
       const dz = context.camera.position.z - character.state.position.z;
-      // How far the camera sits off the character's screen centre line.
-      const forwardX = Math.sin(cameraRig.yaw);
-      const forwardZ = Math.cos(cameraRig.yaw);
-      const lateral = Math.abs(dx * forwardZ - dz * forwardX);
+      const boss = combat.bossState;
       return {
         x: character.state.position.x,
         z: character.state.position.z,
@@ -252,21 +463,37 @@ function boot() {
         strideDistance: character.state.strideDistance,
         facing: character.state.facing,
         camDist: Math.hypot(dx, dz),
-        shoulderOffset: lateral,
         cameraMode: cameraRig.params.shoulder,
         directorPlaying: director.isPlaying,
         heroFired: heroMoment.hasFired,
+        heroParryPlayed: session.heroParryPlayed,
         aspect: context.camera.aspect,
-        bossStarted: boss.state.started,
-        bossVisible: boss.group.visible,
-        bossHp: boss.state.hp,
+        bossStarted: session.bossStarted,
+        bossEngaged: session.bossEngaged,
+        bossVisible: bossPresenter.group.visible,
+        bossHp: boss.hp,
+        bossPosture: boss.posture,
+        bossPhase: boss.phase,
+        bossState: boss.state,
+        bossAttack: boss.attackId,
+        bossTimer: boss.timer,
+        bossDuration: boss.duration,
+        bossX: boss.x,
+        bossZ: boss.z,
+        playerHealth: combat.player.health,
+        recentOutcomes: recentOutcomes.slice(),
+        outcomeCounts: { ...outcomeCounts },
+        statesSeen: statesSeen.slice(),
+        postureMin,
+        staggerCount,
       };
     };
     window.__cumaTeleport = (x, z) => {
       character.state.position.x = x;
       character.state.position.z = z;
     };
-    window.__cumaAttack = () => performAttack();
+    window.__cumaAttack = () => combat.requestAttack();
+    window.__cumaParry = () => combat.requestParry();
   }
 
   loop.start();
@@ -277,8 +504,10 @@ function boot() {
     releaseShoulderButton();
     for (const source of sources) source.dispose();
     hud.dispose();
+    audio.dispose();
     character.dispose();
-    boss.dispose();
+    bossPresenter.dispose();
+    impactFx.dispose();
     crowd.dispose();
     rain.dispose();
     skyline.dispose();
