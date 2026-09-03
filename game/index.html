@@ -40,6 +40,10 @@
       </div>
       <div id="playerVitals" class="hidden"><i id="playerHealth"></i></div>
       <div id="damageFlash"></div>
+      <div id="regionReveal" class="hidden">
+        <span class="city">ASTER CITY</span>
+        <b id="regionName"></b>
+      </div>
       <div id="msg"></div>
     </div>
 
@@ -49,11 +53,9 @@
 
     <div id="mapPanel" class="hidden">
       <h2>ASTER CITY</h2>
-      <p>Meridian Market</p>
-      <p>Crown District</p>
-      <p>Old Aster</p>
-      <p>Blackglass Docks</p>
-      <p>Northline</p>
+      <!-- Filled from what the player has actually seen. -->
+      <ul id="mapRegions"></ul>
+      <p class="mapHint">Unvisited districts appear as you find them.</p>
     </div>
 
     <div id="controls">

@@ -130,6 +130,86 @@ export function heroMomentSequence(crownSpire) {
 }
 
 /**
+ * MERIDIAN AFTER RAIN — the M03 hero moment.
+ *
+ * Twelve and a half seconds of the district simply being itself. Cuma walks the
+ * market as the rain eases; the rig drifts off his shoulder, a foreground
+ * awning and a passing transit light wipe the frame, the wet road opens out,
+ * and the Crown Spire resolves out of the thinning fog before the camera
+ * settles back behind him.
+ *
+ * No cut, no fade, no control lock — the player is walking the whole time.
+ */
+export function meridianAfterRainSequence(crownSpire) {
+  return {
+    name: 'meridianAfterRain',
+    keyframes: [
+      { t: 0, mode: MODE.SHOULDER_RIGHT, blend: 0.9 },
+      {
+        // The rig eases off the shoulder and lets the street open up.
+        t: 2.0,
+        mode: MODE.WIDE,
+        blend: 1.8,
+        yaw: -0.44,
+        pitch: -0.02,
+        pivotX: 1.1,
+        pivotY: 0.5,
+        lookWeight: 0.16,
+        look: crownSpire,
+      },
+      {
+        // Low and wide across the wet road: the reflections carry this beat.
+        t: 4.6,
+        mode: MODE.LOW_TRACK,
+        blend: 1.9,
+        yaw: -0.86,
+        pitch: 0.07,
+        pivotX: 2.0,
+        pivotY: -0.3,
+        fov: -3,
+        lookWeight: 0.3,
+        look: crownSpire,
+      },
+      {
+        // The city stands up: the spire clears the rooftops out of the fog.
+        t: 7.4,
+        mode: MODE.SCENIC,
+        blend: 2.1,
+        yaw: -1.24,
+        pitch: -0.07,
+        pivotX: 1.2,
+        pivotY: 3.1,
+        fov: -7,
+        lookWeight: 0.74,
+        look: crownSpire,
+      },
+      {
+        t: 9.6,
+        yaw: -1.02,
+        pitch: -0.05,
+        pivotX: -0.8,
+        pivotY: 2.5,
+        fov: -5,
+        lookWeight: 0.6,
+        look: crownSpire,
+      },
+      {
+        // Orbits back down without ever losing him.
+        t: 11.2,
+        mode: MODE.SHOULDER_RIGHT,
+        blend: 1.7,
+        yaw: -0.3,
+        pivotY: 0.4,
+        lookWeight: 0.14,
+        look: crownSpire,
+        alignYaw: 0.7,
+      },
+      { t: 12.5, alignYaw: 1 },
+    ],
+  };
+}
+
+/**
  * A phase change. Deliberately about a second and a half of contextual camera
  * motion — a small push and settle — rather than a cutscene.
  */

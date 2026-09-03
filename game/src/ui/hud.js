@@ -23,6 +23,9 @@ export function createHud(root = document) {
     playerHealth: root.querySelector('#playerHealth'),
     damageFlash: root.querySelector('#damageFlash'),
     mapPanel: root.querySelector('#mapPanel'),
+    mapRegions: root.querySelector('#mapRegions'),
+    regionReveal: root.querySelector('#regionReveal'),
+    regionName: root.querySelector('#regionName'),
     mapButton: root.querySelector('#map'),
     cineButton: root.querySelector('#cine'),
     modeLabel: root.querySelector('#cameraMode'),
@@ -136,6 +139,41 @@ export function createHud(root = document) {
 
     setBossPhase(phase) {
       if (elements.bossPhase) elements.bossPhase.textContent = String(phase);
+    },
+
+    /**
+     * Names a district the player has just found. Deliberately small: two lines
+     * that fade in and out, never a banner across the screen.
+     */
+    revealRegion(district) {
+      const panel = elements.regionReveal;
+      if (!panel || !elements.regionName) return;
+      elements.regionName.textContent = district.name;
+      panel.classList.remove('hidden');
+      later(() => panel.classList.add('show'), 30);
+      later(() => panel.classList.remove('show'), 3200);
+      later(() => panel.classList.add('hidden'), 4000);
+    },
+
+    /**
+     * Rebuilds the map from the districts the player has actually seen. The map
+     * never lists somewhere they have not found.
+     */
+    setDiscoveredRegions(districts) {
+      const list = elements.mapRegions;
+      if (!list) return;
+      list.textContent = '';
+      for (const district of districts) {
+        const item = document.createElement('li');
+        const name = document.createElement('b');
+        name.textContent = district.name;
+        const subtitle = document.createElement('small');
+        subtitle.textContent = district.subtitle;
+        item.appendChild(name);
+        item.appendChild(subtitle);
+        if (district.playable) item.classList.add('current');
+        list.appendChild(item);
+      }
     },
 
     setPlayerHealth(percent) {

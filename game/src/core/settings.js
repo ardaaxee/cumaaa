@@ -114,6 +114,8 @@ export const PERFORMANCE = {
   // Crowd agents refreshed per frame; the rest coast on their last velocity.
   CROWD_UPDATES_PER_FRAME: 8,
   CROWD_COUNT: 34,
+  /** Tier B residents with real schedules. Deliberately far fewer. */
+  NPC_COUNT: 14,
   RAIN_STREAKS: 1600,
 };
 

@@ -189,9 +189,130 @@ export function createAudioManager() {
     dodge: 0.2,
   };
 
+  // --- Ambience layers ----------------------------------------------------
+  /**
+   * Continuous beds rather than one-shots: rain, city hum, distant traffic and
+   * so on all run at once and are cross-faded by gain, so moving through the
+   * city never cuts one sound off and starts another.
+   */
+  const layers = new Map();
+
+  /** A looping noise bed, shaped by a filter. */
+  function buildNoiseLayer(ctx, { frequency, q, type, seconds = 4 }) {
+    const frames = Math.floor(ctx.sampleRate * seconds);
+    const buffer = ctx.createBuffer(1, frames, ctx.sampleRate);
+    const data = buffer.getChannelData(0);
+    let last = 0;
+    for (let i = 0; i < frames; i += 1) {
+      // Slightly correlated noise: less hissy than white, cheaper than pink.
+      const white = Math.random() * 2 - 1;
+      last = last * 0.72 + white * 0.28;
+      data[i] = last;
+    }
+    // Taper the seam so the loop point is inaudible.
+    const fade = Math.floor(ctx.sampleRate * 0.05);
+    for (let i = 0; i < fade; i += 1) {
+      const k = i / fade;
+      data[i] *= k;
+      data[frames - 1 - i] *= k;
+    }
+
+    const source = ctx.createBufferSource();
+    source.buffer = buffer;
+    source.loop = true;
+
+    const filter = ctx.createBiquadFilter();
+    filter.type = type;
+    filter.frequency.value = frequency;
+    filter.Q.value = q;
+
+    const gain = ctx.createGain();
+    gain.gain.value = 0;
+
+    source.connect(filter).connect(gain).connect(master);
+    source.start();
+    return { source, gain };
+  }
+
+  /** A looping tonal bed, for the city's low hum. */
+  function buildToneLayer(ctx, { frequency, detune = 0, type = 'sawtooth', lowpass = 220 }) {
+    const oscillator = ctx.createOscillator();
+    oscillator.type = type;
+    oscillator.frequency.value = frequency;
+    oscillator.detune.value = detune;
+
+    const filter = ctx.createBiquadFilter();
+    filter.type = 'lowpass';
+    filter.frequency.value = lowpass;
+
+    const gain = ctx.createGain();
+    gain.gain.value = 0;
+
+    oscillator.connect(filter).connect(gain).connect(master);
+    oscillator.start();
+    return { source: oscillator, gain };
+  }
+
+  /** Each ambience layer has its own voice, not one bed at different volumes. */
+  const LAYER_BUILDERS = {
+    rain: (ctx) => buildNoiseLayer(ctx, { frequency: 2600, q: 0.5, type: 'highpass' }),
+    cityHum: (ctx) => buildToneLayer(ctx, { frequency: 54, lowpass: 150 }),
+    distantTraffic: (ctx) => buildNoiseLayer(ctx, { frequency: 340, q: 0.7, type: 'lowpass' }),
+    marketCrowd: (ctx) => buildNoiseLayer(ctx, { frequency: 900, q: 1.4, type: 'bandpass' }),
+    transit: (ctx) => buildNoiseLayer(ctx, { frequency: 190, q: 2.2, type: 'bandpass' }),
+    wind: (ctx) => buildNoiseLayer(ctx, { frequency: 620, q: 0.35, type: 'lowpass' }),
+    indoorMuffle: (ctx) => buildNoiseLayer(ctx, { frequency: 260, q: 0.5, type: 'lowpass' }),
+  };
+
+  /** Peak gain per layer, so one bed cannot drown the rest. */
+  const LAYER_CEILING = {
+    rain: 0.2,
+    cityHum: 0.1,
+    distantTraffic: 0.11,
+    marketCrowd: 0.1,
+    transit: 0.14,
+    wind: 0.09,
+    indoorMuffle: 0.12,
+  };
+
   return {
     /** Starts audio; safe to call repeatedly. */
     unlock,
+
+    /**
+     * Sets a continuous ambience layer's level, cross-fading rather than
+     * cutting. `weight` is 0..1 against that layer's own ceiling.
+     */
+    setLayer(name, weight, fadeSeconds = 1.2) {
+      const builder = LAYER_BUILDERS[name];
+      if (!builder || muted || !unlocked) return;
+      const ctx = ensureContext();
+      if (!ctx || ctx.state !== 'running') return;
+
+      let layer = layers.get(name);
+      if (!layer) {
+        try {
+          layer = builder(ctx);
+          layers.set(name, layer);
+        } catch {
+          return;
+        }
+      }
+
+      const target = Math.max(0, Math.min(1, weight)) * (LAYER_CEILING[name] ?? 0.1);
+      try {
+        layer.gain.gain.cancelScheduledValues(ctx.currentTime);
+        layer.gain.gain.setValueAtTime(layer.gain.gain.value, ctx.currentTime);
+        layer.gain.gain.linearRampToValueAtTime(target, ctx.currentTime + fadeSeconds);
+      } catch {
+        // A scheduling failure must never break the frame.
+      }
+    },
+
+    /** Layer names this manager knows how to build. */
+    get layerNames() {
+      return Object.keys(LAYER_BUILDERS);
+    },
 
     play(name) {
       const cue = cues[name];
@@ -216,6 +337,14 @@ export function createAudioManager() {
     dispose() {
       for (const off of listeners) off();
       listeners.length = 0;
+      for (const layer of layers.values()) {
+        try {
+          layer.source.stop();
+        } catch {
+          // Already stopped.
+        }
+      }
+      layers.clear();
       if (context) {
         context.close().catch(() => {});
         context = null;

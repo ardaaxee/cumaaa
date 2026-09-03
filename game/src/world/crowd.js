@@ -1,14 +1,18 @@
 import * as THREE from 'three';
 import { PERFORMANCE } from '../core/settings.js';
 import { createRandom, range } from '../core/random.js';
+import { REACTION, reactionFor, speedScaleFor } from './crowdReactions.js';
 
 /**
- * Meridian Market's pedestrians.
+ * TIER C — background crowd.
  *
- * Two instanced meshes (bodies, umbrellas) and a bounded update: only
- * CROWD_UPDATES_PER_FRAME agents are re-integrated each frame, each catching up
- * on the time that actually passed since it was last touched. Distant agents are
- * parked entirely.
+ * The cheapest people in Aster City: they walk the street on rails, and the
+ * only decision they ever make is whether to get out of the way. Two instanced
+ * meshes and a bounded update — only a fixed number of agents are re-integrated
+ * per frame, each catching up on the time that actually passed since it was
+ * last touched, and distant agents are parked entirely.
+ *
+ * The local residents with real schedules are Tier B, in `npcSystem.js`.
  */
 
 const FAR_DISTANCE = 62;
@@ -46,6 +50,8 @@ export function createCrowd(scene) {
   const phase = new Float32Array(count);
   const hasUmbrella = new Uint8Array(count);
   const lastTouched = new Float32Array(count);
+  /** Lateral drift used when a bystander is getting out of the way. */
+  const shove = new Float32Array(count);
 
   for (let i = 0; i < count; i += 1) {
     direction[i] = random() > 0.5 ? 1 : -1;
@@ -60,6 +66,7 @@ export function createCrowd(scene) {
   const hidden = new THREE.Matrix4().makeScale(0, 0, 0);
   let cursor = 0;
   let clock = 0;
+  let umbrellaWeight = 1;
 
   // Everything starts placed so the first frames are not empty.
   for (let i = 0; i < count; i += 1) writeAgent(i);
@@ -71,7 +78,7 @@ export function createCrowd(scene) {
     dummy.updateMatrix();
     bodies.setMatrixAt(i, dummy.matrix);
 
-    if (hasUmbrella[i]) {
+    if (hasUmbrella[i] && umbrellaWeight > 0.25) {
       dummy.position.y = 1.62 + bob;
       dummy.rotation.z = Math.sin(phase[i]) * 0.08;
       dummy.updateMatrix();
@@ -81,8 +88,12 @@ export function createCrowd(scene) {
     }
   }
 
-  function update(dt, playerX, playerZ) {
+  /**
+   * @param {object} threat crowd-reaction threat state; may be inert
+   */
+  function update(dt, playerX, playerZ, threat) {
     clock += dt;
+    const alarmed = threat && threat.intensity > 0.02;
 
     const batch = Math.min(PERFORMANCE.CROWD_UPDATES_PER_FRAME, count);
     for (let n = 0; n < batch; n += 1) {
@@ -105,10 +116,32 @@ export function createCrowd(scene) {
         continue;
       }
 
-      z[i] += direction[i] * speed[i] * elapsed;
-      phase[i] += elapsed * speed[i] * 3.6;
+      let scale = 1;
+      if (alarmed) {
+        const reaction = reactionFor(
+          Math.hypot(x[i] - threat.x, z[i] - threat.z),
+          threat.intensity,
+        );
+        scale = speedScaleFor(reaction);
+
+        if (reaction === REACTION.FLEE_AREA || reaction === REACTION.AVOID) {
+          // Push toward the pavement, away from whatever is in the street.
+          const away = Math.sign(x[i] - threat.x) || 1;
+          shove[i] = Math.min(3.4, shove[i] + elapsed * 2.2);
+          x[i] += away * elapsed * 1.6;
+          // And hurry off along the street rather than walking into it.
+          if (Math.sign(z[i] - threat.z) !== direction[i]) direction[i] *= -1;
+        }
+      } else if (shove[i] > 0) {
+        // Drift back toward the walking line once things calm down.
+        shove[i] = Math.max(0, shove[i] - elapsed * 0.6);
+      }
+
+      z[i] += direction[i] * speed[i] * scale * elapsed;
+      phase[i] += elapsed * speed[i] * scale * 3.6;
       if (z[i] > TURN_AROUND_Z) z[i] = -TURN_AROUND_Z;
       if (z[i] < -TURN_AROUND_Z) z[i] = TURN_AROUND_Z;
+      x[i] = THREE.MathUtils.clamp(x[i], -13.5, 13.5);
 
       writeAgent(i);
     }
@@ -119,6 +152,9 @@ export function createCrowd(scene) {
 
   return {
     update,
+    setRainWeight(value) {
+      umbrellaWeight = value;
+    },
     dispose() {
       scene.remove(bodies);
       scene.remove(umbrellas);

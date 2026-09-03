@@ -1,6 +1,8 @@
 import * as THREE from 'three';
 import { createRandom, range } from '../core/random.js';
 import { createGlow } from './textures.js';
+import { LANDMARKS, LANDMARK_KIND, primaryLandmark } from './landmarks.js';
+import { DISTRICTS, DISTRICT, DISTRICT_IDS } from './districts.js';
 
 /**
  * The distant skyline and the Crown Spire landmark.
@@ -22,11 +24,12 @@ const LAYERS = [
 ];
 
 /**
- * Where the Crown Spire stands. Close enough to fill frame during the hero
- * moment, far enough that the fog still separates it from the street.
+ * The Crown Spire's position comes from the landmark catalog, so the city and
+ * the camera sequences that frame it can never drift apart.
  */
-export const CROWN_SPIRE_POSITION = [-26, 0, -158];
-export const CROWN_SPIRE_FOCUS = [-26, 78, -158];
+const SPIRE = primaryLandmark();
+export const CROWN_SPIRE_POSITION = [SPIRE.position.x, SPIRE.position.y, SPIRE.position.z];
+export const CROWN_SPIRE_FOCUS = [SPIRE.focus.x, SPIRE.focus.y, SPIRE.focus.z];
 
 export function createSkyline(scene) {
   const random = createRandom(0x5a5714e);
@@ -69,17 +72,279 @@ export function createSkyline(scene) {
     group.add(mesh);
   }
 
-  group.add(buildCrownSpire(track));
+  // Every district the player cannot walk into still gets built mass, so the
+  // city visibly continues past the market in each direction.
+  group.add(buildDistrictMasses(track, random));
+
+  // Landmarks come from the catalog rather than being placed here, so the map,
+  // the camera sequences and the city all agree on where they are.
+  const landmarkFocus = {};
+  for (const landmark of LANDMARKS) {
+    group.add(buildLandmark(landmark, track));
+    landmarkFocus[landmark.id] = [landmark.focus.x, landmark.focus.y, landmark.focus.z];
+  }
+
   group.add(buildHaze(track));
 
   return {
     group,
     spireFocus: CROWN_SPIRE_FOCUS,
+    /** Focus points by landmark id, for the camera director. */
+    landmarkFocus,
     dispose() {
       scene.remove(group);
       for (const item of disposables) item.dispose?.();
     },
   };
+}
+
+/**
+ * Blocked-in city mass for each non-playable district, sitting between the
+ * market and the far skyline so the districts read as places rather than gaps.
+ */
+function buildDistrictMasses(track, random) {
+  const masses = new THREE.Group();
+  masses.name = 'districtMasses';
+
+  const geometry = track(new THREE.BoxGeometry(1, 1, 1));
+  const material = track(
+    new THREE.MeshStandardMaterial({ color: 0x202a37, roughness: 0.86, metalness: 0.1 }),
+  );
+
+  const blocks = [];
+  const dummy = new THREE.Object3D();
+
+  for (const id of DISTRICT_IDS) {
+    if (id === DISTRICT.MERIDIAN_MARKET) continue;
+    const bounds = DISTRICTS[id].bounds;
+
+    for (let i = 0; i < 16; i += 1) {
+      const height = range(random, 16, 62);
+      const width = range(random, 12, 30);
+      const depth = range(random, 12, 28);
+      dummy.position.set(
+        range(random, bounds.minX, bounds.maxX),
+        height / 2,
+        range(random, bounds.minZ, bounds.maxZ),
+      );
+      dummy.scale.set(width, height, depth);
+      dummy.rotation.y = range(random, -0.25, 0.25);
+      dummy.updateMatrix();
+      blocks.push(dummy.matrix.clone());
+    }
+  }
+
+  const mesh = new THREE.InstancedMesh(geometry, material, blocks.length);
+  mesh.instanceMatrix.setUsage(THREE.StaticDrawUsage);
+  for (let i = 0; i < blocks.length; i += 1) mesh.setMatrixAt(i, blocks[i]);
+  mesh.instanceMatrix.needsUpdate = true;
+  masses.add(mesh);
+
+  return masses;
+}
+
+/** Dispatches to the silhouette a landmark's `kind` asks for. */
+function buildLandmark(landmark, track) {
+  switch (landmark.kind) {
+    case LANDMARK_KIND.SPIRE:
+      return buildCrownSpire(track);
+    case LANDMARK_KIND.CLOCK_TOWER:
+      return buildClockTower(landmark, track);
+    case LANDMARK_KIND.TRANSIT_HALL:
+      return buildTransitHall(landmark, track);
+    case LANDMARK_KIND.SLAB_TOWER:
+      return buildSlabTower(landmark, track);
+    case LANDMARK_KIND.ARCH:
+      return buildArch(landmark, track);
+    default:
+      return new THREE.Group();
+  }
+}
+
+/** A lit sprite used to make a landmark readable at distance. */
+function landmarkBeacon(landmark, track, y, scale, opacity = 0.4) {
+  const sprite = new THREE.Sprite(
+    track(
+      new THREE.SpriteMaterial({
+        map: track(createGlow(128)),
+        color: landmark.lightColor,
+        transparent: true,
+        opacity,
+        depthWrite: false,
+        blending: THREE.AdditiveBlending,
+        toneMapped: false,
+        fog: false,
+      }),
+    ),
+  );
+  sprite.position.y = y;
+  sprite.scale.set(scale, scale, 1);
+  return sprite;
+}
+
+/**
+ * MERIDIAN CLOCK TOWER — a square brick shaft with a lit face on each side.
+ * It stands inside the playable district, so it is the near bearing.
+ */
+function buildClockTower(landmark, track) {
+  const tower = new THREE.Group();
+  tower.name = landmark.id;
+  tower.position.set(landmark.position.x, 0, landmark.position.z);
+
+  const stone = track(
+    new THREE.MeshStandardMaterial({ color: 0x39424f, roughness: 0.8, metalness: 0.12 }),
+  );
+  const trim = track(
+    new THREE.MeshStandardMaterial({
+      color: 0x5c6979,
+      roughness: 0.5,
+      metalness: 0.4,
+      emissive: 0x2a1c08,
+      emissiveIntensity: 0.6,
+    }),
+  );
+
+  const shaft = new THREE.Mesh(track(new THREE.BoxGeometry(6.4, landmark.height, 6.4)), stone);
+  shaft.position.y = landmark.height / 2;
+  tower.add(shaft);
+
+  const crown = new THREE.Mesh(track(new THREE.BoxGeometry(7.8, 2.2, 7.8)), trim);
+  crown.position.y = landmark.height - 4;
+  tower.add(crown);
+
+  const cap = new THREE.Mesh(track(new THREE.ConeGeometry(5.4, 6.0, 4)), stone);
+  cap.position.y = landmark.height + 2.2;
+  cap.rotation.y = Math.PI / 4;
+  tower.add(cap);
+
+  // The clock faces: four lit discs, the reason it reads at night.
+  const faceGeometry = track(new THREE.CircleGeometry(2.0, 20));
+  const faceMaterial = track(
+    new THREE.MeshBasicMaterial({ color: landmark.lightColor, toneMapped: false }),
+  );
+  for (let i = 0; i < 4; i += 1) {
+    const angle = (i / 4) * Math.PI * 2;
+    const face = new THREE.Mesh(faceGeometry, faceMaterial);
+    face.position.set(Math.sin(angle) * 3.25, landmark.height - 8.5, Math.cos(angle) * 3.25);
+    face.rotation.y = angle;
+    tower.add(face);
+  }
+
+  tower.add(landmarkBeacon(landmark, track, landmark.height - 8.5, 13, 0.3));
+  return tower;
+}
+
+/** GLASS TRANSIT HALL — a long low vault, lit from within. */
+function buildTransitHall(landmark, track) {
+  const hall = new THREE.Group();
+  hall.name = landmark.id;
+  hall.position.set(landmark.position.x, 0, landmark.position.z);
+
+  const frame = track(
+    new THREE.MeshStandardMaterial({ color: 0x2b3542, roughness: 0.6, metalness: 0.35 }),
+  );
+  const glass = track(
+    new THREE.MeshStandardMaterial({
+      color: 0x6f8bb0,
+      roughness: 0.2,
+      metalness: 0.5,
+      emissive: 0x25405e,
+      emissiveIntensity: 1.5,
+      transparent: true,
+      opacity: 0.86,
+    }),
+  );
+
+  const base = new THREE.Mesh(track(new THREE.BoxGeometry(46, 9, 22)), frame);
+  base.position.y = 4.5;
+  hall.add(base);
+
+  // The vault roof: a half cylinder is what makes it a station, not a shed.
+  const vault = new THREE.Mesh(
+    track(new THREE.CylinderGeometry(11.5, 11.5, 46, 14, 1, true, 0, Math.PI)),
+    glass,
+  );
+  vault.position.y = 9;
+  vault.rotation.z = Math.PI / 2;
+  hall.add(vault);
+
+  for (let i = 0; i < 5; i += 1) {
+    const rib = new THREE.Mesh(track(new THREE.TorusGeometry(11.5, 0.35, 5, 14, Math.PI)), frame);
+    rib.position.set(-18 + i * 9, 9, 0);
+    rib.rotation.y = Math.PI / 2;
+    hall.add(rib);
+  }
+
+  hall.add(landmarkBeacon(landmark, track, 14, 26, 0.26));
+  return hall;
+}
+
+/** NORTHLINE TOWER — a tall offset slab with a lit service spine. */
+function buildSlabTower(landmark, track) {
+  const tower = new THREE.Group();
+  tower.name = landmark.id;
+  tower.position.set(landmark.position.x, 0, landmark.position.z);
+
+  const shell = track(
+    new THREE.MeshStandardMaterial({ color: 0x2c3644, roughness: 0.7, metalness: 0.28 }),
+  );
+  const spine = track(
+    new THREE.MeshStandardMaterial({
+      color: 0x46586e,
+      roughness: 0.35,
+      metalness: 0.55,
+      emissive: 0x1b3450,
+      emissiveIntensity: 1.1,
+    }),
+  );
+
+  const lower = new THREE.Mesh(track(new THREE.BoxGeometry(17, landmark.height, 13)), shell);
+  lower.position.y = landmark.height / 2;
+  tower.add(lower);
+
+  // An offset upper section: the silhouette that names it from a distance.
+  const upper = new THREE.Mesh(track(new THREE.BoxGeometry(11, 26, 9)), shell);
+  upper.position.set(4.4, landmark.height + 10, 0);
+  tower.add(upper);
+
+  const column = new THREE.Mesh(track(new THREE.BoxGeometry(1.6, landmark.height + 20, 1.6)), spine);
+  column.position.set(-7.2, (landmark.height + 20) / 2, 0);
+  tower.add(column);
+
+  tower.add(landmarkBeacon(landmark, track, landmark.height + 24, 16, 0.3));
+  return tower;
+}
+
+/** OLD ASTER ARCH — the city's oldest gate, a heavy stone span. */
+function buildArch(landmark, track) {
+  const arch = new THREE.Group();
+  arch.name = landmark.id;
+  arch.position.set(landmark.position.x, 0, landmark.position.z);
+
+  const stone = track(
+    new THREE.MeshStandardMaterial({ color: 0x4a4438, roughness: 0.9, metalness: 0.06 }),
+  );
+
+  for (const side of [-1, 1]) {
+    const pier = new THREE.Mesh(track(new THREE.BoxGeometry(7, landmark.height * 0.72, 8)), stone);
+    pier.position.set(side * 11, landmark.height * 0.36, 0);
+    arch.add(pier);
+  }
+
+  const span = new THREE.Mesh(
+    track(new THREE.TorusGeometry(11, 3.4, 8, 18, Math.PI)),
+    stone,
+  );
+  span.position.y = landmark.height * 0.72;
+  span.rotation.y = Math.PI / 2;
+  arch.add(span);
+
+  const lintel = new THREE.Mesh(track(new THREE.BoxGeometry(30, 4.4, 9)), stone);
+  lintel.position.y = landmark.height - 2;
+  arch.add(lintel);
+
+  arch.add(landmarkBeacon(landmark, track, landmark.height * 0.5, 20, 0.2));
+  return arch;
 }
 
 /**

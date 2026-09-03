@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import { createRandom, range } from '../core/random.js';
 import { createReflectionStreak, createWetRoadRoughness } from './textures.js';
+import { createMeridianMarket } from './meridianMarket.js';
 
 /**
  * Aster City — Meridian Market, night, rain.
@@ -131,6 +132,11 @@ export function createAsterCity(scene) {
   const streaks = buildReflectionStreaks(windowTransforms, track);
   if (streaks) group.add(streaks);
 
+  // The market's own layered detail: alleys, plaza, stalls, stairs, balconies,
+  // the footbridge and every doorway that hints at an interior.
+  const market = createMeridianMarket(scene);
+  for (const collider of market.colliders) colliders.push(collider);
+
   // --- Foreground silhouettes -------------------------------------------
   // Unlit pillars and awnings close to the street. During the hero orbit they
   // pass between the camera and the city and read as natural wipes.
@@ -188,12 +194,43 @@ export function createAsterCity(scene) {
   scene.fog = new THREE.FogExp2(0x18222f, 0.0042);
   scene.background = new THREE.Color(0x141d29);
 
+  // Baselines, so weather scales the look rather than replacing it.
+  const baseAmbient = hemisphere.intensity;
+  const baseKey = key.intensity;
+  const baseRim = rim.intensity;
+  const baseWindowOpacity = windows?.material.opacity ?? 0.82;
+  const baseStreetFill = streetFill.intensity;
+  const baseMarketFill = marketFill.intensity;
+
   return {
     group,
     colliders,
     marketCentre: [0, 1.6, -4],
     bounds: { minX: -46, maxX: 46, minZ: -78, maxZ: 78 },
+
+    /** Surfaces the wet-surface system reads and writes. */
+    roadMaterials: [streetMaterial, groundMaterial],
+    reflectionMesh: streaks,
+
+    /**
+     * Driven by the weather. `windowLight` also dims the reflections beneath
+     * the windows, because those two are the same light.
+     */
+    setLighting(ambient, keyLight, windowLight) {
+      hemisphere.intensity = ambient;
+      key.intensity = keyLight;
+      rim.intensity = baseRim * (0.5 + keyLight / Math.max(0.001, baseKey) * 0.5);
+
+      if (windows) windows.material.opacity = baseWindowOpacity * windowLight;
+      streetFill.intensity = baseStreetFill * (0.35 + windowLight * 0.65);
+      marketFill.intensity = baseMarketFill * (0.35 + windowLight * 0.65);
+    },
+
+    /** Baselines, for tests and tooling. */
+    lightingBaseline: { ambient: baseAmbient, key: baseKey, windowLight: 1 },
+
     dispose() {
+      market.dispose();
       scene.remove(group);
       scene.remove(hemisphere);
       scene.remove(key);

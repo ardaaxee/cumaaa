@@ -25,7 +25,13 @@ import { createAsterCity } from './world/asterCity.js';
 import { createSkyline } from './world/skyline.js';
 import { createRain } from './world/rain.js';
 import { createCrowd } from './world/crowd.js';
+import { createNpcSystem } from './world/npcSystem.js';
+import { createCityMotion } from './world/cityMotion.js';
+import { createWetSurfaceSystem } from './world/wetSurfaceSystem.js';
+import { createWorldDirector } from './world/worldDirector.js';
 import { createHeroMomentTrigger } from './world/heroMoment.js';
+import { createAfterRainMoment } from './world/afterRainMoment.js';
+import { DISTRICTS } from './world/districts.js';
 
 import { createCombatSystem } from './combat/combatSystem.js';
 import { createBossPresenter } from './combat/bossPresenter.js';
@@ -67,6 +73,12 @@ function boot() {
   const skyline = createSkyline(scene);
   const rain = createRain(scene);
   const crowd = createCrowd(scene);
+  const npcs = createNpcSystem(scene);
+  const cityMotion = createCityMotion(scene);
+  const wetSurfaces = createWetSurfaceSystem(scene, {
+    roadMaterials: city.roadMaterials,
+    reflectionMesh: city.reflectionMesh,
+  });
   const impactFx = createImpactFx(scene);
   const audio = createAudioManager();
 
@@ -94,6 +106,38 @@ function boot() {
   ];
 
   const loop = createLoop();
+
+  // The living world: weather, crowd mood, events, discovery and ambience.
+  const world = createWorldDirector({
+    scene,
+    city,
+    skyline,
+    rain,
+    crowd,
+    npcs,
+    cityMotion,
+    wetSurfaces,
+    audio,
+    hud,
+  });
+  // The map only ever lists what has actually been found.
+  const refreshMap = () =>
+    hud.setDiscoveredRegions(world.discoveredRegions.map((id) => DISTRICTS[id]));
+  refreshMap();
+  hud.onToggleMap = (open) => {
+    if (open) refreshMap();
+  };
+
+  const afterRain = createAfterRainMoment(director, world, skyline.spireFocus, {
+    onStart: () => {
+      hud.setObjective('Meridian Market · after the rain');
+      hud.setCameraMode('CINEMATIC');
+    },
+    onEnd: () => {
+      hud.setObjective('Head north through Meridian Market');
+      hud.setCameraMode('SHOULDER R');
+    },
+  });
 
   // --- Session state -----------------------------------------------------
   const session = {
@@ -238,6 +282,8 @@ function boot() {
         break;
 
       case 'defeated':
+        world.clearThreat();
+        world.setWardenDefeated(true);
         hud.showBoss(false);
         hud.setObjective('Encounter complete');
         cameraRig.setMode(MODE.SHOULDER_RIGHT, 1.4);
@@ -388,6 +434,14 @@ function boot() {
     combat.update(gameplayDt, character.state);
     bossPresenter.update(dt, combat.bossState);
 
+    // The district reacts to the Warden while it is actually dangerous.
+    if (session.bossEngaged && combat.bossState.hp > 0) {
+      world.reportThreat(combat.bossState.x, combat.bossState.z, 1);
+    }
+
+    // The world runs on real time: rain does not slow down for a hit-stop.
+    world.update(dt, character.state, cameraRig.yaw);
+    afterRain.update(dt, character.state);
     heroMoment.update(dt, character.state.position);
     director.update(dt);
     cameraRig.update(intent, dt);
@@ -409,9 +463,10 @@ function boot() {
     // it off the per-frame DOM write path.
     if (session.bossEngaged) refreshBossBars();
 
+    // The crowd, NPCs, city motion and wet surfaces are stepped by the world
+    // director, which owns their update order and their distance budgets.
     impactFx.update(dt);
     rain.update(dt, character.state.position.x, character.state.position.z);
-    crowd.update(dt, character.state.position.x, character.state.position.z);
 
     context.render(scene);
   });
@@ -421,10 +476,17 @@ function boot() {
   if (import.meta.env.DEV) {
     let speedPeak = 0;
     let postureMin = COMBAT_RULES.POSTURE_MAX;
+    let threatPeak = 0;
     let staggerCount = 0;
     let wasStaggered = false;
     const recentOutcomes = [];
     const statesSeen = [];
+    const eventStarts = [];
+    world.on((type, event) => {
+      if (type !== 'eventStart') return;
+      eventStarts.push(event.id);
+      while (eventStarts.length > 12) eventStarts.shift();
+    });
     // Cumulative tallies: the rolling list above can drop entries between two
     // polls, so a test cannot count from it reliably.
     const outcomeCounts = Object.create(null);
@@ -443,6 +505,7 @@ function boot() {
 
     loop.add(() => {
       speedPeak = Math.max(speedPeak, character.state.speed);
+      threatPeak = Math.max(threatPeak, world.threat.intensity);
       if (session.bossEngaged) {
         postureMin = Math.min(postureMin, combat.bossState.posture);
         const staggered = combat.isStaggered;
@@ -483,6 +546,19 @@ function boot() {
         playerHealth: combat.player.health,
         recentOutcomes: recentOutcomes.slice(),
         outcomeCounts: { ...outcomeCounts },
+        weatherState: world.weatherState,
+        weatherNext: world.weather.next,
+        weatherTransitioning: world.weather.isTransitioning,
+        rainDensity: world.currentWeather.rainDensity,
+        wetness: world.currentWeather.wetness,
+        fogDensity: world.currentWeather.fogDensity,
+        discoveredRegions: world.discoveredRegions.slice(),
+        threatIntensity: world.threat.intensity,
+        threatPeak,
+        activeEvent: world.events.active?.id ?? null,
+        eventStarts: eventStarts.slice(),
+        afterRainPlayed: afterRain.hasFired,
+        mapRegionCount: document.querySelectorAll('#mapRegions li').length,
         statesSeen: statesSeen.slice(),
         postureMin,
         staggerCount,
@@ -494,6 +570,9 @@ function boot() {
     };
     window.__cumaAttack = () => combat.requestAttack();
     window.__cumaParry = () => combat.requestParry();
+    window.__cumaWeather = (state) => world.requestWeather(state);
+    window.__cumaSetWeather = (state) => world.weather.setImmediate(state);
+    window.__cumaEvent = (id) => world.events.trigger(id, { flags: { wardenDefeated: true } });
   }
 
   loop.start();
@@ -508,6 +587,10 @@ function boot() {
     character.dispose();
     bossPresenter.dispose();
     impactFx.dispose();
+    world.dispose();
+    wetSurfaces.dispose();
+    cityMotion.dispose();
+    npcs.dispose();
     crowd.dispose();
     rain.dispose();
     skyline.dispose();
