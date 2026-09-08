@@ -171,34 +171,28 @@ export function meridianAfterRainSequence(crownSpire) {
         look: crownSpire,
       },
       {
-        // The city stands up: the spire clears the rooftops out of the fog.
-        //
-        // The spire's crown sits about 25 degrees above the horizon from the
-        // market. A scenic rig sits six metres above Cuma, so pitching up to
-        // the spire from there drops him out of frame whatever the lens does.
-        // This beat therefore stays on the low, wide rig and lifts the look
-        // only slightly: Cuma holds the lower third, the spire the upper.
+        // The reveal now treats Cuma as the subject and the Spire as context.
+        // Pulling the look target harder than this made the landmark technically
+        // centred but pushed Cuma out of the device frame during the wide beat.
         t: 7.4,
         mode: MODE.WIDE,
         blend: 2.1,
-        // A modest orbit, not a swing round: a wide yaw offset pushes Cuma out
-        // of frame sideways while the look tilts toward the spire.
-        yaw: -0.58,
-        pitch: -0.02,
-        pivotX: 1.2,
-        pivotY: 0.8,
-        fov: 6,
-        lookWeight: 0.55,
+        yaw: -0.38,
+        pitch: -0.015,
+        pivotX: 0.65,
+        pivotY: 0.65,
+        fov: 8,
+        lookWeight: 0.34,
         look: crownSpire,
       },
       {
         t: 9.6,
-        yaw: -0.48,
-        pitch: -0.02,
-        pivotX: -0.8,
-        pivotY: 0.7,
-        fov: 5,
-        lookWeight: 0.45,
+        yaw: -0.3,
+        pitch: -0.01,
+        pivotX: -0.35,
+        pivotY: 0.55,
+        fov: 7,
+        lookWeight: 0.28,
         look: crownSpire,
       },
       {
@@ -206,11 +200,11 @@ export function meridianAfterRainSequence(crownSpire) {
         t: 11.2,
         mode: MODE.SHOULDER_RIGHT,
         blend: 1.7,
-        yaw: -0.3,
-        pivotY: 0.4,
-        lookWeight: 0.14,
+        yaw: -0.2,
+        pivotY: 0.35,
+        lookWeight: 0.1,
         look: crownSpire,
-        alignYaw: 0.7,
+        alignYaw: 0.72,
       },
       { t: 12.5, alignYaw: 1 },
     ],
