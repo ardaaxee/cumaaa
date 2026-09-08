@@ -3,13 +3,14 @@ import { createRandom, range } from '../core/random.js';
 import { createGlow } from './textures.js';
 import { LANDMARKS, LANDMARK_KIND, primaryLandmark } from './landmarks.js';
 import { DISTRICTS, DISTRICT_IDS } from './districts.js';
+import { isWalkable } from './walkableWorld.js';
 
 /**
  * The distant skyline and the Crown Spire landmark.
  *
- * Everything here is far beyond the playable street and never moves, so it is
- * built as two instanced meshes plus one hero mesh. Depth comes from three
- * layers at increasing distance, each dimmer and more fog-bound than the last.
+ * M04 moves the generic skyline behind Crown District. What was distant from
+ * Meridian at z=-120 would become a building beside the player once Crown was
+ * opened, so the background layers now begin beyond the authored city ground.
  */
 
 /**
@@ -18,9 +19,9 @@ import { DISTRICTS, DISTRICT_IDS } from './districts.js';
  * makes the city read as deep rather than as a wall.
  */
 const LAYERS = [
-  { distance: 120, count: 26, minHeight: 22, maxHeight: 48, color: 0x232d3c, spread: 200 },
-  { distance: 175, count: 30, minHeight: 34, maxHeight: 72, color: 0x2b3648, spread: 280 },
-  { distance: 240, count: 34, minHeight: 48, maxHeight: 104, color: 0x333f53, spread: 360 },
+  { distance: 320, count: 24, minHeight: 30, maxHeight: 58, color: 0x232d3c, spread: 440 },
+  { distance: 430, count: 28, minHeight: 42, maxHeight: 82, color: 0x2b3648, spread: 600 },
+  { distance: 560, count: 32, minHeight: 58, maxHeight: 118, color: 0x333f53, spread: 760 },
 ];
 
 /**
@@ -29,7 +30,7 @@ const LAYERS = [
  */
 const SPIRE = primaryLandmark();
 export const CROWN_SPIRE_POSITION = [SPIRE.position.x, SPIRE.position.y, SPIRE.position.z];
-export const CROWN_SPIRE_FOCUS = [SPIRE.focus.x, SPIRE.focus.y, SPIRE.focus.z];
+export const CROWN_SPIRE_FOCUS = [SPIRE.focus.x, SPIRE.focus.y, SPIRE.focus.position?.z ?? SPIRE.focus.z];
 
 export function createSkyline(scene) {
   const random = createRandom(0x5a5714e);
@@ -59,7 +60,7 @@ export function createSkyline(scene) {
       dummy.position.set(
         range(random, -layer.spread / 2, layer.spread / 2),
         height / 2,
-        -layer.distance + range(random, -22, 22),
+        -layer.distance + range(random, -30, 30),
       );
       dummy.scale.set(width, height, range(random, 14, 30));
       dummy.rotation.y = range(random, -0.2, 0.2);
@@ -67,7 +68,6 @@ export function createSkyline(scene) {
       mesh.setMatrixAt(i, dummy.matrix);
     }
     mesh.instanceMatrix.needsUpdate = true;
-    // Distant geometry is never a camera collider and never needs culling maths.
     mesh.frustumCulled = true;
     group.add(mesh);
   }
@@ -122,11 +122,23 @@ function buildDistrictMasses(track, random) {
       const height = range(random, 16, 62);
       const width = range(random, 12, 30);
       const depth = range(random, 12, 28);
-      dummy.position.set(
-        range(random, bounds.minX, bounds.maxX),
-        height / 2,
-        range(random, bounds.minZ, bounds.maxZ),
-      );
+
+      let x = 0;
+      let z = 0;
+      let found = false;
+      for (let attempt = 0; attempt < 10; attempt += 1) {
+        x = range(random, bounds.minX, bounds.maxX);
+        z = range(random, bounds.minZ, bounds.maxZ);
+        if (!isWalkable(x, z)) {
+          found = true;
+          break;
+        }
+      }
+      // Northline overlaps Crown's western edge in the catalog. Never let a
+      // background filler block land on authored walkable ground.
+      if (!found) continue;
+
+      dummy.position.set(x, height / 2, z);
       dummy.scale.set(width, height, depth);
       dummy.rotation.y = range(random, -0.25, 0.25);
       dummy.updateMatrix();
@@ -217,7 +229,6 @@ function buildClockTower(landmark, track) {
   cap.rotation.y = Math.PI / 4;
   tower.add(cap);
 
-  // The clock faces: four lit discs, the reason it reads at night.
   const faceGeometry = track(new THREE.CircleGeometry(2.0, 20));
   const faceMaterial = track(
     new THREE.MeshBasicMaterial({ color: landmark.lightColor, toneMapped: false }),
@@ -259,7 +270,6 @@ function buildTransitHall(landmark, track) {
   base.position.y = 4.5;
   hall.add(base);
 
-  // The vault roof: a half cylinder is what makes it a station, not a shed.
   const vault = new THREE.Mesh(
     track(new THREE.CylinderGeometry(11.5, 11.5, 46, 14, 1, true, 0, Math.PI)),
     glass,
@@ -302,7 +312,6 @@ function buildSlabTower(landmark, track) {
   lower.position.y = landmark.height / 2;
   tower.add(lower);
 
-  // An offset upper section: the silhouette that names it from a distance.
   const upper = new THREE.Mesh(track(new THREE.BoxGeometry(11, 26, 9)), shell);
   upper.position.set(4.4, landmark.height + 10, 0);
   tower.add(upper);
@@ -364,8 +373,6 @@ function buildCrownSpire(track) {
       color: 0x6a7789,
       roughness: 0.4,
       metalness: 0.55,
-      // A restrained warm glow on the crown: enough to name the landmark at a
-      // distance, nowhere near enough to look like neon or orange plastic.
       emissive: 0x3a2409,
       emissiveIntensity: 0.7,
     }),
@@ -382,7 +389,6 @@ function buildCrownSpire(track) {
   base.position.y = 6;
   spire.add(base);
 
-  // The crown: eight pillars leaning outward from the top of the shaft.
   const pillarGeometry = track(new THREE.BoxGeometry(2.1, 26, 2.1));
   for (let i = 0; i < 8; i += 1) {
     const angle = (i / 8) * Math.PI * 2;
@@ -427,8 +433,6 @@ function buildCrownSpire(track) {
   beaconGlow.scale.set(34, 34, 1);
   spire.add(beaconGlow);
 
-  // A soft column of light behind the shaft. It lifts the spire out of the fog
-  // so the landmark still reads as the hero of the frame at 150m.
   const backlight = new THREE.Mesh(
     track(new THREE.PlaneGeometry(78, 132)),
     track(
@@ -450,19 +454,15 @@ function buildCrownSpire(track) {
   return spire;
 }
 
-/**
- * Atmospheric depth cards between the skyline layers. Sitting behind the fog
- * they separate near buildings from far ones, which is most of what makes the
- * city read as large.
- */
+/** Atmospheric depth cards beyond the authored walkable districts. */
 function buildHaze(track) {
   const haze = new THREE.Group();
   const texture = track(createGlow(256));
 
   const bands = [
-    { z: -140, y: 26, width: 340, height: 70, opacity: 0.2, color: 0x5a719a },
-    { z: -205, y: 40, width: 460, height: 96, opacity: 0.17, color: 0x4d6486 },
-    { z: -275, y: 54, width: 560, height: 130, opacity: 0.14, color: 0x415571 },
+    { z: -300, y: 36, width: 480, height: 88, opacity: 0.18, color: 0x5a719a },
+    { z: -430, y: 52, width: 620, height: 120, opacity: 0.15, color: 0x4d6486 },
+    { z: -570, y: 70, width: 780, height: 154, opacity: 0.12, color: 0x415571 },
   ];
 
   for (const band of bands) {
