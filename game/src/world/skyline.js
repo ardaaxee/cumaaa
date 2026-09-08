@@ -2,7 +2,7 @@ import * as THREE from 'three';
 import { createRandom, range } from '../core/random.js';
 import { createGlow } from './textures.js';
 import { LANDMARKS, LANDMARK_KIND, primaryLandmark } from './landmarks.js';
-import { DISTRICTS, DISTRICT, DISTRICT_IDS } from './districts.js';
+import { DISTRICTS, DISTRICT_IDS } from './districts.js';
 
 /**
  * The distant skyline and the Crown Spire landmark.
@@ -72,8 +72,8 @@ export function createSkyline(scene) {
     group.add(mesh);
   }
 
-  // Every district the player cannot walk into still gets built mass, so the
-  // city visibly continues past the market in each direction.
+  // Only districts without authored ground receive skyline filler. Once a
+  // district becomes walkable its real geometry owns that space instead.
   group.add(buildDistrictMasses(track, random));
 
   // Landmarks come from the catalog rather than being placed here, so the map,
@@ -99,8 +99,8 @@ export function createSkyline(scene) {
 }
 
 /**
- * Blocked-in city mass for each non-playable district, sitting between the
- * market and the far skyline so the districts read as places rather than gaps.
+ * Blocked-in city mass for each non-walkable district, sitting between the
+ * authored regions and the far skyline so the city still reads as continuous.
  */
 function buildDistrictMasses(track, random) {
   const masses = new THREE.Group();
@@ -115,7 +115,7 @@ function buildDistrictMasses(track, random) {
   const dummy = new THREE.Object3D();
 
   for (const id of DISTRICT_IDS) {
-    if (id === DISTRICT.MERIDIAN_MARKET) continue;
+    if (DISTRICTS[id].walkable) continue;
     const bounds = DISTRICTS[id].bounds;
 
     for (let i = 0; i < 16; i += 1) {
