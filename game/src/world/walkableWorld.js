@@ -19,7 +19,6 @@ const rect = (id, minX, maxX, minZ, maxZ, district = null) => ({
 });
 
 const market = DISTRICTS[DISTRICT.MERIDIAN_MARKET].bounds;
-const crown = DISTRICTS[DISTRICT.CROWN_DISTRICT].bounds;
 
 export const WALKABLE_REGIONS = [
   rect(
@@ -32,18 +31,22 @@ export const WALKABLE_REGIONS = [
   ),
 
   // A broad civic approach running north out of Meridian Market. It overlaps
-  // both districts by two metres so normal frame-sized movement crosses the
-  // seam continuously.
-  rect('crownApproach', -20, 12, -98, -76),
+  // both sides of the seam so ordinary locomotion crosses continuously.
+  rect('crownApproach', -20, 12, -102, -76, DISTRICT.CROWN_DISTRICT),
 
-  rect(
-    'crownDistrict',
-    crown.minX,
-    crown.maxX,
-    crown.minZ,
-    crown.maxZ,
-    DISTRICT.CROWN_DISTRICT,
-  ),
+  // South boulevard: the dog-leg between the market and the civic plaza.
+  rect('crownSouthBoulevard', -28, 12, -150, -96, DISTRICT.CROWN_DISTRICT),
+
+  // Crown Plaza itself. The authored square is broad, but deliberately not the
+  // entire district AABB: the player cannot wander into unbuilt city void.
+  rect('crownPlaza', -68, 16, -194, -122, DISTRICT.CROWN_DISTRICT),
+
+  // North boulevard continues beyond the plaza toward the monumental gate.
+  rect('crownNorthBoulevard', -46, -6, -238, -142, DISTRICT.CROWN_DISTRICT),
+
+  // Covered civic promenades at either side of the square.
+  rect('crownWestPromenade', -74, -48, -216, -126, DISTRICT.CROWN_DISTRICT),
+  rect('crownEastPromenade', -4, 18, -216, -126, DISTRICT.CROWN_DISTRICT),
 ];
 
 export const WALKABLE_BOUNDS = Object.freeze({
