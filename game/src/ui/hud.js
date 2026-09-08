@@ -39,6 +39,14 @@ export function createHud(root = document) {
   let messageTimer = null;
   let mapOpen = false;
   let captureMode = false;
+  let currentRegion = null;
+  const regionItems = new Map();
+  const markRegion = (item, id) => {
+    const current = id === currentRegion;
+    item.classList.toggle('current', current);
+    if (current) item.setAttribute('aria-current', 'location');
+    else item.removeAttribute('aria-current');
+  };
 
   const on = (target, type, handler) => {
     if (!target) return;
@@ -163,6 +171,7 @@ export function createHud(root = document) {
       const list = elements.mapRegions;
       if (!list) return;
       list.textContent = '';
+      regionItems.clear();
       for (const district of districts) {
         const item = document.createElement('li');
         const name = document.createElement('b');
@@ -171,9 +180,19 @@ export function createHud(root = document) {
         subtitle.textContent = district.subtitle;
         item.appendChild(name);
         item.appendChild(subtitle);
-        if (district.playable) item.classList.add('current');
+        const status = document.createElement('small');
+        status.textContent = district.walkable ? 'OPEN FOR EXPLORATION' : 'DISTANT LANDMARK';
+        item.appendChild(status);
+        regionItems.set(district.id, item);
+        markRegion(item, district.id);
         list.appendChild(item);
       }
+    },
+
+    setCurrentRegion(id) {
+      if (id === currentRegion) return;
+      currentRegion = id;
+      for (const [regionId, item] of regionItems) markRegion(item, regionId);
     },
 
     setPlayerHealth(percent) {

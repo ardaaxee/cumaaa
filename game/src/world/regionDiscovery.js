@@ -25,15 +25,16 @@ const MIN_SPOT_DISTANCE = 40;
 /** Districts closer than this are simply entered rather than spotted. */
 const ENTER_DISTANCE = 34;
 
-export function createRegionDiscovery({ onDiscover } = {}) {
-  const discovered = new Set(initiallyDiscovered());
+export function createRegionDiscovery({ onDiscover, restored = [] } = {}) {
+  const discovered = new Set([...initiallyDiscovered(),
+    ...(Array.isArray(restored) ? restored.filter((id) => DISTRICT_IDS.includes(id)) : [])]);
   const looking = Object.create(null);
 
   /** Districts the player has seen, in catalog order. */
   const list = () => DISTRICT_IDS.filter((id) => discovered.has(id));
 
   function discover(id) {
-    if (discovered.has(id)) return false;
+    if (!DISTRICT_IDS.includes(id) || discovered.has(id)) return false;
     discovered.add(id);
     onDiscover?.(DISTRICTS[id]);
     return true;

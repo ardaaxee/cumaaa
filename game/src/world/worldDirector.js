@@ -5,8 +5,9 @@ import { createThreatState, clearThreat, setThreat, stepThreat } from './crowdRe
 import { createWorldEventDirector } from './worldEventDirector.js';
 import { WORLD_EVENT } from './worldEvents.js';
 import { createRegionDiscovery } from './regionDiscovery.js';
+import { createExplorationSave } from './explorationSave.js';
 import { createWorldAudio } from './worldAudio.js';
-import { districtAt, PLAYABLE_DISTRICT } from './districts.js';
+import { DISTRICTS, districtAt, PLAYABLE_DISTRICT } from './districts.js';
 
 /**
  * The living world, in one place.
@@ -40,8 +41,14 @@ export function createWorldDirector({
   const events = createWorldEventDirector({ seed: 0x77c17e });
   const worldAudio = createWorldAudio(audio);
 
+  const explorationSave = createExplorationSave();
   const discovery = createRegionDiscovery({
-    onDiscover: (district) => hud?.revealRegion?.(district),
+    restored: explorationSave.load(),
+    onDiscover: (district) => {
+      explorationSave.save(discovery.list());
+      hud?.revealRegion?.(district);
+      hud?.setDiscoveredRegions?.(discovery.list().map((id) => DISTRICTS[id]));
+    },
   });
 
   // Reused every frame; the world allocates nothing on the hot path.
@@ -204,6 +211,7 @@ export function createWorldDirector({
         events.update(step, eventContext);
 
         discovery.update(step, player.position, cameraYaw);
+        hud?.setCurrentRegion?.(districtAt(player.position.x, player.position.z));
 
         audioFlags.transitRunning = cityMotion?.isTransitRunning ?? false;
         audioFlags.eventCrowd = crowdEventTimer > 0;
