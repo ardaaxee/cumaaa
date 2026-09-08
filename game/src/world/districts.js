@@ -2,8 +2,8 @@
  * Aster City's districts.
  *
  * Pure data — no THREE, no DOM — so the catalog can be asserted directly.
- * Meridian Market and Crown District are playable in M04; the remaining
- * districts still exist as skyline, roads and discoverable city mass.
+ * `playable` is kept as the M03 authored-slice flag for backwards compatibility;
+ * `walkable` describes the connected ground that exists in the current runtime.
  *
  * `bounds` are world-space AABBs on the ground plane. `viewDirection` is the
  * heading, in radians, you look along from Meridian Market to see the district —
@@ -33,6 +33,7 @@ export const DISTRICTS = {
     name: 'MERIDIAN MARKET',
     subtitle: 'Trade quarter · night market',
     playable: true,
+    walkable: true,
     centre: { x: 0, z: 4 },
     bounds: { minX: -46, maxX: 46, minZ: -78, maxZ: 78 },
     viewDirection: HEADING.SOUTH,
@@ -43,7 +44,8 @@ export const DISTRICTS = {
     id: DISTRICT.CROWN_DISTRICT,
     name: 'CROWN DISTRICT',
     subtitle: 'Beneath the Crown Spire',
-    playable: true,
+    playable: false,
+    walkable: true,
     centre: { x: -26, z: -158 },
     bounds: { minX: -110, maxX: 60, minZ: -240, maxZ: -96 },
     viewDirection: HEADING.NORTH,
@@ -55,6 +57,7 @@ export const DISTRICTS = {
     name: 'OLD ASTER',
     subtitle: 'The first stones of the city',
     playable: false,
+    walkable: false,
     centre: { x: -132, z: 20 },
     bounds: { minX: -210, maxX: -70, minZ: -60, maxZ: 110 },
     viewDirection: HEADING.WEST,
@@ -66,6 +69,7 @@ export const DISTRICTS = {
     name: 'BLACKGLASS DOCKS',
     subtitle: 'Freight water, east reach',
     playable: false,
+    walkable: false,
     centre: { x: 146, z: 34 },
     bounds: { minX: 84, maxX: 230, minZ: -50, maxZ: 130 },
     viewDirection: HEADING.EAST,
@@ -77,6 +81,7 @@ export const DISTRICTS = {
     name: 'NORTHLINE',
     subtitle: 'Transit spine',
     playable: false,
+    walkable: false,
     centre: { x: -96, z: -104 },
     bounds: { minX: -190, maxX: -40, minZ: -190, maxZ: -60 },
     viewDirection: HEADING.NORTH_WEST,
@@ -86,14 +91,11 @@ export const DISTRICTS = {
 
 export const DISTRICT_IDS = Object.keys(DISTRICTS);
 
-/** All regions that currently have real walkable ground and collision. */
-export const PLAYABLE_DISTRICTS = DISTRICT_IDS.filter((id) => DISTRICTS[id].playable);
-
-/**
- * Backwards-compatible default district used by older event fallback code.
- * New code should prefer PLAYABLE_DISTRICTS when it needs the full set.
- */
+/** M03 compatibility: the one authored gameplay slice at that milestone. */
 export const PLAYABLE_DISTRICT = DISTRICT.MERIDIAN_MARKET;
+
+/** M04 runtime: every district with connected walkable ground. */
+export const WALKABLE_DISTRICTS = DISTRICT_IDS.filter((id) => DISTRICTS[id].walkable);
 
 /** Districts a fresh save already knows about. */
 export const initiallyDiscovered = () =>
@@ -107,7 +109,7 @@ export function isInsideDistrict(id, x, z) {
   return x >= bounds.minX && x <= bounds.maxX && z >= bounds.minZ && z <= bounds.maxZ;
 }
 
-/** Which district contains a point, or null. Playable districts win ties. */
+/** Which district contains a point, or null. Authored playable districts win ties. */
 export function districtAt(x, z) {
   let fallback = null;
   for (const id of DISTRICT_IDS) {
