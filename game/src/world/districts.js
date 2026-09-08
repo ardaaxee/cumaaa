@@ -1,9 +1,9 @@
 /**
  * Aster City's districts.
  *
- * Pure data — no THREE, no DOM — so the catalog can be asserted directly. Only
- * Meridian Market is playable in this slice; the rest exist as skyline, roads
- * and corridors the player can see the city continuing into.
+ * Pure data — no THREE, no DOM — so the catalog can be asserted directly.
+ * Meridian Market and Crown District are playable in M04; the remaining
+ * districts still exist as skyline, roads and discoverable city mass.
  *
  * `bounds` are world-space AABBs on the ground plane. `viewDirection` is the
  * heading, in radians, you look along from Meridian Market to see the district —
@@ -36,7 +36,6 @@ export const DISTRICTS = {
     centre: { x: 0, z: 4 },
     bounds: { minX: -46, maxX: 46, minZ: -78, maxZ: 78 },
     viewDirection: HEADING.SOUTH,
-    // Discovered as soon as the game starts: it is where Cuma is standing.
     discoveredAtStart: true,
   },
 
@@ -44,7 +43,7 @@ export const DISTRICTS = {
     id: DISTRICT.CROWN_DISTRICT,
     name: 'CROWN DISTRICT',
     subtitle: 'Beneath the Crown Spire',
-    playable: false,
+    playable: true,
     centre: { x: -26, z: -158 },
     bounds: { minX: -110, maxX: 60, minZ: -240, maxZ: -96 },
     viewDirection: HEADING.NORTH,
@@ -87,7 +86,13 @@ export const DISTRICTS = {
 
 export const DISTRICT_IDS = Object.keys(DISTRICTS);
 
-/** The one district the player can actually walk around in this slice. */
+/** All regions that currently have real walkable ground and collision. */
+export const PLAYABLE_DISTRICTS = DISTRICT_IDS.filter((id) => DISTRICTS[id].playable);
+
+/**
+ * Backwards-compatible default district used by older event fallback code.
+ * New code should prefer PLAYABLE_DISTRICTS when it needs the full set.
+ */
 export const PLAYABLE_DISTRICT = DISTRICT.MERIDIAN_MARKET;
 
 /** Districts a fresh save already knows about. */
