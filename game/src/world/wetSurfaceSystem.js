@@ -67,13 +67,17 @@ export function createWetSurfaceSystem(scene, { roadMaterials = [], reflectionMe
   puddles.instanceMatrix.needsUpdate = true;
   group.add(puddles);
 
-  // Baseline values, so the system can interpolate rather than assume.
-  const baselines = roadMaterials.map((material) => ({
-    material,
-    roughness: material.roughness,
-    metalness: material.metalness,
-    envMapIntensity: material.envMapIntensity ?? 1,
-  }));
+  // Baseline values, so the system can interpolate rather than assume. A
+  // transparent material can be water or glass; treating it as asphalt would
+  // make Crown's reflecting pools turn matte when the weather dries.
+  const baselines = roadMaterials
+    .filter((material) => !material.transparent)
+    .map((material) => ({
+      material,
+      roughness: material.roughness,
+      metalness: material.metalness,
+      envMapIntensity: material.envMapIntensity ?? 1,
+    }));
 
   const reflectionBase = reflectionMesh?.material?.opacity ?? 0.3;
 
