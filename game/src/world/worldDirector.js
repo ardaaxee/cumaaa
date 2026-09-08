@@ -6,6 +6,7 @@ import { createWorldEventDirector } from './worldEventDirector.js';
 import { WORLD_EVENT } from './worldEvents.js';
 import { createRegionDiscovery } from './regionDiscovery.js';
 import { createExplorationSave } from './explorationSave.js';
+import { createWaypointTracker } from './waypoint.js';
 import { createWorldAudio } from './worldAudio.js';
 import { DISTRICTS, districtAt, PLAYABLE_DISTRICT } from './districts.js';
 
@@ -42,6 +43,7 @@ export function createWorldDirector({
   const worldAudio = createWorldAudio(audio);
 
   const explorationSave = createExplorationSave();
+  const waypoint = createWaypointTracker();
   const discovery = createRegionDiscovery({
     restored: explorationSave.load(),
     onDiscover: (district) => {
@@ -50,6 +52,18 @@ export function createWorldDirector({
       hud?.setDiscoveredRegions?.(discovery.list().map((id) => DISTRICTS[id]));
     },
   });
+  if (hud) {
+    hud.onSelectWaypoint = (id) => {
+      const selected = waypoint.select(id, discovery.list());
+      if (selected) hud.setWaypointTarget?.(id);
+      return selected;
+    };
+    hud.onClearWaypoint = () => {
+      waypoint.clear();
+      hud.setWaypointTarget?.(null);
+      hud.setWaypoint?.(null);
+    };
+  }
 
   // Reused every frame; the world allocates nothing on the hot path.
   const fogColor = new THREE.Color();
@@ -212,6 +226,12 @@ export function createWorldDirector({
 
         discovery.update(step, player.position, cameraYaw);
         hud?.setCurrentRegion?.(districtAt(player.position.x, player.position.z));
+        const guidance = waypoint.update(player.position, cameraYaw);
+        if (guidance?.arrived) {
+          hud?.say?.(`${guidance.name} · VARILDI`, 2400);
+          hud?.setWaypointTarget?.(null);
+        }
+        hud?.setWaypoint?.(guidance?.arrived ? null : guidance);
 
         audioFlags.transitRunning = cityMotion?.isTransitRunning ?? false;
         audioFlags.eventCrowd = crowdEventTimer > 0;
@@ -220,6 +240,10 @@ export function createWorldDirector({
     },
 
     dispose() {
+      if (hud) {
+        hud.onSelectWaypoint = null;
+        hud.onClearWaypoint = null;
+      }
       worldAudio.silence();
       listeners.length = 0;
     },

@@ -45,17 +45,22 @@
         <b id="regionName"></b>
       </div>
       <div id="msg"></div>
+      <div id="waypoint" class="hidden">
+        <span id="waypointArrow" aria-hidden="true">↑</span>
+        <span><b id="waypointName"></b><small id="waypointDistance"></small></span>
+      </div>
     </div>
 
     <button id="cine" type="button" title="9:16 capture (C)">CINE</button>
     <button id="shoulder" type="button" title="Camera mode (V)">CAM</button>
-    <button id="map" type="button" title="Map (M)">MAP</button>
+    <button id="map" type="button" title="Map (M)" aria-controls="mapPanel" aria-expanded="false">MAP</button>
 
     <div id="mapPanel" class="hidden">
-      <h2>ASTER CITY</h2>
+      <div class="mapHeader"><h2>ASTER CITY</h2><button id="closeMap" type="button" aria-label="Haritayı kapat">KAPAT</button></div>
       <!-- Filled from what the player has actually seen. -->
       <ul id="mapRegions"></ul>
-      <p class="mapHint">Unvisited districts appear as you find them.</p>
+      <button id="clearWaypoint" type="button" class="hidden">HEDEFİ KALDIR</button>
+      <p class="mapHint">Keşfettiğin açık bölgelerden bir hedef seç. Ok hedefin yönünü, mesafe kuş uçuşu uzaklığı gösterir.</p>
     </div>
 
     <div id="controls">

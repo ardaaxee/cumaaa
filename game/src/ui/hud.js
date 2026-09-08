@@ -30,16 +30,23 @@ export function createHud(root = document) {
     cineButton: root.querySelector('#cine'),
     modeLabel: root.querySelector('#cameraMode'),
     frame: root.querySelector('#captureFrame'),
+    closeMap: root.querySelector('#closeMap'),
+    clearWaypoint: root.querySelector('#clearWaypoint'),
+    waypoint: root.querySelector('#waypoint'),
+    waypointArrow: root.querySelector('#waypointArrow'),
+    waypointName: root.querySelector('#waypointName'),
+    waypointDistance: root.querySelector('#waypointDistance'),
   };
 
   const listeners = [];
   const timers = new Set();
-  const handlers = { onToggleMap: null, onToggleCapture: null };
+  const handlers = { onToggleMap: null, onToggleCapture: null, onSelectWaypoint: null, onClearWaypoint: null };
 
   let messageTimer = null;
   let mapOpen = false;
   let captureMode = false;
   let currentRegion = null;
+  let waypointTarget = null;
   const regionItems = new Map();
   const markRegion = (item, id) => {
     const current = id === currentRegion;
@@ -67,7 +74,10 @@ export function createHud(root = document) {
   const toggleMap = () => {
     mapOpen = !mapOpen;
     elements.mapPanel?.classList.toggle('hidden', !mapOpen);
+    elements.mapButton?.setAttribute('aria-expanded', String(mapOpen));
     handlers.onToggleMap?.(mapOpen);
+    if (mapOpen) elements.closeMap?.focus();
+    else elements.mapButton?.focus();
   };
 
   const toggleCapture = () => {
@@ -79,8 +89,18 @@ export function createHud(root = document) {
   };
 
   on(elements.mapButton, 'click', toggleMap);
+  on(elements.closeMap, 'click', () => { if (mapOpen) toggleMap(); });
+  on(elements.clearWaypoint, 'click', () => handlers.onClearWaypoint?.());
+  // Delegate clicks: rebuilding the discovery list never accumulates listeners.
+  on(elements.mapRegions, 'click', (event) => {
+    const button = event.target.closest?.('button[data-region]');
+    if (!button || !elements.mapRegions.contains(button)) return;
+    if (handlers.onSelectWaypoint?.(button.dataset.region)) toggleMap();
+  });
   on(elements.cineButton, 'click', toggleCapture);
   on(window, 'keydown', (event) => {
+    if (event.repeat || event.target?.isContentEditable || /^(INPUT|TEXTAREA|SELECT)$/.test(event.target?.tagName)) return;
+    if (event.code === 'Escape' && mapOpen) toggleMap();
     if (event.code === 'KeyM') toggleMap();
     if (event.code === 'KeyC') toggleCapture();
   });
@@ -98,6 +118,8 @@ export function createHud(root = document) {
     set onToggleCapture(fn) {
       handlers.onToggleCapture = fn;
     },
+    set onSelectWaypoint(fn) { handlers.onSelectWaypoint = fn; },
+    set onClearWaypoint(fn) { handlers.onClearWaypoint = fn; },
 
     say(text, duration = 1400) {
       if (!elements.message) return;
@@ -183,6 +205,15 @@ export function createHud(root = document) {
         const status = document.createElement('small');
         status.textContent = district.walkable ? 'OPEN FOR EXPLORATION' : 'DISTANT LANDMARK';
         item.appendChild(status);
+        if (district.walkable) {
+          const button = document.createElement('button');
+          button.type = 'button';
+          button.dataset.region = district.id;
+          button.textContent = 'HEDEF SEÇ';
+          button.setAttribute('aria-label', `${district.name} hedefini seç`);
+          button.setAttribute('aria-pressed', String(waypointTarget === district.id));
+          item.appendChild(button);
+        }
         regionItems.set(district.id, item);
         markRegion(item, district.id);
         list.appendChild(item);
@@ -193,6 +224,22 @@ export function createHud(root = document) {
       if (id === currentRegion) return;
       currentRegion = id;
       for (const [regionId, item] of regionItems) markRegion(item, regionId);
+    },
+
+    setWaypointTarget(id) {
+      waypointTarget = id;
+      elements.clearWaypoint?.classList.toggle('hidden', !id);
+      for (const [regionId, item] of regionItems) {
+        item.querySelector('button')?.setAttribute('aria-pressed', String(regionId === id));
+      }
+    },
+
+    setWaypoint(guidance) {
+      elements.waypoint?.classList.toggle('hidden', !guidance);
+      if (!guidance) return;
+      if (elements.waypointName) elements.waypointName.textContent = guidance.name;
+      if (elements.waypointDistance) elements.waypointDistance.textContent = `${Math.round(guidance.distance)} m · KUŞ UÇUŞU`;
+      if (elements.waypointArrow) elements.waypointArrow.style.transform = `rotate(${guidance.angle}rad)`;
     },
 
     setPlayerHealth(percent) {
