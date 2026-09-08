@@ -2,13 +2,15 @@ import * as THREE from 'three';
 import { createRandom, range } from '../core/random.js';
 import { createReflectionStreak, createWetRoadRoughness } from './textures.js';
 import { createMeridianMarket } from './meridianMarket.js';
+import { createCrownDistrict } from './crownDistrict.js';
+import { WALKABLE_BOUNDS, constrainToWalkable } from './walkableWorld.js';
 
 /**
- * Aster City — Meridian Market, night, rain.
+ * Aster City — Meridian Market into Crown District.
  *
- * The legacy block layout is preserved; what is added is wetness, warm interior
- * light, reflection smears on the road and foreground silhouettes for the hero
- * moment to sweep past. Deliberately restrained: no neon walls, no bloom bath.
+ * The legacy Meridian block layout is preserved; M04 extends the same scene
+ * north into Crown without a loading screen. Wetness, warm interiors and the
+ * distant skyline remain shared so the two districts still feel like one city.
  */
 
 const STREET_HALF_WIDTH = 9;
@@ -132,10 +134,14 @@ export function createAsterCity(scene) {
   const streaks = buildReflectionStreaks(windowTransforms, track);
   if (streaks) group.add(streaks);
 
-  // The market's own layered detail: alleys, plaza, stalls, stairs, balconies,
-  // the footbridge and every doorway that hints at an interior.
+  // Meridian keeps its dense, layered street identity.
   const market = createMeridianMarket(scene);
   for (const collider of market.colliders) colliders.push(collider);
+
+  // Crown is a second real district in the same world: broad civic space,
+  // corporate podiums and the physical base of the Crown Spire.
+  const crown = createCrownDistrict(scene);
+  for (const collider of crown.colliders) colliders.push(collider);
 
   // --- Foreground silhouettes -------------------------------------------
   // Unlit pillars and awnings close to the street. During the hero orbit they
@@ -206,10 +212,17 @@ export function createAsterCity(scene) {
     group,
     colliders,
     marketCentre: [0, 1.6, -4],
-    bounds: { minX: -46, maxX: 46, minZ: -78, maxZ: 78 },
+
+    // main.js still passes city.bounds to Cuma. The attached constraint lets
+    // the character cross a union of connected regions rather than being
+    // clamped to one giant rectangle containing unreachable void.
+    bounds: {
+      ...WALKABLE_BOUNDS,
+      constrain: constrainToWalkable,
+    },
 
     /** Surfaces the wet-surface system reads and writes. */
-    roadMaterials: [streetMaterial, groundMaterial],
+    roadMaterials: [streetMaterial, groundMaterial, ...crown.roadMaterials],
     reflectionMesh: streaks,
 
     /**
@@ -230,6 +243,7 @@ export function createAsterCity(scene) {
     lightingBaseline: { ambient: baseAmbient, key: baseKey, windowLight: 1 },
 
     dispose() {
+      crown.dispose();
       market.dispose();
       scene.remove(group);
       scene.remove(hemisphere);
