@@ -46,6 +46,13 @@ export const WALKABLE_REGIONS = [
   ),
 ];
 
+export const WALKABLE_BOUNDS = Object.freeze({
+  minX: Math.min(...WALKABLE_REGIONS.map((region) => region.minX)),
+  maxX: Math.max(...WALKABLE_REGIONS.map((region) => region.maxX)),
+  minZ: Math.min(...WALKABLE_REGIONS.map((region) => region.minZ)),
+  maxZ: Math.max(...WALKABLE_REGIONS.map((region) => region.maxZ)),
+});
+
 export function isInsideWalkableRegion(region, x, z) {
   return x >= region.minX && x <= region.maxX && z >= region.minZ && z <= region.maxZ;
 }
