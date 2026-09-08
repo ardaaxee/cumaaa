@@ -7,7 +7,16 @@ import { clamp } from '../core/mathx.js';
  * Cuma. Owns the movement state, the rig and the animation driver, and is the
  * only thing that writes the character's world transform.
  */
-export function createCharacter(scene, { startX = 0, startZ = 26, startFacing = 0, bounds } = {}) {
+export function createCharacter(
+  scene,
+  {
+    startX = 0,
+    startZ = 26,
+    startFacing = 0,
+    bounds,
+    constrainPosition = null,
+  } = {},
+) {
   const rig = createCharacterRig();
   const animator = createAnimationDriver(rig);
   const state = createLocomotionState(startX, startZ, startFacing);
@@ -26,7 +35,16 @@ export function createCharacter(scene, { startX = 0, startZ = 26, startFacing = 
     strafeMode: false,
   };
 
+  // Reused by connected-world constraints so locomotion stays allocation-free.
+  const constrained = { x: startX, z: startZ };
+
   function applyBounds() {
+    if (constrainPosition) {
+      constrainPosition(state.position.x, state.position.z, constrained);
+      state.position.x = constrained.x;
+      state.position.z = constrained.z;
+      return;
+    }
     if (!bounds) return;
     state.position.x = clamp(state.position.x, bounds.minX, bounds.maxX);
     state.position.z = clamp(state.position.z, bounds.minZ, bounds.maxZ);
