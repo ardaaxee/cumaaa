@@ -2,25 +2,32 @@ import * as THREE from 'three';
 import { PERFORMANCE } from '../core/settings.js';
 import { createRandom, range } from '../core/random.js';
 import { REACTION, reactionFor, speedScaleFor } from './crowdReactions.js';
+import { constrainToWalkable } from './walkableWorld.js';
 
 /**
- * TIER C — background crowd.
+ * TIER C — background crowd shared by Meridian Market and Crown District.
  *
- * The cheapest people in Aster City: they walk the street on rails, and the
- * only decision they ever make is whether to get out of the way. Two instanced
- * meshes and a bounded update — only a fixed number of agents are re-integrated
- * per frame, each catching up on the time that actually passed since it was
- * last touched, and distant agents are parked entirely.
- *
- * The local residents with real schedules are Tier B, in `npcSystem.js`.
+ * The total population budget does not grow in M04. A portion of the existing
+ * instanced agents now lives on Crown Plaza loops, so opening a second district
+ * adds life without adding another draw-call set or another update system.
  */
 
 const FAR_DISTANCE = 62;
-const TURN_AROUND_Z = 76;
+const MARKET_TURN = 76;
+const CROWN_MIN_Z = -190;
+const CROWN_MAX_Z = -124;
+
+const ROUTE = {
+  MARKET: 0,
+  CROWN_WEST: 1,
+  CROWN_EAST: 2,
+};
 
 export function createCrowd(scene) {
   const random = createRandom(0xc0ffee1);
   const count = PERFORMANCE.CROWD_COUNT;
+  const crownCount = Math.max(6, Math.floor(count * 0.28));
+  const crownStart = Math.max(0, count - crownCount);
 
   const bodyGeometry = new THREE.CapsuleGeometry(0.22, 0.95, 4, 8);
   const bodyMaterial = new THREE.MeshStandardMaterial({
@@ -50,25 +57,37 @@ export function createCrowd(scene) {
   const phase = new Float32Array(count);
   const hasUmbrella = new Uint8Array(count);
   const lastTouched = new Float32Array(count);
-  /** Lateral drift used when a bystander is getting out of the way. */
+  const route = new Uint8Array(count);
   const shove = new Float32Array(count);
 
   for (let i = 0; i < count; i += 1) {
     direction[i] = random() > 0.5 ? 1 : -1;
-    x[i] = (random() > 0.5 ? 1 : -1) * range(random, 4.2, 8.4);
-    z[i] = range(random, -TURN_AROUND_Z, TURN_AROUND_Z);
     speed[i] = range(random, 0.85, 1.55);
     phase[i] = random() * Math.PI * 2;
     hasUmbrella[i] = random() > 0.35 ? 1 : 0;
+
+    if (i < crownStart) {
+      route[i] = ROUTE.MARKET;
+      x[i] = (random() > 0.5 ? 1 : -1) * range(random, 4.2, 8.4);
+      z[i] = range(random, -MARKET_TURN, MARKET_TURN);
+      continue;
+    }
+
+    // Two clean lanes around the Spire base. They sit just outside the plinth
+    // radius and avoid both reflecting pools and the four podium footprints.
+    const west = (i - crownStart) % 2 === 0;
+    route[i] = west ? ROUTE.CROWN_WEST : ROUTE.CROWN_EAST;
+    x[i] = west ? range(random, -45.5, -43.0) : range(random, -9.0, -6.8);
+    z[i] = range(random, CROWN_MIN_Z, CROWN_MAX_Z);
   }
 
   const dummy = new THREE.Object3D();
   const hidden = new THREE.Matrix4().makeScale(0, 0, 0);
+  const constrained = { x: 0, z: 0 };
   let cursor = 0;
   let clock = 0;
   let umbrellaWeight = 1;
 
-  // Everything starts placed so the first frames are not empty.
   for (let i = 0; i < count; i += 1) writeAgent(i);
 
   function writeAgent(i) {
@@ -88,9 +107,25 @@ export function createCrowd(scene) {
     }
   }
 
-  /**
-   * @param {object} threat crowd-reaction threat state; may be inert
-   */
+  function wrapRoute(i) {
+    if (route[i] === ROUTE.MARKET) {
+      if (z[i] > MARKET_TURN) z[i] = -MARKET_TURN;
+      if (z[i] < -MARKET_TURN) z[i] = MARKET_TURN;
+      x[i] = THREE.MathUtils.clamp(x[i], -13.5, 13.5);
+      return;
+    }
+
+    if (z[i] > CROWN_MAX_Z) z[i] = CROWN_MIN_Z;
+    if (z[i] < CROWN_MIN_Z) z[i] = CROWN_MAX_Z;
+
+    // Reactions may shove an agent laterally. Reuse the exact same authored
+    // ground constraint as Cuma so nobody runs through the Spire or a podium.
+    constrainToWalkable(x[i], z[i], constrained);
+    x[i] = constrained.x;
+    z[i] = constrained.z;
+  }
+
+  /** @param {object} threat crowd-reaction threat state; may be inert */
   function update(dt, playerX, playerZ, threat) {
     clock += dt;
     const alarmed = threat && threat.intensity > 0.02;
@@ -107,12 +142,10 @@ export function createCrowd(scene) {
       const dx = x[i] - playerX;
       const dz = z[i] - playerZ;
       if (dx * dx + dz * dz > FAR_DISTANCE * FAR_DISTANCE) {
-        // Out of sight: park it rather than paying for a matrix write.
         bodies.setMatrixAt(i, hidden);
         umbrellas.setMatrixAt(i, hidden);
         z[i] += direction[i] * speed[i] * elapsed;
-        if (z[i] > TURN_AROUND_Z) z[i] = -TURN_AROUND_Z;
-        if (z[i] < -TURN_AROUND_Z) z[i] = TURN_AROUND_Z;
+        wrapRoute(i);
         continue;
       }
 
@@ -125,24 +158,18 @@ export function createCrowd(scene) {
         scale = speedScaleFor(reaction);
 
         if (reaction === REACTION.FLEE_AREA || reaction === REACTION.AVOID) {
-          // Push toward the pavement, away from whatever is in the street.
           const away = Math.sign(x[i] - threat.x) || 1;
           shove[i] = Math.min(3.4, shove[i] + elapsed * 2.2);
           x[i] += away * elapsed * 1.6;
-          // And hurry off along the street rather than walking into it.
           if (Math.sign(z[i] - threat.z) !== direction[i]) direction[i] *= -1;
         }
       } else if (shove[i] > 0) {
-        // Drift back toward the walking line once things calm down.
         shove[i] = Math.max(0, shove[i] - elapsed * 0.6);
       }
 
       z[i] += direction[i] * speed[i] * scale * elapsed;
       phase[i] += elapsed * speed[i] * scale * 3.6;
-      if (z[i] > TURN_AROUND_Z) z[i] = -TURN_AROUND_Z;
-      if (z[i] < -TURN_AROUND_Z) z[i] = TURN_AROUND_Z;
-      x[i] = THREE.MathUtils.clamp(x[i], -13.5, 13.5);
-
+      wrapRoute(i);
       writeAgent(i);
     }
 
@@ -154,6 +181,10 @@ export function createCrowd(scene) {
     update,
     setRainWeight(value) {
       umbrellaWeight = value;
+    },
+    /** Development/test visibility without exposing the typed arrays for writes. */
+    get distribution() {
+      return { market: crownStart, crown: count - crownStart };
     },
     dispose() {
       scene.remove(bodies);
