@@ -23,6 +23,10 @@ export function createCharacter(
 
   scene.add(rig.root);
 
+  // A world can attach a richer constraint to its bounds while old callers can
+  // keep using a plain rectangle. Explicit constructor input wins when supplied.
+  const positionConstraint = constrainPosition ?? bounds?.constrain ?? null;
+
   // Reusable input struct: the character never allocates per frame.
   const frameInput = {
     moveX: 0,
@@ -39,8 +43,8 @@ export function createCharacter(
   const constrained = { x: startX, z: startZ };
 
   function applyBounds() {
-    if (constrainPosition) {
-      constrainPosition(state.position.x, state.position.z, constrained);
+    if (positionConstraint) {
+      positionConstraint(state.position.x, state.position.z, constrained);
       state.position.x = constrained.x;
       state.position.z = constrained.z;
       return;
