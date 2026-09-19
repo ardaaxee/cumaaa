@@ -129,8 +129,8 @@ const DEFAULT_SETTINGS: Settings = {
 }
 
 const DEFAULT_PROFILE: Profile = {
-  name: 'CUMA',
-  username: 'cuma',
+  name: 'Player',
+  username: 'player',
   about: 'Building things in a small digital room.',
   favoriteProject: 'ARDA ROOM',
   currentGoal: 'Ship something real.',

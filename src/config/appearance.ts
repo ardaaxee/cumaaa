@@ -1,6 +1,8 @@
+import { normalizeCharacterId } from './characters'
+
 // What a person looks like, as data.
 //
-// Nothing here is specific to ZEYNEP or CUMA: they are two presets of the same
+// Atlas and Mira are two fictional presets of the same
 // structure, and a player-made character is a third. Every field drives real
 // geometry — a narrower jaw moves vertices, a different nose is a different
 // shape — rather than only tinting a shared mesh. Telling two characters apart
@@ -141,13 +143,10 @@ export interface AvatarProfile {
 }
 
 // ---- Presets ---------------------------------------------------------------
-// ZEYNEP's preset follows a reference the project owner supplied: long dark
-// wavy hair that frames the face, thin round wire glasses, dark eyes, soft
-// features, a red top. These are ordinary descriptive parameters, not a
-// likeness — the reference is not shipped, sampled or drawn anywhere.
+// Fictional cast presets. Geometry stays lightweight across quality tiers.
 
-export const ZEYNEP_PROFILE: AvatarProfile = {
-  id: 'zeynep',
+export const MIRA_PROFILE: AvatarProfile = {
+  id: 'mira',
   presentation: 'feminine',
   build: { shoulder: 0.176, hip: 0.115, scale: 0.965, waist: 0.128 },
   face: {
@@ -190,8 +189,8 @@ export const ZEYNEP_PROFILE: AvatarProfile = {
   accessories: ['glasses'],
 }
 
-export const CUMA_PROFILE: AvatarProfile = {
-  id: 'cuma',
+export const ATLAS_PROFILE: AvatarProfile = {
+  id: 'atlas',
   presentation: 'masculine',
   build: { shoulder: 0.208, hip: 0.104, scale: 1, waist: 0.142 },
   face: {
@@ -228,21 +227,12 @@ export const CUMA_PROFILE: AvatarProfile = {
 }
 
 const PRESETS: Record<string, AvatarProfile> = {
-  zeynep: ZEYNEP_PROFILE,
-  cuma: CUMA_PROFILE,
+  mira: MIRA_PROFILE,
+  atlas: ATLAS_PROFILE,
 }
 
-/**
- * Which preset a display name maps to. This is the seam a character creator
- * replaces later: it hands back a profile, and nothing downstream cares whether
- * that profile came from a preset or from a player's saved choices.
- */
-export function profileFor(name: string): AvatarProfile {
-  return name.trim().toUpperCase().startsWith('Z') ? ZEYNEP_PROFILE : CUMA_PROFILE
-}
-
-export function profileById(id: string): AvatarProfile | undefined {
-  return PRESETS[id]
+export function profileById(id: string): AvatarProfile {
+  return PRESETS[normalizeCharacterId(id)]
 }
 
 export const PRESET_IDS = Object.keys(PRESETS)

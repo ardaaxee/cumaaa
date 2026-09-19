@@ -135,7 +135,7 @@ export function Hud() {
           </button>
           {!isTouch && (
             <button className={barBtn(false)} onClick={openPanel(() => setActivePanel('pc'))}>
-              ▤ CUMA OS
+              ▤ ROOM OS
             </button>
           )}
           {!isTouch && <WeatherControl />}
@@ -180,7 +180,7 @@ export function Hud() {
       {/* Touch: everything that does not fit the bar, one tap away. */}
       {isTouch && moreOpen && (
         <div className="pointer-events-auto absolute left-2 top-12 z-30 flex w-44 flex-col gap-1 rounded-xl border border-white/12 bg-ink-900/95 p-2 backdrop-blur-md">
-          <SheetItem label="▤  CUMA OS" onClick={openPanel(() => setActivePanel('pc'))} />
+          <SheetItem label="▤  ROOM OS" onClick={openPanel(() => setActivePanel('pc'))} />
           <SheetItem label="◉  PROFILE" onClick={openPanel(() => useAppStore.getState().openMenu('profile'))} />
           <SheetItem label="⚙  SETTINGS" onClick={openPanel(() => useAppStore.getState().openMenu('settings'))} />
           <div className="px-1 pt-1">

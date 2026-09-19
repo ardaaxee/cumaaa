@@ -79,7 +79,7 @@ export function AuthScreen({ mode }: { mode: 'signin' | 'register' }) {
               className={inputClass}
               value={displayName}
               maxLength={16}
-              placeholder="CUMA"
+              placeholder="Player name"
               onChange={(e) => setDisplayName(e.target.value)}
             />
           </MenuField>
@@ -123,7 +123,7 @@ export function AuthScreen({ mode }: { mode: 'signin' | 'register' }) {
           disabled={busy}
           onClick={() => {
             Sfx.click()
-            continueAsGuest(displayName || 'CUMA')
+            continueAsGuest(displayName || 'Player')
           }}
         >
           Continue as guest

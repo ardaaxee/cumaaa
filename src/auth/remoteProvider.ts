@@ -180,7 +180,7 @@ export class RemoteAuthProvider implements AuthProvider {
   }
 
   async signInAsGuest(displayName: string): Promise<Session> {
-    const name = validDisplayName(displayName) ?? 'CUMA'
+    const name = validDisplayName(displayName) ?? 'Player'
     const session = parseSession(
       await this.call('/auth/guest', { method: 'POST', body: JSON.stringify({ displayName: name }) }),
     )

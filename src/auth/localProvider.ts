@@ -115,7 +115,7 @@ export class LocalAuthProvider implements AuthProvider {
   }
 
   async signInAsGuest(displayName: string): Promise<Session> {
-    const name = validDisplayName(displayName) ?? 'CUMA'
+    const name = validDisplayName(displayName) ?? 'Player'
     const user: AuthUser = {
       id: newId(),
       displayName: name,

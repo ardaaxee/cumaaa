@@ -8,7 +8,7 @@ import { isHighTier, isUltra } from '../../utils/device'
 import { Avatar, type AvatarRig } from '../characters/Avatar'
 import { animateAvatar } from '../characters/animate'
 import { applyFootIk, applyMicroAnimation, newMicroState } from '../characters/microAnim'
-import { profileById, profileFor } from '../../config/appearance'
+import { profileById } from '../../config/appearance'
 import { animateFace, animateHair, newFaceMemory, type Expression } from '../characters/faceAnim'
 import { usePeerHeld } from '../../systems/items'
 import { HeldInHand, itemSeg } from '../items/ItemViews'
@@ -46,9 +46,8 @@ export function RemotePlayer({ id, name, look, quality }: { id: string; name: st
   const seg = Math.max(6, tierSeg - lod * 4)
   const detail = isHighTier(quality) && lod === 0
   // Their appearance comes from the id the SERVER gave us, not from parsing
-  // their display name. Falling back to the name keeps single-player and older
-  // servers working.
-  const profile = useMemo(() => (look && profileById(look)) || profileFor(name), [look, name])
+  // their display name. Unknown IDs use Atlas; legacy IDs normalize explicitly.
+  const profile = useMemo(() => profileById(look ?? 'atlas'), [look])
   // What they are carrying comes from the shared item map, not from their
   // transform packet: the item is already synced, so the hand just reads it.
   const held = usePeerHeld(id)

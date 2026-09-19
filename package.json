@@ -9,6 +9,7 @@
     "build": "tsc --noEmit && vite build",
     "preview": "vite preview",
     "typecheck": "tsc --noEmit",
+    "test:characters": "node --import tsx --test tests/characters*.test.ts",
     "server": "tsx server/index.ts",
     "typecheck:server": "tsc --noEmit -p server/tsconfig.json",
     "dev:all": "concurrently -n client,server -c cyan,magenta \"npm:dev\" \"npm:server\""

@@ -21,7 +21,7 @@ import {
   type WorldItem,
 } from '../network/protocol'
 import { ITEM_RULES } from '../config/items'
-import { profileFor } from '../config/appearance'
+import { useCharacterStore } from './useCharacterStore'
 import { useRoomStore } from './useRoomStore'
 import { resetActions } from '../components/characters/actions'
 
@@ -123,7 +123,7 @@ interface MultiplayerState {
 // Which appearance this client is wearing. The server validates it and hands
 // it to the partner, so nobody has to guess a look from a display name.
 function myLook(): string {
-  return profileFor(useRoomStore.getState().profile.name).id
+  return useCharacterStore.getState().characterId
 }
 
 let client: NetworkClient | null = null
@@ -250,7 +250,7 @@ export const useMultiplayerStore = create<MultiplayerState>((set, get) => {
     roomId: null,
     playerId: null,
     role: null,
-    selfName: 'CUMA',
+    selfName: 'Player',
     peers: [],
     world: emptyRoomState(''),
     lastError: null,
@@ -262,14 +262,14 @@ export const useMultiplayerStore = create<MultiplayerState>((set, get) => {
     moviePanelOpen: false,
 
     createHome: (name, homeName) => {
-      const self = name.trim() || 'CUMA'
+      const self = name.trim() || 'Player'
       set({ selfName: self, lastError: null })
       intent = { type: 'create', name: self, homeName }
       ensureClient().connect()
     },
     joinHome: (roomId, name) => {
       const code = normalizeRoomCode(roomId)
-      const self = name.trim() || 'ZEYNEP'
+      const self = name.trim() || 'Player'
       if (!code) {
         set({ lastError: 'HOME_NOT_FOUND', selfName: self })
         return
