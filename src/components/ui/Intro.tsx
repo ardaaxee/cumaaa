@@ -44,7 +44,7 @@ export function Intro() {
         animate={{ opacity: 1, y: 0, letterSpacing: '0.4em' }}
         transition={{ duration: 1.4, ease: 'easeOut' }}
       >
-        ARDA ROOM
+        CUMA ROOM
       </motion.h1>
 
       <motion.p

@@ -8,7 +8,7 @@ import { Sfx } from '../../systems/audioSystem'
 
 function useDisplayName(): string {
   const user = useAuthStore((s) => s.user)
-  return user?.displayName ?? 'CUMA'
+  return user?.displayName ?? 'Player'
 }
 
 // Opening a new home: name it, then the server hands back the code to share.

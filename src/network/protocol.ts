@@ -1,3 +1,5 @@
+import { DEFAULT_CHARACTER, normalizeCharacterId, STORY_CHARACTERS } from '../config/characters'
+
 // Shared, typed network protocol for ARDA HOME co-op. Imported by BOTH the
 // browser client (src/) and the Node server (server/), so it must stay free of
 // any DOM or Node dependency — plain types + pure helpers only.
@@ -46,13 +48,12 @@ export interface PeerInfo {
   look: string
 }
 
-// Appearance presets the server will accept. Kept here rather than imported
-// from the client catalogue so the protocol stays loadable by Node on its own.
-export const LOOK_IDS = ['zeynep', 'cuma'] as const
-export const DEFAULT_LOOK = 'cuma'
+// The shared catalogue contains only plain data and stays loadable by Node.
+export const LOOK_IDS = STORY_CHARACTERS.map(character => character.id)
+export const DEFAULT_LOOK = DEFAULT_CHARACTER
 
 export function sanitizeLook(raw: unknown): string {
-  return typeof raw === 'string' && (LOOK_IDS as readonly string[]).includes(raw) ? raw : DEFAULT_LOOK
+  return normalizeCharacterId(raw)
 }
 
 // ---- Home + lobby ---------------------------------------------------------

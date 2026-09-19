@@ -112,8 +112,8 @@ export function MainMenu() {
     <AnimatePresence mode="wait">
       <MenuStage
         key="main"
-        eyebrow={signedIn ? 'A HOME FOR TWO' : 'WELCOME'}
-        title="CUMA HOME"
+        eyebrow={signedIn ? 'EXPLORE TOGETHER' : 'WELCOME'}
+        title="CUMA ROOM"
         subtitle={
           signedIn
             ? isTouch
@@ -160,7 +160,7 @@ export function MainMenu() {
                     setStage('playing')
                   }}
                 />
-                <StageLine label="◉  Profile" onClick={() => { Sfx.click(); setScreen('profile') }} />
+                <StageLine label="◉  Characters" onClick={() => { Sfx.click(); setScreen('profile') }} />
                 <StageLine label="⚙  Settings" onClick={() => { Sfx.click(); setScreen('settings') }} />
                 <StageLine
                   label={isTouch ? '?  Help' : '?  How to play'}
@@ -185,7 +185,7 @@ export function MainMenu() {
               <StageAction
                 glyph="+"
                 title="CREATE ACCOUNT"
-                note="Your name is how your partner finds you"
+                note="Choose your player name"
                 onClick={() => {
                   Sfx.click()
                   openAuth('register')

@@ -90,7 +90,7 @@ export const Face = forwardRef<FaceRig, FaceProps>(function Face({ profile, seg,
   // Face resolution follows the tier: this is the one mesh worth spending on.
   const headSeg = detail ? Math.round(seg * 2) : Math.max(14, Math.round(seg * 1.4))
   const radial = Math.max(8, Math.round(seg * 0.8))
-  const seed = profile.id === 'zeynep' ? 3 : 7
+  const seed = profile.id === 'mira' ? 3 : 7
   // ---- Where the features sit ------------------------------------------
   // Every one of these is measured against the head's ACTUAL surface at that
   // height rather than typed in. The old hand-picked depths had been tuned once

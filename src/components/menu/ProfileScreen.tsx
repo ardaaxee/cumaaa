@@ -6,6 +6,8 @@ import { useRoomStore } from '../../store/useRoomStore'
 import { usePlayerStore } from '../../store/usePlayerStore'
 import { MenuShell, MenuButton, MenuField, inputClass } from './MenuShell'
 import { Sfx } from '../../systems/audioSystem'
+import { STORY_CHARACTERS } from '../../config/characters'
+import { useCharacterStore } from '../../store/useCharacterStore'
 
 const AVATARS = ['🙂', '🧑', '👩', '🧔', '👧', '🐈', '🌿', '☕']
 
@@ -27,6 +29,10 @@ export function ProfileScreen() {
   const setScreen = useAppStore((s) => s.setScreen)
 
   const phase = useMultiplayerStore((s) => s.phase)
+  const roomId = useMultiplayerStore((s) => s.roomId)
+  const characterId = useCharacterStore((s) => s.characterId)
+  const selectCharacter = useCharacterStore((s) => s.selectCharacter)
+  const characterLocked = !!roomId || phase === 'connecting' || phase === 'reconnecting'
   const home = useMultiplayerStore((s) => s.home)
   const quality = useRoomStore((s) => s.settings.quality)
   const isTouch = usePlayerStore((s) => s.isTouch)
@@ -45,7 +51,26 @@ export function ProfileScreen() {
   }
 
   return (
-    <MenuShell title="PROFILE" onBack={() => setScreen('main')}>
+    <MenuShell title="CHARACTER & PROFILE" onBack={() => setScreen('main')}>
+      <fieldset disabled={characterLocked} className="mb-5 space-y-2">
+        <legend className="mb-2 font-mono text-xs text-white/70">Choose your character</legend>
+        {STORY_CHARACTERS.map(character => (
+          <button
+            key={character.id}
+            type="button"
+            aria-pressed={characterId === character.id}
+            onClick={() => selectCharacter(character.id)}
+            className={`block w-full rounded-xl border p-3 text-left disabled:opacity-60 ${
+              characterId === character.id ? 'border-accent/50 bg-accent/15' : 'border-white/15 bg-white/[0.04]'
+            }`}
+          >
+            <span className="block text-sm text-white">{character.name} {characterId === character.id ? '✓' : ''}</span>
+            <span className="block text-xs text-white/70">{character.role}</span>
+            <span className="mt-1 block text-xs leading-relaxed text-white/50">{character.description}</span>
+          </button>
+        ))}
+      </fieldset>
+      {characterLocked && <p className="mb-4 text-xs text-white/60">Leave the shared session before changing character.</p>}
       {!user ? (
         <p className="text-[13px] text-white/50">Sign in to set up a profile.</p>
       ) : (
