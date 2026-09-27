@@ -508,7 +508,7 @@ export const questions: QuestionSeed[] = [
     question: "Sonsuz uzunluktaki düz bir telden 10 A akım geçmektedir.\n\nTelden 5 cm uzaklıktaki noktada manyetik alanın büyüklüğü kaç T’dır? (k = 10⁻⁷ T·m/A; B = 2k·I/d)",
     options: ["4·10⁻⁵", "2·10⁻⁵", "4·10⁻⁷", "8·10⁻⁴", "4·10⁻³"],
     correctAnswer: 0,
-    solution: "B = 2k·I/d = 2·10⁻⁷·10/0,05 = 4·10⁻⁵ T.",
+    solution: "Sonsuz uzun düz telin d uzaklıkta oluşturduğu manyetik alan B = 2k·I/d bağıntısıyla bulunur (k = 10⁻⁷ T·m/A). d = 5 cm = 0,05 m alınarak B = 2·10⁻⁷·10/0,05 = 4·10⁻⁵ T.",
     hint: "Uzaklığı metreye çevir.",
     commonMistake: "d = 5 alıp 4·10⁻⁷ T bulmak ya da 2 katsayısını unutmak (2·10⁻⁵ T).",
     teacherNote: "Düz telin alan bağıntısı ve birim dönüşümü ölçülür.",

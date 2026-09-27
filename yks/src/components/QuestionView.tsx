@@ -1,0 +1,145 @@
+import type { Question } from '../domain/types';
+import { OPTION_LETTERS } from '../utils/ids';
+import { SourceBadge } from './ui';
+
+const ROMAN = ['I', 'II', 'III', 'IV', 'V', 'VI'];
+
+export const DIFFICULTY_LABEL: Record<string, string> = {
+  kolay: 'Kolay',
+  orta: 'Orta',
+  zor: 'Zor',
+  'yeni-nesil': 'Yeni Nesil',
+};
+
+export const TYPE_LABEL: Record<string, string> = {
+  bilgi: 'Bilgi',
+  islem: 'İşlem',
+  yorum: 'Yorum',
+  grafik: 'Grafik',
+  tablo: 'Tablo',
+  deney: 'Deney',
+  onculu: 'Öncüllü',
+  problem: 'Problem',
+  'cok-adimli': 'Çok adımlı',
+  'yeni-nesil': 'Yeni nesil',
+};
+
+export function QuestionMeta({ q, topicName }: { q: Question; topicName?: string }) {
+  return (
+    <div className="row gap-4">
+      <SourceBadge type="ozgun-pratik" />
+      <span className="badge">{q.exam}</span>
+      {topicName && <span className="badge">{topicName}</span>}
+      <span className="badge outline">{DIFFICULTY_LABEL[q.difficulty]}</span>
+      <span className="badge outline">{TYPE_LABEL[q.type]}</span>
+    </div>
+  );
+}
+
+export function QuestionBody({ q }: { q: Question }) {
+  return (
+    <div>
+      <div className="question-text">{q.question}</div>
+      {q.premises && q.premises.length > 0 && (
+        <ol className="premises" aria-label="Öncüller">
+          {q.premises.map((p, i) => (
+            <li key={i}>
+              <b>{ROMAN[i] ?? i + 1}.</b>
+              <span>{p}</span>
+            </li>
+          ))}
+        </ol>
+      )}
+      {q.table && (
+        <div className="q-table-wrap">
+          <table className="q-table">
+            {q.table.caption && <caption>{q.table.caption}</caption>}
+            <thead>
+              <tr>
+                {q.table.headers.map((h, i) => (
+                  <th key={i} scope="col">
+                    {h}
+                  </th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {q.table.rows.map((r, i) => (
+                <tr key={i}>
+                  {r.map((c, j) => (
+                    <td key={j}>{c}</td>
+                  ))}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+    </div>
+  );
+}
+
+export function Options({
+  q,
+  selected,
+  onSelect,
+  reveal,
+  disabled,
+}: {
+  q: Question;
+  selected: number | null | undefined;
+  onSelect?: (i: number) => void;
+  /** Doğru/yanlış renklendirmesi gösterilsin mi? */
+  reveal?: boolean;
+  disabled?: boolean;
+}) {
+  return (
+    <div className="options" role="group" aria-label="Seçenekler">
+      {q.options.map((opt, i) => {
+        const isSel = selected === i;
+        let cls = 'option';
+        if (reveal && i === q.correctAnswer) cls += ' correct';
+        else if (reveal && isSel) cls += ' wrong';
+        const state = reveal ? (i === q.correctAnswer ? ' (doğru cevap)' : isSel ? ' (senin cevabın, yanlış)' : '') : '';
+        return (
+          <button
+            key={i}
+            type="button"
+            className={cls}
+            aria-pressed={isSel}
+            disabled={disabled}
+            onClick={() => onSelect?.(i)}
+            aria-label={`${OPTION_LETTERS[i]} seçeneği: ${opt}${state}`}
+          >
+            <span className="letter" aria-hidden="true">
+              {OPTION_LETTERS[i]}
+            </span>
+            <span className="opt-text">{opt}</span>
+          </button>
+        );
+      })}
+    </div>
+  );
+}
+
+export function SolutionBlock({ q }: { q: Question }) {
+  return (
+    <div className="stack">
+      <div>
+        <div className="eyebrow">Çözüm</div>
+        <div className="pre-line">{q.solution}</div>
+      </div>
+      <div className="callout warn">
+        <b>Sık yapılan hata: </b>
+        {q.commonMistake}
+      </div>
+      {q.teacherNote && (
+        <div className="callout">
+          <b>Öğretmen notu: </b>
+          {q.teacherNote}
+        </div>
+      )}
+      <div className="tiny muted">Kazanım: {q.outcome}</div>
+    </div>
+  );
+}

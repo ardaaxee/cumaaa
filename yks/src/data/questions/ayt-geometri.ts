@@ -286,7 +286,7 @@ export const questions: QuestionSeed[] = [
     question: "Bir dışbükey dörtgenin köşegen uzunlukları 10 cm ve 12 cm’dir ve köşegenler arasındaki dar açı 30°’dir. Bu dörtgenin alanı kaç cm²’dir?",
     options: ["30", "60", "30√3", "15", "60√3"],
     correctAnswer: 0,
-    solution: "A = ½·e·f·sin α = ½·10·12·½ = 30 cm².",
+    solution: "Köşegen uzunlukları e ve f, aralarındaki açı α olan dışbükey dörtgende A = ½·e·f·sin α olur. sin 30° = ½ olduğundan A = ½·10·12·½ = 30 cm².",
     hint: "Köşegenler ve aralarındaki açı ile alan bağıntısını hatırla.",
     commonMistake: "½ çarpanını unutup 60 bulmak ya da cos 30° kullanmak.",
     teacherNote: "Dörtgende trigonometrik alan bağıntısını ölçer.",
