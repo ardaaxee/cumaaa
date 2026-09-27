@@ -1,12 +1,13 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { getTopicRef, subjectLabel } from '../data/curriculum';
 import { loadLesson, loadQuestions } from '../data/content';
-import type { Question } from '../domain/types';
+import type { LessonSeed, Question } from '../domain/types';
 import { TeacherAvatar } from '../components/TeacherAvatar';
 import { PageHeader } from '../components/Layout';
 import { toast } from '../components/ui';
 import { useRoute } from '../hooks/useRoute';
 import { askTeacher, checkAiStatus, type AiStatus, type TeacherAction, type TeacherContext } from '../services/ai';
+import { localTeacherReply } from '../services/localTeacher';
 import { weakTopics } from '../utils/analysis';
 import { addChatMessage, clearChat } from '../store/actions';
 import { update, useAppState } from '../store/store';
@@ -33,6 +34,7 @@ export default function TeacherPage() {
   const [input, setInput] = useState('');
   const [busy, setBusy] = useState(false);
   const [question, setQuestion] = useState<Question | null>(null);
+  const [lesson, setLesson] = useState<LessonSeed | null>(null);
   const listRef = useRef<HTMLDivElement>(null);
 
   const topicId = route.query.get('konu') ?? undefined;
@@ -48,6 +50,10 @@ export default function TeacherPage() {
     else setQuestion(null);
   }, [questionId]);
   useEffect(() => {
+    if (topicId) loadLesson(topicId).then((l) => setLesson(l ?? null));
+    else setLesson(null);
+  }, [topicId]);
+  useEffect(() => {
     listRef.current?.scrollTo({ top: listRef.current.scrollHeight, behavior: 'smooth' });
   }, [state.chat.length]);
 
@@ -59,7 +65,6 @@ export default function TeacherPage() {
     if (ref) {
       ctx.subject = subjectLabel(ref.subject);
       ctx.topic = ref.topic.name;
-      const lesson = await loadLesson(topicId!);
       if (lesson) ctx.lessonSummary = lesson.summary.join(' ');
     }
     if (question) {
@@ -73,15 +78,24 @@ export default function TeacherPage() {
     const d = dashboard(state);
     ctx.statsSummary = `Bugün ${d.todayQuestions} soru, ${formatMinutes(d.todayMinutes)} çalışma. Bu hafta ${d.weekQuestions} soru. Doğruluk: ${d.accuracy != null ? `%${d.accuracy}` : 'veri yok'}. Seri: ${d.streak} gün.`;
     return ctx;
-  }, [ref, topicId, question, answerIdx, state]);
+  }, [ref, topicId, question, answerIdx, state, lesson]);
 
   const send = async (action: TeacherAction, message: string) => {
-    if (!status?.configured) return toast(status?.reason || 'AI bağlantısı yapılandırılmadı.');
     const text = message.trim();
     if (action === 'serbest' && !text) return;
     setBusy(true);
     update((s) => addChatMessage(s, { role: 'user', text: text || QUICK.find((q) => q.action === action)?.label || action }));
     setInput('');
+
+    if (!status?.configured) {
+      // Gerçek AI bağlantısı yok: sahte bir yanıt üretmek yerine uygulama
+      // içindeki gerçek konu anlatımından derlenmiş "yerel konu rehberi" yanıtı verilir.
+      const reply = localTeacherReply(action, lesson, ref?.topic.name);
+      update((s) => addChatMessage(s, { role: 'teacher', text: reply, source: 'icerik' }));
+      setBusy(false);
+      return;
+    }
+
     try {
       const ctx = await context;
       const history = state.chat.slice(-10).map((m) => ({ role: m.role, text: m.text }));
@@ -94,10 +108,16 @@ export default function TeacherPage() {
     }
   };
 
+  const autoFiredRef = useRef<string | null>(null);
   useEffect(() => {
-    if (initialAction && initialAction !== 'serbest' && status?.configured) void send(initialAction, '');
+    const key = `${initialAction ?? ''}|${topicId ?? ''}|${questionId ?? ''}`;
+    if (!initialAction || initialAction === 'serbest' || !status || autoFiredRef.current === key) return;
+    autoFiredRef.current = key;
+    // Konu anlatımının yüklenmesi için kısa bir gecikme (yerel rehber yanıtı tam olsun).
+    const t = setTimeout(() => void send(initialAction, ''), topicId ? 250 : 0);
+    return () => clearTimeout(t);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [initialAction, topicId, questionId, status?.configured]);
+  }, [initialAction, topicId, questionId, status]);
 
   return (
     <>
@@ -110,8 +130,8 @@ export default function TeacherPage() {
             <h2 style={{ margin: 0 }}>{teacherName}</h2>
             <div className="muted small">Adım adım anlatım · ipucu · mini quiz</div>
             {status && !status.configured && (
-              <div className="badge warn mt-8" style={{ display: 'inline-flex' }}>
-                {status.reason || 'AI bağlantısı yapılandırılmadı.'}
+              <div className="badge warn mt-8" style={{ display: 'inline-flex' }} title={status.reason}>
+                Yerel konu rehberi modu
               </div>
             )}
           </div>
@@ -131,7 +151,7 @@ export default function TeacherPage() {
       <div className="card section">
         <div className="chips" role="group" aria-label="Hızlı istekler">
           {QUICK.map((q) => (
-            <button key={q.action} type="button" className="chip" disabled={busy || !status?.configured} onClick={() => void send(q.action, '')}>
+            <button key={q.action} type="button" className="chip" disabled={busy || !status} onClick={() => void send(q.action, '')}>
               {q.label}
             </button>
           ))}

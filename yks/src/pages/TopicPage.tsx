@@ -5,9 +5,9 @@ import type { LessonSeed } from '../domain/types';
 import { Icon } from '../components/Icon';
 import { PageHeader } from '../components/Layout';
 import { ConfirmDialog, Empty, SourceBadge, Spinner, Stat, toast } from '../components/ui';
-import { href } from '../hooks/useRoute';
+import { href, navigate } from '../hooks/useRoute';
 import { launchTest, makeConfig, hasActiveTest } from '../services/testLauncher';
-import { markReviewDone, setTopicStatus } from '../store/actions';
+import { addNotebookPage, markReviewDone, setTopicStatus } from '../store/actions';
 import type { TopicStatus } from '../store/schema';
 import { update, useAppState } from '../store/store';
 import { recentTopicPerformance, weakTopics } from '../utils/analysis';
@@ -215,6 +215,16 @@ export default function TopicPage({ params }: { params: string[] }) {
     else void run();
   };
 
+  const writeToNotebook = () => {
+    let noteId = '';
+    update((s) => {
+      const r = addNotebookPage(s, `${ref.topic.name} notları`, ref.subject.id);
+      noteId = r.id;
+      return r.state;
+    });
+    navigate(`/defterim/${noteId}`);
+  };
+
   return (
     <>
       <PageHeader title={ref.topic.name} sub={`${subjectLabel(ref.subject)} · ${ref.unit.name}`} back={`#/ders/${ref.subject.id}`} />
@@ -272,6 +282,9 @@ export default function TopicPage({ params }: { params: string[] }) {
           <a className="btn ghost" href={href('/ogretmen', { konu: topicId, eylem: 'anlat' })}>
             <Icon name="teacher" /> Öğretmene sor
           </a>
+          <button type="button" className="btn ghost" onClick={writeToNotebook}>
+            <Icon name="sparkle" /> Deftere yaz
+          </button>
         </div>
         {qCount != null && qCount < 10 && qCount > 0 && <div className="tiny muted mt-8">Bu konuda {qCount} soru var; normal test mevcut soruların tamamını kullanır.</div>}
       </div>

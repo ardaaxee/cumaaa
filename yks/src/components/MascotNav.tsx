@@ -1,7 +1,7 @@
 import { useEffect, useId, useRef, useState } from 'react';
 import { Icon, type IconName } from './Icon';
 import { sectionOf } from './Layout';
-import { useRoute } from '../hooks/useRoute';
+import { href, useRoute } from '../hooks/useRoute';
 
 /**
  * Karakter tabanlı gezinme: panda ana menüyü açar (ayağa kalkıp sağ üste "yürür"),
@@ -46,7 +46,7 @@ function PandaFace() {
   );
 }
 
-function RabbitFace() {
+export function RabbitFace() {
   return (
     <svg viewBox="0 0 64 64" width="30" height="30" aria-hidden="true">
       <ellipse cx="21" cy="10" rx="6" ry="16" fill="#fff" stroke="#e7d9ee" strokeWidth="2" />
@@ -62,7 +62,23 @@ function RabbitFace() {
   );
 }
 
-function CatFace() {
+function FoxFace() {
+  return (
+    <svg viewBox="0 0 64 64" width="30" height="30" aria-hidden="true">
+      <path d="M12 8 L26 24 L8 26 Z" fill="#e8783a" />
+      <path d="M52 8 L38 24 L56 26 Z" fill="#e8783a" />
+      <path d="M15 12 L24 22 L12 22 Z" fill="#fff" />
+      <path d="M49 12 L40 22 L52 22 Z" fill="#fff" />
+      <circle cx="32" cy="36" r="22" fill="#ef8a45" />
+      <path d="M20 40 Q32 52 44 40 Q40 52 32 54 Q24 52 20 40 Z" fill="#fff" />
+      <circle cx="24" cy="34" r="2.4" fill="#3a3238" />
+      <circle cx="40" cy="34" r="2.4" fill="#3a3238" />
+      <path d="M32 39 l-3 3 h6 z" fill="#3a3238" />
+    </svg>
+  );
+}
+
+export function CatFace() {
   return (
     <svg viewBox="0 0 64 64" width="30" height="30" aria-hidden="true">
       <path d="M14 10 L24 26 L10 28 Z" fill="#f3a24a" />
@@ -123,8 +139,11 @@ export function MascotNav() {
       </div>
 
       <div className="mascot-dock" aria-hidden={false}>
-        <a href="#/testler" className="mascot-btn mascot-rabbit" aria-label="Testler (TYT)" data-active={section === '/testler' || section === '/test'}>
+        <a href={href('/testler', { sinav: 'TYT' })} className="mascot-btn mascot-rabbit" aria-label="TYT testleri" data-active={section === '/testler' || section === '/test'}>
           <RabbitFace />
+        </a>
+        <a href={href('/testler', { sinav: 'AYT' })} className="mascot-btn mascot-fox" aria-label="AYT testleri" data-active={section === '/testler' || section === '/test'}>
+          <FoxFace />
         </a>
         <button
           ref={pandaBtnRef}

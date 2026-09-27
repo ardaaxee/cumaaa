@@ -3,6 +3,7 @@ import { SUBJECTS, subjectLabel } from '../data/curriculum';
 import { subjectColorFor } from '../data/subjectColors';
 import type { SubjectId } from '../domain/types';
 import { Icon } from '../components/Icon';
+import { CatFace } from '../components/MascotNav';
 import { PageHeader } from '../components/Layout';
 import { ConfirmDialog, Empty, Modal } from '../components/ui';
 import { navigate } from '../hooks/useRoute';
@@ -75,7 +76,11 @@ export default function NotebookPage() {
 
   return (
     <>
-      <PageHeader
+      <div style={{ position: 'relative' }}>
+        <span className="peek peek-cat" aria-hidden="true" style={{ top: 6, right: 2, bottom: 'auto' }}>
+          <CatFace />
+        </span>
+        <PageHeader
         title="Defterim"
         sub="Kareli sayfada kalem, silgi ve şekil araçlarıyla not tut"
         actions={
@@ -83,7 +88,8 @@ export default function NotebookPage() {
             <Icon name="plus" /> <span>Yeni sayfa</span>
           </button>
         }
-      />
+        />
+      </div>
 
       {sorted.length === 0 ? (
         <div className="card">

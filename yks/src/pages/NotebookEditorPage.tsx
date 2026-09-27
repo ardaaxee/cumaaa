@@ -20,12 +20,16 @@ import { update, useSelector } from '../store/store';
 type Tool = 'kalem' | 'silgi' | 'cizgi' | 'ok' | 'kutu' | 'daire' | 'eksen' | 'metin';
 
 const PENS = [
-  { key: 'siyah', color: '#2a2430', width: 3, alpha: 1 },
-  { key: 'mavi', color: '#2f6fed', width: 3, alpha: 1 },
-  { key: 'turuncu', color: '#e07a1f', width: 3, alpha: 1 },
-  { key: 'kirmizi', color: '#d13d54', width: 3, alpha: 1 },
-  { key: 'fosforlu', color: '#ffd93d', width: 16, alpha: 0.4 },
+  { key: 'siyah', color: '#2a2430', alpha: 1 },
+  { key: 'mavi', color: '#2f6fed', alpha: 1 },
+  { key: 'turuncu', color: '#e07a1f', alpha: 1 },
+  { key: 'kirmizi', color: '#d13d54', alpha: 1 },
+  { key: 'yesil', color: '#1f8f5a', alpha: 1 },
+  { key: 'fosforlu', color: '#ffd93d', alpha: 0.4 },
 ] as const;
+
+const DEFAULT_WIDTH = 3;
+const HIGHLIGHTER_WIDTH = 16;
 
 const W = 900;
 const H = 1200;
@@ -93,6 +97,8 @@ export default function NotebookEditorPage({ params }: { params: string[] }) {
   const [loading, setLoading] = useState(true);
   const [tool, setTool] = useState<Tool>('kalem');
   const [pen, setPen] = useState<(typeof PENS)[number]>(PENS[0]);
+  const [width, setWidth] = useState(DEFAULT_WIDTH);
+  const [confirmClear, setConfirmClear] = useState(false);
   const [canUndo, setCanUndo] = useState(false);
   const [canRedo, setCanRedo] = useState(false);
   const [renaming, setRenaming] = useState(false);
@@ -190,13 +196,21 @@ export default function NotebookEditorPage({ params }: { params: string[] }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id]);
 
-  const applyPenStyle = (c: CanvasRenderingContext2D, width?: number) => {
+  const applyPenStyle = (c: CanvasRenderingContext2D, overrideWidth?: number) => {
     c.lineCap = 'round';
     c.lineJoin = 'round';
     c.globalCompositeOperation = 'source-over';
     c.strokeStyle = pen.color;
     c.globalAlpha = pen.alpha;
-    c.lineWidth = width ?? pen.width;
+    c.lineWidth = overrideWidth ?? width;
+  };
+
+  const clearAll = () => {
+    const cx = ctx();
+    if (!cx) return;
+    cx.clearRect(0, 0, W, H);
+    pushHistory();
+    setConfirmClear(false);
   };
 
   const onDown = (e: React.PointerEvent<HTMLCanvasElement>) => {
@@ -254,7 +268,7 @@ export default function NotebookEditorPage({ params }: { params: string[] }) {
       lastRef.current = p;
     } else {
       ocx.clearRect(0, 0, W, H);
-      applyPenStyle(ocx, 3);
+      applyPenStyle(ocx);
       ocx.globalAlpha = 1;
       drawShape(ocx, tool, startRef.current, p);
     }
@@ -269,7 +283,7 @@ export default function NotebookEditorPage({ params }: { params: string[] }) {
     if (!c || !cx || !ocx) return;
     if (tool !== 'kalem' && tool !== 'silgi') {
       const p = point(c, e);
-      applyPenStyle(cx, 3);
+      applyPenStyle(cx);
       drawShape(cx, tool, startRef.current, p);
       ocx.clearRect(0, 0, W, H);
     }
@@ -278,34 +292,56 @@ export default function NotebookEditorPage({ params }: { params: string[] }) {
     pushHistory();
   };
 
-  const exportPng = async () => {
+  const fileBase = () => (meta?.title ?? 'defter-sayfasi').replace(/[^\p{L}\p{N} ]/gu, '').trim() || 'defter-sayfasi';
+
+  /** Çizimi kareli zeminle birleştirip düz bir PNG'ye dönüştürür (dışa aktarım için). */
+  const renderFlattened = (): HTMLCanvasElement | null => {
     const c = canvasRef.current;
-    if (!c) return;
+    if (!c) return null;
     const out = document.createElement('canvas');
     out.width = W;
     out.height = H;
-    const octx2 = out.getContext('2d')!;
-    octx2.fillStyle = isDark ? '#1b1622' : '#ffffff';
-    octx2.fillRect(0, 0, W, H);
-    octx2.strokeStyle = isDark ? '#332a40' : '#e4dcef';
-    octx2.lineWidth = 1;
+    const o = out.getContext('2d')!;
+    o.fillStyle = isDark ? '#1b1622' : '#ffffff';
+    o.fillRect(0, 0, W, H);
+    o.strokeStyle = isDark ? '#332a40' : '#e4dcef';
+    o.lineWidth = 1;
     for (let x = 0; x <= W; x += 30) {
-      octx2.beginPath();
-      octx2.moveTo(x, 0);
-      octx2.lineTo(x, H);
-      octx2.stroke();
+      o.beginPath();
+      o.moveTo(x, 0);
+      o.lineTo(x, H);
+      o.stroke();
     }
     for (let y = 0; y <= H; y += 30) {
-      octx2.beginPath();
-      octx2.moveTo(0, y);
-      octx2.lineTo(W, y);
-      octx2.stroke();
+      o.beginPath();
+      o.moveTo(0, y);
+      o.lineTo(W, y);
+      o.stroke();
     }
-    octx2.drawImage(c, 0, 0);
+    o.drawImage(c, 0, 0);
+    return out;
+  };
+
+  const exportPng = async () => {
+    const out = renderFlattened();
+    if (!out) return;
     const a = document.createElement('a');
     a.href = out.toDataURL('image/png');
-    a.download = `${(meta?.title ?? 'defter-sayfasi').replace(/[^\p{L}\p{N} ]/gu, '')}.png`;
+    a.download = `${fileBase()}.png`;
     a.click();
+  };
+
+  /** Tarayıcının "PDF olarak kaydet" yazdırma seçeneğini kullanarak tek sayfalık PDF üretir. */
+  const exportPdf = async () => {
+    const out = renderFlattened();
+    if (!out) return;
+    const dataUrl = out.toDataURL('image/png');
+    const win = window.open('', '_blank');
+    if (!win) return toast('Açılır pencereye izin verilmedi. Tarayıcı ayarlarından izin ver.');
+    win.document.write(
+      `<!doctype html><html><head><title>${fileBase()}</title><style>@page{size:auto;margin:0}html,body{margin:0}img{width:100%;display:block}</style></head><body><img src="${dataUrl}" onload="window.focus();window.print();"></body></html>`,
+    );
+    win.document.close();
   };
 
   const accent = meta?.subjectId ? subjectColorFor(meta.subjectId, isDark) : null;
@@ -341,6 +377,7 @@ export default function NotebookEditorPage({ params }: { params: string[] }) {
               onClick={() => {
                 setTool('kalem');
                 setPen(p);
+                setWidth(p.key === 'fosforlu' ? HIGHLIGHTER_WIDTH : DEFAULT_WIDTH);
               }}
             />
           ))}
@@ -355,7 +392,7 @@ export default function NotebookEditorPage({ params }: { params: string[] }) {
               ['ok', 'Ok'],
               ['kutu', 'Kutu'],
               ['daire', 'Daire'],
-              ['eksen', 'Eksen'],
+              ['eksen', 'Eksen (x-y)'],
               ['metin', 'Metin'],
             ] as [Tool, string][]
           ).map(([t, label]) => (
@@ -364,6 +401,19 @@ export default function NotebookEditorPage({ params }: { params: string[] }) {
             </button>
           ))}
         </div>
+        <label className="row nowrap mt-8" style={{ gap: 8 }}>
+          <span className="tiny muted nowrap">Kalınlık</span>
+          <input
+            type="range"
+            min={1}
+            max={24}
+            value={width}
+            onChange={(e) => setWidth(Number(e.target.value))}
+            aria-label="Kalem kalınlığı"
+            style={{ flex: 1 }}
+          />
+          <span className="tiny muted nowrap">{width}px</span>
+        </label>
         <div className="row mt-8">
           <button type="button" className="btn small" onClick={undo} disabled={!canUndo}>
             <Icon name="left" /> Geri al
@@ -376,6 +426,12 @@ export default function NotebookEditorPage({ params }: { params: string[] }) {
           </button>
           <button type="button" className="btn small ghost" onClick={() => void exportPng()}>
             <Icon name="download" /> PNG indir
+          </button>
+          <button type="button" className="btn small ghost" onClick={() => void exportPdf()}>
+            <Icon name="download" /> PDF olarak dışa aktar
+          </button>
+          <button type="button" className="btn small ghost danger" onClick={() => setConfirmClear(true)}>
+            Temizle
           </button>
         </div>
       </div>
@@ -426,6 +482,16 @@ export default function NotebookEditorPage({ params }: { params: string[] }) {
             update((s) => deleteNotebookPage(s, id));
             navigate('/defterim', { replace: true });
           }}
+        />
+      )}
+      {confirmClear && (
+        <ConfirmDialog
+          title="Sayfa temizlensin mi?"
+          message="Bu sayfadaki tüm çizim silinir. İstersen sonra “Geri al” ile eski haline döndürebilirsin."
+          confirmLabel="Temizle"
+          danger
+          onCancel={() => setConfirmClear(false)}
+          onConfirm={clearAll}
         />
       )}
     </>

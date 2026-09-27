@@ -91,7 +91,7 @@ export function App() {
       {onboarded ? (
         <Layout>
           <Suspense fallback={<Spinner />}>
-            <Page key={route.path} params={route.segments.slice(1)} />
+            <Page key={`${route.path}?${route.query.toString()}`} params={route.segments.slice(1)} />
           </Suspense>
         </Layout>
       ) : (

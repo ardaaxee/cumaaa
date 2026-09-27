@@ -4,6 +4,7 @@ import { subjectColorFor } from '../data/subjectColors';
 import { PageHeader } from '../components/Layout';
 import { Empty, ProgressBar, SourceBadge } from '../components/ui';
 import { useIsDark } from '../hooks/useIsDark';
+import { RabbitFace } from '../components/MascotNav';
 import { normalizeName } from '../store/migrations';
 import type { TopicStatus } from '../store/schema';
 import { useSelector } from '../store/store';
@@ -46,7 +47,10 @@ export default function SubjectsPage() {
   return (
     <>
       <PageHeader title="Dersler" sub="TYT + AYT Sayısal · konu haritası" />
-      <div className="card">
+      <div className="card" style={{ position: 'relative', overflow: 'visible' }}>
+        <span className="peek peek-rabbit" aria-hidden="true">
+          <RabbitFace />
+        </span>
         <div className="form-grid two">
           <label className="field">
             <span>Konu ara</span>

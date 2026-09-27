@@ -9,14 +9,19 @@ import { navigate } from '../hooks/useRoute';
 import { launchTest, launchWithIds, makeConfig } from '../services/testLauncher';
 import type { TestConfig } from '../store/schema';
 import { useAppState } from '../store/store';
+import { useRoute } from '../hooks/useRoute';
 import { formatDay, formatDuration } from '../utils/date';
 import { formatNet } from '../utils/net';
 import { QUESTION_COUNTS, filterPool } from '../utils/testEngine';
 
 export default function TestSetupPage() {
   const state = useAppState();
+  const route = useRoute();
   const [questions, setQuestions] = useState<Question[] | null>(null);
-  const [cfg, setCfg] = useState<TestConfig>(() => makeConfig({}));
+  const [cfg, setCfg] = useState<TestConfig>(() => {
+    const preset = route.query.get('sinav');
+    return makeConfig(preset === 'TYT' || preset === 'AYT' ? { exam: preset } : {});
+  });
   const [confirm, setConfirm] = useState<null | (() => Promise<string | null>)>(null);
 
   useEffect(() => {

@@ -3,20 +3,20 @@
 
 :root {
   color-scheme: light;
-  --bg: #f7f5fb;
-  --surface: #ffffff;
-  --surface-2: #f2edf9;
-  --surface-3: #e9e1f5;
-  --text: #221c2b;
-  --text-2: #4a4156;
-  --muted: #6b6275;
+  --bg: #fbf6ec;
+  --surface: #fffdf8;
+  --surface-2: #f6ecda;
+  --surface-3: #efe0c4;
+  --text: #2c2418;
+  --text-2: #55492f;
+  --muted: #7c6f52;
   --brand: #5b3fa0;
   --brand-strong: #472f84;
   --brand-ink: #ffffff;
   --brand-soft: #ece5f8;
   --lavender: #a58bd8;
-  --line: #e4dcef;
-  --line-strong: #cfc2e3;
+  --line: #ecdfc4;
+  --line-strong: #dcc79e;
   --ok: #1f7a55;
   --ok-soft: #e3f3ec;
   --warn: #8a5a00;
@@ -103,11 +103,17 @@ html {
 
 body {
   margin: 0;
-  background: var(--bg);
+  background-color: var(--bg);
+  background-image: linear-gradient(var(--line) 1px, transparent 1px), linear-gradient(90deg, var(--line) 1px, transparent 1px);
+  background-size: 26px 26px;
   color: var(--text);
   font: 16px/1.55 system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
   min-height: 100vh;
   overflow-x: hidden;
+}
+:root[data-theme='dark'] body { background-image: none; }
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) body { background-image: none; }
 }
 
 h1, h2, h3, h4 {
@@ -1159,7 +1165,10 @@ details.table-view summary {
   z-index: 40;
   display: flex;
   align-items: flex-end;
-  gap: 14px;
+  gap: 12px;
+}
+@media (max-width: 380px) {
+  .mascot-dock { gap: 8px; }
 }
 
 .mascot-btn {
@@ -1174,9 +1183,9 @@ details.table-view summary {
 .mascot-btn:active { transform: scale(0.94); }
 .mascot-btn[data-active='true'] { border-color: var(--brand); background: var(--brand-soft); }
 
-.mascot-rabbit, .mascot-cat {
-  width: 52px;
-  height: 52px;
+.mascot-rabbit, .mascot-cat, .mascot-fox {
+  width: 46px;
+  height: 46px;
   border-radius: 50%;
   margin-bottom: 6px;
 }
@@ -1258,6 +1267,22 @@ details.table-view summary {
 .main { padding-bottom: calc(96px + var(--safe-b)); }
 @media (min-width: 900px) { .main { padding-bottom: 48px; } }
 
+/* ---------- Kenar dekorları (yalnız süs, tıklanamaz) ---------- */
+
+.peek {
+  position: absolute;
+  pointer-events: none;
+  opacity: 0.9;
+  z-index: 1;
+}
+.peek-rabbit { top: -14px; right: 14px; }
+.peek-cat { bottom: -10px; right: 10px; transform: scaleX(-1); }
+
+@media (max-width: 480px) {
+  .peek { transform: scale(0.8); }
+  .peek-cat { transform: scale(0.8) scaleX(-1); }
+}
+
 /* ---------- Ders/konu renk sistemi ---------- */
 
 .subject-icon[style], .notebook-card[style] { border-width: 2px; }
@@ -1277,7 +1302,7 @@ details.table-view summary {
   --accent: var(--brand);
   position: relative;
   border-radius: var(--radius);
-  border: 2px solid var(--line);
+  border: 2px solid var(--accent);
   overflow: hidden;
   background-color: var(--surface);
   background-image: linear-gradient(var(--chart-grid) 1px, transparent 1px), linear-gradient(90deg, var(--chart-grid) 1px, transparent 1px);
