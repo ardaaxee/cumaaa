@@ -37,7 +37,7 @@ const PATHS: Record<string, string> = {
 
 export type IconName = keyof typeof PATHS;
 
-export function Icon({ name, size, title }: { name: IconName; size?: number; title?: string }) {
+export function Icon({ name, size = 20, title }: { name: IconName; size?: number; title?: string }) {
   return (
     <svg
       viewBox="0 0 24 24"

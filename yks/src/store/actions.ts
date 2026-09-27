@@ -293,6 +293,29 @@ export function deleteVideo(state: AppState, id: string): AppState {
   return { ...state, videos: state.videos.filter((v) => v.id !== id) };
 }
 
+// ---------- Dijital defter ----------
+
+export function addNotebookPage(state: AppState, title: string, subjectId?: SubjectId, now: Date = new Date()): { state: AppState; id: string } {
+  const id = uid('note');
+  const iso = now.toISOString();
+  return {
+    state: { ...state, notebookPages: [{ id, title: title.trim().slice(0, 80) || 'Yeni sayfa', subjectId, createdAt: iso, updatedAt: iso }, ...state.notebookPages] },
+    id,
+  };
+}
+
+export function touchNotebookPage(state: AppState, id: string, now: Date = new Date()): AppState {
+  return { ...state, notebookPages: state.notebookPages.map((p) => (p.id === id ? { ...p, updatedAt: now.toISOString() } : p)) };
+}
+
+export function renameNotebookPage(state: AppState, id: string, title: string): AppState {
+  return { ...state, notebookPages: state.notebookPages.map((p) => (p.id === id ? { ...p, title: title.trim().slice(0, 80) || p.title } : p)) };
+}
+
+export function deleteNotebookPage(state: AppState, id: string): AppState {
+  return { ...state, notebookPages: state.notebookPages.filter((p) => p.id !== id) };
+}
+
 // ---------- Profil / ayarlar ----------
 
 export function updateProfile(state: AppState, patch: Partial<Profile>): AppState {

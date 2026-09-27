@@ -203,6 +203,14 @@ export interface ChatMessage {
   at: string;
 }
 
+export interface NotebookPageMeta {
+  id: string;
+  title: string;
+  subjectId?: SubjectId;
+  createdAt: string;
+  updatedAt: string;
+}
+
 export interface LegacyTotals {
   answered: number;
   correct: number;
@@ -225,6 +233,8 @@ export interface AppState {
   videos: VideoResource[];
   pomodoro: PomodoroState;
   chat: ChatMessage[];
+  /** Dijital defter sayfalarının bilgisi (çizim verisi IndexedDB'de saklanır). */
+  notebookPages: NotebookPageMeta[];
   /** Eski sürümden gelen, güne atanamayan toplamlar (yalnız toplam istatistiğe eklenir). */
   legacy: LegacyTotals | null;
 }
@@ -271,6 +281,7 @@ export function defaultState(): AppState {
       completedFocusCount: 0,
     },
     chat: [],
+    notebookPages: [],
     legacy: null,
   };
 }

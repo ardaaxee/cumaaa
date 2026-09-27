@@ -266,6 +266,7 @@ export function sanitize(raw: Json): AppState {
       completedFocusCount: Math.max(0, num(pomodoro.completedFocusCount, 0)),
     } as AppState['pomodoro'],
     chat: arr(raw.chat).filter(isObj) as unknown as AppState['chat'],
+    notebookPages: arr(raw.notebookPages).filter(isObj).filter((p) => typeof p.id === 'string') as unknown as AppState['notebookPages'],
     legacy: isObj(raw.legacy) ? (raw.legacy as unknown as AppState['legacy']) : null,
   };
 }

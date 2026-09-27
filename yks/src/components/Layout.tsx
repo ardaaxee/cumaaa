@@ -2,6 +2,7 @@ import type { ReactNode } from 'react';
 import { useRoute } from '../hooks/useRoute';
 import { update, useSelector } from '../store/store';
 import { Icon, type IconName } from './Icon';
+import { MascotNav } from './MascotNav';
 
 interface NavItem {
   path: string;
@@ -10,27 +11,20 @@ interface NavItem {
 }
 
 export const NAV_ALL: NavItem[] = [
-  { path: '/', label: 'Odam', icon: 'home' },
+  { path: '/', label: 'Ana Sayfa', icon: 'home' },
   { path: '/dersler', label: 'Dersler', icon: 'book' },
   { path: '/testler', label: 'Testler', icon: 'check' },
-  { path: '/plan', label: 'Plan', icon: 'calendar' },
-  { path: '/ogretmen', label: 'Öğretmen', icon: 'teacher' },
-  { path: '/yanlislar', label: 'Yanlışlarım', icon: 'alert' },
-  { path: '/tekrar', label: 'Tekrarlar', icon: 'repeat' },
   { path: '/denemeler', label: 'Denemeler', icon: 'trophy' },
+  { path: '/defterim', label: 'Defterim', icon: 'sparkle' },
+  { path: '/plan', label: 'Planım', icon: 'calendar' },
+  { path: '/tekrar', label: 'Genel Tekrar', icon: 'repeat' },
+  { path: '/ogretmen', label: 'Konu Asistanı', icon: 'teacher' },
+  { path: '/yanlislar', label: 'Yanlışlarım', icon: 'alert' },
   { path: '/gelisim', label: 'Gelişimim', icon: 'chart' },
   { path: '/odak', label: 'Odak (Pomodoro)', icon: 'timer' },
   { path: '/kaynaklar', label: 'Kaynaklar', icon: 'link' },
   { path: '/cikmis', label: 'ÖSYM Çıkmış Sorular', icon: 'archive' },
   { path: '/ayarlar', label: 'Ayarlar', icon: 'settings' },
-];
-
-const BOTTOM: NavItem[] = [
-  { path: '/', label: 'Odam', icon: 'home' },
-  { path: '/dersler', label: 'Dersler', icon: 'book' },
-  { path: '/testler', label: 'Testler', icon: 'check' },
-  { path: '/plan', label: 'Plan', icon: 'calendar' },
-  { path: '/daha', label: 'Daha Fazla', icon: 'more' },
 ];
 
 export function sectionOf(path: string): string {
@@ -41,15 +35,9 @@ export function sectionOf(path: string): string {
   return first;
 }
 
-function bottomSection(path: string): string {
-  const s = sectionOf(path);
-  return ['/', '/dersler', '/testler', '/plan'].includes(s) ? s : '/daha';
-}
-
 export function Layout({ children }: { children: ReactNode }) {
   const route = useRoute();
   const section = sectionOf(route.path);
-  const bottom = bottomSection(route.path);
   return (
     <div className="shell">
       <a className="skip-link" href="#main" onClick={(e) => { e.preventDefault(); document.getElementById('main')?.focus(); }}>
@@ -73,14 +61,7 @@ export function Layout({ children }: { children: ReactNode }) {
       <main id="main" className="main" tabIndex={-1}>
         {children}
       </main>
-      <nav className="bottom-nav" aria-label="Alt menü">
-        {BOTTOM.map((n) => (
-          <a key={n.path} href={`#${n.path}`} aria-current={bottom === n.path ? 'page' : undefined}>
-            <Icon name={n.icon} />
-            <span>{n.label}</span>
-          </a>
-        ))}
-      </nav>
+      <MascotNav />
     </div>
   );
 }

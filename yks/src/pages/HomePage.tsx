@@ -1,4 +1,5 @@
 import { useMemo } from 'react';
+import { SUBJECTS } from '../data/curriculum';
 import { Icon } from '../components/Icon';
 import { PageHeader } from '../components/Layout';
 import { PomodoroCard } from '../components/PomodoroCard';
@@ -183,7 +184,31 @@ export default function HomePage() {
         </section>
 
         <PomodoroCard compact />
+
+        <section className="card" aria-labelledby="note-title">
+          <div className="card-head">
+            <h2 id="note-title">Defterim</h2>
+            <Icon name="sparkle" />
+          </div>
+          <p className="small muted">Kareli sayfada kalemle formül, grafik ve renkli not tut.</p>
+          <a className="btn primary block" href="#/defterim">
+            Deftere geç
+          </a>
+        </section>
       </div>
+
+      <section className="card section" aria-labelledby="quick-h">
+        <h2 id="quick-h" className="mb-8">
+          Hızlı ders seç
+        </h2>
+        <div className="chips">
+          {SUBJECTS.slice(0, 8).map((s) => (
+            <a key={s.id} className="chip" href={`#/ders/${s.id}`}>
+              {s.icon} {s.name}
+            </a>
+          ))}
+        </div>
+      </section>
 
       <section className="grid grid-4 section" aria-label="Genel durum">
         <Stat label="Bu hafta çözülen" value={d.weekQuestions} />

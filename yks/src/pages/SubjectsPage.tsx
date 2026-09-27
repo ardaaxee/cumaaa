@@ -1,7 +1,9 @@
 import { useMemo, useState } from 'react';
 import { SUBJECTS, allTopics, subjectLabel } from '../data/curriculum';
+import { subjectColorFor } from '../data/subjectColors';
 import { PageHeader } from '../components/Layout';
 import { Empty, ProgressBar, SourceBadge } from '../components/ui';
+import { useIsDark } from '../hooks/useIsDark';
 import { normalizeName } from '../store/migrations';
 import type { TopicStatus } from '../store/schema';
 import { useSelector } from '../store/store';
@@ -16,6 +18,7 @@ export { STATUS_LABEL };
 
 export default function SubjectsPage() {
   const progress = useSelector((s) => s.topicProgress);
+  const isDark = useIsDark();
   const [q, setQ] = useState('');
   const [exam, setExam] = useState<'all' | 'TYT' | 'AYT'>('all');
   const [subject, setSubject] = useState('all');
@@ -116,10 +119,16 @@ export default function SubjectsPage() {
             const topics = s.units.flatMap((u) => u.topics);
             const done = topics.filter((t) => statusOf(t.id) === 'tamamlandi').length;
             const working = topics.filter((t) => statusOf(t.id) === 'calisiliyor').length;
+            const accent = subjectColorFor(s.id, isDark);
             return (
-              <a key={s.id} className="card link-row" href={`#/ders/${s.id}`} style={{ margin: 0, display: 'block' }}>
+              <a
+                key={s.id}
+                className="card link-row"
+                href={`#/ders/${s.id}`}
+                style={{ margin: 0, display: 'block', borderColor: accent.fg, borderWidth: 2 }}
+              >
                 <div className="row nowrap">
-                  <span className="subject-icon" aria-hidden="true">
+                  <span className="subject-icon" aria-hidden="true" style={{ background: accent.soft, color: accent.fg }}>
                     {s.icon}
                   </span>
                   <div className="grow">

@@ -1,0 +1,18 @@
+{
+  "name": "İyi ki • YKS Çalışma Odası",
+  "short_name": "İyi ki YKS",
+  "description": "TYT + AYT Sayısal için kişisel çalışma odası: konu anlatımı, özgün soru bankası, deneme takibi ve çalışma planı.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#f7f5fb",
+  "theme_color": "#5b3fa0",
+  "lang": "tr",
+  "icons": [
+    { "src": "icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" },
+    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}
