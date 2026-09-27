@@ -93,44 +93,73 @@ export function CatFace() {
   );
 }
 
+type PandaPhase = 'sit' | 'walking' | 'stood' | 'returning';
+
+const WALK_MS = 900;
+const RETURN_MS = 700;
+
+function prefersReducedMotion(): boolean {
+  return typeof window !== 'undefined' && !!window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+}
+
 export function MascotNav() {
   const route = useRoute();
-  const [open, setOpen] = useState(false);
+  const [phase, setPhase] = useState<PandaPhase>('sit');
   const panelId = useId();
   const closeBtnRef = useRef<HTMLButtonElement>(null);
   const pandaBtnRef = useRef<HTMLButtonElement>(null);
   const section = sectionOf(route.path);
+  const menuOpen = phase === 'stood';
 
   useEffect(() => {
-    if (open) closeBtnRef.current?.focus();
-  }, [open]);
+    if (menuOpen) closeBtnRef.current?.focus();
+  }, [menuOpen]);
+
+  const openMenu = () => {
+    if (phase !== 'sit') return;
+    if (prefersReducedMotion()) return setPhase('stood');
+    setPhase('walking');
+    setTimeout(() => setPhase('stood'), WALK_MS);
+  };
+  const closeMenu = () => {
+    if (phase !== 'stood') return;
+    if (prefersReducedMotion()) {
+      setPhase('sit');
+      pandaBtnRef.current?.focus();
+      return;
+    }
+    setPhase('returning');
+    setTimeout(() => {
+      setPhase('sit');
+      pandaBtnRef.current?.focus();
+    }, RETURN_MS);
+  };
 
   useEffect(() => {
-    if (!open) return;
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') {
-        setOpen(false);
-        pandaBtnRef.current?.focus();
-      }
-    };
+    if (!menuOpen) return;
+    const onKey = (e: KeyboardEvent) => e.key === 'Escape' && closeMenu();
     document.addEventListener('keydown', onKey);
     return () => document.removeEventListener('keydown', onKey);
-  }, [open]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [menuOpen]);
+
+  const pandaClass = phase === 'walking' || phase === 'stood' ? ' walking' : phase === 'returning' ? ' returning' : '';
 
   return (
     <>
-      {open && <div className="mascot-backdrop" onClick={() => setOpen(false)} aria-hidden="true" />}
+      {menuOpen && <div className="mascot-backdrop" onClick={closeMenu} aria-hidden="true" />}
+      {(phase === 'walking' || phase === 'stood') && <span className="mascot-pull-tab" aria-hidden="true" />}
 
-      <div className={`mascot-menu-panel${open ? ' open' : ''}`} id={panelId} role="dialog" aria-modal="true" aria-label="Ana menü" hidden={!open}>
+      <div className={`mascot-menu-panel${menuOpen ? ' open' : ''}`} id={panelId} role="dialog" aria-modal="true" aria-label="Ana menü" hidden={!menuOpen}>
         <div className="row between mb-8">
           <b>Menü ♡</b>
-          <button ref={closeBtnRef} type="button" className="icon-btn" aria-label="Menüyü kapat" onClick={() => setOpen(false)}>
+          <button ref={closeBtnRef} type="button" className="icon-btn" aria-label="Menüyü kapat" onClick={closeMenu}>
             <Icon name="close" />
           </button>
         </div>
         <nav className="mascot-menu-list">
           {MENU.map((m) => (
-            <a key={m.path} href={`#${m.path}`} aria-current={section === m.path ? 'page' : undefined} onClick={() => setOpen(false)}>
+            <a key={m.path} href={`#${m.path}`} aria-current={section === m.path ? 'page' : undefined} onClick={closeMenu}>
               <Icon name={m.icon} />
               {m.label}
             </a>
@@ -148,12 +177,12 @@ export function MascotNav() {
         <button
           ref={pandaBtnRef}
           type="button"
-          className={`mascot-btn mascot-panda${open ? ' walking' : ''}`}
+          className={`mascot-btn mascot-panda${pandaClass}`}
           aria-haspopup="dialog"
-          aria-expanded={open}
+          aria-expanded={menuOpen}
           aria-controls={panelId}
-          aria-label="Ana menüyü aç"
-          onClick={() => setOpen((o) => !o)}
+          aria-label={menuOpen ? 'Ana menüyü kapat' : 'Ana menüyü aç'}
+          onClick={() => (phase === 'sit' ? openMenu() : phase === 'stood' ? closeMenu() : undefined)}
         >
           <PandaFace />
         </button>

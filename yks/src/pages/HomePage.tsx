@@ -50,16 +50,29 @@ export default function HomePage() {
     <>
       <PageHeader title="Odam" sub={formatDay(today, { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })} />
 
-      <section className="card hero" aria-labelledby="hello">
-        <div className="eyebrow">Senin çalışma alanın</div>
-        <h2 id="hello" style={{ fontSize: '1.35rem', marginTop: 4 }}>
-          İyi ki buradasın{profile.name ? `, ${profile.name}` : ''} <span style={{ color: '#c0668f' }}>♡</span>
-        </h2>
-        <p className="muted mt-8" style={{ marginBottom: 0 }}>
-          {daysLeft != null && daysLeft >= 0
-            ? `Sınavına ${daysLeft} gün var. Bugün küçük ama net bir adım at.`
-            : 'Küçük adımlar, büyük hayaller. Bugün kendin için bir adım at.'}
-        </p>
+      <section className="card hero hero-panda" aria-labelledby="hello">
+        <div className="hero-text">
+          <div className="eyebrow">Senin çalışma alanın</div>
+          <h2 id="hello">
+            İyi ki buradasın{profile.name ? `, ${profile.name}` : ''} <span className="heart">♡</span>
+          </h2>
+          <p className="muted" style={{ marginBottom: 0 }}>
+            {daysLeft != null && daysLeft >= 0
+              ? `Sınavına ${daysLeft} gün var. Bugün küçük ama net bir adım at.`
+              : 'Küçük adımlar, büyük hayaller. Bugün kendin için bir adım at.'}
+          </p>
+        </div>
+        <svg className="hero-mascot" viewBox="0 0 120 120" aria-hidden="true">
+          <ellipse cx="30" cy="26" rx="15" ry="15" fill="#3a3238" />
+          <ellipse cx="90" cy="26" rx="15" ry="15" fill="#3a3238" />
+          <circle cx="60" cy="62" r="46" fill="#fbfbfa" />
+          <ellipse cx="38" cy="62" rx="14" ry="16" fill="#2f2830" />
+          <ellipse cx="82" cy="62" rx="14" ry="16" fill="#2f2830" />
+          <circle cx="41" cy="64" r="4.6" fill="#fff" />
+          <circle cx="85" cy="64" r="4.6" fill="#fff" />
+          <ellipse cx="60" cy="76" rx="8" ry="6" fill="#2f2830" />
+          <path d="M48 90 Q60 98 72 90" stroke="#2f2830" strokeWidth="3.5" fill="none" strokeLinecap="round" />
+        </svg>
       </section>
 
       <section className="grid grid-4 section" aria-label="Bugünün özeti">

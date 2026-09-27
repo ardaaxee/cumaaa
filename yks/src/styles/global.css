@@ -26,9 +26,9 @@
   --chart: #6d4fb3;
   --chart-grid: #ebe5f3;
   --focus: #7c5cd6;
-  --shadow: 0 1px 2px rgba(40, 24, 70, 0.05), 0 8px 24px rgba(40, 24, 70, 0.06);
-  --radius: 18px;
-  --radius-sm: 12px;
+  --shadow: 0 2px 4px rgba(120, 80, 40, 0.06), 0 10px 26px rgba(120, 80, 40, 0.08);
+  --radius: 24px;
+  --radius-sm: 16px;
   --nav-h: 68px;
   --safe-b: env(safe-area-inset-bottom, 0px);
 }
@@ -348,6 +348,30 @@ button {
   background: linear-gradient(140deg, var(--brand-soft), var(--surface) 70%);
 }
 
+.hero-panda {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  overflow: visible;
+}
+.hero-panda .hero-text { flex: 1; min-width: 0; }
+.hero-panda h2 { font-size: 1.4rem; margin: 4px 0 8px; }
+.hero-panda .heart { color: #c0668f; }
+.hero-mascot {
+  width: 84px;
+  height: 84px;
+  flex-shrink: 0;
+  filter: drop-shadow(0 6px 10px rgba(91, 63, 160, 0.18));
+  animation: mascot-idle 3s ease-in-out infinite;
+}
+@media (min-width: 640px) {
+  .hero-mascot { width: 108px; height: 108px; }
+  .hero-panda h2 { font-size: 1.6rem; }
+}
+@media (max-width: 420px) {
+  .hero-mascot { width: 64px; height: 64px; }
+}
+
 .eyebrow {
   font-size: 0.72rem;
   font-weight: 700;
@@ -427,16 +451,17 @@ button {
   justify-content: center;
   gap: 6px;
   min-height: 44px;
-  padding: 0 16px;
-  border-radius: 12px;
-  border: 1px solid var(--line-strong);
+  padding: 0 18px;
+  border-radius: 999px;
+  border: 1.5px solid var(--line-strong);
   background: var(--surface);
   color: var(--text);
-  font-weight: 600;
+  font-weight: 700;
   text-decoration: none;
   white-space: nowrap;
-  transition: background 0.15s;
+  transition: background 0.15s, transform 0.1s;
 }
+.btn:active { transform: scale(0.97); }
 .btn:hover { background: var(--surface-2); }
 .btn:disabled { opacity: 0.5; cursor: not-allowed; }
 .btn.primary {
@@ -448,7 +473,7 @@ button {
 .btn.ghost { background: transparent; border-color: transparent; }
 .btn.ghost:hover { background: var(--surface-2); }
 .btn.danger { color: var(--bad); }
-.btn.small { min-height: 36px; padding: 0 12px; font-size: 0.85rem; border-radius: 10px; }
+.btn.small { min-height: 36px; padding: 0 14px; font-size: 0.85rem; border-radius: 999px; }
 .btn.block { width: 100%; }
 .btn svg { width: 18px; height: 18px; }
 
@@ -457,7 +482,7 @@ button {
   place-items: center;
   width: 44px;
   height: 44px;
-  border-radius: 12px;
+  border-radius: 16px;
   border: 1px solid var(--line);
   background: var(--surface);
   color: var(--text);
@@ -1189,21 +1214,74 @@ details.table-view summary {
   border-radius: 50%;
   margin-bottom: 6px;
 }
+.mascot-rabbit:hover, .mascot-cat:hover, .mascot-fox:hover { animation: mascot-wiggle 0.5s ease; }
 
 .mascot-panda {
-  width: 68px;
-  height: 68px;
+  width: 72px;
+  height: 72px;
   border-radius: 50%;
   background: var(--surface);
   border-color: var(--brand);
   position: relative;
-  transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+  animation: mascot-idle 2.6s ease-in-out infinite;
+  transform-origin: 50% 100%;
 }
 .mascot-panda.walking {
-  transform: translate(calc(50vw - 90px), calc(-1 * (100vh - 190px)));
+  animation: mascot-walk-out 0.9s cubic-bezier(0.3, 0, 0.2, 1) forwards;
+}
+.mascot-panda.returning {
+  animation: mascot-walk-back 0.7s ease-in forwards;
+}
+
+@keyframes mascot-idle {
+  0%, 100% { transform: translateY(0) scale(1, 1); }
+  50% { transform: translateY(-3px) scale(1.02, 0.98); }
+}
+@keyframes mascot-wiggle {
+  0%, 100% { transform: rotate(0deg); }
+  25% { transform: rotate(-8deg); }
+  75% { transform: rotate(8deg); }
+}
+/* Panda: ayağa kalkar (sıkışıp uzar), küçük adımlarla sağ üste yürür, tutamacı çeker. */
+@keyframes mascot-walk-out {
+  0% { transform: translate(0, 0) scale(1, 1) rotate(0deg); }
+  8% { transform: translate(0, 3px) scale(1.08, 0.9) rotate(0deg); }
+  20% { transform: translate(calc(10vw), calc(-0.18 * (100vh - 120px))) scale(0.94, 1.05) rotate(-4deg); }
+  35% { transform: translate(calc(20vw), calc(-0.4 * (100vh - 120px))) scale(1.03, 0.97) rotate(4deg); }
+  50% { transform: translate(calc(30vw), calc(-0.62 * (100vh - 120px))) scale(0.95, 1.05) rotate(-4deg); }
+  65% { transform: translate(calc(38vw), calc(-0.8 * (100vh - 120px))) scale(1.03, 0.97) rotate(3deg); }
+  82% { transform: translate(calc(44vw), calc(-0.94 * (100vh - 120px))) scale(0.97, 1.04) rotate(-2deg); }
+  92% { transform: translate(calc(48vw - 40px), calc(-1 * (100vh - 150px))) scale(1.05, 0.95) rotate(6deg); }
+  100% { transform: translate(calc(48vw - 40px), calc(-1 * (100vh - 150px))) scale(1, 1) rotate(0deg); }
+}
+@keyframes mascot-walk-back {
+  0% { transform: translate(calc(48vw - 40px), calc(-1 * (100vh - 150px))) scale(1, 1) rotate(0deg); }
+  20% { transform: translate(calc(30vw), calc(-0.55 * (100vh - 120px))) scale(1.04, 0.96) rotate(3deg); }
+  45% { transform: translate(calc(15vw), calc(-0.25 * (100vh - 120px))) scale(0.96, 1.04) rotate(-3deg); }
+  75% { transform: translate(0, 3px) scale(1.06, 0.92) rotate(0deg); }
+  100% { transform: translate(0, 0) scale(1, 1) rotate(0deg); }
 }
 @media (min-width: 900px) {
-  .mascot-panda.walking { transform: translate(calc(50vw - 130px), calc(-1 * (100vh - 200px))); }
+  @keyframes mascot-walk-out {
+    100% { transform: translate(calc(48vw - 60px), calc(-1 * (100vh - 170px))) scale(1, 1) rotate(0deg); }
+  }
+}
+
+.mascot-pull-tab {
+  position: fixed;
+  z-index: 41;
+  top: calc(30px + env(safe-area-inset-top, 0px));
+  right: 40px;
+  width: 6px;
+  height: 34px;
+  border-radius: 3px;
+  background: var(--brand);
+  transform-origin: top center;
+  animation: mascot-tab-appear 0.3s ease 0.75s both;
+}
+@keyframes mascot-tab-appear {
+  0% { opacity: 0; transform: scaleY(0); }
+  100% { opacity: 1; transform: scaleY(1); }
 }
 
 .mascot-backdrop {

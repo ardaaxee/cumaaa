@@ -129,10 +129,10 @@ export default function SubjectsPage() {
                 key={s.id}
                 className="card link-row"
                 href={`#/ders/${s.id}`}
-                style={{ margin: 0, display: 'block', borderColor: accent.fg, borderWidth: 2 }}
+                style={{ margin: 0, display: 'block', borderColor: accent.fg, borderWidth: 2, background: accent.soft }}
               >
                 <div className="row nowrap">
-                  <span className="subject-icon" aria-hidden="true" style={{ background: accent.soft, color: accent.fg }}>
+                  <span className="subject-icon" aria-hidden="true" style={{ background: 'var(--surface)', color: accent.fg }}>
                     {s.icon}
                   </span>
                   <div className="grow">
