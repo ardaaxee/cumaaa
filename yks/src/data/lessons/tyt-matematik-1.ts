@@ -1,0 +1,770 @@
+import type { LessonSeed } from '../../domain/types';
+
+export const lessons: LessonSeed[] = [
+  // ---------------------------------------------------------------- Temel Kavramlar
+  {
+    topicId: 'tytmat-temel-kavramlar',
+    intro:
+      "TYT matematiğin kapısı temel kavramlardır. Rakam, sayı, sayı kümeleri, tek-çift, pozitif-negatif, ardışık sayılar, asal sayılar ve faktöriyel gibi kavramlar tek başına az soru getirir gibi görünse de neredeyse her sorunun içinde gizlidir. Bir problemi çözerken ‘x tam sayı’, ‘a, b farklı rakamlar’ ya da ‘p asal’ gibi bir koşulu gözden kaçırmak, doğru kurulmuş bir çözümü yanlış cevaba götürür.\n\nBu konuda amacımız ezber değil, koşulları okuyup sayıların hangi değerleri alabileceğini hızlıca daraltabilmektir. ‘En büyük’, ‘en küçük’, ‘kaç farklı değer’ gibi ifadeler gördüğünde sayı kümesini ve kısıtları ilk iş olarak not etmeyi alışkanlık hâline getir.",
+    prerequisites: [
+      "Dört işlem ve işlem önceliği",
+      "Negatif sayılarla işlem yapma",
+      "Doğal sayı, tam sayı ve kesir kavramları",
+    ],
+    concepts: [
+      { term: "Rakam", definition: "Sayıları yazmaya yarayan 0, 1, 2, …, 9 sembolleridir. Onluk sistemde 10 rakam vardır." },
+      { term: "Sayı kümeleri", definition: "Doğal sayılar N = {0, 1, 2, …}, tam sayılar Z, rasyonel sayılar Q (a/b, b ≠ 0), irrasyonel sayılar Q′ ve gerçek sayılar R = Q ∪ Q′ biçimindedir. N ⊂ Z ⊂ Q ⊂ R." },
+      { term: "Tek ve çift sayı", definition: "2k biçimindeki tam sayılar çift, 2k + 1 biçimindekiler tektir (k ∈ Z). 0 çift sayıdır." },
+      { term: "Asal sayı", definition: "1’den ve kendisinden başka pozitif böleni olmayan, 1’den büyük doğal sayıdır. En küçük asal 2’dir ve 2 tek çift asaldır." },
+      { term: "Aralarında asal", definition: "1’den başka ortak pozitif böleni olmayan sayılardır. Örneğin 8 ve 15 aralarında asaldır; kendileri asal olmak zorunda değildir." },
+      { term: "Faktöriyel", definition: "n! = 1 · 2 · 3 · … · n (n ≥ 1) ve 0! = 1 olarak tanımlanır." },
+      { term: "Ardışık sayılar", definition: "Belirli bir kurala göre eşit aralıklarla artan sayılardır: ardışık tam sayılar n, n + 1, …; ardışık çiftler 2n, 2n + 2, …" },
+    ],
+    formulas: [
+      { expr: "Tek ± Tek = Çift, Tek ± Çift = Tek, Çift ± Çift = Çift", meaning: "Toplama ve çıkarmada tek sayı adedi çiftse sonuç çifttir." },
+      { expr: "Tek · Tek = Tek, Çift · (herhangi tam sayı) = Çift", meaning: "Çarpımda bir tane çift çarpan sonucu çift yapar." },
+      { expr: "Terim sayısı = (Son − İlk) / Artış + 1", meaning: "Eşit aralıklı ardışık dizide kaç terim olduğunu verir." },
+      { expr: "Toplam = (İlk + Son) · Terim sayısı / 2", meaning: "Ardışık (eşit aralıklı) sayıların toplamı." },
+      { expr: "1 + 2 + … + n = n(n + 1)/2", meaning: "İlk n pozitif tam sayının toplamı." },
+      { expr: "(n + 1)! = (n + 1) · n!", meaning: "Faktöriyelli ifadelerde ortak çarpan parantezine almayı sağlar." },
+    ],
+    logic:
+      "Tek-çift kuralları aslında 2’ye bölümden kalan hesabıdır: tek sayı 2’ye bölününce 1 kalanı verir, iki kalanı topladığında 1 + 1 = 2 yani kalan 0 olur; bu yüzden tek + tek çifttir. Çarpımda ise çarpanlardan biri 2’yi içeriyorsa sonuç da 2’yi içerir.\n\nArdışık sayıların toplam formülü, ilk ve son terimi eşleştirme fikrinden gelir: ilk ile son, ikinci ile sondan bir önceki… her çiftin toplamı aynıdır. Faktöriyellerde (n + 1)! = (n + 1) · n! eşitliği, büyük faktöriyeli küçüğün katı olarak yazıp sadeleştirmemizi sağlar.",
+    examples: [
+      {
+        level: 'kolay',
+        problem: "a tek, b çift tam sayı olmak üzere a² + 3b + 1 ifadesinin tek mi çift mi olduğunu belirleyiniz.",
+        steps: [
+          "a tek ⇒ a² = tek · tek = tek.",
+          "b çift ⇒ 3b çift.",
+          "tek + çift + tek = çift + çift = çift.",
+        ],
+        answer: "Çift",
+      },
+      {
+        level: 'orta',
+        problem: "12’den 96’ya kadar (ikisi de dahil) 4’ün katı olan sayıların toplamı kaçtır?",
+        steps: [
+          "Terim sayısı = (96 − 12)/4 + 1 = 21 + 1 = 22.",
+          "Toplam = (12 + 96) · 22 / 2 = 108 · 11 = 1188.",
+        ],
+        answer: "1188",
+      },
+      {
+        level: 'zor',
+        problem: "(12! + 11!) / (10! + 9!) işleminin sonucu kaçtır?",
+        steps: [
+          "Pay: 12! + 11! = 11!(12 + 1) = 13 · 11!.",
+          "Payda: 10! + 9! = 9!(10 + 1) = 11 · 9!.",
+          "11!/9! = 11 · 10 = 110 olduğundan sonuç = 13 · 110 / 11 = 130.",
+        ],
+        answer: "130",
+      },
+    ],
+    osymThinking:
+      "Bu konudaki sorular çoğunlukla koşul okuma sorusudur: ‘a, b, c farklı pozitif tam sayılar’, ‘x negatif, y pozitif’ gibi bilgiler verilip bir ifadenin kesin tek/çift ya da pozitif/negatif olup olmadığı sorulur. Deneme yaparken sayı seçimiyle hızlı sonuç alırsın; ama ‘kesinlikle’ sorusunda tek bir karşı örnek bir şıkkı eler. Faktöriyel sorularında ise ortak çarpan parantezine alma becerisi ölçülür.",
+    commonMistakes: [
+      "0’ı çift sayı saymamak ya da 1’i asal saymak.",
+      "‘Aralarında asal’ ile ‘asal’ kavramlarını karıştırmak.",
+      "Ardışık çift sayılarda terim sayısını (Son − İlk) / 2 + 1 yerine (Son − İlk) + 1 ile hesaplamak.",
+      "0! değerini 0 almak (doğrusu 0! = 1).",
+    ],
+    tips: [
+      "Tek-çift sorularında değişkenlere en küçük uygun değerleri (1, 2) vererek kontrol et.",
+      "Faktöriyelli kesirlerde her zaman en küçük faktöriyeli ortak çarpan parantezine al.",
+      "‘Farklı rakamlar’ ifadesinde en büyük/küçük değeri ararken önce kısıtları listele.",
+    ],
+    summary: [
+      "N ⊂ Z ⊂ Q ⊂ R; irrasyoneller Q′ kümesidir.",
+      "0 çifttir, 2 tek çift asaldır, 1 asal değildir.",
+      "Terim sayısı = (Son − İlk)/Artış + 1; Toplam = (İlk + Son)·Terim sayısı/2.",
+      "0! = 1 ve (n + 1)! = (n + 1)·n!.",
+      "Kesinlik sorularında tek karşı örnek yeter.",
+    ],
+  },
+  // ---------------------------------------------------------------- Sayı Basamakları
+  {
+    topicId: 'tytmat-sayi-basamaklari',
+    intro:
+      "Bir sayının değeri, rakamlarının hangi basamakta durduğuna bağlıdır. 352 sayısındaki 5 aslında 50 değerindedir. Sayı basamakları konusu, rakamları harflerle verilen sayıları (ab, abc gibi) çözümleyip denklem kurmayı öğretir.\n\nTYT’de bu konu genellikle ‘rakamlarının yerleri değiştirildiğinde sayı ne kadar artar’, ‘koşulları sağlayan en büyük sayı kaçtır’ ya da farklı tabanlarda yazılmış sayılar üzerinden gelir. Çözümleme bir kez oturduğunda soruların çoğu birkaç satırlık denkleme dönüşür.",
+    prerequisites: [
+      "Rakam ve sayı kavramı",
+      "Birinci dereceden denklem kurma",
+      "Üslü sayıların temel anlamı (10², 10³, 2⁴ …)",
+    ],
+    concepts: [
+      { term: "Basamak değeri", definition: "Bir rakamın bulunduğu basamağa göre aldığı değerdir; abc sayısında a’nın basamak değeri 100a’dır." },
+      { term: "Sayı değeri", definition: "Rakamın kendi değeridir; basamaktan bağımsızdır." },
+      { term: "Çözümleme", definition: "Sayıyı basamak değerlerinin toplamı biçiminde yazmaktır: abc = 100a + 10b + c." },
+      { term: "Taban (sayma sistemi)", definition: "k tabanında yalnızca 0, 1, …, k − 1 rakamları kullanılır ve basamak değerleri k’nin kuvvetleridir." },
+    ],
+    formulas: [
+      { expr: "ab = 10a + b", meaning: "İki basamaklı sayının çözümlenmesi (a ≠ 0)." },
+      { expr: "abc = 100a + 10b + c", meaning: "Üç basamaklı sayının çözümlenmesi (a ≠ 0)." },
+      { expr: "ab + ba = 11(a + b)", meaning: "Rakamları yer değiştiren iki basamaklı sayıların toplamı." },
+      { expr: "ab − ba = 9(a − b)", meaning: "Rakamları yer değiştiren iki basamaklı sayıların farkı." },
+      { expr: "abc − cba = 99(a − c)", meaning: "Üç basamaklı sayının tersiyle farkı; ortadaki rakam etkisizdir." },
+      { expr: "(abc)ₖ = a·k² + b·k + c", meaning: "k tabanındaki sayının onluk tabana çevrilmesi (a, b, c < k)." },
+    ],
+    logic:
+      "Onluk sistemde her basamak bir öncekinin 10 katıdır; bu yüzden abc yazdığımızda a aslında 100 tane, b 10 tane, c 1 tane ifade eder. Rakamların yeri değişince toplam değişir ama değişimin miktarı yalnızca yer değiştiren rakamlara bağlıdır: abc − cba hesabında 10b’ler birbirini götürür, geriye 99a − 99c kalır.\n\nTabanlar da aynı mantıkla çalışır; sadece 10 yerine k’nin kuvvetleri kullanılır. Bu nedenle bir tabanda yazılmış sayıdaki her rakam tabandan küçük olmak zorundadır.",
+    examples: [
+      {
+        level: 'kolay',
+        problem: "İki basamaklı ab sayısı, rakamları toplamının 7 katına eşittir. ab sayısı kaç farklı değer alabilir?",
+        steps: [
+          "10a + b = 7(a + b) ⇒ 3a = 6b ⇒ a = 2b.",
+          "b = 1 ⇒ 21, b = 2 ⇒ 42, b = 3 ⇒ 63, b = 4 ⇒ 84; hepsi koşulu sağlar.",
+          "Örneğin 42: 4 + 2 = 6, 6 · 7 = 42 ✓.",
+        ],
+        answer: "4 (21, 42, 63, 84)",
+      },
+      {
+        level: 'orta',
+        problem: "Üç basamaklı abc sayısı ile cba sayısının farkı abc − cba = 594’tür. a + c = 10 ise abc sayısının alabileceği en büyük değer kaçtır?",
+        steps: [
+          "abc − cba = 99(a − c) = 594 ⇒ a − c = 6.",
+          "a + c = 10 ve a − c = 6 ⇒ a = 8, c = 2.",
+          "b serbesttir; en büyük için b = 9 ⇒ 892.",
+        ],
+        answer: "892",
+      },
+      {
+        level: 'zor',
+        problem: "(213)₄ sayısının 5 tabanındaki yazılışı nedir?",
+        steps: [
+          "(213)₄ = 2·16 + 1·4 + 3 = 39.",
+          "39 = 1·25 + 14; 14 = 2·5 + 4.",
+          "Rakamlar 1, 2, 4 ⇒ (124)₅.",
+        ],
+        answer: "(124)₅",
+      },
+    ],
+    osymThinking:
+      "Sorular çoğunlukla çözümleme kurulmadan çözülemeyecek biçimde tasarlanır: ‘rakamları yer değiştirince 36 artıyor’ gibi bir bilgi 9(b − a) = 36 denklemine dönüşür. Seçeneklerde tek bir sayı yerine ‘kaç farklı değer alır’ sorusu da sık gelir; burada rakamların 0–9 aralığında olması ve ilk rakamın 0 olamaması kısıtları belirleyicidir.",
+    commonMistakes: [
+      "abc sayısını a · b · c çarpımı gibi işlemek.",
+      "İlk basamaktaki rakamın 0 olamayacağını unutmak.",
+      "Taban sorularında tabana eşit ya da büyük rakam kullanmak.",
+      "Tabana çevirirken kalanları ters sırada yazmayı unutmak.",
+    ],
+    tips: [
+      "Yer değiştirme sorularında doğrudan 9(a − b) ve 99(a − c) kalıplarını kullan.",
+      "‘Kaç farklı değer’ sorularında rakam aralıklarını tabloyla tara.",
+    ],
+    summary: [
+      "abc = 100a + 10b + c; a ≠ 0.",
+      "ab − ba = 9(a − b), abc − cba = 99(a − c).",
+      "k tabanında rakamlar 0 … k − 1 arasındadır.",
+      "Onluktan k tabanına: k’ye art arda böl, kalanları sondan başa yaz.",
+    ],
+  },
+  // ---------------------------------------------------------------- Bölme ve Bölünebilme
+  {
+    topicId: 'tytmat-bolme-bolunebilme',
+    intro:
+      "Bölme işlemi dört bileşenden oluşur: bölünen, bölen, bölüm ve kalan. Bu konunun kalbi A = B · C + K eşitliği ve kalanın bölenden küçük olması koşuludur. Bu iki bilgi, ‘en büyük bölünen kaçtır’ tipindeki soruların tamamını çözer.\n\nBölünebilme kuralları ise uzun bölme yapmadan bir sayının başka bir sayıya bölünüp bölünmediğini anlamamızı sağlar. TYT’de özellikle rakamları harflerle verilen sayıların 3, 4, 5, 9 veya 11 ile bölünebilmesi ve bileşik bölünebilme (örneğin 12 = 3 · 4) sık sorulur.",
+    prerequisites: [
+      "Dört işlem ve çarpım tablosu",
+      "Sayı basamakları ve çözümleme",
+      "Asal sayı kavramı",
+    ],
+    concepts: [
+      { term: "Bölme bağıntısı", definition: "A = B · C + K; A bölünen, B bölen, C bölüm, K kalandır ve 0 ≤ K < B olur." },
+      { term: "Tam bölünme", definition: "Kalanın 0 olmasıdır; A, B’nin katıdır." },
+      { term: "Asal çarpanlara ayırma", definition: "Bir sayıyı asal sayıların kuvvetlerinin çarpımı olarak yazmaktır: 360 = 2³ · 3² · 5." },
+      { term: "Bileşik bölünebilme", definition: "Bir sayı aralarında asal çarpanlara ayrılan bir sayıya, her bir çarpana ayrı ayrı bölünüyorsa bölünür (12 için 3 ve 4)." },
+    ],
+    formulas: [
+      { expr: "A = B · C + K, 0 ≤ K < B", meaning: "Bölme işleminin temel bağıntısı." },
+      { expr: "3 ve 9 ile: rakamlar toplamı 3’e / 9’a bölünmeli", meaning: "Kalan da rakamlar toplamının kalanıdır." },
+      { expr: "4 ile: son iki basamak; 8 ile: son üç basamak", meaning: "Son iki (üç) basamağın oluşturduğu sayı 4’e (8’e) bölünmeli." },
+      { expr: "11 ile: sağdan başlayarak + − + − işaretli rakam toplamı", meaning: "Bu toplam 11’in katı olmalı." },
+      { expr: "n = aˣ · bʸ · cᶻ ⇒ pozitif bölen sayısı (x + 1)(y + 1)(z + 1)", meaning: "Asal çarpan kuvvetlerinden bölen sayısı hesaplanır; tam sayı bölen sayısı bunun 2 katıdır." },
+    ],
+    logic:
+      "Kalanın bölenden küçük olması, bölmenin ‘bölen kadar grup kalmayana kadar dağıtma’ olmasından gelir; kalan bölen kadar ya da daha fazla olsaydı bir grup daha oluşturulabilirdi.\n\n3 ve 9 kuralı, 10’un 9’a bölümünden kalanın 1 olmasından doğar: 10, 100, 1000 … sayılarının hepsi 9’a bölününce 1 kalanını verir, bu yüzden sayının kalanı rakamlarının toplamının kalanına eşittir. 11 kuralında ise 10 ≡ −1 olduğundan basamaklar sırayla + ve − işaret alır.",
+    examples: [
+      {
+        level: 'kolay',
+        problem: "Bir sayı 7’ye bölündüğünde bölüm 12, kalan en büyük değerini alıyor. Bu sayı kaçtır?",
+        steps: [
+          "Kalan en fazla 6 olabilir.",
+          "A = 7 · 12 + 6 = 90.",
+        ],
+        answer: "90",
+      },
+      {
+        level: 'orta',
+        problem: "Beş basamaklı 4a73b sayısı 45 ile tam bölünebilmektedir. a’nın alabileceği değerlerin toplamı kaçtır?",
+        steps: [
+          "45 = 5 · 9; 5’e bölünme ⇒ b = 0 veya b = 5.",
+          "b = 0: 4 + a + 7 + 3 + 0 = 14 + a, 9’un katı ⇒ a = 4.",
+          "b = 5: 19 + a, 9’un katı ⇒ a = 8.",
+          "Toplam = 4 + 8 = 12.",
+        ],
+        answer: "12",
+      },
+      {
+        level: 'zor',
+        problem: "720 sayısının pozitif bölenlerinden kaç tanesi çift sayıdır?",
+        steps: [
+          "720 = 2⁴ · 3² · 5; toplam pozitif bölen sayısı 5 · 3 · 2 = 30.",
+          "Tek bölenler 2 içermez: 3² · 5’in bölen sayısı 3 · 2 = 6.",
+          "Çift bölen sayısı = 30 − 6 = 24.",
+        ],
+        answer: "24",
+      },
+    ],
+    osymThinking:
+      "Sorular çoğu zaman kalan koşulunu gizler: ‘bölüm ile kalan eşittir’ ya da ‘kalan bölümün 2 katıdır’ gibi ilişkiler verilir ve kalan < bölen koşulundan sınırlar çıkarılır. Bölünebilme sorularında 45, 36, 72 gibi bileşik sayılar kullanılarak iki kural aynı anda ölçülür; ayrıca rakam koşulları nedeniyle birden fazla durum incelenmesi gerekir.",
+    commonMistakes: [
+      "Kalanın bölenden küçük olması gerektiğini unutmak.",
+      "12 ile bölünebilmeyi 2 ve 6 ile kontrol etmek (2 ile 6 aralarında asal değildir; 3 ve 4 kullanılmalı).",
+      "11 kuralında işaretleri soldan başlatıp sonucu yanlış yorumlamak (önemli olan farkın 11’in katı olması).",
+      "Bölen sayısını hesaplarken kuvvetlere 1 eklemeyi unutmak.",
+    ],
+    tips: [
+      "Bileşik bölünebilmede sayıyı her zaman aralarında asal çarpanlara ayır.",
+      "Kalan sorularında büyük sayılar yerine kalanlarla işlem yap: (A · B)’nin kalanı, kalanların çarpımının kalanıdır.",
+      "Tek bölen sayısı için 2’nin kuvvetini yok say.",
+    ],
+    summary: [
+      "A = B·C + K ve 0 ≤ K < B.",
+      "3/9: rakam toplamı; 4: son iki basamak; 8: son üç basamak; 5/10: son basamak; 11: ± toplam.",
+      "Bileşik bölünebilmede aralarında asal çarpanlar kullanılır.",
+      "Bölen sayısı: kuvvetlere 1 ekleyip çarp.",
+    ],
+  },
+  // ---------------------------------------------------------------- EBOB-EKOK
+  {
+    topicId: 'tytmat-ebob-ekok',
+    intro:
+      "EBOB (en büyük ortak bölen) ve EKOK (en küçük ortak kat), sayıları ‘parçalama’ ve ‘buluşturma’ problemlerinin matematiğidir. Bir kumaşı eşit ve en büyük parçalara ayırmak, bir bahçenin çevresine eşit aralıklarla ağaç dikmek EBOB’dur; iki otobüsün yeniden aynı anda duraktan kalkması, farklı adımlarla yürüyen iki kişinin tekrar aynı noktaya basması EKOK’tur.\n\nKonuyu öğrenirken ‘soru bölüyor mu, yoksa bir araya mı getiriyor?’ sorusunu kendine sor. Parça küçülüyorsa ve sayıları bölüyorsan EBOB; sonuç verilen sayılardan büyükse ve katlarını arıyorsan EKOK düşünmelisin.",
+    prerequisites: [
+      "Asal çarpanlara ayırma",
+      "Bölme bağıntısı ve kalan",
+      "Bölünebilme kuralları",
+    ],
+    concepts: [
+      { term: "EBOB", definition: "İki veya daha fazla sayıyı tam bölen en büyük pozitif tam sayıdır." },
+      { term: "EKOK", definition: "İki veya daha fazla sayının her birine tam bölünen en küçük pozitif tam sayıdır." },
+      { term: "Aralarında asal sayılar", definition: "EBOB’u 1 olan sayılardır; EKOK’ları çarpımlarına eşittir." },
+      { term: "Periyot", definition: "Bir olayın tekrarlandığı sabit zaman aralığıdır; periyotların EKOK’u olayların birlikte tekrarlanma aralığıdır." },
+    ],
+    formulas: [
+      { expr: "EBOB: ortak asal çarpanların en küçük kuvvetleri", meaning: "Asal çarpan yöntemiyle EBOB hesabı." },
+      { expr: "EKOK: tüm asal çarpanların en büyük kuvvetleri", meaning: "Asal çarpan yöntemiyle EKOK hesabı." },
+      { expr: "EBOB(a, b) · EKOK(a, b) = a · b", meaning: "Yalnızca iki sayı için geçerlidir." },
+      { expr: "x ≡ −r (mod a, b, c) ⇒ x = k · EKOK(a, b, c) − r", meaning: "Sayı her birine bölündüğünde bölenden r eksik kalan veriyorsa." },
+    ],
+    logic:
+      "EBOB’da ortak bölen arıyoruz; bir sayının tüm sayıları bölebilmesi için her asal çarpanı, her sayıda en az o kadar bulunmalıdır. Bu yüzden ortak asalların en küçük kuvvetini alırız. EKOK’ta ise her sayıyı içine alacak kadar büyük bir kat istiyoruz; her asal çarpanın en büyük kuvvetini alırsak tüm sayılar bu katın içine sığar.\n\nEBOB · EKOK = a · b eşitliği, her asal için en küçük kuvvet + en büyük kuvvet = iki kuvvetin toplamı olmasından gelir.",
+    examples: [
+      {
+        level: 'kolay',
+        problem: "EBOB(84, 120) ve EKOK(84, 120) kaçtır?",
+        steps: [
+          "84 = 2² · 3 · 7, 120 = 2³ · 3 · 5.",
+          "EBOB = 2² · 3 = 12.",
+          "EKOK = 2³ · 3 · 5 · 7 = 840. Kontrol: 12 · 840 = 10080 = 84 · 120 ✓.",
+        ],
+        answer: "EBOB = 12, EKOK = 840",
+      },
+      {
+        level: 'orta',
+        problem: "Kenarları 60 m ve 84 m olan dikdörtgen bir tarlanın çevresine, köşelere de gelecek şekilde eşit aralıklarla ağaç dikilecektir. En az kaç ağaç gerekir?",
+        steps: [
+          "Aralık en büyük olmalı ⇒ EBOB(60, 84) = 12 m.",
+          "Çevre = 2(60 + 84) = 288 m.",
+          "Kapalı şekilde ağaç sayısı = çevre / aralık = 288 / 12 = 24.",
+        ],
+        answer: "24",
+      },
+      {
+        level: 'zor',
+        problem: "Bir sepetteki yumurtalar 4’er, 5’er ve 6’şar sayıldığında her seferinde 1 yumurta artıyor; 7’şer sayıldığında ise hiç artmıyor. Sepette en az kaç yumurta vardır?",
+        steps: [
+          "x − 1 sayısı 4, 5 ve 6’nın ortak katıdır: EKOK(4, 5, 6) = 60.",
+          "x ∈ {61, 121, 181, 241, 301, …}.",
+          "7’ye bölünme kontrolü: 61, 121, 181, 241 bölünmez; 301 = 7 · 43 ✓.",
+        ],
+        answer: "301",
+      },
+    ],
+    osymThinking:
+      "Soru EBOB ya da EKOK kelimesini neredeyse hiç kullanmaz; günlük hayat bağlamı verir. Otobüs seferleri, ilaç saatleri, fayans döşeme, kumaş kesme gibi durumlarda hangi işlemin gerektiğini seçmen beklenir. Ayrıca ağaç dikme sorularında kapalı (çevre) ve açık (doğru boyunca) durumlarının farkı, kalan sorularında da ‘eksik kalan’ fikri ölçülür.",
+    commonMistakes: [
+      "EBOB · EKOK = çarpım eşitliğini üç sayı için kullanmak.",
+      "Açık bir yol boyunca ağaç dikerken 1 eklemeyi, kapalı çevrede ise gereksiz yere 1 eklemeyi yapmak.",
+      "Farklı kalanlar verildiğinde tek bir EKOK’tan kalanı çıkarmaya çalışmak (kalan − bölen farkı eşit olmalı).",
+      "Saat ve gün sorularında başlangıç gününü sayıma katmayı unutmak.",
+    ],
+    tips: [
+      "‘En az kaç parça’ sorusunda önce EBOB’u bul, sonra toplam / EBOB hesapla.",
+      "Kalanlar bölenden hep aynı miktar eksikse, sayıyı ‘EKOK’un katı eksi o miktar’ olarak yaz.",
+      "Kare fayans döşemede fayans kenarı EBOB, kare oluşturmada kenar EKOK’tur.",
+    ],
+    summary: [
+      "EBOB: ortak asalların en küçük kuvvetleri; EKOK: tüm asalların en büyük kuvvetleri.",
+      "İki sayı için EBOB · EKOK = a · b.",
+      "Bölme/parçalama → EBOB; buluşma/tekrar → EKOK.",
+      "Kapalı çevrede ağaç sayısı = çevre / aralık.",
+    ],
+  },
+  // ---------------------------------------------------------------- Rasyonel Sayılar
+  {
+    topicId: 'tytmat-rasyonel-sayilar',
+    intro:
+      "Rasyonel sayılar a/b (b ≠ 0) biçiminde yazılabilen sayılardır. Kesirler, ondalık sayılar ve devirli ondalık sayılar aynı kümenin farklı görünümleridir. TYT’de bu konu hem doğrudan işlem sorusu olarak hem de problemlerin içinde karşına çıkar.\n\nKesirlerle hızlı ve hatasız işlem yapmak, sıralama yaparken doğru stratejiyi seçmek ve devirli sayıları kesre çevirebilmek bu konunun temel becerileridir. Merdivenli kesirlerde en alttan başlayarak adım adım ilerlemek hatayı azaltır.",
+    prerequisites: [
+      "EBOB-EKOK ile payda eşitleme",
+      "Dört işlem ve işlem önceliği",
+      "Sayı basamakları (ondalık basamaklar)",
+    ],
+    concepts: [
+      { term: "Rasyonel sayı", definition: "a, b tam sayı ve b ≠ 0 olmak üzere a/b biçiminde yazılabilen sayıdır." },
+      { term: "Basit kesir", definition: "Payı paydasından küçük (mutlak değerce) olan kesirdir; değeri −1 ile 1 arasındadır." },
+      { term: "Devirli ondalık sayı", definition: "Virgülden sonra bir rakam grubunun sonsuz kez tekrarladığı ondalık sayıdır: 0,272727… = 0,2̅7̅." },
+      { term: "Merdivenli kesir", definition: "Payında veya paydasında başka kesirler bulunan iç içe kesirdir." },
+    ],
+    formulas: [
+      { expr: "a/b ± c/d = (ad ± bc)/(bd)", meaning: "Payda eşitleyerek toplama/çıkarma." },
+      { expr: "(a/b) ÷ (c/d) = (a/b) · (d/c)", meaning: "Bölme, ikinci kesri ters çevirip çarpmadır." },
+      { expr: "Devirli sayı = (Sayının tamamı − Devretmeyen kısım) / (Devreden kadar 9, devretmeyen ondalık kadar 0)", meaning: "Örn: 1,23̅ = (123 − 12)/90 = 111/90." },
+      { expr: "0,9̅ = 1", meaning: "Devreden 9 bir üst değere eşittir." },
+    ],
+    logic:
+      "Devirli ondalık kuralı aslında basit bir denklemden gelir: x = 0,3̅ ise 10x = 3,3̅ olur, iki eşitliği çıkarınca 9x = 3 ve x = 1/3 bulunur. Devreden kısım kaç basamaklıysa 10’un o kadar kuvvetiyle çarparak tekrarlayan kuyruğu yok ederiz; 9’ların sayısı bu yüzden devreden basamak sayısı kadardır.\n\nKesir sıralamada paydaları eşitlemek her zaman çalışır ama zaman alır. Paylar eşitse paydası küçük olan büyüktür; kesirler 1’e yakınsa 1’e olan uzaklıkları karşılaştırmak daha hızlıdır.",
+    examples: [
+      {
+        level: 'kolay',
+        problem: "0,4̅ + 0,1̅6̅ işleminin sonucu kaçtır? (0,1̅6̅ = 0,161616…)",
+        steps: [
+          "0,4̅ = 4/9 = 44/99.",
+          "0,1̅6̅ = 16/99.",
+          "Toplam = 60/99 = 20/33.",
+        ],
+        answer: "20/33",
+      },
+      {
+        level: 'orta',
+        problem: "1 + 1/(1 + 1/(1 + 1/2)) ifadesinin değeri kaçtır?",
+        steps: [
+          "En alttan başla: 1 + 1/2 = 3/2.",
+          "1/(3/2) = 2/3 ⇒ 1 + 2/3 = 5/3.",
+          "1/(5/3) = 3/5 ⇒ 1 + 3/5 = 8/5.",
+        ],
+        answer: "8/5",
+      },
+      {
+        level: 'zor',
+        problem: "a = 17/18, b = 23/24, c = 11/12 sayılarını sıralayınız.",
+        steps: [
+          "Her kesrin 1’e uzaklığı: 1 − a = 1/18, 1 − b = 1/24, 1 − c = 1/12.",
+          "1/24 < 1/18 < 1/12 ⇒ 1’e en yakın b, en uzak c.",
+          "Sıralama: c < a < b.",
+        ],
+        answer: "c < a < b",
+      },
+    ],
+    osymThinking:
+      "Sıralama sorularında kesirler özellikle payda eşitlemeyi zahmetli yapacak şekilde seçilir; burada 1’e uzaklık, pay eşitleme ya da ortak bir sayıya göre karşılaştırma gibi stratejiler ölçülür. Devirli sayılar genellikle bir işlemin içine yerleştirilir ve sonuç sade bir kesir çıkacak biçimde tasarlanır.",
+    commonMistakes: [
+      "Devirli sayıyı çevirirken devretmeyen ondalık basamak için 0 eklemeyi unutmak.",
+      "Merdivenli kesirde üstten başlayıp işlem önceliğini bozmak.",
+      "Negatif kesirleri sıralarken büyüklük ilişkisini ters çevirmemek.",
+      "a/b + c/d işlemini (a + c)/(b + d) sanmak.",
+    ],
+    tips: [
+      "1’e yakın kesirlerde 1 − kesir farklarını karşılaştır.",
+      "Devirli sayıları işleme sokmadan önce hepsini kesre çevir.",
+      "Ondalık sayılarla çarpma/bölmede virgülleri kaydırarak tam sayılarla çalış.",
+    ],
+    summary: [
+      "Q = {a/b : a, b ∈ Z, b ≠ 0}.",
+      "Devirli sayı: (tamamı − devretmeyen) / (9’lar ve 0’lar).",
+      "Merdivenli kesirde en alttan başla.",
+      "Sıralamada payda eşitle, pay eşitle ya da 1’e uzaklığa bak.",
+    ],
+  },
+  // ---------------------------------------------------------------- Basit Eşitsizlikler
+  {
+    topicId: 'tytmat-basit-esitsizlikler',
+    intro:
+      "Eşitsizlikler, bir büyüklüğün tek bir değer yerine bir aralıkta olduğunu anlatır. ‘Bir sınıfta en az 20, en fazla 30 öğrenci var’ cümlesi 20 ≤ x ≤ 30 eşitsizliğidir. Bu konu hem saf cebirsel sorular hem de değer aralığı problemleri olarak gelir.\n\nEşitsizlikle çalışmak denkleme çok benzer; tek büyük fark negatif bir sayıyla çarpıp bölerken yönün değişmesidir. Ayrıca iki değişkenin aralığı verildiğinde toplam, fark ve çarpımın aralığını bulmak TYT’nin sevdiği bir sorudur.",
+    prerequisites: [
+      "Birinci dereceden denklem çözme",
+      "Negatif sayılarla işlem",
+      "Sayı doğrusu",
+    ],
+    concepts: [
+      { term: "Eşitsizlik", definition: "<, >, ≤, ≥ sembolleriyle kurulan ve iki ifade arasındaki büyüklük ilişkisini gösteren bağıntıdır." },
+      { term: "Açık aralık", definition: "(a, b) = {x : a < x < b}; uç noktalar dahil değildir." },
+      { term: "Kapalı aralık", definition: "[a, b] = {x : a ≤ x ≤ b}; uç noktalar dahildir." },
+      { term: "Çözüm kümesi", definition: "Eşitsizliği sağlayan tüm değerlerin kümesidir." },
+    ],
+    formulas: [
+      { expr: "a < b ⇒ a + c < b + c", meaning: "Her iki tarafa aynı sayı eklemek yönü değiştirmez." },
+      { expr: "a < b ve c > 0 ⇒ ac < bc", meaning: "Pozitif sayıyla çarpmak yönü korur." },
+      { expr: "a < b ve c < 0 ⇒ ac > bc", meaning: "Negatif sayıyla çarpmak/bölmek yönü değiştirir." },
+      { expr: "0 < a < b ⇒ 1/a > 1/b", meaning: "Aynı işaretli sayılarda ters alınca yön değişir." },
+      { expr: "a < x < b, c < y < d ⇒ a + c < x + y < b + d", meaning: "Eşitsizlikler taraf tarafa toplanabilir; çıkarılamaz." },
+    ],
+    logic:
+      "Negatifle çarpınca yönün değişmesinin sebebi sayı doğrusunda yansımadır: 2 < 5 iken −2 ile −5’e bakınca −5 daha soldadır. Eşitsizlikleri taraf tarafa çıkaramayız çünkü x − y’nin en küçük değeri x’in en küçüğü ile y’nin en büyüğünden oluşur; bu yüzden önce y’yi −1 ile çarpıp −d < −y < −c yazar, sonra toplarız.\n\nÇarpımda ise uç değerlerin dört çarpımı (ac, ad, bc, bd) hesaplanır ve en küçük ile en büyük seçilir, çünkü işaretler karışabilir.",
+    examples: [
+      {
+        level: 'kolay',
+        problem: "3 − 2x ≥ −7 eşitsizliğini sağlayan pozitif tam sayıların toplamı kaçtır?",
+        steps: [
+          "−2x ≥ −10 ⇒ x ≤ 5 (−2’ye bölünce yön değişti).",
+          "Pozitif tam sayılar: 1, 2, 3, 4, 5.",
+          "Toplam = 15.",
+        ],
+        answer: "15",
+      },
+      {
+        level: 'orta',
+        problem: "−3 < x < 2 ve 1 < y < 4 olduğuna göre x − 2y ifadesinin alabileceği tam sayı değerleri kaç tanedir?",
+        steps: [
+          "−8 < −2y < −2.",
+          "Topla: −11 < x − 2y < 0.",
+          "Tam sayılar: −10, −9, …, −1 ⇒ 10 tane.",
+        ],
+        answer: "10",
+      },
+      {
+        level: 'zor',
+        problem: "−2 ≤ a ≤ 3 ve −4 ≤ b ≤ 1 olduğuna göre a · b çarpımının en küçük ve en büyük değeri nedir?",
+        steps: [
+          "Uç çarpımlar: (−2)(−4) = 8, (−2)(1) = −2, 3 · (−4) = −12, 3 · 1 = 3.",
+          "En küçük −12, en büyük 8.",
+        ],
+        answer: "−12 ≤ a·b ≤ 8",
+      },
+    ],
+    osymThinking:
+      "Sorular genellikle tuzaklı işlem içerir: eşitsizliğin iki tarafı negatif bir ifadeyle bölünür, değişkenlerin aralıkları taraf tarafa çıkarılmaya zorlanır ya da kare alınan bir değişkenin aralığı sıfırı kapsar. Tam sayı koşulu eklenerek kaç değer olduğu sorulur; açık-kapalı uçlara dikkat ölçülür.",
+    commonMistakes: [
+      "Negatif sayıyla çarpıp bölerken yönü değiştirmemek.",
+      "İki eşitsizliği taraf tarafa çıkarmak.",
+      "−3 < x < 2 iken x²’nin aralığını 4 < x² < 9 sanmak (doğrusu 0 ≤ x² < 9).",
+      "Açık uçlu aralıklarda uç değerleri saymak.",
+    ],
+    tips: [
+      "Çarpımda dört uç çarpımı yaz, en küçük ve en büyüğü seç.",
+      "Kare alırken aralık 0’ı içeriyorsa alt sınır 0 olur.",
+      "Tam sayı sayarken sonuç aralığını yazıp uçları tek tek kontrol et.",
+    ],
+    summary: [
+      "Negatifle çarpma/bölmede yön değişir.",
+      "Eşitsizlikler toplanır, çıkarılmaz; fark için önce −1 ile çarp.",
+      "Çarpım aralığı: dört uç çarpımın en küçüğü ve en büyüğü.",
+      "Aralık 0’ı içeriyorsa karenin en küçük değeri 0’dır.",
+    ],
+  },
+  // ---------------------------------------------------------------- Mutlak Değer
+  {
+    topicId: 'tytmat-mutlak-deger',
+    intro:
+      "Mutlak değer, bir sayının sayı doğrusunda 0’a olan uzaklığıdır ve uzaklık hiçbir zaman negatif olamaz. |x − a| ifadesi ise x ile a arasındaki uzaklıktır. Bu yorum, mutlak değerli denklem ve eşitsizlikleri neredeyse hesap yapmadan görmeyi sağlar.\n\nTYT’de mutlak değer soruları genellikle işaret incelemesiyle başlar: ‘a < 0 < b ise |a − b| + |a| ifadesi neye eşittir?’ gibi. İçerideki ifadenin işaretini doğru belirlersen mutlak değeri kaldırmak kolaydır.",
+    prerequisites: [
+      "Sayı doğrusu ve işaret incelemesi",
+      "Basit eşitsizlikler",
+      "Birinci dereceden denklemler",
+    ],
+    concepts: [
+      { term: "Mutlak değer", definition: "|x| = x (x ≥ 0) ve |x| = −x (x < 0) olarak tanımlanır." },
+      { term: "Uzaklık yorumu", definition: "|x − a|, sayı doğrusunda x ile a arasındaki uzaklıktır." },
+      { term: "Kritik nokta", definition: "Mutlak değerin içini sıfır yapan değerdir; ifade bu noktada biçim değiştirir." },
+    ],
+    formulas: [
+      { expr: "|x| ≥ 0, |x| = |−x|", meaning: "Mutlak değer negatif olamaz; zıt sayıların mutlak değerleri eşittir." },
+      { expr: "|a · b| = |a| · |b|, |a/b| = |a|/|b|", meaning: "Çarpma ve bölmede mutlak değer dağılır." },
+      { expr: "|x| = a (a > 0) ⇒ x = a veya x = −a", meaning: "Mutlak değerli denklem iki duruma ayrılır." },
+      { expr: "|x − a| < b ⇔ a − b < x < a + b", meaning: "a’ya uzaklığı b’den az olan sayılar." },
+      { expr: "|x − a| > b ⇔ x < a − b veya x > a + b", meaning: "a’ya uzaklığı b’den fazla olan sayılar." },
+    ],
+    logic:
+      "Mutlak değerin tanımı parçalıdır çünkü uzaklığı pozitif yapmak için negatif sayıların işaretini değiştirmemiz gerekir; −x ifadesi x negatifken pozitiftir. Bu yüzden ‘|x| = −x’ yazmak x’in negatif olduğunu söylemektir.\n\n|x − 3| < 5 eşitsizliği ‘3’e uzaklığı 5’ten az olan sayılar’ demektir; 3’ün 5 solu ve 5 sağı arasındaki bölge, yani −2 < x < 8 olur. Uzaklık düşüncesi, hem denklem hem eşitsizlikte cebirsel adımları kısaltır.",
+    examples: [
+      {
+        level: 'kolay',
+        problem: "a < 0 < b olmak üzere |a − b| + |a| − |b| ifadesinin eşiti nedir?",
+        steps: [
+          "a − b < 0 ⇒ |a − b| = b − a.",
+          "|a| = −a, |b| = b.",
+          "b − a − a − b = −2a.",
+        ],
+        answer: "−2a",
+      },
+      {
+        level: 'orta',
+        problem: "|2x − 5| = 9 denklemini sağlayan x değerlerinin toplamı kaçtır?",
+        steps: [
+          "2x − 5 = 9 ⇒ x = 7.",
+          "2x − 5 = −9 ⇒ x = −2.",
+          "Toplam = 5.",
+        ],
+        answer: "5",
+      },
+      {
+        level: 'zor',
+        problem: "|x − 4| ≤ 6 eşitsizliğini sağlayan tam sayılardan kaç tanesi |x| > 3 eşitsizliğini de sağlar?",
+        steps: [
+          "|x − 4| ≤ 6 ⇒ −2 ≤ x ≤ 10 ⇒ 13 tam sayı.",
+          "|x| ≤ 3 olanlar bu aralıkta −2, −1, 0, 1, 2, 3 ⇒ 6 tane.",
+          "İstenen = 13 − 6 = 7 (4, 5, …, 10).",
+        ],
+        answer: "7",
+      },
+    ],
+    osymThinking:
+      "Sorular işaret bilgisini dolaylı verir: ‘a · b < 0 ve a > b’ gibi koşullardan a’nın pozitif, b’nin negatif olduğu sonucuna senin varman beklenir. Yeni nesil sorularda ise mutlak değer ‘hedef değerden sapma’ olarak kullanılır: bir ürünün ağırlığının 500 g’dan en fazla 8 g sapabileceği gibi.",
+    commonMistakes: [
+      "|a − b| ifadesini |a| − |b| sanmak.",
+      "|x| = −3 gibi denklemlere çözüm yazmak (çözüm kümesi boştur).",
+      "|x − a| > b çözümünü tek bir aralık gibi yazmak.",
+      "İçerinin işaretini belirlemeden mutlak değeri ‘parantez’ gibi kaldırmak.",
+    ],
+    tips: [
+      "Mutlak değeri kaldırmadan önce içerideki ifadenin işaretini yanına yaz.",
+      "|x − a| < b görürsen hemen ‘a merkezli, b yarıçaplı aralık’ diye düşün.",
+    ],
+    summary: [
+      "|x| uzaklıktır, negatif olamaz.",
+      "|x − a| < b ⇔ a − b < x < a + b.",
+      "|x − a| > b ⇔ x < a − b veya x > a + b.",
+      "Önce işaret incele, sonra mutlak değeri kaldır.",
+    ],
+  },
+  // ---------------------------------------------------------------- Üslü Sayılar
+  {
+    topicId: 'tytmat-uslu-sayilar',
+    intro:
+      "Üslü sayılar, aynı sayının tekrar tekrar çarpımını kısa yoldan yazmamızı sağlar: 2 · 2 · 2 · 2 · 2 = 2⁵. Bakteri çoğalması, faiz hesabı, bilgisayar belleği ve bilimsel gösterim gibi pek çok alanda karşımıza çıkar.\n\nTYT’de bu konunun anahtarı tabanları eşitlemektir. 4, 8, 16, 32 gibi sayıları 2’nin kuvveti; 9, 27, 81 gibi sayıları 3’ün kuvveti olarak görmeye alışırsan soruların çoğu birkaç satırda çözülür. Negatif taban ve negatif üs gibi işaret tuzaklarına da dikkat etmelisin.",
+    prerequisites: [
+      "Çarpma ve bölme işlemleri",
+      "Asal çarpanlara ayırma",
+      "Kesirlerle işlem",
+    ],
+    concepts: [
+      { term: "Üslü ifade", definition: "aⁿ = a · a · … · a (n tane a); a taban, n üstür." },
+      { term: "Sıfırıncı kuvvet", definition: "a ≠ 0 için a⁰ = 1; 0⁰ tanımsızdır." },
+      { term: "Negatif üs", definition: "a⁻ⁿ = 1/aⁿ (a ≠ 0); sayının işaretini değil yerini (pay/payda) değiştirir." },
+      { term: "Bilimsel gösterim", definition: "Bir sayının a · 10ⁿ (1 ≤ |a| < 10, n ∈ Z) biçiminde yazılmasıdır." },
+    ],
+    formulas: [
+      { expr: "aᵐ · aⁿ = aᵐ⁺ⁿ", meaning: "Tabanlar eşitken çarpmada üsler toplanır." },
+      { expr: "aᵐ / aⁿ = aᵐ⁻ⁿ", meaning: "Tabanlar eşitken bölmede üsler çıkarılır." },
+      { expr: "(aᵐ)ⁿ = aᵐⁿ", meaning: "Kuvvetin kuvvetinde üsler çarpılır." },
+      { expr: "aⁿ · bⁿ = (a · b)ⁿ", meaning: "Üsler eşitken tabanlar çarpılır." },
+      { expr: "(−a)ⁿ: n çift ⇒ pozitif, n tek ⇒ negatif", meaning: "Negatif tabanın işaretini üssün tek-çiftliği belirler." },
+      { expr: "aˣ = aʸ (a ≠ −1, 0, 1) ⇒ x = y", meaning: "Tabanlar eşitse üsler eşitlenir." },
+    ],
+    logic:
+      "aᵐ · aⁿ = aᵐ⁺ⁿ kuralı sayma işidir: m tane a ile n tane a’yı yan yana yazarsan m + n tane a elde edersin. Bölmede ortak a’lar sadeleşir ve geriye m − n tane kalır. m = n alınırsa aⁿ/aⁿ = 1 = a⁰ olur; sıfırıncı kuvvetin 1 olmasının nedeni budur. Negatif üs de aynı mantığın devamıdır: a⁰/aⁿ = a⁻ⁿ = 1/aⁿ.\n\nDikkat: −2⁴ ile (−2)⁴ farklıdır. İlkinde üs yalnızca 2’ye aittir ve sonuç −16’dır; ikincisinde taban −2’dir ve sonuç 16’dır.",
+    examples: [
+      {
+        level: 'kolay',
+        problem: "(8² · 4³) / 16² işleminin sonucu 2’nin kaçıncı kuvvetidir?",
+        steps: [
+          "8² = 2⁶, 4³ = 2⁶, 16² = 2⁸.",
+          "2⁶ · 2⁶ / 2⁸ = 2¹²⁻⁸ = 2⁴.",
+        ],
+        answer: "4",
+      },
+      {
+        level: 'orta',
+        problem: "3ˣ⁺² − 3ˣ = 216 olduğuna göre x kaçtır?",
+        steps: [
+          "3ˣ ortak paranteze: 3ˣ(9 − 1) = 216.",
+          "3ˣ = 27 = 3³.",
+          "x = 3.",
+        ],
+        answer: "3",
+      },
+      {
+        level: 'zor',
+        problem: "a = 2⁴⁰, b = 3³⁰, c = 5²⁰ sayılarını sıralayınız.",
+        steps: [
+          "Üslerin EBOB’u 10: a = (2⁴)¹⁰ = 16¹⁰, b = (3³)¹⁰ = 27¹⁰, c = (5²)¹⁰ = 25¹⁰.",
+          "16 < 25 < 27 ⇒ a < c < b.",
+        ],
+        answer: "a < c < b",
+      },
+    ],
+    osymThinking:
+      "Sıralama sorularında üsler ortak bir sayıya indirgenerek tabanlar karşılaştırılır; denklem sorularında ise ortak çarpan parantezi gizlenir (3ˣ⁺² − 3ˣ gibi). Yeni nesil sorularda katlanarak artan süreçler (her saat ikiye katlanan bakteri, her katlamada kalınlığı iki katına çıkan kâğıt) üslü ifadeyle modellenir.",
+    commonMistakes: [
+      "−2⁴ ile (−2)⁴’ü karıştırmak.",
+      "aᵐ + aⁿ ifadesini aᵐ⁺ⁿ sanmak.",
+      "Negatif üssün sayıyı negatif yaptığını düşünmek (2⁻³ = 1/8, negatif değil).",
+      "(a + b)ⁿ ifadesini aⁿ + bⁿ gibi açmak.",
+    ],
+    tips: [
+      "2, 3, 5’in ilk birkaç kuvvetini ezbere bil: 2¹⁰ = 1024, 3⁵ = 243, 5⁴ = 625.",
+      "Toplam ya da fark içeren üslü ifadelerde en küçük kuvveti ortak paranteze al.",
+      "Sıralamada ya tabanları ya üsleri eşitle.",
+    ],
+    summary: [
+      "Çarpmada üsler toplanır, bölmede çıkarılır, kuvvetin kuvvetinde çarpılır.",
+      "a⁰ = 1 (a ≠ 0), a⁻ⁿ = 1/aⁿ.",
+      "Negatif taban: çift üs pozitif, tek üs negatif.",
+      "Sıralama: üsleri ya da tabanları eşitle.",
+      "Bilimsel gösterim: a · 10ⁿ, 1 ≤ |a| < 10.",
+    ],
+  },
+  // ---------------------------------------------------------------- Köklü Sayılar
+  {
+    topicId: 'tytmat-koklu-sayilar',
+    intro:
+      "Köklü sayılar üslü sayıların tersidir: 3² = 9 ise √9 = 3’tür. Köklü ifadeler aslında kesirli üsle yazılmış üslü ifadelerdir ve bu bakış açısı birçok işlemi kolaylaştırır.\n\nTYT’de köklü sayılar soruları genellikle kök dışına çıkarma, benzer terimleri toplama, sıralama ve paydayı rasyonel yapma üzerinedir. Çift dereceli köklerin içinin negatif olamayacağı ve √(x²) = |x| eşitliği ise en sık kullanılan tuzaklardır.",
+    prerequisites: [
+      "Üslü sayılar ve üs kuralları",
+      "Asal çarpanlara ayırma",
+      "İki kare farkı özdeşliği",
+    ],
+    concepts: [
+      { term: "n. dereceden kök", definition: "ⁿ√a = a^(1/n); n çiftse a ≥ 0 olmalıdır." },
+      { term: "Kök dışına çıkarma", definition: "Kök içindeki tam kare (ya da tam n. kuvvet) çarpanların kök dışına alınmasıdır: √72 = 6√2." },
+      { term: "Eşlenik", definition: "√a + √b ifadesinin eşleniği √a − √b’dir; çarpımları a − b rasyonel sayısıdır." },
+      { term: "Benzer köklü terimler", definition: "Kök derecesi ve kök içi aynı olan terimlerdir; yalnız bunlar toplanıp çıkarılabilir." },
+    ],
+    formulas: [
+      { expr: "ⁿ√(aᵐ) = a^(m/n)", meaning: "Köklü ifadeyi üslü biçimde yazma." },
+      { expr: "√a · √b = √(a · b) (a, b ≥ 0)", meaning: "Aynı dereceli kökler çarpılabilir." },
+      { expr: "√(x²) = |x|", meaning: "Çift dereceli kökten mutlak değerle çıkılır." },
+      { expr: "x√a + y√a = (x + y)√a", meaning: "Benzer köklü terimler toplanır." },
+      { expr: "1/(√a − √b) = (√a + √b)/(a − b)", meaning: "Eşlenikle çarparak paydayı rasyonel yapma." },
+    ],
+    logic:
+      "√a, karesi a olan negatif olmayan sayıdır; bu yüzden √(x²) sonucunu x yazamayız, çünkü x negatifse sonuç negatif çıkar. Doğru sonuç her zaman |x|’tir.\n\nPaydayı rasyonel yapmak, iki kare farkı özdeşliğinin uygulamasıdır: (√a − √b)(√a + √b) = a − b. Kesri eşlenikle hem payda hem paydada çarptığımızda değeri değişmez ama payda kökten kurtulur. √a + √b ≠ √(a + b) olduğunu 9 ve 16 ile kontrol edebilirsin: 3 + 4 = 7 ama √25 = 5.",
+    examples: [
+      {
+        level: 'kolay',
+        problem: "√50 + √18 − √32 işleminin sonucu kaçtır?",
+        steps: [
+          "√50 = 5√2, √18 = 3√2, √32 = 4√2.",
+          "5√2 + 3√2 − 4√2 = 4√2.",
+        ],
+        answer: "4√2",
+      },
+      {
+        level: 'orta',
+        problem: "4/(√7 − √3) ifadesinin paydası rasyonel yapıldığında sonuç nedir?",
+        steps: [
+          "Eşlenikle çarp: 4(√7 + √3)/(7 − 3).",
+          "= 4(√7 + √3)/4 = √7 + √3.",
+        ],
+        answer: "√7 + √3",
+      },
+      {
+        level: 'zor',
+        problem: "a = 3√5, b = 4√3, c = 2√11 sayılarını sıralayınız.",
+        steps: [
+          "Kök içine al: a = √45, b = √48, c = √44.",
+          "44 < 45 < 48 ⇒ c < a < b.",
+        ],
+        answer: "c < a < b",
+      },
+    ],
+    osymThinking:
+      "Sıralama sorularında sayılar kök dışında farklı katsayılarla verilir; hepsini kök içine almak ya da karelerini karşılaştırmak beklenir. Sadeleştirme sorularında payda rasyonel yapıldıktan sonra terimlerin birbirini götürmesi (teleskopik toplam) kurgulanır. √(x²) = |x| ise işaret bilgisiyle birleştirilerek sorulur.",
+    commonMistakes: [
+      "√a + √b = √(a + b) sanmak.",
+      "√(x²) = x yazıp mutlak değeri unutmak.",
+      "Farklı kök içlerine sahip terimleri toplamak (√2 + √3 ≠ √5).",
+      "Eşlenikle yalnız paydayı çarpıp payı unutmak.",
+    ],
+    tips: [
+      "Köklü sayıları sıralarken katsayıyı kök içine kare olarak al.",
+      "Kök içindeki sayıyı asal çarpanlarına ayırıp çift kuvvetleri dışarı çıkar.",
+      "1/(√(n+1) + √n) = √(n+1) − √n kalıbı teleskopik toplamlarda çok işe yarar.",
+    ],
+    summary: [
+      "ⁿ√(aᵐ) = a^(m/n); çift dereceli kökte iç ≥ 0.",
+      "√(x²) = |x|.",
+      "Yalnızca benzer köklü terimler toplanır.",
+      "Paydayı rasyonel yapmak için eşlenikle çarp.",
+    ],
+  },
+  // ---------------------------------------------------------------- Çarpanlara Ayırma
+  {
+    topicId: 'tytmat-carpanlara-ayirma',
+    intro:
+      "Çarpanlara ayırma, toplam hâlindeki bir ifadeyi çarpım hâline getirme sanatıdır. Neden önemli? Çünkü çarpımlar sadeleşir, sıfıra eşitlenip kolayca çözülür ve büyük sayısal işlemler özdeşliklerle zihinden yapılabilir.\n\nTYT’de bu konu çoğunlukla rasyonel ifadeleri sadeleştirme, özdeşlik kullanarak sayısal işlem yapma (örneğin 101² − 99²) ve verilen x + y, x · y değerlerinden x² + y² gibi ifadeleri hesaplama şeklinde gelir. Temel özdeşlikleri ezbere ve her iki yönde kullanabilmek gerekir.",
+    prerequisites: [
+      "Üslü ifadelerle işlem",
+      "Polinomlarda çarpma (dağılma özelliği)",
+      "Rasyonel sayılarla sadeleştirme",
+    ],
+    concepts: [
+      { term: "Ortak çarpan parantezi", definition: "Tüm terimlerde bulunan ortak çarpanın paranteze alınmasıdır: ax + ay = a(x + y)." },
+      { term: "Gruplandırma", definition: "Terimleri ikişer ikişer gruplayıp ortak çarpan bulmaktır: ax + ay + bx + by = (a + b)(x + y)." },
+      { term: "Özdeşlik", definition: "Değişkenlerin her değeri için doğru olan eşitliktir." },
+      { term: "Tam kare", definition: "(a ± b)² biçiminde yazılabilen üç terimli ifadedir: a² ± 2ab + b²." },
+    ],
+    formulas: [
+      { expr: "a² − b² = (a − b)(a + b)", meaning: "İki kare farkı." },
+      { expr: "(a ± b)² = a² ± 2ab + b²", meaning: "Tam kare açılımı." },
+      { expr: "a³ − b³ = (a − b)(a² + ab + b²)", meaning: "İki küp farkı." },
+      { expr: "a³ + b³ = (a + b)(a² − ab + b²)", meaning: "İki küp toplamı." },
+      { expr: "x² + (a + b)x + ab = (x + a)(x + b)", meaning: "Baş katsayısı 1 olan üç terimliyi ayırma." },
+      { expr: "a² + b² = (a + b)² − 2ab", meaning: "Toplam ve çarpım bilindiğinde kareler toplamı." },
+    ],
+    logic:
+      "Özdeşlikler, dağılma özelliğinin tersidir. (a − b)(a + b) çarpımını açınca ab ve −ab terimleri birbirini götürür ve a² − b² kalır. Bu yüzden iki kare farkını görünce hemen çarpıma dönüştürebiliriz.\n\nx² + 5x + 6 ifadesini ayırırken çarpımı 6, toplamı 5 olan iki sayı ararız çünkü (x + a)(x + b) açıldığında orta terim (a + b)x, sabit terim ab olur. Rasyonel ifadelerde amaç pay ve paydada ortak çarpan oluşturup sadeleştirmektir; toplamlar sadeleşmez, yalnızca çarpanlar sadeleşir.",
+    examples: [
+      {
+        level: 'kolay',
+        problem: "103² − 97² işleminin sonucu kaçtır?",
+        steps: [
+          "İki kare farkı: (103 − 97)(103 + 97).",
+          "= 6 · 200 = 1200.",
+        ],
+        answer: "1200",
+      },
+      {
+        level: 'orta',
+        problem: "x + y = 7 ve x · y = 10 olduğuna göre x² + y² ve x³ + y³ kaçtır?",
+        steps: [
+          "x² + y² = (x + y)² − 2xy = 49 − 20 = 29.",
+          "x³ + y³ = (x + y)(x² − xy + y²) = 7(29 − 10) = 133.",
+        ],
+        answer: "29 ve 133",
+      },
+      {
+        level: 'zor',
+        problem: "(x² − 9)/(x² + x − 6) · (x² − 4x + 4)/(x − 3) ifadesinin sadeleşmiş biçimi nedir?",
+        steps: [
+          "x² − 9 = (x − 3)(x + 3); x² + x − 6 = (x + 3)(x − 2); x² − 4x + 4 = (x − 2)².",
+          "[(x − 3)(x + 3)] / [(x + 3)(x − 2)] · (x − 2)² / (x − 3).",
+          "Sadeleştir: (x − 2).",
+        ],
+        answer: "x − 2",
+      },
+    ],
+    osymThinking:
+      "ÖSYM tarzı sorularda özdeşlik doğrudan verilmez; x − 1/x = 3 gibi bir bilgi verilip x² + 1/x² istenir ya da büyük sayılarla işlem yaptırılarak özdeşliği fark etmen beklenir. Rasyonel ifadelerde her çarpanın ayrılabilmesi ve ortak çarpanın görülmesi ölçülür; bazen işaret değiştirme (3 − x = −(x − 3)) gizli adımdır.",
+    commonMistakes: [
+      "(a + b)² = a² + b² sanmak.",
+      "Toplam hâlindeki terimleri sadeleştirmek ((x + 2)/2 = x gibi).",
+      "(3 − x) ile (x − 3)’ün birbirinin −1 katı olduğunu gözden kaçırmak.",
+      "a³ + b³ açılımında orta terimin işaretini yanlış yazmak.",
+    ],
+    tips: [
+      "Önce ortak çarpan, sonra özdeşlik, sonra üç terimli ayırma sırasını izle.",
+      "Büyük sayılı işlemlerde a² − b² ve (a ± b)² kalıplarını ara.",
+      "x ± 1/x verildiğinde karesini alarak x² + 1/x²’ye geç.",
+    ],
+    summary: [
+      "a² − b² = (a − b)(a + b).",
+      "(a ± b)² = a² ± 2ab + b²; a² + b² = (a + b)² − 2ab.",
+      "a³ ± b³ = (a ± b)(a² ∓ ab + b²).",
+      "x² + (a + b)x + ab = (x + a)(x + b).",
+      "Yalnızca çarpanlar sadeleşir.",
+    ],
+  },
+];
