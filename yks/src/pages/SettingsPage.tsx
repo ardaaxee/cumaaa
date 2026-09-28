@@ -4,7 +4,7 @@ import type { SubjectId } from '../domain/types';
 import { AssistantCharacter } from '../components/AssistantCharacter';
 import { PageHeader } from '../components/Layout';
 import { ConfirmDialog, toast } from '../components/ui';
-import { getTeacherPhoto, resizeImage, setTeacherPhoto } from '../services/photoStore';
+import { getTeacherPhoto, setTeacherPhoto } from '../services/photoStore';
 import { updateProfile, updateSettings } from '../store/actions';
 import { createBackup, migrationContext, parseBackup } from '../store/storage';
 import { replaceState, update, useAppState } from '../store/store';
@@ -14,7 +14,6 @@ export default function SettingsPage() {
   const state = useAppState();
   const { profile, settings } = state;
   const fileRef = useRef<HTMLInputElement>(null);
-  const photoRef = useRef<HTMLInputElement>(null);
   const [busy, setBusy] = useState(false);
   const [resetConfirm, setResetConfirm] = useState(false);
 
@@ -46,19 +45,7 @@ export default function SettingsPage() {
     }
   };
 
-  const uploadPhoto = async (file: File) => {
-    setBusy(true);
-    try {
-      const dataUrl = await resizeImage(file);
-      await setTeacherPhoto(dataUrl);
-      toast('Öğretmen fotoğrafı güncellendi.');
-    } catch (e) {
-      toast(e instanceof Error ? e.message : 'Fotoğraf yüklenemedi.');
-    } finally {
-      setBusy(false);
-      if (photoRef.current) photoRef.current.value = '';
-    }
-  };
+
 
   return (
     <>
@@ -161,26 +148,6 @@ export default function SettingsPage() {
             </label>
           </div>
         </div>
-        <div className="row mt-12">
-          <label className="btn small">
-            Farklı yüz fotoğrafı yükle
-            <input ref={photoRef} type="file" accept="image/*" hidden disabled={busy} onChange={(e) => e.target.files?.[0] && void uploadPhoto(e.target.files[0])} />
-          </label>
-          <button type="button" className="btn small ghost" onClick={() => void setTeacherPhoto(null).then(() => toast('Fotoğraf kaldırıldı.'))}>
-            Varsayılan yüze dön
-          </button>
-        </div>
-        <label className="field mt-12">
-          <span>Fotoğraf dikey konumu</span>
-          <input
-            className="input"
-            type="range"
-            min={0}
-            max={100}
-            value={settings.teacherPhotoFocusY}
-            onChange={(e) => update((s) => updateSettings(s, { teacherPhotoFocusY: Number(e.target.value) }))}
-          />
-        </label>
       </section>
 
       <section className="card section" aria-labelledby="d-h">

@@ -1644,48 +1644,65 @@ details.table-view summary {
 
 /* ---------- Konuşan asistan karakteri ---------- */
 .asst { overflow: visible; display: block; }
-.asst .asst-head { transform-box: view-box; transform-origin: 100px 140px; animation: asst-breathe 3.4s ease-in-out infinite; }
-.asst .asst-body { transform-box: view-box; transform-origin: 100px 250px; animation: asst-body 3.4s ease-in-out infinite; }
-.asst .asst-jaw { transform: translateY(0); }
-.asst .asst-lids ellipse { transform-box: fill-box; transform-origin: 50% 0; transform: scaleY(0); animation: asst-blink 4.8s ease-in-out infinite; }
-.asst .asst-lids ellipse:nth-child(2) { animation-delay: 0.02s; }
-.asst .asst-arm-think, .asst .asst-arm-wave, .asst .asst-think-dots, .asst .asst-listen { display: none; }
-.asst .asst-arm-r, .asst .asst-arm-l { transform-box: view-box; }
-.asst .asst-arm-r { transform-origin: 148px 168px; }
-.asst .asst-arm-l { transform-origin: 52px 168px; }
+.asst .asst-head { transform-box: view-box; transform-origin: 122px 180px; animation: asst-breathe 3.6s ease-in-out infinite; }
+.asst .asst-body { transform-box: view-box; transform-origin: 124px 300px; animation: asst-body 3.6s ease-in-out infinite; }
+.asst .asst-mouth-open { display: none; }
+.asst .asst-mouth-open, .asst .asst-brows path, .asst .asst-iris { transform-box: fill-box; transform-origin: center; }
+.asst .asst-iris { animation: asst-look 7s ease-in-out infinite; }
+.asst .asst-lids ellipse { transform-box: fill-box; transform-origin: 50% 0; transform: scaleY(0); animation: asst-blink 4.6s ease-in-out infinite; }
+.asst .asst-arm-think, .asst .asst-arm-talk, .asst .asst-arm-wave, .asst .asst-think-dots, .asst .asst-listen, .asst .asst-hearts { display: none; }
+.asst .asst-pencil-hand { transform-box: view-box; transform-origin: 166px 251px; animation: asst-write 1.4s ease-in-out infinite; }
+.asst .asst-forearm { transform-box: view-box; transform-origin: 204px 238px; }
+.asst .asst-hand-wave { transform-box: view-box; transform-origin: 218px 170px; }
 
-.asst-talking .asst-jaw { animation: asst-jaw 0.22s ease-in-out infinite alternate; }
-.asst-talking .asst-head { animation: asst-nod 1.3s ease-in-out infinite; }
-.asst-talking .asst-arm-r { animation: asst-gesture 1.6s ease-in-out infinite; }
-.asst-talking .asst-arm-l { animation: asst-gesture-l 2.1s ease-in-out infinite; }
+/* konuşurken: çene + baş sallama + elle anlatma */
+.asst-talking .asst-mouth-closed { display: none; }
+.asst-talking .asst-mouth-open { display: inline; animation: asst-talk 0.24s ease-in-out infinite alternate; }
+.asst-talking .asst-brows path { animation: asst-brow 1.4s ease-in-out infinite; }
+.asst-talking .asst-head { animation: asst-nod 1.4s ease-in-out infinite; }
+.asst-talking .asst-arm-r { display: none; }
+.asst-talking .asst-arm-talk { display: inline; }
+.asst-talking .asst-forearm { animation: asst-explain 1.2s ease-in-out infinite; }
 
 .asst-thinking .asst-arm-l { display: none; }
 .asst-thinking .asst-arm-think, .asst-thinking .asst-think-dots { display: inline; }
-.asst-thinking .asst-head { animation: asst-tilt 2.4s ease-in-out infinite; }
+.asst-thinking .asst-head { animation: asst-tilt 2.6s ease-in-out infinite; }
+.asst-thinking .asst-brows path:last-child { transform: translateY(-4px) rotate(-6deg); }
+.asst-thinking .asst-iris { animation: none; transform: translate(2px, -2.5px); }
+.asst-happy .asst-mouth-closed { display: none; }
+.asst-happy .asst-mouth-open { display: inline; transform: scaleY(0.8); }
+.asst-happy .asst-brows path { transform: translateY(-2px); }
+.asst-thinking .asst-pencil-hand { animation: asst-tap 0.9s ease-in-out infinite; }
 .asst-thinking .asst-think-dots circle { animation: asst-dot 1.2s ease-in-out infinite; }
 .asst-thinking .asst-think-dots circle:nth-child(2) { animation-delay: 0.2s; }
 .asst-thinking .asst-think-dots circle:nth-child(3) { animation-delay: 0.4s; }
 
 .asst-happy .asst-arm-r { display: none; }
-.asst-happy .asst-arm-wave { display: inline; }
-.asst-happy .asst-hand-wave { transform-box: view-box; transform-origin: 172px 118px; animation: asst-wave 0.8s ease-in-out infinite alternate; }
-.asst-happy .asst-head { animation: asst-hop 1.6s ease-in-out infinite; }
+.asst-happy .asst-arm-wave, .asst-happy .asst-hearts { display: inline; }
+.asst-happy .asst-hand-wave { animation: asst-wave 0.7s ease-in-out infinite alternate; }
+.asst-happy .asst-head { animation: asst-happy-head 1.8s ease-in-out infinite; }
+.asst-happy .asst-hearts path { transform-box: fill-box; transform-origin: center; animation: asst-heart 2s ease-in-out infinite; }
+.asst-happy .asst-hearts path:nth-child(2) { animation-delay: 0.6s; }
 
-.asst-listening .asst-listen { display: inline; animation: asst-pulse 1s ease-in-out infinite; }
-.asst-listening .asst-head { transform: rotate(4deg); animation: none; }
+.asst-listening .asst-listen { display: inline; animation: asst-dot 1s ease-in-out infinite; }
+.asst-listening .asst-head { animation: none; transform: rotate(5deg); }
+.asst-listening .asst-pencil-hand { animation: none; }
 
-@keyframes asst-breathe { 0%, 100% { transform: translateY(0) rotate(0); } 50% { transform: translateY(-1.5px) rotate(-1deg); } }
-@keyframes asst-body { 0%, 100% { transform: scale(1, 1); } 50% { transform: scale(1.01, 1.012); } }
+@keyframes asst-breathe { 0%, 100% { transform: translateY(0) rotate(0); } 50% { transform: translateY(-2px) rotate(-1.2deg); } }
+@keyframes asst-body { 0%, 100% { transform: scale(1, 1); } 50% { transform: scale(1.012, 1.018); } }
 @keyframes asst-blink { 0%, 93%, 100% { transform: scaleY(0); } 95.5% { transform: scaleY(1); } }
-@keyframes asst-jaw { 0% { transform: translateY(0); } 60% { transform: translateY(2.2px); } 100% { transform: translateY(3px); } }
-@keyframes asst-nod { 0%, 100% { transform: rotate(0) translateY(0); } 25% { transform: rotate(-2.5deg) translateY(-1px); } 50% { transform: rotate(1.5deg) translateY(1px); } 75% { transform: rotate(2.5deg) translateY(-1px); } }
-@keyframes asst-gesture { 0%, 100% { transform: rotate(0); } 40% { transform: rotate(-22deg); } 60% { transform: rotate(-14deg); } }
-@keyframes asst-gesture-l { 0%, 100% { transform: rotate(0); } 50% { transform: rotate(10deg); } }
-@keyframes asst-tilt { 0%, 100% { transform: rotate(-5deg); } 50% { transform: rotate(-8deg) translateY(-1px); } }
-@keyframes asst-dot { 0%, 100% { opacity: 0.3; } 50% { opacity: 1; } }
-@keyframes asst-wave { from { transform: rotate(-18deg); } to { transform: rotate(18deg); } }
-@keyframes asst-hop { 0%, 100% { transform: translateY(0); } 30% { transform: translateY(-4px) rotate(-2deg); } }
-@keyframes asst-pulse { 0%, 100% { opacity: 0.3; } 50% { opacity: 1; } }
+@keyframes asst-talk { 0% { transform: scaleY(0.25); } 60% { transform: scaleY(0.8); } 100% { transform: scaleY(1.05); } }
+@keyframes asst-brow { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-2.5px); } }
+@keyframes asst-look { 0%, 40%, 100% { transform: translate(0, 0); } 45%, 60% { transform: translate(-2.5px, 0.5px); } 65%, 85% { transform: translate(2.5px, 0); } }
+@keyframes asst-nod { 0%, 100% { transform: rotate(0) translateY(0); } 25% { transform: rotate(-3deg) translateY(-1.5px); } 50% { transform: rotate(1.5deg) translateY(1px); } 75% { transform: rotate(3deg) translateY(-1px); } }
+@keyframes asst-explain { 0%, 100% { transform: rotate(0); } 35% { transform: rotate(-16deg); } 55% { transform: rotate(-8deg); } 75% { transform: rotate(-20deg); } }
+@keyframes asst-write { 0%, 100% { transform: translate(0, 0) rotate(0); } 25% { transform: translate(-4px, 1px) rotate(-4deg); } 50% { transform: translate(-8px, 0) rotate(0); } 75% { transform: translate(-4px, -1px) rotate(3deg); } }
+@keyframes asst-tap { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-3px); } }
+@keyframes asst-tilt { 0%, 100% { transform: rotate(-6deg); } 50% { transform: rotate(-9deg) translateY(-1px); } }
+@keyframes asst-dot { 0%, 100% { opacity: 0.35; } 50% { opacity: 1; } }
+@keyframes asst-wave { from { transform: rotate(-14deg); } to { transform: rotate(18deg); } }
+@keyframes asst-happy-head { 0%, 100% { transform: translateY(0) rotate(0); } 30% { transform: translateY(-5px) rotate(-3deg); } 60% { transform: translateY(0) rotate(2deg); } }
+@keyframes asst-heart { 0%, 100% { transform: translateY(0) scale(1); opacity: 0.9; } 50% { transform: translateY(-6px) scale(1.15); opacity: 1; } }
 
 /* Asistan sahnesi */
 .asst-stage {
@@ -1700,7 +1717,7 @@ details.table-view summary {
     radial-gradient(circle at 20% 110%, color-mix(in srgb, var(--brand-soft) 90%, transparent) 0 45%, transparent 46%),
     linear-gradient(160deg, var(--brand-soft), var(--surface) 70%);
 }
-.asst-stage .asst { margin-bottom: -4px; }
+.asst-stage .asst { margin-bottom: -2px; }
 .asst-say {
   align-self: center;
   position: relative;
