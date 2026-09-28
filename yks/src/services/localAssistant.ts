@@ -162,10 +162,11 @@ function netReply(m: string): string | null {
 }
 
 const CHEER = [
-  'Yorulman çok normal, çünkü gerçekten emek veriyorsun. 10 dakika mola ver, su iç, sonra sadece 5 soru çözelim. Küçük adım yeter ♡',
-  'Bir kötü gün seni tanımlamaz. Dün bilmediğin bir şeyi bugün öğrendiysen kazandın demektir.',
-  'Kendini başkalarıyla değil, dünkü hâlinle kıyasla. Ben seninle gurur duyuyorum.',
-  'Bugün sadece bir konu bitirsen bile bu, sınav gününe bir adım daha yakın olman demek. Hadi birlikte başlayalım.',
+  'Yorulman çok normal canım, çünkü gerçekten emek veriyorsun. 10 dakika mola ver, su iç, sonra sadece 5 soru çözelim. Ben yanındayım ♡',
+  'Bir kötü gün seni tanımlamaz. Dün bilmediğin bir şeyi bugün öğrendiysen kazandın demektir. Seninle gurur duyuyorum.',
+  'Kendini başkalarıyla değil, dünkü hâlinle kıyasla. Ben her gün biraz daha ileri gittiğini görüyorum ♡',
+  'Bugün sadece bir konu bitirsen bile sınav gününe bir adım daha yakınsın. Hadi birlikte başlayalım, ben buradayım.',
+  'Biraz nefes al, omuzlarını gevşet. Sen bunu yaparsın, ben sana inanıyorum ♡',
 ];
 
 export async function assistantReply(input: AssistantInput): Promise<string> {
@@ -173,6 +174,8 @@ export async function assistantReply(input: AssistantInput): Promise<string> {
   const raw = input.message.trim();
   const m = norm(raw);
   const name = state.profile.name ? `, ${state.profile.name}` : '';
+  const me = state.settings.teacherName || 'Cuma';
+  const her = state.profile.name || 'canım';
   const today = dayKey();
 
   // 1) Seçili soruyla ilgili istekler
@@ -225,9 +228,11 @@ export async function assistantReply(input: AssistantInput): Promise<string> {
   if (has(m, 'yoruldum', 'sikildim', 'uzgun', 'motivasyon', 'yapamiyorum', 'bunaldim', 'stres', 'kaygi', 'korkuyorum')) {
     return CHEER[(raw.length + today.length) % CHEER.length];
   }
-  if (has(m, 'seni seviyorum', 'tesekkur', 'sagol', 'eyvallah')) return 'Ben de seninleyim ♡ Hadi bir soru daha çözelim mi?';
+  if (has(m, 'seni seviyorum', 'seviyorum')) return `Ben de seni çok seviyorum ${her} ♡ Şimdi bir soru daha çözelim mi, sonra mola?`;
+  if (has(m, 'ozledim')) return `Ben de seni çok özledim ♡ Bu konuyu bitir, sonra konuşuruz; söz!`;
+  if (has(m, 'tesekkur', 'sagol', 'eyvallah')) return `Ne demek ${her} ♡ Hep yanındayım. Hadi bir soru daha?`;
   if (/^(merhaba|selam|hey|gunaydin|iyi aksamlar|slm|mrb)\b/.test(m)) {
-    return `Selam${name}! Ben senin çalışma asistanınım. Bir konu adı yaz (ör. “türev”, “mol kavramı”, “paragraf”), ya da “bugün ne çalışayım”, “yanlışlarım”, “35 doğru 8 yanlış net” gibi sor.`;
+    return `Selam ${her} ♡ Ben ${me}, bugün de seninle çalışmaya geldim. Bir konu adı yaz (ör. “türev”, “mol kavramı”, “paragraf”), ya da “bugün ne çalışayım”, “yanlışlarım”, “35 doğru 8 yanlış net” gibi sor.`;
   }
 
   // 5) Konu anlatımı
@@ -242,5 +247,5 @@ export async function assistantReply(input: AssistantInput): Promise<string> {
     return lessonReply(lessonKind(action, m), ref, lesson);
   }
 
-  return 'Bunu tam anlayamadım. Bir konu adı yazabilirsin (ör. “logaritma”, “hücre”, “Kurtuluş Savaşı”), ya da “bugün ne çalışayım”, “yanlışlarım”, “durumum nasıl”, “40 doğru 10 yanlış” diyebilirsin.';
+  return `Bunu tam anlayamadım ${her} ♡ Bir konu adı yazabilirsin (ör. “logaritma”, “hücre”, “Kurtuluş Savaşı”), ya da “bugün ne çalışayım”, “yanlışlarım”, “durumum nasıl”, “40 doğru 10 yanlış” diyebilirsin.`;
 }

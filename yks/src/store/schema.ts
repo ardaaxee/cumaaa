@@ -38,6 +38,8 @@ export interface Settings {
   cloud: CloudSettings;
   /** Panda arkadaşın adı ve taktığı aksesuarlar. */
   pet: { name: string; items: string[] };
+  /** Asistan karakterinin sayfalarda dolaşması. */
+  companion: boolean;
 }
 
 export interface TopicProgress {
@@ -193,7 +195,7 @@ export interface StudySession {
   id: string;
   day: DayKey;
   minutes: number;
-  source: 'pomodoro' | 'manuel';
+  source: 'pomodoro' | 'manuel' | 'test';
   subjectId?: SubjectId;
   at: string;
 }
@@ -296,11 +298,12 @@ export function defaultState(): AppState {
       breakMinutes: 5,
       longBreakMinutes: 15,
       cyclesBeforeLongBreak: 4,
-      teacherName: 'Asistanın',
+      teacherName: 'Cuma',
       teacherPhotoFocusY: 35,
       aiServerUrl: '',
       cloud: { projectId: '', apiKey: '', syncCode: '', shareCode: '' },
       pet: { name: 'Bambu', items: [] },
+      companion: true,
     },
     topicProgress: {},
     attempts: [],

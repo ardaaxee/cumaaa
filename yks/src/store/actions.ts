@@ -195,10 +195,18 @@ export function finishTest(state: AppState, byId: Map<string, Question>, now: Da
         ]
       : state.mocks;
 
+  // Test süresi çalışma süresine eklenir (en az 1 dk, en fazla testin süre sınırı kadar).
+  const testMinutes = Math.min(240, Math.round(score.durationMs / 60_000));
+  const studyLog =
+    testMinutes >= 1
+      ? [...state.studyLog, { id: uid('study'), day: today, minutes: testMinutes, source: 'test' as const, subjectId: test.config.subjectId !== 'all' ? test.config.subjectId : undefined, at: iso }]
+      : state.studyLog;
+
   return {
     state: {
       ...state,
       activeTest: null,
+      studyLog,
       attempts: [...state.attempts, ...attempts],
       testResults: [...state.testResults, result],
       wrongs,

@@ -5,7 +5,7 @@ import { dayKey, type DayKey } from '../utils/date';
 import { analyzeMocks } from '../utils/mock';
 import { formatNet } from '../utils/net';
 import { dueReviews } from '../utils/srs';
-import { attemptsOn, minutesOn, solved } from '../utils/stats';
+import { attemptsOn, solved } from '../utils/stats';
 
 /**
  * Akıllı çalışma önerisi. Yalnız kullanıcının gerçek verisinden üretilir;
@@ -18,8 +18,7 @@ export type RecommendationAction =
   | { kind: 'wrongs' }
   | { kind: 'reviews' }
   | { kind: 'mocks' }
-  | { kind: 'first-test' }
-  | { kind: 'focus' };
+  | { kind: 'first-test' };
 
 export interface Recommendation {
   id: string;
@@ -98,19 +97,6 @@ export function buildRecommendations(state: AppState, lookup: CurriculumLookup, 
       basis: `${exam} deneme kayıtları`,
       action: { kind: 'mocks' },
       actionLabel: 'Denemeleri incele',
-    });
-  }
-
-  const todayMinutes = minutesOn(state.studyLog, today);
-  const goal = state.profile.dailyStudyMinutes;
-  if (hasAnyData(state) && goal > 0 && todayMinutes < goal) {
-    recs.push({
-      id: 'time',
-      title: `Bugün ${todayMinutes} / ${goal} dk çalıştın`,
-      detail: `Günlük hedefine ${goal - todayMinutes} dk kaldı. Bir odak seansı başlat.`,
-      basis: 'Pomodoro / çalışma kayıtları',
-      action: { kind: 'focus' },
-      actionLabel: 'Odak başlat',
     });
   }
 

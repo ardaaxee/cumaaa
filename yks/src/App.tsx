@@ -1,7 +1,6 @@
 import { lazy, Suspense, useEffect, type ComponentType } from 'react';
 import { Layout } from './components/Layout';
 import { Spinner, toast, ToastHost } from './components/ui';
-import { usePomodoroEngine } from './hooks/usePomodoro';
 import { useRoute } from './hooks/useRoute';
 import { getState, startupError, startupReport, useSelector } from './store/store';
 import { cloudConfig, startAutoSync } from './services/cloud';
@@ -19,7 +18,6 @@ const pages = {
   notebook: lazy(() => import('./pages/NotebookRouter')),
   reviews: lazy(() => import('./pages/ReviewsPage')),
   plan: lazy(() => import('./pages/PlanPage')),
-  focus: lazy(() => import('./pages/FocusPage')),
   mocks: lazy(() => import('./pages/MocksPage')),
   progress: lazy(() => import('./pages/ProgressPage')),
   resources: lazy(() => import('./pages/ResourcesPage')),
@@ -50,12 +48,11 @@ const ROUTES: Record<string, { page: ComponentType<{ params: string[] }>; title:
   defterim: { page: pages.notebook, title: 'Defterim' },
   tekrar: { page: pages.reviews, title: 'Tekrarlar' },
   plan: { page: pages.plan, title: 'Plan' },
-  odak: { page: pages.focus, title: 'Odak' },
   denemeler: { page: pages.mocks, title: 'Denemeler' },
   gelisim: { page: pages.progress, title: 'Gelişimim' },
   kaynaklar: { page: pages.resources, title: 'Kaynaklar' },
   cikmis: { page: pages.osym, title: 'ÖSYM Çıkmış Sorular' },
-  ogretmen: { page: pages.teacher, title: 'Asistanım' },
+  ogretmen: { page: pages.teacher, title: 'Cuma' },
   ayarlar: { page: pages.settings, title: 'Ayarlar' },
   daha: { page: pages.more, title: 'Daha Fazla' },
   kartlar: { page: pages.cards, title: 'Bilgi Kartları' },
@@ -83,7 +80,6 @@ export function App() {
   const onboarded = useSelector((s) => s.profile.onboarded);
   const cloudKey = useSelector((s) => `${s.settings.cloud.projectId}|${s.settings.cloud.apiKey}|${s.settings.cloud.syncCode}`);
   useThemeEffect();
-  usePomodoroEngine();
   useReminder();
 
   // Bulut eşitlemesi: yapılandırılmışsa açılışta, periyodik olarak ve sekme gizlenince çalışır.

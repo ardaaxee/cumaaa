@@ -2,7 +2,6 @@ import { useMemo } from 'react';
 import { SUBJECTS, subjectLabel } from '../data/curriculum';
 import { Icon } from '../components/Icon';
 import { PageHeader } from '../components/Layout';
-import { PomodoroCard } from '../components/PomodoroCard';
 import { PandaBody } from '../components/MascotNav';
 import { AssistantCharacter } from '../components/AssistantCharacter';
 import { DailyQuestion } from '../components/DailyQuestion';
@@ -55,7 +54,6 @@ export async function runRecommendation(r: Recommendation): Promise<void> {
   if (a.kind === 'wrongs') return navigate('/yanlislar');
   if (a.kind === 'reviews') return navigate('/tekrar');
   if (a.kind === 'mocks') return navigate('/denemeler');
-  if (a.kind === 'focus') return navigate('/odak');
   return navigate('/testler');
 }
 
@@ -276,7 +274,6 @@ export default function HomePage() {
           </a>
         </section>
 
-        <PomodoroCard compact />
 
         <section className="card" aria-labelledby="note-title">
           <div className="card-head">

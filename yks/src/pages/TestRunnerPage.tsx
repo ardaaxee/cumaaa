@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { AskLabel } from '../components/AskName';
 import { getTopicRef } from '../data/curriculum';
 import { loadQuestions } from '../data/content';
 import type { Question } from '../domain/types';
@@ -305,7 +306,7 @@ export default function TestRunnerPage() {
             </details>
             <div className="row mt-12">
               <a className="btn small" href={href('/ogretmen', { soru: q.id, cevap: chosen != null ? String(chosen) : undefined, eylem: isCorrect ? 'coz' : 'hatam' })}>
-                <Icon name="teacher" /> Asistana sor
+                <Icon name="teacher" /> <AskLabel />
               </a>
               <button type="button" className="btn small" onClick={addSimilar}>
                 Benzer soru

@@ -245,9 +245,9 @@ export function sanitize(raw: Json): AppState {
       breakMinutes: Math.min(60, Math.max(1, num(settings.breakMinutes, 5))),
       longBreakMinutes: Math.min(90, Math.max(1, num(settings.longBreakMinutes, 15))),
       cyclesBeforeLongBreak: Math.min(10, Math.max(1, num(settings.cyclesBeforeLongBreak, 4))),
-      // Eski varsayılan öğretmen adı yeni asistan adına taşınır.
+      // Eski varsayılan adlar (Cuma Öğretmen, Asistanın) yeni varsayılana (Cuma) taşınır.
       teacherName:
-        (str(settings.teacherName, base.settings.teacherName).slice(0, 40) || base.settings.teacherName).replace(/^Cuma Öğretmen$/, base.settings.teacherName),
+        (str(settings.teacherName, base.settings.teacherName).slice(0, 40) || base.settings.teacherName).replace(/^(Cuma Öğretmen|Asistanın)$/, base.settings.teacherName),
       teacherPhotoFocusY: Math.min(100, Math.max(0, num(settings.teacherPhotoFocusY, 35))),
       cloud: {
         projectId: /^[a-z0-9-]{4,40}$/.test(str(cloudRaw.projectId)) ? str(cloudRaw.projectId) : '',
@@ -259,6 +259,7 @@ export function sanitize(raw: Json): AppState {
         name: str(petRaw.name).trim().slice(0, 20) || 'Bambu',
         items: arr(petRaw.items).filter((x): x is string => typeof x === 'string').slice(0, 12),
       },
+      companion: settings.companion !== false,
       aiServerUrl: /^https:\/\/[^\s]+$/.test(str(settings.aiServerUrl)) ? str(settings.aiServerUrl).slice(0, 200) : '',
     } as AppState['settings'],
     topicProgress: isObj(raw.topicProgress) ? (raw.topicProgress as AppState['topicProgress']) : {},

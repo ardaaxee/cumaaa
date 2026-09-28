@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
+import { AskLabel } from '../components/AskName';
 import { getTopicRef, subjectLabel } from '../data/curriculum';
 import { loadLesson, loadTopicQuestions } from '../data/content';
 import type { LessonSeed, Question } from '../domain/types';
@@ -311,7 +312,7 @@ export default function TopicPage({ params }: { params: string[] }) {
             Normal test ({Math.min(20, Math.max(10, qCount ?? 10))} soru)
           </button>
           <a className="btn ghost" href={href('/ogretmen', { konu: topicId, eylem: 'anlat' })}>
-            <Icon name="teacher" /> Asistana sor
+            <Icon name="teacher" /> <AskLabel />
           </a>
           <button type="button" className="btn ghost" onClick={writeToNotebook}>
             <Icon name="sparkle" /> Deftere yaz

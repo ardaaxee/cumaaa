@@ -3,6 +3,7 @@ import { SUBJECTS, subjectLabel } from '../data/curriculum';
 import type { SubjectId } from '../domain/types';
 import { AssistantCharacter } from '../components/AssistantCharacter';
 import { ConnectSettings } from '../components/ConnectSettings';
+import { CompanionToggle } from '../components/Companion';
 import { PageHeader } from '../components/Layout';
 import { ConfirmDialog, toast } from '../components/ui';
 import { getTeacherPhoto, setTeacherPhoto } from '../services/photoStore';
@@ -112,30 +113,6 @@ export default function SettingsPage() {
         </div>
       </section>
 
-      <section className="card section" aria-labelledby="pom-h">
-        <h2 id="pom-h" className="mb-8">
-          Pomodoro
-        </h2>
-        <div className="form-grid two">
-          <label className="field">
-            <span>Odak süresi (dk)</span>
-            <input className="input" type="number" min={5} max={120} value={settings.focusMinutes} onChange={(e) => update((s) => updateSettings(s, { focusMinutes: Math.min(120, Math.max(5, Number(e.target.value) || 25)) }))} />
-          </label>
-          <label className="field">
-            <span>Kısa mola (dk)</span>
-            <input className="input" type="number" min={1} max={60} value={settings.breakMinutes} onChange={(e) => update((s) => updateSettings(s, { breakMinutes: Math.min(60, Math.max(1, Number(e.target.value) || 5)) }))} />
-          </label>
-          <label className="field">
-            <span>Uzun mola (dk)</span>
-            <input className="input" type="number" min={1} max={90} value={settings.longBreakMinutes} onChange={(e) => update((s) => updateSettings(s, { longBreakMinutes: Math.min(90, Math.max(1, Number(e.target.value) || 15)) }))} />
-          </label>
-          <label className="field">
-            <span>Kaç odaktan sonra uzun mola</span>
-            <input className="input" type="number" min={1} max={10} value={settings.cyclesBeforeLongBreak} onChange={(e) => update((s) => updateSettings(s, { cyclesBeforeLongBreak: Math.min(10, Math.max(1, Number(e.target.value) || 4)) }))} />
-          </label>
-        </div>
-      </section>
-
       <section className="card section" aria-labelledby="t-h">
         <h2 id="t-h" className="mb-8">
           Asistan
@@ -145,10 +122,11 @@ export default function SettingsPage() {
           <div className="grow">
             <label className="field">
               <span>Asistan adı</span>
-              <input className="input" value={settings.teacherName} maxLength={40} onChange={(e) => update((s) => updateSettings(s, { teacherName: e.target.value || 'Asistanın' }))} />
+              <input className="input" value={settings.teacherName} maxLength={40} onChange={(e) => update((s) => updateSettings(s, { teacherName: e.target.value || 'Cuma' }))} />
             </label>
           </div>
         </div>
+        <CompanionToggle />
       </section>
 
       <ConnectSettings />

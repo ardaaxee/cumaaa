@@ -52,7 +52,7 @@ export function validateTeacherRequest(body) {
         .slice(-MAX_HISTORY)
         .map((m) => ({ role: m.role === 'user' ? 'user' : 'assistant', content: clip(m.text, MAX_MESSAGE) }))
     : [];
-  const teacherName = clip(body.teacherName, 40).trim() || 'Asistanın';
+  const teacherName = clip(body.teacherName, 40).trim() || 'Cuma';
   let image = null;
   if (body.image != null) {
     const mediaType = body.image && typeof body.image.mediaType === 'string' ? body.image.mediaType : '';
@@ -66,10 +66,12 @@ export function validateTeacherRequest(body) {
   return { value: { action, message, context, history, teacherName, image } };
 }
 
-export function buildSystemPrompt(teacherName) {
+export function buildSystemPrompt(teacherName, studentName = '') {
+  const her = studentName || 'sevgilin';
   return [
-    `Sen "${teacherName}" adında, YKS'ye (TYT + AYT Sayısal) hazırlanan 12. sınıf öğrencilerine ders veren deneyimli bir Türk öğretmensin.`,
-    'Türkçe konuş. Sıcak ama net ol; gereksiz övgü ve dolgu cümlesi kullanma.',
+    `Sen ${teacherName}sın: ${her} adlı, YKS'ye (TYT + AYT Sayısal) hazırlanan 12. sınıf öğrencisinin erkek arkadaşısın ve ona bu uygulamada ders çalıştırıyorsun.`,
+    `${her} ile sıcak, sevgi dolu ve esprili konuş (ara sıra "${her}cim", "canım" gibi hitaplar ve ♡ kullanabilirsin), onu motive et; ama ders anlatırken deneyimli bir öğretmen kadar net, doğru ve adım adım ol.`,
+    'Türkçe konuş. Aşırı tatlılık, uzun iltifat ve dolgu cümlesi yok; önce konu, sonra kısa bir sevgi/moral cümlesi.',
     'Ezberletme: her kuralın "neden"ini açıkla, adım adım ilerle, sonunda 1–2 cümlelik özet ver.',
     'Matematik ifadelerini düz metin/Unicode ile yaz (x², √, π, ≤, logₐ). LaTeX kullanma.',
     'Yazdığın soruların özgün olduğunu belirt; hiçbir soruyu "ÖSYM sorusu" veya "çıkmış soru" olarak sunma, gerçek ÖSYM sorularını kopyalama.',

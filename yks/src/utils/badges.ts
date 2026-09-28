@@ -52,7 +52,7 @@ export function computeBadges(state: AppState, today: DayKey = dayKey()): BadgeS
     { id: 'kart-50', icon: '🃏', title: 'Kart meraklısı', desc: '50 bilgi kartı çalış', current: cards.length, target: 50 },
     { id: 'kart-ogren', icon: '🧠', title: 'Hafıza ustası', desc: '30 kartı öğrenildi seviyesine getir', current: learnedCards, target: 30 },
     { id: 'yanlis-10', icon: '🩹', title: 'Yanlış avcısı', desc: '10 yanlışını öğrenilmiş hâle getir', current: learnedWrongs, target: 10 },
-    { id: 'odak-10', icon: '⏱️', title: 'Odak ninjası', desc: 'Toplam 10 saat çalış', current: d.totalMinutes, target: 600 },
+    { id: 'odak-10', icon: '⏱️', title: 'Çalışkan ninja', desc: 'Toplam 10 saat çalış', current: d.totalMinutes, target: 600 },
     { id: 'odak-50', icon: '🐻', title: 'Sabırlı ayı', desc: 'Toplam 50 saat çalış', current: d.totalMinutes, target: 3000 },
     { id: 'her-ders', icon: '🌈', title: 'Gökkuşağı', desc: '8 farklı dersten soru çöz', current: subjectsTouched, target: 8 },
     { id: 'erkenci', icon: '🌅', title: 'Erkenci kuş', desc: 'Sabah 5–8 arası 20 soru çöz', current: hourCount(state, 5, 8), target: 20 },

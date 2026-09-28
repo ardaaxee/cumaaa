@@ -28,7 +28,7 @@ const DESK_EDGE = '#d4b183';
  * - happy: el sallar, hafif zıplar
  * - listening: başı eğik, ses dalgaları
  */
-export function AssistantCharacter({ mood = 'idle', size = 200 }: { mood?: AssistantMood; size?: number }) {
+export function AssistantCharacter({ mood = 'idle', size = 200, desk = true }: { mood?: AssistantMood; size?: number; desk?: boolean }) {
   const name = useSelector((s) => s.settings.teacherName);
   const uid = useId().replace(/:/g, '');
 
@@ -141,7 +141,7 @@ export function AssistantCharacter({ mood = 'idle', size = 200 }: { mood?: Assis
       </g>
 
       {/* ---- masa + defter ---- */}
-      <g className="asst-desk">
+      <g className="asst-desk" style={desk ? undefined : { display: 'none' }}>
         <rect x="6" y="246" width="228" height="58" rx="12" fill={`url(#desk-${uid})`} stroke={INK} strokeWidth="2.5" />
         <path d="M16 256 H224" stroke="#f6e3c7" strokeWidth="3" strokeLinecap="round" />
         {/* açık defter */}

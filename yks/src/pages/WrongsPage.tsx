@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
+import { AskLabel } from '../components/AskName';
 import { SUBJECTS, getTopicRef, subjectLabel } from '../data/curriculum';
 import { loadQuestions } from '../data/content';
 import type { Question } from '../domain/types';
@@ -174,7 +175,7 @@ export default function WrongsPage() {
                       {w.learned ? 'Geri al' : 'Öğrendim'}
                     </button>
                     <a className="btn small" href={href('/ogretmen', { soru: q.id, cevap: w.lastAnswer != null ? String(w.lastAnswer) : undefined, eylem: 'hatam' })}>
-                      <Icon name="teacher" /> Asistana sor
+                      <Icon name="teacher" /> <AskLabel />
                     </a>
                     <button type="button" className="btn small" onClick={() => void run(launchTest(makeConfig({ topicId: q.topic, count: 10, origin: 'filtre', title: `${ref?.topic.name ?? ''} testi` })))}>
                       Bu konudan test

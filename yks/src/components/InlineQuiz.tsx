@@ -1,4 +1,5 @@
 import { useRef, useState } from 'react';
+import { AskLabel } from './AskName';
 import type { Question } from '../domain/types';
 import { href } from '../hooks/useRoute';
 import { recordPractice } from '../store/actions';
@@ -65,7 +66,7 @@ export function InlineQuiz({
                   </div>
                 </details>
                 <a className="btn small ghost mt-8" href={href('/ogretmen', { soru: q.id, cevap: String(chosen), eylem: ok ? 'coz' : 'hatam' })}>
-                  <Icon name="teacher" /> Asistana sor
+                  <Icon name="teacher" /> <AskLabel />
                 </a>
               </div>
             )}

@@ -131,7 +131,7 @@ async function handleTeacher(req, res) {
       output_config: { effort: 'medium' },
       betas: ['server-side-fallback-2026-07-01'],
       fallbacks: 'default',
-      system: buildSystemPrompt(value.teacherName),
+      system: buildSystemPrompt(value.teacherName, value.context.studentName),
       messages: [...value.history, { role: 'user', content: buildUserContent(value) }],
     });
     if (response.stop_reason === 'refusal') {
@@ -169,7 +169,7 @@ async function handleGemini(res, value, sendJson) {
     const { text, truncated } = await askGemini({
       apiKey: GEMINI_KEY,
       model: GEMINI_MODEL,
-      system: buildSystemPrompt(value.teacherName),
+      system: buildSystemPrompt(value.teacherName, value.context.studentName),
       history: value.history,
       userContent: buildUserContent(value),
       signal: AbortSignal.timeout(120_000),

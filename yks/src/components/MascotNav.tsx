@@ -32,9 +32,8 @@ const MENU: MenuItem[] = [
   { path: '/pandam', label: 'Pandam', icon: 'sparkle', tint: '#e5f5ec' },
   { path: '/kaydedilenler', label: 'Kaydettiklerim', icon: 'star', tint: '#fdeedd' },
   { path: '/karne', label: 'Haftalık karne', icon: 'chart', tint: '#e2f4f3' },
-  { path: '/ogretmen', label: 'Asistanım', icon: 'teacher', tint: '#ece8f3' },
+  { path: '/ogretmen', label: 'Cuma ♡', icon: 'teacher', tint: '#ece8f3' },
   { path: '/yanlislar', label: 'Yanlışlarım', icon: 'alert', tint: '#fde4e1' },
-  { path: '/odak', label: 'Odak', icon: 'timer', tint: '#e6f0dc' },
   { path: '/gelisim', label: 'Gelişimim', icon: 'chart', tint: '#e3effd' },
   { path: '/kaynaklar', label: 'Kaynaklar', icon: 'link', tint: '#f1ebe1' },
   { path: '/cikmis', label: 'ÖSYM Çıkmış', icon: 'archive', tint: '#efe6fb' },
@@ -245,6 +244,7 @@ export function MascotNav() {
   const timers = useRef<number[]>([]);
   const section = sectionOf(route.path);
   const petItems = useSelector((s) => s.settings.pet.items);
+  const teacherName = useSelector((s) => s.settings.teacherName);
   const menuOpen = phase === 'stood';
   const exam = route.query.get('sinav');
   const onTests = section === '/testler';
@@ -337,7 +337,7 @@ export function MascotNav() {
               <span className="tile-icon">
                 <Icon name={m.icon} size={22} />
               </span>
-              <span>{m.label}</span>
+              <span>{m.path === '/ogretmen' ? `${teacherName} ♡` : m.label}</span>
             </a>
           ))}
         </nav>

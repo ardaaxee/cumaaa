@@ -61,7 +61,7 @@ export default function ProgressPage() {
           </div>
         </div>
         {!hasSeries ? (
-          <Empty title="Henüz yeterli veri yok.">Test çözdükçe ve odak seansı tamamladıkça günlük grafik oluşur.</Empty>
+          <Empty title="Henüz yeterli veri yok.">Test çözdükçe günlük grafik oluşur.</Empty>
         ) : (
           <>
             <BarChart

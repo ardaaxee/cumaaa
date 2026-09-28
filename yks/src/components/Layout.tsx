@@ -3,6 +3,7 @@ import { useRoute } from '../hooks/useRoute';
 import { update, useSelector } from '../store/store';
 import { Icon, type IconName } from './Icon';
 import { CatFace, MascotNav, RabbitFace } from './MascotNav';
+import { Companion } from './Companion';
 
 interface NavItem {
   path: string;
@@ -24,10 +25,9 @@ export const NAV_ALL: NavItem[] = [
   { path: '/pandam', label: 'Panda arkadaşım', icon: 'sparkle' },
   { path: '/kaydedilenler', label: 'Kaydettiğim sorular', icon: 'star' },
   { path: '/karne', label: 'Haftalık karne', icon: 'chart' },
-  { path: '/ogretmen', label: 'Asistanım', icon: 'teacher' },
+  { path: '/ogretmen', label: 'Cuma ♡', icon: 'teacher' },
   { path: '/yanlislar', label: 'Yanlışlarım', icon: 'alert' },
   { path: '/gelisim', label: 'Gelişimim', icon: 'chart' },
-  { path: '/odak', label: 'Odak (Pomodoro)', icon: 'timer' },
   { path: '/kaynaklar', label: 'Kaynaklar', icon: 'link' },
   { path: '/cikmis', label: 'ÖSYM Çıkmış Sorular', icon: 'archive' },
   { path: '/ayarlar', label: 'Ayarlar', icon: 'settings' },
@@ -44,6 +44,7 @@ export function sectionOf(path: string): string {
 export function Layout({ children }: { children: ReactNode }) {
   const route = useRoute();
   const section = sectionOf(route.path);
+  const teacherName = useSelector((s) => s.settings.teacherName);
   // Test çözerken alt şerit gizlenir; ekran tamamen soruya ayrılır (çıkış testin kendi kapat düğmesiyle).
   const focusMode = route.path === '/test';
   return (
@@ -60,7 +61,7 @@ export function Layout({ children }: { children: ReactNode }) {
           {NAV_ALL.map((n) => (
             <a key={n.path} href={`#${n.path}`} aria-current={section === n.path ? 'page' : undefined}>
               <Icon name={n.icon} />
-              {n.label}
+              {n.path === '/ogretmen' ? `${teacherName} ♡` : n.label}
             </a>
           ))}
         </nav>
@@ -70,6 +71,7 @@ export function Layout({ children }: { children: ReactNode }) {
         {children}
       </main>
       {!focusMode && <MascotNav />}
+      <Companion />
       <EdgeFriends />
     </div>
   );

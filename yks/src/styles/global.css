@@ -1936,3 +1936,37 @@ body { overflow-x: clip; }
 .saved-toggle { display: flex; gap: 8px; width: 100%; text-align: left; border: 0; background: none; padding: 10px 0 0; font: inherit; color: inherit; cursor: pointer; }
 .quick-tile.t-mint { background: linear-gradient(160deg, #e5f5ec, var(--surface) 75%); }
 @media (min-width: 760px) { .quick-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+
+/* ---------- Sitede dolaşan asistan (Cuma) ---------- */
+.companion {
+  position: fixed;
+  bottom: calc(var(--nav-h) + var(--safe-b) - 30px);
+  z-index: 39;
+  width: 84px;
+  transition: left 2.6s cubic-bezier(0.45, 0, 0.55, 1);
+  pointer-events: none;
+}
+.companion-body { pointer-events: auto; border: 0; background: none; padding: 0; line-height: 0; cursor: pointer; display: block; }
+.companion.walking .companion-body { animation: comp-walk 0.42s ease-in-out infinite; }
+@keyframes comp-walk { 0%, 100% { transform: translateY(0) rotate(-2.5deg); } 50% { transform: translateY(-5px) rotate(2.5deg); } }
+.companion-bubble {
+  position: absolute;
+  bottom: calc(100% - 6px);
+  left: 0;
+  width: max-content;
+  max-width: min(260px, 78vw);
+  pointer-events: auto;
+  background: var(--surface);
+  border: 1.5px solid var(--line-strong);
+  border-radius: 16px 16px 16px 4px;
+  padding: 8px 12px;
+  box-shadow: 0 8px 24px rgba(60, 30, 80, 0.14);
+  font-size: 0.86rem;
+  line-height: 1.4;
+  animation: speech-pop 0.35s cubic-bezier(0.2, 0.9, 0.3, 1.4) both;
+}
+.companion-bubble.right { left: auto; right: 0; border-radius: 16px 16px 4px 16px; }
+.companion-bubble b { color: var(--brand); }
+.companion-actions { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 8px; }
+@media (min-width: 900px) { .companion { bottom: -34px; } }
+@media (prefers-reduced-motion: reduce) { .companion { transition: none; } }

@@ -173,7 +173,7 @@ export default function TeacherPage() {
 
   const mood: AssistantMood = listener.listening ? 'listening' : busy ? 'thinking' : speaker.speaking ? 'talking' : state.chat.length === 0 ? 'happy' : 'idle';
   const lastTeacher = lastSaid ?? [...state.chat].reverse().find((m) => m.role === 'teacher')?.text;
-  const greeting = `Selam${state.profile.name ? ` ${state.profile.name}` : ''}! Ben senin asistanınım ♡ Bir konu yaz ya da bana sesle sor.`;
+  const greeting = `Selam ${state.profile.name || 'canım'} ♡ Ben ${teacherName}. Bugün de seninle çalışmaya geldim; bir konu yaz ya da bana sesle sor.`;
   const toggleVoice = () => {
     const next = !voiceOn;
     setVoiceOn(next);
@@ -187,7 +187,7 @@ export default function TeacherPage() {
 
   return (
     <>
-      <PageHeader title="Asistanım" sub={ref ? `${subjectLabel(ref.subject)} · ${ref.topic.name}` : question ? 'Soru bağlamı seçili' : 'Konuşan çalışma arkadaşın'} />
+      <PageHeader title={`${teacherName} ♡`} sub={ref ? `${subjectLabel(ref.subject)} · ${ref.topic.name}` : question ? 'Soru bağlamı seçili' : 'Sevgilin ve çalışma arkadaşın'} />
 
       <section className="card asst-stage" aria-label="Asistan">
         <button
