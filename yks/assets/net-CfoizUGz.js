@@ -1,0 +1,1 @@
+function e(e,n){return t(Math.max(0,e||0)-Math.max(0,n||0)/4)}function t(e){return Math.round(e*100)/100}function n(e){return e.toLocaleString(`tr-TR`,{minimumFractionDigits:0,maximumFractionDigits:2})}function r(e,t){return t?Math.round(e/t*100):null}export{t as i,n,r,e as t};
