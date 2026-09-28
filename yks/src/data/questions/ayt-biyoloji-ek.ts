@@ -8,6 +8,8 @@ import type { QuestionSeed } from '../../domain/types';
 const DUY = "aytbio-duyu-organlari";
 const DHS = "aytbio-destek-hareket";
 const URE = "aytbio-ureme-embriyonik";
+const KOM = "aytbio-komunite-populasyon";
+const CEV = "aytbio-canlilar-ve-cevre";
 
 export const questions: QuestionSeed[] = [
   // =====================================================================
@@ -214,5 +216,174 @@ export const questions: QuestionSeed[] = [
     hint: "Gebelikte yeni yumurtlamanın neden olmadığını hatırla.",
     commonMistake: "Döngü ortasındaki östrojen artışının oluşturduğu pozitif geri bildirimi, sürekli yüksek hormon düzeyiyle karıştırmak.",
     teacherNote: "Menstrual döngüdeki geri bildirim mekanizmalarını güncel bir uygulamaya aktarmayı ölçer.",
+  },
+
+  // =====================================================================
+  // KOMÜNİTE VE POPÜLASYON EKOLOJİSİ
+  // =====================================================================
+  {
+    id: `${KOM}-q101`,
+    topic: KOM,
+    subtopic: `${KOM}-s1`,
+    outcome: "Türler arası ilişkileri (rekabet, av–avcı, simbiyoz) örneklerle açıklar.",
+    difficulty: "kolay",
+    type: "bilgi",
+    question:
+      "İki tür arasındaki ilişkide türlerden biri yarar görürken diğeri bu ilişkiden ne yarar ne de zarar görüyorsa bu ilişki kommensalizmdir.\n\nAşağıdaki tür çiftlerinden hangisi arasındaki ilişki kommensalizme örnektir?",
+    options: [
+      "Köpek balığına tutunarak taşınan ve artık besinlerle beslenen vantuz balığı ile köpek balığı",
+      "Nektarla beslenirken çiçeğin tozlaşmasını sağlayan bal arısı ile çiçekli bitki",
+      "İnsan bağırsağında yaşayıp besinine ortak olan tenya ile insan",
+      "Zebrayı avlayan aslan ile zebra",
+      "Köklerinde azot bağlayan Rhizobium bakterisi ile baklagil bitkisi",
+    ],
+    correctAnswer: 0,
+    solution:
+      "Vantuz balığı köpek balığına tutunarak taşınır ve artık besinlerden yararlanır; köpek balığı bu durumdan belirgin biçimde etkilenmez (+/0): kommensalizm. Arı–çiçek ve Rhizobium–baklagil ilişkisinde iki taraf da yararlanır (mutualizm, +/+). Tenya–insan parazitlik, aslan–zebra av–avcı ilişkisidir (+/−).",
+    hint: "Her ilişkide iki türün göreceği etkiyi +, − ve 0 ile işaretle.",
+    commonMistake: "Bir türün yarar gördüğü her ilişkiyi mutualizm sanmak.",
+    teacherNote: "Simbiyotik ilişki türlerini tarafların gördüğü etkiye göre sınıflandırmayı ölçer.",
+  },
+  {
+    id: `${KOM}-q102`,
+    topic: KOM,
+    subtopic: `${KOM}-s3`,
+    outcome: "Üstel (J) ve lojistik (S) büyüme eğrilerini taşıma kapasitesiyle yorumlar.",
+    difficulty: "orta",
+    type: "grafik",
+    question:
+      "Sınırlı kaynakların bulunduğu bir ortamda büyüyen bir popülasyonun birey sayısı–zaman grafiği S biçimli bir eğridir. Eğri başlangıçta yavaş, ardından hızlı yükselir; sonra yükselişi yavaşlayarak ortamın taşıma kapasitesi civarında yatay hâle gelir.\n\nBu popülasyon taşıma kapasitesine yaklaştıkça aşağıdakilerden hangisinin gerçekleşmesi beklenmez?",
+    options: [
+      "Bireyler arasında besin ve alan için rekabetin artması",
+      "Doğum oranının azalması",
+      "Ölüm oranının artması",
+      "Popülasyonun büyüme hızının artması",
+      "Bulaşıcı hastalıkların yayılma olasılığının artması",
+    ],
+    correctAnswer: 3,
+    solution:
+      "Taşıma kapasitesine yaklaşıldıkça yoğunluğa bağlı sınırlayıcı etkenler (rekabet, besin azlığı, hastalık, atık birikimi) güçlenir. Bunun sonucunda doğum oranı düşer, ölüm oranı artar ve iki oran birbirine yaklaşır. Büyüme hızı eğrinin orta bölgesinde en yüksektir; taşıma kapasitesine yaklaşırken azalarak sıfıra yaklaşır. Bu nedenle büyüme hızının artması beklenmez.",
+    hint: "S eğrisinin eğimi, büyüme hızını gösterir; eğim sonlara doğru nasıl değişiyor?",
+    commonMistake: "Birey sayısı arttığı için büyüme hızının da arttığını düşünmek.",
+    teacherNote: "Lojistik büyümede birey sayısı ile büyüme hızı kavramlarının ayrımını ölçer.",
+  },
+  {
+    id: `${KOM}-q103`,
+    topic: KOM,
+    subtopic: `${KOM}-s3`,
+    outcome: "Popülasyon büyüklüğünü, yoğunluğunu ve dağılışını etkileyen faktörleri açıklar.",
+    difficulty: "orta",
+    type: "tablo",
+    question:
+      "Bir adadaki yaban keçisi popülasyonunda yıl başında 500 birey bulunmaktadır. Bir yıl boyunca kaydedilen veriler tabloda verilmiştir.\n\nBuna göre yıl sonundaki birey sayısı ve popülasyonun yıllık büyüme yüzdesi aşağıdakilerin hangisinde doğru verilmiştir?",
+    table: {
+      headers: ["Olay", "Birey sayısı"],
+      rows: [
+        ["Doğum", "120"],
+        ["Ölüm", "80"],
+        ["Göç ile gelen (içe göç)", "30"],
+        ["Göç ile ayrılan (dışa göç)", "20"],
+      ],
+    },
+    options: ["540; %8", "550; %10", "570; %14", "530; %6", "450; −%10"],
+    correctAnswer: 1,
+    solution:
+      "Popülasyondaki değişim = (doğum + içe göç) − (ölüm + dışa göç) = (120 + 30) − (80 + 20) = +50. Yıl sonu birey sayısı = 500 + 50 = 550. Büyüme yüzdesi = 50/500 · 100 = %10.",
+    hint: "Popülasyona katılan ve popülasyondan ayrılan bireyleri ayrı ayrı topla.",
+    commonMistake: "Göçleri hesaba katmayıp 540 bulmak ya da dışa göçü artış olarak eklemek.",
+    teacherNote: "Popülasyon büyüklüğünü değiştiren dört etkeni sayısal olarak birleştirmeyi ölçer.",
+  },
+  {
+    id: `${KOM}-q104`,
+    topic: KOM,
+    subtopic: `${KOM}-s2`,
+    outcome: "Birincil ve ikincil süksesyonu karşılaştırır.",
+    difficulty: "orta",
+    type: "onculu",
+    question: "Aşağıdaki alanlardan hangilerinde başlayan ekolojik süksesyon ikincil süksesyona örnektir?",
+    premises: [
+      "Toprağı büyük ölçüde korunan, yangında yanmış bir çam ormanı",
+      "Denizaltı volkanik patlamasıyla yeni oluşmuş, çıplak kayalık bir ada",
+      "Yıllar önce ekilip biçilmesi bırakılmış bir tarım arazisi",
+    ],
+    options: ["Yalnız I", "Yalnız II", "I ve III", "II ve III", "I, II ve III"],
+    correctAnswer: 2,
+    solution:
+      "İkincil süksesyon, bir komünitenin bozulduğu ancak toprağın (ve tohum, kök gibi canlı kalıntılarının) korunduğu alanlarda başlar: yanmış orman (I) ve terk edilmiş tarla (III) buna örnektir. Yeni oluşmuş volkanik adada toprak yoktur; süksesyon liken gibi öncü türlerle çıplak kaya üzerinde başlar ve birincil süksesyondur (II).",
+    hint: "Ölçüt, başlangıçta toprağın bulunup bulunmamasıdır.",
+    commonMistake: "Yangın gibi büyük bir yıkımın ardından başlayan süksesyonu birincil sanmak.",
+    teacherNote: "Birincil ve ikincil süksesyonu başlangıç koşuluna göre ayırt etmeyi ölçer.",
+  },
+
+  // =====================================================================
+  // CANLILAR VE ÇEVRE
+  // =====================================================================
+  {
+    id: `${CEV}-q101`,
+    topic: CEV,
+    subtopic: `${CEV}-s2`,
+    outcome: "Küresel iklim değişikliği, biyolojik birikim ve habitat kaybı gibi çevre sorunlarının canlılara etkisini yorumlar.",
+    difficulty: "yeni-nesil",
+    type: "yeni-nesil",
+    question:
+      "Bir otoyol, geniş bir ormanı ikiye bölmüştür. Yıllar içinde yapılan izlemelerde otoyolun iki yanındaki ayı ve karaca popülasyonlarının küçüldüğü, bireylerin karşıya geçmeye çalışırken sıklıkla kazalarda öldüğü ve iki taraftaki popülasyonlar arasında üreme olmadığı saptanmıştır. Bunun üzerine otoyolun üzerine, bitki örtüsüyle kaplı bir “yaban hayatı köprüsü” (ekolojik koridor) yapılmıştır.\n\nBu uygulamanın temel amacı aşağıdakilerden hangisidir?",
+    options: [
+      "Ormandaki ağaç türü sayısını artırmak",
+      "Hayvanların otoyol kenarındaki tarım alanlarına ulaşmasını kolaylaştırmak",
+      "Ayı ve karaca popülasyonlarını birbirinden tamamen yalıtmak",
+      "Otoyoldaki araç trafiğini azaltmak",
+      "Parçalanan habitatlar arasında bireylerin güvenle geçişini ve popülasyonlar arası gen akışını yeniden sağlamak",
+    ],
+    correctAnswer: 4,
+    solution:
+      "Habitatın parçalanması popülasyonları küçük ve yalıtılmış gruplara ayırır; küçük popülasyonlarda akraba çiftleşmesi ve genetik çeşitlilik kaybı artar, yok olma riski yükselir. Ekolojik koridorlar parçalar arasında güvenli geçişi sağlayarak hem kaza ölümlerini azaltır hem de popülasyonlar arasında gen akışını yeniden kurar.",
+    hint: "Metinde popülasyonlar arasında hangi sürecin kesildiği vurgulanıyor?",
+    commonMistake: "Koridorun yalnızca trafik güvenliği için yapıldığını düşünüp biyolojik amacı gözden kaçırmak.",
+    teacherNote: "Habitat parçalanmasının genetik çeşitliliğe etkisini ve koruma çözümünü değerlendirmeyi ölçer.",
+  },
+  {
+    id: `${CEV}-q102`,
+    topic: CEV,
+    subtopic: `${CEV}-s2`,
+    outcome: "Küresel iklim değişikliği, biyolojik birikim ve habitat kaybı gibi çevre sorunlarının canlılara etkisini yorumlar.",
+    difficulty: "orta",
+    type: "onculu",
+    question:
+      "Stratosferdeki ozon tabakasının incelmesi sonucu yeryüzüne ulaşan morötesi (UV) ışınların miktarı artmaktadır.\n\nBu durumun doğrudan sonuçlarına aşağıdakilerden hangileri örnek gösterilebilir?",
+    premises: [
+      "İnsanlarda deri kanseri ve katarakt riskinin artması",
+      "Okyanus yüzeyindeki fitoplanktonlarda DNA hasarı nedeniyle üretimin azalması",
+      "Atmosferdeki sera etkisinin tamamen ortadan kalkması",
+    ],
+    options: ["Yalnız I", "I ve II", "Yalnız III", "II ve III", "I, II ve III"],
+    correctAnswer: 1,
+    solution:
+      "UV ışınları DNA’da hasara (örneğin timin dimerlerine) yol açar. Bu nedenle insanlarda deri kanseri ve katarakt riski artar (I). Fitoplanktonlar yüzey sularında yaşadığı için UV’den etkilenir; üretimlerinin azalması besin zincirinin tabanını zayıflatır (II). Ozon incelmesi ile sera etkisi farklı olaylardır; ozon incelmesi sera etkisini ortadan kaldırmaz (III yanlış).",
+    hint: "Ozon tabakasının görevi hangi ışınları süzmektir ve bu ışınlar hücrede neye zarar verir?",
+    commonMistake: "Ozon tabakası incelmesi ile küresel ısınmayı (sera etkisi) aynı olay sanmak.",
+    teacherNote: "Ozon incelmesinin canlılar üzerindeki etkilerini ve sera etkisinden farkını ölçer.",
+  },
+  {
+    id: `${CEV}-q103`,
+    topic: CEV,
+    subtopic: `${CEV}-s3`,
+    outcome: "Biyoçeşitliliğin korunmasının önemini açıklar.",
+    difficulty: "kolay",
+    type: "bilgi",
+    question:
+      "Biyoçeşitliliği koruma çalışmaları, türlerin kendi doğal yaşam alanlarında korunması (yerinde koruma) ve doğal yaşam alanı dışında korunması (yerinden ayrı koruma) olarak iki grupta incelenir.\n\nAşağıdakilerden hangisi yerinde korumaya örnektir?",
+    options: [
+      "Yerel tohum çeşitlerinin tohum bankasında saklanması",
+      "Nesli tehlikedeki bir türün hayvanat bahçesinde üretilmesi",
+      "Nadir bitki türlerinin botanik bahçesinde yetiştirilmesi",
+      "Doku ve sperm örneklerinin gen bankasında dondurularak saklanması",
+      "Endemik türlerin yaşadığı bir vadinin milli park ilan edilerek korunması",
+    ],
+    correctAnswer: 4,
+    solution:
+      "Yerinde koruma, türün doğal habitatıyla birlikte korunmasıdır; milli park, tabiat parkı ve yaban hayatı koruma sahası ilan etmek buna örnektir. Tohum bankası, gen bankası, hayvanat bahçesi ve botanik bahçesi türü doğal ortamı dışında koruduğu için yerinden ayrı korumadır.",
+    hint: "Türün yaşam alanının korunup korunmadığına bak.",
+    commonMistake: "Tohum bankası gibi bilimsel kurumları, yerel türleri sakladığı için yerinde koruma sanmak.",
+    teacherNote: "Biyoçeşitlilik koruma yöntemlerinin sınıflandırılmasını ölçer.",
   },
 ];
