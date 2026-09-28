@@ -25,7 +25,7 @@ const MENU: MenuItem[] = [
   { path: '/defterim', label: 'Defterim', icon: 'sparkle', tint: '#fde6ec' },
   { path: '/plan', label: 'Planım', icon: 'calendar', tint: '#e2f4f3' },
   { path: '/tekrar', label: 'Genel Tekrar', icon: 'repeat', tint: '#fff3cf' },
-  { path: '/ogretmen', label: 'Konu Asistanı', icon: 'teacher', tint: '#ece8f3' },
+  { path: '/ogretmen', label: 'Asistanım', icon: 'teacher', tint: '#ece8f3' },
   { path: '/yanlislar', label: 'Yanlışlarım', icon: 'alert', tint: '#fde4e1' },
   { path: '/odak', label: 'Odak', icon: 'timer', tint: '#e6f0dc' },
   { path: '/gelisim', label: 'Gelişimim', icon: 'chart', tint: '#e3effd' },

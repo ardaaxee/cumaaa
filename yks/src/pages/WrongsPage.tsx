@@ -174,7 +174,7 @@ export default function WrongsPage() {
                       {w.learned ? 'Geri al' : 'Öğrendim'}
                     </button>
                     <a className="btn small" href={href('/ogretmen', { soru: q.id, cevap: w.lastAnswer != null ? String(w.lastAnswer) : undefined, eylem: 'hatam' })}>
-                      <Icon name="teacher" /> Öğretmene sor
+                      <Icon name="teacher" /> Asistana sor
                     </a>
                     <button type="button" className="btn small" onClick={() => void run(launchTest(makeConfig({ topicId: q.topic, count: 10, origin: 'filtre', title: `${ref?.topic.name ?? ''} testi` })))}>
                       Bu konudan test

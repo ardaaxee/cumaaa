@@ -4,6 +4,7 @@ import { Icon } from '../components/Icon';
 import { PageHeader } from '../components/Layout';
 import { PomodoroCard } from '../components/PomodoroCard';
 import { PandaBody } from '../components/MascotNav';
+import { AssistantCharacter } from '../components/AssistantCharacter';
 import { DailyQuestion } from '../components/DailyQuestion';
 import { Empty, ProgressBar, Stat, toast } from '../components/ui';
 import { navigate } from '../hooks/useRoute';
@@ -212,6 +213,21 @@ export default function HomePage() {
               ))}
             </ul>
           )}
+        </section>
+
+        <section className="card asst-home" aria-labelledby="asst-h">
+          <a href="#/ogretmen" className="asst-home-link">
+            <AssistantCharacter mood="happy" size={92} />
+            <div className="grow">
+              <h2 id="asst-h" style={{ margin: 0 }}>
+                {state.settings.teacherName}
+              </h2>
+              <p className="small muted" style={{ margin: '4px 0 10px' }}>
+                Konu anlat, soru çöz, yanlışlarına bak… Yaz ya da sesle sor, cevabı sesli söylesin.
+              </p>
+              <span className="btn small primary">Konuşalım ♡</span>
+            </div>
+          </a>
         </section>
 
         <PomodoroCard compact />

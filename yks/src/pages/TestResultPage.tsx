@@ -170,7 +170,7 @@ export default function TestResultPage({ params }: { params: string[] }) {
                       <SolutionBlock q={q} />
                       <div className="row mt-12">
                         <a className="btn small" href={href('/ogretmen', { soru: q.id, cevap: item.answer != null ? String(item.answer) : undefined, eylem: item.state === 'dogru' ? 'coz' : 'hatam' })}>
-                          <Icon name="teacher" /> Öğretmene sor
+                          <Icon name="teacher" /> Asistana sor
                         </a>
                         <a className="btn small ghost" href={`#/konu/${q.topic}`}>
                           Konuya git

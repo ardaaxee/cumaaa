@@ -1,7 +1,7 @@
 import { useRef, useState } from 'react';
 import { SUBJECTS, subjectLabel } from '../data/curriculum';
 import type { SubjectId } from '../domain/types';
-import { TeacherAvatar } from '../components/TeacherAvatar';
+import { AssistantCharacter } from '../components/AssistantCharacter';
 import { PageHeader } from '../components/Layout';
 import { ConfirmDialog, toast } from '../components/ui';
 import { getTeacherPhoto, resizeImage, setTeacherPhoto } from '../services/photoStore';
@@ -150,24 +150,24 @@ export default function SettingsPage() {
 
       <section className="card section" aria-labelledby="t-h">
         <h2 id="t-h" className="mb-8">
-          Öğretmen
+          Asistan
         </h2>
         <div className="teacher">
-          <TeacherAvatar size={72} />
+          <AssistantCharacter size={110} mood="happy" />
           <div className="grow">
             <label className="field">
-              <span>Öğretmen adı</span>
-              <input className="input" value={settings.teacherName} maxLength={40} onChange={(e) => update((s) => updateSettings(s, { teacherName: e.target.value || 'Cuma Öğretmen' }))} />
+              <span>Asistan adı</span>
+              <input className="input" value={settings.teacherName} maxLength={40} onChange={(e) => update((s) => updateSettings(s, { teacherName: e.target.value || 'Asistanın' }))} />
             </label>
           </div>
         </div>
         <div className="row mt-12">
           <label className="btn small">
-            Fotoğraf yükle
+            Farklı yüz fotoğrafı yükle
             <input ref={photoRef} type="file" accept="image/*" hidden disabled={busy} onChange={(e) => e.target.files?.[0] && void uploadPhoto(e.target.files[0])} />
           </label>
           <button type="button" className="btn small ghost" onClick={() => void setTeacherPhoto(null).then(() => toast('Fotoğraf kaldırıldı.'))}>
-            Fotoğrafı kaldır
+            Varsayılan yüze dön
           </button>
         </div>
         <label className="field mt-12">

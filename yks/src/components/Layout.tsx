@@ -18,7 +18,7 @@ export const NAV_ALL: NavItem[] = [
   { path: '/defterim', label: 'Defterim', icon: 'sparkle' },
   { path: '/plan', label: 'Planım', icon: 'calendar' },
   { path: '/tekrar', label: 'Genel Tekrar', icon: 'repeat' },
-  { path: '/ogretmen', label: 'Konu Asistanı', icon: 'teacher' },
+  { path: '/ogretmen', label: 'Asistanım', icon: 'teacher' },
   { path: '/yanlislar', label: 'Yanlışlarım', icon: 'alert' },
   { path: '/gelisim', label: 'Gelişimim', icon: 'chart' },
   { path: '/odak', label: 'Odak (Pomodoro)', icon: 'timer' },

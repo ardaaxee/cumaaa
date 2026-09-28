@@ -264,7 +264,7 @@ export function defaultState(): AppState {
       breakMinutes: 5,
       longBreakMinutes: 15,
       cyclesBeforeLongBreak: 4,
-      teacherName: 'Cuma Öğretmen',
+      teacherName: 'Asistanın',
       teacherPhotoFocusY: 35,
     },
     topicProgress: {},

@@ -243,7 +243,9 @@ export function sanitize(raw: Json): AppState {
       breakMinutes: Math.min(60, Math.max(1, num(settings.breakMinutes, 5))),
       longBreakMinutes: Math.min(90, Math.max(1, num(settings.longBreakMinutes, 15))),
       cyclesBeforeLongBreak: Math.min(10, Math.max(1, num(settings.cyclesBeforeLongBreak, 4))),
-      teacherName: str(settings.teacherName, base.settings.teacherName).slice(0, 40) || base.settings.teacherName,
+      // Eski varsayılan öğretmen adı yeni asistan adına taşınır.
+      teacherName:
+        (str(settings.teacherName, base.settings.teacherName).slice(0, 40) || base.settings.teacherName).replace(/^Cuma Öğretmen$/, base.settings.teacherName),
       teacherPhotoFocusY: Math.min(100, Math.max(0, num(settings.teacherPhotoFocusY, 35))),
     } as AppState['settings'],
     topicProgress: isObj(raw.topicProgress) ? (raw.topicProgress as AppState['topicProgress']) : {},

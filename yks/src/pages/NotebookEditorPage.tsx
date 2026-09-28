@@ -18,7 +18,7 @@ import { update, useSelector } from '../store/store';
  * (destination-out) ve dışa aktarımda ayrıca birleştirilir.
  */
 
-type Tool = 'kalem' | 'silgi' | 'cizgi' | 'ok' | 'kutu' | 'daire' | 'eksen' | 'metin';
+type Tool = 'kalem' | 'silgi' | 'cizgi' | 'ok' | 'kutu' | 'daire' | 'eksen' | 'metin' | 'cikartma';
 
 const PENS = [
   { key: 'siyah', label: 'Siyah kalem', color: '#2a2430', alpha: 1 },
@@ -38,7 +38,119 @@ const TOOLS: { key: Tool; label: string; icon: string }[] = [
   { key: 'daire', label: 'Daire', icon: 'circle' },
   { key: 'eksen', label: 'Eksen (x-y)', icon: 'axis' },
   { key: 'metin', label: 'Metin', icon: 'text' },
+  { key: 'cikartma', label: 'Çıkartma', icon: 'sparkle' },
 ];
+
+const STICKERS = ['⭐', '✅', '❌', '❤️', '⚠️', '❓', '💡', '📌', '🐰', '🐱', '🐼', '🦊', '🐻', '🌸', '🎯', '🔥'];
+
+type Template = 'sayi-dogrusu' | 'koordinat' | 'tablo' | 'formul-kutusu' | 'cetvel';
+
+const TEMPLATES: { key: Template; label: string }[] = [
+  { key: 'sayi-dogrusu', label: 'Sayı doğrusu' },
+  { key: 'koordinat', label: 'Koordinat düzlemi' },
+  { key: 'tablo', label: 'Tablo (3×4)' },
+  { key: 'formul-kutusu', label: 'Formül kutusu' },
+  { key: 'cetvel', label: 'Başlık + çizgi' },
+];
+
+/** Şablonu sayfanın görünen üst bölgesine (y0) çizer. */
+function drawTemplate(ctx: CanvasRenderingContext2D, t: Template, y0: number, color: string) {
+  ctx.save();
+  ctx.globalCompositeOperation = 'source-over';
+  ctx.globalAlpha = 1;
+  ctx.strokeStyle = color;
+  ctx.fillStyle = color;
+  ctx.lineWidth = 3;
+  ctx.lineCap = 'round';
+  ctx.font = '600 22px system-ui, sans-serif';
+  ctx.textAlign = 'center';
+  if (t === 'sayi-dogrusu') {
+    const y = y0 + 90;
+    ctx.beginPath();
+    ctx.moveTo(90, y);
+    ctx.lineTo(810, y);
+    ctx.stroke();
+    drawArrowHead(ctx, { x: 790, y }, { x: 810, y });
+    drawArrowHead(ctx, { x: 110, y }, { x: 90, y });
+    for (let i = -5; i <= 5; i++) {
+      const x = 450 + i * 60;
+      ctx.beginPath();
+      ctx.moveTo(x, y - 12);
+      ctx.lineTo(x, y + 12);
+      ctx.stroke();
+      ctx.fillText(String(i), x, y + 42);
+    }
+  } else if (t === 'koordinat') {
+    const cx = 450;
+    const cy = y0 + 240;
+    const step = 40;
+    ctx.save();
+    ctx.globalAlpha = 0.25;
+    ctx.lineWidth = 1.5;
+    for (let i = -8; i <= 8; i++) {
+      ctx.beginPath();
+      ctx.moveTo(cx + i * step, cy - 200);
+      ctx.lineTo(cx + i * step, cy + 200);
+      ctx.stroke();
+    }
+    for (let j = -5; j <= 5; j++) {
+      ctx.beginPath();
+      ctx.moveTo(cx - 330, cy + j * step);
+      ctx.lineTo(cx + 330, cy + j * step);
+      ctx.stroke();
+    }
+    ctx.restore();
+    ctx.beginPath();
+    ctx.moveTo(cx - 340, cy);
+    ctx.lineTo(cx + 340, cy);
+    ctx.moveTo(cx, cy + 210);
+    ctx.lineTo(cx, cy - 210);
+    ctx.stroke();
+    drawArrowHead(ctx, { x: cx + 320, y: cy }, { x: cx + 340, y: cy });
+    drawArrowHead(ctx, { x: cx, y: cy - 190 }, { x: cx, y: cy - 210 });
+    ctx.fillText('x', cx + 330, cy + 30);
+    ctx.fillText('y', cx - 22, cy - 196);
+    ctx.fillText('O', cx - 16, cy + 26);
+    ctx.font = '500 16px system-ui, sans-serif';
+    for (let i = -7; i <= 7; i++) if (i) ctx.fillText(String(i), cx + i * step, cy + 22);
+    for (let j = -4; j <= 4; j++) if (j) ctx.fillText(String(-j), cx - 18, cy + j * step + 6);
+  } else if (t === 'tablo') {
+    const x = 90;
+    const w = 720;
+    const rows = 4;
+    const cols = 3;
+    const rh = 60;
+    for (let r = 0; r <= rows; r++) {
+      ctx.lineWidth = r === 1 ? 3 : 2;
+      ctx.beginPath();
+      ctx.moveTo(x, y0 + 40 + r * rh);
+      ctx.lineTo(x + w, y0 + 40 + r * rh);
+      ctx.stroke();
+    }
+    for (let c = 0; c <= cols; c++) {
+      ctx.beginPath();
+      ctx.moveTo(x + (c * w) / cols, y0 + 40);
+      ctx.lineTo(x + (c * w) / cols, y0 + 40 + rows * rh);
+      ctx.stroke();
+    }
+  } else if (t === 'formul-kutusu') {
+    ctx.setLineDash([12, 8]);
+    ctx.strokeRect(120, y0 + 40, 660, 150);
+    ctx.setLineDash([]);
+    ctx.textAlign = 'left';
+    ctx.fillText('★ Formül:', 140, y0 + 76);
+  } else {
+    ctx.textAlign = 'left';
+    ctx.font = '700 30px system-ui, sans-serif';
+    ctx.fillText('Başlık:', 90, y0 + 70);
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(90, y0 + 86);
+    ctx.lineTo(810, y0 + 86);
+    ctx.stroke();
+  }
+  ctx.restore();
+}
 
 const PAPERS: { key: NotebookPaper; label: string }[] = [
   { key: 'kareli', label: 'Kareli' },
@@ -129,6 +241,9 @@ export default function NotebookEditorPage({ params }: { params: string[] }) {
   const [textValue, setTextValue] = useState('');
   const [textSize, setTextSize] = useState(28);
   const [showMore, setShowMore] = useState(false);
+  const [sticker, setSticker] = useState(STICKERS[0]);
+  const [stickerSize, setStickerSize] = useState(56);
+  const [full, setFull] = useState(false);
   const paper: NotebookPaper = meta?.paper ?? 'kareli';
 
   const ctx = () => canvasRef.current?.getContext('2d') ?? null;
@@ -249,6 +364,32 @@ export default function NotebookEditorPage({ params }: { params: string[] }) {
     pushHistory();
   };
 
+  useEffect(() => {
+    if (!full) return;
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    const onKey = (e: KeyboardEvent) => e.key === 'Escape' && setFull(false);
+    document.addEventListener('keydown', onKey);
+    return () => {
+      document.body.style.overflow = prev;
+      document.removeEventListener('keydown', onKey);
+    };
+  }, [full]);
+
+  const insertTemplate = (t: Template) => {
+    const cx = ctx();
+    const wrap = wrapRef.current;
+    if (!cx || !wrap) return;
+    // Şablon, sayfanın ekranda görünen üst kısmına yerleştirilir.
+    const r = wrap.getBoundingClientRect();
+    const visibleTop = Math.max(0, -r.top + 80);
+    const y0 = Math.min(H - 480, Math.max(0, (visibleTop / r.height) * H));
+    drawTemplate(cx, t, y0, pen.key === 'fosforlu' ? '#2a2430' : pen.color);
+    pushHistory();
+    setShowMore(false);
+    toast('Şablon eklendi.');
+  };
+
   const clearAll = () => {
     const cx = ctx();
     if (!cx) return;
@@ -265,6 +406,19 @@ export default function NotebookEditorPage({ params }: { params: string[] }) {
     if (!c || !oc || !cx || !ocx) return;
     (e.target as HTMLCanvasElement).setPointerCapture(e.pointerId);
 
+    if (tool === 'cikartma') {
+      const p = point(c, e);
+      cx.save();
+      cx.globalCompositeOperation = 'source-over';
+      cx.globalAlpha = 1;
+      cx.font = `${stickerSize}px "Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",sans-serif`;
+      cx.textAlign = 'center';
+      cx.textBaseline = 'middle';
+      cx.fillText(sticker, p.x, p.y);
+      cx.restore();
+      pushHistory();
+      return;
+    }
     if (tool === 'metin') {
       setTextValue('');
       setTextAt(point(c, e));
@@ -408,6 +562,7 @@ export default function NotebookEditorPage({ params }: { params: string[] }) {
         }
       />
 
+      <div className={`nb-stage${full ? ' full' : ''}`}>
       <div className="card notebook-toolbar">
         <div className="nb-tools" role="group" aria-label="Araçlar">
           {TOOLS.map((t) => (
@@ -461,7 +616,23 @@ export default function NotebookEditorPage({ params }: { params: string[] }) {
           <button type="button" className="btn small" aria-expanded={showMore} onClick={() => setShowMore((v) => !v)}>
             <Icon name="more" /> Daha
           </button>
+          <button type="button" className="icon-btn" aria-pressed={full} aria-label={full ? 'Tam ekrandan çık' : 'Tam ekran'} title={full ? 'Tam ekrandan çık' : 'Tam ekran'} onClick={() => setFull((v) => !v)}>
+            <Icon name={full ? 'close' : 'expand'} />
+          </button>
         </div>
+        {tool === 'cikartma' && (
+          <div className="nb-row nb-stickers" role="group" aria-label="Çıkartmalar">
+            {STICKERS.map((st) => (
+              <button key={st} type="button" className={`nb-sticker${sticker === st ? ' on' : ''}`} aria-pressed={sticker === st} onClick={() => setSticker(st)}>
+                {st}
+              </button>
+            ))}
+            <label className="nb-width">
+              <span className="tiny muted">Boyut</span>
+              <input type="range" min={28} max={120} value={stickerSize} onChange={(e) => setStickerSize(Number(e.target.value))} aria-label="Çıkartma boyutu" />
+            </label>
+          </div>
+        )}
         {showMore && (
           <div className="nb-more">
             <div className="nb-row" role="group" aria-label="Kağıt deseni">
@@ -475,6 +646,14 @@ export default function NotebookEditorPage({ params }: { params: string[] }) {
                   onClick={() => update((s) => setNotebookPaper(s, id, p.key))}
                 >
                   {p.label}
+                </button>
+              ))}
+            </div>
+            <div className="nb-row" role="group" aria-label="Şablonlar">
+              <span className="tiny muted">Şablon ekle:</span>
+              {TEMPLATES.map((t) => (
+                <button key={t.key} type="button" className="chip" onClick={() => insertTemplate(t.key)}>
+                  {t.label}
                 </button>
               ))}
             </div>
@@ -512,7 +691,8 @@ export default function NotebookEditorPage({ params }: { params: string[] }) {
         />
         <canvas ref={overlayRef} width={W} height={H} className="notebook-canvas overlay" aria-hidden="true" />
       </div>
-      <p className="tiny muted mt-8">Değişikliklerin birkaç saniyede bir otomatik kaydedilir. Metin aracında sayfaya dokunduğun yere yazı eklenir.</p>
+      </div>
+      <p className="tiny muted mt-8">Değişikliklerin birkaç saniyede bir otomatik kaydedilir. Metin ve çıkartma araçlarında sayfaya dokunduğun yere eklenir; tam ekran için ⤢ düğmesine bas.</p>
 
       {textAt && (
         <Modal

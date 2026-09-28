@@ -24,24 +24,24 @@ export default function OsymPage() {
       </div>
 
       <section className="card section" aria-label={`${year} sınavları`}>
-        <ul className="list">
+        <div className="osym-grid">
           {entries.map((e) => (
-            <li key={`${e.year}-${e.exam}`} className="list-item">
-              <span className="grow">
-                <b>
+            <article key={`${e.year}-${e.exam}`} className="osym-card">
+              <div className="row between nowrap">
+                <h3 style={{ margin: 0 }}>
                   {e.year} {e.exam}
-                </b>
-                <span className="tiny muted" style={{ display: 'block' }}>
-                  Soru kitapçıkları ve cevap anahtarları
-                </span>
-              </span>
-              <SourceBadge type="osym-resmi" />
-              <a className="btn small primary" href={e.url} target="_blank" rel="noopener noreferrer">
-                Resmî ÖSYM Kaynağı <Icon name="external" />
+                </h3>
+                <SourceBadge type="osym-resmi" />
+              </div>
+              <p className="small muted" style={{ margin: '6px 0 12px' }}>
+                Soru kitapçıkları ve cevap anahtarları ÖSYM’nin resmî sayfasında.
+              </p>
+              <a className="btn primary block" href={e.url} target="_blank" rel="noopener noreferrer">
+                Resmî ÖSYM sayfasını aç <Icon name="external" />
               </a>
-            </li>
+            </article>
           ))}
-        </ul>
+        </div>
       </section>
     </>
   );

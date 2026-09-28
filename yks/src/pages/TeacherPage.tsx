@@ -2,18 +2,40 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { getTopicRef, subjectLabel } from '../data/curriculum';
 import { loadLesson, loadQuestions } from '../data/content';
 import type { LessonSeed, Question } from '../domain/types';
-import { TeacherAvatar } from '../components/TeacherAvatar';
+import { AssistantCharacter, type AssistantMood } from '../components/AssistantCharacter';
+import { Icon } from '../components/Icon';
 import { PageHeader } from '../components/Layout';
 import { toast } from '../components/ui';
 import { useRoute } from '../hooks/useRoute';
 import { askTeacher, checkAiStatus, type AiStatus, type TeacherAction, type TeacherContext } from '../services/ai';
-import { localTeacherReply } from '../services/localTeacher';
+import { assistantReply } from '../services/localAssistant';
+import { useListener, useSpeaker } from '../hooks/useVoice';
 import { weakTopics } from '../utils/analysis';
 import { addChatMessage, clearChat } from '../store/actions';
 import { update, useAppState } from '../store/store';
 import { formatMinutes } from '../utils/date';
 import { optionLetter } from '../utils/ids';
 import { dashboard } from '../utils/stats';
+
+const VOICE_KEY = 'iyikiYks.asistanSes';
+
+function readVoicePref(): boolean {
+  try {
+    return localStorage.getItem(VOICE_KEY) !== '0';
+  } catch {
+    return true;
+  }
+}
+
+/** **kalın** yazımı gerçek kalın metne çevirir (başka HTML üretmez). */
+function RichText({ text }: { text: string }) {
+  const parts = text.split(/(\*\*[^*]+\*\*)/g);
+  return (
+    <>
+      {parts.map((p, i) => (p.startsWith('**') && p.endsWith('**') ? <b key={i}>{p.slice(2, -2)}</b> : <span key={i}>{p}</span>))}
+    </>
+  );
+}
 
 const QUICK: { action: TeacherAction; label: string }[] = [
   { action: 'anlat', label: 'Sıfırdan anlat' },
@@ -36,6 +58,10 @@ export default function TeacherPage() {
   const [question, setQuestion] = useState<Question | null>(null);
   const [lesson, setLesson] = useState<LessonSeed | null>(null);
   const listRef = useRef<HTMLDivElement>(null);
+  const [voiceOn, setVoiceOn] = useState(readVoicePref);
+  const [lastSaid, setLastSaid] = useState<string | null>(null);
+  const speaker = useSpeaker();
+  const listener = useListener((t) => void send('serbest', t));
 
   const topicId = route.query.get('konu') ?? undefined;
   const questionId = route.query.get('soru') ?? undefined;
@@ -87,11 +113,26 @@ export default function TeacherPage() {
     update((s) => addChatMessage(s, { role: 'user', text: text || QUICK.find((q) => q.action === action)?.label || action }));
     setInput('');
 
+    const say = (reply: string, source: 'icerik' | 'ai') => {
+      update((s) => addChatMessage(s, { role: 'teacher', text: reply, source }));
+      setLastSaid(reply);
+      speaker.speak(reply, voiceOn);
+    };
+
     if (!status?.configured) {
-      // Gerçek AI bağlantısı yok: sahte bir yanıt üretmek yerine uygulama
-      // içindeki gerçek konu anlatımından derlenmiş "yerel konu rehberi" yanıtı verilir.
-      const reply = localTeacherReply(action, lesson, ref?.topic.name);
-      update((s) => addChatMessage(s, { role: 'teacher', text: reply, source: 'icerik' }));
+      // Gerçek AI bağlantısı yok: yanıt, uygulamadaki gerçek içerik ve öğrencinin
+      // kendi verisinden derlenir (yerel asistan). Kısa bir "düşünme" anı gösterilir.
+      const reply = await assistantReply({
+        action,
+        message: text,
+        state,
+        topic: ref,
+        lesson,
+        question,
+        studentAnswer: answerIdx != null ? Number(answerIdx) : null,
+      });
+      await new Promise((r) => setTimeout(r, 450));
+      say(reply, 'icerik');
       setBusy(false);
       return;
     }
@@ -100,7 +141,7 @@ export default function TeacherPage() {
       const ctx = await context;
       const history = state.chat.slice(-10).map((m) => ({ role: m.role, text: m.text }));
       const reply = await askTeacher({ action, message: text, context: ctx, history, teacherName });
-      update((s) => addChatMessage(s, { role: 'teacher', text: reply, source: 'ai' }));
+      say(reply, 'ai');
     } catch (e) {
       toast(e instanceof Error ? e.message : 'Yanıt alınamadı.');
     } finally {
@@ -119,34 +160,69 @@ export default function TeacherPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [initialAction, topicId, questionId, status]);
 
+  const mood: AssistantMood = listener.listening ? 'listening' : busy ? 'thinking' : speaker.speaking ? 'talking' : state.chat.length === 0 ? 'happy' : 'idle';
+  const lastTeacher = lastSaid ?? [...state.chat].reverse().find((m) => m.role === 'teacher')?.text;
+  const greeting = `Selam${state.profile.name ? ` ${state.profile.name}` : ''}! Ben senin asistanınım ♡ Bir konu yaz ya da bana sesle sor.`;
+  const toggleVoice = () => {
+    const next = !voiceOn;
+    setVoiceOn(next);
+    if (!next) speaker.stop();
+    try {
+      localStorage.setItem(VOICE_KEY, next ? '1' : '0');
+    } catch {
+      /* tercih kaydedilemese de çalışır */
+    }
+  };
+
   return (
     <>
-      <PageHeader title="Öğretmenim" sub={ref ? `${subjectLabel(ref.subject)} · ${ref.topic.name}` : question ? 'Soru bağlamı seçili' : 'Kaynak tabanlı çalışma yardımcısı'} />
+      <PageHeader title="Asistanım" sub={ref ? `${subjectLabel(ref.subject)} · ${ref.topic.name}` : question ? 'Soru bağlamı seçili' : 'Konuşan çalışma arkadaşın'} />
 
-      <div className="card">
-        <div className="teacher">
-          <TeacherAvatar size={64} />
-          <div>
-            <h2 style={{ margin: 0 }}>{teacherName}</h2>
-            <div className="muted small">Adım adım anlatım · ipucu · mini quiz</div>
+      <section className="card asst-stage" aria-label="Asistan">
+        <button
+          type="button"
+          className="asst-tap"
+          onClick={() => speaker.speak(lastTeacher ?? greeting, voiceOn)}
+          aria-label="Asistanın son söylediğini tekrar dinle"
+        >
+          <AssistantCharacter mood={mood} size={170} />
+        </button>
+        <div className="asst-say" aria-live="polite">
+          <div className="asst-name">{teacherName}</div>
+          {busy ? 'Hmm, bir düşüneyim…' : <RichText text={(lastTeacher ?? greeting).slice(0, 420) + ((lastTeacher ?? '').length > 420 ? '…' : '')} />}
+          <div className="asst-controls">
+            <button type="button" className={`chip${voiceOn ? ' on' : ''}`} aria-pressed={voiceOn} onClick={toggleVoice}>
+              {voiceOn ? '🔊 Sesli' : '🔈 Sessiz'}
+            </button>
+            {speaker.speaking && (
+              <button type="button" className="chip" onClick={speaker.stop}>
+                ⏹ Sustur
+              </button>
+            )}
             {status && !status.configured && (
-              <div className="badge warn mt-8" style={{ display: 'inline-flex' }} title={status.reason}>
-                Yerel konu rehberi modu
-              </div>
+              <span className="badge warn" title={status.reason}>
+                Yerel konu rehberi
+              </span>
             )}
           </div>
         </div>
-        {ref && (
-          <div className="notice mt-12">
-            Bağlam: <b>{ref.topic.name}</b> ({subjectLabel(ref.subject)}) <a href={`#/konu/${ref.topic.id}`}>konuya git</a>
-          </div>
-        )}
-        {question && (
-          <div className="notice mt-12">
-            Bağlam: seçili soru. <a href={`#/konu/${question.topic}`}>konuya git</a>
-          </div>
-        )}
-      </div>
+      </section>
+
+      {(ref || question) && (
+        <div className="notice section">
+          {ref ? (
+            <>
+              Bağlam: <b>{ref.topic.name}</b> ({subjectLabel(ref.subject)}) <a href={`#/konu/${ref.topic.id}`}>konuya git</a>
+            </>
+          ) : (
+            question && (
+              <>
+                Bağlam: seçili soru. <a href={`#/konu/${question.topic}`}>konuya git</a>
+              </>
+            )
+          )}
+        </div>
+      )}
 
       <div className="card section">
         <div className="chips" role="group" aria-label="Hızlı istekler">
@@ -159,19 +235,19 @@ export default function TeacherPage() {
 
         <div className="chat mt-12" ref={listRef} aria-live="polite">
           {state.chat.length === 0 ? (
-            <div className="bubble teacher">Merhaba ♡ Bir ders veya konu yaz, ya da yukarıdaki butonlardan seç. Sana ezberletmeden, mantığıyla çalıştırayım.</div>
+            <div className="bubble teacher">{greeting}{'\n\n'}Örnek: “türev nedir”, “mol kavramı örnek çöz”, “bugün ne çalışayım”, “yanlışlarım”, “38 doğru 6 yanlış”.</div>
           ) : (
             state.chat.map((m) => (
               <div key={m.id} className={`bubble ${m.role}`}>
-                {m.text}
+                <RichText text={m.text} />
               </div>
             ))
           )}
-          {busy && <div className="bubble teacher">Yazıyor…</div>}
+          {busy && <div className="bubble teacher">Düşünüyor…</div>}
         </div>
 
         <form
-          style={{ display: 'grid', gridTemplateColumns: '1fr auto', gap: 8, marginTop: 8 }}
+          className="chat-form"
           onSubmit={(e) => {
             e.preventDefault();
             void send('serbest', input);
@@ -180,13 +256,34 @@ export default function TeacherPage() {
           <label className="sr-only" htmlFor="chat-input">
             Mesajın
           </label>
-          <input id="chat-input" className="input" value={input} onChange={(e) => setInput(e.target.value)} placeholder="Örn. Logaritmayı adım adım anlat" disabled={busy} />
-          <button type="submit" className="btn primary" disabled={busy || !input.trim()}>
-            Gönder
+          {listener.supported && (
+            <button
+              type="button"
+              className={`icon-btn mic-btn${listener.listening ? ' on' : ''}`}
+              aria-label={listener.listening ? 'Dinlemeyi durdur' : 'Sesle sor'}
+              aria-pressed={listener.listening}
+              onClick={() => (listener.listening ? listener.stop() : listener.start())}
+              disabled={busy}
+            >
+              <Icon name="mic" />
+            </button>
+          )}
+          <input id="chat-input" className="input" value={input} onChange={(e) => setInput(e.target.value)} placeholder="Örn. Logaritmayı basitçe anlat" disabled={busy} />
+          <button type="submit" className="btn primary" disabled={busy || !input.trim()} aria-label="Gönder">
+            <Icon name="send" />
           </button>
         </form>
+        {listener.error && <div className="tiny muted mt-8">{listener.error}</div>}
         {state.chat.length > 0 && (
-          <button type="button" className="btn small ghost mt-8" onClick={() => update(clearChat)}>
+          <button
+            type="button"
+            className="btn small ghost mt-8"
+            onClick={() => {
+              update(clearChat);
+              setLastSaid(null);
+              speaker.stop();
+            }}
+          >
             Sohbeti temizle
           </button>
         )}
