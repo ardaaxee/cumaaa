@@ -1,1 +1,0 @@
-import{n as e}from"./Icon-CsLhTxlq.js";import{dt as t,rt as n}from"./index-B0j5yg_8.js";var r=e();function i(){return(0,r.jsxs)(r.Fragment,{children:[(0,r.jsx)(t,{title:`Sayfa bulunamadı`}),(0,r.jsx)(n,{title:`Aradığın sayfa yok.`,action:(0,r.jsx)(`a`,{className:`btn primary`,href:`#/`,children:`Ana sayfaya dön`})})]})}export{i as default};
