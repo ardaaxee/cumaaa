@@ -1,1 +1,0 @@
-import{F as e,M as t,N as n,P as r}from"./Icon-CxnjtyBg.js";var i={topicName:e=>n(e)?.topic.name??e,subjectName:e=>{let n=t(e);return n?r(n):e},subjectTopicIds:t=>e(t).map(e=>e.id)};function a(e){let t=n(e);return t?`${t.subject.exam} ${t.subject.name} · ${t.topic.name}`:e}export{a as n,i as t};
