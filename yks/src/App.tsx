@@ -25,6 +25,9 @@ const pages = {
   teacher: lazy(() => import('./pages/TeacherPage')),
   settings: lazy(() => import('./pages/SettingsPage')),
   more: lazy(() => import('./pages/MorePage')),
+  cards: lazy(() => import('./pages/CardsPage')),
+  formulas: lazy(() => import('./pages/FormulasPage')),
+  badges: lazy(() => import('./pages/BadgesPage')),
   onboarding: lazy(() => import('./pages/OnboardingPage')),
   notFound: lazy(() => import('./pages/NotFoundPage')),
 };
@@ -46,9 +49,12 @@ const ROUTES: Record<string, { page: ComponentType<{ params: string[] }>; title:
   gelisim: { page: pages.progress, title: 'Gelişimim' },
   kaynaklar: { page: pages.resources, title: 'Kaynaklar' },
   cikmis: { page: pages.osym, title: 'ÖSYM Çıkmış Sorular' },
-  ogretmen: { page: pages.teacher, title: 'Öğretmen' },
+  ogretmen: { page: pages.teacher, title: 'Asistanım' },
   ayarlar: { page: pages.settings, title: 'Ayarlar' },
   daha: { page: pages.more, title: 'Daha Fazla' },
+  kartlar: { page: pages.cards, title: 'Bilgi Kartları' },
+  formuller: { page: pages.formulas, title: 'Formül Defteri' },
+  rozetler: { page: pages.badges, title: 'Rozetlerim' },
 };
 
 function useThemeEffect() {

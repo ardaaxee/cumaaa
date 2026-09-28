@@ -46,8 +46,8 @@ export function useSpeaker() {
 
   /** Metni okur; ses kapalıysa ya da desteklenmiyorsa yalnızca konuşma animasyonunu metin uzunluğu kadar oynatır. */
   const speak = useCallback(
-    (text: string, withVoice: boolean) => {
-      const clean = speakableText(text).slice(0, 900);
+    (text: string, withVoice: boolean, maxChars = 900) => {
+      const clean = speakableText(text).slice(0, maxChars);
       if (!clean) return;
       stop();
       const mimic = () => {
@@ -55,16 +55,25 @@ export function useSpeaker() {
         timer.current = window.setTimeout(() => setSpeaking(false), Math.min(9000, 1200 + clean.length * 45));
       };
       if (!withVoice || !supported) return mimic();
-      const u = new SpeechSynthesisUtterance(clean);
-      u.lang = 'tr-TR';
+      // Uzun metinler bazı tarayıcılarda yarıda kesildiği için cümle cümle sıraya alınır.
+      const chunks = clean.match(/[^.!?]+[.!?]*/g)?.reduce<string[]>((acc, part) => {
+        const last = acc[acc.length - 1];
+        if (last && last.length + part.length < 220) acc[acc.length - 1] = last + part;
+        else acc.push(part);
+        return acc;
+      }, []) ?? [clean];
       const v = pickTurkishVoice();
-      if (v) u.voice = v;
-      u.rate = 1.02;
-      u.pitch = 0.95;
-      u.onstart = () => setSpeaking(true);
-      u.onend = () => setSpeaking(false);
-      u.onerror = () => setSpeaking(false);
-      window.speechSynthesis.speak(u);
+      chunks.forEach((chunk, i) => {
+        const u = new SpeechSynthesisUtterance(chunk.trim());
+        u.lang = 'tr-TR';
+        if (v) u.voice = v;
+        u.rate = 1.02;
+        u.pitch = 0.95;
+        if (i === 0) u.onstart = () => setSpeaking(true);
+        if (i === chunks.length - 1) u.onend = () => setSpeaking(false);
+        u.onerror = () => setSpeaking(false);
+        window.speechSynthesis.speak(u);
+      });
       // onstart tetiklenmezse (ör. ses izni yok) animasyon yine de başlasın.
       timer.current = window.setTimeout(() => {
         if (!window.speechSynthesis.speaking) mimic();

@@ -387,3 +387,23 @@ export function addChatMessage(state: AppState, msg: Omit<ChatMessage, 'id' | 'a
 export function clearChat(state: AppState): AppState {
   return { ...state, chat: [] };
 }
+
+// ---------- Bilgi kartları (Leitner) ----------
+
+/** Kutu → gün aralığı. Kutu 1: ertesi gün, kutu 5: 16 gün sonra. */
+export const CARD_INTERVALS = [0, 1, 2, 4, 8, 16] as const;
+
+export type CardGrade = 'bilmiyorum' | 'zor' | 'biliyorum';
+
+export function gradeCard(state: AppState, cardId: string, grade: CardGrade, today: DayKey = dayKey()): AppState {
+  const cur = state.cards[cardId];
+  const box = cur?.box ?? 1;
+  const nextBox = grade === 'biliyorum' ? Math.min(5, box + (cur ? 1 : 2)) : grade === 'zor' ? Math.max(1, box) : 1;
+  const next = {
+    box: nextBox,
+    dueDay: addDays(today, grade === 'bilmiyorum' ? 1 : CARD_INTERVALS[nextBox]),
+    seen: (cur?.seen ?? 0) + 1,
+    lastDay: today,
+  };
+  return { ...state, cards: { ...state.cards, [cardId]: next } };
+}

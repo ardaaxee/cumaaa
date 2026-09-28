@@ -8,6 +8,7 @@ import { Icon } from '../components/Icon';
 import { PageHeader } from '../components/Layout';
 import { ConfirmDialog, Empty, SourceBadge, Spinner, Stat, toast } from '../components/ui';
 import { href, navigate } from '../hooks/useRoute';
+import { useSpeaker } from '../hooks/useVoice';
 import { launchTest, makeConfig, hasActiveTest } from '../services/testLauncher';
 import { addNotebookPage, markReviewDone, setTopicStatus } from '../store/actions';
 import type { TopicStatus } from '../store/schema';
@@ -182,6 +183,13 @@ export default function TopicPage({ params }: { params: string[] }) {
   const ref = getTopicRef(topicId);
   const state = useAppState();
   const [lesson, setLesson] = useState<LessonSeed | null | undefined>(undefined);
+  const speaker = useSpeaker();
+  const listen = () => {
+    if (speaker.speaking) return speaker.stop();
+    if (!lesson) return;
+    // Konu anlatımının ana bölümleri sırayla sesli okunur (tarayıcının yerleşik sesiyle).
+    speaker.speak([lesson.intro, lesson.logic, `Özet. ${lesson.summary.join('. ')}`].join('\n\n'), true, 6000);
+  };
   const [qCount, setQCount] = useState<number | null>(null);
   const [topicQs, setTopicQs] = useState<Question[]>([]);
   const [quizRound, setQuizRound] = useState(0);
@@ -308,6 +316,14 @@ export default function TopicPage({ params }: { params: string[] }) {
           <button type="button" className="btn ghost" onClick={writeToNotebook}>
             <Icon name="sparkle" /> Deftere yaz
           </button>
+          {speaker.supported && lesson && (
+            <button type="button" className="btn ghost" onClick={listen} aria-pressed={speaker.speaking}>
+              <Icon name="headphones" /> {speaker.speaking ? 'Dinlemeyi durdur' : 'Konuyu dinle'}
+            </button>
+          )}
+          <a className="btn ghost" href={href('/kartlar', { ders: ref.subject.id, konu: topicId })}>
+            <Icon name="cards" /> Kartlarla çalış
+          </a>
         </div>
         {qCount != null && qCount < 10 && qCount > 0 && <div className="tiny muted mt-8">Bu konuda {qCount} soru var; normal test mevcut soruların tamamını kullanır.</div>}
       </div>

@@ -17,6 +17,7 @@ import { dayKey, diffDays, formatDay, formatMinutes } from '../utils/date';
 import { formatNet } from '../utils/net';
 import { dueReviews } from '../utils/srs';
 import { dashboard } from '../utils/stats';
+import { computeBadges } from '../utils/badges';
 
 /** Uygulamaya özgü kısa moral cümleleri; tarihe göre her gün biri seçilir. */
 const CHEERS = [
@@ -65,6 +66,8 @@ export default function HomePage() {
   const todayTasks = state.tasks.filter((t) => t.date === today);
   const overdue = state.tasks.filter((t) => t.date < today && !t.done);
   const { profile } = state;
+  const cardsDue = Object.values(state.cards).filter((c) => c.dueDay <= today).length;
+  const earnedBadges = useMemo(() => computeBadges(state, today).filter((b) => b.earned).length, [state, today]);
   const daysLeft = profile.examDate ? diffDays(today, profile.examDate) : null;
   const qPct = profile.dailyQuestionGoal ? (d.todayQuestions / profile.dailyQuestionGoal) * 100 : 0;
   const mPct = profile.dailyStudyMinutes ? (d.todayMinutes / profile.dailyStudyMinutes) * 100 : 0;
@@ -92,6 +95,33 @@ export default function HomePage() {
           </div>
         </div>
       </section>
+
+      <nav className="quick-grid section" aria-label="Hızlı başla">
+        <button
+          type="button"
+          className="quick-tile t-lilac"
+          onClick={() => void launchTest(makeConfig({ count: 10, title: 'Hızlı 10 soru' })).then((e) => e && toast(e))}
+        >
+          <span className="quick-emoji" aria-hidden="true">⚡</span>
+          <b>Hızlı 10 soru</b>
+          <span className="tiny muted">Karışık, ÖSYM tarzı</span>
+        </button>
+        <a className="quick-tile t-rose" href="#/kartlar">
+          <span className="quick-emoji" aria-hidden="true">🃏</span>
+          <b>Bilgi kartları</b>
+          <span className="tiny muted">{cardsDue ? `${cardsDue} kart tekrar zamanı` : 'Kavram & formül ezberi'}</span>
+        </a>
+        <a className="quick-tile t-sky" href="#/formuller">
+          <span className="quick-emoji" aria-hidden="true">📐</span>
+          <b>Formül defteri</b>
+          <span className="tiny muted">Tüm formüller tek yerde</span>
+        </a>
+        <a className="quick-tile t-peach" href="#/rozetler">
+          <span className="quick-emoji" aria-hidden="true">🏅</span>
+          <b>Rozetlerim</b>
+          <span className="tiny muted">{earnedBadges} rozet kazandın</span>
+        </a>
+      </nav>
 
       <section className="grid grid-4 section" aria-label="Bugünün özeti">
         <div className="stat tint-lilac">

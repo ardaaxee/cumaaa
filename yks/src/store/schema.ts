@@ -119,6 +119,15 @@ export interface WrongEntry {
   learnedAt?: string;
 }
 
+/** Bilgi kartı (Leitner kutusu) ilerlemesi. Kart id'si: `<topicId>:k<n>` (kavram) veya `<topicId>:f<n>` (formül). */
+export interface CardState {
+  /** 1..5 — kutu arttıkça tekrar aralığı uzar. */
+  box: number;
+  dueDay: DayKey;
+  seen: number;
+  lastDay: DayKey;
+}
+
 export interface ReviewItem {
   topicId: string;
   /** 0..4 → 1, 3, 7, 14, 30 gün aralıkları. 5 = tamamlandı. */
@@ -239,6 +248,8 @@ export interface AppState {
   chat: ChatMessage[];
   /** Dijital defter sayfalarının bilgisi (çizim verisi IndexedDB'de saklanır). */
   notebookPages: NotebookPageMeta[];
+  /** Bilgi kartlarının tekrar durumu. */
+  cards: Record<string, CardState>;
   /** Eski sürümden gelen, güne atanamayan toplamlar (yalnız toplam istatistiğe eklenir). */
   legacy: LegacyTotals | null;
 }
@@ -286,6 +297,7 @@ export function defaultState(): AppState {
     },
     chat: [],
     notebookPages: [],
+    cards: {},
     legacy: null,
   };
 }

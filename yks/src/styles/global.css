@@ -1766,3 +1766,116 @@ details.table-view summary {
 .nb-tools { display: flex; overflow-x: auto; scrollbar-width: none; }
 .nb-tools::-webkit-scrollbar { display: none; }
 .nb-tool { flex: 0 0 56px; font-size: 0.66rem; }
+
+/* ---------- Bilgi kartları ---------- */
+.flashcard {
+  --fc: var(--brand);
+  --fc-soft: var(--brand-soft);
+  display: block;
+  width: 100%;
+  margin-top: 12px;
+  border: 0;
+  padding: 0;
+  background: none;
+  perspective: 1200px;
+  cursor: pointer;
+  font: inherit;
+  color: inherit;
+}
+.fc-inner {
+  position: relative;
+  display: block;
+  min-height: 250px;
+  transition: transform 0.5s cubic-bezier(0.3, 0.8, 0.3, 1);
+  transform-style: preserve-3d;
+}
+.flashcard.flipped .fc-inner { transform: rotateY(180deg); }
+.fc-face {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 22px 18px;
+  border-radius: 24px;
+  border: 2px solid var(--fc);
+  background: linear-gradient(160deg, var(--fc-soft), var(--surface) 70%);
+  box-shadow: var(--shadow);
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  text-align: center;
+}
+.fc-back { transform: rotateY(180deg); background: var(--surface); }
+.fc-kind { font-size: 0.72rem; font-weight: 800; letter-spacing: 0.06em; text-transform: uppercase; color: var(--fc); }
+.fc-text { font-size: 1.35rem; font-weight: 800; line-height: 1.35; overflow-wrap: anywhere; }
+.fc-text.small { font-size: 1.02rem; font-weight: 600; }
+.fc-text.formula { font-family: ui-monospace, 'Cascadia Mono', Menlo, monospace; font-size: 1.2rem; }
+.fc-hint { font-size: 0.75rem; color: var(--muted); }
+.fc-grades { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 12px; }
+.fc-no { background: var(--bad-soft); color: var(--bad); border-color: transparent; }
+.fc-hard { background: var(--warn-soft); color: var(--warn); border-color: transparent; }
+.fc-yes { background: var(--ok-soft); color: var(--ok); border-color: transparent; }
+@media (prefers-reduced-motion: reduce) { .fc-inner { transition: none; } }
+
+/* ---------- Formül defteri ---------- */
+.formula-group { border-left: 5px solid var(--fc); }
+.formula-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.formula-list li { padding: 10px 12px; border-radius: 14px; background: var(--fc-soft); }
+.formula-expr { font-family: ui-monospace, 'Cascadia Mono', Menlo, monospace; font-weight: 700; font-size: 1rem; overflow-wrap: anywhere; margin-bottom: 2px; }
+
+/* ---------- Rozetler ---------- */
+.badge-grid { display: grid; gap: 10px; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); }
+.badge-card { background: var(--surface); border: 1.5px solid var(--line); border-radius: 18px; padding: 14px 12px; text-align: center; display: grid; gap: 4px; justify-items: center; box-shadow: var(--shadow); }
+.badge-card .progress { width: 100%; }
+.badge-icon { font-size: 2.2rem; line-height: 1.1; }
+.badge-card.locked .badge-icon { filter: grayscale(1); opacity: 0.55; }
+.badge-card:not(.locked) { border-color: #f3c86a; background: linear-gradient(160deg, #fff6dc, var(--surface) 70%); }
+:root[data-theme='dark'] .badge-card:not(.locked) { background: var(--surface); }
+
+/* ---------- Çalışma takvimi ---------- */
+.cal { display: flex; gap: 3px; overflow-x: auto; padding-bottom: 2px; }
+.cal-days, .cal-col { display: grid; grid-template-rows: repeat(7, 1fr); gap: 3px; }
+.cal-days span { font-size: 0.6rem; color: var(--muted); line-height: 14px; height: 14px; padding-right: 2px; }
+.cal-cell { display: inline-block; width: 14px; height: 14px; border-radius: 4px; background: var(--surface-3); }
+.cal-cell.l1 { background: #d9ccf3; }
+.cal-cell.l2 { background: #b39be6; }
+.cal-cell.l3 { background: #8b6ad3; }
+.cal-cell.l4 { background: #5b3fa0; }
+.cal-cell.lx { background: transparent; }
+.cal-cell.today { outline: 2px solid var(--focus); outline-offset: 1px; }
+.cal-legend { display: inline-flex; align-items: center; gap: 3px; }
+.cal-legend .cal-cell { width: 10px; height: 10px; }
+@media (min-width: 500px) { .cal-cell { width: 16px; height: 16px; } .cal-days span { height: 16px; line-height: 16px; } }
+
+/* ---------- Ana sayfa hızlı başla ---------- */
+.quick-grid { display: grid; gap: 10px; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+@media (min-width: 760px) { .quick-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
+.quick-tile {
+  display: grid;
+  gap: 2px;
+  justify-items: start;
+  text-align: left;
+  padding: 14px;
+  border-radius: 20px;
+  border: 1.5px solid var(--line);
+  background: var(--surface);
+  color: inherit;
+  text-decoration: none;
+  font: inherit;
+  cursor: pointer;
+  box-shadow: var(--shadow);
+  transition: transform 0.15s ease;
+}
+.quick-tile:active { transform: scale(0.97); }
+.quick-emoji { font-size: 1.6rem; line-height: 1.2; }
+.quick-tile.t-lilac { background: linear-gradient(160deg, #efe6fb, var(--surface) 75%); }
+.quick-tile.t-rose { background: linear-gradient(160deg, #fde6ec, var(--surface) 75%); }
+.quick-tile.t-sky { background: linear-gradient(160deg, #e3effd, var(--surface) 75%); }
+.quick-tile.t-peach { background: linear-gradient(160deg, #fdeedd, var(--surface) 75%); }
+:root[data-theme='dark'] .quick-tile { background: var(--surface); }
+@media (prefers-color-scheme: dark) { :root:not([data-theme='light']) .quick-tile { background: var(--surface); } }
+body { overflow-x: clip; }
+.fc-grades .btn { min-width: 0; padding-left: 6px; padding-right: 6px; white-space: normal; line-height: 1.15; }
+.flashcard { contain: layout; }

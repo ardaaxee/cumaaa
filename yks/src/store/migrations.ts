@@ -269,6 +269,13 @@ export function sanitize(raw: Json): AppState {
     } as AppState['pomodoro'],
     chat: arr(raw.chat).filter(isObj) as unknown as AppState['chat'],
     notebookPages: arr(raw.notebookPages).filter(isObj).filter((p) => typeof p.id === 'string') as unknown as AppState['notebookPages'],
+    cards: isObj(raw.cards)
+      ? (Object.fromEntries(
+          Object.entries(raw.cards).filter(
+            ([, c]) => isObj(c) && typeof c.box === 'number' && isValidDayKey(c.dueDay) && isValidDayKey(c.lastDay),
+          ),
+        ) as AppState['cards'])
+      : {},
     legacy: isObj(raw.legacy) ? (raw.legacy as unknown as AppState['legacy']) : null,
   };
 }

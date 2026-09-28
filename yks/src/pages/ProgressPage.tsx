@@ -3,6 +3,7 @@ import { SUBJECTS, getTopicRef, subjectLabel } from '../data/curriculum';
 import { BarChart } from '../components/Charts';
 import { PageHeader } from '../components/Layout';
 import { Empty, Segmented, Stat } from '../components/ui';
+import { StudyCalendar } from '../components/StudyCalendar';
 import { useAppState } from '../store/store';
 import { weakTopics } from '../utils/analysis';
 import { dayKey, formatDay, formatMinutes } from '../utils/date';
@@ -78,6 +79,16 @@ export default function ProgressPage() {
             </div>
           </>
         )}
+      </section>
+
+      <section className="card section" aria-labelledby="cal-h">
+        <div className="card-head">
+          <h2 id="cal-h">Çalışma takvimi</h2>
+          <a className="btn small" href="#/rozetler">
+            Rozetlerim
+          </a>
+        </div>
+        <StudyCalendar state={state} />
       </section>
 
       <section className="card section" aria-labelledby="sp-h">
