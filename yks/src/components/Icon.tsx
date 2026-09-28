@@ -33,6 +33,17 @@ const PATHS: Record<string, string> = {
   send: 'M22 2 11 13M22 2l-7 20-4-9-9-4z',
   target: 'M12 22a10 10 0 1 0 0-20 10 10 0 0 0 0 20zM12 18a6 6 0 1 0 0-12 6 6 0 0 0 0 12zM12 14a2 2 0 1 0 0-4 2 2 0 0 0 0 4z',
   sparkle: 'M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8z',
+  pen: 'M17 3l4 4L8 20H4v-4zM14 6l4 4',
+  eraser: 'M7 21h13M4.5 14.5l9-9a2 2 0 0 1 2.8 0l3.2 3.2a2 2 0 0 1 0 2.8L12 19H8.5l-4-4a0 0 0 0 1 0-.5zM9 10l6 6',
+  line: 'M5 19 19 5',
+  arrow: 'M5 19 19 5M10 5h9v9',
+  square: 'M4 4h16v16H4z',
+  circle: 'M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18z',
+  axis: 'M4 20V3M4 20h17M1.5 5.5 4 3l2.5 2.5M18.5 17.5 21 20l-2.5 2.5M7 15c3-1 5-4 6-9',
+  text: 'M4 6V4h16v2M12 4v16M9 20h6',
+  undo: 'M9 14 4 9l5-5M4 9h10.5a5.5 5.5 0 0 1 0 11H11',
+  redo: 'M15 14l5-5-5-5M20 9H9.5a5.5 5.5 0 0 0 0 11H13',
+  save: 'M5 3h11l4 4v13a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1zM8 3v5h7V3M8 21v-7h8v7',
 };
 
 export type IconName = keyof typeof PATHS;

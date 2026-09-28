@@ -158,9 +158,9 @@ export function SourceBadge({ type }: { type: SourceType }) {
   );
 }
 
-export function Stat({ label, value, sub }: { label: string; value: ReactNode; sub?: ReactNode }) {
+export function Stat({ label, value, sub, tint }: { label: string; value: ReactNode; sub?: ReactNode; tint?: 'lilac' | 'mint' | 'peach' | 'sky' | 'rose' }) {
   return (
-    <div className="stat">
+    <div className={`stat${tint ? ` tint-${tint}` : ''}`}>
       <div className="stat-label">{label}</div>
       <div className="stat-value">{value}</div>
       {sub != null && <div className="stat-sub">{sub}</div>}

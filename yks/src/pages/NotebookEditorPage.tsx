@@ -3,11 +3,12 @@ import { SUBJECTS, subjectLabel } from '../data/curriculum';
 import { subjectColorFor } from '../data/subjectColors';
 import { Icon } from '../components/Icon';
 import { PageHeader } from '../components/Layout';
-import { ConfirmDialog, Spinner, toast } from '../components/ui';
+import { ConfirmDialog, Modal, Spinner, toast } from '../components/ui';
 import { navigate } from '../hooks/useRoute';
 import { useIsDark } from '../hooks/useIsDark';
 import { getPageImage, setPageImage } from '../services/notebookStore';
-import { deleteNotebookPage, renameNotebookPage, touchNotebookPage } from '../store/actions';
+import { deleteNotebookPage, renameNotebookPage, setNotebookPaper, touchNotebookPage } from '../store/actions';
+import type { NotebookPaper } from '../store/schema';
 import { update, useSelector } from '../store/store';
 
 /**
@@ -20,13 +21,31 @@ import { update, useSelector } from '../store/store';
 type Tool = 'kalem' | 'silgi' | 'cizgi' | 'ok' | 'kutu' | 'daire' | 'eksen' | 'metin';
 
 const PENS = [
-  { key: 'siyah', color: '#2a2430', alpha: 1 },
-  { key: 'mavi', color: '#2f6fed', alpha: 1 },
-  { key: 'turuncu', color: '#e07a1f', alpha: 1 },
-  { key: 'kirmizi', color: '#d13d54', alpha: 1 },
-  { key: 'yesil', color: '#1f8f5a', alpha: 1 },
-  { key: 'fosforlu', color: '#ffd93d', alpha: 0.4 },
+  { key: 'siyah', label: 'Siyah kalem', color: '#2a2430', alpha: 1 },
+  { key: 'mavi', label: 'Mavi kalem', color: '#2f6fed', alpha: 1 },
+  { key: 'turuncu', label: 'Turuncu kalem', color: '#e07a1f', alpha: 1 },
+  { key: 'kirmizi', label: 'Kırmızı kalem', color: '#d13d54', alpha: 1 },
+  { key: 'yesil', label: 'Yeşil kalem', color: '#1f8f5a', alpha: 1 },
+  { key: 'fosforlu', label: 'Fosforlu kalem', color: '#ffd93d', alpha: 0.4 },
 ] as const;
+
+const TOOLS: { key: Tool; label: string; icon: string }[] = [
+  { key: 'kalem', label: 'Kalem', icon: 'pen' },
+  { key: 'silgi', label: 'Silgi', icon: 'eraser' },
+  { key: 'cizgi', label: 'Çizgi', icon: 'line' },
+  { key: 'ok', label: 'Ok', icon: 'arrow' },
+  { key: 'kutu', label: 'Kutu', icon: 'square' },
+  { key: 'daire', label: 'Daire', icon: 'circle' },
+  { key: 'eksen', label: 'Eksen (x-y)', icon: 'axis' },
+  { key: 'metin', label: 'Metin', icon: 'text' },
+];
+
+const PAPERS: { key: NotebookPaper; label: string }[] = [
+  { key: 'kareli', label: 'Kareli' },
+  { key: 'cizgili', label: 'Çizgili' },
+  { key: 'noktali', label: 'Noktalı' },
+  { key: 'duz', label: 'Düz' },
+];
 
 const DEFAULT_WIDTH = 3;
 const HIGHLIGHTER_WIDTH = 16;
@@ -88,6 +107,8 @@ export default function NotebookEditorPage({ params }: { params: string[] }) {
   const overlayRef = useRef<HTMLCanvasElement>(null);
   const wrapRef = useRef<HTMLDivElement>(null);
   const historyRef = useRef<string[]>([]);
+  /** Sayfa açıldığındaki hâl: ilk çizgi geri alınınca buraya dönülür (kayıtlı çizim silinmez). */
+  const baseRef = useRef<string | null>(null);
   const redoRef = useRef<string[]>([]);
   const drawingRef = useRef(false);
   const startRef = useRef({ x: 0, y: 0 });
@@ -104,6 +125,11 @@ export default function NotebookEditorPage({ params }: { params: string[] }) {
   const [renaming, setRenaming] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [title, setTitle] = useState(meta?.title ?? '');
+  const [textAt, setTextAt] = useState<{ x: number; y: number } | null>(null);
+  const [textValue, setTextValue] = useState('');
+  const [textSize, setTextSize] = useState(28);
+  const [showMore, setShowMore] = useState(false);
+  const paper: NotebookPaper = meta?.paper ?? 'kareli';
 
   const ctx = () => canvasRef.current?.getContext('2d') ?? null;
   const octx = () => overlayRef.current?.getContext('2d') ?? null;
@@ -122,6 +148,11 @@ export default function NotebookEditorPage({ params }: { params: string[] }) {
           img.src = data;
         }
       }
+      baseRef.current = data ?? null;
+      historyRef.current = [];
+      redoRef.current = [];
+      setCanUndo(false);
+      setCanRedo(false);
       setLoading(false);
     });
     return () => {
@@ -157,7 +188,7 @@ export default function NotebookEditorPage({ params }: { params: string[] }) {
     if (!c || !historyRef.current.length) return;
     redoRef.current.push(c.toDataURL());
     historyRef.current.pop();
-    restoreFrom(historyRef.current[historyRef.current.length - 1] ?? null);
+    restoreFrom(historyRef.current[historyRef.current.length - 1] ?? baseRef.current);
     setCanUndo(historyRef.current.length > 0);
     setCanRedo(true);
     dirtyRef.current = true;
@@ -205,6 +236,19 @@ export default function NotebookEditorPage({ params }: { params: string[] }) {
     c.lineWidth = overrideWidth ?? width;
   };
 
+  const placeText = () => {
+    const cx = ctx();
+    const at = textAt;
+    setTextAt(null);
+    if (!cx || !at || !textValue.trim()) return;
+    cx.globalCompositeOperation = 'source-over';
+    cx.globalAlpha = 1;
+    cx.fillStyle = pen.color;
+    cx.font = `600 ${textSize}px system-ui, sans-serif`;
+    textValue.split('\n').forEach((line, i) => cx.fillText(line, at.x, at.y + i * textSize * 1.25));
+    pushHistory();
+  };
+
   const clearAll = () => {
     const cx = ctx();
     if (!cx) return;
@@ -222,16 +266,8 @@ export default function NotebookEditorPage({ params }: { params: string[] }) {
     (e.target as HTMLCanvasElement).setPointerCapture(e.pointerId);
 
     if (tool === 'metin') {
-      const text = window.prompt('Not metni:');
-      if (text) {
-        const p = point(c, e);
-        cx.globalCompositeOperation = 'source-over';
-        cx.globalAlpha = 1;
-        cx.fillStyle = pen.color;
-        cx.font = '28px system-ui, sans-serif';
-        cx.fillText(text, p.x, p.y);
-        pushHistory();
-      }
+      setTextValue('');
+      setTextAt(point(c, e));
       return;
     }
 
@@ -246,7 +282,7 @@ export default function NotebookEditorPage({ params }: { params: string[] }) {
         cx.globalCompositeOperation = 'destination-out';
         cx.lineCap = 'round';
         cx.lineJoin = 'round';
-        cx.lineWidth = 26;
+        cx.lineWidth = Math.max(14, width * 4);
       } else {
         applyPenStyle(cx);
       }
@@ -305,18 +341,26 @@ export default function NotebookEditorPage({ params }: { params: string[] }) {
     o.fillStyle = isDark ? '#1b1622' : '#ffffff';
     o.fillRect(0, 0, W, H);
     o.strokeStyle = isDark ? '#332a40' : '#e4dcef';
+    o.fillStyle = isDark ? '#3a3048' : '#d9cfe8';
     o.lineWidth = 1;
-    for (let x = 0; x <= W; x += 30) {
-      o.beginPath();
-      o.moveTo(x, 0);
-      o.lineTo(x, H);
-      o.stroke();
+    if (paper === 'kareli') {
+      for (let x = 0; x <= W; x += 30) {
+        o.beginPath();
+        o.moveTo(x, 0);
+        o.lineTo(x, H);
+        o.stroke();
+      }
     }
-    for (let y = 0; y <= H; y += 30) {
-      o.beginPath();
-      o.moveTo(0, y);
-      o.lineTo(W, y);
-      o.stroke();
+    if (paper === 'kareli' || paper === 'cizgili') {
+      for (let y = 0; y <= H; y += 30) {
+        o.beginPath();
+        o.moveTo(0, y);
+        o.lineTo(W, y);
+        o.stroke();
+      }
+    }
+    if (paper === 'noktali') {
+      for (let x = 15; x < W; x += 30) for (let y = 15; y < H; y += 30) o.fillRect(x - 1.5, y - 1.5, 3, 3);
     }
     o.drawImage(c, 0, 0);
     return out;
@@ -365,78 +409,91 @@ export default function NotebookEditorPage({ params }: { params: string[] }) {
       />
 
       <div className="card notebook-toolbar">
-        <div className="row nowrap" style={{ overflowX: 'auto' }} role="group" aria-label="Kalemler">
+        <div className="nb-tools" role="group" aria-label="Araçlar">
+          {TOOLS.map((t) => (
+            <button
+              key={t.key}
+              type="button"
+              className={`nb-tool${tool === t.key ? ' on' : ''}`}
+              aria-pressed={tool === t.key}
+              aria-label={t.label}
+              title={t.label}
+              onClick={() => setTool(t.key)}
+            >
+              <Icon name={t.icon} size={20} />
+              <span>{t.key === 'eksen' ? 'Eksen' : t.label}</span>
+            </button>
+          ))}
+        </div>
+        <div className="nb-row" role="group" aria-label="Kalem renkleri">
           {PENS.map((p) => (
             <button
               key={p.key}
               type="button"
               className="pen-swatch"
               style={{ background: p.color, opacity: p.alpha < 1 ? 0.85 : 1 }}
-              aria-pressed={tool === 'kalem' && pen.key === p.key}
-              aria-label={`${p.key} kalem`}
+              aria-pressed={tool !== 'silgi' && pen.key === p.key}
+              aria-label={p.label}
+              title={p.label}
               onClick={() => {
-                setTool('kalem');
+                if (tool === 'silgi') setTool('kalem');
                 setPen(p);
                 setWidth(p.key === 'fosforlu' ? HIGHLIGHTER_WIDTH : DEFAULT_WIDTH);
               }}
             />
           ))}
-          <button type="button" className={`btn small${tool === 'silgi' ? ' primary' : ''}`} aria-pressed={tool === 'silgi'} onClick={() => setTool('silgi')}>
-            Silgi
-          </button>
+          <label className="nb-width">
+            <span className="sr-only">Kalem kalınlığı</span>
+            <input type="range" min={1} max={24} value={width} onChange={(e) => setWidth(Number(e.target.value))} aria-label="Kalem kalınlığı" />
+            <span className="nb-dot" style={{ width: Math.min(24, width + 4), height: Math.min(24, width + 4), background: tool === 'silgi' ? 'var(--line-strong)' : pen.color }} />
+          </label>
         </div>
-        <div className="row nowrap mt-8" style={{ overflowX: 'auto' }} role="group" aria-label="Şekil araçları">
-          {(
-            [
-              ['cizgi', 'Çizgi'],
-              ['ok', 'Ok'],
-              ['kutu', 'Kutu'],
-              ['daire', 'Daire'],
-              ['eksen', 'Eksen (x-y)'],
-              ['metin', 'Metin'],
-            ] as [Tool, string][]
-          ).map(([t, label]) => (
-            <button key={t} type="button" className={`btn small${tool === t ? ' primary' : ''}`} aria-pressed={tool === t} onClick={() => setTool(t)}>
-              {label}
-            </button>
-          ))}
-        </div>
-        <label className="row nowrap mt-8" style={{ gap: 8 }}>
-          <span className="tiny muted nowrap">Kalınlık</span>
-          <input
-            type="range"
-            min={1}
-            max={24}
-            value={width}
-            onChange={(e) => setWidth(Number(e.target.value))}
-            aria-label="Kalem kalınlığı"
-            style={{ flex: 1 }}
-          />
-          <span className="tiny muted nowrap">{width}px</span>
-        </label>
-        <div className="row mt-8">
-          <button type="button" className="btn small" onClick={undo} disabled={!canUndo}>
-            <Icon name="left" /> Geri al
+        <div className="nb-row">
+          <button type="button" className="icon-btn" onClick={undo} disabled={!canUndo} aria-label="Geri al" title="Geri al">
+            <Icon name="undo" />
           </button>
-          <button type="button" className="btn small" onClick={redo} disabled={!canRedo}>
-            Yinele <Icon name="right" />
+          <button type="button" className="icon-btn" onClick={redo} disabled={!canRedo} aria-label="Yinele" title="Yinele">
+            <Icon name="redo" />
           </button>
           <button type="button" className="btn small primary" onClick={() => void save()}>
-            Kaydet
+            <Icon name="save" size={18} /> Kaydet
           </button>
-          <button type="button" className="btn small ghost" onClick={() => void exportPng()}>
-            <Icon name="download" /> PNG indir
-          </button>
-          <button type="button" className="btn small ghost" onClick={() => void exportPdf()}>
-            <Icon name="download" /> PDF olarak dışa aktar
-          </button>
-          <button type="button" className="btn small ghost danger" onClick={() => setConfirmClear(true)}>
-            Temizle
+          <button type="button" className="btn small" aria-expanded={showMore} onClick={() => setShowMore((v) => !v)}>
+            <Icon name="more" /> Daha
           </button>
         </div>
+        {showMore && (
+          <div className="nb-more">
+            <div className="nb-row" role="group" aria-label="Kağıt deseni">
+              <span className="tiny muted">Kağıt:</span>
+              {PAPERS.map((p) => (
+                <button
+                  key={p.key}
+                  type="button"
+                  className={`chip${paper === p.key ? ' on' : ''}`}
+                  aria-pressed={paper === p.key}
+                  onClick={() => update((s) => setNotebookPaper(s, id, p.key))}
+                >
+                  {p.label}
+                </button>
+              ))}
+            </div>
+            <div className="nb-row">
+              <button type="button" className="btn small ghost" onClick={() => void exportPng()}>
+                <Icon name="download" /> PNG indir
+              </button>
+              <button type="button" className="btn small ghost" onClick={() => void exportPdf()}>
+                <Icon name="download" /> PDF indir
+              </button>
+              <button type="button" className="btn small ghost danger" onClick={() => setConfirmClear(true)}>
+                <Icon name="trash" /> Sayfayı temizle
+              </button>
+            </div>
+          </div>
+        )}
       </div>
 
-      <div className="notebook-canvas-wrap section" ref={wrapRef} style={accent ? ({ ['--accent' as string]: accent.fg }) : undefined}>
+      <div className={`notebook-canvas-wrap section paper-${paper}`} ref={wrapRef} style={accent ? ({ ['--accent' as string]: accent.fg }) : undefined}>
         {loading && (
           <div className="center" style={{ padding: 40 }}>
             <Spinner />
@@ -455,7 +512,31 @@ export default function NotebookEditorPage({ params }: { params: string[] }) {
         />
         <canvas ref={overlayRef} width={W} height={H} className="notebook-canvas overlay" aria-hidden="true" />
       </div>
-      <p className="tiny muted mt-8">Değişikliklerin birkaç saniyede bir otomatik kaydedilir. Sayfadan ayrılmadan önce “Kaydet”e basman önerilir.</p>
+      <p className="tiny muted mt-8">Değişikliklerin birkaç saniyede bir otomatik kaydedilir. Metin aracında sayfaya dokunduğun yere yazı eklenir.</p>
+
+      {textAt && (
+        <Modal
+          title="Sayfaya yazı ekle"
+          onClose={() => setTextAt(null)}
+          actions={
+            <>
+              <button type="button" className="btn" onClick={() => setTextAt(null)}>
+                Vazgeç
+              </button>
+              <button type="button" className="btn primary" onClick={placeText} disabled={!textValue.trim()}>
+                Ekle
+              </button>
+            </>
+          }
+        >
+          <textarea className="input" rows={3} value={textValue} onChange={(e) => setTextValue(e.target.value)} placeholder="Örn. F = m · a" style={{ color: pen.color, fontWeight: 600 }} />
+          <label className="row nowrap mt-8" style={{ gap: 8 }}>
+            <span className="tiny muted">Boyut</span>
+            <input type="range" min={16} max={60} value={textSize} onChange={(e) => setTextSize(Number(e.target.value))} style={{ flex: 1 }} aria-label="Yazı boyutu" />
+            <span className="tiny muted">{textSize}</span>
+          </label>
+        </Modal>
+      )}
 
       {renaming && (
         <ConfirmDialog

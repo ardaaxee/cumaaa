@@ -2,7 +2,7 @@ import type { ReactNode } from 'react';
 import { useRoute } from '../hooks/useRoute';
 import { update, useSelector } from '../store/store';
 import { Icon, type IconName } from './Icon';
-import { MascotNav } from './MascotNav';
+import { CatFace, MascotNav, RabbitFace } from './MascotNav';
 
 interface NavItem {
   path: string;
@@ -38,8 +38,10 @@ export function sectionOf(path: string): string {
 export function Layout({ children }: { children: ReactNode }) {
   const route = useRoute();
   const section = sectionOf(route.path);
+  // Test çözerken alt şerit gizlenir; ekran tamamen soruya ayrılır (çıkış testin kendi kapat düğmesiyle).
+  const focusMode = route.path === '/test';
   return (
-    <div className="shell">
+    <div className={`shell${focusMode ? ' no-dock' : ''}`}>
       <a className="skip-link" href="#main" onClick={(e) => { e.preventDefault(); document.getElementById('main')?.focus(); }}>
         İçeriğe geç
       </a>
@@ -61,7 +63,20 @@ export function Layout({ children }: { children: ReactNode }) {
       <main id="main" className="main" tabIndex={-1}>
         {children}
       </main>
-      <MascotNav />
+      {!focusMode && <MascotNav />}
+      <EdgeFriends />
+    </div>
+  );
+}
+
+/** Kenarlardan bakan süs hayvanları — işlevsizdir, içeriğin arkasında kalır. */
+function EdgeFriends() {
+  return (
+    <div aria-hidden="true">
+      <span className="edge-friend edge-rabbit"><RabbitFace size={36} /></span>
+      <span className="edge-friend edge-cat"><CatFace size={36} /></span>
+      <span className="edge-friend edge-kitten"><CatFace size={30} /></span>
+      <span className="edge-friend edge-bunny"><RabbitFace size={30} /></span>
     </div>
   );
 }

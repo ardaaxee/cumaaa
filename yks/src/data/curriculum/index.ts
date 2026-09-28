@@ -24,6 +24,8 @@ export const SUBJECTS: Subject[] = Object.entries(modules)
   .filter(([path]) => !path.endsWith('/index.ts'))
   .map(([, mod]) => mod.subject)
   .filter(Boolean)
+  // Bazı ders adları "TYT ..." önekiyle yazılmış; etiket tekrarını ("TYT TYT") önlemek için normalize edilir.
+  .map((s) => ({ ...s, name: s.name.replace(new RegExp(`^${s.exam}\\s+`), '') }))
   .sort((a, b) => SUBJECT_ORDER.indexOf(a.id) - SUBJECT_ORDER.indexOf(b.id));
 
 export interface TopicRef {

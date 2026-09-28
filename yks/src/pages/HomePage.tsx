@@ -1,8 +1,9 @@
 import { useMemo } from 'react';
-import { SUBJECTS } from '../data/curriculum';
+import { SUBJECTS, subjectLabel } from '../data/curriculum';
 import { Icon } from '../components/Icon';
 import { PageHeader } from '../components/Layout';
 import { PomodoroCard } from '../components/PomodoroCard';
+import { PandaBody } from '../components/MascotNav';
 import { DailyQuestion } from '../components/DailyQuestion';
 import { Empty, ProgressBar, Stat, toast } from '../components/ui';
 import { navigate } from '../hooks/useRoute';
@@ -15,6 +16,26 @@ import { dayKey, diffDays, formatDay, formatMinutes } from '../utils/date';
 import { formatNet } from '../utils/net';
 import { dueReviews } from '../utils/srs';
 import { dashboard } from '../utils/stats';
+
+/** Uygulamaya özgü kısa moral cümleleri; tarihe göre her gün biri seçilir. */
+const CHEERS = [
+  'Bugün 1 konu bile yeter ♡',
+  'Yavaş ama emin adımlar!',
+  'Hata yapmak öğrenmenin yarısı.',
+  'Kahveni al, başlayalım ☕',
+  'Dünden daha iyisin!',
+  'Küçük tekrar, büyük fark.',
+  'Sen yaparsın, biliyorum.',
+  'Bir test, bir mola, bir gülümseme.',
+  'Bugün kendine iyi davran.',
+  'Soru soru, net net ✦',
+];
+
+function cheerOfDay(day: string): string {
+  let h = 0;
+  for (const ch of day) h = (h * 31 + ch.charCodeAt(0)) >>> 0;
+  return CHEERS[h % CHEERS.length];
+}
 
 export async function runRecommendation(r: Recommendation): Promise<void> {
   const a = r.action;
@@ -63,36 +84,32 @@ export default function HomePage() {
               : 'Küçük adımlar, büyük hayaller. Bugün kendin için bir adım at.'}
           </p>
         </div>
-        <svg className="hero-mascot" viewBox="0 0 120 120" aria-hidden="true">
-          <ellipse cx="30" cy="26" rx="15" ry="15" fill="#3a3238" />
-          <ellipse cx="90" cy="26" rx="15" ry="15" fill="#3a3238" />
-          <circle cx="60" cy="62" r="46" fill="#fbfbfa" />
-          <ellipse cx="38" cy="62" rx="14" ry="16" fill="#2f2830" />
-          <ellipse cx="82" cy="62" rx="14" ry="16" fill="#2f2830" />
-          <circle cx="41" cy="64" r="4.6" fill="#fff" />
-          <circle cx="85" cy="64" r="4.6" fill="#fff" />
-          <ellipse cx="60" cy="76" rx="8" ry="6" fill="#2f2830" />
-          <path d="M48 90 Q60 98 72 90" stroke="#2f2830" strokeWidth="3.5" fill="none" strokeLinecap="round" />
-        </svg>
+        <div className="hero-mascot-wrap" aria-hidden="true">
+          <div className="speech">{cheerOfDay(today)}</div>
+          <div className="hero-mascot">
+            <PandaBody size={96} waving />
+          </div>
+        </div>
       </section>
 
       <section className="grid grid-4 section" aria-label="Bugünün özeti">
-        <div className="stat">
-          <div className="stat-label">Bugün çözülen soru</div>
+        <div className="stat tint-lilac">
+          <div className="stat-label">✎ Bugün çözülen soru</div>
           <div className="stat-value">
             {d.todayQuestions}
             <span className="small muted"> / {profile.dailyQuestionGoal}</span>
           </div>
           <ProgressBar value={qPct} label="Günlük soru hedefi" />
         </div>
-        <div className="stat">
-          <div className="stat-label">Bugünkü çalışma</div>
+        <div className="stat tint-mint">
+          <div className="stat-label">⏱ Bugünkü çalışma</div>
           <div className="stat-value">{formatMinutes(d.todayMinutes)}</div>
           <ProgressBar value={mPct} label="Günlük süre hedefi" />
         </div>
-        <Stat label="Seri" value={`${d.streak} gün`} sub={d.streak ? 'kesintisiz aktif gün' : 'Bugün başla'} />
+        <Stat tint="peach" label="♨ Seri" value={`${d.streak} gün`} sub={d.streak ? 'kesintisiz aktif gün' : 'Bugün başla'} />
         <Stat
-          label="Son deneme"
+          tint="sky"
+          label="✦ Son deneme"
           value={d.lastMockNet != null ? `${formatNet(d.lastMockNet)} net` : '—'}
           sub={d.lastMockNet != null ? d.lastMockExam : 'Henüz deneme yok'}
         />
@@ -218,19 +235,19 @@ export default function HomePage() {
           Hızlı ders seç
         </h2>
         <div className="chips">
-          {SUBJECTS.slice(0, 8).map((s) => (
+          {SUBJECTS.map((s) => (
             <a key={s.id} className="chip" href={`#/ders/${s.id}`}>
-              {s.icon} {s.name}
+              {s.icon} {subjectLabel(s)}
             </a>
           ))}
         </div>
       </section>
 
       <section className="grid grid-4 section" aria-label="Genel durum">
-        <Stat label="Bu hafta çözülen" value={d.weekQuestions} />
-        <Stat label="Bu hafta çalışma" value={formatMinutes(d.weekMinutes)} />
-        <Stat label="Tamamlanan konu" value={d.completedTopics} />
-        <Stat label="Doğruluk" value={d.accuracy != null ? `%${d.accuracy}` : '—'} sub={d.accuracy == null ? 'Henüz soru çözülmedi' : 'tüm zamanlar'} />
+        <Stat tint="lilac" label="Bu hafta çözülen" value={d.weekQuestions} />
+        <Stat tint="mint" label="Bu hafta çalışma" value={formatMinutes(d.weekMinutes)} />
+        <Stat tint="peach" label="Tamamlanan konu" value={d.completedTopics} />
+        <Stat tint="rose" label="Doğruluk" value={d.accuracy != null ? `%${d.accuracy}` : '—'} sub={d.accuracy == null ? 'Henüz soru çözülmedi' : 'tüm zamanlar'} />
       </section>
     </>
   );

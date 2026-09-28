@@ -207,9 +207,13 @@ export interface NotebookPageMeta {
   id: string;
   title: string;
   subjectId?: SubjectId;
+  /** Kağıt deseni; yoksa kareli. */
+  paper?: NotebookPaper;
   createdAt: string;
   updatedAt: string;
 }
+
+export type NotebookPaper = 'kareli' | 'cizgili' | 'noktali' | 'duz';
 
 export interface LegacyTotals {
   answered: number;

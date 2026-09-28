@@ -7,6 +7,7 @@ import type {
   AppState,
   ChatMessage,
   MockExam,
+  NotebookPaper,
   PlanTask,
   Profile,
   QuestionAttempt,
@@ -354,6 +355,10 @@ export function touchNotebookPage(state: AppState, id: string, now: Date = new D
 
 export function renameNotebookPage(state: AppState, id: string, title: string): AppState {
   return { ...state, notebookPages: state.notebookPages.map((p) => (p.id === id ? { ...p, title: title.trim().slice(0, 80) || p.title } : p)) };
+}
+
+export function setNotebookPaper(state: AppState, id: string, paper: NotebookPaper): AppState {
+  return { ...state, notebookPages: state.notebookPages.map((p) => (p.id === id ? { ...p, paper } : p)) };
 }
 
 export function deleteNotebookPage(state: AppState, id: string): AppState {
