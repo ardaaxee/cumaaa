@@ -38,7 +38,7 @@ function AiSection() {
       </h2>
       <p className="small muted">
         Bağlanınca asistan her soruyu gerçekten anlar, konuları sıfırdan anlatır ve <b>fotoğrafı çekilen soruyu</b> adım adım çözer. API anahtarı yalnız senin sunucunda
-        durur, bu uygulamaya asla yazılmaz.
+        durur, bu uygulamaya asla yazılmaz. Tamamen ücretsiz kurulabilir.
       </p>
       <label className="field">
         <span>Sunucu adresi</span>
@@ -52,14 +52,22 @@ function AiSection() {
           <span className={`badge ${status.configured ? 'ok' : 'warn'}`}>{status.configured ? `Bağlı ✓ (${status.model})` : status.reason}</span>
         )}
       </div>
-      <details className="mt-12">
-        <summary className="small">Sunucuyu nasıl kurarım? (5 dakika)</summary>
+      <details className="mt-12" open={!url}>
+        <summary className="small">Ücretsiz nasıl kurarım? (5 dakika)</summary>
         <ol className="small muted">
-          <li>console.anthropic.com adresinden bir API anahtarı oluştur (kullandıkça küçük bir ücret).</li>
-          <li>render.com’a GitHub ile giriş yap → New → Blueprint → bu depoyu seç (render.yaml hazır).</li>
-          <li>İstenince ANTHROPIC_API_KEY alanına anahtarı yapıştır → Deploy.</li>
+          <li>
+            <b>aistudio.google.com</b> → Google hesabınla gir → “Get API key” → anahtar oluştur (ücretsiz, kart istemez).
+          </li>
+          <li>
+            <b>render.com</b>’a GitHub ile ücretsiz üye ol → New → Blueprint → <b>cumaaa</b> deposunu seç (ayarlar hazır).
+          </li>
+          <li>İstenince GEMINI_API_KEY alanına anahtarı yapıştır → Deploy (ücretsiz plan).</li>
           <li>Verilen adresi (…onrender.com) yukarıya yapıştır ve “Kaydet ve dene”ye bas.</li>
         </ol>
+        <p className="tiny muted">
+          Ücretsiz kotada dakikalık/günlük soru sınırı vardır; dolarsa biraz bekleyip tekrar dene. Ücretsiz sunucu bir süre kullanılmazsa uyur, ilk
+          cevap ~30 sn gecikebilir. Google ücretsiz kotadaki istekleri hizmetini geliştirmek için kullanabilir; kişisel bilgi yazma.
+        </p>
       </details>
     </section>
   );

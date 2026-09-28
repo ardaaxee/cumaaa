@@ -5,8 +5,11 @@
  *
  * Ortam değişkenleri:
  *   PORT                (varsayılan 8787)
- *   ANTHROPIC_API_KEY   (yoksa AI bölümü "yapılandırılmadı" olarak görünür)
- *   AI_MODEL            (varsayılan claude-opus-5)
+ *   GEMINI_API_KEY      (ÜCRETSİZ seçenek: Google AI Studio anahtarı; ANTHROPIC_API_KEY yoksa kullanılır)
+ *   GEMINI_MODEL        (varsayılan gemini-2.5-flash)
+ *   ANTHROPIC_API_KEY   (ücretli Claude seçeneği; tanımlıysa önceliklidir)
+ *   AI_MODEL            (Claude modeli, varsayılan claude-opus-5)
+ *   İkisi de yoksa AI bölümü "yapılandırılmadı" olarak görünür.
  *   AI_RATE_LIMIT       (IP başına dakikalık istek, varsayılan 20)
  *   ALLOWED_ORIGINS     (başka alan adındaki arayüzün /api'ye erişimi için virgülle ayrılmış liste,
  *                        ör. https://ardaaxee.github.io — varsayılan bu adres)
@@ -17,11 +20,14 @@ import { extname, join, normalize, resolve, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import Anthropic from '@anthropic-ai/sdk';
 import { buildSystemPrompt, buildUserContent, createRateLimiter, validateTeacherRequest } from './teacher.mjs';
+import { GeminiError, askGemini } from './gemini.mjs';
 
 const ROOT = resolve(fileURLToPath(new URL('../dist', import.meta.url)));
 const PORT = Number(process.env.PORT) || 8787;
 const MODEL = process.env.AI_MODEL || 'claude-opus-5';
 const API_KEY = process.env.ANTHROPIC_API_KEY || '';
+const GEMINI_KEY = process.env.GEMINI_API_KEY || '';
+const GEMINI_MODEL = process.env.GEMINI_MODEL || 'gemini-2.5-flash';
 const MAX_BODY = 8 * 1024 * 1024; // fotoğraflı sorular için
 const ALLOWED_ORIGINS = (process.env.ALLOWED_ORIGINS || 'https://ardaaxee.github.io')
   .split(',')
@@ -29,6 +35,7 @@ const ALLOWED_ORIGINS = (process.env.ALLOWED_ORIGINS || 'https://ardaaxee.github
   .filter(Boolean);
 
 const client = API_KEY ? new Anthropic({ apiKey: API_KEY, maxRetries: 2, timeout: 120_000 }) : null;
+const ACTIVE_MODEL = client ? MODEL : GEMINI_KEY ? GEMINI_MODEL : null;
 const allow = createRateLimiter({ limit: Number(process.env.AI_RATE_LIMIT) || 20 });
 
 const MIME = {
@@ -100,7 +107,7 @@ function clientIp(req) {
 
 async function handleTeacher(req, res) {
   const sendJson = (r, status, data) => sendJsonBase(r, status, data, req);
-  if (!client) return sendJson(res, 503, { error: 'AI bağlantısı yapılandırılmadı.' });
+  if (!ACTIVE_MODEL) return sendJson(res, 503, { error: 'AI bağlantısı yapılandırılmadı.' });
   if (!allow(clientIp(req))) return sendJson(res, 429, { error: 'Çok fazla istek. Lütfen bir dakika sonra tekrar dene.' });
   if (!String(req.headers['content-type'] || '').includes('application/json')) {
     return sendJson(res, 415, { error: 'İçerik türü application/json olmalı.' });
@@ -114,6 +121,8 @@ async function handleTeacher(req, res) {
   }
   const { value, error } = validateTeacherRequest(body);
   if (error) return sendJson(res, 400, { error });
+
+  if (!client) return handleGemini(res, value, sendJson);
 
   try {
     const response = await client.beta.messages.create({
@@ -155,6 +164,29 @@ async function handleTeacher(req, res) {
   }
 }
 
+async function handleGemini(res, value, sendJson) {
+  try {
+    const { text, truncated } = await askGemini({
+      apiKey: GEMINI_KEY,
+      model: GEMINI_MODEL,
+      system: buildSystemPrompt(value.teacherName),
+      history: value.history,
+      userContent: buildUserContent(value),
+      signal: AbortSignal.timeout(120_000),
+    });
+    return sendJson(res, 200, { text, model: GEMINI_MODEL, truncated });
+  } catch (err) {
+    if (err instanceof GeminiError) {
+      console.error('[teacher/gemini]', err.status, err.message);
+      if (err.status === 429) return sendJson(res, 429, { error: 'Ücretsiz kota şu an doldu. Biraz sonra tekrar dene.' });
+      if (err.status === 400 || err.status === 403) return sendJson(res, 502, { error: 'AI bağlantısı yapılandırma hatası (anahtar veya model).' });
+      return sendJson(res, 502, { error: 'AI servisine ulaşılamadı. Biraz sonra tekrar dene.' });
+    }
+    console.error('[teacher/gemini] beklenmeyen hata:', err);
+    return sendJson(res, 502, { error: 'AI servisine ulaşılamadı. Biraz sonra tekrar dene.' });
+  }
+}
+
 async function serveStatic(req, res, pathname) {
   let rel = decodeURIComponent(pathname);
   if (rel.endsWith('/')) rel += 'index.html';
@@ -185,7 +217,7 @@ const server = createServer(async (req, res) => {
     return res.end();
   }
   if (url.pathname === '/api/health') {
-    return sendJsonBase(res, 200, { ok: true, ai: !!client, model: client ? MODEL : null }, req);
+    return sendJsonBase(res, 200, { ok: true, ai: !!ACTIVE_MODEL, model: ACTIVE_MODEL }, req);
   }
   if (url.pathname === '/api/teacher') {
     if (req.method !== 'POST') return sendJsonBase(res, 405, { error: 'Yalnız POST desteklenir.' }, req);
@@ -197,5 +229,5 @@ const server = createServer(async (req, res) => {
 });
 
 server.listen(PORT, () => {
-  console.log(`İyi ki • YKS sunucusu http://localhost:${PORT} (AI: ${client ? MODEL : 'yapılandırılmadı'})`);
+  console.log(`İyi ki • YKS sunucusu http://localhost:${PORT} (AI: ${ACTIVE_MODEL ?? 'yapılandırılmadı'})`);
 });

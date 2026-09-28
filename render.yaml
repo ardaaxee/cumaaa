@@ -1,6 +1,7 @@
-# Render.com tek tıkla kurulum (Blueprint): yapay zekâ asistanı sunucusu.
-# Render panelinde "New → Blueprint" ile bu depoyu seçin; ANTHROPIC_API_KEY değerini
-# yalnızca Render panelindeki ortam değişkenine girin (koda asla yazmayın).
+# Render.com tek tıkla kurulum (Blueprint, ücretsiz plan): yapay zekâ asistanı sunucusu.
+# Render panelinde "New → Blueprint" ile bu depoyu seçin; GEMINI_API_KEY değerini
+# (Google AI Studio'dan ücretsiz) yalnızca Render panelindeki ortam değişkenine girin.
+# İsterseniz ücretli Claude için sonradan ANTHROPIC_API_KEY de ekleyebilirsiniz.
 services:
   - type: web
     name: iyiki-yks
@@ -11,7 +12,7 @@ services:
     startCommand: npm start
     healthCheckPath: /api/health
     envVars:
-      - key: ANTHROPIC_API_KEY
+      - key: GEMINI_API_KEY
         sync: false
       - key: ALLOWED_ORIGINS
         value: https://ardaaxee.github.io
