@@ -12,6 +12,11 @@ const WALK_MS = 2600;
 const BUBBLE_MS = 8000;
 const ROAM_MS = 40_000;
 
+/** Ortadaki panda düğmesinin önüne geçmemek için yalnız iki yanda dolaşır (% cinsinden sol konum). */
+function spot(seed: number): number {
+  return seed % 2 ? 3 + ((seed * 7) % 26) : 56 + ((seed * 11) % 20);
+}
+
 function mutedToday(): boolean {
   try {
     return localStorage.getItem(MUTE_KEY) === new Date().toDateString();
@@ -76,13 +81,12 @@ export function Companion() {
     clearTimers();
     setMenu(false);
     seed.current += 1;
-    const target = 6 + ((seed.current * 37) % 64);
-    walkTo(target, () => {
+    walkTo(spot(seed.current), () => {
       if (!mutedToday()) say(lines[0]);
     });
     const iv = window.setInterval(() => {
       seed.current += 1;
-      walkTo(6 + ((seed.current * 53) % 64), () => {
+      walkTo(spot(seed.current), () => {
         if (!mutedToday() && seed.current % 3 === 0) say(pickLine(lines, seed.current));
       });
     }, ROAM_MS);
@@ -121,7 +125,7 @@ export function Companion() {
     speaker.stop();
   };
 
-  const right = x > 50;
+  const right = x > 40;
 
   return (
     <div className={`companion${walking ? ' walking' : ''}`} style={{ left: `${x}%` }}>
