@@ -4,17 +4,17 @@ import { useSelector } from '../store/store';
 export type AssistantMood = 'idle' | 'talking' | 'thinking' | 'happy' | 'listening';
 
 const EYES = [
-  { cx: 99, cy: 98 },
-  { cx: 146, cy: 97 },
+  { cx: 101, cy: 104 },
+  { cx: 143, cy: 103 },
 ];
 
 const INK = '#2b2430';
 const SHIRT = '#3d4049';
 const SHIRT_SHADE = '#33363e';
 const SHIRT_LIGHT = '#50545e';
-const SKIN = '#f1c6a8';
-const SKIN_SHADE = '#d9a27f';
-const HAIR = '#2a1f1c';
+const SKIN = '#efc6ae';
+const SKIN_SHADE = '#d39c7d';
+const HAIR = '#231a17';
 const HAIR_LIGHT = '#4a3a33';
 const DESK = '#e9cda6';
 const DESK_EDGE = '#d4b183';
@@ -44,70 +44,84 @@ export function AssistantCharacter({ mood = 'idle', size = 200 }: { mood?: Assis
       {/* ---- baş (çizgi film portre) ---- */}
       <g className="asst-head">
         {/* boyun */}
-        <path d="M104 146 h36 v42 h-36 z" fill={SKIN} stroke={INK} strokeWidth="2.5" />
-        <path d="M104 160 q18 9 36 0" stroke={SKIN_SHADE} strokeWidth="4" fill="none" opacity=".6" />
-        {/* kulaklar */}
-        <ellipse cx="66" cy="102" rx="9" ry="14" fill={SKIN} stroke={INK} strokeWidth="2.5" />
-        <ellipse cx="178" cy="100" rx="9" ry="14" fill={SKIN} stroke={INK} strokeWidth="2.5" />
-        <path d="M66 94 q-4 8 1 16 M178 92 q4 8 -1 16" stroke={SKIN_SHADE} strokeWidth="2.2" fill="none" strokeLinecap="round" />
-        {/* yüz */}
+        <path d="M106 150 h32 v38 h-32 z" fill={SKIN} stroke={INK} strokeWidth="2.5" />
+        <path d="M106 162 q16 8 32 0" stroke={SKIN_SHADE} strokeWidth="4" fill="none" opacity=".55" />
+        {/* kulaklar: hafif dışa açık */}
+        <path d="M76 96 C62 88 58 110 66 120 C70 126 76 124 78 120 Z" fill={SKIN} stroke={INK} strokeWidth="2.4" strokeLinejoin="round" />
+        <path d="M168 94 C184 86 188 110 179 120 C175 126 169 124 167 120 Z" fill={SKIN} stroke={INK} strokeWidth="2.4" strokeLinejoin="round" />
+        <path d="M70 100 q-3 8 2 14 M176 98 q3 8 -2 14" stroke={SKIN_SHADE} strokeWidth="2" fill="none" strokeLinecap="round" />
+        {/* yüz: uzunca oval, ince çene */}
         <path
-          d="M122 38 C159 38 175 64 175 100 C175 131 158 160 122 166 C86 160 69 131 69 100 C69 64 85 38 122 38 Z"
+          d="M122 38 C156 38 172 62 172 98 C172 128 162 152 144 164 C136 170 108 170 100 164 C82 152 72 128 72 98 C72 62 88 38 122 38 Z"
           fill={SKIN}
           stroke={INK}
           strokeWidth="2.5"
         />
-        {/* çene gölgesi */}
-        <path d="M86 140 Q122 170 158 140" stroke={SKIN_SHADE} strokeWidth="5" fill="none" opacity=".35" strokeLinecap="round" />
-        {/* saç: kısa, üstte hacimli ve dağınık, yana taranmış sivri perçem */}
+        <path d="M90 142 Q104 164 122 168 Q142 166 156 142" stroke={SKIN_SHADE} strokeWidth="5" fill="none" opacity=".3" strokeLinecap="round" />
+        {/* saç: koyu, kısa, üstte hacimli; alna düşen dağınık perçem */}
         <path
-          d="M63 106 C52 58 78 18 124 16 C170 16 194 52 182 106 C180 92 177 82 171 74 C165 64 157 60 150 61 L154 72 C146 63 138 59 130 61 L134 73 C126 63 116 59 106 63 L112 73 C102 66 92 66 84 71 L90 77 C80 78 72 88 66 98 Z"
+          d="M68 110 C58 70 70 30 104 20 C112 14 124 15 131 18 C142 13 158 18 166 28 C180 42 186 66 178 110 C176 96 172 86 166 80 L168 93 L158 76 L155 89 L146 71 L141 86 L132 69 L125 84 L118 69 L109 84 L104 71 L95 87 L90 74 L82 91 C76 95 72 101 68 110 Z"
           fill={HAIR}
           stroke={INK}
           strokeWidth="2.5"
           strokeLinejoin="round"
         />
-        <path d="M90 36 Q108 26 130 28 M138 30 Q158 34 170 50 M100 50 Q118 42 140 46" stroke={HAIR_LIGHT} strokeWidth="3" fill="none" strokeLinecap="round" />
-        {/* favoriler */}
-        <path d="M70 96 q2 10 4 16 M174 94 q-2 10 -4 16" stroke={HAIR} strokeWidth="5" strokeLinecap="round" />
-        {/* kaşlar: kalın ve koyu */}
-        <g className="asst-brows" stroke={HAIR} strokeWidth="5.5" strokeLinecap="round" fill="none">
-          <path d="M85 85 Q99 76 114 82" />
-          <path d="M131 81 Q146 74 161 82" />
+        {/* saç dokusu */}
+        <g stroke={HAIR_LIGHT} strokeWidth="2.6" fill="none" strokeLinecap="round">
+          <path d="M88 40 q8 -8 18 -8" />
+          <path d="M116 30 q10 -6 20 -2" />
+          <path d="M146 32 q10 4 16 14" />
+          <path d="M98 56 q10 -6 20 -4" />
+          <path d="M128 50 q10 -2 18 4" />
+          <path d="M84 70 q4 -6 10 -8" />
+          <path d="M156 60 q6 4 8 12" />
         </g>
-        {/* alındaki küçük ben */}
-        <circle cx="119" cy="76" r="1.6" fill="#7a5040" />
-        {/* gözler */}
+        {/* yanlar kısa */}
+        <path d="M74 92 q0 12 4 20 M170 90 q0 12 -4 20" stroke={HAIR} strokeWidth="5" strokeLinecap="round" />
+        {/* kaşlar: kalın, düz, gözlere yakın */}
+        <g className="asst-brows" fill={HAIR} stroke={INK} strokeWidth="1.2" strokeLinejoin="round">
+          <path d="M88 88 Q100 82 115 86 L114 91 Q101 88 89 93 Z" />
+          <path d="M129 86 Q143 81 157 86 L157 91 Q144 87 130 91 Z" />
+        </g>
+        {/* alındaki küçük ben (sol kaşın iç ucunun üstü) */}
+        <circle cx="116" cy="78" r="1.8" fill="#6e4636" />
+        {/* gözler: badem, yarı kapalı rahat bakış */}
         <g className="asst-eyes">
           {EYES.map((e) => (
             <g key={e.cx}>
-              <ellipse cx={e.cx} cy={e.cy} rx="10" ry="7.2" fill="#fff" stroke={INK} strokeWidth="2" />
+              <path d={`M${e.cx - 11} ${e.cy} Q${e.cx} ${e.cy - 8.5} ${e.cx + 11} ${e.cy} Q${e.cx} ${e.cy + 6.5} ${e.cx - 11} ${e.cy} Z`} fill="#fff" stroke={INK} strokeWidth="1.6" />
               <g className="asst-iris">
-                <circle cx={e.cx + 1} cy={e.cy + 0.6} r="5.4" fill="#5b3a26" />
-                <circle cx={e.cx + 1} cy={e.cy + 0.6} r="2.6" fill="#1b1311" />
-                <circle cx={e.cx + 2.8} cy={e.cy - 1.4} r="1.6" fill="#fff" />
+                <circle cx={e.cx} cy={e.cy - 0.5} r="5.4" fill="#4a2e1f" />
+                <circle cx={e.cx} cy={e.cy - 0.5} r="2.6" fill="#140e0c" />
+                <circle cx={e.cx + 2} cy={e.cy - 2.2} r="1.4" fill="#fff" />
               </g>
-              {/* hafif düşük göz kapağı çizgisi (rahat bakış) */}
-              <path d={`M${e.cx - 10} ${e.cy - 2} Q${e.cx} ${e.cy - 9} ${e.cx + 10} ${e.cy - 2}`} stroke={INK} strokeWidth="2.6" fill="none" strokeLinecap="round" />
+              {/* ağır üst kapak */}
+                            <path d={`M${e.cx - 12} ${e.cy} Q${e.cx} ${e.cy - 9} ${e.cx + 12} ${e.cy - 1}`} stroke={INK} strokeWidth="2.8" fill="none" strokeLinecap="round" />
+              <path d={`M${e.cx - 9} ${e.cy - 10} Q${e.cx} ${e.cy - 14} ${e.cx + 9} ${e.cy - 10}`} stroke={SKIN_SHADE} strokeWidth="1.4" fill="none" strokeLinecap="round" opacity=".7" />
+              <path d={`M${e.cx - 7} ${e.cy + 6} q7 3 14 0`} stroke={SKIN_SHADE} strokeWidth="1.4" fill="none" strokeLinecap="round" opacity=".8" />
             </g>
           ))}
-          <g className="asst-lids" fill={SKIN}>
+          <g className="asst-lids" fill={SKIN_SHADE}>
             {EYES.map((e) => (
-              <ellipse key={e.cx} cx={e.cx} cy={e.cy} rx="11" ry="8" />
+              <ellipse key={e.cx} cx={e.cx} cy={e.cy - 1} rx="11.5" ry="7" />
             ))}
           </g>
         </g>
-        {/* burun */}
-        <path d="M121 96 Q117 114 118 119 Q122 124 129 120" stroke={SKIN_SHADE} strokeWidth="2.6" fill="none" strokeLinecap="round" />
-        {/* yanaklar */}
-        <ellipse cx="88" cy="120" rx="8" ry="4.5" fill="#f19aa9" opacity=".35" />
-        <ellipse cx="156" cy="119" rx="8" ry="4.5" fill="#f19aa9" opacity=".35" />
-        {/* ağız: kapalı hafif gülümseme / konuşurken açılan ağız */}
-        <path className="asst-mouth-closed" d="M109 136 Q123 143 137 134" stroke="#7d3b3b" strokeWidth="3" fill="none" strokeLinecap="round" />
+        {/* burun: uzun, düz, yuvarlak uç */}
+        <path d="M120 98 Q118 112 114 121 Q110 127 115 130 Q121 133 127 130 Q132 128 130 123" stroke={SKIN_SHADE} strokeWidth="2.6" fill="none" strokeLinecap="round" strokeLinejoin="round" />
+        <path d="M112 128 q3 3 6 1 M126 130 q3 1 6 -2" stroke="#a86e57" strokeWidth="1.9" fill="none" strokeLinecap="round" />
+        {/* hafif kızarıklık */}
+        <ellipse cx="94" cy="124" rx="7" ry="3.5" fill="#e98f8f" opacity=".22" />
+        <ellipse cx="152" cy="123" rx="7" ry="3.5" fill="#e98f8f" opacity=".22" />
+        {/* ağız: ince dudak, bir yanı hafif yukarı (yan gülüş) */}
+        <g className="asst-mouth-closed">
+          <path d="M108 144 Q116 141 122 143 Q128 141 137 142 Q128 152 122 151 Q114 151 108 144 Z" fill="#d4908a" />
+          <path d="M108 144 Q121 147 137 141.5" stroke="#8a4a42" strokeWidth="2.6" fill="none" strokeLinecap="round" />
+        </g>
         <g className="asst-mouth-open">
-          <ellipse cx="123" cy="138" rx="9.5" ry="6" fill="#6b2632" stroke={INK} strokeWidth="2" />
-          <ellipse cx="123" cy="141.5" rx="5.5" ry="2.4" fill="#e9798c" />
-          <path d="M115 135.5 h16" stroke="#fff" strokeWidth="2.4" strokeLinecap="round" />
+          <path d="M111 143 Q122 141 134 142 Q132 153 122 154 Q112 152 111 143 Z" fill="#6b2632" stroke={INK} strokeWidth="2" strokeLinejoin="round" />
+          <ellipse cx="122" cy="150" rx="5.5" ry="2.2" fill="#e9798c" />
+          <path d="M114 144 h16" stroke="#fff" strokeWidth="2.2" strokeLinecap="round" />
         </g>
       </g>
 
