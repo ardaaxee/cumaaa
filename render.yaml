@@ -1,0 +1,19 @@
+# Render.com tek tıkla kurulum (Blueprint): yapay zekâ asistanı sunucusu.
+# Render panelinde "New → Blueprint" ile bu depoyu seçin; ANTHROPIC_API_KEY değerini
+# yalnızca Render panelindeki ortam değişkenine girin (koda asla yazmayın).
+services:
+  - type: web
+    name: iyiki-yks
+    runtime: node
+    rootDir: yks
+    plan: free
+    buildCommand: npm ci && npm run build
+    startCommand: npm start
+    healthCheckPath: /api/health
+    envVars:
+      - key: ANTHROPIC_API_KEY
+        sync: false
+      - key: ALLOWED_ORIGINS
+        value: https://ardaaxee.github.io
+      - key: NODE_VERSION
+        value: "22"

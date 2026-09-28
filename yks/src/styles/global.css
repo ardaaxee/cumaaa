@@ -446,7 +446,7 @@ button {
   flex-wrap: wrap;
 }
 .row.between { justify-content: space-between; }
-.row.nowrap { flex-wrap: nowrap; }
+.row.nowrap { flex-wrap: nowrap; white-space: normal; }
 .grow { flex: 1; min-width: 0; }
 
 /* ---------- Metrik ---------- */
@@ -1742,8 +1742,10 @@ details.table-view summary {
   .asst-stage .asst { order: 2; }
 }
 .asst-tap { border: 0; background: none; padding: 0; cursor: pointer; line-height: 0; }
-.chat-form { display: grid; grid-template-columns: auto 1fr auto; gap: 8px; margin-top: 8px; align-items: center; }
-.chat-form:not(:has(.mic-btn)) { grid-template-columns: 1fr auto; }
+.chat-form { display: flex; gap: 8px; margin-top: 8px; align-items: center; }
+.chat-form .input { flex: 1; min-width: 0; }
+.photo-btn { cursor: pointer; }
+.photo-btn.disabled { opacity: 0.4; pointer-events: none; }
 .asst-home { background: linear-gradient(150deg, var(--brand-soft), var(--surface) 65%); padding-bottom: 0; overflow: hidden; }
 .asst-home-link { display: flex; align-items: flex-end; gap: 12px; color: inherit; text-decoration: none; }
 .asst-home-link .grow { padding-bottom: 14px; align-self: center; }
@@ -1879,3 +1881,5 @@ details.table-view summary {
 body { overflow-x: clip; }
 .fc-grades .btn { min-width: 0; padding-left: 6px; padding-right: 6px; white-space: normal; line-height: 1.15; }
 .flashcard { contain: layout; }
+.partner-card { background: linear-gradient(160deg, #fde6ec, var(--surface) 70%); }
+.bubble.user .bubble-meta { color: rgba(255, 255, 255, 0.78); }

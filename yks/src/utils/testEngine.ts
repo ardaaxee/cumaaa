@@ -52,7 +52,7 @@ export function createActiveTest(config: TestConfig, questionIds: string[], now:
     timeSpent: {},
     current: 0,
     startedAt: now.toISOString(),
-    timeLimitMs: config.mode === 'sinav' ? questionIds.length * EXAM_MS_PER_QUESTION : null,
+    timeLimitMs: config.mode === 'sinav' ? (config.durationMin ? config.durationMin * 60_000 : questionIds.length * EXAM_MS_PER_QUESTION) : null,
     elapsedMs: 0,
   };
 }

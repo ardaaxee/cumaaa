@@ -1,3 +1,5 @@
+import { getState } from '../store/store';
+
 /**
  * Öğretmen yapay zekâsı istemcisi. Hiçbir API anahtarı istemcide tutulmaz;
  * istekler sunucudaki /api/teacher uç noktasına gider. Sunucu yoksa ya da
@@ -16,7 +18,8 @@ export type TeacherAction =
   | 'quiz'
   | 'yanlislar'
   | 'bugun'
-  | 'serbest';
+  | 'serbest'
+  | 'foto';
 
 export interface TeacherContext {
   subject?: string;
@@ -37,13 +40,17 @@ export interface AiStatus {
   reason: string;
 }
 
-const API_BASE = './api';
+/** Ayarlardaki sunucu adresi > derleme sırasında verilen VITE_AI_URL > aynı alan adındaki /api. */
+export function apiBase(): string {
+  const configured = getState().settings.aiServerUrl || (import.meta.env.VITE_AI_URL as string | undefined) || '';
+  return configured ? `${configured.replace(/\/+$/, '')}/api` : './api';
+}
 
 export async function checkAiStatus(timeoutMs = 4000): Promise<AiStatus> {
   const ctrl = new AbortController();
   const timer = setTimeout(() => ctrl.abort(), timeoutMs);
   try {
-    const res = await fetch(`${API_BASE}/health`, { signal: ctrl.signal, cache: 'no-store' });
+    const res = await fetch(`${apiBase()}/health`, { signal: ctrl.signal, cache: 'no-store' });
     if (!res.ok) return { configured: false, model: null, reason: 'AI sunucusu bulunamadı.' };
     const data = (await res.json()) as { ai?: boolean; model?: string | null };
     return data.ai
@@ -62,12 +69,14 @@ export interface AskInput {
   context: TeacherContext;
   history: { role: 'user' | 'teacher'; text: string }[];
   teacherName: string;
+  /** Fotoğraflı soru (base64, veri önekisiz). */
+  image?: { mediaType: string; data: string };
 }
 
 export async function askTeacher(input: AskInput, signal?: AbortSignal): Promise<string> {
   let res: Response;
   try {
-    res = await fetch(`${API_BASE}/teacher`, {
+    res = await fetch(`${apiBase()}/teacher`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(input),

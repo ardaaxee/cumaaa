@@ -6,6 +6,7 @@ import { PomodoroCard } from '../components/PomodoroCard';
 import { PandaBody } from '../components/MascotNav';
 import { AssistantCharacter } from '../components/AssistantCharacter';
 import { DailyQuestion } from '../components/DailyQuestion';
+import { PartnerMessages } from '../components/PartnerMessages';
 import { Empty, ProgressBar, Stat, toast } from '../components/ui';
 import { navigate } from '../hooks/useRoute';
 import { lookup, topicLabel } from '../services/lookup';
@@ -95,6 +96,8 @@ export default function HomePage() {
           </div>
         </div>
       </section>
+
+      <PartnerMessages />
 
       <nav className="quick-grid section" aria-label="Hızlı başla">
         <button

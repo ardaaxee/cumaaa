@@ -220,6 +220,7 @@ export function sanitize(raw: Json): AppState {
   const profile = isObj(raw.profile) ? raw.profile : {};
   const settings = isObj(raw.settings) ? raw.settings : {};
   const pomodoro = isObj(raw.pomodoro) ? raw.pomodoro : {};
+  const cloudRaw = isObj(settings.cloud) ? settings.cloud : {};
   const themeRaw = settings.theme;
   return {
     ...base,
@@ -247,6 +248,13 @@ export function sanitize(raw: Json): AppState {
       teacherName:
         (str(settings.teacherName, base.settings.teacherName).slice(0, 40) || base.settings.teacherName).replace(/^Cuma Öğretmen$/, base.settings.teacherName),
       teacherPhotoFocusY: Math.min(100, Math.max(0, num(settings.teacherPhotoFocusY, 35))),
+      cloud: {
+        projectId: /^[a-z0-9-]{4,40}$/.test(str(cloudRaw.projectId)) ? str(cloudRaw.projectId) : '',
+        apiKey: /^[A-Za-z0-9_-]{20,60}$/.test(str(cloudRaw.apiKey)) ? str(cloudRaw.apiKey) : '',
+        syncCode: /^[A-Za-z0-9]{20,64}$/.test(str(cloudRaw.syncCode)) ? str(cloudRaw.syncCode) : '',
+        shareCode: /^[A-Za-z0-9]{20,64}$/.test(str(cloudRaw.shareCode)) ? str(cloudRaw.shareCode) : '',
+      },
+      aiServerUrl: /^https:\/\/[^\s]+$/.test(str(settings.aiServerUrl)) ? str(settings.aiServerUrl).slice(0, 200) : '',
     } as AppState['settings'],
     topicProgress: isObj(raw.topicProgress) ? (raw.topicProgress as AppState['topicProgress']) : {},
     attempts: arr(raw.attempts).filter(isObj).filter((a) => typeof a.questionId === 'string' && isValidDayKey(a.day)) as unknown as AppState['attempts'],
@@ -275,6 +283,9 @@ export function sanitize(raw: Json): AppState {
             ([, c]) => isObj(c) && typeof c.box === 'number' && isValidDayKey(c.dueDay) && isValidDayKey(c.lastDay),
           ),
         ) as AppState['cards'])
+      : {},
+    deleted: isObj(raw.deleted)
+      ? (Object.fromEntries(Object.entries(raw.deleted).filter(([, v]) => typeof v === 'string')) as AppState['deleted'])
       : {},
     legacy: isObj(raw.legacy) ? (raw.legacy as unknown as AppState['legacy']) : null,
   };

@@ -3,7 +3,9 @@ import { Layout } from './components/Layout';
 import { Spinner, toast, ToastHost } from './components/ui';
 import { usePomodoroEngine } from './hooks/usePomodoro';
 import { useRoute } from './hooks/useRoute';
-import { startupError, startupReport, useSelector } from './store/store';
+import { getState, startupError, startupReport, useSelector } from './store/store';
+import { cloudConfig, startAutoSync } from './services/cloud';
+import { useReminder } from './hooks/useReminder';
 
 const pages = {
   home: lazy(() => import('./pages/HomePage')),
@@ -28,6 +30,7 @@ const pages = {
   cards: lazy(() => import('./pages/CardsPage')),
   formulas: lazy(() => import('./pages/FormulasPage')),
   badges: lazy(() => import('./pages/BadgesPage')),
+  partner: lazy(() => import('./pages/PartnerPage')),
   onboarding: lazy(() => import('./pages/OnboardingPage')),
   notFound: lazy(() => import('./pages/NotFoundPage')),
 };
@@ -72,8 +75,16 @@ function useThemeEffect() {
 export function App() {
   const route = useRoute();
   const onboarded = useSelector((s) => s.profile.onboarded);
+  const cloudKey = useSelector((s) => `${s.settings.cloud.projectId}|${s.settings.cloud.apiKey}|${s.settings.cloud.syncCode}`);
   useThemeEffect();
   usePomodoroEngine();
+  useReminder();
+
+  // Bulut eşitlemesi: yapılandırılmışsa açılışta, periyodik olarak ve sekme gizlenince çalışır.
+  useEffect(() => {
+    if (!cloudConfig() || !getState().settings.cloud.syncCode) return;
+    return startAutoSync();
+  }, [cloudKey]);
 
   useEffect(() => {
     if (startupError) toast(`Kayıtlı veri okunamadı: ${startupError}`, 6000);
@@ -91,6 +102,20 @@ export function App() {
     document.title = `${onboarded ? match?.title ?? 'Bulunamadı' : 'Hoş geldin'} · İyi ki • YKS`;
     window.scrollTo(0, 0);
   }, [route.path, onboarded, match]);
+
+  // Sevgili/ortak ekranı: bağlantıyla gelen kişi uygulamayı kurmadan görebilsin.
+  if (key === 'ortak') {
+    return (
+      <>
+        <main id="main" className="main" style={{ maxWidth: 720 }}>
+          <Suspense fallback={<Spinner />}>
+            <pages.partner />
+          </Suspense>
+        </main>
+        <ToastHost />
+      </>
+    );
+  }
 
   return (
     <>

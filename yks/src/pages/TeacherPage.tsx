@@ -10,6 +10,7 @@ import { useRoute } from '../hooks/useRoute';
 import { askTeacher, checkAiStatus, type AiStatus, type TeacherAction, type TeacherContext } from '../services/ai';
 import { assistantReply } from '../services/localAssistant';
 import { useListener, useSpeaker } from '../hooks/useVoice';
+import { resizeImage } from '../services/photoStore';
 import { weakTopics } from '../utils/analysis';
 import { addChatMessage, clearChat } from '../store/actions';
 import { update, useAppState } from '../store/store';
@@ -106,11 +107,12 @@ export default function TeacherPage() {
     return ctx;
   }, [ref, topicId, question, answerIdx, state, lesson]);
 
-  const send = async (action: TeacherAction, message: string) => {
+  const send = async (action: TeacherAction, message: string, image?: { mediaType: string; data: string }) => {
     const text = message.trim();
     if (action === 'serbest' && !text) return;
     setBusy(true);
-    update((s) => addChatMessage(s, { role: 'user', text: text || QUICK.find((q) => q.action === action)?.label || action }));
+    const userText = action === 'foto' ? `📷 Fotoğraflı soru${text ? `: ${text}` : ''}` : text || QUICK.find((q) => q.action === action)?.label || action;
+    update((s) => addChatMessage(s, { role: 'user', text: userText }));
     setInput('');
 
     const say = (reply: string, source: 'icerik' | 'ai') => {
@@ -118,6 +120,15 @@ export default function TeacherPage() {
       setLastSaid(reply);
       speaker.speak(reply, voiceOn);
     };
+
+    if (!status?.configured && action === 'foto') {
+      say(
+        'Fotoğraftaki soruyu okuyabilmem için yapay zekâ bağlantısı gerekiyor. Ayarlar → “Yapay zekâ bağlantısı” bölümünden sunucu adresini girince fotoğraflı soruları adım adım çözerim. O zamana kadar soruyu yazarak sorabilirsin ♡',
+        'icerik',
+      );
+      setBusy(false);
+      return;
+    }
 
     if (!status?.configured) {
       // Gerçek AI bağlantısı yok: yanıt, uygulamadaki gerçek içerik ve öğrencinin
@@ -140,7 +151,7 @@ export default function TeacherPage() {
     try {
       const ctx = await context;
       const history = state.chat.slice(-10).map((m) => ({ role: m.role, text: m.text }));
-      const reply = await askTeacher({ action, message: text, context: ctx, history, teacherName });
+      const reply = await askTeacher({ action, message: text, context: ctx, history, teacherName, image });
       say(reply, 'ai');
     } catch (e) {
       toast(e instanceof Error ? e.message : 'Yanıt alınamadı.');
@@ -268,6 +279,27 @@ export default function TeacherPage() {
               <Icon name="mic" />
             </button>
           )}
+          <label className={`icon-btn photo-btn${busy ? ' disabled' : ''}`} aria-label="Soru fotoğrafı gönder" title="Soru fotoğrafı gönder">
+            <Icon name="camera" />
+            <input
+              type="file"
+              accept="image/*"
+              capture="environment"
+              hidden
+              disabled={busy}
+              onChange={(e) => {
+                const f = e.target.files?.[0];
+                e.target.value = '';
+                if (!f) return;
+                resizeImage(f, 1568)
+                  .then((url) => {
+                    const [head, data] = url.split(',');
+                    void send('foto', input, { mediaType: head.slice(5, head.indexOf(';')), data });
+                  })
+                  .catch((err: unknown) => toast(err instanceof Error ? err.message : 'Fotoğraf okunamadı.'));
+              }}
+            />
+          </label>
           <input id="chat-input" className="input" value={input} onChange={(e) => setInput(e.target.value)} placeholder="Örn. Logaritmayı basitçe anlat" disabled={busy} />
           <button type="submit" className="btn primary" disabled={busy || !input.trim()} aria-label="Gönder">
             <Icon name="send" />

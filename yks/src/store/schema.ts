@@ -32,6 +32,10 @@ export interface Settings {
   teacherName: string;
   /** Öğretmen fotoğrafının dikey odak noktası (object-position %). */
   teacherPhotoFocusY: number;
+  /** Yapay zekâ sunucusunun adresi (ör. https://iyiki-yks.onrender.com). Boşsa aynı alan adındaki /api denenir. */
+  aiServerUrl: string;
+  /** Bulut eşitleme (Firebase Firestore). Boş alanlar = kapalı. */
+  cloud: CloudSettings;
 }
 
 export interface TopicProgress {
@@ -67,8 +71,10 @@ export interface TestConfig {
   count: number;
   mode: TestMode;
   /** Testin nereden oluşturulduğu (bilgi amaçlı). */
-  origin: 'filtre' | 'yanlislar' | 'konu-mini' | 'konu-normal' | 'tekrar' | 'tek-soru' | 'ogretmen' | 'plan';
+  origin: 'filtre' | 'yanlislar' | 'konu-mini' | 'konu-normal' | 'tekrar' | 'tek-soru' | 'ogretmen' | 'plan' | 'deneme';
   title?: string;
+  /** Sınav modunda toplam süre (dk). Verilmezse soru başına 90 sn. */
+  durationMin?: number;
 }
 
 export interface ActiveTest {
@@ -126,6 +132,15 @@ export interface CardState {
   dueDay: DayKey;
   seen: number;
   lastDay: DayKey;
+}
+
+export interface CloudSettings {
+  projectId: string;
+  apiKey: string;
+  /** Cihazları eşleştiren gizli kod (en az 20 karakter). */
+  syncCode: string;
+  /** Sevgilinle paylaşılan özet sayfasının kodu. */
+  shareCode: string;
 }
 
 export interface ReviewItem {
@@ -250,6 +265,8 @@ export interface AppState {
   notebookPages: NotebookPageMeta[];
   /** Bilgi kartlarının tekrar durumu. */
   cards: Record<string, CardState>;
+  /** Silinen kayıtların izi (id → ISO zaman). Bulut eşitlemesinde silinenlerin geri gelmesini önler. */
+  deleted: Record<string, string>;
   /** Eski sürümden gelen, güne atanamayan toplamlar (yalnız toplam istatistiğe eklenir). */
   legacy: LegacyTotals | null;
 }
@@ -277,6 +294,8 @@ export function defaultState(): AppState {
       cyclesBeforeLongBreak: 4,
       teacherName: 'Asistanın',
       teacherPhotoFocusY: 35,
+      aiServerUrl: '',
+      cloud: { projectId: '', apiKey: '', syncCode: '', shareCode: '' },
     },
     topicProgress: {},
     attempts: [],
@@ -298,6 +317,7 @@ export function defaultState(): AppState {
     chat: [],
     notebookPages: [],
     cards: {},
+    deleted: {},
     legacy: null,
   };
 }

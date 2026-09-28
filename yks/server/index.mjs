@@ -8,6 +8,8 @@
  *   ANTHROPIC_API_KEY   (yoksa AI bölümü "yapılandırılmadı" olarak görünür)
  *   AI_MODEL            (varsayılan claude-opus-5)
  *   AI_RATE_LIMIT       (IP başına dakikalık istek, varsayılan 20)
+ *   ALLOWED_ORIGINS     (başka alan adındaki arayüzün /api'ye erişimi için virgülle ayrılmış liste,
+ *                        ör. https://ardaaxee.github.io — varsayılan bu adres)
  */
 import { createServer } from 'node:http';
 import { readFile, stat } from 'node:fs/promises';
@@ -20,7 +22,11 @@ const ROOT = resolve(fileURLToPath(new URL('../dist', import.meta.url)));
 const PORT = Number(process.env.PORT) || 8787;
 const MODEL = process.env.AI_MODEL || 'claude-opus-5';
 const API_KEY = process.env.ANTHROPIC_API_KEY || '';
-const MAX_BODY = 64 * 1024;
+const MAX_BODY = 8 * 1024 * 1024; // fotoğraflı sorular için
+const ALLOWED_ORIGINS = (process.env.ALLOWED_ORIGINS || 'https://ardaaxee.github.io')
+  .split(',')
+  .map((o) => o.trim())
+  .filter(Boolean);
 
 const client = API_KEY ? new Anthropic({ apiKey: API_KEY, maxRetries: 2, timeout: 120_000 }) : null;
 const allow = createRateLimiter({ limit: Number(process.env.AI_RATE_LIMIT) || 20 });
@@ -50,8 +56,24 @@ function send(res, status, body, headers = {}) {
   res.end(body);
 }
 
-function sendJson(res, status, data) {
-  send(res, status, JSON.stringify(data), { 'Content-Type': 'application/json; charset=utf-8', 'Cache-Control': 'no-store' });
+function corsHeaders(req) {
+  const origin = req.headers.origin;
+  if (!origin || !ALLOWED_ORIGINS.includes(origin)) return {};
+  return {
+    'Access-Control-Allow-Origin': origin,
+    'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+    'Access-Control-Allow-Headers': 'Content-Type',
+    'Access-Control-Max-Age': '86400',
+    Vary: 'Origin',
+  };
+}
+
+function sendJsonBase(res, status, data, req) {
+  send(res, status, JSON.stringify(data), {
+    'Content-Type': 'application/json; charset=utf-8',
+    'Cache-Control': 'no-store',
+    ...(req ? corsHeaders(req) : {}),
+  });
 }
 
 function readBody(req) {
@@ -77,6 +99,7 @@ function clientIp(req) {
 }
 
 async function handleTeacher(req, res) {
+  const sendJson = (r, status, data) => sendJsonBase(r, status, data, req);
   if (!client) return sendJson(res, 503, { error: 'AI bağlantısı yapılandırılmadı.' });
   if (!allow(clientIp(req))) return sendJson(res, 429, { error: 'Çok fazla istek. Lütfen bir dakika sonra tekrar dene.' });
   if (!String(req.headers['content-type'] || '').includes('application/json')) {
@@ -153,13 +176,19 @@ async function serveStatic(req, res, pathname) {
   }
 }
 
+const sendJson = (res, status, data) => sendJsonBase(res, status, data);
+
 const server = createServer(async (req, res) => {
   const url = new URL(req.url || '/', 'http://localhost');
+  if (url.pathname.startsWith('/api/') && req.method === 'OPTIONS') {
+    res.writeHead(204, { ...SECURITY_HEADERS, ...corsHeaders(req) });
+    return res.end();
+  }
   if (url.pathname === '/api/health') {
-    return sendJson(res, 200, { ok: true, ai: !!client, model: client ? MODEL : null });
+    return sendJsonBase(res, 200, { ok: true, ai: !!client, model: client ? MODEL : null }, req);
   }
   if (url.pathname === '/api/teacher') {
-    if (req.method !== 'POST') return sendJson(res, 405, { error: 'Yalnız POST desteklenir.' });
+    if (req.method !== 'POST') return sendJsonBase(res, 405, { error: 'Yalnız POST desteklenir.' }, req);
     return handleTeacher(req, res);
   }
   if (url.pathname.startsWith('/api/')) return sendJson(res, 404, { error: 'Bulunamadı.' });

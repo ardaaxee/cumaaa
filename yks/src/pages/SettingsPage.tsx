@@ -2,6 +2,7 @@ import { useRef, useState } from 'react';
 import { SUBJECTS, subjectLabel } from '../data/curriculum';
 import type { SubjectId } from '../domain/types';
 import { AssistantCharacter } from '../components/AssistantCharacter';
+import { ConnectSettings } from '../components/ConnectSettings';
 import { PageHeader } from '../components/Layout';
 import { ConfirmDialog, toast } from '../components/ui';
 import { getTeacherPhoto, setTeacherPhoto } from '../services/photoStore';
@@ -149,6 +150,8 @@ export default function SettingsPage() {
           </div>
         </div>
       </section>
+
+      <ConnectSettings />
 
       <section className="card section" aria-labelledby="d-h">
         <h2 id="d-h" className="mb-8">

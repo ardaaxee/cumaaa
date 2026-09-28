@@ -3,6 +3,7 @@ import { dayKey, addDays, type DayKey } from '../utils/date';
 import { uid } from '../utils/ids';
 import { completeReview, onWrongInTopic, scheduleFirstReview } from '../utils/srs';
 import { createActiveTest, scoreTest } from '../utils/testEngine';
+import { mockSectionsFromAnswers } from '../utils/fullMock';
 import type {
   AppState,
   ChatMessage,
@@ -172,6 +173,28 @@ export function finishTest(state: AppState, byId: Map<string, Question>, now: Da
     net: score.net,
   };
 
+  // Uygulama içi tam denemeler, deneme kayıtlarına da otomatik eklenir (grafik ve net takibi için).
+  const exam = test.config.exam;
+  const mocks =
+    test.config.origin === 'deneme' && (exam === 'TYT' || exam === 'AYT')
+      ? [
+          ...state.mocks,
+          {
+            id: uid('mock'),
+            exam,
+            name: test.config.title ?? `${exam} Denemesi`,
+            date: today,
+            sections: mockSectionsFromAnswers(
+              exam,
+              test.questionIds.map((id) => byId.get(id)).filter((q): q is Question => !!q),
+              test.answers,
+            ),
+            note: 'Uygulama içi deneme (özgün ÖSYM tarzı sorular)',
+            createdAt: iso,
+          },
+        ]
+      : state.mocks;
+
   return {
     state: {
       ...state,
@@ -181,6 +204,7 @@ export function finishTest(state: AppState, byId: Map<string, Question>, now: Da
       wrongs,
       reviews,
       topicProgress,
+      mocks,
     },
     result,
   };
@@ -241,10 +265,16 @@ export function setWrongLearned(state: AppState, questionId: string, learned: bo
   };
 }
 
+/** Silinen kayıt kimliklerini bulut eşitlemesi için işaretler. */
+function tomb(state: AppState, ids: string[], now: Date = new Date()): AppState['deleted'] {
+  const iso = now.toISOString();
+  return { ...state.deleted, ...Object.fromEntries(ids.map((id) => [id, iso])) };
+}
+
 export function removeWrong(state: AppState, questionId: string): AppState {
   const wrongs = { ...state.wrongs };
   delete wrongs[questionId];
-  return { ...state, wrongs };
+  return { ...state, wrongs, deleted: tomb(state, [`wrong:${questionId}`]) };
 }
 
 // ---------- Plan ----------
@@ -270,7 +300,7 @@ export function toggleTask(state: AppState, id: string, now: Date = new Date()):
 }
 
 export function deleteTask(state: AppState, id: string): AppState {
-  return { ...state, tasks: state.tasks.filter((t) => t.id !== id) };
+  return { ...state, deleted: tomb(state, [id]), tasks: state.tasks.filter((t) => t.id !== id) };
 }
 
 /** Tamamlanmayan görevi ertesi güne taşır. */
@@ -300,7 +330,7 @@ export function addMock(state: AppState, mock: Omit<MockExam, 'id' | 'createdAt'
 }
 
 export function deleteMock(state: AppState, id: string): AppState {
-  return { ...state, mocks: state.mocks.filter((m) => m.id !== id) };
+  return { ...state, deleted: tomb(state, [id]), mocks: state.mocks.filter((m) => m.id !== id) };
 }
 
 // ---------- Çalışma süresi ----------
@@ -321,7 +351,7 @@ export function addStudyMinutes(
 }
 
 export function deleteStudySession(state: AppState, id: string): AppState {
-  return { ...state, studyLog: state.studyLog.filter((s) => s.id !== id) };
+  return { ...state, deleted: tomb(state, [id]), studyLog: state.studyLog.filter((s) => s.id !== id) };
 }
 
 // ---------- Videolar ----------
@@ -335,7 +365,7 @@ export function toggleVideoWatched(state: AppState, id: string): AppState {
 }
 
 export function deleteVideo(state: AppState, id: string): AppState {
-  return { ...state, videos: state.videos.filter((v) => v.id !== id) };
+  return { ...state, deleted: tomb(state, [id]), videos: state.videos.filter((v) => v.id !== id) };
 }
 
 // ---------- Dijital defter ----------
@@ -362,7 +392,7 @@ export function setNotebookPaper(state: AppState, id: string, paper: NotebookPap
 }
 
 export function deleteNotebookPage(state: AppState, id: string): AppState {
-  return { ...state, notebookPages: state.notebookPages.filter((p) => p.id !== id) };
+  return { ...state, deleted: tomb(state, [id]), notebookPages: state.notebookPages.filter((p) => p.id !== id) };
 }
 
 // ---------- Profil / ayarlar ----------
@@ -385,7 +415,7 @@ export function addChatMessage(state: AppState, msg: Omit<ChatMessage, 'id' | 'a
 }
 
 export function clearChat(state: AppState): AppState {
-  return { ...state, chat: [] };
+  return { ...state, chat: [], deleted: tomb(state, state.chat.map((m) => m.id)) };
 }
 
 // ---------- Bilgi kartları (Leitner) ----------

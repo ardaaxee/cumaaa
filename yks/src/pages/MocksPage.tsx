@@ -5,6 +5,10 @@ import { Icon } from '../components/Icon';
 import { PageHeader } from '../components/Layout';
 import { ConfirmDialog, Empty, Modal, Segmented, Stat, toast } from '../components/ui';
 import { addMock, deleteMock } from '../store/actions';
+import { loadQuestions } from '../data/content';
+import { launchWithIds, makeConfig, hasActiveTest } from '../services/testLauncher';
+import { getState } from '../store/store';
+import { FULL_MOCKS, buildFullMock, totalQuestions } from '../utils/fullMock';
 import type { MockExam } from '../store/schema';
 import { update, useSelector } from '../store/store';
 import { dayKey, formatDay, isValidDayKey } from '../utils/date';
@@ -135,6 +139,18 @@ export default function MocksPage() {
   const [range, setRange] = useState<'5' | '10'>('5');
   const [adding, setAdding] = useState(false);
   const [del, setDel] = useState<MockExam | null>(null);
+  const [startExam, setStartExam] = useState<Exam | null>(null);
+
+  const startFullMock = async (e: Exam) => {
+    setStartExam(null);
+    const plan = FULL_MOCKS[e];
+    const ids = buildFullMock(plan, await loadQuestions(), getState().attempts);
+    const err = await launchWithIds(
+      ids,
+      makeConfig({ exam: e, mode: 'sinav', origin: 'deneme', count: ids.length, durationMin: plan.durationMin, title: `${plan.title} (${formatDay(dayKey())})` }),
+    );
+    if (err) toast(err);
+  };
 
   const list = useMemo(() => sortMocks(mocks.filter((m) => m.exam === exam)), [mocks, exam]);
   const shown = list.slice(-Number(range));
@@ -155,7 +171,30 @@ export default function MocksPage() {
           </button>
         }
       />
-      <div className="row between">
+      <section className="card hero full-mock" aria-labelledby="fm-h">
+        <div className="row nowrap" style={{ gap: 12 }}>
+          <div style={{ fontSize: '2.4rem' }} aria-hidden="true">
+            🐱
+          </div>
+          <div className="grow">
+            <h2 id="fm-h" style={{ margin: 0 }}>
+              Uygulamada tam deneme çöz
+            </h2>
+            <p className="small muted" style={{ margin: '4px 0 10px' }}>
+              Gerçek sınav düzeninde: süre, soru sayısı ve ders sırası YKS ile aynı. Bitince netlerin ders ders çıkar ve deneme listene otomatik eklenir.
+            </p>
+            <div className="row">
+              {(['TYT', 'AYT'] as const).map((e) => (
+                <button key={e} type="button" className="btn primary" onClick={() => setStartExam(e)}>
+                  {e === 'TYT' ? 'TYT · 120 soru · 165 dk' : 'AYT Sayısal · 80 soru · 180 dk'}
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <div className="row between section">
         <Segmented label="Sınav" value={exam} onChange={setExam} options={[{ value: 'TYT', label: 'TYT' }, { value: 'AYT', label: 'AYT (Sayısal)' }]} />
         <Segmented label="Aralık" value={range} onChange={setRange} options={[{ value: '5', label: 'Son 5' }, { value: '10', label: 'Son 10' }]} />
       </div>
@@ -255,6 +294,20 @@ export default function MocksPage() {
             update((s) => deleteMock(s, del.id));
             setDel(null);
           }}
+        />
+      )}
+      {startExam && (
+        <ConfirmDialog
+          title={`${FULL_MOCKS[startExam].title} başlasın mı?`}
+          confirmLabel="Başlat"
+          message={
+            <>
+              {totalQuestions(FULL_MOCKS[startExam])} soru, {FULL_MOCKS[startExam].durationMin} dakika. Sınav modunda cevaplar sonda gösterilir; süre bitince deneme otomatik tamamlanır.
+              {hasActiveTest() && <b> Devam eden testin kapanacak.</b>}
+            </>
+          }
+          onCancel={() => setStartExam(null)}
+          onConfirm={() => void startFullMock(startExam)}
         />
       )}
     </>

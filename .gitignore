@@ -33,3 +33,4 @@ cikti-ag/
 yks/node_modules/
 yks/dist/
 yks/coverage/
+yks/*.tsbuildinfo

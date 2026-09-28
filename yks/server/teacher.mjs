@@ -16,7 +16,12 @@ export const TEACHER_ACTIONS = {
   yanlislar: 'Öğrencinin yanlışlar listesine bakarak ortak hata kalıplarını bul ve somut bir çalışma önerisi ver.',
   bugun: 'Öğrencinin verilerine bakarak bugün ne çalışması gerektiğini somut bir plan halinde öner. Veri yoksa bunu açıkça söyle.',
   serbest: 'Öğrencinin sorusunu cevapla.',
+  foto: 'Fotoğraftaki soruyu oku; önce soruyu kısaca yaz, sonra adım adım çöz ve doğru seçeneği belirt. Fotoğraf okunaksızsa bunu söyle ve tahmin yürütme.',
 };
+
+const IMAGE_TYPES = new Set(['image/jpeg', 'image/png', 'image/webp', 'image/gif']);
+/** base64 karakter sınırı (~5 MB görüntü). */
+const MAX_IMAGE_B64 = 7_000_000;
 
 const MAX_MESSAGE = 4000;
 const MAX_CONTEXT_FIELD = 6000;
@@ -47,8 +52,18 @@ export function validateTeacherRequest(body) {
         .slice(-MAX_HISTORY)
         .map((m) => ({ role: m.role === 'user' ? 'user' : 'assistant', content: clip(m.text, MAX_MESSAGE) }))
     : [];
-  const teacherName = clip(body.teacherName, 40).trim() || 'Cuma Öğretmen';
-  return { value: { action, message, context, history, teacherName } };
+  const teacherName = clip(body.teacherName, 40).trim() || 'Asistanın';
+  let image = null;
+  if (body.image != null) {
+    const mediaType = body.image && typeof body.image.mediaType === 'string' ? body.image.mediaType : '';
+    const data = body.image && typeof body.image.data === 'string' ? body.image.data : '';
+    if (!IMAGE_TYPES.has(mediaType) || !data || data.length > MAX_IMAGE_B64 || !/^[A-Za-z0-9+/=]+$/.test(data)) {
+      return { error: 'Fotoğraf okunamadı (JPEG/PNG/WebP, en fazla ~5 MB).' };
+    }
+    image = { mediaType, data };
+  }
+  if (action === 'foto' && !image) return { error: 'Çözülecek fotoğraf eklenmedi.' };
+  return { value: { action, message, context, history, teacherName, image } };
 }
 
 export function buildSystemPrompt(teacherName) {
@@ -77,12 +92,18 @@ const CONTEXT_LABELS = {
   statsSummary: 'Öğrencinin çalışma verisi',
 };
 
-export function buildUserContent({ action, message, context }) {
+export function buildUserContent({ action, message, context, image }) {
   const lines = [`Görev: ${TEACHER_ACTIONS[action]}`];
   const ctxLines = Object.entries(context).map(([k, v]) => `### ${CONTEXT_LABELS[k] ?? k}\n${v}`);
   if (ctxLines.length) lines.push('', '## Bağlam', ...ctxLines);
   if (message) lines.push('', '## Öğrencinin mesajı', message);
-  return lines.join('\n');
+  const text = lines.join('\n');
+  if (!image) return text;
+  // Görsel, metinden önce verilir.
+  return [
+    { type: 'image', source: { type: 'base64', media_type: image.mediaType, data: image.data } },
+    { type: 'text', text },
+  ];
 }
 
 /** Basit, bellek içi IP başına hız sınırı. */

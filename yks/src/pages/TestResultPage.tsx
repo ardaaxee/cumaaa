@@ -13,6 +13,8 @@ import { formatDay, formatDuration } from '../utils/date';
 import { optionLetter } from '../utils/ids';
 import { formatNet, percent } from '../utils/net';
 import { breakdown, scoreTest, type AnswerState } from '../utils/testEngine';
+import { FULL_MOCKS, mockSectionsFromAnswers } from '../utils/fullMock';
+import { calcNet } from '../utils/net';
 
 const STATE_LABEL: Record<AnswerState, string> = { dogru: 'Doğru', yanlis: 'Yanlış', bos: 'Boş' };
 
@@ -64,6 +66,46 @@ export default function TestResultPage({ params }: { params: string[] }) {
         <Stat label="Süre" value={formatDuration(score.durationMs)} />
         <Stat label="Soru başına" value={formatDuration(score.avgMsPerQuestion)} sub="ortalama" />
       </section>
+
+      {result.config.origin === 'deneme' && (result.config.exam === 'TYT' || result.config.exam === 'AYT') && (
+        <section className="card section" aria-labelledby="sec-h">
+          <div className="card-head">
+            <h2 id="sec-h">Ders ders netler</h2>
+            <a className="btn small" href="#/denemeler">
+              Deneme grafiğim
+            </a>
+          </div>
+          <table className="data-table">
+            <thead>
+              <tr>
+                <th>Bölüm</th>
+                <th>D</th>
+                <th>Y</th>
+                <th>B</th>
+                <th>Net</th>
+              </tr>
+            </thead>
+            <tbody>
+              {mockSectionsFromAnswers(
+                result.config.exam,
+                result.questionIds.map((id) => byId.get(id)).filter((q): q is Question => !!q),
+                result.answers,
+              ).map((sec) => (
+                <tr key={sec.key}>
+                  <td>{FULL_MOCKS[result.config.exam as 'TYT' | 'AYT'].parts.find((p) => p.section === sec.key)?.label}</td>
+                  <td>{sec.correct}</td>
+                  <td>{sec.wrong}</td>
+                  <td>{sec.blank}</td>
+                  <td>
+                    <b>{formatNet(calcNet(sec.correct, sec.wrong))}</b>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+          <p className="tiny muted mt-8">Bu deneme “Denemeler” sayfasına otomatik kaydedildi. Sorular uygulamanın özgün ÖSYM tarzı sorularıdır.</p>
+        </section>
+      )}
 
       <div className="row section">
         {wrongIds.length > 0 && (
