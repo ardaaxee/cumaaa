@@ -2,6 +2,7 @@ import { useEffect, useId, useRef, useState } from 'react';
 import { Icon, type IconName } from './Icon';
 import { sectionOf } from './Layout';
 import { href, useRoute } from '../hooks/useRoute';
+import { useSelector } from '../store/store';
 
 /**
  * Karakter tabanlı gezinme. Alt şeritte oturan hayvanlar:
@@ -28,6 +29,9 @@ const MENU: MenuItem[] = [
   { path: '/kartlar', label: 'Bilgi Kartları', icon: 'cards', tint: '#fde6ec' },
   { path: '/formuller', label: 'Formüller', icon: 'formula', tint: '#e3effd' },
   { path: '/rozetler', label: 'Rozetlerim', icon: 'trophy', tint: '#fff3cf' },
+  { path: '/pandam', label: 'Pandam', icon: 'sparkle', tint: '#e5f5ec' },
+  { path: '/kaydedilenler', label: 'Kaydettiklerim', icon: 'star', tint: '#fdeedd' },
+  { path: '/karne', label: 'Haftalık karne', icon: 'chart', tint: '#e2f4f3' },
   { path: '/ogretmen', label: 'Asistanım', icon: 'teacher', tint: '#ece8f3' },
   { path: '/yanlislar', label: 'Yanlışlarım', icon: 'alert', tint: '#fde4e1' },
   { path: '/odak', label: 'Odak', icon: 'timer', tint: '#e6f0dc' },
@@ -38,9 +42,79 @@ const MENU: MenuItem[] = [
 ];
 
 /** Oturan, tam gövdeli yavru panda. */
-export function PandaBody({ size = 64, waving = false }: { size?: number; waving?: boolean }) {
+/** Panda aksesuarları (seviye ile açılır). Baş/gövde koordinatları PandaBody'ye göredir. */
+function PandaItems({ items, layer }: { items: string[]; layer: 'back' | 'front' }) {
+  const has = (i: string) => items.includes(i);
+  if (layer === 'back') {
+    return has('kulaklik') ? <path d="M17 26 Q17 4 40 4 Q63 4 63 26" stroke="#5b3fa0" strokeWidth="3.5" fill="none" strokeLinecap="round" /> : null;
+  }
+  return (
+    <>
+      {has('atki') && (
+        <g>
+          <path d="M22 45 Q40 52 58 45 L58 50 Q40 57 22 50 Z" fill="#e8674f" />
+          <path d="M50 49 l3 13 l6 -2 l-4 -12 z" fill="#d85641" />
+          <path d="M28 47 v5 M34 48.5 v5 M40 49 v5 M46 48.5 v5" stroke="#f6b0a3" strokeWidth="1.2" />
+        </g>
+      )}
+      {has('papyon') && !has('atki') && (
+        <g>
+          <path d="M40 47 l-8 -4 v8 z M40 47 l8 -4 v8 z" fill="#f06a9b" />
+          <circle cx="40" cy="47" r="2.2" fill="#d44f82" />
+        </g>
+      )}
+      {has('gozluk') && (
+        <g stroke="#3a2a55" strokeWidth="1.6" fill="rgba(200,230,255,.25)">
+          <circle cx="30" cy="28" r="7.5" />
+          <circle cx="50" cy="28" r="7.5" />
+          <path d="M37.5 28 h5" fill="none" />
+        </g>
+      )}
+      {has('kulaklik') && (
+        <g fill="#7c5cd6">
+          <rect x="12" y="22" width="8" height="13" rx="4" />
+          <rect x="60" y="22" width="8" height="13" rx="4" />
+        </g>
+      )}
+      {has('cicek') && !has('kep') && !has('tac') && (
+        <g>
+          {[20, 30, 40, 50, 60].map((x, i) => (
+            <g key={x} transform={`translate(${x} ${i % 2 ? 9 : 11})`}>
+              <circle r="3.4" fill={['#f7a1c4', '#ffd166', '#a0d8ef', '#f7a1c4', '#b8e0a8'][i]} />
+              <circle r="1.3" fill="#fff6d5" />
+            </g>
+          ))}
+        </g>
+      )}
+      {has('kep') && !has('tac') && (
+        <g>
+          <path d="M40 2 L64 11 L40 20 L16 11 Z" fill="#2f2830" />
+          <rect x="30" y="13" width="20" height="6" fill="#2f2830" />
+          <path d="M62 11 v10" stroke="#ffd166" strokeWidth="1.6" />
+          <circle cx="62" cy="22" r="1.8" fill="#ffd166" />
+        </g>
+      )}
+      {has('tac') && (
+        <g>
+          <path d="M26 14 L28 2 L34 9 L40 0 L46 9 L52 2 L54 14 Z" fill="#ffc53d" stroke="#e0a100" strokeWidth="1" />
+          <circle cx="40" cy="7" r="1.8" fill="#f06a9b" />
+        </g>
+      )}
+      {has('kalem') && (
+        <g transform="rotate(-35 64 60)">
+          <rect x="61" y="44" width="5" height="22" rx="1" fill="#ffc53d" />
+          <path d="M61 66 L63.5 71 L66 66 Z" fill="#f3d2a2" />
+          <rect x="61" y="42" width="5" height="3" fill="#f06a9b" />
+        </g>
+      )}
+    </>
+  );
+}
+
+export function PandaBody({ size = 64, waving = false, items = [], sleepy = false }: { size?: number; waving?: boolean; items?: string[]; sleepy?: boolean }) {
   return (
     <svg viewBox="0 0 80 80" width={size} height={size} aria-hidden="true" className="panda-body">
+      <PandaItems items={items} layer="back" />
       <ellipse cx="40" cy="76" rx="24" ry="3.5" fill="rgba(60,40,20,.12)" />
       {/* gövde */}
       <ellipse cx="40" cy="58" rx="21" ry="17" fill="#fbfbfa" stroke="#e8e2da" strokeWidth="1.2" />
@@ -61,12 +135,24 @@ export function PandaBody({ size = 64, waving = false }: { size?: number; waving
       <ellipse cx="40" cy="28" rx="23" ry="20" fill="#fffefc" stroke="#e8e2da" strokeWidth="1.2" />
       <ellipse cx="30" cy="28" rx="6.5" ry="7.5" fill="#2f2830" transform="rotate(-15 30 28)" />
       <ellipse cx="50" cy="28" rx="6.5" ry="7.5" fill="#2f2830" transform="rotate(15 50 28)" />
-      <circle cx="31" cy="28" r="2.4" fill="#fff" />
-      <circle cx="49" cy="28" r="2.4" fill="#fff" />
+      {sleepy ? (
+        <path d="M27 29 q3 2.5 6 0 M47 29 q3 2.5 6 0" stroke="#fff" strokeWidth="1.6" fill="none" strokeLinecap="round" />
+      ) : (
+        <>
+          <circle cx="31" cy="28" r="2.4" fill="#fff" />
+          <circle cx="49" cy="28" r="2.4" fill="#fff" />
+        </>
+      )}
       <ellipse cx="40" cy="36" rx="3.4" ry="2.4" fill="#2f2830" />
-      <path d="M36 40 Q40 43 44 40" stroke="#2f2830" strokeWidth="1.6" fill="none" strokeLinecap="round" />
+      <path d={sleepy ? 'M37 41 Q40 42 43 41' : 'M36 40 Q40 43 44 40'} stroke="#2f2830" strokeWidth="1.6" fill="none" strokeLinecap="round" />
       <ellipse cx="24" cy="37" rx="4" ry="2.4" fill="#f7c6d3" opacity=".8" />
       <ellipse cx="56" cy="37" rx="4" ry="2.4" fill="#f7c6d3" opacity=".8" />
+      <PandaItems items={items} layer="front" />
+      {sleepy && (
+        <text x="62" y="14" fontSize="9" fontWeight="700" fill="#7c5cd6">
+          z<tspan fontSize="7" dy="-4">z</tspan>
+        </text>
+      )}
     </svg>
   );
 }
@@ -158,6 +244,7 @@ export function MascotNav() {
   const pandaBtnRef = useRef<HTMLButtonElement>(null);
   const timers = useRef<number[]>([]);
   const section = sectionOf(route.path);
+  const petItems = useSelector((s) => s.settings.pet.items);
   const menuOpen = phase === 'stood';
   const exam = route.query.get('sinav');
   const onTests = section === '/testler';
@@ -281,7 +368,7 @@ export function MascotNav() {
           onClick={() => (phase === 'sit' ? openMenu() : phase === 'stood' ? closeMenu() : undefined)}
         >
           <span className="dock-panda-seat">
-            <PandaBody size={58} />
+            <PandaBody size={58} items={petItems} />
           </span>
           <span className="dock-label">Menü</span>
         </button>

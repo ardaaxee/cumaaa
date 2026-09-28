@@ -19,6 +19,7 @@ import { formatNet } from '../utils/net';
 import { dueReviews } from '../utils/srs';
 import { dashboard } from '../utils/stats';
 import { computeBadges } from '../utils/badges';
+import { petStatus } from '../utils/pet';
 
 /** Uygulamaya özgü kısa moral cümleleri; tarihe göre her gün biri seçilir. */
 const CHEERS = [
@@ -68,6 +69,7 @@ export default function HomePage() {
   const overdue = state.tasks.filter((t) => t.date < today && !t.done);
   const { profile } = state;
   const cardsDue = Object.values(state.cards).filter((c) => c.dueDay <= today).length;
+  const pet = useMemo(() => petStatus(state, today), [state, today]);
   const earnedBadges = useMemo(() => computeBadges(state, today).filter((b) => b.earned).length, [state, today]);
   const daysLeft = profile.examDate ? diffDays(today, profile.examDate) : null;
   const qPct = profile.dailyQuestionGoal ? (d.todayQuestions / profile.dailyQuestionGoal) * 100 : 0;
@@ -89,11 +91,12 @@ export default function HomePage() {
               : 'Küçük adımlar, büyük hayaller. Bugün kendin için bir adım at.'}
           </p>
         </div>
-        <div className="hero-mascot-wrap" aria-hidden="true">
+        <div className="hero-mascot-wrap">
           <div className="speech">{cheerOfDay(today)}</div>
-          <div className="hero-mascot">
-            <PandaBody size={96} waving />
-          </div>
+          <a className="hero-mascot" href="#/pandam" aria-label={`${state.settings.pet.name}: seviye ${pet.level}`}>
+            <PandaBody size={96} waving={pet.mood !== 'uykulu'} sleepy={pet.mood === 'uykulu'} items={state.settings.pet.items} />
+            <span className="pet-level">Sv. {pet.level}</span>
+          </a>
         </div>
       </section>
 
@@ -118,6 +121,16 @@ export default function HomePage() {
           <span className="quick-emoji" aria-hidden="true">📐</span>
           <b>Formül defteri</b>
           <span className="tiny muted">Tüm formüller tek yerde</span>
+        </a>
+        <a className="quick-tile t-mint" href="#/pandam">
+          <span className="quick-emoji" aria-hidden="true">🐼</span>
+          <b>{state.settings.pet.name}</b>
+          <span className="tiny muted">Seviye {pet.level} · {pet.todayXp} XP bugün</span>
+        </a>
+        <a className="quick-tile t-sky" href="#/karne">
+          <span className="quick-emoji" aria-hidden="true">📊</span>
+          <b>Haftalık karne</b>
+          <span className="tiny muted">Bu haftanın özeti</span>
         </a>
         <a className="quick-tile t-peach" href="#/rozetler">
           <span className="quick-emoji" aria-hidden="true">🏅</span>

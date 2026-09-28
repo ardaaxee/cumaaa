@@ -437,3 +437,16 @@ export function gradeCard(state: AppState, cardId: string, grade: CardGrade, tod
   };
   return { ...state, cards: { ...state.cards, [cardId]: next } };
 }
+
+// ---------- Kaydedilen sorular ----------
+
+export function toggleFavorite(state: AppState, questionId: string, now: Date = new Date()): AppState {
+  if (state.favorites[questionId]) {
+    const favorites = { ...state.favorites };
+    delete favorites[questionId];
+    return { ...state, favorites, deleted: tomb(state, [`fav:${questionId}`], now) };
+  }
+  const deleted = { ...state.deleted };
+  delete deleted[`fav:${questionId}`];
+  return { ...state, favorites: { ...state.favorites, [questionId]: now.toISOString() }, deleted };
+}

@@ -81,6 +81,7 @@ export function mergeStates({ local, localChangedAt, remote, remoteChangedAt }: 
     chat: mergeList(local.chat, remote.chat, deleted, remoteNewer, (m) => m.at).slice(-200),
     notebookPages: mergeList(local.notebookPages, remote.notebookPages, deleted, remoteNewer),
     cards: mergeRecord(local.cards, remote.cards, newerCard, deleted),
+    favorites: mergeRecord(local.favorites, remote.favorites, (a, b) => (a >= b ? a : b), deleted, 'fav:'),
     deleted,
     legacy: local.legacy ?? remote.legacy,
   };

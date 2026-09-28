@@ -36,6 +36,8 @@ export interface Settings {
   aiServerUrl: string;
   /** Bulut eşitleme (Firebase Firestore). Boş alanlar = kapalı. */
   cloud: CloudSettings;
+  /** Panda arkadaşın adı ve taktığı aksesuarlar. */
+  pet: { name: string; items: string[] };
 }
 
 export interface TopicProgress {
@@ -267,6 +269,8 @@ export interface AppState {
   cards: Record<string, CardState>;
   /** Silinen kayıtların izi (id → ISO zaman). Bulut eşitlemesinde silinenlerin geri gelmesini önler. */
   deleted: Record<string, string>;
+  /** Kaydedilen (favori) sorular: soru id → kaydedilme zamanı. */
+  favorites: Record<string, string>;
   /** Eski sürümden gelen, güne atanamayan toplamlar (yalnız toplam istatistiğe eklenir). */
   legacy: LegacyTotals | null;
 }
@@ -296,6 +300,7 @@ export function defaultState(): AppState {
       teacherPhotoFocusY: 35,
       aiServerUrl: '',
       cloud: { projectId: '', apiKey: '', syncCode: '', shareCode: '' },
+      pet: { name: 'Bambu', items: [] },
     },
     topicProgress: {},
     attempts: [],
@@ -318,6 +323,7 @@ export function defaultState(): AppState {
     notebookPages: [],
     cards: {},
     deleted: {},
+    favorites: {},
     legacy: null,
   };
 }

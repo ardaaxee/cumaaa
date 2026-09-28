@@ -221,6 +221,7 @@ export function sanitize(raw: Json): AppState {
   const settings = isObj(raw.settings) ? raw.settings : {};
   const pomodoro = isObj(raw.pomodoro) ? raw.pomodoro : {};
   const cloudRaw = isObj(settings.cloud) ? settings.cloud : {};
+  const petRaw = isObj(settings.pet) ? settings.pet : {};
   const themeRaw = settings.theme;
   return {
     ...base,
@@ -254,6 +255,10 @@ export function sanitize(raw: Json): AppState {
         syncCode: /^[A-Za-z0-9]{20,64}$/.test(str(cloudRaw.syncCode)) ? str(cloudRaw.syncCode) : '',
         shareCode: /^[A-Za-z0-9]{20,64}$/.test(str(cloudRaw.shareCode)) ? str(cloudRaw.shareCode) : '',
       },
+      pet: {
+        name: str(petRaw.name).trim().slice(0, 20) || 'Bambu',
+        items: arr(petRaw.items).filter((x): x is string => typeof x === 'string').slice(0, 12),
+      },
       aiServerUrl: /^https:\/\/[^\s]+$/.test(str(settings.aiServerUrl)) ? str(settings.aiServerUrl).slice(0, 200) : '',
     } as AppState['settings'],
     topicProgress: isObj(raw.topicProgress) ? (raw.topicProgress as AppState['topicProgress']) : {},
@@ -286,6 +291,9 @@ export function sanitize(raw: Json): AppState {
       : {},
     deleted: isObj(raw.deleted)
       ? (Object.fromEntries(Object.entries(raw.deleted).filter(([, v]) => typeof v === 'string')) as AppState['deleted'])
+      : {},
+    favorites: isObj(raw.favorites)
+      ? (Object.fromEntries(Object.entries(raw.favorites).filter(([, v]) => typeof v === 'string')) as AppState['favorites'])
       : {},
     legacy: isObj(raw.legacy) ? (raw.legacy as unknown as AppState['legacy']) : null,
   };

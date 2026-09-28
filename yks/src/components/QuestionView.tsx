@@ -1,6 +1,8 @@
 import type { Question } from '../domain/types';
 import { OPTION_LETTERS } from '../utils/ids';
-import { SourceBadge } from './ui';
+import { SourceBadge, toast } from './ui';
+import { toggleFavorite } from '../store/actions';
+import { update, useSelector } from '../store/store';
 
 const ROMAN = ['I', 'II', 'III', 'IV', 'V', 'VI'];
 
@@ -32,7 +34,29 @@ export function QuestionMeta({ q, topicName }: { q: Question; topicName?: string
       {topicName && <span className="badge">{topicName}</span>}
       <span className="badge outline">{DIFFICULTY_LABEL[q.difficulty]}</span>
       <span className="badge outline">{TYPE_LABEL[q.type]}</span>
+      <FavoriteButton id={q.id} />
     </div>
+  );
+}
+
+/** Soruyu "Kaydettiğim sorular"a ekler / çıkarır. */
+export function FavoriteButton({ id }: { id: string }) {
+  const saved = useSelector((s) => !!s.favorites[id]);
+  return (
+    <button
+      type="button"
+      className={`fav-btn${saved ? ' on' : ''}`}
+      aria-pressed={saved}
+      aria-label={saved ? 'Kaydedilenlerden çıkar' : 'Soruyu kaydet'}
+      title={saved ? 'Kaydedilenlerden çıkar' : 'Soruyu kaydet'}
+      onClick={(e) => {
+        e.stopPropagation();
+        update((s) => toggleFavorite(s, id));
+        if (!saved) toast('Soru kaydedildi ⭐');
+      }}
+    >
+      {saved ? '★' : '☆'} {saved ? 'Kaydedildi' : 'Kaydet'}
+    </button>
   );
 }
 

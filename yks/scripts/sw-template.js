@@ -16,6 +16,21 @@ self.addEventListener('activate', (event) => {
   );
 });
 
+// Önbellek stratejisi (eski sürümde takılı kalmamak için):
+// - Sayfa (HTML) ve sabit adlı dosyalar: önce ağ, ağ yoksa önbellek.
+// - /assets/ altındaki dosyalar içerik özetiyle adlandırıldığı için değişmez: önce önbellek.
+function networkFirst(request, fallbackUrl) {
+  return fetch(request)
+    .then((response) => {
+      if (response.ok && response.type === 'basic') {
+        const copy = response.clone();
+        caches.open(CACHE).then((cache) => cache.put(fallbackUrl || request, copy));
+      }
+      return response;
+    })
+    .catch(() => caches.match(fallbackUrl || request, { ignoreSearch: true }));
+}
+
 self.addEventListener('fetch', (event) => {
   const request = event.request;
   if (request.method !== 'GET') return;
@@ -24,22 +39,26 @@ self.addEventListener('fetch', (event) => {
   if (url.pathname.includes('/api/')) return;
 
   if (request.mode === 'navigate') {
+    event.respondWith(networkFirst(request, './index.html'));
+    return;
+  }
+
+  if (url.pathname.includes('/assets/')) {
     event.respondWith(
-      fetch(request).catch(() => caches.match('./index.html', { ignoreSearch: true })),
+      caches.match(request).then(
+        (cached) =>
+          cached ||
+          fetch(request).then((response) => {
+            if (response.ok && response.type === 'basic') {
+              const copy = response.clone();
+              caches.open(CACHE).then((cache) => cache.put(request, copy));
+            }
+            return response;
+          }),
+      ),
     );
     return;
   }
 
-  event.respondWith(
-    caches.match(request, { ignoreSearch: true }).then((cached) => {
-      if (cached) return cached;
-      return fetch(request).then((response) => {
-        if (response.ok && response.type === 'basic') {
-          const copy = response.clone();
-          caches.open(CACHE).then((cache) => cache.put(request, copy));
-        }
-        return response;
-      });
-    }),
-  );
+  event.respondWith(networkFirst(request));
 });
