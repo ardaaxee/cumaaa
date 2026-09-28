@@ -1,8 +1,9 @@
-import type { LessonSeed, Question, QuestionSeed } from '../domain/types';
+import type { LessonSeed, Question, QuestionSeed, SubjectId } from '../domain/types';
 import { getTopicRef } from './curriculum';
 
 type LessonModule = { lessons: LessonSeed[] };
 type QuestionModule = { questions: QuestionSeed[] };
+type Loader<T> = () => Promise<T>;
 
 const lessonModules = import.meta.glob<LessonModule>('./lessons/*.ts');
 const questionModules = import.meta.glob<QuestionModule>('./questions/*.ts');
@@ -10,8 +11,13 @@ const questionModules = import.meta.glob<QuestionModule>('./questions/*.ts');
 /** İçerik dosyalarının oluşturulma tarihi (soru bankası sürümü). */
 export const CONTENT_CREATED_AT = '2026-09-27';
 
-let lessonCache: Promise<Map<string, LessonSeed>> | null = null;
-let questionCache: Promise<Question[]> | null = null;
+/** Dosya adı dersin kimliğiyle başlar: "./lessons/ayt-fizik-1.ts" → ayt-fizik. */
+function loadersFor<T>(modules: Record<string, Loader<T>>, subjectId: string): Loader<T>[] {
+  const re = new RegExp(`/${subjectId}(-[^/]*)?\\.ts$`);
+  return Object.entries(modules)
+    .filter(([path]) => re.test(path))
+    .map(([, load]) => load);
+}
 
 export function normalizeQuestion(seed: QuestionSeed): Question | null {
   const ref = getTopicRef(seed.topic);
@@ -26,29 +32,60 @@ export function normalizeQuestion(seed: QuestionSeed): Question | null {
   };
 }
 
-export function loadLessons(): Promise<Map<string, LessonSeed>> {
-  if (!lessonCache) {
-    lessonCache = Promise.all(Object.values(lessonModules).map((load) => load())).then((mods) => {
+const subjectLessonCache = new Map<string, Promise<Map<string, LessonSeed>>>();
+const subjectQuestionCache = new Map<string, Promise<Question[]>>();
+let allQuestionCache: Promise<Question[]> | null = null;
+
+/** Yalnız bir dersin konu anlatımlarını yükler (telefonda hızlı açılış için). */
+export function loadSubjectLessons(subjectId: SubjectId | string): Promise<Map<string, LessonSeed>> {
+  let p = subjectLessonCache.get(subjectId);
+  if (!p) {
+    p = Promise.all(loadersFor(lessonModules, subjectId).map((load) => load())).then((mods) => {
       const map = new Map<string, LessonSeed>();
       for (const mod of mods) for (const lesson of mod.lessons) map.set(lesson.topicId, lesson);
       return map;
     });
+    subjectLessonCache.set(subjectId, p);
   }
-  return lessonCache;
+  return p;
 }
 
 export async function loadLesson(topicId: string): Promise<LessonSeed | undefined> {
-  return (await loadLessons()).get(topicId);
+  const ref = getTopicRef(topicId);
+  if (!ref) return undefined;
+  return (await loadSubjectLessons(ref.subject.id)).get(topicId);
 }
 
+/** Yalnız bir dersin soru bankasını yükler. */
+export function loadSubjectQuestions(subjectId: SubjectId | string): Promise<Question[]> {
+  let p = subjectQuestionCache.get(subjectId);
+  if (!p) {
+    p = Promise.all(loadersFor(questionModules, subjectId).map((load) => load())).then((mods) =>
+      mods
+        .flatMap((m) => m.questions)
+        .map(normalizeQuestion)
+        .filter((q): q is Question => q !== null),
+    );
+    subjectQuestionCache.set(subjectId, p);
+  }
+  return p;
+}
+
+export async function loadTopicQuestions(topicId: string): Promise<Question[]> {
+  const ref = getTopicRef(topicId);
+  if (!ref) return [];
+  return (await loadSubjectQuestions(ref.subject.id)).filter((q) => q.topic === topicId);
+}
+
+/** Tüm soru bankası (karışık testler için). */
 export function loadQuestions(): Promise<Question[]> {
-  if (!questionCache) {
-    questionCache = Promise.all(Object.values(questionModules).map((load) => load())).then((mods) =>
+  if (!allQuestionCache) {
+    allQuestionCache = Promise.all(Object.values(questionModules).map((load) => load())).then((mods) =>
       mods
         .flatMap((m) => m.questions)
         .map(normalizeQuestion)
         .filter((q): q is Question => q !== null),
     );
   }
-  return questionCache;
+  return allQuestionCache;
 }

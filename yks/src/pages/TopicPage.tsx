@@ -1,7 +1,9 @@
 import { useEffect, useMemo, useState } from 'react';
 import { getTopicRef, subjectLabel } from '../data/curriculum';
-import { loadLesson, loadQuestions } from '../data/content';
-import type { LessonSeed } from '../domain/types';
+import { loadLesson, loadTopicQuestions } from '../data/content';
+import type { LessonSeed, Question } from '../domain/types';
+import { InlineQuiz } from '../components/InlineQuiz';
+import { pickQuestions } from '../utils/testEngine';
 import { Icon } from '../components/Icon';
 import { PageHeader } from '../components/Layout';
 import { ConfirmDialog, Empty, SourceBadge, Spinner, Stat, toast } from '../components/ui';
@@ -9,7 +11,7 @@ import { href, navigate } from '../hooks/useRoute';
 import { launchTest, makeConfig, hasActiveTest } from '../services/testLauncher';
 import { addNotebookPage, markReviewDone, setTopicStatus } from '../store/actions';
 import type { TopicStatus } from '../store/schema';
-import { update, useAppState } from '../store/store';
+import { getState, update, useAppState } from '../store/store';
 import { recentTopicPerformance, weakTopics } from '../utils/analysis';
 import { dayKey, formatDay } from '../utils/date';
 import { isDue, stageLabel } from '../utils/srs';
@@ -56,6 +58,15 @@ function LessonView({ lesson }: { lesson: LessonSeed }) {
             {label}
           </a>
         ))}
+        <a
+          href="#konu-sonu"
+          onClick={(e) => {
+            e.preventDefault();
+            document.getElementById('konu-sonu')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          }}
+        >
+          Konu sonu soruları ✎
+        </a>
       </nav>
 
       <section id="sec-giris">
@@ -172,12 +183,18 @@ export default function TopicPage({ params }: { params: string[] }) {
   const state = useAppState();
   const [lesson, setLesson] = useState<LessonSeed | null | undefined>(undefined);
   const [qCount, setQCount] = useState<number | null>(null);
+  const [topicQs, setTopicQs] = useState<Question[]>([]);
+  const [quizRound, setQuizRound] = useState(0);
   const [pending, setPending] = useState<null | (() => void)>(null);
 
   useEffect(() => {
     let alive = true;
     loadLesson(topicId).then((l) => alive && setLesson(l ?? null));
-    loadQuestions().then((qs) => alive && setQCount(qs.filter((q) => q.topic === topicId).length));
+    loadTopicQuestions(topicId).then((qs) => {
+      if (!alive) return;
+      setQCount(qs.length);
+      setTopicQs(qs);
+    });
     return () => {
       alive = false;
     };
@@ -185,6 +202,12 @@ export default function TopicPage({ params }: { params: string[] }) {
 
   const perf = useMemo(() => recentTopicPerformance(state.attempts, topicId, 5), [state.attempts, topicId]);
   const weak = useMemo(() => weakTopics(state).find((w) => w.topicId === topicId), [state, topicId]);
+  // Tur başına sabit 5 soru; önce hiç çözülmemiş sorular. (Cevap verdikçe yeniden karışmaz.)
+  const quizSet = useMemo(() => {
+    const ids = pickQuestions(topicQs, 5, getState().attempts);
+    return ids.map((id) => topicQs.find((q) => q.id === id)!).filter(Boolean);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [topicQs, quizRound]);
 
   if (!ref) {
     return (
@@ -237,7 +260,7 @@ export default function TopicPage({ params }: { params: string[] }) {
         </div>
         <div className="field mt-12">
           <span className="field-label" id="status-label">Konu durumu</span>
-          <div className="segmented" role="radiogroup" aria-labelledby="status-label">
+          <div className="segmented full" role="radiogroup" aria-labelledby="status-label">
             {(['baslanmadi', 'calisiliyor', 'tamamlandi'] as TopicStatus[]).map((s) => (
               <button key={s} type="button" role="radio" aria-checked={status === s} aria-pressed={status === s} onClick={() => setStatus(s)}>
                 {s === 'baslanmadi' ? 'Başlanmadı' : s === 'calisiliyor' ? 'Çalışıyorum' : 'Tamamlandı'}
@@ -291,6 +314,26 @@ export default function TopicPage({ params }: { params: string[] }) {
 
       <div className="card section">
         {lesson === undefined ? <Spinner label="Konu anlatımı yükleniyor" /> : lesson === null ? <Empty title="Bu konunun anlatımı henüz eklenmedi." /> : <LessonView lesson={lesson} />}
+      </div>
+
+      <div className="card section" id="konu-sonu">
+        <div className="card-head">
+          <h2>Konu sonu soruları</h2>
+          <SourceBadge type="ozgun-pratik" />
+        </div>
+        <p className="small muted">Anlatımı bitirdin mi? Şimdi ÖSYM tarzında hazırlanmış {Math.min(5, topicQs.length)} soruyla kendini dene. Cevabını seçer seçmez doğru/yanlış ve çözüm açılır.</p>
+        {qCount == null ? (
+          <Spinner label="Sorular yükleniyor" />
+        ) : topicQs.length === 0 ? (
+          <Empty title="Bu konu için henüz soru yok." />
+        ) : (
+          <InlineQuiz
+            key={quizRound}
+            questions={quizSet}
+            topicName={ref.topic.name}
+            onMore={topicQs.length > 5 ? () => setQuizRound((r) => r + 1) : undefined}
+          />
+        )}
       </div>
 
       <div className="card section">

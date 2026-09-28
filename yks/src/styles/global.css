@@ -1420,3 +1420,11 @@ details.table-view summary {
   place-items: center;
   flex-shrink: 0;
 }
+
+/* Tam genişlikte, taşmayan segment (ör. konu durumu) */
+.segmented.full { display: flex; width: 100%; }
+.segmented.full button { flex: 1; padding: 0 6px; font-size: 0.9rem; }
+
+/* Sayfa içi soru çözme */
+.inline-quiz { display: grid; gap: 14px; }
+.inline-q { border: 1.5px solid var(--line); border-radius: var(--radius-sm); padding: 14px; background: var(--surface); }

@@ -3,6 +3,7 @@ import { SUBJECTS } from '../data/curriculum';
 import { Icon } from '../components/Icon';
 import { PageHeader } from '../components/Layout';
 import { PomodoroCard } from '../components/PomodoroCard';
+import { DailyQuestion } from '../components/DailyQuestion';
 import { Empty, ProgressBar, Stat, toast } from '../components/ui';
 import { navigate } from '../hooks/useRoute';
 import { lookup, topicLabel } from '../services/lookup';
@@ -209,6 +210,8 @@ export default function HomePage() {
           </a>
         </section>
       </div>
+
+      <DailyQuestion />
 
       <section className="card section" aria-labelledby="quick-h">
         <h2 id="quick-h" className="mb-8">

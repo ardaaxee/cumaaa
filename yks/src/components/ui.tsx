@@ -138,14 +138,14 @@ export function ConfirmDialog({
 
 const SOURCE_LABELS: Record<SourceType, string> = {
   'meb-program': 'MEB Programı ile eşleşmiş',
-  'ozgun-pratik': 'Özgün YKS Pratiği',
+  'ozgun-pratik': 'ÖSYM Tarzı • Özgün Pratik',
   'osym-resmi': 'Resmî ÖSYM bağlantısı',
   kullanici: 'Kullanıcı kaynağı',
 };
 
 const SOURCE_HINTS: Record<SourceType, string> = {
   'meb-program': 'Konu ve kazanımlar MEB ortaöğretim programı mantığıyla eşleştirilmiştir.',
-  'ozgun-pratik': 'Bu uygulama için yazılmış özgün pratik sorudur; ÖSYM sorusu değildir.',
+  'ozgun-pratik': 'ÖSYM sınav formatında, bu uygulama için yazılmış özgün sorudur; ÖSYM tarafından hazırlanmamıştır.',
   'osym-resmi': 'ÖSYM’nin resmî sayfasına bağlantıdır; içerik kopyalanmaz.',
   kullanici: 'Senin eklediğin kaynak.',
 };

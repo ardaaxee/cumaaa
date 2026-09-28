@@ -185,6 +185,50 @@ export function finishTest(state: AppState, byId: Map<string, Question>, now: Da
   };
 }
 
+/**
+ * Konu sonu / günün sorusu gibi test dışı tek soruluk pratiği kaydeder.
+ * İstatistik, yanlışlar defteri ve tekrar planı test sonuçlarıyla aynı şekilde güncellenir.
+ */
+export function recordPractice(
+  state: AppState,
+  q: Question,
+  answer: number | null,
+  sessionId: string,
+  timeMs = 0,
+  now: Date = new Date(),
+): AppState {
+  const iso = now.toISOString();
+  const today = dayKey(now);
+  const correct = answer != null && answer === q.correctAnswer;
+  const attempt: QuestionAttempt = {
+    id: uid('att'),
+    questionId: q.id,
+    topicId: q.topic,
+    subjectId: q.subject,
+    difficulty: q.difficulty,
+    answer,
+    correct,
+    timeMs,
+    at: iso,
+    day: today,
+    sessionId,
+  };
+  const wrongs = { ...state.wrongs };
+  const reviews = { ...state.reviews };
+  if (correct) {
+    const prev = wrongs[q.id];
+    if (prev) wrongs[q.id] = { ...prev, correctStreak: prev.correctStreak + 1 };
+  } else {
+    wrongs[q.id] = upsertWrong(wrongs[q.id], q, answer, iso);
+    if (answer != null) reviews[q.topic] = onWrongInTopic(q.topic, today, reviews[q.topic]);
+  }
+  const topicProgress =
+    !state.topicProgress[q.topic] || state.topicProgress[q.topic].status === 'baslanmadi'
+      ? { ...state.topicProgress, [q.topic]: { status: 'calisiliyor' as const, startedAt: iso } }
+      : state.topicProgress;
+  return { ...state, attempts: [...state.attempts, attempt], wrongs, reviews, topicProgress };
+}
+
 // ---------- Yanlışlar ----------
 
 export function setWrongLearned(state: AppState, questionId: string, learned: boolean, now: Date = new Date()): AppState {
