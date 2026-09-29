@@ -61,6 +61,11 @@ export default function FocusPage() {
     return () => clearInterval(id);
   }, [p.running]);
 
+  useEffect(() => {
+    document.body.classList.toggle('focus-immersive-mode', immersive);
+    return () => document.body.classList.remove('focus-immersive-mode');
+  }, [immersive]);
+
   const finishPhase = () => {
     if (completing.current) return;
     completing.current = true;
