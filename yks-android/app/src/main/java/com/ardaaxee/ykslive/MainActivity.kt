@@ -250,7 +250,7 @@ class MainActivity : Activity(), ScreenShareService.UiListener {
     }
 
     private fun normalizedRoom(): String =
-        roomInput.text.toString().uppercase(Locale.ROOT).filter { it.isLetterOrDigit() }.take(32)
+        roomInput.text.toString().uppercase(Locale.ROOT).filter { it.isLetterOrDigit() }.take(24)
 
     private fun roomFromIntent(intent: Intent?): String? {
         val uri = intent?.data ?: return null
