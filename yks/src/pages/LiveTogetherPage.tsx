@@ -154,7 +154,7 @@ export default function LiveTogetherPage() {
 
   const handleSignal = async (payload: SignalPayload) => {
     if (!payload || payload.from === clientId) return;
-    polite.current = clientId.localeCompare(payload.from) > 0;
+    polite.current = payload.from.startsWith('android-') || clientId.localeCompare(payload.from) > 0;
     const pc = ensurePeer();
 
     try {
