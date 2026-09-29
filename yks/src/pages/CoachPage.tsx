@@ -182,6 +182,17 @@ export default function CoachPage() {
         )}
       </section>
 
+      <section className="coach-start-strip section" aria-label="Hemen başla">
+        <a className="coach-start-main" href="#/odak">
+          <span className="coach-start-icon">◷</span>
+          <span className="grow">
+            <b>Şimdi {state.settings.focusMinutes} dakikalık odak başlat</b>
+            <small>Gerçek çalışma süren günlüğe ve Panda XP sistemine otomatik işlenir.</small>
+          </span>
+          <Icon name="right" />
+        </a>
+      </section>
+
       <section className="card section coach-plan-card" aria-labelledby="smart-plan-h">
         <div className="card-head">
           <div>
