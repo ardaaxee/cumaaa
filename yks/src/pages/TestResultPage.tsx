@@ -9,7 +9,7 @@ import { PageHeader } from '../components/Layout';
 import { DIFFICULTY_LABEL, Options, QuestionBody, QuestionMeta, SolutionBlock } from '../components/QuestionView';
 import { Empty, Segmented, LoadFailed, Spinner, Stat, toast } from '../components/ui';
 import { href } from '../hooks/useRoute';
-import { launchWithIds, makeConfig } from '../services/testLauncher';
+import { launchAdaptivePractice, launchWithIds, makeConfig } from '../services/testLauncher';
 import { useAppState } from '../store/store';
 import { formatDay, formatDuration } from '../utils/date';
 import { optionLetter } from '../utils/ids';
@@ -72,6 +72,20 @@ export default function TestResultPage({ params }: { params: string[] }) {
         </div>
       </section>
 
+      {result.config.origin === 'seviye' && (
+        <section className="card section diagnostic-result-card" aria-labelledby="diagnostic-h">
+          <div className="diagnostic-result-icon" aria-hidden="true">◎</div>
+          <div className="grow">
+            <div className="eyebrow">Seviye tespiti tamamlandı</div>
+            <h2 id="diagnostic-h">Kişisel çalışma profilin güncellendi</h2>
+            <p className="small muted">
+              Bu sonuçtaki konu, zorluk ve hata verileri Akıllı Koç tarafından kullanılıyor. Hakimiyet haritanı görüp 7 günlük planını şimdi yeniden hesaplayabilirsin.
+            </p>
+          </div>
+          <a className="btn primary" href="#/koc">Akıllı Koç'a git</a>
+        </section>
+      )}
+
       <section className="grid grid-4 section result-stats" aria-label="Detaylı özet">
         <Stat label="Doğruluk" value={score.accuracy != null ? `%${score.accuracy}` : '—'} sub="doğru / cevaplanan" />
         <Stat label="Süre" value={formatDuration(score.durationMs)} />
@@ -131,6 +145,11 @@ export default function TestResultPage({ params }: { params: string[] }) {
         <a className="btn ghost" href="#/yanlislar">
           Yanlışlarıma git
         </a>
+        {(result.config.origin === 'adaptif' || result.config.origin === 'seviye') && (
+          <button type="button" className="btn ghost" onClick={() => void launchAdaptivePractice(12).then((e) => e && toast(e))}>
+            Sonraki adaptif test
+          </button>
+        )}
       </div>
 
       <div className="grid grid-cards section">
