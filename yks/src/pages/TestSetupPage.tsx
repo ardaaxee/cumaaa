@@ -22,13 +22,22 @@ export default function TestSetupPage() {
     const presetExam = route.query.get('sinav');
     const presetSubjectId = route.query.get('ders');
     const presetTopicId = route.query.get('konu');
+    const presetSubtopicId = route.query.get('altkonu');
+    const presetDifficulty = route.query.get('zorluk');
+    const presetType = route.query.get('tip');
     const presetSubject = presetSubjectId ? getSubject(presetSubjectId) : undefined;
     const presetTopic = presetTopicId ? getTopicRef(presetTopicId) : undefined;
+    const validSubtopic = presetTopic?.topic.subtopics.some((s) => s.id === presetSubtopicId) ? presetSubtopicId! : 'all';
+    const validDifficulty = ['kolay', 'orta', 'zor', 'yeni-nesil'].includes(presetDifficulty ?? '') ? (presetDifficulty as Difficulty) : 'all';
+    const validType = Object.prototype.hasOwnProperty.call(TYPE_LABEL, presetType ?? '') ? (presetType as QuestionType) : 'all';
 
     return makeConfig({
       exam: presetExam === 'TYT' || presetExam === 'AYT' ? presetExam : presetSubject?.exam ?? presetTopic?.subject.exam ?? 'all',
       subjectId: presetSubject?.id ?? presetTopic?.subject.id ?? 'all',
       topicId: presetTopic?.topic.id ?? 'all',
+      subtopicId: validSubtopic,
+      difficulty: validDifficulty,
+      type: validType,
     });
   });
   const [confirm, setConfirm] = useState<null | (() => Promise<string | null>)>(null);
