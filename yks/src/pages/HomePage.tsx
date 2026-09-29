@@ -1,12 +1,10 @@
 import { useMemo } from 'react';
-import { SUBJECTS, subjectLabel } from '../data/curriculum';
 import { Icon } from '../components/Icon';
 import { PageHeader } from '../components/Layout';
 import { PandaBody } from '../components/MascotNav';
-import { AssistantCharacter } from '../components/AssistantCharacter';
 import { DailyQuestion } from '../components/DailyQuestion';
 import { PartnerMessages } from '../components/PartnerMessages';
-import { Empty, ProgressBar, Stat, toast } from '../components/ui';
+import { Empty, ProgressBar, toast } from '../components/ui';
 import { navigate } from '../hooks/useRoute';
 import { lookup, topicLabel } from '../services/lookup';
 import { buildRecommendations, hasAnyData, type Recommendation } from '../services/recommendations';
@@ -16,7 +14,6 @@ import { needsMessage } from '../utils/petCare';
 import { toggleTask } from '../store/actions';
 import { update, useAppState } from '../store/store';
 import { dayKey, diffDays, formatDay, formatMinutes } from '../utils/date';
-import { formatNet } from '../utils/net';
 import { dueReviews } from '../utils/srs';
 import { dashboard } from '../utils/stats';
 import { petStatus } from '../utils/pet';
@@ -155,176 +152,150 @@ export default function HomePage() {
         </a>
       </nav>
 
-      <section className="grid grid-4 section" aria-label="Bugünün özeti">
-        <div className="stat tint-lilac">
-          <div className="stat-label">✎ Bugün çözülen soru</div>
-          <div className="stat-value">
-            {d.todayQuestions}
-            <span className="small muted"> / {profile.dailyQuestionGoal}</span>
-          </div>
-          <ProgressBar value={qPct} label="Günlük soru hedefi" />
-        </div>
-        <div className="stat tint-mint">
-          <div className="stat-label">⏱ Bugünkü çalışma</div>
-          <div className="stat-value">{formatMinutes(d.todayMinutes)}</div>
-          <ProgressBar value={mPct} label="Günlük süre hedefi" />
-        </div>
-        <Stat tint="peach" label="♨ Seri" value={`${d.streak} gün`} sub={d.streak ? 'kesintisiz aktif gün' : 'Bugün başla'} />
-        <Stat
-          tint="sky"
-          label="✦ Son deneme"
-          value={d.lastMockNet != null ? `${formatNet(d.lastMockNet)} net` : '—'}
-          sub={d.lastMockNet != null ? d.lastMockExam : 'Henüz deneme yok'}
-        />
-      </section>
-
-      <div className="grid grid-cards section">
-        <section className="card" aria-labelledby="rec-title">
+      <section className="home-today-grid section" aria-label="Bugünün çalışma merkezi">
+        <div className="card home-focus-card">
           <div className="card-head">
-            <h2 id="rec-title">Akıllı çalışma önerisi</h2>
+            <div>
+              <div className="eyebrow">Bugünün hedefi</div>
+              <h2>İki hedef, tek ekran</h2>
+            </div>
+            <a className="text-link" href="#/plan">Planı aç <Icon name="right" /></a>
+          </div>
+
+          <div className="home-goals">
+            <div className="home-goal">
+              <div className="row between nowrap">
+                <span>Soru hedefi</span>
+                <b>{d.todayQuestions} / {profile.dailyQuestionGoal}</b>
+              </div>
+              <ProgressBar value={qPct} label="Günlük soru hedefi" />
+            </div>
+            <div className="home-goal">
+              <div className="row between nowrap">
+                <span>Çalışma süresi</span>
+                <b>{formatMinutes(d.todayMinutes)} / {formatMinutes(profile.dailyStudyMinutes)}</b>
+              </div>
+              <ProgressBar value={mPct} label="Günlük süre hedefi" />
+            </div>
+          </div>
+
+          <div className="home-plan-preview">
+            <div className="row between nowrap">
+              <b>Bugünün planı</b>
+              <span className="tiny muted">{todayTasks.filter((t) => t.done).length}/{todayTasks.length} tamamlandı</span>
+            </div>
+            {overdue.length > 0 && (
+              <div className="home-overdue">
+                <Icon name="alert" />
+                <span>{overdue.length} eski görev bekliyor.</span>
+                <a href="#/plan">Düzenle</a>
+              </div>
+            )}
+            {todayTasks.length === 0 ? (
+              <Empty title="Bugün için görev yok." action={<a className="btn small" href="#/plan">Görev ekle</a>}>
+                Kısa ve gerçekçi bir plan ekleyip doğrudan başlayabilirsin.
+              </Empty>
+            ) : (
+              <ul className="list home-task-list">
+                {todayTasks.slice(0, 4).map((t) => (
+                  <li key={t.id} className={`task${t.done ? ' done' : ''}`}>
+                    <input
+                      type="checkbox"
+                      className="task-check"
+                      checked={t.done}
+                      onChange={() => update((s) => toggleTask(s, t.id))}
+                      aria-label={`${t.title} tamamlandı`}
+                    />
+                    <div className="grow">
+                      <div className="task-title">{t.title}</div>
+                      <div className="task-meta">
+                        {[t.time, t.estMinutes ? `${t.estMinutes} dk` : '', t.targetQuestions ? `${t.targetQuestions} soru` : ''].filter(Boolean).join(' · ')}
+                      </div>
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            )}
+            {todayTasks.length > 4 && <a className="home-more-link" href="#/plan">+{todayTasks.length - 4} görevi daha göster</a>}
+          </div>
+        </div>
+
+        <div className="card home-coach-card">
+          <div className="card-head">
+            <div>
+              <div className="eyebrow">Akıllı yönlendirme</div>
+              <h2>Sıradaki en mantıklı adım</h2>
+            </div>
             <span className="badge brand">Verine göre</span>
           </div>
+
           {!hasAnyData(state) ? (
             <Empty
-              title="Henüz yeterli veri yok."
+              title="Seni tanımaya başlayalım."
               action={
-                <button type="button" className="btn primary" onClick={() => navigate('/testler')}>
+                <button type="button" className="btn primary small" onClick={() => navigate('/testler')}>
                   İlk testini çöz
                 </button>
               }
             >
-              Test çözdükçe, konu tamamladıkça ve deneme girdikçe öneriler burada oluşur.
+              Birkaç test ve konu çalışmasından sonra öneriler burada kişiselleşir.
               {profile.hardestSubject && <> En zorlandığın ders: {lookup.subjectName(profile.hardestSubject)}.</>}
             </Empty>
           ) : recs.length === 0 ? (
-            <Empty title="Bugün için ek öneri yok.">Hedeflerini tutturmuşsun. Planındaki görevlere devam et.</Empty>
+            <div className="home-clear-state">
+              <span aria-hidden="true">✓</span>
+              <div>
+                <b>Bugün için acil öneri yok.</b>
+                <p>Planındaki görevlere devam edebilirsin.</p>
+              </div>
+            </div>
           ) : (
-            <ul className="list">
-              {recs.slice(0, 4).map((r) => (
-                <li key={r.id} className="list-item" style={{ alignItems: 'flex-start' }}>
-                  <div className="grow">
-                    <div style={{ fontWeight: 700 }}>{r.title}</div>
-                    <div className="small muted">{r.detail}</div>
-                    <div className="tiny muted mt-8">Dayanak: {r.basis}</div>
-                  </div>
-                  <button type="button" className="btn small" onClick={() => void runRecommendation(r)}>
-                    {r.actionLabel}
-                  </button>
-                </li>
-              ))}
-            </ul>
-          )}
-        </section>
-
-        <section className="card" aria-labelledby="rev-title">
-          <div className="card-head">
-            <h2 id="rev-title">Bugün tekrar etmen gerekenler</h2>
-            <a className="btn small" href="#/tekrar">
-              Tümü
-            </a>
-          </div>
-          {due.length === 0 ? (
-            <Empty title="Bugün tekrar yok.">Bir konuyu tamamladığında 1, 3, 7, 14 ve 30 gün sonra tekrar hatırlatılır.</Empty>
-          ) : (
-            <ul className="list">
-              {due.slice(0, 5).map((r) => (
-                <li key={r.topicId}>
-                  <a className="link-row" href={`#/konu/${r.topicId}`}>
-                    <Icon name="repeat" />
-                    <span className="grow">{topicLabel(r.topicId)}</span>
-                    <span className="badge warn">{r.dueDay < today ? 'Gecikti' : 'Bugün'}</span>
-                  </a>
-                </li>
-              ))}
-            </ul>
-          )}
-        </section>
-
-        <section className="card" aria-labelledby="plan-title">
-          <div className="card-head">
-            <h2 id="plan-title">Bugünün planı</h2>
-            <a className="btn small" href="#/plan">
-              Düzenle
-            </a>
-          </div>
-          {overdue.length > 0 && (
-            <div className="notice warn mb-8">
-              {overdue.length} tamamlanmamış eski görev var. <a href="#/plan">Planda yarına taşıyabilirsin.</a>
+            <div className="home-recommendation">
+              <div className="home-rec-icon" aria-hidden="true">✦</div>
+              <div className="grow">
+                <b>{recs[0].title}</b>
+                <p>{recs[0].detail}</p>
+                <span>Dayanak: {recs[0].basis}</span>
+              </div>
+              <button type="button" className="btn small primary" onClick={() => void runRecommendation(recs[0])}>
+                {recs[0].actionLabel}
+              </button>
             </div>
           )}
-          {todayTasks.length === 0 ? (
-            <Empty title="Bugün için görev yok." action={<a className="btn" href="#/plan">Görev ekle</a>} />
-          ) : (
-            <ul className="list">
-              {todayTasks.map((t) => (
-                <li key={t.id} className={`task${t.done ? ' done' : ''}`}>
-                  <input
-                    type="checkbox"
-                    className="task-check"
-                    checked={t.done}
-                    onChange={() => update((s) => toggleTask(s, t.id))}
-                    aria-label={`${t.title} tamamlandı`}
-                  />
-                  <div className="grow">
-                    <div className="task-title">{t.title}</div>
-                    <div className="task-meta">
-                      {[t.time, t.estMinutes ? `${t.estMinutes} dk` : '', t.targetQuestions ? `${t.targetQuestions} soru` : ''].filter(Boolean).join(' · ')}
-                    </div>
-                  </div>
-                </li>
-              ))}
-            </ul>
-          )}
-        </section>
 
-        <section className="card asst-home" aria-labelledby="asst-h">
-          <a href="#/ogretmen" className="asst-home-link">
-            <AssistantCharacter mood="happy" size={92} />
-            <div className="grow">
-              <h2 id="asst-h" style={{ margin: 0 }}>
-                {state.settings.teacherName}
-              </h2>
-              <p className="small muted" style={{ margin: '4px 0 10px' }}>
-                Konu anlat, soru çöz, yanlışlarına bak… Yaz ya da sesle sor, cevabı sesli söylesin.
-              </p>
-              <span className="btn small primary">Konuşalım ♡</span>
+          <div className="home-review-block">
+            <div className="row between nowrap">
+              <div>
+                <b>Tekrar zamanı</b>
+                <div className="tiny muted">Unutmadan kısa tekrar yap</div>
+              </div>
+              <a className="btn small ghost" href="#/tekrar">Tümü</a>
             </div>
-          </a>
-        </section>
-
-
-        <section className="card" aria-labelledby="note-title">
-          <div className="card-head">
-            <h2 id="note-title">Defterim</h2>
-            <Icon name="sparkle" />
+            {due.length === 0 ? (
+              <div className="home-review-empty">Bugün bekleyen tekrar yok.</div>
+            ) : (
+              <ul className="list home-review-list">
+                {due.slice(0, 3).map((r) => (
+                  <li key={r.topicId}>
+                    <a className="link-row" href={`#/konu/${r.topicId}`}>
+                      <Icon name="repeat" />
+                      <span className="grow">{topicLabel(r.topicId)}</span>
+                      <span className={`badge ${r.dueDay < today ? 'warn' : 'brand'}`}>{r.dueDay < today ? 'Gecikti' : 'Bugün'}</span>
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            )}
           </div>
-          <p className="small muted">Kareli sayfada kalemle formül, grafik ve renkli not tut.</p>
-          <a className="btn primary block" href="#/defterim">
-            Deftere geç
-          </a>
-        </section>
-      </div>
-
-      <DailyQuestion />
-
-      <section className="card section" aria-labelledby="quick-h">
-        <h2 id="quick-h" className="mb-8">
-          Hızlı ders seç
-        </h2>
-        <div className="chips">
-          {SUBJECTS.map((s) => (
-            <a key={s.id} className="chip" href={`#/ders/${s.id}`}>
-              {s.icon} {subjectLabel(s)}
-            </a>
-          ))}
         </div>
       </section>
 
-      <section className="grid grid-4 section" aria-label="Genel durum">
-        <Stat tint="lilac" label="Bu hafta çözülen" value={d.weekQuestions} />
-        <Stat tint="mint" label="Bu hafta çalışma" value={formatMinutes(d.weekMinutes)} />
-        <Stat tint="peach" label="Tamamlanan konu" value={d.completedTopics} />
-        <Stat tint="rose" label="Doğruluk" value={d.accuracy != null ? `%${d.accuracy}` : '—'} sub={d.accuracy == null ? 'Henüz soru çözülmedi' : 'tüm zamanlar'} />
+      <DailyQuestion />
+
+      <section className="home-footer-actions section" aria-label="Diğer çalışma alanları">
+        <a href="#/gelisim"><Icon name="chart" /><span><b>Gelişimim</b><small>İstatistikleri gör</small></span><Icon name="right" /></a>
+        <a href="#/denemeler"><Icon name="trophy" /><span><b>Denemeler</b><small>Netlerini takip et</small></span><Icon name="right" /></a>
+        <a href="#/defterim"><Icon name="sparkle" /><span><b>Defterim</b><small>Notlarını aç</small></span><Icon name="right" /></a>
       </section>
     </>
   );
