@@ -174,13 +174,14 @@ class WebRtcSession(
         if (peerId == clientId) return
         remoteId = peerId
         callbacks.onStatus("Karşı taraf bulundu · WebRTC hazırlanıyor")
-        maybeOffer(false)
+        val webPeer = !peerId.startsWith("android-")
+        maybeOffer(false, force = webPeer)
     }
 
     private fun amOfferer(): Boolean = remoteId?.let { clientId < it } == true
 
-    private fun maybeOffer(iceRestart: Boolean) {
-        if (!amOfferer() || closed) return
+    private fun maybeOffer(iceRestart: Boolean, force: Boolean = false) {
+        if ((!force && !amOfferer()) || closed) return
         val pc = ensurePeer()
         if (pc.signalingState() != PeerConnection.SignalingState.STABLE) return
         val constraints = MediaConstraints().apply {
@@ -210,6 +211,14 @@ class WebRtcSession(
                 "offer" -> SessionDescription.Type.OFFER
                 "answer" -> SessionDescription.Type.ANSWER
                 else -> return@let
+            }
+            val webPeer = remoteId?.startsWith("android-") == false
+            if (type == SessionDescription.Type.OFFER &&
+                webPeer &&
+                pc.signalingState() != PeerConnection.SignalingState.STABLE
+            ) {
+                // Android web eşleşmesinde birincil teklifçidir; browser polite peer olarak bu teklifi kabul eder.
+                return@let
             }
             pc.setRemoteDescription(object : SdpAdapter() {
                 override fun onSetSuccess() {
