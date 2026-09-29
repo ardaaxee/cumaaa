@@ -47,7 +47,7 @@ class SignalingClient(
         encodeDefaults = true
     }
     private val crypto = RoomCrypto(roomCode)
-    private val channel = supabase.channel("yks-live:$roomCode")
+    private val channel = supabase.channel("yks-live:" + RoomCrypto.topicId(roomCode))
     private var heartbeat: Job? = null
 
     suspend fun connect() {
