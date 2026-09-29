@@ -2043,3 +2043,9 @@ body { overflow-x: clip; }
 .study-steps li.done span { background: var(--ok-soft, #dff3e4); color: var(--ok, #2f8a4c); }
 .study-done h2 { margin: 8px 0 4px; }
 .study-done .notice { text-decoration: none; color: inherit; text-align: left; }
+
+/* Telefonda yana taşmayı önle: geniş tablo/uzun ifade kendi kutusunda kaysın, sayfayı genişletmesin. */
+.inline-quiz { grid-template-columns: minmax(0, 1fr); }
+.inline-q, .card, .main, .grid > * { min-width: 0; }
+.question-text, .option, .feedback, .solution, .lesson, .example, .formula { overflow-wrap: break-word; }
+.formula code { white-space: pre-wrap; word-break: break-word; }
