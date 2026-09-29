@@ -21,28 +21,62 @@ export const OFFICIAL_RESOURCES: OfficialResource[] = [
 export interface ExamArchiveEntry {
   year: number;
   exam: 'TYT' | 'AYT';
-  url: string;
-  /** Resmî sayfa taşınırsa: ÖSYM sitesinde aynı yılın kitapçıklarını arayan yedek bağlantı. */
-  searchUrl: string;
+  /** ÖSYM'nin doğrudan PDF kitapçığı. Mobilde ara sayfa yerine bunu açıyoruz. */
+  pdfUrl: string;
+  /** ÖSYM'nin ilgili yıl kitapçık/cevap anahtarı sayfası. */
+  pageUrl: string;
 }
+
+const BOOKLET_PDFS: Record<number, Record<'TYT' | 'AYT', string>> = {
+  2026: {
+    TYT: 'https://dokuman.osym.gov.tr/pdfdokuman/2026/YKS/TSK/yks_tyt_2026_kitapcik_d350.pdf',
+    AYT: 'https://dokuman.osym.gov.tr/pdfdokuman/2026/YKS/TSK/yks_ayt_2026_kitapcik_kt12.pdf',
+  },
+  2025: {
+    TYT: 'https://dokuman.osym.gov.tr/pdfdokuman/2025/YKS/TSK/yks_tyt_2025_kitapcik_d250.pdf',
+    AYT: 'https://dokuman.osym.gov.tr/pdfdokuman/2025/YKS/TSK/yks_ayt_2025_kitapcik_st12.pdf',
+  },
+  2024: {
+    TYT: 'https://dokuman.osym.gov.tr/pdfdokuman/2024/YKS/TSK/yks_tyt_2024_kitapcik_T24kt.pdf',
+    AYT: 'https://dokuman.osym.gov.tr/pdfdokuman/2024/YKS/TSK/yks_ayt_2024_kitapcik_ts85k.pdf',
+  },
+  2023: {
+    TYT: 'https://dokuman.osym.gov.tr/pdfdokuman/2023/YKS/TSK/yks_tyt_2023_kitapcik_T23ky.pdf',
+    AYT: 'https://dokuman.osym.gov.tr/pdfdokuman/2023/YKS/TSK/yks_ayt_2023_kitapcik_g5A2H.pdf',
+  },
+  2022: {
+    TYT: 'https://dokuman.osym.gov.tr/pdfdokuman/2022/YKS/TSK/yks_2022_tyt.pdf',
+    AYT: 'https://dokuman.osym.gov.tr/pdfdokuman/2022/YKS/TSK/yks_2022_ayt.pdf',
+  },
+};
 
 /**
- * ÖSYM'nin yeni sitesindeki yıl sayfası (ör. /2025yks-tyt-ayt-ve-ydt-temel-soru-kitapciklari-ve-cevap-anahtarlari).
- * Eski "TR,8797/…html" adresi yeni sitede 404 veriyordu.
+ * ÖSYM'nin yıl sayfası.
+ * PDF bağlantıları ayrı tutulur; Android/PWA'da sayfa içindeki yeni-sekme davranışına güvenmeyiz.
  */
 export function osymBookletUrl(year: number): string {
-  return `https://www.osym.gov.tr/${year}yks-tyt-ayt-ve-ydt-temel-soru-kitapciklari-ve-cevap-anahtarlari`;
+  return \`https://www.osym.gov.tr/\${year}yks-tyt-ayt-ve-ydt-temel-soru-kitapciklari-ve-cevap-anahtarlari\`;
 }
 
-export function osymSearchUrl(year: number, exam: 'TYT' | 'AYT'): string {
-  const q = `site:osym.gov.tr ${year}-YKS ${exam} temel soru kitapçığı cevap anahtarı`;
-  return `https://www.google.com/search?q=${encodeURIComponent(q)}`;
+export function osymBookletPdfUrl(year: number, exam: 'TYT' | 'AYT'): string | undefined {
+  return BOOKLET_PDFS[year]?.[exam];
 }
 
 /** Resmî YKS sayfası: tüm yıllar ve duyurular. */
 export const OSYM_YKS_PAGE = 'https://www.osym.gov.tr/SinavGrubu/Menu/323';
 
-/** ÖSYM çıkmış sorular bölümü için yıl/sınav listesi. Sorular kopyalanmaz; resmî bağlantı açılır. */
-export const EXAM_ARCHIVE: ExamArchiveEntry[] = [2026, 2025, 2024, 2023, 2022].flatMap((year) =>
-  (['TYT', 'AYT'] as const).map((exam) => ({ year, exam, url: osymBookletUrl(year), searchUrl: osymSearchUrl(year, exam) })),
-);
+/**
+ * Çıkmış sorular uygulama içine kopyalanmaz. Kullanıcı doğrudan ÖSYM'nin
+ * dokuman.osym.gov.tr alanındaki resmî PDF'ine gider.
+ */
+export const EXAM_ARCHIVE: ExamArchiveEntry[] = Object.keys(BOOKLET_PDFS)
+  .map(Number)
+  .sort((a, b) => b - a)
+  .flatMap((year) =>
+    (['TYT', 'AYT'] as const).map((exam) => ({
+      year,
+      exam,
+      pdfUrl: BOOKLET_PDFS[year][exam],
+      pageUrl: osymBookletUrl(year),
+    })),
+  );
