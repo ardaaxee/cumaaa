@@ -62,7 +62,7 @@ export default function TestSetupPage() {
         </div>
       )}
 
-      <section className="card section" aria-labelledby="setup-h">
+      <section className="card section test-builder-card" aria-labelledby="setup-h">
         <div className="card-head">
           <h2 id="setup-h">Test oluştur</h2>
           <SourceBadge type="ozgun-pratik" />
@@ -182,7 +182,7 @@ export default function TestSetupPage() {
         </div>
       </section>
 
-      <section className="card section" aria-labelledby="wr-h">
+      <section className="card section test-secondary-card" aria-labelledby="wr-h">
         <div className="card-head">
           <h2 id="wr-h">Yanlışlarımdan test</h2>
           <span className="badge">{openWrongIds.length} soru</span>
@@ -200,7 +200,7 @@ export default function TestSetupPage() {
         )}
       </section>
 
-      <section className="card section" aria-labelledby="hist-h">
+      <section className="card section test-secondary-card" aria-labelledby="hist-h">
         <div className="card-head">
           <h2 id="hist-h">Son testlerim</h2>
         </div>
