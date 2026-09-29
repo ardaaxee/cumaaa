@@ -1,5 +1,5 @@
-import { useMemo, useRef, useState, type CSSProperties } from 'react';
-import { PandaBody } from '../components/MascotNav';
+import { useEffect, useMemo, useRef, useState, type CSSProperties } from 'react';
+import { RealisticPanda } from '../components/RealisticPanda';
 import { Icon } from '../components/Icon';
 import { ProgressBar, toast } from '../components/ui';
 import { updateSettings } from '../store/actions';
@@ -253,6 +253,8 @@ export default function PetPage() {
   const [happiness, setHappiness] = useState(84);
   const [sceneMessage, setSceneMessage] = useState<string | null>(null);
   const [name, setName] = useState(pet.name);
+  const [petPos, setPetPos] = useState({ x: 50, y: 2 });
+  const [facing, setFacing] = useState<'left' | 'right'>('right');
   const timers = useRef<number[]>([]);
 
   const sad = needs.hungry || needs.thirsty;
@@ -268,10 +270,38 @@ export default function PetPage() {
     timers.current = [];
   };
 
+  useEffect(() => {
+    if (activity !== 'idle') return;
+    let cancelled = false;
+    const schedule = () => {
+      const wait = 4200 + Math.floor(Math.random() * 4200);
+      const id = window.setTimeout(() => {
+        if (cancelled) return;
+        const nextX = 30 + Math.round(Math.random() * 40);
+        setFacing((prev) => (nextX < petPos.x ? 'left' : nextX > petPos.x ? 'right' : prev));
+        setActivity('walking');
+        setPetPos({ x: nextX, y: 2 + Math.round(Math.random() * 4) });
+        const stopId = window.setTimeout(() => {
+          if (cancelled) return;
+          setActivity('idle');
+        }, 1150);
+        timers.current.push(stopId);
+      }, wait);
+      timers.current.push(id);
+    };
+    schedule();
+    return () => {
+      cancelled = true;
+    };
+  }, [activity, petPos.x]);
+
+  useEffect(() => () => clearTimers(), []);
+
   const moveTo = (nextRoom: HouseRoom, nextActivity: HouseActivity = 'idle', message?: string) => {
     clearTimers();
     setHolding(null);
     setRoom(nextRoom);
+    setPetPos({ x: 50, y: 2 });
     setActivity('walking');
     setSceneMessage(message ?? ROOM_INFO[nextRoom].label + 'a gidiyor…');
     later(() => {
@@ -296,6 +326,8 @@ export default function PetPage() {
 
     clearTimers();
     setRoom('kitchen');
+    setPetPos({ x: 52, y: 2 });
+    setFacing('right');
     setActivity('walking');
     setZeynepActivity('walking');
     setSceneMessage('Zeynep mutfağa geliyor. ' + pet.name + ' masaya geçiyor…');
@@ -327,6 +359,8 @@ export default function PetPage() {
   const bath = () => {
     clearTimers();
     setRoom('bathroom');
+    setPetPos({ x: 59, y: 2 });
+    setFacing('right');
     setActivity('walking');
     setSceneMessage(pet.name + ' banyoya gidiyor…');
     later(() => {
@@ -355,6 +389,8 @@ export default function PetPage() {
     }
     clearTimers();
     setRoom('bedroom');
+    setPetPos({ x: 42, y: 2 });
+    setFacing('left');
     setActivity('walking');
     setSceneMessage(pet.name + ' yatağına gidiyor…');
     later(() => {
@@ -471,19 +507,25 @@ export default function PetPage() {
           <button className="pet-scene-arrow prev" type="button" onClick={() => changeRoom(-1)} aria-label="Önceki oda">‹</button>
           <button className="pet-scene-arrow next" type="button" onClick={() => changeRoom(1)} aria-label="Sonraki oda">›</button>
 
-          <button type="button" className={'pet-stage-panda act-' + activity} onClick={petPanda} aria-label={pet.name + ' pandayı sev'}>
-            <PandaBody
+          <button
+            type="button"
+            className={'pet-stage-panda act-' + activity + ' facing-' + facing}
+            style={{ '--pet-x': petPos.x + '%', '--pet-y': petPos.y + '%' } as CSSProperties}
+            onClick={petPanda}
+            aria-label={pet.name + ' pandayı sev'}
+          >
+            <RealisticPanda
               size={250}
-              items={pet.items}
               sleepy={activity === 'sleeping'}
-              waving={!sad && activity !== 'sleeping' && activity !== 'bathing'}
               sad={!holding && sad}
-              holding={holding}
+              eating={activity === 'eating'}
+              drinking={activity === 'drinking'}
+              bathing={activity === 'bathing'}
+              playing={activity === 'playing'}
             />
             <span className="pet-floor-shadow" />
             {hearts > 0 && <span key={hearts} className="pet-game-heart" aria-hidden="true">♡</span>}
             {activity === 'sleeping' && <span className="pet-game-sleep">Z z z</span>}
-            {activity === 'bathing' && <span className="pet-game-foam">🫧 🫧</span>}
           </button>
 
           {zeynepActivity !== 'idle' && room === 'kitchen' && (
