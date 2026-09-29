@@ -16,12 +16,30 @@ export function serviceWorkerPlugin(): Plugin {
       const staticFiles = ['manifest.webmanifest', 'icon.svg', 'icon-192.png', 'icon-512.png', 'icon-maskable-512.png', 'apple-touch-icon.png'];
       const precache = ['./', './index.html', ...[...files, ...staticFiles].map((f) => `./${f}`)];
       const unique = [...new Set(precache)];
-      const version = createHash('sha256').update(unique.join('|')).digest('hex').slice(0, 12);
+      const contentSignature = Object.entries(bundle)
+        .sort(([a], [b]) => a.localeCompare(b))
+        .map(([name, item]) => {
+          if (item.type === 'asset') {
+            const body = typeof item.source === 'string' ? item.source : Buffer.from(item.source).toString('base64');
+            return name + ':' + createHash('sha256').update(body).digest('hex');
+          }
+          return name + ':' + createHash('sha256').update(item.code).digest('hex');
+        })
+        .join('|');
+      const version = createHash('sha256')
+        .update(unique.join('|') + '|' + contentSignature)
+        .digest('hex')
+        .slice(0, 12);
       const template = readFileSync(fileURLToPath(new URL('./sw-template.js', import.meta.url)), 'utf8');
       const source = template
         .replace('__VERSION__', version)
         .replace('__PRECACHE__', JSON.stringify(unique));
       this.emitFile({ type: 'asset', fileName: 'sw.js', source });
+      this.emitFile({
+        type: 'asset',
+        fileName: 'app-version.json',
+        source: JSON.stringify({ version }),
+      });
     },
   };
 }
