@@ -5600,3 +5600,98 @@ body {
     grid-column: 2;
   }
 }
+
+
+/* ===== STUDY MASTERY + DAILY ROUTE ===== */
+.coach-today-route {
+  padding: clamp(18px, 3vw, 26px);
+  border-color: color-mix(in srgb, var(--brand) 18%, var(--line));
+}
+.coach-route-grid {
+  display: grid;
+  gap: 9px;
+  grid-template-columns: 1fr;
+}
+.coach-route-step {
+  appearance: none;
+  display: grid;
+  grid-template-columns: auto minmax(0,1fr);
+  align-items: center;
+  gap: 11px;
+  width: 100%;
+  min-height: 78px;
+  padding: 12px;
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  background: var(--surface);
+  color: var(--text);
+  text-align: left;
+  text-decoration: none;
+  font: inherit;
+  cursor: pointer;
+}
+.coach-route-step:hover {
+  border-color: color-mix(in srgb, var(--brand) 28%, var(--line));
+  background: color-mix(in srgb, var(--brand-soft) 28%, var(--surface));
+}
+.coach-route-no {
+  width: 39px;
+  height: 39px;
+  display: grid;
+  place-items: center;
+  border-radius: 14px;
+  background: var(--brand-soft);
+  color: var(--brand);
+  font-weight: 900;
+}
+.coach-route-step > span:last-child {
+  display: grid;
+  gap: 3px;
+}
+.coach-route-step small {
+  color: var(--muted);
+  font-size: .72rem;
+  line-height: 1.4;
+}
+.coach-target-strip {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 8px 16px;
+  margin-top: 12px;
+  padding: 11px 13px;
+  border-radius: 15px;
+  background: var(--surface-2);
+  color: var(--muted);
+  font-size: .75rem;
+}
+.coach-target-strip b { color: var(--text); }
+.study-mastery-check {
+  width: min(560px, 100%);
+  display: grid;
+  grid-template-columns: repeat(3,minmax(0,1fr));
+  gap: 8px;
+  margin: 16px auto;
+}
+.study-mastery-check > div {
+  display: grid;
+  gap: 2px;
+  padding: 11px 12px;
+  border: 1px solid var(--line);
+  border-radius: 15px;
+  background: var(--surface-2);
+  text-align: left;
+}
+.study-mastery-check span {
+  color: var(--muted);
+  font-size: .66rem;
+}
+.study-mastery-check b {
+  font-size: .88rem;
+}
+@media (min-width: 800px) {
+  .coach-route-grid { grid-template-columns: repeat(3,minmax(0,1fr)); }
+}
+@media (max-width: 520px) {
+  .study-mastery-check { grid-template-columns: 1fr; }
+}
