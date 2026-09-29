@@ -9,6 +9,7 @@ import javax.crypto.Cipher
 import javax.crypto.KeyGenerator
 import javax.crypto.SecretKey
 import javax.crypto.spec.GCMParameterSpec
+import java.util.Locale
 
 class SecureRoomStore(context: Context) {
     private val prefs = context.getSharedPreferences("yks_live_secure", Context.MODE_PRIVATE)
@@ -28,7 +29,7 @@ class SecureRoomStore(context: Context) {
     }
 
     fun save(room: String) {
-        val clean = room.trim().uppercase()
+        val clean = room.trim().uppercase(Locale.ROOT)
         if (clean.length < 12) return
         runCatching {
             val cipher = Cipher.getInstance("AES/GCM/NoPadding")
