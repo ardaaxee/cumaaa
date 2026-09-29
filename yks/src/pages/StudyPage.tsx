@@ -259,7 +259,7 @@ function Session({ topicId }: { topicId: string }) {
             <h2>Harika çalıştın ♡</h2>
             <p className="muted">
               {score.answered ? `${score.answered} sorudan ${score.correct} doğru. ` : ''}
-              Çalışma süren günlüğüne eklendi; {petName} için bambu ve su kazandın.
+              Çalışma süren günlüğüne eklendi; {petName} için yemek ve su kazandın 🎋💧
             </p>
             <div className="row" style={{ justifyContent: 'center' }}>
               {status !== 'tamamlandi' && (

@@ -6,7 +6,7 @@ import { companionLines, pickLine } from '../services/companion';
 import { updateSettings } from '../store/actions';
 import { getState, update, useSelector } from '../store/store';
 
-const HIDDEN_SECTIONS = new Set(['test', 'ogretmen', 'ortak']);
+const HIDDEN_SECTIONS = new Set(['test', 'ogretmen', 'ortak', 'calis']);
 const MUTE_KEY = 'iyikiYks.cumaSessiz';
 const WALK_MS = 2600;
 const BUBBLE_MS = 8000;
