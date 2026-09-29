@@ -1,21 +1,21 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import { AskLabel } from '../components/AskName';
 import { getTopicRef, subjectLabel } from '../data/curriculum';
 import { loadLesson, loadTopicQuestions } from '../data/content';
-import type { LessonSeed, Question } from '../domain/types';
+import type { LessonSeed } from '../domain/types';
 import { InlineQuiz } from '../components/InlineQuiz';
 import { pickQuestions } from '../utils/testEngine';
 import { Icon } from '../components/Icon';
 import { PageHeader } from '../components/Layout';
-import { ConfirmDialog, Empty, SourceBadge, Spinner, Stat, toast } from '../components/ui';
+import { ConfirmDialog, Empty, LoadFailed, SourceBadge, Spinner, Stat, toast } from '../components/ui';
 import { href, navigate } from '../hooks/useRoute';
 import { useSpeaker } from '../hooks/useVoice';
+import { useLoad } from '../hooks/useLoad';
 import { launchTest, makeConfig, hasActiveTest } from '../services/testLauncher';
 import { addNotebookPage, markReviewDone, setTopicStatus } from '../store/actions';
 import type { TopicStatus } from '../store/schema';
 import { getState, update, useAppState } from '../store/store';
 import { recentTopicPerformance, weakTopics } from '../utils/analysis';
-import { recoverFromChunkError } from '../utils/chunkRecovery';
 import { dayKey, formatDay } from '../utils/date';
 import { isDue, stageLabel } from '../utils/srs';
 
@@ -184,7 +184,8 @@ export default function TopicPage({ params }: { params: string[] }) {
   const topicId = params[0] ?? '';
   const ref = getTopicRef(topicId);
   const state = useAppState();
-  const [lesson, setLesson] = useState<LessonSeed | null | undefined>(undefined);
+  const lessonLoad = useLoad(() => loadLesson(topicId).then((l) => l ?? null), [topicId]);
+  const lesson = lessonLoad.data;
   const speaker = useSpeaker();
   const listen = () => {
     if (speaker.speaking) return speaker.stop();
@@ -192,34 +193,11 @@ export default function TopicPage({ params }: { params: string[] }) {
     // Konu anlatımının ana bölümleri sırayla sesli okunur (tarayıcının yerleşik sesiyle).
     speaker.speak([lesson.intro, lesson.logic, `Özet. ${lesson.summary.join('. ')}`].join('\n\n'), true, 6000);
   };
-  const [qCount, setQCount] = useState<number | null>(null);
-  const [topicQs, setTopicQs] = useState<Question[]>([]);
+  const qLoad = useLoad(() => loadTopicQuestions(topicId), [topicId]);
+  const topicQs = useMemo(() => qLoad.data ?? [], [qLoad.data]);
+  const qCount = qLoad.data ? qLoad.data.length : null;
   const [quizRound, setQuizRound] = useState(0);
   const [pending, setPending] = useState<null | (() => void)>(null);
-
-  useEffect(() => {
-    let alive = true;
-    const fail = (e: unknown) => {
-      if (recoverFromChunkError(e) || !alive) return;
-      toast('İçerik yüklenemedi. İnternet bağlantını kontrol edip sayfayı yenile.');
-    };
-    loadLesson(topicId)
-      .then((l) => alive && setLesson(l ?? null))
-      .catch((e) => {
-        fail(e);
-        if (alive) setLesson(null);
-      });
-    loadTopicQuestions(topicId)
-      .then((qs) => {
-        if (!alive) return;
-        setQCount(qs.length);
-        setTopicQs(qs);
-      })
-      .catch(fail);
-    return () => {
-      alive = false;
-    };
-  }, [topicId]);
 
   const perf = useMemo(() => recentTopicPerformance(state.attempts, topicId, 5), [state.attempts, topicId]);
   const weak = useMemo(() => weakTopics(state).find((w) => w.topicId === topicId), [state, topicId]);
@@ -342,7 +320,7 @@ export default function TopicPage({ params }: { params: string[] }) {
       </div>
 
       <div className="card section">
-        {lesson === undefined ? <Spinner label="Konu anlatımı yükleniyor" /> : lesson === null ? <Empty title="Bu konunun anlatımı henüz eklenmedi." /> : <LessonView lesson={lesson} />}
+        {lessonLoad.failed ? <LoadFailed what="Konu anlatımı" onRetry={lessonLoad.retry} /> : lesson === undefined ? <Spinner label="Konu anlatımı yükleniyor" /> : lesson === null ? <Empty title="Bu konunun anlatımı henüz eklenmedi." /> : <LessonView lesson={lesson} />}
       </div>
 
       <div className="card section" id="konu-sonu">
@@ -351,7 +329,9 @@ export default function TopicPage({ params }: { params: string[] }) {
           <SourceBadge type="ozgun-pratik" />
         </div>
         <p className="small muted">Anlatımı bitirdin mi? Şimdi ÖSYM tarzında hazırlanmış {Math.min(5, topicQs.length)} soruyla kendini dene. Cevabını seçer seçmez doğru/yanlış ve çözüm açılır.</p>
-        {qCount == null ? (
+        {qLoad.failed ? (
+          <LoadFailed what="Sorular" onRetry={qLoad.retry} />
+        ) : qCount == null ? (
           <Spinner label="Sorular yükleniyor" />
         ) : topicQs.length === 0 ? (
           <Empty title="Bu konu için henüz soru yok." />

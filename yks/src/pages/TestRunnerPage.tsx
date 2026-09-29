@@ -1,12 +1,13 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { AskLabel } from '../components/AskName';
 import { getTopicRef } from '../data/curriculum';
-import { loadQuestions } from '../data/content';
+import { loadSubjectQuestions, subjectOfQuestionId } from '../data/content';
 import type { Question } from '../domain/types';
 import { Icon } from '../components/Icon';
 import { PageHeader } from '../components/Layout';
 import { Options, QuestionBody, QuestionMeta, SolutionBlock } from '../components/QuestionView';
-import { ConfirmDialog, Empty, Spinner, toast } from '../components/ui';
+import { ConfirmDialog, Empty, LoadFailed, Spinner, toast } from '../components/ui';
+import { useLoad } from '../hooks/useLoad';
 import { href, navigate } from '../hooks/useRoute';
 import {
   abandonTest,
@@ -32,8 +33,6 @@ function firstSentence(text: string): string {
 
 export default function TestRunnerPage() {
   const test = useSelector((s) => s.activeTest);
-  const [byId, setById] = useState<Map<string, Question> | null>(null);
-  const [all, setAll] = useState<Question[]>([]);
   const [showHint, setShowHint] = useState(false);
   const [confirmFinish, setConfirmFinish] = useState(false);
   const [confirmExit, setConfirmExit] = useState(false);
@@ -43,12 +42,14 @@ export default function TestRunnerPage() {
   const lastRef = useRef(Date.now());
   const finishingRef = useRef(false);
 
-  useEffect(() => {
-    loadQuestions().then((qs) => {
-      setAll(qs);
-      setById(new Map(qs.map((q) => [q.id, q])));
-    });
-  }, []);
+  // Yalnız bu testteki soruların dersleri yüklenir (tüm bankayı indirmeden, telefonda hızlı).
+  const subjectKey = [...new Set((test?.questionIds ?? []).map(subjectOfQuestionId).filter(Boolean))].sort().join(',');
+  const loaded = useLoad<Question[]>(
+    () => Promise.all(subjectKey.split(',').filter(Boolean).map((s) => loadSubjectQuestions(s))).then((l) => l.flat()),
+    [subjectKey],
+  );
+  const all = useMemo(() => loaded.data ?? [], [loaded.data]);
+  const byId = useMemo(() => (loaded.data ? new Map(loaded.data.map((q) => [q.id, q])) : null), [loaded.data]);
 
   const currentId = test ? test.questionIds[test.current] : undefined;
 
@@ -170,7 +171,7 @@ export default function TestRunnerPage() {
       </>
     );
   }
-  if (!byId) return <Spinner label="Sorular yükleniyor" />;
+  if (!byId) return loaded.failed ? <LoadFailed what="Sorular" onRetry={loaded.retry} /> : <Spinner label="Sorular yükleniyor" />;
   if (!q) {
     return (
       <>

@@ -47,7 +47,9 @@ export default function CardsPage() {
     } catch {
       /* yok say */
     }
-    loadSubjectCards(subjectId).then((c) => alive && setCards(c));
+    loadSubjectCards(subjectId)
+      .then((c) => alive && setCards(c))
+      .catch(() => alive && setCards([]));
     return () => {
       alive = false;
     };

@@ -187,6 +187,15 @@ export function Empty({ title, children, action }: { title: string; children?: R
   );
 }
 
+/** İçerik yüklenemediğinde sonsuz beklemek yerine gösterilir. */
+export function LoadFailed({ onRetry, what = 'İçerik' }: { onRetry: () => void; what?: string }) {
+  return (
+    <Empty title={`${what} yüklenemedi.`} action={<button type="button" className="btn primary" onClick={onRetry}>Tekrar dene</button>}>
+      İnternet bağlantını kontrol et; bağlantı gelince tekrar dene.
+    </Empty>
+  );
+}
+
 export function Spinner({ label = 'Yükleniyor' }: { label?: string }) {
   return (
     <div role="status">

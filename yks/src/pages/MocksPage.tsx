@@ -5,7 +5,7 @@ import { Icon } from '../components/Icon';
 import { PageHeader } from '../components/Layout';
 import { ConfirmDialog, Empty, Modal, Segmented, Stat, toast } from '../components/ui';
 import { addMock, deleteMock } from '../store/actions';
-import { loadQuestions } from '../data/content';
+import { loadQuestionsFor } from '../data/content';
 import { launchWithIds, makeConfig, hasActiveTest } from '../services/testLauncher';
 import { getState } from '../store/store';
 import { FULL_MOCKS, buildFullMock, totalQuestions } from '../utils/fullMock';
@@ -144,7 +144,14 @@ export default function MocksPage() {
   const startFullMock = async (e: Exam) => {
     setStartExam(null);
     const plan = FULL_MOCKS[e];
-    const ids = buildFullMock(plan, await loadQuestions(), getState().attempts);
+    let pool;
+    try {
+      pool = await loadQuestionsFor({ exam: e, subjectId: 'all', topicId: 'all' });
+    } catch {
+      toast('Sorular yüklenemedi. İnternet bağlantını kontrol edip tekrar dene.');
+      return;
+    }
+    const ids = buildFullMock(plan, pool, getState().attempts);
     const err = await launchWithIds(
       ids,
       makeConfig({ exam: e, mode: 'sinav', origin: 'deneme', count: ids.length, durationMin: plan.durationMin, title: `${plan.title} (${formatDay(dayKey())})` }),

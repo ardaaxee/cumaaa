@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { getTopicRef, subjectLabel } from '../data/curriculum';
-import { loadLesson, loadQuestions } from '../data/content';
+import { loadLesson, loadQuestionsByIds } from '../data/content';
 import type { LessonSeed, Question } from '../domain/types';
 import { AssistantCharacter, type AssistantMood } from '../components/AssistantCharacter';
 import { Icon } from '../components/Icon';
@@ -73,11 +73,11 @@ export default function TeacherPage() {
     checkAiStatus().then(setStatus);
   }, []);
   useEffect(() => {
-    if (questionId) loadQuestions().then((qs) => setQuestion(qs.find((q) => q.id === questionId) ?? null));
+    if (questionId) loadQuestionsByIds([questionId]).then((m) => setQuestion(m.get(questionId) ?? null)).catch(() => setQuestion(null));
     else setQuestion(null);
   }, [questionId]);
   useEffect(() => {
-    if (topicId) loadLesson(topicId).then((l) => setLesson(l ?? null));
+    if (topicId) loadLesson(topicId).then((l) => setLesson(l ?? null)).catch(() => setLesson(null));
     else setLesson(null);
   }, [topicId]);
   useEffect(() => {

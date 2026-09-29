@@ -1,5 +1,5 @@
 import type { LessonSeed, Question, QuestionSeed, SubjectId } from '../domain/types';
-import { getTopicRef } from './curriculum';
+import { SUBJECTS, getTopicRef } from './curriculum';
 
 type LessonModule = { lessons: LessonSeed[] };
 type QuestionModule = { questions: QuestionSeed[] };
@@ -90,15 +90,37 @@ export async function loadTopicQuestions(topicId: string): Promise<Question[]> {
   return (await loadSubjectQuestions(ref.subject.id)).filter((q) => q.topic === topicId);
 }
 
+/** Soru kimliği "<konuId>-qNN" biçimindedir; konu → ders. */
+export function subjectOfQuestionId(id: string): string | undefined {
+  return getTopicRef(id.replace(/-q\d+$/, ''))?.subject.id;
+}
+
+/** Yalnız verilen soruların derslerini yükler (tüm bankayı indirmeden). */
+export async function loadQuestionsByIds(ids: string[]): Promise<Map<string, Question>> {
+  const subjects = [...new Set(ids.map(subjectOfQuestionId).filter((s): s is string => !!s))];
+  const lists = await Promise.all(subjects.map((s) => loadSubjectQuestions(s)));
+  const want = new Set(ids);
+  const map = new Map<string, Question>();
+  for (const list of lists) for (const q of list) if (want.has(q.id)) map.set(q.id, q);
+  return map;
+}
+
+/** Filtreye göre gereken en küçük soru kümesini yükler: konu/ders seçiliyse yalnız o ders, sınav seçiliyse o sınavın dersleri. */
+export async function loadQuestionsFor(filter: { exam: string; subjectId: string; topicId: string }): Promise<Question[]> {
+  const subjectId = filter.topicId !== 'all' ? getTopicRef(filter.topicId)?.subject.id : filter.subjectId !== 'all' ? filter.subjectId : undefined;
+  if (subjectId) return loadSubjectQuestions(subjectId);
+  if (filter.exam === 'TYT' || filter.exam === 'AYT') {
+    const subjects = SUBJECTS.filter((s) => s.exam === filter.exam).map((s) => s.id);
+    return (await Promise.all(subjects.map((s) => loadSubjectQuestions(s)))).flat();
+  }
+  return loadQuestions();
+}
+
 /** Tüm soru bankası (karışık testler için). */
 export function loadQuestions(): Promise<Question[]> {
   if (!allQuestionCache) {
-    const p = Promise.all(Object.values(questionModules).map((load) => withRetry(load))).then((mods) =>
-      mods
-        .flatMap((m) => m.questions)
-        .map(normalizeQuestion)
-        .filter((q): q is Question => q !== null),
-    );
+    // Ders önbellekleri paylaşılır; bir ders zaten yüklendiyse yeniden indirilmez.
+    const p = Promise.all(SUBJECTS.map((s) => loadSubjectQuestions(s.id))).then((lists) => lists.flat());
     p.catch(() => {
       allQuestionCache = null;
     });

@@ -1,10 +1,11 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import { SUBJECTS, getSubject, getTopicRef, subjectLabel } from '../data/curriculum';
-import { loadQuestions } from '../data/content';
+import { loadQuestionsFor } from '../data/content';
+import { useLoad } from '../hooks/useLoad';
 import type { Difficulty, Question, QuestionType } from '../domain/types';
 import { DIFFICULTY_LABEL, TYPE_LABEL } from '../components/QuestionView';
 import { PageHeader } from '../components/Layout';
-import { ConfirmDialog, Empty, SourceBadge, Spinner, toast } from '../components/ui';
+import { ConfirmDialog, Empty, SourceBadge, toast } from '../components/ui';
 import { navigate } from '../hooks/useRoute';
 import { launchTest, launchWithIds, makeConfig } from '../services/testLauncher';
 import type { TestConfig } from '../store/schema';
@@ -17,16 +18,15 @@ import { QUESTION_COUNTS, filterPool } from '../utils/testEngine';
 export default function TestSetupPage() {
   const state = useAppState();
   const route = useRoute();
-  const [questions, setQuestions] = useState<Question[] | null>(null);
   const [cfg, setCfg] = useState<TestConfig>(() => {
     const preset = route.query.get('sinav');
     return makeConfig(preset === 'TYT' || preset === 'AYT' ? { exam: preset } : {});
   });
   const [confirm, setConfirm] = useState<null | (() => Promise<string | null>)>(null);
 
-  useEffect(() => {
-    loadQuestions().then(setQuestions);
-  }, []);
+  // Yalnız seçili sınav/ders için soru sayılır; tüm banka gereksiz yere indirilmez.
+  const loaded = useLoad<Question[]>(() => loadQuestionsFor(cfg), [cfg.exam, cfg.subjectId, cfg.topicId]);
+  const questions = loaded.data ?? null;
 
   const set = (patch: Partial<TestConfig>) => setCfg((c) => ({ ...c, ...patch }));
   const pool = useMemo(() => (questions ? filterPool(questions, cfg) : []), [questions, cfg]);
@@ -162,13 +162,22 @@ export default function TestSetupPage() {
           <button
             type="button"
             className="btn primary"
-            disabled={!questions || pool.length === 0}
+            disabled={!!questions && pool.length === 0}
             onClick={() => run(() => launchTest(cfg))}
           >
             Testi başlat
           </button>
           <span className="small muted" aria-live="polite">
-            {questions ? `Bu filtrede ${pool.length} soru var${pool.length && pool.length < cfg.count ? ` (test ${pool.length} soruyla başlar)` : ''}.` : 'Soru bankası yükleniyor…'}
+            {questions ? `Bu filtrede ${pool.length} soru var${pool.length && pool.length < cfg.count ? ` (test ${pool.length} soruyla başlar)` : ''}.` : loaded.failed ? (
+              <>
+                Soru sayısı alınamadı.{' '}
+                <button type="button" className="btn small ghost" onClick={loaded.retry}>
+                  Tekrar dene
+                </button>
+              </>
+            ) : (
+              'Sorular sayılıyor…'
+            )}
           </span>
         </div>
       </section>
@@ -195,7 +204,6 @@ export default function TestSetupPage() {
         <div className="card-head">
           <h2 id="hist-h">Son testlerim</h2>
         </div>
-        {!questions && <Spinner />}
         {recent.length === 0 ? (
           <Empty title="Henüz test çözmedin.">İlk testini çöz; sonuçların burada listelenir.</Empty>
         ) : (

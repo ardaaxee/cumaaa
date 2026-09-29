@@ -1,5 +1,5 @@
-import { loadQuestions } from '../data/content';
-import type { Question } from '../domain/types';
+import { loadQuestionsByIds, loadQuestionsFor } from '../data/content';
+import { recoverFromChunkError } from '../utils/chunkRecovery';
 import { navigate } from '../hooks/useRoute';
 import { startTest } from '../store/actions';
 import type { TestConfig } from '../store/schema';
@@ -26,8 +26,16 @@ export function makeConfig(patch: Partial<TestConfig>): TestConfig {
  * Filtreye göre test oluşturup başlatır. Havuz boşsa hata mesajı döner.
  * Devam eden test varsa üzerine yazılır (çağıran taraf onay almalıdır).
  */
+const LOAD_ERROR = 'Sorular yüklenemedi. İnternet bağlantını kontrol edip tekrar dene.';
+
 export async function launchTest(config: TestConfig): Promise<string | null> {
-  const all = await loadQuestions();
+  let all;
+  try {
+    all = await loadQuestionsFor(config);
+  } catch (e) {
+    recoverFromChunkError(e);
+    return LOAD_ERROR;
+  }
   const pool = filterPool(all, config);
   if (!pool.length) return 'Bu filtrelere uyan soru bulunamadı. Filtreleri genişletmeyi dene.';
   const ids = pickQuestions(pool, config.count, getState().attempts);
@@ -38,8 +46,13 @@ export async function launchTest(config: TestConfig): Promise<string | null> {
 
 /** Belirli soru kimlikleriyle test başlatır (yanlışlar, tek soru). */
 export async function launchWithIds(ids: string[], config: TestConfig): Promise<string | null> {
-  const all = await loadQuestions();
-  const known = new Set(all.map((q: Question) => q.id));
+  let known;
+  try {
+    known = await loadQuestionsByIds(ids);
+  } catch (e) {
+    recoverFromChunkError(e);
+    return LOAD_ERROR;
+  }
   const valid = ids.filter((id) => known.has(id));
   if (!valid.length) return 'Soru bulunamadı.';
   update((s) => startTest(s, { ...config, count: valid.length }, valid));

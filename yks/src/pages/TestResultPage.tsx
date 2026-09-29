@@ -1,12 +1,13 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import { AskLabel } from '../components/AskName';
 import { getTopicRef } from '../data/curriculum';
-import { loadQuestions } from '../data/content';
+import { loadQuestionsByIds } from '../data/content';
+import { useLoad } from '../hooks/useLoad';
 import type { Question } from '../domain/types';
 import { Icon } from '../components/Icon';
 import { PageHeader } from '../components/Layout';
 import { DIFFICULTY_LABEL, Options, QuestionBody, QuestionMeta, SolutionBlock } from '../components/QuestionView';
-import { Empty, Segmented, Spinner, Stat, toast } from '../components/ui';
+import { Empty, Segmented, LoadFailed, Spinner, Stat, toast } from '../components/ui';
 import { href } from '../hooks/useRoute';
 import { launchWithIds, makeConfig } from '../services/testLauncher';
 import { useAppState } from '../store/store';
@@ -22,13 +23,13 @@ const STATE_LABEL: Record<AnswerState, string> = { dogru: 'Doğru', yanlis: 'Yan
 export default function TestResultPage({ params }: { params: string[] }) {
   const state = useAppState();
   const result = state.testResults.find((r) => r.id === params[0]);
-  const [byId, setById] = useState<Map<string, Question> | null>(null);
   const [filter, setFilter] = useState<'all' | AnswerState | 'isaretli'>('all');
   const [open, setOpen] = useState<string | null>(null);
 
-  useEffect(() => {
-    loadQuestions().then((qs) => setById(new Map(qs.map((q) => [q.id, q]))));
-  }, []);
+  // Yalnız gereken soruların dersleri yüklenir; hata olursa "Tekrar dene" görünür.
+  const idKey = [...new Set(result?.questionIds ?? [])].sort().join('|');
+  const loaded = useLoad<Map<string, Question>>(() => loadQuestionsByIds(idKey ? idKey.split('|') : []), [idKey]);
+  const byId = loaded.data ?? null;
 
   const score = useMemo(() => (result && byId ? scoreTest({ ...result, elapsedMs: result.durationMs }, byId) : null), [result, byId]);
   const byTopic = useMemo(() => (score && byId ? breakdown(score.items, byId, (q) => q.topic) : []), [score, byId]);
@@ -42,6 +43,7 @@ export default function TestResultPage({ params }: { params: string[] }) {
       </>
     );
   }
+  if (loaded.failed) return <LoadFailed what="Sonuç" onRetry={loaded.retry} />;
   if (!score || !byId) return <Spinner />;
 
   const items = score.items.filter((i) => (filter === 'all' ? true : filter === 'isaretli' ? i.marked : i.state === filter));

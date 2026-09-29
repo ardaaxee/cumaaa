@@ -23,7 +23,9 @@ export default function FormulasPage() {
   useEffect(() => {
     let alive = true;
     setLessons(null);
-    loadSubjectLessons(subjectId).then((m) => alive && setLessons(m));
+    loadSubjectLessons(subjectId)
+      .then((m) => alive && setLessons(m))
+      .catch(() => alive && setLessons(new Map()));
     return () => {
       alive = false;
     };

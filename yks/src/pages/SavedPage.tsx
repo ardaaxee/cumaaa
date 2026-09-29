@@ -1,22 +1,23 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import { SUBJECTS, getTopicRef, subjectLabel } from '../data/curriculum';
-import { loadQuestions } from '../data/content';
+import { loadQuestionsByIds } from '../data/content';
+import { useLoad } from '../hooks/useLoad';
 import type { Question } from '../domain/types';
 import { PageHeader } from '../components/Layout';
 import { Options, QuestionBody, QuestionMeta, SolutionBlock } from '../components/QuestionView';
-import { Empty, Spinner, toast } from '../components/ui';
+import { Empty, LoadFailed, Spinner, toast } from '../components/ui';
 import { launchWithIds, makeConfig } from '../services/testLauncher';
 import { useSelector } from '../store/store';
 
 export default function SavedPage() {
   const favorites = useSelector((s) => s.favorites);
-  const [byId, setById] = useState<Map<string, Question> | null>(null);
   const [subject, setSubject] = useState<string>('all');
   const [open, setOpen] = useState<string | null>(null);
 
-  useEffect(() => {
-    loadQuestions().then((qs) => setById(new Map(qs.map((q) => [q.id, q]))));
-  }, []);
+  // Yalnız gereken soruların dersleri yüklenir; hata olursa "Tekrar dene" görünür.
+  const idKey = [...new Set(Object.keys(favorites))].sort().join('|');
+  const loaded = useLoad<Map<string, Question>>(() => loadQuestionsByIds(idKey ? idKey.split('|') : []), [idKey]);
+  const byId = loaded.data ?? null;
 
   const list = useMemo(() => {
     if (!byId) return [];
@@ -44,7 +45,7 @@ export default function SavedPage() {
     <>
       <PageHeader title="Kaydettiğim sorular" sub="Sorulardaki ☆ Kaydet ile eklenir" />
       {!byId ? (
-        <Spinner />
+        loaded.failed ? <LoadFailed what="Kaydedilen sorular" onRetry={loaded.retry} /> : <Spinner />
       ) : Object.keys(favorites).length === 0 ? (
         <div className="card">
           <Empty title="Henüz kaydettiğin soru yok." action={<a className="btn primary" href="#/testler">Test çöz</a>}>

@@ -1,12 +1,13 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import { AskLabel } from '../components/AskName';
 import { SUBJECTS, getTopicRef, subjectLabel } from '../data/curriculum';
-import { loadQuestions } from '../data/content';
+import { loadQuestionsByIds } from '../data/content';
+import { useLoad } from '../hooks/useLoad';
 import type { Question } from '../domain/types';
 import { Icon } from '../components/Icon';
 import { PageHeader } from '../components/Layout';
 import { Options, QuestionBody, QuestionMeta, SolutionBlock } from '../components/QuestionView';
-import { ConfirmDialog, Empty, Segmented, Spinner, toast } from '../components/ui';
+import { ConfirmDialog, Empty, Segmented, LoadFailed, Spinner, toast } from '../components/ui';
 import { href } from '../hooks/useRoute';
 import { launchTest, launchWithIds, makeConfig } from '../services/testLauncher';
 import { removeWrong, setWrongLearned } from '../store/actions';
@@ -17,15 +18,15 @@ import { optionLetter } from '../utils/ids';
 
 export default function WrongsPage() {
   const state = useAppState();
-  const [byId, setById] = useState<Map<string, Question> | null>(null);
   const [show, setShow] = useState<'acik' | 'ogrenildi'>('acik');
   const [subject, setSubject] = useState('all');
   const [open, setOpen] = useState<string | null>(null);
   const [toDelete, setToDelete] = useState<string | null>(null);
 
-  useEffect(() => {
-    loadQuestions().then((qs) => setById(new Map(qs.map((q) => [q.id, q]))));
-  }, []);
+  // Yalnız gereken soruların dersleri yüklenir; hata olursa "Tekrar dene" görünür.
+  const idKey = [...new Set(Object.values(state.wrongs).map((w) => w.questionId))].sort().join('|');
+  const loaded = useLoad<Map<string, Question>>(() => loadQuestionsByIds(idKey ? idKey.split('|') : []), [idKey]);
+  const byId = loaded.data ?? null;
 
   const weak = useMemo(() => weakTopics(state), [state]);
   const entries = Object.values(state.wrongs)
@@ -103,7 +104,7 @@ export default function WrongsPage() {
 
       <section className="section">
         {!byId ? (
-          <Spinner />
+          loaded.failed ? <LoadFailed what="Yanlışların" onRetry={loaded.retry} /> : <Spinner />
         ) : entries.length === 0 ? (
           <div className="card">
             <Empty title={show === 'acik' ? 'Açık yanlışın yok.' : 'Henüz “öğrendim” işaretlediğin soru yok.'}>
