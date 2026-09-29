@@ -29,8 +29,15 @@ export function makeConfig(patch: Partial<TestConfig>): TestConfig {
  * Devam eden test varsa üzerine yazılır (çağıran taraf onay almalıdır).
  */
 const LOAD_ERROR = 'Sorular yüklenemedi. İnternet bağlantını kontrol edip tekrar dene.';
+export const ACTIVE_TEST_ERROR = 'Devam eden testin var. Önce teste dönüp bitir veya yeni test başlatırken mevcut testi kapatmayı onayla.';
 
-export async function launchTest(config: TestConfig): Promise<string | null> {
+function activeTestBlocked(replaceActive = false): string | null {
+  return getState().activeTest && !replaceActive ? ACTIVE_TEST_ERROR : null;
+}
+
+export async function launchTest(config: TestConfig, replaceActive = false): Promise<string | null> {
+  const blocked = activeTestBlocked(replaceActive);
+  if (blocked) return blocked;
   let all;
   try {
     all = await loadQuestionsFor(config);
@@ -47,7 +54,9 @@ export async function launchTest(config: TestConfig): Promise<string | null> {
 }
 
 /** Belirli soru kimlikleriyle test başlatır (yanlışlar, tek soru). */
-export async function launchWithIds(ids: string[], config: TestConfig): Promise<string | null> {
+export async function launchWithIds(ids: string[], config: TestConfig, replaceActive = false): Promise<string | null> {
+  const blocked = activeTestBlocked(replaceActive);
+  if (blocked) return blocked;
   let known;
   try {
     known = await loadQuestionsByIds(ids);
@@ -69,6 +78,8 @@ const QUICK_SUBJECTS = 3;
  * (telefonda saniyeler içinde açılır). Her seferinde farklı dersler gelir.
  */
 export async function launchQuickMix(count: number, title: string): Promise<string | null> {
+  const blocked = activeTestBlocked();
+  if (blocked) return blocked;
   const subjects = [...SUBJECTS].sort(() => Math.random() - 0.5).slice(0, QUICK_SUBJECTS);
   let pool;
   try {
@@ -107,6 +118,8 @@ const DIAGNOSTIC_SUBJECTS = [
  * sonuçlar normal deneme kayıtları gibi attempts'a işlenir ve adaptif motoru besler.
  */
 export async function launchDiagnostic(): Promise<string | null> {
+  const blocked = activeTestBlocked();
+  if (blocked) return blocked;
   const state = getState();
   let groups;
   try {
@@ -141,6 +154,8 @@ export async function launchDiagnostic(): Promise<string | null> {
  * Önerilen zorlukta soru yoksa aynı konunun tüm zorluklarına geri düşer.
  */
 export async function launchAdaptivePractice(count = 12): Promise<string | null> {
+  const blocked = activeTestBlocked();
+  if (blocked) return blocked;
   const state = getState();
   const candidates = nextBestTopics(state, 8);
   if (!candidates.length) return launchQuickMix(count, 'Adaptif başlangıç testi');
