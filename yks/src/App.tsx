@@ -35,6 +35,7 @@ const pages = {
   badges: lazy(() => import('./pages/BadgesPage')),
   partner: lazy(() => import('./pages/PartnerPage')),
   pet: lazy(() => import('./pages/PetPage')),
+  live: lazy(() => import('./pages/LiveTogetherPage')),
   saved: lazy(() => import('./pages/SavedPage')),
   report: lazy(() => import('./pages/ReportPage')),
   onboarding: lazy(() => import('./pages/OnboardingPage')),
@@ -67,6 +68,7 @@ const ROUTES: Record<string, { page: ComponentType<{ params: string[] }>; title:
   formuller: { page: pages.formulas, title: 'Formül Defteri' },
   rozetler: { page: pages.badges, title: 'Rozetlerim' },
   pandam: { page: pages.pet, title: 'Panda arkadaşım' },
+  canli: { page: pages.live, title: 'Cuma ♡ Zeynep Canlı' },
   kaydedilenler: { page: pages.saved, title: 'Kaydettiğim sorular' },
   karne: { page: pages.report, title: 'Haftalık karne' },
 };
