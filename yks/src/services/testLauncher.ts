@@ -6,6 +6,7 @@ import { startTest } from '../store/actions';
 import type { TestConfig } from '../store/schema';
 import { getState, update } from '../store/store';
 import { filterPool, pickQuestions } from '../utils/testEngine';
+import { nextBestTopics } from './adaptiveStudy';
 
 export const DEFAULT_CONFIG: TestConfig = {
   exam: 'all',
@@ -86,4 +87,79 @@ export async function launchQuickMix(count: number, title: string): Promise<stri
 
 export function hasActiveTest(): boolean {
   return !!getState().activeTest;
+}
+
+
+const DIAGNOSTIC_SUBJECTS = [
+  'tyt-turkce',
+  'tyt-matematik',
+  'tyt-fizik',
+  'tyt-kimya',
+  'tyt-biyoloji',
+  'ayt-matematik',
+  'ayt-fizik',
+  'ayt-kimya',
+  'ayt-biyoloji',
+] as const;
+
+/**
+ * Kısa seviye tespit testi. Her ana sayısal dersten temsilî sorular seçer;
+ * sonuçlar normal deneme kayıtları gibi attempts'a işlenir ve adaptif motoru besler.
+ */
+export async function launchDiagnostic(): Promise<string | null> {
+  const state = getState();
+  let groups;
+  try {
+    groups = await Promise.all(DIAGNOSTIC_SUBJECTS.map(async (id) => ({ id, qs: await loadSubjectQuestions(id) })));
+  } catch (e) {
+    recoverFromChunkError(e);
+    return LOAD_ERROR;
+  }
+
+  const ids: string[] = [];
+  for (const g of groups) {
+    const baseCount = g.id === 'tyt-matematik' || g.id === 'ayt-matematik' || g.id === 'tyt-turkce' ? 3 : 2;
+    ids.push(...pickQuestions(g.qs, baseCount, state.attempts));
+  }
+  if (!ids.length) return 'Seviye tespit testi için soru bulunamadı.';
+
+  const config = makeConfig({
+    exam: 'all',
+    count: ids.length,
+    mode: 'sinav',
+    origin: 'seviye',
+    durationMin: Math.max(20, Math.ceil(ids.length * 1.25)),
+    title: 'Akıllı Seviye Tespit Testi',
+  });
+  update((st) => startTest(st, config, ids));
+  navigate('/test');
+  return null;
+}
+
+/**
+ * Son performansa göre en çok fayda sağlayacak konudan adaptif test başlatır.
+ * Önerilen zorlukta soru yoksa aynı konunun tüm zorluklarına geri düşer.
+ */
+export async function launchAdaptivePractice(count = 12): Promise<string | null> {
+  const state = getState();
+  const candidates = nextBestTopics(state, 8);
+  if (!candidates.length) return launchQuickMix(count, 'Adaptif başlangıç testi');
+
+  for (const row of candidates) {
+    const config = makeConfig({
+      subjectId: row.subjectId,
+      topicId: row.topicId,
+      difficulty: row.recommendedDifficulty,
+      count,
+      mode: 'ogrenme',
+      origin: 'adaptif',
+      title: 'Adaptif çalışma testi',
+    });
+    const err = await launchTest(config);
+    if (!err) return null;
+
+    const fallback = await launchTest({ ...config, difficulty: 'all' });
+    if (!fallback) return null;
+  }
+  return launchQuickMix(count, 'Adaptif karışık test');
 }
