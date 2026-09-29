@@ -23,6 +23,15 @@ data class SignalEnvelope(
 data class HelloPayload(val from: String, val at: Long)
 
 @Serializable
+data class SecurePacket(
+    val v: Int = 2,
+    val from: String,
+    val iv: String,
+    val data: String,
+    val at: Long,
+)
+
+@Serializable
 data class ChatPayload(
     val id: String,
     val from: String,
