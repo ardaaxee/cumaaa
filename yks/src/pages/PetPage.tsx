@@ -355,7 +355,7 @@ export default function PetPage() {
             <b>Bakım ve XP kuralları</b>
             <small>Bambu, su ve seviye sistemi nasıl çalışıyor?</small>
           </span>
-          <Icon name="down" />
+          <Icon name="right" />
         </summary>
         <div className="pet-rule-grid">
           <section aria-labelledby="care-h">
