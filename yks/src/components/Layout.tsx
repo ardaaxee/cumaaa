@@ -14,10 +14,10 @@ interface NavItem {
 export const NAV_ALL: NavItem[] = [
   { path: '/', label: 'Ana Sayfa', icon: 'home' },
   { path: '/koc', label: 'Akıllı Koç', icon: 'target' },
+  { path: '/dersler', label: 'Konu anlatımı', icon: 'book' },
+  { path: '/testler', label: 'Soru bankası', icon: 'check' },
+  { path: '/calis', label: 'Adım adım çalış', icon: 'play' },
   { path: '/odak', label: 'Odak Modu', icon: 'timer' },
-  { path: '/calis', label: 'Ders çalış', icon: 'play' },
-  { path: '/dersler', label: 'Dersler', icon: 'book' },
-  { path: '/testler', label: 'Testler', icon: 'check' },
   { path: '/denemeler', label: 'Denemeler', icon: 'trophy' },
   { path: '/defterim', label: 'Defterim', icon: 'sparkle' },
   { path: '/plan', label: 'Planım', icon: 'calendar' },
