@@ -5,7 +5,7 @@ import { Icon } from '../components/Icon';
 import { PageHeader } from '../components/Layout';
 import { ConfirmDialog, Empty, Modal, Segmented, Stat, toast } from '../components/ui';
 import { addMock, deleteMock } from '../store/actions';
-import { loadQuestionsFor } from '../data/content';
+import { loadQuestionsFor, loadSubjectQuestions } from '../data/content';
 import { launchWithIds, makeConfig, hasActiveTest } from '../services/testLauncher';
 import { getState } from '../store/store';
 import { FULL_MOCKS, buildFullMock, totalQuestions } from '../utils/fullMock';
@@ -17,19 +17,45 @@ import { calcNet, formatNet, round2 } from '../utils/net';
 import { pickQuestions } from '../utils/testEngine';
 import { osymBookletPdfUrl, osymBookletUrl } from '../data/officialResources';
 
-const BRANCH_MOCKS: Record<Exam, { subjectId: SubjectId; label: string; count: number; durationMin: number; icon: string }[]> = {
+interface BranchMockDef {
+  subjects: { subjectId: SubjectId; count: number }[];
+  label: string;
+  count: number;
+  durationMin: number;
+  icon: string;
+}
+
+const BRANCH_MOCKS: Record<Exam, BranchMockDef[]> = {
   TYT: [
-    { subjectId: 'tyt-turkce', label: 'Türkçe', count: 40, durationMin: 55, icon: 'Aa' },
-    { subjectId: 'tyt-matematik', label: 'Matematik', count: 40, durationMin: 65, icon: '∑' },
-    { subjectId: 'tyt-fizik', label: 'Fizik', count: 7, durationMin: 12, icon: '⚡' },
-    { subjectId: 'tyt-kimya', label: 'Kimya', count: 7, durationMin: 12, icon: '⚗' },
-    { subjectId: 'tyt-biyoloji', label: 'Biyoloji', count: 6, durationMin: 10, icon: '◉' },
+    { subjects: [{ subjectId: 'tyt-turkce', count: 40 }], label: 'Türkçe', count: 40, durationMin: 55, icon: 'Aa' },
+    {
+      subjects: [
+        { subjectId: 'tyt-matematik', count: 30 },
+        { subjectId: 'tyt-geometri', count: 10 },
+      ],
+      label: 'Matematik',
+      count: 40,
+      durationMin: 65,
+      icon: '∑',
+    },
+    { subjects: [{ subjectId: 'tyt-fizik', count: 7 }], label: 'Fizik', count: 7, durationMin: 12, icon: '⚡' },
+    { subjects: [{ subjectId: 'tyt-kimya', count: 7 }], label: 'Kimya', count: 7, durationMin: 12, icon: '⚗' },
+    { subjects: [{ subjectId: 'tyt-biyoloji', count: 6 }], label: 'Biyoloji', count: 6, durationMin: 10, icon: '◉' },
   ],
   AYT: [
-    { subjectId: 'ayt-matematik', label: 'Matematik', count: 40, durationMin: 90, icon: '∑' },
-    { subjectId: 'ayt-fizik', label: 'Fizik', count: 14, durationMin: 25, icon: '⚡' },
-    { subjectId: 'ayt-kimya', label: 'Kimya', count: 13, durationMin: 25, icon: '⚗' },
-    { subjectId: 'ayt-biyoloji', label: 'Biyoloji', count: 13, durationMin: 25, icon: '◉' },
+    {
+      subjects: [
+        { subjectId: 'ayt-matematik', count: 30 },
+        { subjectId: 'ayt-geometri', count: 10 },
+      ],
+      label: 'Matematik',
+      count: 40,
+      durationMin: 90,
+      icon: '∑',
+    },
+    { subjects: [{ subjectId: 'ayt-fizik', count: 14 }], label: 'Fizik', count: 14, durationMin: 25, icon: '⚡' },
+    { subjects: [{ subjectId: 'ayt-kimya', count: 13 }], label: 'Kimya', count: 13, durationMin: 25, icon: '⚗' },
+    { subjects: [{ subjectId: 'ayt-biyoloji', count: 13 }], label: 'Biyoloji', count: 13, durationMin: 25, icon: '◉' },
   ],
 };
 
@@ -182,23 +208,31 @@ export default function MocksPage() {
     if (err) toast(err);
   };
 
-  const startBranchMock = async (item: (typeof BRANCH_MOCKS)[Exam][number]) => {
-    let pool;
+  const startBranchMock = async (item: BranchMockDef) => {
+    const state = getState();
+    const preferredTypes = new Set(['islem', 'yorum', 'grafik', 'cok-adimli', 'yeni-nesil', 'deney']);
+    const ids: string[] = [];
+
     try {
-      pool = await loadQuestionsFor({ exam, subjectId: item.subjectId, topicId: 'all' });
+      for (const part of item.subjects) {
+        const pool = await loadSubjectQuestions(part.subjectId);
+        const physics = part.subjectId.endsWith('-fizik');
+        const preferred = physics ? pool.filter((q) => preferredTypes.has(q.type)) : pool;
+        const targetPreferred = physics ? Math.ceil(part.count * 0.85) : part.count;
+        const first = pickQuestions(preferred, Math.min(part.count, targetPreferred), state.attempts);
+        const used = new Set(first);
+        const rest = pickQuestions(
+          pool.filter((q) => !used.has(q.id)),
+          Math.max(0, part.count - first.length),
+          state.attempts,
+        );
+        const selected = [...first, ...rest].slice(0, part.count);
+        ids.push(...selected);
+      }
     } catch {
       toast(item.label + ' soru havuzu yüklenemedi.');
       return;
     }
-
-    const physics = item.subjectId.endsWith('-fizik');
-    const preferredTypes = new Set(['islem', 'yorum', 'grafik', 'cok-adimli', 'yeni-nesil', 'deney']);
-    const preferred = physics ? pool.filter((q) => preferredTypes.has(q.type)) : pool;
-    const targetPreferred = physics ? Math.ceil(item.count * 0.85) : item.count;
-    const first = pickQuestions(preferred, Math.min(item.count, targetPreferred), getState().attempts);
-    const used = new Set(first);
-    const rest = pickQuestions(pool.filter((q) => !used.has(q.id)), item.count - first.length, getState().attempts);
-    const ids = [...first, ...rest].slice(0, item.count);
 
     if (ids.length !== item.count) {
       toast(
@@ -208,16 +242,18 @@ export default function MocksPage() {
       return;
     }
 
+    const isPhysics = item.subjects.length === 1 && item.subjects[0].subjectId.endsWith('-fizik');
+    const configSubject: SubjectId | 'all' = item.subjects.length === 1 ? item.subjects[0].subjectId : 'all';
     const err = await launchWithIds(
       ids,
       makeConfig({
         exam,
-        subjectId: item.subjectId,
+        subjectId: configSubject,
         count: ids.length,
         mode: 'sinav',
         origin: 'filtre',
         durationMin: item.durationMin,
-        title: exam + ' ' + item.label + ' Branş Denemesi' + (physics ? ' · İşlem + Yorum' : ''),
+        title: exam + ' ' + item.label + ' Branş Denemesi' + (isPhysics ? ' · İşlem + Yorum' : ''),
       }),
     );
     if (err) toast(err);
@@ -287,11 +323,11 @@ export default function MocksPage() {
           <span className="badge brand">{BRANCH_MOCKS[exam].length} branş</span>
         </div>
         <p className="small muted">
-          Her branş kendi soru sayısı ve süresiyle açılır. Fizikte soru seçimi özellikle işlem, grafik, deney ve yorum tiplerine ağırlık verir.
+          Her branş kendi soru sayısı ve süresiyle açılır. Matematik denemeleri 30 matematik + 10 geometri dağılımını korur; fizikte işlem, grafik, deney ve yorum soruları ağırlıklıdır.
         </p>
         <div className="branch-mock-grid">
           {BRANCH_MOCKS[exam].map((item) => (
-            <button key={item.subjectId} type="button" className="branch-mock" onClick={() => void startBranchMock(item)}>
+            <button key={item.label} type="button" className="branch-mock" onClick={() => void startBranchMock(item)}>
               <span className="branch-mock-icon">{item.icon}</span>
               <span className="grow">
                 <b>{item.label}</b>
