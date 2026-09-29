@@ -66,13 +66,15 @@ export default function TestSetupPage() {
     [pool],
   );
 
-  const run = (fn: () => Promise<string | null>) => {
-    const go = async () => {
-      const err = await fn();
+  const run = (
+    start: (replaceActive: boolean) => Promise<string | null>,
+  ) => {
+    const go = async (replaceActive: boolean) => {
+      const err = await start(replaceActive);
       if (err) toast(err);
     };
-    if (state.activeTest) setConfirm(() => fn);
-    else void go();
+    if (state.activeTest) setConfirm(() => () => start(true));
+    else void go(false);
   };
 
   const recent = state.testResults.slice(-8).reverse();
@@ -217,7 +219,7 @@ export default function TestSetupPage() {
             type="button"
             className="btn primary"
             disabled={!!questions && pool.length === 0}
-            onClick={() => run(() => launchTest(cfg))}
+            onClick={() => run((replace) => launchTest(cfg, replace))}
           >
             Testi başlat
           </button>
@@ -247,7 +249,7 @@ export default function TestSetupPage() {
           <button
             type="button"
             className="btn"
-            onClick={() => run(() => launchWithIds(openWrongIds.slice(0, 40), makeConfig({ origin: 'yanlislar', mode: 'ogrenme', title: 'Yanlışlarım tekrarı' })))}
+            onClick={() => run((replace) => launchWithIds(openWrongIds.slice(0, 40), makeConfig({ origin: 'yanlislar', mode: 'ogrenme', title: 'Yanlışlarım tekrarı' }), replace))}
           >
             Yanlışlarımı tekrar çöz ({Math.min(40, openWrongIds.length)} soru)
           </button>
