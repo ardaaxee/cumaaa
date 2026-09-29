@@ -7,7 +7,7 @@ import { StudyCalendar } from '../components/StudyCalendar';
 import { useAppState } from '../store/store';
 import { weakTopics } from '../utils/analysis';
 import { dayKey, formatDay, formatMinutes } from '../utils/date';
-import { formatNet, percent } from '../utils/net';
+import { percent } from '../utils/net';
 import { dailySeries, dashboard, summarize, topicPerformance } from '../utils/stats';
 
 export default function ProgressPage() {
