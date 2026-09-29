@@ -13,6 +13,7 @@ interface NavItem {
 
 export const NAV_ALL: NavItem[] = [
   { path: '/', label: 'Ana Sayfa', icon: 'home' },
+  { path: '/koc', label: 'Akıllı Koç', icon: 'target' },
   { path: '/calis', label: 'Ders çalış', icon: 'play' },
   { path: '/dersler', label: 'Dersler', icon: 'book' },
   { path: '/testler', label: 'Testler', icon: 'check' },
@@ -36,7 +37,7 @@ export const NAV_ALL: NavItem[] = [
 ];
 
 const SIDEBAR_GROUPS: { label: string; paths: string[] }[] = [
-  { label: 'Çalış', paths: ['/', '/calis', '/dersler', '/testler', '/denemeler', '/plan'] },
+  { label: 'Çalış', paths: ['/', '/koc', '/calis', '/dersler', '/testler', '/denemeler', '/plan'] },
   { label: 'Takip', paths: ['/tekrar', '/yanlislar', '/gelisim', '/karne'] },
   { label: 'Araçlar', paths: ['/defterim', '/kartlar', '/formuller', '/kaydedilenler'] },
   { label: 'Kişisel', paths: ['/ogretmen', '/pandam', '/ayarlar', '/daha'] },
