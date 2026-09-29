@@ -8527,3 +8527,107 @@ body {
     transition:none !important;
   }
 }
+
+
+/* ===== PANDA ARTICULATION v5 ===== */
+.real-panda .rp-arm,
+.real-panda .rp-leg,
+.real-panda .rp-foot {
+  transform-box: fill-box;
+}
+.real-panda .rp-arm-left { transform-origin: 72% 16%; }
+.real-panda .rp-arm-right { transform-origin: 28% 16%; }
+.real-panda .rp-leg-left,
+.real-panda .rp-foot-left { transform-origin: 72% 18%; }
+.real-panda .rp-leg-right,
+.real-panda .rp-foot-right { transform-origin: 28% 18%; }
+
+.pet-stage-panda.act-walking .rp-arm-left {
+  animation: rp-arm-left-walk .52s ease-in-out infinite alternate;
+}
+.pet-stage-panda.act-walking .rp-arm-right {
+  animation: rp-arm-right-walk .52s ease-in-out infinite alternate;
+}
+.pet-stage-panda.act-walking .rp-leg-left,
+.pet-stage-panda.act-walking .rp-foot-left {
+  animation: rp-leg-left-walk .52s ease-in-out infinite alternate;
+}
+.pet-stage-panda.act-walking .rp-leg-right,
+.pet-stage-panda.act-walking .rp-foot-right {
+  animation: rp-leg-right-walk .52s ease-in-out infinite alternate;
+}
+.pet-stage-panda.act-eating .rp-arm-right,
+.pet-stage-panda.act-drinking .rp-arm-right {
+  animation: rp-arm-feed .55s ease-in-out infinite alternate;
+}
+.pet-stage-panda.act-playing .rp-arm-left {
+  animation: rp-play-arm-left .7s ease-in-out infinite alternate;
+}
+.pet-stage-panda.act-playing .rp-arm-right {
+  animation: rp-play-arm-right .7s ease-in-out infinite alternate;
+}
+.pet-stage-panda.act-sleeping .rp-arm-left {
+  transform: rotate(18deg) translate(5px,5px);
+}
+.pet-stage-panda.act-sleeping .rp-arm-right {
+  transform: rotate(-24deg) translate(-5px,7px);
+}
+.pet-stage-panda.act-sleeping .rp-leg-left {
+  transform: rotate(12deg) translate(4px,-1px);
+}
+.pet-stage-panda.act-sleeping .rp-leg-right {
+  transform: rotate(-15deg) translate(-4px,-1px);
+}
+
+@keyframes rp-arm-left-walk {
+  from { transform:rotate(8deg) translateY(1px); }
+  to { transform:rotate(-11deg) translateY(-1px); }
+}
+@keyframes rp-arm-right-walk {
+  from { transform:rotate(-11deg) translateY(-1px); }
+  to { transform:rotate(8deg) translateY(1px); }
+}
+@keyframes rp-leg-left-walk {
+  from { transform:rotate(-5deg) translateY(0); }
+  to { transform:rotate(7deg) translateY(-2px); }
+}
+@keyframes rp-leg-right-walk {
+  from { transform:rotate(7deg) translateY(-2px); }
+  to { transform:rotate(-5deg) translateY(0); }
+}
+@keyframes rp-arm-feed {
+  from { transform:rotate(-6deg) translate(-1px,0); }
+  to { transform:rotate(-17deg) translate(-3px,-4px); }
+}
+@keyframes rp-play-arm-left {
+  from { transform:rotate(2deg); }
+  to { transform:rotate(18deg) translateY(-3px); }
+}
+@keyframes rp-play-arm-right {
+  from { transform:rotate(-2deg); }
+  to { transform:rotate(-18deg) translateY(-3px); }
+}
+
+/* Idle'da tamamen donuk durmasın: ağırlık aktarımı ve çok hafif pati hareketi. */
+.pet-stage-panda.act-idle .rp-leg-left {
+  animation: rp-idle-weight-left 6.2s ease-in-out infinite;
+}
+.pet-stage-panda.act-idle .rp-leg-right {
+  animation: rp-idle-weight-right 6.2s ease-in-out infinite;
+}
+.pet-stage-panda.act-idle .rp-arm-left {
+  animation: rp-idle-arm 5.8s ease-in-out infinite;
+}
+@keyframes rp-idle-weight-left {
+  0%,28%,100% { transform:translateY(0); }
+  42%,62% { transform:translateY(1.8px) rotate(-1deg); }
+}
+@keyframes rp-idle-weight-right {
+  0%,28%,100% { transform:translateY(1.5px); }
+  42%,62% { transform:translateY(0) rotate(1deg); }
+}
+@keyframes rp-idle-arm {
+  0%,55%,100% { transform:rotate(0deg); }
+  67% { transform:rotate(3deg) translateY(1px); }
+  74% { transform:rotate(-2deg); }
+}
