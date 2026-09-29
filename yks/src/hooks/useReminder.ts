@@ -34,7 +34,10 @@ export function useReminder(): void {
         const body = parts.length ? 'Bugün ' + parts.slice(0, 3).join(' · ') + ' bekliyor.' : 'Bugünkü hedeflerini tamamladın. Kısa bir tekrar yeter ♡';
         const options: NotificationOptions = { body, icon: 'icon-192.png', badge: 'icon-192.png', tag: 'yks-calisma' };
         navigator.serviceWorker?.getRegistration?.()
-          .then((reg) => (reg ? reg.showNotification('YKS çalışma zamanı ♡', options) : new Notification('YKS çalışma zamanı ♡', options)))
+          .then((reg) => {
+            if (reg) return reg.showNotification('YKS çalışma zamanı ♡', options);
+            new Notification('YKS çalışma zamanı ♡', options);
+          })
           .catch(() => {
             try { new Notification('YKS çalışma zamanı ♡', options); } catch { /* desteklenmiyor */ }
           });
