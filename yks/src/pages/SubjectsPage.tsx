@@ -51,48 +51,76 @@ export default function SubjectsPage() {
         <span className="peek peek-rabbit" aria-hidden="true">
           <RabbitFace />
         </span>
-        <div className="form-grid two">
-          <label className="field">
+        <div className="subject-search-row">
+          <label className="field subject-search">
             <span>Konu ara</span>
-            <input className="input" type="search" value={q} onChange={(e) => setQ(e.target.value)} placeholder="Örn. türev, mol, paragraf" />
+            <input className="input" type="search" value={q} onChange={(e) => setQ(e.target.value)} placeholder="Türev, mol, paragraf…" />
           </label>
-          <label className="field">
-            <span>Sınav</span>
-            <select className="select" value={exam} onChange={(e) => { setExam(e.target.value as typeof exam); setSubject('all'); }}>
-              <option value="all">TYT + AYT</option>
-              <option value="TYT">TYT</option>
-              <option value="AYT">AYT</option>
-            </select>
-          </label>
-          <label className="field">
-            <span>Ders</span>
-            <select className="select" value={subject} onChange={(e) => setSubject(e.target.value)}>
-              <option value="all">Tüm dersler</option>
-              {subjects.map((s) => (
-                <option key={s.id} value={s.id}>
-                  {subjectLabel(s)}
-                </option>
-              ))}
-            </select>
-          </label>
-          <label className="field">
-            <span>Durum</span>
-            <select className="select" value={status} onChange={(e) => setStatus(e.target.value as typeof status)}>
-              <option value="all">Tümü</option>
-              <option value="baslanmadi">Başlanmadı</option>
-              <option value="calisiliyor">Çalışılıyor</option>
-              <option value="tamamlandi">Tamamlandı</option>
-            </select>
-          </label>
+          <div className="subject-exam-tabs" role="group" aria-label="Sınav türü">
+            {(['all', 'TYT', 'AYT'] as const).map((value) => (
+              <button
+                key={value}
+                type="button"
+                className={`chip${exam === value ? ' on' : ''}`}
+                aria-pressed={exam === value}
+                onClick={() => {
+                  setExam(value);
+                  setSubject('all');
+                }}
+              >
+                {value === 'all' ? 'Tümü' : value}
+              </button>
+            ))}
+          </div>
         </div>
-        <div className="row mt-12">
+
+        <details className="subject-advanced-filter" open={subject !== 'all' || status !== 'all'}>
+          <summary>Filtreleri daralt</summary>
+          <div className="form-grid two mt-12">
+            <label className="field">
+              <span>Ders</span>
+              <select className="select" value={subject} onChange={(e) => setSubject(e.target.value)}>
+                <option value="all">Tüm dersler</option>
+                {subjects.map((s) => (
+                  <option key={s.id} value={s.id}>
+                    {subjectLabel(s)}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <label className="field">
+              <span>Durum</span>
+              <select className="select" value={status} onChange={(e) => setStatus(e.target.value as typeof status)}>
+                <option value="all">Tümü</option>
+                <option value="baslanmadi">Başlanmadı</option>
+                <option value="calisiliyor">Çalışılıyor</option>
+                <option value="tamamlandi">Tamamlandı</option>
+              </select>
+            </label>
+          </div>
+          {(q || subject !== 'all' || status !== 'all') && (
+            <button
+              type="button"
+              className="btn small ghost mt-8"
+              onClick={() => {
+                setQ('');
+                setSubject('all');
+                setStatus('all');
+              }}
+            >
+              Filtreleri temizle
+            </button>
+          )}
+        </details>
+
+        <div className="subject-source-note">
           <SourceBadge type="meb-program" />
-          <span className="tiny muted">Konular MEB ortaöğretim programı (2018) mantığıyla düzenlenmiştir; 2026–2027’de 12. sınıfta önceki program uygulanır.</span>
+          <span>Konular okul programındaki sırayı takip edecek şekilde düzenlenmiştir.</span>
         </div>
       </div>
 
       {filtering ? (
-        <section className="card section" aria-live="polite">
+        <section className="card section subject-results-card" aria-live="polite">
           <div className="card-head">
             <h2>{results.length} konu bulundu</h2>
           </div>
@@ -118,7 +146,7 @@ export default function SubjectsPage() {
           )}
         </section>
       ) : (
-        <div className="grid grid-cards three section">
+        <div className="grid grid-cards three section subject-grid">
           {subjects.map((s) => {
             const topics = s.units.flatMap((u) => u.topics);
             const done = topics.filter((t) => statusOf(t.id) === 'tamamlandi').length;
