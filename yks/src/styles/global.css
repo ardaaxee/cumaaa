@@ -2073,7 +2073,13 @@ body {
   letter-spacing: -0.01em;
 }
 
-:root[data-theme='dark'] body,
+:root[data-theme='dark'] body {
+  background:
+    radial-gradient(circle at 8% 6%, rgba(123, 92, 196, .13), transparent 28rem),
+    radial-gradient(circle at 92% 0%, rgba(190, 95, 135, .10), transparent 28rem),
+    var(--bg);
+}
+
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme='light']) body {
     background:
