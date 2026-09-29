@@ -12,6 +12,10 @@ on:
 permissions:
   contents: write
 
+concurrency:
+  group: deploy-yks-pages
+  cancel-in-progress: true
+
 jobs:
   deploy:
     runs-on: ubuntu-latest
@@ -58,4 +62,8 @@ jobs:
             exit 0
           fi
           git commit -m "deploy: latest YKS site"
-          git push origin gh-pages
+          if ! git push origin gh-pages; then
+            echo "gh-pages changed during deploy; publishing newest YKS build."
+            git fetch origin gh-pages
+            git push --force-with-lease origin HEAD:gh-pages
+          fi
