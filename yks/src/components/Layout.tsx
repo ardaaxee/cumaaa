@@ -55,10 +55,11 @@ export function Layout({ children }: { children: ReactNode }) {
   const route = useRoute();
   const section = sectionOf(route.path);
   const teacherName = useSelector((s) => s.settings.teacherName);
-  // Test çözerken alt şerit gizlenir; ekran tamamen soruya ayrılır (çıkış testin kendi kapat düğmesiyle).
-  const focusMode = route.path === '/test';
+  // Test ve Panda Evi tam ekran deneyimdir; global alt şerit gizlenir.
+  const petMode = route.path === '/pandam';
+  const focusMode = route.path === '/test' || petMode;
   return (
-    <div className={`shell${focusMode ? ' no-dock' : ''}`}>
+    <div className={`shell${focusMode ? ' no-dock' : ''}${petMode ? ' pet-shell' : ''}`}>
       <a className="skip-link" href="#main" onClick={(e) => { e.preventDefault(); document.getElementById('main')?.focus(); }}>
         İçeriğe geç
       </a>
