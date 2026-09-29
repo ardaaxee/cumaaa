@@ -135,7 +135,7 @@ export function App() {
           </PageErrorBoundary>
         </Layout>
       ) : (
-        <main id="main" className="main" style={{ maxWidth: 640 }}>
+        <main id="main" className="main onboarding-main">
           <Suspense fallback={<Spinner />}>
             <Page params={[]} />
           </Suspense>
