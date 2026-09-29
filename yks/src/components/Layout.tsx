@@ -1,4 +1,4 @@
-import type { ReactNode } from 'react';
+import { useEffect, useState, type ReactNode } from 'react';
 import { useRoute } from '../hooks/useRoute';
 import { update, useSelector } from '../store/store';
 import { Icon, type IconName } from './Icon';
@@ -52,6 +52,78 @@ export function sectionOf(path: string): string {
   return first;
 }
 
+
+interface InstallPromptEvent extends Event {
+  prompt(): Promise<void>;
+  userChoice: Promise<{ outcome: 'accepted' | 'dismissed' }>;
+}
+
+function AppStatusBar() {
+  const activeTest = useSelector((s) => s.activeTest);
+  const pomodoro = useSelector((s) => s.pomodoro);
+  const [online, setOnline] = useState(() => (typeof navigator === 'undefined' ? true : navigator.onLine));
+  const [installPrompt, setInstallPrompt] = useState<InstallPromptEvent | null>(null);
+
+  useEffect(() => {
+    const onOnline = () => setOnline(true);
+    const onOffline = () => setOnline(false);
+    const onPrompt = (event: Event) => {
+      event.preventDefault();
+      setInstallPrompt(event as InstallPromptEvent);
+    };
+    const onInstalled = () => setInstallPrompt(null);
+    window.addEventListener('online', onOnline);
+    window.addEventListener('offline', onOffline);
+    window.addEventListener('beforeinstallprompt', onPrompt as EventListener);
+    window.addEventListener('appinstalled', onInstalled);
+    return () => {
+      window.removeEventListener('online', onOnline);
+      window.removeEventListener('offline', onOffline);
+      window.removeEventListener('beforeinstallprompt', onPrompt as EventListener);
+      window.removeEventListener('appinstalled', onInstalled);
+    };
+  }, []);
+
+  const focusRunning = pomodoro.running && pomodoro.phase === 'odak';
+  if (online && !activeTest && !focusRunning && !installPrompt) return null;
+
+  return (
+    <div className="app-status-bar" aria-label="Uygulama durumu">
+      {!online && (
+        <span className="app-status-item offline">
+          <span aria-hidden="true">●</span> Çevrimdışı · kayıtların cihazda çalışmaya devam eder
+        </span>
+      )}
+      {activeTest && (
+        <a className="app-status-item action" href="#/test">
+          <Icon name="play" />
+          Devam eden test · {activeTest.current + 1}/{activeTest.questionIds.length}
+        </a>
+      )}
+      {focusRunning && (
+        <a className="app-status-item action" href="#/odak">
+          <Icon name="timer" />
+          Odak oturumu sürüyor
+        </a>
+      )}
+      {installPrompt && (
+        <button
+          type="button"
+          className="app-status-item action install"
+          onClick={async () => {
+            const prompt = installPrompt;
+            setInstallPrompt(null);
+            await prompt.prompt();
+            await prompt.userChoice.catch(() => ({ outcome: 'dismissed' as const }));
+          }}
+        >
+          <Icon name="plus" /> Uygulamayı telefona yükle
+        </button>
+      )}
+    </div>
+  );
+}
+
 export function Layout({ children }: { children: ReactNode }) {
   const route = useRoute();
   const section = sectionOf(route.path);
@@ -97,6 +169,7 @@ export function Layout({ children }: { children: ReactNode }) {
       <main id="main" className="main" tabIndex={-1}>
         {children}
       </main>
+      {!focusMode && <AppStatusBar />}
       {!focusMode && <MascotNav />}
       <Companion />
     </div>
