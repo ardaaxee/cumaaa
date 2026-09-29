@@ -83,24 +83,34 @@ export default function HomePage() {
 
       <section className="card hero hero-panda" aria-labelledby="hello">
         <div className="hero-text">
-          <div className="eyebrow">Senin çalışma alanın</div>
+          <div className="eyebrow">Bugünün çalışma alanı</div>
           <h2 id="hello">
             İyi ki buradasın{profile.name ? `, ${profile.name}` : ''} <span className="heart">♡</span>
           </h2>
-          <p className="muted" style={{ marginBottom: 0 }}>
+          <p className="muted hero-copy">
             {daysLeft != null && daysLeft >= 0
-              ? `Sınavına ${daysLeft} gün var. Bugün küçük ama net bir adım at.`
-              : 'Küçük adımlar, büyük hayaller. Bugün kendin için bir adım at.'}
+              ? `YKS'ye ${daysLeft} gün kaldı. Bugünün hedefini bitir, kalanını yarına bırak.`
+              : 'Bugün küçük ama tamamlanmış bir çalışma, yarım kalan büyük plandan daha değerlidir.'}
           </p>
-          <a className="btn primary mt-12 study-cta" href="#/calis">
-            <Icon name="play" /> Ders çalışmaya başla
-          </a>
+          <div className="hero-actions">
+            <a className="btn primary study-cta" href="#/calis">
+              <Icon name="play" /> Çalışmaya başla
+            </a>
+            <a className="btn hero-secondary" href="#/plan">
+              <Icon name="calendar" /> Bugünün planı
+            </a>
+          </div>
+          <div className="hero-kpis" aria-label="Bugünün özeti">
+            <div><b>{d.todayQuestions}</b><span>soru</span></div>
+            <div><b>{formatMinutes(d.todayMinutes)}</b><span>çalışma</span></div>
+            <div><b>{d.streak}</b><span>gün seri</span></div>
+          </div>
         </div>
         <div className="hero-mascot-wrap">
           <div className="speech">{petNeed ? (needs.hungry ? 'Acıktım 🎋' : 'Susadım 💧') : cheerOfDay(today)}</div>
           <a className="hero-mascot" href="#/pandam" aria-label={`${state.settings.pet.name}: seviye ${pet.level}${petNeed ? `. ${petNeed}` : ''}`}>
             <PandaBody
-              size={96}
+              size={104}
               waving={!petNeed && pet.mood !== 'uykulu'}
               sleepy={!petNeed && pet.mood === 'uykulu'}
               sad={!!petNeed}
@@ -113,42 +123,38 @@ export default function HomePage() {
 
       <PartnerMessages />
 
-      <nav className="quick-grid section" aria-label="Hızlı başla">
+      <section className="section home-section-head">
+        <div>
+          <div className="eyebrow">Hızlı başla</div>
+          <h2>Şimdi ne yapmak istiyorsun?</h2>
+        </div>
+        <a className="text-link" href="#/daha">Tüm araçlar <Icon name="right" /></a>
+      </section>
+
+      <nav className="quick-grid home-quick-grid" aria-label="Hızlı başla">
         <button
           type="button"
           className="quick-tile t-lilac"
           onClick={() => void launchQuickMix(10, 'Hızlı 10 soru').then((e) => e && toast(e))}
         >
           <span className="quick-emoji" aria-hidden="true">⚡</span>
-          <b>Hızlı 10 soru</b>
-          <span className="tiny muted">Karışık, ÖSYM tarzı</span>
+          <b>10 soruluk mini test</b>
+          <span className="tiny muted">Karışık ve kısa bir başlangıç</span>
         </button>
-        <a className="quick-tile t-rose" href="#/kartlar">
-          <span className="quick-emoji" aria-hidden="true">🃏</span>
-          <b>Bilgi kartları</b>
-          <span className="tiny muted">{cardsDue ? `${cardsDue} kart tekrar zamanı` : 'Kavram & formül ezberi'}</span>
+        <a className="quick-tile t-sky" href="#/dersler">
+          <span className="quick-emoji" aria-hidden="true">📚</span>
+          <b>Konu çalış</b>
+          <span className="tiny muted">TYT + AYT konu anlatımları</span>
         </a>
-        <a className="quick-tile t-sky" href="#/formuller">
-          <span className="quick-emoji" aria-hidden="true">📐</span>
-          <b>Formül defteri</b>
-          <span className="tiny muted">Tüm formüller tek yerde</span>
+        <a className="quick-tile t-mint" href="#/plan">
+          <span className="quick-emoji" aria-hidden="true">✓</span>
+          <b>Planı tamamla</b>
+          <span className="tiny muted">{todayTasks.length ? `${todayTasks.filter((t) => !t.done).length} görev kaldı` : 'Bugün için görev ekle'}</span>
         </a>
-        <a className="quick-tile t-mint" href="#/pandam">
-          <span className="quick-emoji" aria-hidden="true">🐼</span>
-          <b>{state.settings.pet.name}</b>
-          <span className="tiny muted">
-            {needs.hungry || needs.thirsty ? `${needs.hungry ? 'Acıktı 🎋' : ''}${needs.hungry && needs.thirsty ? ' · ' : ''}${needs.thirsty ? 'Susadı 💧' : ''}` : `Tok %${Math.round(needs.food)} · Su %${Math.round(needs.water)}`}
-          </span>
-        </a>
-        <a className="quick-tile t-sky" href="#/karne">
-          <span className="quick-emoji" aria-hidden="true">📊</span>
-          <b>Haftalık karne</b>
-          <span className="tiny muted">Bu haftanın özeti</span>
-        </a>
-        <a className="quick-tile t-peach" href="#/rozetler">
-          <span className="quick-emoji" aria-hidden="true">🏅</span>
-          <b>Rozetlerim</b>
-          <span className="tiny muted">{earnedBadges} rozet kazandın</span>
+        <a className="quick-tile t-rose" href="#/ogretmen">
+          <span className="quick-emoji" aria-hidden="true">✦</span>
+          <b>{state.settings.teacherName} ile çalış</b>
+          <span className="tiny muted">Sor, anlatsın; yanlışını birlikte çöz</span>
         </a>
       </nav>
 
