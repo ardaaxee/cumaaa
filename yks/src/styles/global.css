@@ -2049,3 +2049,4 @@ body { overflow-x: clip; }
 .inline-q, .card, .main, .grid > * { min-width: 0; }
 .question-text, .option, .feedback, .solution, .lesson, .example, .formula { overflow-wrap: break-word; }
 .formula code { white-space: pre-wrap; word-break: break-word; }
+.badge { max-width: 100%; white-space: normal; overflow-wrap: break-word; text-align: left; }
