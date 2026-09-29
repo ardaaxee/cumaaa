@@ -5954,3 +5954,19 @@ body {
   :root:not([data-theme='light']) .focus-panda span { color: var(--muted); }
   :root:not([data-theme='light']) .focus-panda span { background: rgba(255,255,255,.06); }
 }
+
+
+/* ===== FOCUS TASK BINDING ===== */
+.focus-task-bind {
+  max-width: 520px;
+  margin: 17px auto 0;
+  padding: 13px;
+  border: 1px solid var(--line);
+  border-radius: 17px;
+  background: var(--surface-2);
+}
+.focus-task-check {
+  margin-top: 7px;
+  color: var(--text-2);
+  font-size: .76rem;
+}
