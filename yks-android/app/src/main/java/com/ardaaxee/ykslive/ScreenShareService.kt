@@ -7,11 +7,14 @@ import android.app.PendingIntent
 import android.app.Service
 import android.content.Intent
 import android.content.pm.ServiceInfo
+import android.net.ConnectivityManager
+import android.net.Network
 import android.os.Binder
 import android.os.Build
 import android.os.Handler
 import android.os.IBinder
 import android.os.Looper
+import android.os.PowerManager
 import com.ardaaxee.ykslive.model.ChatLine
 import com.ardaaxee.ykslive.model.ChatPayload
 import com.ardaaxee.ykslive.model.SignalEnvelope
@@ -45,6 +48,8 @@ class ScreenShareService : Service(), SignalingClient.Listener, WebRtcSession.Ca
     private var ui: UiListener? = null
     private val chat = mutableListOf<ChatLine>()
     private var currentStatus = "Başlatılıyor…"
+    private var wakeLock: PowerManager.WakeLock? = null
+    private var networkCallback: ConnectivityManager.NetworkCallback? = null
 
     companion object {
         const val ACTION_START = "com.ardaaxee.ykslive.START"
@@ -60,6 +65,7 @@ class ScreenShareService : Service(), SignalingClient.Listener, WebRtcSession.Ca
         super.onCreate()
         running = true
         createNotificationChannel()
+        registerNetworkRecovery()
     }
 
     override fun onBind(intent: Intent?): IBinder = binder
@@ -79,6 +85,7 @@ class ScreenShareService : Service(), SignalingClient.Listener, WebRtcSession.Ca
         }
 
         startProjectionForeground("Ekran paylaşımı hazırlanıyor")
+        acquireStreamingWakeLock()
         startSession(room, projectionData)
         return START_NOT_STICKY
     }
@@ -198,8 +205,52 @@ class ScreenShareService : Service(), SignalingClient.Listener, WebRtcSession.Ca
         detachRenderer()
         rtc?.close()
         rtc = null
+        releaseStreamingWakeLock()
+        unregisterNetworkRecovery()
         scope.cancel()
         super.onDestroy()
+    }
+
+    private fun acquireStreamingWakeLock() {
+        if (wakeLock?.isHeld == true) return
+        val pm = getSystemService(PowerManager::class.java)
+        wakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "YksLive:ScreenShare").apply {
+            setReferenceCounted(false)
+            acquire()
+        }
+    }
+
+    private fun releaseStreamingWakeLock() {
+        wakeLock?.let { lock ->
+            if (lock.isHeld) runCatching { lock.release() }
+        }
+        wakeLock = null
+    }
+
+    private fun registerNetworkRecovery() {
+        val manager = getSystemService(ConnectivityManager::class.java)
+        val callback = object : ConnectivityManager.NetworkCallback() {
+            override fun onAvailable(network: Network) {
+                main.postDelayed({
+                    if (running) {
+                        postStatus("Ağ değişikliği algılandı · bağlantı yenileniyor")
+                        rtc?.restartIce()
+                    }
+                }, 650)
+            }
+
+            override fun onLost(network: Network) {
+                if (running) postStatus("Ağ bağlantısı koptu · yeniden bağlanma bekleniyor")
+            }
+        }
+        networkCallback = callback
+        runCatching { manager.registerDefaultNetworkCallback(callback) }
+    }
+
+    private fun unregisterNetworkRecovery() {
+        val callback = networkCallback ?: return
+        networkCallback = null
+        runCatching { getSystemService(ConnectivityManager::class.java).unregisterNetworkCallback(callback) }
     }
 
     private fun createNotificationChannel() {
