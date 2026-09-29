@@ -152,6 +152,11 @@ export default function MocksPage() {
       return;
     }
     const ids = buildFullMock(plan, pool, getState().attempts);
+    const expected = totalQuestions(plan);
+    if (ids.length !== expected) {
+      toast('Tam sınav simülasyonu için yeterli özgün soru yok. Eksik deneme başlatılmadı.', 5000);
+      return;
+    }
     const err = await launchWithIds(
       ids,
       makeConfig({ exam: e, mode: 'sinav', origin: 'deneme', count: ids.length, durationMin: plan.durationMin, title: `${plan.title} (${formatDay(dayKey())})` }),
@@ -188,7 +193,7 @@ export default function MocksPage() {
               Uygulamada tam deneme çöz
             </h2>
             <p className="small muted" style={{ margin: '4px 0 10px' }}>
-              Gerçek sınav düzeninde: süre, soru sayısı ve ders sırası YKS ile aynı. Bitince netlerin ders ders çıkar ve deneme listene otomatik eklenir.
+              2026 YKS oturum yapısına göre süreli simülasyon. Soru sayısı tam değilse deneme başlamaz; bitince netlerin ders ders çıkar ve deneme listene otomatik eklenir.
             </p>
             <div className="row">
               {(['TYT', 'AYT'] as const).map((e) => (
@@ -200,6 +205,8 @@ export default function MocksPage() {
           </div>
         </div>
       </section>
+
+      <div className="tiny muted mt-8">Kaynak referansı: ÖSYM 2026-YKS sınav yapısı. Uygulamadaki sorular özgün pratik sorularıdır; resmî ÖSYM soruları değildir.</div>
 
       <div className="row between section">
         <Segmented label="Sınav" value={exam} onChange={setExam} options={[{ value: 'TYT', label: 'TYT' }, { value: 'AYT', label: 'AYT (Sayısal)' }]} />
