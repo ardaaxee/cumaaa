@@ -6,7 +6,7 @@ import { ConnectSettings } from '../components/ConnectSettings';
 import { CompanionToggle } from '../components/Companion';
 import { PageHeader } from '../components/Layout';
 import { ConfirmDialog, toast } from '../components/ui';
-import { getPageImage, setPageImage } from '../services/notebookStore';
+import { deletePageImage, getPageImage, setPageImage } from '../services/notebookStore';
 import { getTeacherPhoto, setTeacherPhoto } from '../services/photoStore';
 import { updateProfile, updateSettings } from '../store/actions';
 import { clearAppData, createBackup, migrationContext, parseBackup } from '../store/storage';
@@ -45,8 +45,9 @@ export default function SettingsPage() {
     try {
       const text = await file.text();
       const { state: next, teacherPhoto, notebookImages, report } = parseBackup(text, migrationContext());
+      await Promise.all(state.notebookPages.map((page) => deletePageImage(page.id)));
       replaceState(next);
-      if (teacherPhoto) await setTeacherPhoto(teacherPhoto);
+      await setTeacherPhoto(teacherPhoto);
       await Promise.all(
         Object.entries(notebookImages)
           .filter(([id]) => next.notebookPages.some((page) => page.id === id))
