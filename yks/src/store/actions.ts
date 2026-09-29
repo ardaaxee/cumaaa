@@ -18,6 +18,7 @@ import type {
   TopicStatus,
   VideoResource,
   WrongEntry,
+  WrongReason,
 } from './schema';
 
 /**
@@ -106,7 +107,16 @@ export function abandonTest(state: AppState): AppState {
   return { ...state, activeTest: null };
 }
 
-function upsertWrong(prev: WrongEntry | undefined, q: Question, answer: number | null, iso: string): WrongEntry {
+export function inferWrongReason(q: Question, answer: number | null, timeMs = 0): WrongReason {
+  if (answer == null) return 'bos';
+  if (timeMs >= 150_000) return 'zaman';
+  if (q.type === 'islem' || q.type === 'problem' || q.type === 'cok-adimli') return 'islem';
+  if (q.type === 'yorum' || q.type === 'grafik' || q.type === 'tablo' || q.type === 'deney' || q.type === 'onculu' || q.type === 'yeni-nesil') return 'yorum';
+  if (q.type === 'bilgi') return 'kavram';
+  return 'dikkat';
+}
+
+function upsertWrong(prev: WrongEntry | undefined, q: Question, answer: number | null, iso: string, timeMs = 0): WrongEntry {
   return {
     questionId: q.id,
     topicId: q.topic,
@@ -116,6 +126,7 @@ function upsertWrong(prev: WrongEntry | undefined, q: Question, answer: number |
     firstAt: prev?.firstAt ?? iso,
     lastAt: iso,
     correctStreak: 0,
+    reason: prev?.reason ?? inferWrongReason(q, answer, timeMs),
     learned: false,
   };
 }
@@ -161,7 +172,7 @@ export function finishTest(state: AppState, byId: Map<string, Question>, now: Da
         };
       }
     } else {
-      wrongs[q.id] = upsertWrong(wrongs[q.id], q, item.answer, iso);
+      wrongs[q.id] = upsertWrong(wrongs[q.id], q, item.answer, iso, item.timeMs);
       if (item.state === 'yanlis') reviews[q.topic] = onWrongInTopic(q.topic, today, reviews[q.topic]);
     }
     if (!topicProgress[q.topic] || topicProgress[q.topic].status === 'baslanmadi') {
@@ -273,7 +284,7 @@ export function recordPractice(
       };
     }
   } else {
-    wrongs[q.id] = upsertWrong(wrongs[q.id], q, answer, iso);
+    wrongs[q.id] = upsertWrong(wrongs[q.id], q, answer, iso, timeMs);
     if (answer != null) reviews[q.topic] = onWrongInTopic(q.topic, today, reviews[q.topic]);
   }
   const topicProgress =
@@ -284,6 +295,12 @@ export function recordPractice(
 }
 
 // ---------- Yanlışlar ----------
+
+export function setWrongReason(state: AppState, questionId: string, reason: WrongReason): AppState {
+  const prev = state.wrongs[questionId];
+  if (!prev) return state;
+  return { ...state, wrongs: { ...state.wrongs, [questionId]: { ...prev, reason } } };
+}
 
 export function setWrongLearned(state: AppState, questionId: string, learned: boolean, now: Date = new Date()): AppState {
   const prev = state.wrongs[questionId];
