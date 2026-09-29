@@ -69,8 +69,22 @@ const seed = {
 async function makePage(browser) {
   const context = await browser.newContext({ viewport: { width: 393, height: 873 } });
   await context.addInitScript((state) => {
-    localStorage.setItem('iyikiYks.state.v3', JSON.stringify(state));
     sessionStorage.clear();
+    localStorage.setItem('iyikiYks.state.v3', JSON.stringify(state));
+
+    const originalSetItem = Storage.prototype.setItem;
+    Storage.prototype.setItem = function (key, value) {
+      if (key === 'iyikiYks.state.v3') {
+        try { sessionStorage.setItem('e2e:last-state-write', String(value).slice(0, 7000)); } catch {}
+      }
+      return originalSetItem.call(this, key, value);
+    };
+
+    window.addEventListener('iyiki:state-sync', (event) => {
+      try {
+        sessionStorage.setItem('e2e:last-sync', JSON.stringify(event.detail).slice(0, 7000));
+      } catch {}
+    });
   }, seed);
   const page = await context.newPage();
   const pageErrors = [];
@@ -97,7 +111,9 @@ async function assertQuestionOpened(page, diagnostics = { pageErrors: [], networ
   } catch (error) {
     const body = (await page.locator('body').innerText()).slice(0, 5000);
     const stored = await page.evaluate(() => localStorage.getItem('iyikiYks.state.v3'));
-    throw new Error(`Soru ekranı açılmadı. URL=${page.url()}\nBODY:\n${body}\nSTORAGE:\n${stored?.slice(0, 5000)}\nPAGE_ERRORS:\n${diagnostics.pageErrors.join('\n')}\nNETWORK_ERRORS:\n${diagnostics.networkErrors.join('\n')}\nORIGINAL: ${error}`);
+    const lastWrite = await page.evaluate(() => sessionStorage.getItem('e2e:last-state-write'));
+    const lastSync = await page.evaluate(() => sessionStorage.getItem('e2e:last-sync'));
+    throw new Error(`Soru ekranı açılmadı. URL=${page.url()}\nBODY:\n${body}\nSTORAGE:\n${stored?.slice(0, 5000)}\nLAST_WRITE:\n${lastWrite}\nLAST_SYNC:\n${lastSync}\nPAGE_ERRORS:\n${diagnostics.pageErrors.join('\n')}\nNETWORK_ERRORS:\n${diagnostics.networkErrors.join('\n')}\nORIGINAL: ${error}`);
   }
 }
 
