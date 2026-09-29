@@ -1,4 +1,4 @@
-import { useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { PageHeader } from '../components/Layout';
 import { PandaBody } from '../components/MascotNav';
 import { Icon } from '../components/Icon';
@@ -21,16 +21,39 @@ const EARN_RULES = [
   ['💧 1 damla', '10 bilgi kartı tekrarı'],
 ];
 
-const ROOM_UNLOCKS = [
-  { level: 1, icon: '🪴', label: 'Bambu köşesi' },
-  { level: 2, icon: '📚', label: 'Çalışma masası' },
-  { level: 4, icon: '🛋️', label: 'Okuma köşesi' },
-  { level: 6, icon: '🧸', label: 'Oyuncak rafı' },
-  { level: 8, icon: '🌙', label: 'Gece lambası' },
-  { level: 10, icon: '🏆', label: 'Başarı rafı' },
+const HOUSE_UPGRADES = [
+  { level: 1, icon: '🏠', label: 'Salon + mutfak' },
+  { level: 2, icon: '📚', label: 'Çalışma odası' },
+  { level: 3, icon: '🛁', label: 'Banyo detayları' },
+  { level: 4, icon: '🛏️', label: 'Yatak odası' },
+  { level: 6, icon: '🌿', label: 'Bahçe alanı' },
+  { level: 8, icon: '🌙', label: 'Gece aydınlatması' },
+  { level: 10, icon: '🏆', label: 'Başarı duvarı' },
 ];
 
-type RoomActivity = 'idle' | 'study' | 'rest' | 'window' | 'play' | 'snack';
+type HouseRoom = 'living' | 'kitchen' | 'bedroom' | 'bathroom' | 'study' | 'garden';
+type HouseActivity =
+  | 'idle'
+  | 'walking'
+  | 'waiting'
+  | 'eating'
+  | 'drinking'
+  | 'sleeping'
+  | 'bathing'
+  | 'playing'
+  | 'studying'
+  | 'relaxing';
+
+type ZeynepActivity = 'idle' | 'walking' | 'cooking' | 'serving';
+
+const ROOM_INFO: Record<HouseRoom, { icon: string; label: string; desc: string }> = {
+  living: { icon: '🛋️', label: 'Salon', desc: 'Dinlenme, TV ve oyun alanı' },
+  kitchen: { icon: '🍽️', label: 'Mutfak', desc: 'Zeynep burada yemek hazırlıyor' },
+  bedroom: { icon: '🛏️', label: 'Yatak odası', desc: 'Uyku ve gece rutini' },
+  bathroom: { icon: '🛁', label: 'Banyo', desc: 'Temizlik ve bakım' },
+  study: { icon: '📚', label: 'Çalışma odası', desc: 'Ders ve odak köşesi' },
+  garden: { icon: '🌿', label: 'Bahçe', desc: 'Oyun, yürüyüş ve hava alma' },
+};
 
 function Meter({ label, value, kind }: { label: string; value: number; kind: 'food' | 'water' }) {
   const v = Math.round(value);
@@ -57,13 +80,17 @@ const XP_RULES = [
   ['Kaydettiğin her deneme', '+30 XP'],
 ];
 
-function activityText(activity: RoomActivity, name: string): string {
-  if (activity === 'study') return name + ' masasını hazırladı. Birlikte kısa bir çalışma yapalım 📚';
-  if (activity === 'rest') return name + ' biraz dinleniyor. Molalar da planın bir parçası 😴';
-  if (activity === 'window') return name + ' pencereden dışarı bakıyor. Küçük bir nefes molası 🌤️';
-  if (activity === 'play') return name + ' oyuncak köşesinde keyfi yerinde 🧸';
-  if (activity === 'snack') return name + ' bambu köşesine geçti 🎋';
-  return '';
+function activityText(activity: HouseActivity, room: HouseRoom, name: string): string {
+  if (activity === 'walking') return name + ' ' + ROOM_INFO[room].label.toLowerCase() + ' tarafına yürüyor…';
+  if (activity === 'waiting') return name + ' mutfakta Zeynep’i bekliyor 🍽️';
+  if (activity === 'eating') return name + ' mutfak masasında yemeğini yiyor 🎋';
+  if (activity === 'drinking') return name + ' mutfakta suyunu içiyor 💧';
+  if (activity === 'sleeping') return name + ' yatağına kıvrıldı. Tatlı rüyalar 🌙';
+  if (activity === 'bathing') return name + ' banyoda köpüklü bakım yapıyor 🫧';
+  if (activity === 'playing') return name + ' bahçede oynuyor ve temiz hava alıyor 🌿';
+  if (activity === 'studying') return name + ' çalışma odasında seninle ders çalışıyor 📚';
+  if (activity === 'relaxing') return name + ' salonda koltuğa kuruldu 🛋️';
+  return name + ' şu an ' + ROOM_INFO[room].label.toLowerCase() + 'da.';
 }
 
 export default function PetPage() {
@@ -72,51 +99,182 @@ export default function PetPage() {
   const p = useMemo(() => petStatus(state), [state]);
   const needs = usePetNeeds();
   const [holding, setHolding] = useState<'bambu' | 'su' | null>(null);
-  const [activity, setActivity] = useState<RoomActivity>('idle');
+  const [room, setRoom] = useState<HouseRoom>('living');
+  const [activity, setActivity] = useState<HouseActivity>('idle');
+  const [zeynepRoom, setZeynepRoom] = useState<HouseRoom>('living');
+  const [zeynepActivity, setZeynepActivity] = useState<ZeynepActivity>('idle');
   const [roomMode, setRoomMode] = useState<'day' | 'night'>(() => {
     const h = new Date().getHours();
     return h >= 19 || h < 7 ? 'night' : 'day';
   });
   const [hearts, setHearts] = useState(0);
-  const holdTimer = useRef(0);
-  const activityTimer = useRef(0);
+  const [cleanliness, setCleanliness] = useState(82);
+  const [energy, setEnergy] = useState(76);
+  const [happiness, setHappiness] = useState(84);
+  const [sceneMessage, setSceneMessage] = useState<string | null>(null);
+  const timers = useRef<number[]>([]);
+
   const sad = needs.hungry || needs.thirsty;
   const need = needsMessage(pet.name, needs);
 
-  const give = (kind: 'bambu' | 'su') => {
+  const clearTimers = () => {
+    for (const id of timers.current) window.clearTimeout(id);
+    timers.current = [];
+  };
+
+  const later = (fn: () => void, ms: number) => {
+    const id = window.setTimeout(fn, ms);
+    timers.current.push(id);
+  };
+
+  useEffect(() => () => clearTimers(), []);
+
+  useEffect(() => {
+    if (activity !== 'idle') return;
+    const choices: HouseRoom[] = ['living', 'kitchen', 'study', 'garden'];
+    const id = window.setInterval(() => {
+      const next = choices[Math.floor(Math.random() * choices.length)];
+      setActivity('walking');
+      setRoom(next);
+      const done = window.setTimeout(() => setActivity('idle'), 1100);
+      timers.current.push(done);
+    }, 14000);
+    return () => window.clearInterval(id);
+  }, [activity]);
+
+  const moveTo = (nextRoom: HouseRoom, nextActivity: HouseActivity = 'idle', message?: string) => {
+    clearTimers();
+    setHolding(null);
+    setActivity('walking');
+    setRoom(nextRoom);
+    setSceneMessage(message ?? null);
+    later(() => {
+      setActivity(nextActivity);
+      if (nextActivity === 'idle') setSceneMessage(null);
+    }, 1050);
+  };
+
+  const kitchenGive = (kind: 'bambu' | 'su') => {
     const full = kind === 'bambu' ? needs.food >= 100 : needs.water >= 100;
     const have = kind === 'bambu' ? needs.bamboo : needs.drops;
     if (full) return toast(kind === 'bambu' ? pet.name + ' şu an tok ♡' : pet.name + ' şu an susamamış ♡');
-    if (have < 1) return toast(kind === 'bambu' ? 'Bambun kalmadı. 5 doğru cevap = 1 bambu 🎋' : 'Suyun kalmadı. 4 soru çöz = 1 damla su 💧');
-    update((s) => (kind === 'bambu' ? feedPet(s) : waterPet(s)));
-    setHolding(kind);
-    setActivity('snack');
-    clearTimeout(holdTimer.current);
-    clearTimeout(activityTimer.current);
-    holdTimer.current = window.setTimeout(() => setHolding(null), 2200);
-    activityTimer.current = window.setTimeout(() => setActivity('idle'), 2800);
-    toast(kind === 'bambu' ? 'Nam nam! ' + pet.name + ' bambuyu çok sevdi 🎋' : 'Glu glu! ' + pet.name + ' suyunu içti 💧');
+    if (have < 1) {
+      return toast(kind === 'bambu' ? 'Bambun kalmadı. 5 doğru cevap = 1 bambu 🎋' : 'Suyun kalmadı. 4 soru çöz = 1 damla su 💧');
+    }
+
+    clearTimers();
+    setActivity('walking');
+    setRoom('kitchen');
+    setZeynepActivity('walking');
+    setZeynepRoom('kitchen');
+    setSceneMessage('Zeynep mutfağa gidiyor. ' + pet.name + ' da onu takip ediyor…');
+
+    later(() => {
+      setActivity('waiting');
+      setZeynepActivity('cooking');
+      setSceneMessage(kind === 'bambu' ? 'Zeynep bambuyu hazırlıyor 🎋' : 'Zeynep su kabını hazırlıyor 💧');
+    }, 1050);
+
+    later(() => {
+      update((s) => (kind === 'bambu' ? feedPet(s) : waterPet(s)));
+      setHolding(kind);
+      setActivity(kind === 'bambu' ? 'eating' : 'drinking');
+      setZeynepActivity('serving');
+      setSceneMessage(kind === 'bambu' ? 'Zeynep yemeği verdi. Afiyet olsun ♡' : 'Zeynep suyunu verdi. Ohh, ferahladı ♡');
+      setHappiness((v) => Math.min(100, v + 5));
+    }, 2300);
+
+    later(() => {
+      setHolding(null);
+      setActivity('idle');
+      setZeynepActivity('idle');
+      setSceneMessage(null);
+      toast(kind === 'bambu' ? 'Zeynep mutfakta yemeğini verdi 🎋' : 'Zeynep mutfakta suyunu verdi 💧');
+    }, 5200);
   };
 
-  const react = (nextActivity: RoomActivity) => {
-    setActivity(nextActivity);
-    clearTimeout(activityTimer.current);
-    activityTimer.current = window.setTimeout(() => setActivity('idle'), 4200);
+  const bath = () => {
+    clearTimers();
+    setActivity('walking');
+    setRoom('bathroom');
+    setSceneMessage(pet.name + ' banyoya gidiyor…');
+    later(() => {
+      setActivity('bathing');
+      setSceneMessage('Ilık su, köpükler ve hızlı bir bakım 🫧');
+    }, 1050);
+    later(() => {
+      setCleanliness(100);
+      setHappiness((v) => Math.min(100, v + 4));
+      setActivity('idle');
+      setSceneMessage(pet.name + ' tertemiz oldu ✨');
+      toast(pet.name + ' banyosunu yaptı 🫧');
+    }, 5200);
+    later(() => setSceneMessage(null), 7000);
+  };
+
+  const sleep = () => {
+    if (activity === 'sleeping') {
+      clearTimers();
+      setActivity('idle');
+      setEnergy((v) => Math.max(v, 88));
+      setSceneMessage('Günaydın! ' + pet.name + ' uyandı ☀️');
+      later(() => setSceneMessage(null), 2200);
+      return;
+    }
+    clearTimers();
+    setActivity('walking');
+    setRoom('bedroom');
+    setSceneMessage(pet.name + ' yatak odasına gidiyor…');
+    later(() => {
+      setActivity('sleeping');
+      setRoomMode('night');
+      setSceneMessage('Işıklar kısıldı. ' + pet.name + ' uyuyor 🌙');
+    }, 1100);
+    later(() => setEnergy(100), 5200);
+  };
+
+  const garden = () => {
+    moveTo('garden', 'playing', 'Bahçe zamanı! Biraz koşup hava alsın 🌿');
+    later(() => {
+      setHappiness(100);
+      setEnergy((v) => Math.max(35, v - 4));
+      setActivity('idle');
+      setSceneMessage(null);
+    }, 6200);
+  };
+
+  const studyTogether = () => {
+    moveTo('study', 'studying', 'Çalışma odasına geçiyoruz. Panda da masasına oturacak 📚');
+    later(() => setHappiness((v) => Math.min(100, v + 2)), 3000);
+    later(() => {
+      setActivity('idle');
+      setSceneMessage(null);
+    }, 6500);
+  };
+
+  const relax = () => {
+    moveTo('living', 'relaxing', 'Salonda kısa bir mola zamanı 🛋️');
+    later(() => setEnergy((v) => Math.min(100, v + 5)), 3000);
+    later(() => {
+      setActivity('idle');
+      setSceneMessage(null);
+    }, 5600);
   };
 
   const petPanda = () => {
     setHearts((v) => v + 1);
-    react('play');
+    setHappiness((v) => Math.min(100, v + 3));
     toast(pet.name + ' çok mutlu oldu ♡');
   };
 
   const [name, setName] = useState(pet.name);
   const nextItem = PET_ITEMS.find((i) => i.level > p.level);
-  const nextRoom = ROOM_UNLOCKS.find((i) => i.level > p.level);
+  const nextUpgrade = HOUSE_UPGRADES.find((i) => i.level > p.level);
   const pct = ((p.xp - p.levelStartXp) / Math.max(1, p.nextLevelXp - p.levelStartXp)) * 100;
-  const roomUnlocked = ROOM_UNLOCKS.filter((i) => i.level <= p.level).length;
-  const roomPct = (roomUnlocked / ROOM_UNLOCKS.length) * 100;
-  const roomMessage = activityText(activity, pet.name) || need || p.moodText;
+  const unlocked = HOUSE_UPGRADES.filter((i) => i.level <= p.level).length;
+  const housePct = (unlocked / HOUSE_UPGRADES.length) * 100;
+  const roomMessage = sceneMessage || activityText(activity, room, pet.name) || need || p.moodText;
+
   const today = dayKey();
   const d = dashboard(state, today);
   const doneTasks = state.tasks.filter((t) => t.date === today && t.done).length;
@@ -124,7 +282,7 @@ export default function PetPage() {
   const questMinutes = Math.max(20, Math.min(60, Math.round(state.profile.dailyStudyMinutes * 0.25)));
   const quests = [
     { icon: '⚡', label: questQuestions + ' soru çöz', current: Math.min(questQuestions, d.todayQuestions), target: questQuestions, done: d.todayQuestions >= questQuestions, reward: '+ çalışma XP' },
-    { icon: '⏱️', label: questMinutes + ' dk odaklan', current: Math.min(questMinutes, d.todayMinutes), target: questMinutes, done: d.todayMinutes >= questMinutes, reward: '+ oda enerjisi' },
+    { icon: '⏱️', label: questMinutes + ' dk odaklan', current: Math.min(questMinutes, d.todayMinutes), target: questMinutes, done: d.todayMinutes >= questMinutes, reward: '+ ev enerjisi' },
     { icon: '✓', label: '1 plan görevi bitir', current: Math.min(1, doneTasks), target: 1, done: doneTasks >= 1, reward: '+ seri desteği' },
   ];
   const questDone = quests.filter((q) => q.done).length;
@@ -138,8 +296,8 @@ export default function PetPage() {
   return (
     <>
       <PageHeader
-        title={pet.name + '’nın odası'}
-        sub="Çalıştıkça oda büyür, yeni eşyalar açılır ve panda seninle gelişir ♡"
+        title={pet.name + '’nın evi'}
+        sub="Salon · mutfak · yatak odası · banyo · çalışma odası · bahçe"
         actions={
           <button type="button" className="btn small" onClick={() => setRoomMode((m) => (m === 'day' ? 'night' : 'day'))}>
             {roomMode === 'day' ? '🌙 Gece' : '☀️ Gündüz'}
@@ -147,101 +305,133 @@ export default function PetPage() {
         }
       />
 
-      <section className={'panda-room ' + roomMode + ' mood-' + p.mood} aria-label={pet.name + ' panda odası'}>
-        <div className="room-wall">
-          <div className="room-window" aria-hidden="true">
-            <div className="room-sky">
-              <span className="room-sunmoon">{roomMode === 'day' ? '☀' : '☾'}</span>
-              <span className="room-cloud cloud-a">☁</span>
-              <span className="room-cloud cloud-b">☁</span>
-            </div>
-            <div className="room-window-frame" />
+      <section className={'panda-home ' + roomMode + ' mood-' + p.mood} aria-label={pet.name + ' yaşayan panda evi'}>
+        <div className="panda-home-head">
+          <div>
+            <div className="eyebrow">Canlı ev</div>
+            <h2>{ROOM_INFO[room].icon} {ROOM_INFO[room].label}</h2>
+            <p>{ROOM_INFO[room].desc}</p>
           </div>
+          <div className="home-status-pills">
+            <span>🎋 %{Math.round(needs.food)}</span>
+            <span>💧 %{Math.round(needs.water)}</span>
+            <span>✨ %{cleanliness}</span>
+            <span>⚡ %{energy}</span>
+            <span>♡ %{happiness}</span>
+          </div>
+        </div>
 
-          <button type="button" className="room-hotspot window-hotspot" onClick={() => react('window')} aria-label="Pencereye git">
-            <span>🌤️</span>
-            <small>Pencere</small>
+        <div className="home-scene">
+          <button className="house-room living" type="button" onClick={() => moveTo('living', 'relaxing')}>
+            <span className="house-room-label">🛋️ Salon</span>
+            <span className="furniture couch">▰</span>
+            <span className="furniture tv">▣</span>
+            <span className="furniture rug" />
+            <span className="furniture plant">🪴</span>
           </button>
 
-          <div className={'room-lamp' + (p.level >= 8 ? ' unlocked' : ' locked')} aria-hidden="true">
-            <span className="lamp-shade">✦</span>
-            <span className="lamp-stand" />
-          </div>
-
-          <div className={'room-shelf' + (p.level >= 6 ? ' unlocked' : ' locked')} aria-hidden="true">
-            <span>📕</span><span>📘</span><span>🧸</span>
-          </div>
-
-          <div className={'room-trophy' + (p.level >= 10 ? ' unlocked' : ' locked')} aria-hidden="true">🏆</div>
-
-          <div className={'room-desk' + (p.level >= 2 ? ' unlocked' : ' locked')}>
-            <span className="desk-top" />
-            <span className="desk-leg leg-left" />
-            <span className="desk-leg leg-right" />
-            <span className="desk-books">📚</span>
-            <span className="desk-mug">☕</span>
-          </div>
-
-          <button
-            type="button"
-            className={'room-hotspot desk-hotspot' + (p.level >= 2 ? '' : ' locked')}
-            disabled={p.level < 2}
-            onClick={() => react('study')}
-            aria-label={p.level >= 2 ? 'Çalışma masasına git' : 'Çalışma masası seviye 2’de açılır'}
-          >
-            <span>📚</span>
-            <small>{p.level >= 2 ? 'Çalış' : 'Sv. 2'}</small>
+          <button className="house-room kitchen" type="button" onClick={() => moveTo('kitchen')}>
+            <span className="house-room-label">🍽️ Mutfak</span>
+            <span className="furniture fridge">▥</span>
+            <span className="furniture counter">▰▰</span>
+            <span className="furniture table">◯</span>
+            <span className="furniture bowl">🥣</span>
           </button>
 
-          <div className={'room-sofa' + (p.level >= 4 ? ' unlocked' : ' locked')} aria-hidden="true">
-            <span className="sofa-back" />
-            <span className="sofa-seat" />
-            <span className="sofa-pillow">♡</span>
+          <button className="house-room bedroom" type="button" onClick={sleep}>
+            <span className="house-room-label">🛏️ Yatak odası</span>
+            <span className="furniture bed">▰</span>
+            <span className="furniture pillow">♡</span>
+            <span className="furniture wardrobe">▥</span>
+            <span className="furniture bedside">☾</span>
+          </button>
+
+          <button className="house-room study" type="button" onClick={studyTogether}>
+            <span className="house-room-label">📚 Çalışma odası</span>
+            <span className="furniture desk">▰</span>
+            <span className="furniture books">📚</span>
+            <span className="furniture chair">⌑</span>
+            <span className="furniture board">✓ 25 soru</span>
+          </button>
+
+          <button className="house-room bathroom" type="button" onClick={bath}>
+            <span className="house-room-label">🛁 Banyo</span>
+            <span className="furniture tub">▰</span>
+            <span className="furniture bubbles">🫧</span>
+            <span className="furniture sink">◒</span>
+            <span className="furniture mirror">◯</span>
+          </button>
+
+          <button className="house-room garden" type="button" onClick={garden}>
+            <span className="house-room-label">🌿 Bahçe</span>
+            <span className="furniture tree">🌳</span>
+            <span className="furniture flowers">🌷 🌼</span>
+            <span className="furniture bench">▰</span>
+            <span className="furniture path" />
+          </button>
+
+          <div className="house-hall" aria-hidden="true">
+            <span>⌂</span>
           </div>
 
-          <button
-            type="button"
-            className={'room-hotspot rest-hotspot' + (p.level >= 4 ? '' : ' locked')}
-            disabled={p.level < 4}
-            onClick={() => react('rest')}
-            aria-label={p.level >= 4 ? 'Okuma köşesinde dinlen' : 'Okuma köşesi seviye 4’te açılır'}
-          >
-            <span>🛋️</span>
-            <small>{p.level >= 4 ? 'Dinlen' : 'Sv. 4'}</small>
+          <button type="button" className={'house-panda room-' + room + ' activity-' + activity} onClick={petPanda} aria-label={pet.name + ' pandayı sev'}>
+            <PandaBody
+              size={128}
+              items={pet.items}
+              sleepy={activity === 'sleeping'}
+              waving={!sad && activity !== 'sleeping' && activity !== 'bathing'}
+              sad={!holding && sad}
+              holding={holding}
+            />
+            {hearts > 0 && <span key={hearts} className="house-heart" aria-hidden="true">♡</span>}
+            {activity === 'sleeping' && <span className="sleep-z">Z z</span>}
+            {activity === 'bathing' && <span className="bath-foam">🫧</span>}
           </button>
 
-          <div className="room-plant" aria-hidden="true">
-            <span className="plant-leaves">🎋</span>
-            <span className="plant-pot" />
+          <div className={'house-zeynep room-' + zeynepRoom + ' z-' + zeynepActivity} aria-label="Zeynep">
+            <span className="zeynep-avatar" aria-hidden="true">👩🏻</span>
+            <b>Zeynep</b>
+            {zeynepActivity === 'cooking' && <span className="zeynep-action">🍳</span>}
+            {zeynepActivity === 'serving' && <span className="zeynep-action">🍽️</span>}
           </div>
 
-          <button type="button" className="room-hotspot snack-hotspot" onClick={() => react('snack')} aria-label="Bambu köşesine git">
-            <span>🎋</span>
-            <small>Bambu</small>
-          </button>
-
-          <div className="room-rug" aria-hidden="true" />
-
-          <button type="button" className="room-panda-zone" onClick={petPanda} aria-label={pet.name + ' pandayı sev'}>
-            <span className={'room-panda ' + (activity !== 'idle' ? 'activity-' + activity : '') + (p.mood === 'coskulu' ? ' celebrate' : '')}>
-              <PandaBody
-                size={210}
-                items={pet.items}
-                sleepy={!holding && !sad && (activity === 'rest' || p.mood === 'uykulu')}
-                waving={!holding && !sad && activity !== 'rest'}
-                sad={!holding && sad}
-                holding={holding}
-              />
-              {hearts > 0 && <span key={hearts} className="room-heart" aria-hidden="true">♡</span>}
-            </span>
-          </button>
-
-          <div className="room-bubble" aria-live="polite">
+          <div className="house-message" aria-live="polite">
             <b>{pet.name}</b>
             <span>{roomMessage}</span>
           </div>
+        </div>
 
-          <div className="room-floor" aria-hidden="true" />
+        <div className="house-room-nav" aria-label="Ev odaları">
+          {(Object.keys(ROOM_INFO) as HouseRoom[]).map((id) => (
+            <button key={id} type="button" className={room === id ? 'active' : ''} onClick={() => moveTo(id)}>
+              <span>{ROOM_INFO[id].icon}</span>
+              <b>{ROOM_INFO[id].label}</b>
+            </button>
+          ))}
+        </div>
+
+        <div className="house-actions" aria-label="Panda günlük yaşam eylemleri">
+          <button type="button" className="house-action food" onClick={() => kitchenGive('bambu')}>
+            <span>🍳</span><b>Zeynep yemek versin</b><small>Mutfağa gider · 🎋 {needs.bamboo}</small>
+          </button>
+          <button type="button" className="house-action water" onClick={() => kitchenGive('su')}>
+            <span>💧</span><b>Su içir</b><small>Mutfağa gider · {needs.drops} damla</small>
+          </button>
+          <button type="button" className="house-action" onClick={sleep}>
+            <span>🛏️</span><b>{activity === 'sleeping' ? 'Uyandır' : 'Uyut'}</b><small>Yatak odası</small>
+          </button>
+          <button type="button" className="house-action" onClick={bath}>
+            <span>🛁</span><b>Banyo yaptır</b><small>Temizlik %{cleanliness}</small>
+          </button>
+          <button type="button" className="house-action" onClick={garden}>
+            <span>🌿</span><b>Bahçeye çıkar</b><small>Oynasın · yürüsün</small>
+          </button>
+          <button type="button" className="house-action" onClick={studyTogether}>
+            <span>📚</span><b>Birlikte çalış</b><small>Çalışma odası</small>
+          </button>
+          <button type="button" className="house-action" onClick={relax}>
+            <span>🛋️</span><b>Salonda dinlen</b><small>Kısa mola</small>
+          </button>
         </div>
 
         <div className="room-hud">
@@ -251,10 +441,10 @@ export default function PetPage() {
           </div>
           <div className="room-hud-main">
             <div className="row between nowrap">
-              <span className="tiny muted">Oda gelişimi</span>
-              <b className="small">{roomUnlocked}/{ROOM_UNLOCKS.length}</b>
+              <span className="tiny muted">Ev gelişimi</span>
+              <b className="small">{unlocked}/{HOUSE_UPGRADES.length}</b>
             </div>
-            <ProgressBar value={roomPct} label="Oda gelişimi" />
+            <ProgressBar value={housePct} label="Ev gelişimi" />
           </div>
           <div className="room-hud-resources">
             <span>🎋 {needs.bamboo}</span>
@@ -296,22 +486,21 @@ export default function PetPage() {
           <div className="card-head">
             <div>
               <div className="eyebrow">Bakım</div>
-              <h2>Enerjisini yüksek tut</h2>
+              <h2>Günlük ihtiyaçları</h2>
             </div>
             <span className={'badge ' + (sad ? 'warn' : 'ok')}>{sad ? 'İlgilenmen gerekiyor' : 'Keyfi yerinde'}</span>
           </div>
           <Meter label="Tokluk 🎋" value={needs.food} kind="food" />
           <Meter label="Su 💧" value={needs.water} kind="water" />
+          <div className="life-meter-grid">
+            <div><span>Temizlik</span><b>%{cleanliness}</b></div>
+            <div><span>Enerji</span><b>%{energy}</b></div>
+            <div><span>Mutluluk</span><b>%{happiness}</b></div>
+          </div>
           <div className="pet-actions">
-            <button type="button" className="btn primary" onClick={() => give('bambu')}>
-              🎋 Bambu ver <span className="badge">{needs.bamboo}</span>
-            </button>
-            <button type="button" className="btn" onClick={() => give('su')}>
-              💧 Su ver <span className="badge">{needs.drops}</span>
-            </button>
-            <button type="button" className="btn ghost" onClick={petPanda}>
-              ♡ Sev
-            </button>
+            <button type="button" className="btn primary" onClick={() => kitchenGive('bambu')}>🍳 Zeynep yemek versin</button>
+            <button type="button" className="btn" onClick={bath}>🛁 Banyo</button>
+            <button type="button" className="btn ghost" onClick={petPanda}>♡ Sev</button>
           </div>
         </div>
 
@@ -324,14 +513,12 @@ export default function PetPage() {
             <span className="badge brand">{p.todayXp} XP bugün</span>
           </div>
           <ProgressBar value={pct} label="Seviye ilerlemesi" />
-          <p className="small muted">
-            {p.xp} XP · sonraki seviyeye {Math.max(0, p.nextLevelXp - p.xp)} XP
-          </p>
+          <p className="small muted">{p.xp} XP · sonraki seviyeye {Math.max(0, p.nextLevelXp - p.xp)} XP</p>
           <div className="pet-next-unlock">
-            <span className="pet-next-icon">{nextRoom?.icon ?? '✨'}</span>
+            <span className="pet-next-icon">{nextUpgrade?.icon ?? '✨'}</span>
             <div className="grow">
-              <b>{nextRoom ? 'Sıradaki oda açılımı' : 'Oda tamamlandı'}</b>
-              <span>{nextRoom ? 'Seviye ' + nextRoom.level + ': ' + nextRoom.label : 'Tüm oda bölümleri açık.'}</span>
+              <b>{nextUpgrade ? 'Sıradaki ev geliştirmesi' : 'Ev tamamen gelişti'}</b>
+              <span>{nextUpgrade ? 'Seviye ' + nextUpgrade.level + ': ' + nextUpgrade.label : 'Tüm ev geliştirmeleri açık.'}</span>
             </div>
           </div>
           {nextItem && <div className="tiny muted mt-8">Aksesuar: Seviye {nextItem.level}’de {nextItem.icon} {nextItem.label} açılır.</div>}
@@ -341,19 +528,19 @@ export default function PetPage() {
       <section className="card section" aria-labelledby="room-h">
         <div className="card-head">
           <div>
-            <div className="eyebrow">Oda koleksiyonu</div>
-            <h2 id="room-h">Açılan eşyalar</h2>
+            <div className="eyebrow">Ev gelişimi</div>
+            <h2 id="room-h">Açılan alanlar ve geliştirmeler</h2>
           </div>
-          <span className="badge brand">%{Math.round(roomPct)}</span>
+          <span className="badge brand">%{Math.round(housePct)}</span>
         </div>
         <div className="room-unlocks">
-          {ROOM_UNLOCKS.map((item) => {
+          {HOUSE_UPGRADES.map((item) => {
             const open = item.level <= p.level;
             return (
               <div key={item.label} className={'room-unlock ' + (open ? 'open' : 'locked')}>
                 <span aria-hidden="true">{open ? item.icon : '🔒'}</span>
                 <b>{item.label}</b>
-                <small>{open ? 'Odada' : 'Seviye ' + item.level}</small>
+                <small>{open ? 'Aktif' : 'Seviye ' + item.level}</small>
               </div>
             );
           })}
@@ -433,7 +620,7 @@ export default function PetPage() {
         <div>
           <div className="eyebrow">Kimlik</div>
           <h2 id="name-h">Pandanın adını değiştir</h2>
-          <p className="small muted">Bu isim odada, ana sayfada ve bakım bildirimlerinde görünür.</p>
+          <p className="small muted">Bu isim evde, ana sayfada ve bakım bildirimlerinde görünür.</p>
         </div>
         <form
           className="chat-form"
