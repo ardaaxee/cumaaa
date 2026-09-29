@@ -2722,3 +2722,379 @@ body {
     font-size: .95rem;
   }
 }
+
+
+/* ===== FIRST IMPRESSION + LEARNING SURFACES v3 ===== */
+.onboarding-shell {
+  width: min(1040px, 100%);
+  min-height: min(720px, calc(100vh - 32px));
+  margin: 0 auto;
+  display: grid;
+  align-items: stretch;
+  gap: 16px;
+}
+
+.onboarding-intro {
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  min-height: 290px;
+  padding: clamp(26px, 5vw, 54px);
+  border-radius: 32px;
+  color: #2e2340;
+  background:
+    radial-gradient(circle at 88% 12%, rgba(255,255,255,.82) 0 5rem, transparent 5.1rem),
+    radial-gradient(circle at 10% 115%, rgba(163, 215, 191, .56) 0 11rem, transparent 11.1rem),
+    linear-gradient(145deg, #eee5ff 0%, #fff4f8 58%, #eef8f3 100%);
+  box-shadow: 0 28px 80px rgba(60, 38, 88, .13);
+}
+
+.onboarding-intro::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background-image:
+    radial-gradient(circle at 72% 70%, rgba(112,82,189,.12) 0 4px, transparent 5px),
+    radial-gradient(circle at 80% 78%, rgba(181,111,154,.12) 0 3px, transparent 4px);
+  background-size: 60px 60px, 76px 76px;
+  opacity: .45;
+}
+
+.onboarding-intro > * {
+  position: relative;
+  z-index: 1;
+}
+
+.onboarding-logo {
+  width: 54px;
+  height: 54px;
+  display: grid;
+  place-items: center;
+  margin-bottom: 20px;
+  border-radius: 18px;
+  background: rgba(255,255,255,.70);
+  border: 1px solid rgba(77,54,104,.10);
+  font-size: 1.45rem;
+  color: #7b58bd;
+  box-shadow: 0 10px 30px rgba(66,42,91,.10);
+}
+
+.onboarding-intro h1 {
+  max-width: 560px;
+  margin: 5px 0 12px;
+  font-size: clamp(2.1rem, 6vw, 4.3rem);
+  line-height: .98;
+  letter-spacing: -.065em;
+}
+
+.onboarding-intro p {
+  max-width: 560px;
+  margin: 0;
+  color: #6d6277;
+  font-size: 1rem;
+  line-height: 1.7;
+}
+
+.onboarding-benefits {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 22px;
+}
+
+.onboarding-benefits span {
+  padding: 8px 11px;
+  border-radius: 999px;
+  background: rgba(255,255,255,.58);
+  border: 1px solid rgba(77,54,104,.08);
+  font-size: .76rem;
+  font-weight: 800;
+  backdrop-filter: blur(10px);
+}
+
+.onboarding-card {
+  align-self: center;
+  padding: clamp(20px, 4vw, 32px);
+  border-radius: 30px;
+}
+
+.onboarding-card-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.onboarding-card-head h2 {
+  margin: 3px 0 5px;
+  font-size: clamp(1.45rem, 3vw, 2rem);
+  letter-spacing: -.045em;
+}
+
+.onboarding-card-head p {
+  margin: 0;
+}
+
+.onboarding-step-count {
+  flex: 0 0 auto;
+  min-width: 50px;
+  padding: 7px 9px;
+  border-radius: 12px;
+  text-align: center;
+  color: var(--brand);
+  background: var(--brand-soft);
+  font-size: .75rem;
+  font-weight: 850;
+}
+
+.onboarding-steps {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 7px;
+  margin: 22px 0 10px;
+}
+
+.onboarding-step {
+  display: grid;
+  justify-items: center;
+  gap: 5px;
+  color: var(--muted);
+  min-width: 0;
+}
+
+.onboarding-step > span {
+  width: 30px;
+  height: 30px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: var(--surface-2);
+  color: var(--muted);
+  font-size: .75rem;
+  font-weight: 850;
+}
+
+.onboarding-step small {
+  max-width: 100%;
+  font-size: .65rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.onboarding-step.current {
+  color: var(--text);
+  font-weight: 800;
+}
+
+.onboarding-step.current > span {
+  background: var(--brand);
+  color: var(--brand-ink);
+  box-shadow: 0 0 0 5px var(--brand-soft);
+}
+
+.onboarding-step.done > span {
+  background: var(--ok-soft);
+  color: var(--ok);
+}
+
+.onboarding-progress {
+  height: 5px;
+  margin: 8px 0 24px;
+}
+
+.onboarding-card form {
+  min-height: 220px;
+  align-content: start;
+}
+
+.onboarding-card .input,
+.onboarding-card .select {
+  min-height: 50px;
+  border-radius: 14px;
+}
+
+.onboarding-card .row.mt-12 {
+  margin-top: auto;
+  padding-top: 12px;
+}
+
+@media (min-width: 860px) {
+  .onboarding-shell {
+    grid-template-columns: minmax(0, 1.05fr) minmax(390px, .95fr);
+  }
+  .onboarding-intro {
+    min-height: 680px;
+  }
+}
+
+@media (max-width: 520px) {
+  .onboarding-shell {
+    gap: 12px;
+  }
+  .onboarding-intro {
+    min-height: 220px;
+    padding: 24px 20px;
+    border-radius: 26px;
+  }
+  .onboarding-logo {
+    width: 46px;
+    height: 46px;
+    margin-bottom: 14px;
+    border-radius: 15px;
+  }
+  .onboarding-intro h1 {
+    font-size: 2.2rem;
+  }
+  .onboarding-intro p {
+    font-size: .9rem;
+  }
+  .onboarding-benefits {
+    margin-top: 15px;
+  }
+  .onboarding-benefits span:nth-child(3) {
+    display: none;
+  }
+  .onboarding-card {
+    padding: 19px 16px;
+    border-radius: 24px;
+  }
+  .onboarding-step small {
+    display: none;
+  }
+  .onboarding-card form {
+    min-height: 0;
+  }
+}
+
+:root[data-theme='dark'] .onboarding-intro {
+  color: var(--text);
+  background:
+    radial-gradient(circle at 10% 115%, rgba(70, 111, 90, .30) 0 11rem, transparent 11.1rem),
+    linear-gradient(145deg, #292038, #211b29 58%, #19231e);
+}
+:root[data-theme='dark'] .onboarding-intro p { color: var(--muted); }
+:root[data-theme='dark'] .onboarding-benefits span,
+:root[data-theme='dark'] .onboarding-logo {
+  background: rgba(255,255,255,.06);
+  border-color: rgba(255,255,255,.08);
+}
+
+.subject-filter-card {
+  position: relative;
+  overflow: visible;
+  padding: 18px;
+  background:
+    linear-gradient(145deg, color-mix(in srgb, var(--brand-soft) 35%, var(--surface)), var(--surface) 44%);
+}
+
+.subject-card {
+  position: relative;
+  margin: 0 !important;
+  display: block !important;
+  overflow: hidden;
+  min-height: 162px;
+  border-width: 1px !important;
+  border-color: color-mix(in srgb, var(--subject-fg) 20%, var(--line)) !important;
+  background:
+    radial-gradient(circle at 100% 0%, color-mix(in srgb, var(--subject-soft) 82%, transparent) 0 7rem, transparent 7.1rem),
+    var(--surface) !important;
+}
+
+.subject-card::after {
+  content: "";
+  position: absolute;
+  width: 84px;
+  height: 84px;
+  right: -30px;
+  bottom: -32px;
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--subject-fg) 9%, transparent);
+}
+
+.subject-card-icon {
+  background: var(--surface) !important;
+  color: var(--subject-fg) !important;
+  box-shadow: 0 8px 22px color-mix(in srgb, var(--subject-fg) 12%, transparent);
+}
+
+.subject-card h3 {
+  font-size: 1.08rem;
+  letter-spacing: -.03em;
+}
+
+.subject-card .progress > span {
+  background: var(--subject-fg);
+}
+
+@media (hover:hover) {
+  .subject-card:hover {
+    transform: translateY(-4px);
+    border-color: color-mix(in srgb, var(--subject-fg) 42%, var(--line)) !important;
+  }
+}
+
+.test-builder-card {
+  position: relative;
+  overflow: hidden;
+  padding: clamp(18px, 3vw, 26px);
+  background:
+    radial-gradient(circle at 100% 0%, color-mix(in srgb, var(--brand-soft) 55%, transparent) 0 10rem, transparent 10.1rem),
+    var(--surface);
+}
+
+.test-builder-card .card-head {
+  padding-bottom: 4px;
+}
+
+.test-builder-card .form-grid {
+  gap: 13px;
+}
+
+.test-builder-card .input,
+.test-builder-card .select,
+.study-picker-card .select {
+  min-height: 48px;
+  border-radius: 14px;
+}
+
+.test-builder-card .segmented {
+  min-height: 46px;
+  border-radius: 14px;
+}
+
+.test-builder-card .btn.primary {
+  min-width: 150px;
+}
+
+.test-secondary-card {
+  box-shadow: 0 10px 34px rgba(57,39,80,.055);
+}
+
+.study-suggest-card {
+  overflow: hidden;
+  background:
+    radial-gradient(circle at 94% 10%, rgba(255,255,255,.62) 0 5rem, transparent 5.1rem),
+    linear-gradient(145deg, var(--brand-soft), var(--surface) 68%);
+}
+
+.study-suggest-card .list-item,
+.study-suggest-card .link-row {
+  background: color-mix(in srgb, var(--surface) 84%, transparent);
+  border-radius: 15px;
+}
+
+.study-picker-card {
+  border-style: dashed;
+  border-color: color-mix(in srgb, var(--brand) 20%, var(--line));
+}
+
+@media (max-width: 640px) {
+  .subject-filter-card .form-grid.two,
+  .test-builder-card .form-grid.two {
+    grid-template-columns: 1fr;
+  }
+}
