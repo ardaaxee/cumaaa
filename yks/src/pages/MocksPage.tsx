@@ -270,8 +270,8 @@ export default function MocksPage() {
         <div className="card mock-source-card official">
           <span className="mock-source-icon" aria-hidden="true">Ö</span>
           <div className="grow">
-            <b>2026 ${exam} çıkmış soruları</b>
-            <p>ÖSYM’nin resmî ${exam} PDF kitapçığını doğrudan aç. Mobilde ara sayfa kullanılmaz.</p>
+            <b>2026 {exam} çıkmış soruları</b>
+            <p>ÖSYM’nin resmî {exam} PDF kitapçığını doğrudan aç. Mobilde ara sayfa kullanılmaz.</p>
             <div className="row mt-8">
               <a className="btn small primary" href={osymBookletPdfUrl(2026, exam)}>PDF’yi aç</a>
               <a className="btn small ghost" href={osymBookletUrl(2026)}>ÖSYM sayfası</a>
