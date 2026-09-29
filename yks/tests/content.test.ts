@@ -1,6 +1,12 @@
 import { describe, expect, it } from 'vitest';
 import type { LessonSeed, QuestionSeed } from '../src/domain/types';
 import { SUBJECTS, getTopicRef } from '../src/data/curriculum';
+import {
+  QUESTION_COUNT_TOTAL,
+  QUESTION_COUNTS_BY_SUBJECT,
+  QUESTION_COUNTS_BY_TOPIC,
+  QUESTION_FILES_BY_TOPIC,
+} from '../src/data/questionMetadata.generated';
 
 /**
  * İçerik bütünlüğü testleri. CHECK_SUBJECTS=ayt-kimya,ayt-biyoloji ile
@@ -153,5 +159,33 @@ describe('soru bankası', () => {
       if (Math.max(...dist) / qs.length > 0.35) problems.push(`${s.id}: ${dist.join('/')}`);
     }
     expect(problems).toEqual([]);
+  });
+});
+
+
+describe('soru metadata indeksi', () => {
+  it('üretilen toplam ve ders sayaçları gerçek soru bankasıyla eşleşir', () => {
+    expect(QUESTION_COUNT_TOTAL).toBe(questions.length);
+    for (const subject of SUBJECTS) {
+      const actual = questions.filter((q) => getTopicRef(q.topic)?.subject.id === subject.id).length;
+      expect(QUESTION_COUNTS_BY_SUBJECT[subject.id] ?? 0).toBe(actual);
+    }
+  });
+
+  it('her konunun soru sayısı ve dosya eşlemesi doğrudur', () => {
+    const modulePaths = new Set(Object.keys(questionMods).map((path) => path.replace('../src/data/', './')));
+    for (const subject of SUBJECTS) {
+      for (const unit of subject.units) {
+        for (const topic of unit.topics) {
+          const actual = questions.filter((q) => q.topic === topic.id).length;
+          expect(QUESTION_COUNTS_BY_TOPIC[topic.id] ?? 0).toBe(actual);
+          if (actual > 0) {
+            const files = QUESTION_FILES_BY_TOPIC[topic.id] ?? [];
+            expect(files.length).toBeGreaterThan(0);
+            for (const file of files) expect(modulePaths.has(file)).toBe(true);
+          }
+        }
+      }
+    }
   });
 });
