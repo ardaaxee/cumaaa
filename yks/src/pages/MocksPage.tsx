@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import type { Exam } from '../domain/types';
+import type { Exam, SubjectId } from '../domain/types';
 import { LineChart } from '../components/Charts';
 import { Icon } from '../components/Icon';
 import { PageHeader } from '../components/Layout';
@@ -16,6 +16,22 @@ import { MOCK_SECTIONS, analyzeMocks, buildSections, mockNet, mockTotals, sectio
 import { calcNet, formatNet, round2 } from '../utils/net';
 import { pickQuestions } from '../utils/testEngine';
 import { osymBookletPdfUrl, osymBookletUrl } from '../data/officialResources';
+
+const BRANCH_MOCKS: Record<Exam, { subjectId: SubjectId; label: string; count: number; durationMin: number; icon: string }[]> = {
+  TYT: [
+    { subjectId: 'tyt-turkce', label: 'Türkçe', count: 40, durationMin: 55, icon: 'Aa' },
+    { subjectId: 'tyt-matematik', label: 'Matematik', count: 40, durationMin: 65, icon: '∑' },
+    { subjectId: 'tyt-fizik', label: 'Fizik', count: 7, durationMin: 12, icon: '⚡' },
+    { subjectId: 'tyt-kimya', label: 'Kimya', count: 7, durationMin: 12, icon: '⚗' },
+    { subjectId: 'tyt-biyoloji', label: 'Biyoloji', count: 6, durationMin: 10, icon: '◉' },
+  ],
+  AYT: [
+    { subjectId: 'ayt-matematik', label: 'Matematik', count: 40, durationMin: 90, icon: '∑' },
+    { subjectId: 'ayt-fizik', label: 'Fizik', count: 14, durationMin: 25, icon: '⚡' },
+    { subjectId: 'ayt-kimya', label: 'Kimya', count: 13, durationMin: 25, icon: '⚗' },
+    { subjectId: 'ayt-biyoloji', label: 'Biyoloji', count: 13, durationMin: 25, icon: '◉' },
+  ],
+};
 
 function MockForm({ exam, onClose }: { exam: Exam; onClose: () => void }) {
   const defs = MOCK_SECTIONS[exam];
@@ -166,37 +182,42 @@ export default function MocksPage() {
     if (err) toast(err);
   };
 
-  const startPhysicsMock = async (e: Exam) => {
-    const subjectId = e === 'TYT' ? 'tyt-fizik' : 'ayt-fizik';
-    const count = e === 'TYT' ? 7 : 14;
-    const durationMin = e === 'TYT' ? 12 : 25;
+  const startBranchMock = async (item: (typeof BRANCH_MOCKS)[Exam][number]) => {
     let pool;
     try {
-      pool = await loadQuestionsFor({ exam: e, subjectId, topicId: 'all' });
+      pool = await loadQuestionsFor({ exam, subjectId: item.subjectId, topicId: 'all' });
     } catch {
-      toast('Fizik soru havuzu yüklenemedi.');
+      toast(item.label + ' soru havuzu yüklenemedi.');
       return;
     }
-    const preferredTypes = new Set(['islem', 'yorum', 'grafik', 'cok-adimli', 'yeni-nesil']);
-    const preferred = pool.filter((q) => preferredTypes.has(q.type));
-    const first = pickQuestions(preferred, Math.min(count, Math.ceil(count * 0.85)), getState().attempts);
+
+    const physics = item.subjectId.endsWith('-fizik');
+    const preferredTypes = new Set(['islem', 'yorum', 'grafik', 'cok-adimli', 'yeni-nesil', 'deney']);
+    const preferred = physics ? pool.filter((q) => preferredTypes.has(q.type)) : pool;
+    const targetPreferred = physics ? Math.ceil(item.count * 0.85) : item.count;
+    const first = pickQuestions(preferred, Math.min(item.count, targetPreferred), getState().attempts);
     const used = new Set(first);
-    const rest = pickQuestions(pool.filter((q) => !used.has(q.id)), count - first.length, getState().attempts);
-    const ids = [...first, ...rest];
-    if (ids.length < Math.min(count, 5)) {
-      toast('Bu branş denemesi için yeterli fizik sorusu yok.');
+    const rest = pickQuestions(pool.filter((q) => !used.has(q.id)), item.count - first.length, getState().attempts);
+    const ids = [...first, ...rest].slice(0, item.count);
+
+    if (ids.length !== item.count) {
+      toast(
+        item.label + ' branş denemesi için tam ' + item.count + ' özgün soru gerekiyor. Havuz şu an ' + ids.length + ' soruyu karşılıyor; eksik deneme başlatılmadı.',
+        5500,
+      );
       return;
     }
+
     const err = await launchWithIds(
       ids,
       makeConfig({
-        exam: e,
-        subjectId,
+        exam,
+        subjectId: item.subjectId,
         count: ids.length,
         mode: 'sinav',
         origin: 'filtre',
-        durationMin,
-        title: `${e} Fizik Branş Denemesi · İşlem + Yorum`,
+        durationMin: item.durationMin,
+        title: exam + ' ' + item.label + ' Branş Denemesi' + (physics ? ' · İşlem + Yorum' : ''),
       }),
     );
     if (err) toast(err);
@@ -247,15 +268,38 @@ export default function MocksPage() {
             <button type="button" className="btn primary" onClick={() => setStartExam(exam)}>
               <Icon name="play" /> Tam denemeyi başlat
             </button>
-            <button type="button" className="btn" onClick={() => void startPhysicsMock(exam)}>
-              ⚡ {exam} Fizik branş denemesi
-            </button>
+            <a className="btn" href="#branch-mocks">Branş denemeleri</a>
           </div>
         </div>
         <div className="mock-clock-preview" aria-hidden="true">
           <span>{exam}</span>
           <b>{exam === 'TYT' ? '02:45' : '03:00'}</b>
           <small>arka planda da devam eder</small>
+        </div>
+      </section>
+
+      <section id="branch-mocks" className="card section branch-mocks-card" aria-labelledby="branch-h">
+        <div className="card-head">
+          <div>
+            <div className="eyebrow">{exam} branş denemeleri</div>
+            <h2 id="branch-h">Ders ders süreli deneme</h2>
+          </div>
+          <span className="badge brand">{BRANCH_MOCKS[exam].length} branş</span>
+        </div>
+        <p className="small muted">
+          Her branş kendi soru sayısı ve süresiyle açılır. Fizikte soru seçimi özellikle işlem, grafik, deney ve yorum tiplerine ağırlık verir.
+        </p>
+        <div className="branch-mock-grid">
+          {BRANCH_MOCKS[exam].map((item) => (
+            <button key={item.subjectId} type="button" className="branch-mock" onClick={() => void startBranchMock(item)}>
+              <span className="branch-mock-icon">{item.icon}</span>
+              <span className="grow">
+                <b>{item.label}</b>
+                <small>{item.count} soru · {item.durationMin} dk</small>
+              </span>
+              <Icon name="right" />
+            </button>
+          ))}
         </div>
       </section>
 
