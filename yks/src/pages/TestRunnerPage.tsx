@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { AskLabel } from '../components/AskName';
 import { getTopicRef } from '../data/curriculum';
-import { loadSubjectQuestions, subjectOfQuestionId } from '../data/content';
+import { loadTopicQuestions, topicOfQuestionId } from '../data/content';
 import type { Question } from '../domain/types';
 import { Icon } from '../components/Icon';
 import { PageHeader } from '../components/Layout';
@@ -42,11 +42,12 @@ export default function TestRunnerPage() {
   const lastRef = useRef(Date.now());
   const finishingRef = useRef(false);
 
-  // Yalnız bu testteki soruların dersleri yüklenir (tüm bankayı indirmeden, telefonda hızlı).
-  const subjectKey = [...new Set((test?.questionIds ?? []).map(subjectOfQuestionId).filter(Boolean))].sort().join(',');
+  // Yalnız bu testte geçen konuların soru paketleri yüklenir.
+  // Böylece 5 soruluk test bir dersin bütün bankasını indirmez.
+  const topicKey = [...new Set((test?.questionIds ?? []).map(topicOfQuestionId).filter(Boolean))].sort().join(',');
   const loaded = useLoad<Question[]>(
-    () => Promise.all(subjectKey.split(',').filter(Boolean).map((s) => loadSubjectQuestions(s))).then((l) => l.flat()),
-    [subjectKey],
+    () => Promise.all(topicKey.split(',').filter(Boolean).map((topicId) => loadTopicQuestions(topicId))).then((lists) => lists.flat()),
+    [topicKey],
   );
   const all = useMemo(() => loaded.data ?? [], [loaded.data]);
   const byId = useMemo(() => (loaded.data ? new Map(loaded.data.map((q) => [q.id, q])) : null), [loaded.data]);

@@ -1,5 +1,10 @@
 import type { LessonSeed, Question, QuestionSeed, SubjectId } from '../domain/types';
+import { isChunkError } from '../utils/chunkRecovery';
 import { SUBJECTS, getTopicRef } from './curriculum';
+import {
+  QUESTION_FILES_BY_SUBJECT,
+  QUESTION_FILES_BY_TOPIC,
+} from './questionMetadata.generated';
 
 type LessonModule = { lessons: LessonSeed[] };
 type QuestionModule = { questions: QuestionSeed[] };
@@ -10,14 +15,38 @@ const questionModules = import.meta.glob<QuestionModule>('./questions/*.ts');
 
 /** İçerik dosyalarının oluşturulma tarihi (soru bankası sürümü). */
 export const CONTENT_CREATED_AT = '2026-09-27';
+const LOAD_TIMEOUT_MS = 15_000;
 
-/** Ağ hatasında bir kez yeniden dener (mobil bağlantı kopmaları için). */
+function timeoutError(): Error {
+  const error = new Error('İçerik paketi zaman aşımına uğradı.');
+  error.name = 'ContentTimeoutError';
+  return error;
+}
+
+async function withTimeout<T>(promise: Promise<T>): Promise<T> {
+  let timer = 0;
+  const timeout = new Promise<never>((_, reject) => {
+    timer = globalThis.setTimeout(() => reject(timeoutError()), LOAD_TIMEOUT_MS) as unknown as number;
+  });
+  try {
+    return await Promise.race([promise, timeout]);
+  } finally {
+    globalThis.clearTimeout(timer);
+  }
+}
+
+/**
+ * Mobil bağlantı anlık koptuğunda bir kez yeniden dener.
+ * Eski/değişmiş chunk hataları yeniden denenmez; üst katman tek seferlik sürüm
+ * yenileme akışını yönetir.
+ */
 async function withRetry<T>(load: Loader<T>): Promise<T> {
   try {
-    return await load();
-  } catch {
-    await new Promise((r) => setTimeout(r, 600));
-    return load();
+    return await withTimeout(load());
+  } catch (error) {
+    if (isChunkError(error)) throw error;
+    await new Promise((resolve) => setTimeout(resolve, 500));
+    return withTimeout(load());
   }
 }
 
@@ -27,6 +56,20 @@ function loadersFor<T>(modules: Record<string, Loader<T>>, subjectId: string): L
   return Object.entries(modules)
     .filter(([path]) => re.test(path))
     .map(([, load]) => load);
+}
+
+function questionLoadersFromPaths(paths: readonly string[] | undefined): Loader<QuestionModule>[] {
+  if (!paths?.length) return [];
+  return paths
+    .map((path) => questionModules[path])
+    .filter((load): load is Loader<QuestionModule> => typeof load === 'function');
+}
+
+function normalizeModules(mods: QuestionModule[]): Question[] {
+  return mods
+    .flatMap((module) => module.questions)
+    .map(normalizeQuestion)
+    .filter((question): question is Question => question !== null);
 }
 
 export function normalizeQuestion(seed: QuestionSeed): Question | null {
@@ -44,22 +87,22 @@ export function normalizeQuestion(seed: QuestionSeed): Question | null {
 
 const subjectLessonCache = new Map<string, Promise<Map<string, LessonSeed>>>();
 const subjectQuestionCache = new Map<string, Promise<Question[]>>();
+const topicQuestionCache = new Map<string, Promise<Question[]>>();
 let allQuestionCache: Promise<Question[]> | null = null;
 
 /** Yalnız bir dersin konu anlatımlarını yükler (telefonda hızlı açılış için). */
 export function loadSubjectLessons(subjectId: SubjectId | string): Promise<Map<string, LessonSeed>> {
-  let p = subjectLessonCache.get(subjectId);
-  if (!p) {
-    p = Promise.all(loadersFor(lessonModules, subjectId).map((load) => withRetry(load))).then((mods) => {
+  let promise = subjectLessonCache.get(subjectId);
+  if (!promise) {
+    promise = Promise.all(loadersFor(lessonModules, subjectId).map((load) => withRetry(load))).then((mods) => {
       const map = new Map<string, LessonSeed>();
       for (const mod of mods) for (const lesson of mod.lessons) map.set(lesson.topicId, lesson);
       return map;
     });
-    // Başarısız yükleme önbellekte kalmasın; bir sonraki denemede yeniden istensin.
-    p.catch(() => subjectLessonCache.delete(subjectId));
-    subjectLessonCache.set(subjectId, p);
+    promise.catch(() => subjectLessonCache.delete(subjectId));
+    subjectLessonCache.set(subjectId, promise);
   }
-  return p;
+  return promise;
 }
 
 export async function loadLesson(topicId: string): Promise<LessonSeed | undefined> {
@@ -70,61 +113,88 @@ export async function loadLesson(topicId: string): Promise<LessonSeed | undefine
 
 /** Yalnız bir dersin soru bankasını yükler. */
 export function loadSubjectQuestions(subjectId: SubjectId | string): Promise<Question[]> {
-  let p = subjectQuestionCache.get(subjectId);
-  if (!p) {
-    p = Promise.all(loadersFor(questionModules, subjectId).map((load) => withRetry(load))).then((mods) =>
-      mods
-        .flatMap((m) => m.questions)
-        .map(normalizeQuestion)
-        .filter((q): q is Question => q !== null),
-    );
-    p.catch(() => subjectQuestionCache.delete(subjectId));
-    subjectQuestionCache.set(subjectId, p);
+  let promise = subjectQuestionCache.get(subjectId);
+  if (!promise) {
+    const indexed = questionLoadersFromPaths(QUESTION_FILES_BY_SUBJECT[subjectId]);
+    const loaders = indexed.length ? indexed : loadersFor(questionModules, subjectId);
+    promise = Promise.all(loaders.map((load) => withRetry(load))).then(normalizeModules);
+    promise.catch(() => subjectQuestionCache.delete(subjectId));
+    subjectQuestionCache.set(subjectId, promise);
   }
-  return p;
+  return promise;
 }
 
-export async function loadTopicQuestions(topicId: string): Promise<Question[]> {
+/**
+ * Konu sayfası için yalnız o konuyu içeren soru dosyalarını yükler.
+ * Böylece tek bir konu açmak bütün dersin soru bankasını indirmez.
+ */
+export function loadTopicQuestions(topicId: string): Promise<Question[]> {
   const ref = getTopicRef(topicId);
-  if (!ref) return [];
-  return (await loadSubjectQuestions(ref.subject.id)).filter((q) => q.topic === topicId);
+  if (!ref) return Promise.resolve([]);
+
+  let promise = topicQuestionCache.get(topicId);
+  if (!promise) {
+    const loaders = questionLoadersFromPaths(QUESTION_FILES_BY_TOPIC[topicId]);
+    if (!loaders.length) {
+      promise = loadSubjectQuestions(ref.subject.id).then((list) => list.filter((question) => question.topic === topicId));
+    } else {
+      promise = Promise.all(loaders.map((load) => withRetry(load)))
+        .then(normalizeModules)
+        .then((list) => list.filter((question) => question.topic === topicId));
+    }
+    promise.catch(() => topicQuestionCache.delete(topicId));
+    topicQuestionCache.set(topicId, promise);
+  }
+  return promise;
 }
 
-/** Soru kimliği "<konuId>-qNN" biçimindedir; konu → ders. */
+/** Soru kimliği "<konuId>-qNN" biçimindedir. */
+export function topicOfQuestionId(id: string): string | undefined {
+  const topicId = id.replace(/-q\d+$/, '');
+  return getTopicRef(topicId) ? topicId : undefined;
+}
+
+/** Soru kimliğinden ders kimliğini bulur. */
 export function subjectOfQuestionId(id: string): string | undefined {
-  return getTopicRef(id.replace(/-q\d+$/, ''))?.subject.id;
+  const topicId = topicOfQuestionId(id);
+  return topicId ? getTopicRef(topicId)?.subject.id : undefined;
 }
 
-/** Yalnız verilen soruların derslerini yükler (tüm bankayı indirmeden). */
+/**
+ * Yalnız verilen soru kimliklerinin konularını yükler.
+ * Aktif testi yeniden açarken bütün ders bankası indirilmez.
+ */
 export async function loadQuestionsByIds(ids: string[]): Promise<Map<string, Question>> {
-  const subjects = [...new Set(ids.map(subjectOfQuestionId).filter((s): s is string => !!s))];
-  const lists = await Promise.all(subjects.map((s) => loadSubjectQuestions(s)));
-  const want = new Set(ids);
+  const topics = [...new Set(ids.map(topicOfQuestionId).filter((topic): topic is string => !!topic))];
+  const lists = await Promise.all(topics.map((topic) => loadTopicQuestions(topic)));
+  const wanted = new Set(ids);
   const map = new Map<string, Question>();
-  for (const list of lists) for (const q of list) if (want.has(q.id)) map.set(q.id, q);
+  for (const list of lists) for (const question of list) if (wanted.has(question.id)) map.set(question.id, question);
   return map;
 }
 
-/** Filtreye göre gereken en küçük soru kümesini yükler: konu/ders seçiliyse yalnız o ders, sınav seçiliyse o sınavın dersleri. */
+/**
+ * Filtreye göre gereken en küçük temel soru kümesini yükler.
+ * Test kurulum ekranı bunu otomatik çağırmaz; yalnız test gerçekten başlatılırken kullanılır.
+ */
 export async function loadQuestionsFor(filter: { exam: string; subjectId: string; topicId: string }): Promise<Question[]> {
-  const subjectId = filter.topicId !== 'all' ? getTopicRef(filter.topicId)?.subject.id : filter.subjectId !== 'all' ? filter.subjectId : undefined;
-  if (subjectId) return loadSubjectQuestions(subjectId);
+  if (filter.topicId !== 'all') return loadTopicQuestions(filter.topicId);
+  if (filter.subjectId !== 'all') return loadSubjectQuestions(filter.subjectId);
   if (filter.exam === 'TYT' || filter.exam === 'AYT') {
-    const subjects = SUBJECTS.filter((s) => s.exam === filter.exam).map((s) => s.id);
-    return (await Promise.all(subjects.map((s) => loadSubjectQuestions(s)))).flat();
+    const subjectIds = SUBJECTS.filter((subject) => subject.exam === filter.exam).map((subject) => subject.id);
+    return (await Promise.all(subjectIds.map((subjectId) => loadSubjectQuestions(subjectId)))).flat();
   }
   return loadQuestions();
 }
 
-/** Tüm soru bankası (karışık testler için). */
+/** Tüm soru bankası (yalnız açıkça tüm-bankayı isteyen akışlarda). */
 export function loadQuestions(): Promise<Question[]> {
   if (!allQuestionCache) {
-    // Ders önbellekleri paylaşılır; bir ders zaten yüklendiyse yeniden indirilmez.
-    const p = Promise.all(SUBJECTS.map((s) => loadSubjectQuestions(s.id))).then((lists) => lists.flat());
-    p.catch(() => {
+    const promise = Promise.all(SUBJECTS.map((subject) => loadSubjectQuestions(subject.id))).then((lists) => lists.flat());
+    promise.catch(() => {
       allQuestionCache = null;
     });
-    allQuestionCache = p;
+    allQuestionCache = promise;
   }
   return allQuestionCache;
 }

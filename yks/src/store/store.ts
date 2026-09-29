@@ -12,6 +12,20 @@ let state: AppState = initial.state;
 const listeners = new Set<() => void>();
 let saveTimer: ReturnType<typeof setTimeout> | null = null;
 let storageFailed = false;
+const STORE_SYNC_EVENT = 'iyiki:state-sync';
+const storeInstanceId =
+  typeof crypto !== 'undefined' && 'randomUUID' in crypto
+    ? crypto.randomUUID()
+    : `store-${Math.random().toString(36).slice(2)}`;
+
+function broadcastState(): void {
+  if (typeof window === 'undefined') return;
+  window.dispatchEvent(
+    new CustomEvent(STORE_SYNC_EVENT, {
+      detail: { source: storeInstanceId, state },
+    }),
+  );
+}
 
 export const startupReport = initial.report;
 export const startupError = initial.error;
@@ -41,12 +55,14 @@ export function update(fn: (s: AppState) => AppState): void {
   state = next;
   schedulePersist();
   listeners.forEach((l) => l());
+  broadcastState();
 }
 
 export function replaceState(next: AppState): void {
   state = next;
   flush();
   listeners.forEach((l) => l());
+  broadcastState();
 }
 
 export function subscribe(listener: () => void): () => void {
@@ -67,6 +83,16 @@ export function useSelector<T>(selector: (s: AppState) => T): T {
 }
 
 if (typeof window !== 'undefined') {
+  // Vite'ın lazy chunk grafiğinde store modülü birden fazla chunk tarafından
+  // örneklenirse bile aynı sekmedeki tüm örnekler tek state'i paylaşsın.
+  // Bu özellikle TestSetup -> TestRunner geçişinde aktif testin kaybolmasını önler.
+  window.addEventListener(STORE_SYNC_EVENT, (event) => {
+    const detail = (event as CustomEvent<{ source?: string; state?: AppState }>).detail;
+    if (!detail?.state || detail.source === storeInstanceId) return;
+    state = detail.state;
+    listeners.forEach((listener) => listener());
+  });
+
   window.addEventListener('pagehide', () => {
     if (saveTimer) {
       clearTimeout(saveTimer);

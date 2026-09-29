@@ -1,8 +1,12 @@
 import { useMemo, useState } from 'react';
 import { SUBJECTS, getSubject, getTopicRef, subjectLabel } from '../data/curriculum';
-import { loadQuestionsFor } from '../data/content';
-import { useLoad } from '../hooks/useLoad';
-import type { Difficulty, Question, QuestionType } from '../domain/types';
+import {
+  QUESTION_COUNT_TOTAL,
+  QUESTION_COUNTS_BY_EXAM,
+  QUESTION_COUNTS_BY_SUBJECT,
+  QUESTION_COUNTS_BY_TOPIC,
+} from '../data/questionMetadata.generated';
+import type { Difficulty, QuestionType } from '../domain/types';
 import { DIFFICULTY_LABEL, TYPE_LABEL } from '../components/QuestionView';
 import { PageHeader } from '../components/Layout';
 import { ConfirmDialog, Empty, SourceBadge, toast } from '../components/ui';
@@ -13,7 +17,15 @@ import { useAppState } from '../store/store';
 import { useRoute } from '../hooks/useRoute';
 import { formatDay, formatDuration } from '../utils/date';
 import { formatNet } from '../utils/net';
-import { QUESTION_COUNTS, filterPool } from '../utils/testEngine';
+import { QUESTION_COUNTS } from '../utils/testEngine';
+
+function availableBeforeAdvancedFilters(cfg: TestConfig): number {
+  if (cfg.topicId !== 'all') return QUESTION_COUNTS_BY_TOPIC[cfg.topicId] ?? 0;
+  if (cfg.subjectId !== 'all') return QUESTION_COUNTS_BY_SUBJECT[cfg.subjectId] ?? 0;
+  if (cfg.exam === 'TYT') return QUESTION_COUNTS_BY_EXAM.TYT ?? 0;
+  if (cfg.exam === 'AYT') return QUESTION_COUNTS_BY_EXAM.AYT ?? 0;
+  return QUESTION_COUNT_TOTAL;
+}
 
 export default function TestSetupPage() {
   const state = useAppState();
@@ -23,29 +35,46 @@ export default function TestSetupPage() {
     return makeConfig(preset === 'TYT' || preset === 'AYT' ? { exam: preset } : {});
   });
   const [confirm, setConfirm] = useState<null | (() => Promise<string | null>)>(null);
+  const [launching, setLaunching] = useState(false);
 
-  // Yalnız seçili sınav/ders için soru sayılır; tüm banka gereksiz yere indirilmez.
-  const loaded = useLoad<Question[]>(() => loadQuestionsFor(cfg), [cfg.exam, cfg.subjectId, cfg.topicId]);
-  const questions = loaded.data ?? null;
-
-  const set = (patch: Partial<TestConfig>) => setCfg((c) => ({ ...c, ...patch }));
-  const pool = useMemo(() => (questions ? filterPool(questions, cfg) : []), [questions, cfg]);
-  const subjects = SUBJECTS.filter((s) => cfg.exam === 'all' || s.exam === cfg.exam);
+  const set = (patch: Partial<TestConfig>) => setCfg((current) => ({ ...current, ...patch }));
+  const subjects = SUBJECTS.filter((subject) => cfg.exam === 'all' || subject.exam === cfg.exam);
   const subject = cfg.subjectId !== 'all' ? getSubject(cfg.subjectId) : undefined;
-  const topics = subject ? subject.units.flatMap((u) => u.topics) : [];
+  const topics = subject ? subject.units.flatMap((unit) => unit.topics) : [];
   const topic = cfg.topicId !== 'all' ? getTopicRef(cfg.topicId)?.topic : undefined;
-  const openWrongIds = Object.values(state.wrongs).filter((w) => !w.learned).map((w) => w.questionId);
+  const openWrongIds = Object.values(state.wrongs)
+    .filter((wrong) => !wrong.learned)
+    .map((wrong) => wrong.questionId);
+
+  // Bu sayı derleme sırasında üretilen küçücük metadata'dan gelir.
+  // Test kurulum ekranını açmak artık soru JS chunk'larını indirmez.
+  const availableBase = useMemo(
+    () => availableBeforeAdvancedFilters(cfg),
+    [cfg.exam, cfg.subjectId, cfg.topicId],
+  );
+
+  const advancedFilterActive =
+    cfg.subtopicId !== 'all' || cfg.difficulty !== 'all' || cfg.type !== 'all';
+
+  const execute = async (fn: () => Promise<string | null>) => {
+    if (launching) return;
+    setLaunching(true);
+    try {
+      const error = await fn();
+      if (error) toast(error);
+    } finally {
+      setLaunching(false);
+    }
+  };
 
   const run = (fn: () => Promise<string | null>) => {
-    const go = async () => {
-      const err = await fn();
-      if (err) toast(err);
-    };
+    if (launching) return;
     if (state.activeTest) setConfirm(() => fn);
-    else void go();
+    else void execute(fn);
   };
 
   const recent = state.testResults.slice(-8).reverse();
+  const estimatedQuestions = Math.max(1, Math.min(cfg.count, availableBase || cfg.count));
 
   return (
     <>
@@ -54,7 +83,8 @@ export default function TestSetupPage() {
       {state.activeTest && (
         <div className="notice warn">
           <div className="grow">
-            Devam eden bir testin var ({Object.values(state.activeTest.answers).filter((a) => a != null).length}/{state.activeTest.questionIds.length} cevaplandı).
+            Devam eden bir testin var ({Object.values(state.activeTest.answers).filter((answer) => answer != null).length}/
+            {state.activeTest.questionIds.length} cevaplandı).
           </div>
           <button type="button" className="btn small primary" onClick={() => navigate('/test')}>
             Devam et
@@ -67,80 +97,136 @@ export default function TestSetupPage() {
           <h2 id="setup-h">Test oluştur</h2>
           <SourceBadge type="ozgun-pratik" />
         </div>
-        <div className="form-grid two">
+
+        <div className="notice">
+          Test ekranı açılırken soru bankası indirilmez. Filtrelerini seç; gerekli soru paketleri yalnız <b>Testi başlat</b> dediğinde hazırlanır.
+        </div>
+
+        <div className="form-grid two mt-12">
           <label className="field">
             <span>Sınav</span>
-            <select className="select" value={cfg.exam} onChange={(e) => set({ exam: e.target.value as TestConfig['exam'], subjectId: 'all', topicId: 'all', subtopicId: 'all' })}>
+            <select
+              className="select"
+              value={cfg.exam}
+              onChange={(event) =>
+                set({
+                  exam: event.target.value as TestConfig['exam'],
+                  subjectId: 'all',
+                  topicId: 'all',
+                  subtopicId: 'all',
+                })
+              }
+            >
               <option value="all">TYT + AYT</option>
               <option value="TYT">TYT</option>
               <option value="AYT">AYT</option>
             </select>
           </label>
+
           <label className="field">
             <span>Ders</span>
-            <select className="select" value={cfg.subjectId} onChange={(e) => set({ subjectId: e.target.value as TestConfig['subjectId'], topicId: 'all', subtopicId: 'all' })}>
+            <select
+              className="select"
+              value={cfg.subjectId}
+              onChange={(event) =>
+                set({
+                  subjectId: event.target.value as TestConfig['subjectId'],
+                  topicId: 'all',
+                  subtopicId: 'all',
+                })
+              }
+            >
               <option value="all">Karışık</option>
-              {subjects.map((s) => (
-                <option key={s.id} value={s.id}>
-                  {subjectLabel(s)}
+              {subjects.map((item) => (
+                <option key={item.id} value={item.id}>
+                  {subjectLabel(item)}
                 </option>
               ))}
             </select>
           </label>
+
           <label className="field">
             <span>Konu</span>
-            <select className="select" value={cfg.topicId} disabled={!subject} onChange={(e) => set({ topicId: e.target.value, subtopicId: 'all' })}>
+            <select
+              className="select"
+              value={cfg.topicId}
+              disabled={!subject}
+              onChange={(event) => set({ topicId: event.target.value, subtopicId: 'all' })}
+            >
               <option value="all">{subject ? 'Tüm konular' : 'Önce ders seç'}</option>
-              {topics.map((t) => (
-                <option key={t.id} value={t.id}>
-                  {t.name}
+              {topics.map((item) => (
+                <option key={item.id} value={item.id}>
+                  {item.name}
                 </option>
               ))}
             </select>
           </label>
+
           <label className="field">
             <span>Alt konu</span>
-            <select className="select" value={cfg.subtopicId} disabled={!topic} onChange={(e) => set({ subtopicId: e.target.value })}>
+            <select
+              className="select"
+              value={cfg.subtopicId}
+              disabled={!topic}
+              onChange={(event) => set({ subtopicId: event.target.value })}
+            >
               <option value="all">{topic ? 'Tüm alt konular' : 'Önce konu seç'}</option>
-              {topic?.subtopics.map((s) => (
-                <option key={s.id} value={s.id}>
-                  {s.name}
+              {topic?.subtopics.map((item) => (
+                <option key={item.id} value={item.id}>
+                  {item.name}
                 </option>
               ))}
             </select>
           </label>
+
           <label className="field">
             <span>Zorluk</span>
-            <select className="select" value={cfg.difficulty} onChange={(e) => set({ difficulty: e.target.value as Difficulty | 'all' })}>
+            <select
+              className="select"
+              value={cfg.difficulty}
+              onChange={(event) => set({ difficulty: event.target.value as Difficulty | 'all' })}
+            >
               <option value="all">Tümü</option>
-              {Object.entries(DIFFICULTY_LABEL).map(([k, v]) => (
-                <option key={k} value={k}>
-                  {v}
+              {Object.entries(DIFFICULTY_LABEL).map(([key, value]) => (
+                <option key={key} value={key}>
+                  {value}
                 </option>
               ))}
             </select>
           </label>
+
           <label className="field">
             <span>Soru tipi</span>
-            <select className="select" value={cfg.type} onChange={(e) => set({ type: e.target.value as QuestionType | 'all' })}>
+            <select
+              className="select"
+              value={cfg.type}
+              onChange={(event) => set({ type: event.target.value as QuestionType | 'all' })}
+            >
               <option value="all">Tümü</option>
-              {Object.entries(TYPE_LABEL).map(([k, v]) => (
-                <option key={k} value={k}>
-                  {v}
+              {Object.entries(TYPE_LABEL).map(([key, value]) => (
+                <option key={key} value={key}>
+                  {value}
                 </option>
               ))}
             </select>
           </label>
+
           <div className="field">
             <span className="field-label" id="count-l">Soru sayısı</span>
             <div className="segmented" role="group" aria-labelledby="count-l">
-              {QUESTION_COUNTS.map((n) => (
-                <button key={n} type="button" aria-pressed={cfg.count === n} onClick={() => set({ count: n })}>
-                  {n}
+              {QUESTION_COUNTS.map((count) => (
+                <button
+                  key={count}
+                  type="button"
+                  aria-pressed={cfg.count === count}
+                  onClick={() => set({ count })}
+                >
+                  {count}
                 </button>
               ))}
             </div>
           </div>
+
           <div className="field">
             <span className="field-label" id="mode-l">Mod</span>
             <div className="segmented" role="group" aria-labelledby="mode-l">
@@ -153,31 +239,29 @@ export default function TestSetupPage() {
             </div>
           </div>
         </div>
+
         <p className="small muted mt-12" style={{ marginBottom: 0 }}>
           {cfg.mode === 'ogrenme'
-            ? 'Öğrenme modu: her cevaptan sonra doğru/yanlış, çözüm, öğretmene sor ve benzer soru seçenekleri görünür.'
-            : `Sınav modu: süre ${Math.round((Math.min(cfg.count, pool.length || cfg.count) * 90) / 60)} dk (soru başına 1,5 dk). Test bitene kadar cevaplar açıklanmaz.`}
+            ? 'Öğrenme modu: her cevaptan sonra doğru/yanlış ve ayrıntılı çözüm görünür.'
+            : `Sınav modu: yaklaşık ${Math.round((estimatedQuestions * 90) / 60)} dk. Test bitene kadar cevaplar açıklanmaz.`}
         </p>
+
         <div className="row mt-12">
           <button
             type="button"
             className="btn primary"
-            disabled={!!questions && pool.length === 0}
+            disabled={launching || availableBase === 0}
+            aria-busy={launching}
             onClick={() => run(() => launchTest(cfg))}
           >
-            Testi başlat
+            {launching ? 'Sorular hazırlanıyor…' : 'Testi başlat'}
           </button>
           <span className="small muted" aria-live="polite">
-            {questions ? `Bu filtrede ${pool.length} soru var${pool.length && pool.length < cfg.count ? ` (test ${pool.length} soruyla başlar)` : ''}.` : loaded.failed ? (
-              <>
-                Soru sayısı alınamadı.{' '}
-                <button type="button" className="btn small ghost" onClick={loaded.retry}>
-                  Tekrar dene
-                </button>
-              </>
-            ) : (
-              'Sorular sayılıyor…'
-            )}
+            {availableBase === 0
+              ? 'Bu seçim için soru bulunmuyor.'
+              : advancedFilterActive
+                ? `Temel havuzda ${availableBase} soru var. Zorluk/tip filtresi test başlatılırken doğrulanır.`
+                : `Bu seçimde ${availableBase} soru var${availableBase < cfg.count ? `; test en fazla ${availableBase} soruyla başlar` : ''}.`}
           </span>
         </div>
       </section>
@@ -188,14 +272,24 @@ export default function TestSetupPage() {
           <span className="badge">{openWrongIds.length} soru</span>
         </div>
         {openWrongIds.length === 0 ? (
-          <div className="small muted">Yanlışlar defterin boş. Test çözdükçe yanlış ve boş bıraktığın sorular buraya gelir.</div>
+          <div className="small muted">
+            Yanlışlar defterin boş. Test çözdükçe yanlış ve boş bıraktığın sorular buraya gelir.
+          </div>
         ) : (
           <button
             type="button"
             className="btn"
-            onClick={() => run(() => launchWithIds(openWrongIds.slice(0, 40), makeConfig({ origin: 'yanlislar', mode: 'ogrenme', title: 'Yanlışlarım tekrarı' })))}
+            disabled={launching}
+            onClick={() =>
+              run(() =>
+                launchWithIds(
+                  openWrongIds.slice(0, 40),
+                  makeConfig({ origin: 'yanlislar', mode: 'ogrenme', title: 'Yanlışlarım tekrarı' }),
+                ),
+              )
+            }
           >
-            Yanlışlarımı tekrar çöz ({Math.min(40, openWrongIds.length)} soru)
+            {launching ? 'Sorular hazırlanıyor…' : `Yanlışlarımı tekrar çöz (${Math.min(40, openWrongIds.length)} soru)`}
           </button>
         )}
       </section>
@@ -208,16 +302,22 @@ export default function TestSetupPage() {
           <Empty title="Henüz test çözmedin.">İlk testini çöz; sonuçların burada listelenir.</Empty>
         ) : (
           <ul className="list">
-            {recent.map((r) => (
-              <li key={r.id}>
-                <a className="link-row" href={`#/sonuc/${r.id}`}>
+            {recent.map((result) => (
+              <li key={result.id}>
+                <a className="link-row" href={`#/sonuc/${result.id}`}>
                   <span className="grow">
-                    <b>{r.config.title ?? (r.config.subjectId !== 'all' ? subjectLabel(getSubject(r.config.subjectId)!) : 'Karışık test')}</b>
+                    <b>
+                      {result.config.title ??
+                        (result.config.subjectId !== 'all'
+                          ? subjectLabel(getSubject(result.config.subjectId)!)
+                          : 'Karışık test')}
+                    </b>
                     <span className="tiny muted" style={{ display: 'block' }}>
-                      {formatDay(r.day)} · {r.questionIds.length} soru · {formatDuration(r.durationMs)} · {r.config.mode === 'sinav' ? 'Sınav' : 'Öğrenme'}
+                      {formatDay(result.day)} · {result.questionIds.length} soru · {formatDuration(result.durationMs)} ·{' '}
+                      {result.config.mode === 'sinav' ? 'Sınav' : 'Öğrenme'}
                     </span>
                   </span>
-                  <span className="badge brand">{formatNet(r.net)} net</span>
+                  <span className="badge brand">{formatNet(result.net)} net</span>
                 </a>
               </li>
             ))}
@@ -237,11 +337,10 @@ export default function TestSetupPage() {
           confirmLabel="Yeni testi başlat"
           danger
           onCancel={() => setConfirm(null)}
-          onConfirm={async () => {
+          onConfirm={() => {
             const fn = confirm;
             setConfirm(null);
-            const err = await fn();
-            if (err) toast(err);
+            void execute(fn);
           }}
         />
       )}

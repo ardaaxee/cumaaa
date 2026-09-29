@@ -19,7 +19,6 @@ import { dayKey, diffDays, formatDay, formatMinutes } from '../utils/date';
 import { formatNet } from '../utils/net';
 import { dueReviews } from '../utils/srs';
 import { dashboard } from '../utils/stats';
-import { computeBadges } from '../utils/badges';
 import { petStatus } from '../utils/pet';
 
 /** Uygulamaya özgü kısa moral cümleleri; tarihe göre her gün biri seçilir. */
@@ -68,11 +67,9 @@ export default function HomePage() {
   const todayTasks = state.tasks.filter((t) => t.date === today);
   const overdue = state.tasks.filter((t) => t.date < today && !t.done);
   const { profile } = state;
-  const cardsDue = Object.values(state.cards).filter((c) => c.dueDay <= today).length;
   const pet = useMemo(() => petStatus(state, today), [state, today]);
   const needs = usePetNeeds();
   const petNeed = needsMessage(state.settings.pet.name, needs);
-  const earnedBadges = useMemo(() => computeBadges(state, today).filter((b) => b.earned).length, [state, today]);
   const daysLeft = profile.examDate ? diffDays(today, profile.examDate) : null;
   const qPct = profile.dailyQuestionGoal ? (d.todayQuestions / profile.dailyQuestionGoal) * 100 : 0;
   const mPct = profile.dailyStudyMinutes ? (d.todayMinutes / profile.dailyStudyMinutes) * 100 : 0;
