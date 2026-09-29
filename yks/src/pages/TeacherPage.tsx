@@ -189,7 +189,7 @@ export default function TeacherPage() {
     <>
       <PageHeader title={`${teacherName} ♡`} sub={ref ? `${subjectLabel(ref.subject)} · ${ref.topic.name}` : question ? 'Soru bağlamı seçili' : 'Sevgilin ve çalışma arkadaşın'} />
 
-      <section className="card asst-stage" aria-label="Asistan">
+      <section className="card asst-stage teacher-hero" aria-label="Asistan">
         <button
           type="button"
           className="asst-tap"
@@ -220,7 +220,7 @@ export default function TeacherPage() {
       </section>
 
       {(ref || question) && (
-        <div className="notice section">
+        <div className="notice section teacher-context">
           {ref ? (
             <>
               Bağlam: <b>{ref.topic.name}</b> ({subjectLabel(ref.subject)}) <a href={`#/konu/${ref.topic.id}`}>konuya git</a>
@@ -235,8 +235,15 @@ export default function TeacherPage() {
         </div>
       )}
 
-      <div className="card section">
-        <div className="chips" role="group" aria-label="Hızlı istekler">
+      <div className="card section teacher-chat-card">
+        <div className="teacher-chat-head">
+          <div>
+            <div className="eyebrow">Birlikte çalışalım</div>
+            <h2>Ne öğrenmek istiyorsun?</h2>
+          </div>
+          <span className="badge brand">Kişisel çalışma asistanı</span>
+        </div>
+        <div className="chips teacher-quick" role="group" aria-label="Hızlı istekler">
           {QUICK.map((q) => (
             <button key={q.action} type="button" className="chip" disabled={busy || !status} onClick={() => void send(q.action, '')}>
               {q.label}
@@ -244,7 +251,7 @@ export default function TeacherPage() {
           ))}
         </div>
 
-        <div className="chat mt-12" ref={listRef} aria-live="polite">
+        <div className="chat mt-12 teacher-chat" ref={listRef} aria-live="polite">
           {state.chat.length === 0 ? (
             <div className="bubble teacher">{greeting}{'\n\n'}Örnek: “türev nedir”, “mol kavramı örnek çöz”, “bugün ne çalışayım”, “yanlışlarım”, “38 doğru 6 yanlış”.</div>
           ) : (
@@ -258,7 +265,7 @@ export default function TeacherPage() {
         </div>
 
         <form
-          className="chat-form"
+          className="chat-form teacher-composer"
           onSubmit={(e) => {
             e.preventDefault();
             void send('serbest', input);
