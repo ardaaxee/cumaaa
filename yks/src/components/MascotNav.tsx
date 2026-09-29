@@ -3,6 +3,7 @@ import { Icon, type IconName } from './Icon';
 import { sectionOf } from './Layout';
 import { href, useRoute } from '../hooks/useRoute';
 import { useSelector } from '../store/store';
+import { usePetNeeds } from '../hooks/usePetNeeds';
 
 /**
  * Karakter tabanlı gezinme. Alt şeritte oturan hayvanlar:
@@ -110,7 +111,23 @@ function PandaItems({ items, layer }: { items: string[]; layer: 'back' | 'front'
   );
 }
 
-export function PandaBody({ size = 64, waving = false, items = [], sleepy = false }: { size?: number; waving?: boolean; items?: string[]; sleepy?: boolean }) {
+export function PandaBody({
+  size = 64,
+  waving = false,
+  items = [],
+  sleepy = false,
+  sad = false,
+  holding = null,
+}: {
+  size?: number;
+  waving?: boolean;
+  items?: string[];
+  sleepy?: boolean;
+  /** Aç/susuz: ağzı aşağı kıvrık, gözünde yaş. */
+  sad?: boolean;
+  /** Elinde bambu ya da su şişesi (beslerken). */
+  holding?: 'bambu' | 'su' | null;
+}) {
   return (
     <svg viewBox="0 0 80 80" width={size} height={size} aria-hidden="true" className="panda-body">
       <PandaItems items={items} layer="back" />
@@ -143,7 +160,29 @@ export function PandaBody({ size = 64, waving = false, items = [], sleepy = fals
         </>
       )}
       <ellipse cx="40" cy="36" rx="3.4" ry="2.4" fill="#2f2830" />
-      <path d={sleepy ? 'M37 41 Q40 42 43 41' : 'M36 40 Q40 43 44 40'} stroke="#2f2830" strokeWidth="1.6" fill="none" strokeLinecap="round" />
+      <path
+        d={holding ? 'M36.5 40 Q40 45 43.5 40 Z' : sad ? 'M36 42 Q40 39 44 42' : sleepy ? 'M37 41 Q40 42 43 41' : 'M36 40 Q40 43 44 40'}
+        stroke="#2f2830"
+        strokeWidth="1.6"
+        fill={holding ? '#e27a95' : 'none'}
+        strokeLinecap="round"
+        className={holding ? 'panda-chew' : undefined}
+      />
+      {sad && !sleepy && <path d="M52 33 q1.6 3 0 4.4 q-1.6-1.4 0-4.4z" fill="#8cc8f0" className="panda-tear" />}
+      {holding === 'bambu' && (
+        <g className="panda-hold">
+          <rect x="54" y="30" width="4.5" height="30" rx="2" fill="#7cc36b" transform="rotate(-18 56 45)" />
+          <path d="M53 38 h6 M53.5 48 h6" stroke="#4f9a45" strokeWidth="1.2" transform="rotate(-18 56 45)" />
+          <path d="M60 30 q7-5 11-2 q-6 3-11 2z" fill="#8fd47c" />
+        </g>
+      )}
+      {holding === 'su' && (
+        <g className="panda-hold">
+          <rect x="54" y="38" width="10" height="17" rx="3" fill="#bfe6fb" stroke="#6bb6e4" strokeWidth="1.2" />
+          <rect x="56.5" y="34" width="5" height="5" rx="1" fill="#6bb6e4" />
+          <rect x="55.5" y="45" width="8" height="9" rx="2" fill="#7fc8f2" />
+        </g>
+      )}
       <ellipse cx="24" cy="37" rx="4" ry="2.4" fill="#f7c6d3" opacity=".8" />
       <ellipse cx="56" cy="37" rx="4" ry="2.4" fill="#f7c6d3" opacity=".8" />
       <PandaItems items={items} layer="front" />
@@ -244,6 +283,7 @@ export function MascotNav() {
   const timers = useRef<number[]>([]);
   const section = sectionOf(route.path);
   const petItems = useSelector((s) => s.settings.pet.items);
+  const needs = usePetNeeds();
   const teacherName = useSelector((s) => s.settings.teacherName);
   const menuOpen = phase === 'stood';
   const exam = route.query.get('sinav');
@@ -364,12 +404,18 @@ export function MascotNav() {
           aria-haspopup="dialog"
           aria-expanded={menuOpen}
           aria-controls={panelId}
-          aria-label={menuOpen ? 'Ana menüyü kapat' : 'Ana menüyü aç'}
+          aria-label={menuOpen ? 'Ana menüyü kapat' : `Ana menüyü aç${needs.hungry ? ', panda acıktı' : ''}${needs.thirsty ? ', panda susadı' : ''}`}
           onClick={() => (phase === 'sit' ? openMenu() : phase === 'stood' ? closeMenu() : undefined)}
         >
           <span className="dock-panda-seat">
-            <PandaBody size={58} items={petItems} />
+            <PandaBody size={58} items={petItems} sad={needs.hungry || needs.thirsty} />
           </span>
+          {(needs.hungry || needs.thirsty) && (
+            <span className="dock-need" aria-hidden="true">
+              {needs.hungry ? '🎋' : ''}
+              {needs.thirsty ? '💧' : ''}
+            </span>
+          )}
           <span className="dock-label">Menü</span>
         </button>
         <a href="#/denemeler" className="dock-item" aria-label="Denemeler" data-active={section === '/denemeler'}>

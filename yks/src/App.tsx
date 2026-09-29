@@ -6,6 +6,7 @@ import { useRoute } from './hooks/useRoute';
 import { getState, startupError, startupReport, useSelector } from './store/store';
 import { cloudConfig, startAutoSync } from './services/cloud';
 import { useReminder } from './hooks/useReminder';
+import { usePetAlerts } from './hooks/usePetAlerts';
 
 const pages = {
   home: lazy(() => import('./pages/HomePage')),
@@ -82,6 +83,7 @@ export function App() {
   const cloudKey = useSelector((s) => `${s.settings.cloud.projectId}|${s.settings.cloud.apiKey}|${s.settings.cloud.syncCode}`);
   useThemeEffect();
   useReminder();
+  usePetAlerts();
 
   // Bulut eşitlemesi: yapılandırılmışsa açılışta, periyodik olarak ve sekme gizlenince çalışır.
   useEffect(() => {

@@ -1970,3 +1970,49 @@ body { overflow-x: clip; }
 .companion-actions { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 8px; }
 @media (min-width: 900px) { .companion { bottom: -34px; } }
 @media (prefers-reduced-motion: reduce) { .companion { transition: none; } }
+
+/* ---------- Panda bakımı (yemek & su) ---------- */
+.dock-need {
+  position: absolute;
+  top: -6px;
+  right: calc(50% - 38px);
+  padding: 2px 5px;
+  border-radius: 999px;
+  background: var(--surface);
+  box-shadow: 0 2px 8px rgba(60, 40, 90, 0.18);
+  font-size: 0.72rem;
+  line-height: 1.2;
+  animation: need-bob 1.6s ease-in-out infinite;
+  pointer-events: none;
+}
+@keyframes need-bob {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-3px); }
+}
+.need-meter { margin-top: 8px; }
+.need-bar { height: 10px; border-radius: 999px; background: var(--surface-2, #eee9f5); overflow: hidden; margin-top: 4px; }
+.need-bar > span { display: block; height: 100%; border-radius: inherit; transition: width 0.6s ease; }
+.need-meter.food .need-bar > span { background: linear-gradient(90deg, #8fd47c, #5fb85a); }
+.need-meter.water .need-bar > span { background: linear-gradient(90deg, #9fd8fb, #4fa8e0); }
+.need-meter.low .need-bar > span { background: linear-gradient(90deg, #f7a8a8, #e46a6a); }
+.need-meter.low b { color: var(--bad); }
+.pet-actions .btn .badge { margin-left: 4px; }
+.panda-tear { animation: tear-drop 2.2s ease-in infinite; }
+@keyframes tear-drop {
+  0% { transform: translateY(0); opacity: 0.9; }
+  80% { transform: translateY(6px); opacity: 0.9; }
+  100% { transform: translateY(8px); opacity: 0; }
+}
+.panda-chew { animation: chew 0.35s ease-in-out infinite; transform-origin: 40px 41px; transform-box: view-box; }
+@keyframes chew {
+  0%, 100% { transform: scaleY(1); }
+  50% { transform: scaleY(0.5); }
+}
+.panda-hold { animation: hold-bob 0.7s ease-in-out infinite; transform-box: view-box; transform-origin: 58px 50px; }
+@keyframes hold-bob {
+  0%, 100% { transform: rotate(0deg); }
+  50% { transform: rotate(-8deg); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .dock-need, .panda-tear, .panda-chew, .panda-hold { animation: none; }
+}

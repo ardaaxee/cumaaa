@@ -2,6 +2,7 @@ import type { AppState } from '../store/schema';
 import { dueReviews } from '../utils/srs';
 import { dayKey, diffDays } from '../utils/date';
 import { formatNet } from '../utils/net';
+import { needsMessage, petNeeds } from '../utils/petCare';
 import { dashboard } from '../utils/stats';
 
 /**
@@ -83,7 +84,7 @@ export function companionLines(path: string, state: AppState, now: Date = new Da
       page.push('Gelişimine bakınca gözlerim doluyor, çok emek veriyorsun ♡');
       break;
     case 'pandam':
-      page.push('Bambu seni çok seviyor, ben de ♡');
+      page.push(`${state.settings.pet.name} seni çok seviyor, ben de ♡ Çalıştıkça bambu ve su kazanıyorsun.`);
       break;
     case 'rozetler':
       page.push('Her rozet seninle gurur duyduğum bir an ♡');
@@ -92,6 +93,10 @@ export function companionLines(path: string, state: AppState, now: Date = new Da
       break;
   }
   lines.push(`Bir şeye takılırsan bana dokun, beraber bakarız ${her} ♡`, 'Su içmeyi unutma 💧', 'Seni seviyorum, çalışmaya devam ♡');
+  // Panda aç/susuzsa Cuma önce bunu hatırlatır (panda sayfasında ve ana sayfada en başta).
+  const need = needsMessage(state.settings.pet.name, petNeeds(state, now));
+  if (need && (section === '' || section === 'pandam')) page.unshift(need);
+  else if (need) lines.unshift(need);
   // Sayfaya özel cümleler başta: Cuma bir sayfaya girince önce onu söyler.
   return [...page, ...lines];
 }

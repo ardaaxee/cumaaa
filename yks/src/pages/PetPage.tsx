@@ -1,10 +1,37 @@
-import { useMemo, useState } from 'react';
+import { useMemo, useRef, useState } from 'react';
 import { PageHeader } from '../components/Layout';
 import { PandaBody } from '../components/MascotNav';
 import { ProgressBar, toast } from '../components/ui';
 import { updateSettings } from '../store/actions';
 import { update, useAppState } from '../store/store';
 import { PET_ITEMS, petStatus } from '../utils/pet';
+import { usePetNeeds } from '../hooks/usePetNeeds';
+import { FOOD_PER_BAMBOO, WATER_PER_DROP, feedPet, needsMessage, waterPet } from '../utils/petCare';
+import { PetNotifyToggle } from '../hooks/usePetAlerts';
+
+const EARN_RULES = [
+  ['🎋 1 bambu', '5 doğru cevap'],
+  ['🎋 1 bambu', 'bitirdiğin her test'],
+  ['🎋 2 bambu', 'tamamladığın her konu'],
+  ['💧 1 damla', '4 cevaplanan soru'],
+  ['💧 1 damla', '15 dk çalışma'],
+  ['💧 1 damla', '10 bilgi kartı tekrarı'],
+];
+
+function Meter({ label, value, kind }: { label: string; value: number; kind: 'food' | 'water' }) {
+  const v = Math.round(value);
+  return (
+    <div className={`need-meter ${kind}${v < 35 ? ' low' : ''}`}>
+      <div className="row between nowrap small">
+        <b>{label}</b>
+        <span>%{v}</span>
+      </div>
+      <div className="need-bar" role="meter" aria-label={label} aria-valuemin={0} aria-valuemax={100} aria-valuenow={v}>
+        <span style={{ width: `${v}%` }} />
+      </div>
+    </div>
+  );
+}
 
 const XP_RULES = [
   ['Cevapladığın her soru', '+2 XP'],
@@ -20,6 +47,23 @@ export default function PetPage() {
   const state = useAppState();
   const pet = state.settings.pet;
   const p = useMemo(() => petStatus(state), [state]);
+  const needs = usePetNeeds();
+  const [holding, setHolding] = useState<'bambu' | 'su' | null>(null);
+  const holdTimer = useRef(0);
+  const sad = needs.hungry || needs.thirsty;
+  const need = needsMessage(pet.name, needs);
+
+  const give = (kind: 'bambu' | 'su') => {
+    const full = kind === 'bambu' ? needs.food >= 100 : needs.water >= 100;
+    const have = kind === 'bambu' ? needs.bamboo : needs.drops;
+    if (full) return toast(kind === 'bambu' ? `${pet.name} şu an tok ♡` : `${pet.name} şu an susamamış ♡`);
+    if (have < 1) return toast(kind === 'bambu' ? 'Bambun kalmadı. 5 doğru cevap = 1 bambu 🎋' : 'Suyun kalmadı. 4 soru çöz = 1 damla 💧');
+    update((s) => (kind === 'bambu' ? feedPet(s) : waterPet(s)));
+    setHolding(kind);
+    clearTimeout(holdTimer.current);
+    holdTimer.current = window.setTimeout(() => setHolding(null), 2200);
+    toast(kind === 'bambu' ? `Nam nam! ${pet.name} bambuyu çok sevdi 🎋` : `Glu glu! ${pet.name} suyunu içti 💧`);
+  };
   const [name, setName] = useState(pet.name);
   const next = PET_ITEMS.find((i) => i.level > p.level);
   const pct = ((p.xp - p.levelStartXp) / Math.max(1, p.nextLevelXp - p.levelStartXp)) * 100;
@@ -36,7 +80,7 @@ export default function PetPage() {
 
       <section className={`card pet-stage mood-${p.mood}`} aria-label="Panda">
         <div className={`pet-big${p.mood === 'coskulu' ? ' dance' : ''}`}>
-          <PandaBody size={190} items={pet.items} sleepy={p.mood === 'uykulu'} waving={p.mood !== 'uykulu'} />
+          <PandaBody size={190} items={pet.items} sleepy={!holding && !sad && p.mood === 'uykulu'} waving={!holding && !sad && p.mood !== 'uykulu'} sad={!holding && sad} holding={holding} />
         </div>
         <div className="pet-info">
           <div className="row between nowrap">
@@ -44,14 +88,43 @@ export default function PetPage() {
             <span className="badge brand">Seviye {p.level}</span>
           </div>
           <p className="small muted" style={{ margin: '6px 0 10px' }}>
-            {p.moodText}
+            {holding ? (holding === 'bambu' ? 'Nam nam nam… 🎋' : 'Glu glu glu… 💧') : need ?? p.moodText}
           </p>
+          <Meter label="Tokluk 🎋" value={needs.food} kind="food" />
+          <Meter label="Su 💧" value={needs.water} kind="water" />
+          <div className="row mt-12 pet-actions">
+            <button type="button" className="btn primary" onClick={() => give('bambu')}>
+              🎋 Bambu ver <span className="badge">{needs.bamboo}</span>
+            </button>
+            <button type="button" className="btn" onClick={() => give('su')}>
+              💧 Su ver <span className="badge">{needs.drops}</span>
+            </button>
+          </div>
+          <div className="mt-12" />
           <ProgressBar value={pct} label="Seviye ilerlemesi" />
           <div className="tiny muted mt-8">
             {p.xp} XP · sonraki seviyeye {Math.max(0, p.nextLevelXp - p.xp)} XP
             {next ? ` · Seviye ${next.level}’de ${next.icon} ${next.label} açılır` : ' · tüm aksesuarlar açık!'}
           </div>
         </div>
+      </section>
+
+      <section className="card section" aria-labelledby="care-h">
+        <h2 id="care-h" className="mb-8">
+          Yemek ve su nasıl kazanılır?
+        </h2>
+        <ul className="list">
+          {EARN_RULES.map(([k, v]) => (
+            <li key={k + v} className="list-item">
+              <b className="small" style={{ minWidth: 92 }}>{k}</b>
+              <span className="grow small">{v}</span>
+            </li>
+          ))}
+        </ul>
+        <p className="tiny muted mt-8">
+          Bir bambu tokluğu %{FOOD_PER_BAMBOO}, bir damla su %{WATER_PER_DROP} artırır. Tokluk yaklaşık 30 saatte, su 20 saatte biter; yani {pet.name} her gün biraz çalışmanı bekler ♡ Toplam kazandığın: {needs.earnedBamboo} bambu, {needs.earnedDrops} damla.
+        </p>
+        <PetNotifyToggle />
       </section>
 
       <section className="card section" aria-labelledby="items-h">

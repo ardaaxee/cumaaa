@@ -1,10 +1,12 @@
 import type { SubjectId } from '../domain/types';
 import { dayKey, isValidDayKey } from '../utils/date';
 import { uid } from '../utils/ids';
+import { freshCare } from '../utils/petCare';
 import {
   SCHEMA_VERSION,
   defaultState,
   type AppState,
+  type PetCare,
   type MockExam,
   type PlanTask,
   type TaskType,
@@ -215,6 +217,20 @@ export function migrateV2toV3(old: Json, ctx: MigrationContext): { state: AppSta
 // ---------- Temizleme (her yüklemede) ----------
 
 /** Bilinmeyen/bozuk alanları varsayılanlarla doldurur; tip dışı değerleri atar. */
+function sanitizeCare(raw: unknown): PetCare {
+  if (!isObj(raw)) return freshCare();
+  const iso = (v: unknown) => (typeof v === 'string' && Number.isFinite(Date.parse(v)) ? v : new Date().toISOString());
+  const level = (v: unknown) => Math.min(100, Math.max(0, num(v, 80)));
+  return {
+    food: level(raw.food),
+    foodAt: iso(raw.foodAt),
+    water: level(raw.water),
+    waterAt: iso(raw.waterAt),
+    spentBamboo: Math.max(0, Math.floor(num(raw.spentBamboo, 0))),
+    spentWater: Math.max(0, Math.floor(num(raw.spentWater, 0))),
+  };
+}
+
 export function sanitize(raw: Json): AppState {
   const base = defaultState();
   const profile = isObj(raw.profile) ? raw.profile : {};
@@ -258,6 +274,7 @@ export function sanitize(raw: Json): AppState {
       pet: {
         name: str(petRaw.name).trim().slice(0, 20) || 'Bambu',
         items: arr(petRaw.items).filter((x): x is string => typeof x === 'string').slice(0, 12),
+        care: sanitizeCare(petRaw.care),
       },
       companion: settings.companion !== false,
       aiServerUrl: /^https:\/\/[^\s]+$/.test(str(settings.aiServerUrl)) ? str(settings.aiServerUrl).slice(0, 200) : '',

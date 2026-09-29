@@ -62,3 +62,21 @@ self.addEventListener('fetch', (event) => {
 
   event.respondWith(networkFirst(request));
 });
+
+// Bildirime dokununca uygulama açılır (açıksa öne gelir); panda bildirimi panda sayfasına götürür.
+self.addEventListener('notificationclick', (event) => {
+  event.notification.close();
+  const hash = event.notification.tag === 'panda-ihtiyac' ? '#/pandam' : '#/';
+  const url = new URL(`./${hash}`, self.registration.scope).href;
+  event.waitUntil(
+    self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then((list) => {
+      for (const client of list) {
+        if ('focus' in client) {
+          client.navigate?.(url);
+          return client.focus();
+        }
+      }
+      return self.clients.openWindow(url);
+    }),
+  );
+});

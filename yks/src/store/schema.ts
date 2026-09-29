@@ -36,10 +36,20 @@ export interface Settings {
   aiServerUrl: string;
   /** Bulut eşitleme (Firebase Firestore). Boş alanlar = kapalı. */
   cloud: CloudSettings;
-  /** Panda arkadaşın adı ve taktığı aksesuarlar. */
-  pet: { name: string; items: string[] };
+  /** Panda arkadaşın adı, taktığı aksesuarlar ve yemek/su durumu. */
+  pet: { name: string; items: string[]; care?: PetCare };
   /** Asistan karakterinin sayfalarda dolaşması. */
   companion: boolean;
+}
+
+/** Pandanın tokluk/su seviyesi (0–100, verilen zamandaki değer) ve harcanan bambu/su. */
+export interface PetCare {
+  food: number;
+  foodAt: string;
+  water: number;
+  waterAt: string;
+  spentBamboo: number;
+  spentWater: number;
 }
 
 export interface TopicProgress {
@@ -195,7 +205,7 @@ export interface StudySession {
   id: string;
   day: DayKey;
   minutes: number;
-  source: 'pomodoro' | 'manuel' | 'test';
+  source: 'pomodoro' | 'manuel' | 'test' | 'calisma';
   subjectId?: SubjectId;
   at: string;
 }
