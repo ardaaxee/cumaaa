@@ -204,6 +204,7 @@ export default function MocksPage() {
     const err = await launchWithIds(
       ids,
       makeConfig({ exam: e, mode: 'sinav', origin: 'deneme', count: ids.length, durationMin: plan.durationMin, title: `${plan.title} (${formatDay(dayKey())})` }),
+      true,
     );
     if (err) toast(err);
   };
