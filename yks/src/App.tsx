@@ -11,6 +11,7 @@ import { usePetAlerts } from './hooks/usePetAlerts';
 const pages = {
   home: lazy(() => import('./pages/HomePage')),
   coach: lazy(() => import('./pages/CoachPage')),
+  focus: lazy(() => import('./pages/FocusPage')),
   subjects: lazy(() => import('./pages/SubjectsPage')),
   subject: lazy(() => import('./pages/SubjectPage')),
   topic: lazy(() => import('./pages/TopicPage')),
@@ -43,6 +44,7 @@ const pages = {
 const ROUTES: Record<string, { page: ComponentType<{ params: string[] }>; title: string }> = {
   '': { page: pages.home, title: 'Odam' },
   koc: { page: pages.coach, title: 'Akıllı Koç' },
+  odak: { page: pages.focus, title: 'Odak Modu' },
   dersler: { page: pages.subjects, title: 'Dersler' },
   ders: { page: pages.subject, title: 'Ders' },
   konu: { page: pages.topic, title: 'Konu' },
