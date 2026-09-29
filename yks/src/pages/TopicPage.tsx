@@ -15,6 +15,7 @@ import { addNotebookPage, markReviewDone, setTopicStatus } from '../store/action
 import type { TopicStatus } from '../store/schema';
 import { getState, update, useAppState } from '../store/store';
 import { recentTopicPerformance, weakTopics } from '../utils/analysis';
+import { recoverFromChunkError } from '../utils/chunkRecovery';
 import { dayKey, formatDay } from '../utils/date';
 import { isDue, stageLabel } from '../utils/srs';
 
@@ -198,12 +199,23 @@ export default function TopicPage({ params }: { params: string[] }) {
 
   useEffect(() => {
     let alive = true;
-    loadLesson(topicId).then((l) => alive && setLesson(l ?? null));
-    loadTopicQuestions(topicId).then((qs) => {
-      if (!alive) return;
-      setQCount(qs.length);
-      setTopicQs(qs);
-    });
+    const fail = (e: unknown) => {
+      if (recoverFromChunkError(e) || !alive) return;
+      toast('İçerik yüklenemedi. İnternet bağlantını kontrol edip sayfayı yenile.');
+    };
+    loadLesson(topicId)
+      .then((l) => alive && setLesson(l ?? null))
+      .catch((e) => {
+        fail(e);
+        if (alive) setLesson(null);
+      });
+    loadTopicQuestions(topicId)
+      .then((qs) => {
+        if (!alive) return;
+        setQCount(qs.length);
+        setTopicQs(qs);
+      })
+      .catch(fail);
     return () => {
       alive = false;
     };

@@ -11,6 +11,16 @@ const questionModules = import.meta.glob<QuestionModule>('./questions/*.ts');
 /** İçerik dosyalarının oluşturulma tarihi (soru bankası sürümü). */
 export const CONTENT_CREATED_AT = '2026-09-27';
 
+/** Ağ hatasında bir kez yeniden dener (mobil bağlantı kopmaları için). */
+async function withRetry<T>(load: Loader<T>): Promise<T> {
+  try {
+    return await load();
+  } catch {
+    await new Promise((r) => setTimeout(r, 600));
+    return load();
+  }
+}
+
 /** Dosya adı dersin kimliğiyle başlar: "./lessons/ayt-fizik-1.ts" → ayt-fizik. */
 function loadersFor<T>(modules: Record<string, Loader<T>>, subjectId: string): Loader<T>[] {
   const re = new RegExp(`/${subjectId}(-[^/]*)?\\.ts$`);
@@ -40,11 +50,13 @@ let allQuestionCache: Promise<Question[]> | null = null;
 export function loadSubjectLessons(subjectId: SubjectId | string): Promise<Map<string, LessonSeed>> {
   let p = subjectLessonCache.get(subjectId);
   if (!p) {
-    p = Promise.all(loadersFor(lessonModules, subjectId).map((load) => load())).then((mods) => {
+    p = Promise.all(loadersFor(lessonModules, subjectId).map((load) => withRetry(load))).then((mods) => {
       const map = new Map<string, LessonSeed>();
       for (const mod of mods) for (const lesson of mod.lessons) map.set(lesson.topicId, lesson);
       return map;
     });
+    // Başarısız yükleme önbellekte kalmasın; bir sonraki denemede yeniden istensin.
+    p.catch(() => subjectLessonCache.delete(subjectId));
     subjectLessonCache.set(subjectId, p);
   }
   return p;
@@ -60,12 +72,13 @@ export async function loadLesson(topicId: string): Promise<LessonSeed | undefine
 export function loadSubjectQuestions(subjectId: SubjectId | string): Promise<Question[]> {
   let p = subjectQuestionCache.get(subjectId);
   if (!p) {
-    p = Promise.all(loadersFor(questionModules, subjectId).map((load) => load())).then((mods) =>
+    p = Promise.all(loadersFor(questionModules, subjectId).map((load) => withRetry(load))).then((mods) =>
       mods
         .flatMap((m) => m.questions)
         .map(normalizeQuestion)
         .filter((q): q is Question => q !== null),
     );
+    p.catch(() => subjectQuestionCache.delete(subjectId));
     subjectQuestionCache.set(subjectId, p);
   }
   return p;
@@ -80,12 +93,16 @@ export async function loadTopicQuestions(topicId: string): Promise<Question[]> {
 /** Tüm soru bankası (karışık testler için). */
 export function loadQuestions(): Promise<Question[]> {
   if (!allQuestionCache) {
-    allQuestionCache = Promise.all(Object.values(questionModules).map((load) => load())).then((mods) =>
+    const p = Promise.all(Object.values(questionModules).map((load) => withRetry(load))).then((mods) =>
       mods
         .flatMap((m) => m.questions)
         .map(normalizeQuestion)
         .filter((q): q is Question => q !== null),
     );
+    p.catch(() => {
+      allQuestionCache = null;
+    });
+    allQuestionCache = p;
   }
   return allQuestionCache;
 }

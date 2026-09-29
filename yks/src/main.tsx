@@ -2,6 +2,9 @@ import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import { App } from './App';
 import './styles/global.css';
+import { installChunkRecovery } from './utils/chunkRecovery';
+
+installChunkRecovery();
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>

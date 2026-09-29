@@ -3,6 +3,7 @@ import { SUBJECTS, getTopicRef, subjectLabel } from '../data/curriculum';
 import { loadSubjectQuestions } from '../data/content';
 import type { Question } from '../domain/types';
 import { dayKey } from '../utils/date';
+import { recoverFromChunkError } from '../utils/chunkRecovery';
 import { InlineQuiz } from './InlineQuiz';
 import { SourceBadge, Spinner } from './ui';
 
@@ -21,10 +22,14 @@ export function DailyQuestion() {
     let alive = true;
     const h = hash(today);
     const subject = SUBJECTS[h % SUBJECTS.length];
-    loadSubjectQuestions(subject.id).then((qs) => {
-      if (!alive) return;
-      setQ(qs.length ? qs[(h >>> 8) % qs.length] : null);
-    });
+    loadSubjectQuestions(subject.id)
+      .then((qs) => {
+        if (!alive) return;
+        setQ(qs.length ? qs[(h >>> 8) % qs.length] : null);
+      })
+      .catch((e) => {
+        if (!recoverFromChunkError(e) && alive) setQ(null);
+      });
     return () => {
       alive = false;
     };

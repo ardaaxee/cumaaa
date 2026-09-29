@@ -1,5 +1,6 @@
 import { lazy, Suspense, useEffect, type ComponentType } from 'react';
 import { Layout } from './components/Layout';
+import { PageErrorBoundary } from './components/ErrorBoundary';
 import { Spinner, toast, ToastHost } from './components/ui';
 import { useRoute } from './hooks/useRoute';
 import { getState, startupError, startupReport, useSelector } from './store/store';
@@ -123,9 +124,11 @@ export function App() {
     <>
       {onboarded ? (
         <Layout>
-          <Suspense fallback={<Spinner />}>
-            <Page key={`${route.path}?${route.query.toString()}`} params={route.segments.slice(1)} />
-          </Suspense>
+          <PageErrorBoundary resetKey={route.path}>
+            <Suspense fallback={<Spinner />}>
+              <Page key={`${route.path}?${route.query.toString()}`} params={route.segments.slice(1)} />
+            </Suspense>
+          </PageErrorBoundary>
         </Layout>
       ) : (
         <main id="main" className="main" style={{ maxWidth: 640 }}>

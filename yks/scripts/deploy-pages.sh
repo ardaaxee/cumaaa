@@ -6,7 +6,8 @@ WT="$(mktemp -d)"
 cd "$ROOT"
 git fetch -q origin gh-pages
 git worktree add -q "$WT" origin/gh-pages
-rm -rf "$WT/yks" && mkdir -p "$WT/yks" && cp -r "$ROOT/yks/dist/." "$WT/yks/"
+# Eski sürümün /assets dosyaları silinmez: açık kalmış sayfalar güncellemede kırılmasın.
+mkdir -p "$WT/yks" && cp -r "$ROOT/yks/dist/." "$WT/yks/"
 cd "$WT"
 git add -A yks
 if git diff --cached --quiet; then echo "Değişiklik yok"; else
