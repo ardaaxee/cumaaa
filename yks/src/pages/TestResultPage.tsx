@@ -33,6 +33,10 @@ export default function TestResultPage({ params }: { params: string[] }) {
 
   const score = useMemo(() => (result && byId ? scoreTest({ ...result, elapsedMs: result.durationMs }, byId) : null), [result, byId]);
   const byTopic = useMemo(() => (score && byId ? breakdown(score.items, byId, (q) => q.topic) : []), [score, byId]);
+  const bySubtopic = useMemo(
+    () => (score && byId ? breakdown(score.items, byId, (q) => q.subtopic ?? '').filter((r) => r.key) : []),
+    [score, byId],
+  );
   const byDiff = useMemo(() => (score && byId ? breakdown(score.items, byId, (q) => q.difficulty) : []), [score, byId]);
 
   if (!result) {
@@ -49,6 +53,18 @@ export default function TestResultPage({ params }: { params: string[] }) {
   const items = score.items.filter((i) => (filter === 'all' ? true : filter === 'isaretli' ? i.marked : i.state === filter));
   const wrongIds = score.items.filter((i) => i.state !== 'dogru').map((i) => i.questionId);
   const topicIds = [...new Set(score.items.map((i) => byId.get(i.questionId)?.topic).filter(Boolean))] as string[];
+  const weakestSubtopic = bySubtopic
+    .filter((r) => r.total >= 2 && r.success != null)
+    .slice()
+    .sort((a, b) => (a.success ?? 0) - (b.success ?? 0))[0];
+  const subtopicLabel = (id: string) => {
+    for (const topicId of topicIds) {
+      const st = getTopicRef(topicId)?.topic.subtopics.find((s) => s.id === id);
+      if (st) return st.name;
+    }
+    return id;
+  };
+  const subtopicTopicId = (id: string) => topicIds.find((topicId) => getTopicRef(topicId)?.topic.subtopics.some((s) => s.id === id));
 
   const retryWrongs = async () => {
     const err = await launchWithIds(wrongIds, makeConfig({ origin: 'yanlislar', mode: 'ogrenme', title: 'Bu testin yanlışları' }));
@@ -152,6 +168,29 @@ export default function TestResultPage({ params }: { params: string[] }) {
         )}
       </div>
 
+      {weakestSubtopic && (
+        <section className="card section result-learning-next" aria-labelledby="next-learning-h">
+          <div>
+            <div className="eyebrow">Sonraki çalışma</div>
+            <h2 id="next-learning-h">{subtopicLabel(weakestSubtopic.key)}</h2>
+            <p className="small muted">
+              Bu testte bu alt konuda {weakestSubtopic.correct}/{weakestSubtopic.total} doğru yaptın. Önce kısa konu tekrarına dön, sonra yalnız bu alt konudan soru çöz.
+            </p>
+          </div>
+          <div className="row">
+            {subtopicTopicId(weakestSubtopic.key) && (
+              <a className="btn" href={'#/konu/' + subtopicTopicId(weakestSubtopic.key)}>Konuyu tekrar et</a>
+            )}
+            <a
+              className="btn primary"
+              href={href('/testler', { konu: subtopicTopicId(weakestSubtopic.key), altkonu: weakestSubtopic.key })}
+            >
+              Bu alt konudan soru çöz
+            </a>
+          </div>
+        </section>
+      )}
+
       <div className="grid grid-cards section">
         <section className="card" aria-labelledby="bt-h">
           <h2 id="bt-h" className="mb-8">
@@ -171,6 +210,25 @@ export default function TestResultPage({ params }: { params: string[] }) {
             </div>
           ))}
         </section>
+        {bySubtopic.length > 0 && (
+          <section className="card" aria-labelledby="bs-h">
+            <h2 id="bs-h" className="mb-8">Alt konu bazlı başarı</h2>
+            {bySubtopic.map((r) => (
+              <div key={r.key} className="bar-row">
+                <a
+                  className="name"
+                  href={href('/testler', { konu: subtopicTopicId(r.key), altkonu: r.key })}
+                >
+                  {subtopicLabel(r.key)}
+                </a>
+                <div className="progress" aria-hidden="true">
+                  <span style={{ width: `${r.success ?? 0}%` }} />
+                </div>
+                <span className="pct">{r.correct}/{r.total}</span>
+              </div>
+            ))}
+          </section>
+        )}
         <section className="card" aria-labelledby="bd-h">
           <h2 id="bd-h" className="mb-8">
             Zorluk bazlı başarı
