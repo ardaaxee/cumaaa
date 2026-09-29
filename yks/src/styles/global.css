@@ -5525,3 +5525,78 @@ body {
   }
   :root:not([data-theme='light']) .coach-readiness > b { color: var(--text); }
 }
+
+
+/* ===== PANDA DAILY QUESTS ===== */
+.panda-quest-card {
+  overflow: hidden;
+  border-color: color-mix(in srgb, var(--brand) 15%, var(--line));
+  background:
+    radial-gradient(circle at 100% 0%, rgba(255,255,255,.52) 0 6rem, transparent 6.1rem),
+    linear-gradient(145deg, color-mix(in srgb, var(--brand-soft) 44%, var(--surface)), var(--surface) 62%);
+}
+.panda-quests {
+  display: grid;
+  gap: 8px;
+}
+.panda-quest {
+  display: grid;
+  grid-template-columns: auto minmax(0,1fr) auto;
+  align-items: center;
+  gap: 11px;
+  min-height: 72px;
+  padding: 10px 11px;
+  border: 1px solid var(--line);
+  border-radius: 17px;
+  background: var(--surface);
+}
+.panda-quest.done {
+  border-color: color-mix(in srgb, var(--ok) 20%, var(--line));
+  background: color-mix(in srgb, var(--ok-soft) 38%, var(--surface));
+}
+.panda-quest-icon {
+  width: 38px;
+  height: 38px;
+  display: grid;
+  place-items: center;
+  border-radius: 13px;
+  background: var(--brand-soft);
+  color: var(--brand);
+  font-weight: 900;
+}
+.panda-quest.done .panda-quest-icon {
+  background: var(--ok);
+  color: white;
+}
+.panda-quest .grow {
+  display: grid;
+  gap: 3px;
+}
+.panda-quest .grow b {
+  font-size: .82rem;
+}
+.panda-quest .grow small {
+  color: var(--muted);
+  font-size: .67rem;
+}
+.panda-quest .progress {
+  height: 5px;
+  margin-top: 3px;
+}
+.panda-quest-complete {
+  margin-top: 11px;
+  padding: 11px 13px;
+  border-radius: 14px;
+  background: var(--ok-soft);
+  color: var(--ok);
+  font-size: .78rem;
+  font-weight: 800;
+}
+@media (max-width: 480px) {
+  .panda-quest {
+    grid-template-columns: auto minmax(0,1fr);
+  }
+  .panda-quest > .tiny {
+    grid-column: 2;
+  }
+}
