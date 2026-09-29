@@ -31,6 +31,7 @@ const GROUPS: { title: string; items: { path: string; label: string; desc: strin
       { path: '/cikmis', label: 'ÖSYM çıkmış sorular', desc: 'Yıl bazlı resmî bağlantılar', icon: 'archive' },
       { path: '/kaynaklar', label: 'Kaynaklar', desc: 'Resmî kaynaklar ve çalışma içerikleri', icon: 'link' },
       { path: '/pandam', label: 'Panda arkadaşım', desc: 'Seviye, bakım ve aksesuarlar', icon: 'sparkle' },
+      { path: '/canli', label: 'Cuma ♡ Zeynep Canlı', desc: 'İzinli canlı ekran paylaşımı ve mesajlaşma', icon: 'link' },
       { path: '/ayarlar', label: 'Ayarlar', desc: 'Profil, görünüm, bulut ve yedek', icon: 'settings' },
     ],
   },
