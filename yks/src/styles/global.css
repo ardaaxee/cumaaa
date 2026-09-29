@@ -8285,3 +8285,245 @@ body {
     transition:none !important;
   }
 }
+
+
+/* ===== LIFELIKE PANDA MOTION v4 ===== */
+.pet-stage-panda {
+  left: var(--pet-x, 50%);
+  bottom: var(--pet-y, 2%);
+  width: 280px;
+  height: 330px;
+  transition:
+    left 1.05s cubic-bezier(.35,.05,.2,1),
+    bottom .8s ease,
+    transform .25s ease,
+    filter .25s ease;
+}
+.pet-stage-panda .real-panda {
+  width: 250px;
+  height: auto;
+  overflow: visible;
+  transform-origin: 50% 92%;
+  animation: rp-idle-breathe 3.8s ease-in-out infinite;
+}
+.pet-stage-panda.facing-left .real-panda {
+  transform: scaleX(-1);
+}
+.pet-stage-panda.facing-right .real-panda {
+  transform: scaleX(1);
+}
+.pet-stage-panda.act-walking .real-panda {
+  animation: rp-walk-body .52s ease-in-out infinite alternate;
+}
+.pet-stage-panda.act-playing .real-panda {
+  animation: rp-play-body .7s ease-in-out infinite;
+}
+.pet-stage-panda.act-eating .real-panda,
+.pet-stage-panda.act-drinking .real-panda {
+  animation: rp-eat-body .62s ease-in-out infinite alternate;
+}
+.pet-stage-panda.act-sleeping .real-panda {
+  animation: rp-sleep-breathe 4.2s ease-in-out infinite;
+}
+.pet-stage-panda.act-bathing .real-panda {
+  animation: rp-bath-sway 1.6s ease-in-out infinite;
+}
+
+.real-panda .rp-head {
+  transform-box: fill-box;
+  transform-origin: 50% 78%;
+  animation: rp-head-curious 7.5s ease-in-out infinite;
+}
+.real-panda .rp-body {
+  transform-box: fill-box;
+  transform-origin: 50% 90%;
+  animation: rp-body-breathe 3.8s ease-in-out infinite;
+}
+.real-panda .rp-ear-left {
+  transform-box: fill-box;
+  transform-origin: 65% 70%;
+  animation: rp-ear-twitch-left 8.7s ease-in-out infinite;
+}
+.real-panda .rp-ear-right {
+  transform-box: fill-box;
+  transform-origin: 35% 70%;
+  animation: rp-ear-twitch-right 10.2s ease-in-out infinite;
+}
+.real-panda .rp-pupil {
+  transform-box: fill-box;
+  transform-origin:center;
+  animation: rp-look-around 6.4s ease-in-out infinite;
+}
+.real-panda .rp-eye-lid {
+  animation: rp-blink 5.2s ease-in-out infinite;
+}
+.real-panda .rp-mouth {
+  transform-box: fill-box;
+  transform-origin:center;
+}
+.real-panda.is-eating .rp-mouth,
+.real-panda.is-drinking .rp-mouth {
+  animation: rp-chew-mouth .38s ease-in-out infinite alternate;
+}
+.real-panda.is-eating .rp-tongue,
+.real-panda.is-drinking .rp-tongue,
+.real-panda.is-playing .rp-tongue {
+  opacity: .85;
+}
+.real-panda .rp-held-item {
+  transform-box: fill-box;
+  transform-origin: 60% 60%;
+  animation: rp-held-item .55s ease-in-out infinite alternate;
+}
+.real-panda .rp-tear {
+  animation: rp-tear-drop 1.7s ease-in infinite;
+}
+.real-panda.is-sleepy .rp-head {
+  animation: rp-sleep-head 4.2s ease-in-out infinite;
+}
+.real-panda.is-playing .rp-head {
+  animation: rp-play-head .7s ease-in-out infinite alternate;
+}
+
+@keyframes rp-idle-breathe {
+  0%,100% { transform: translateY(0) scale(1); }
+  48% { transform: translateY(-3px) scale(1.006,1.012); }
+  52% { transform: translateY(-3px) scale(1.006,1.012); }
+}
+@keyframes rp-body-breathe {
+  0%,100% { transform: scale(1); }
+  50% { transform: scale(1.018,1.025); }
+}
+@keyframes rp-head-curious {
+  0%,18%,100% { transform: rotate(0deg) translateY(0); }
+  25%,38% { transform: rotate(-3deg) translateY(1px); }
+  45%,63% { transform: rotate(2deg) translateY(0); }
+  72%,82% { transform: rotate(-1deg) translateY(1px); }
+}
+@keyframes rp-look-around {
+  0%,18%,100% { transform: translate(0,0); }
+  25%,38% { transform: translate(-1.8px,.3px); }
+  47%,63% { transform: translate(1.8px,.2px); }
+  72%,84% { transform: translate(.5px,-.7px); }
+}
+@keyframes rp-blink {
+  0%,42%,45%,100% { opacity:0; }
+  43%,44% { opacity:1; }
+  78%,80% { opacity:0; }
+  79% { opacity:1; }
+}
+@keyframes rp-ear-twitch-left {
+  0%,58%,64%,100% { transform:rotate(0deg); }
+  60% { transform:rotate(-6deg); }
+  62% { transform:rotate(4deg); }
+}
+@keyframes rp-ear-twitch-right {
+  0%,67%,73%,100% { transform:rotate(0deg); }
+  69% { transform:rotate(6deg); }
+  71% { transform:rotate(-4deg); }
+}
+@keyframes rp-walk-body {
+  0% { transform: translateY(1px) rotate(-1.8deg) scaleY(.995); }
+  100% { transform: translateY(-7px) rotate(1.8deg) scaleY(1.012); }
+}
+@keyframes rp-play-body {
+  0%,100% { transform: translateY(0) rotate(0); }
+  25% { transform: translateY(-12px) rotate(-4deg); }
+  50% { transform: translateY(-3px) rotate(0); }
+  75% { transform: translateY(-12px) rotate(4deg); }
+}
+@keyframes rp-eat-body {
+  from { transform: translateY(0) rotate(-.6deg); }
+  to { transform: translateY(-3px) rotate(.6deg); }
+}
+@keyframes rp-chew-mouth {
+  from { transform:scaleY(.78) translateY(-.3px); }
+  to { transform:scaleY(1.18) translateY(.7px); }
+}
+@keyframes rp-held-item {
+  from { transform:rotate(-2deg) translateY(0); }
+  to { transform:rotate(3deg) translateY(-2px); }
+}
+@keyframes rp-sleep-breathe {
+  0%,100% { transform:translateY(1px) scale(1); }
+  50% { transform:translateY(-2px) scale(1.012,1.024); }
+}
+@keyframes rp-sleep-head {
+  0%,100% { transform:rotate(-5deg) translateY(2px); }
+  50% { transform:rotate(-7deg) translateY(3px); }
+}
+@keyframes rp-bath-sway {
+  0%,100% { transform:translateY(0) rotate(-1deg); }
+  50% { transform:translateY(-4px) rotate(1.5deg); }
+}
+@keyframes rp-play-head {
+  from { transform:rotate(-3deg); }
+  to { transform:rotate(3deg); }
+}
+@keyframes rp-tear-drop {
+  0% { transform:translateY(-1px); opacity:.2; }
+  30% { opacity:.9; }
+  100% { transform:translateY(10px); opacity:0; }
+}
+
+.pet-stage-panda.act-walking {
+  animation: none;
+}
+.pet-stage-panda.act-eating,
+.pet-stage-panda.act-drinking,
+.pet-stage-panda.act-playing,
+.pet-stage-panda.act-studying {
+  animation: none;
+}
+.pet-stage-panda.act-sleeping {
+  transform: translateX(-50%) rotate(-7deg) scale(.92);
+  bottom: max(var(--pet-y, 2%), 1%);
+}
+.pet-stage-panda.act-bathing {
+  transform: translateX(-50%) scale(.88);
+}
+
+.pet-floor-shadow {
+  width: 48%;
+  height: 8%;
+  bottom: 8px;
+  transition: width .35s ease, opacity .35s ease, transform .35s ease;
+}
+.pet-stage-panda.act-walking .pet-floor-shadow {
+  width: 42%;
+  opacity:.78;
+}
+.pet-stage-panda.act-playing .pet-floor-shadow {
+  animation: rp-shadow-play .7s ease-in-out infinite;
+}
+@keyframes rp-shadow-play {
+  0%,100% { transform:translateX(-50%) scale(1); opacity:.8; }
+  50% { transform:translateX(-50%) scale(.72); opacity:.48; }
+}
+
+@media (max-width: 560px) {
+  .pet-stage-panda {
+    width:230px;
+    height:285px;
+  }
+  .pet-stage-panda .real-panda {
+    width:215px;
+  }
+}
+@media (max-width:390px) {
+  .pet-stage-panda {
+    width:210px;
+    height:260px;
+  }
+  .pet-stage-panda .real-panda {
+    width:198px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .real-panda,
+  .real-panda *,
+  .pet-stage-panda {
+    animation:none !important;
+    transition:none !important;
+  }
+}
