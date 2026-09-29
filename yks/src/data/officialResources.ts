@@ -8,7 +8,7 @@ export interface OfficialResource {
 /** Resmî kaynaklar. İçerik kopyalanmaz; yalnız bağlantı verilir. */
 export const OFFICIAL_RESOURCES: OfficialResource[] = [
   { title: 'ÖSYM YKS sayfası', org: 'ÖSYM', desc: 'Duyurular, kılavuzlar ve sınav takvimi.', url: 'https://www.osym.gov.tr/SinavGrubu/Menu/323' },
-  { title: 'ÖSYM soru kitapçıkları ve cevap anahtarları', org: 'ÖSYM', desc: 'Geçmiş yıllara ait resmî TYT/AYT/YDT kitapçıkları.', url: osymBookletUrl(2025) },
+  { title: '2026 ÖSYM YKS soru kitapçıkları', org: 'ÖSYM', desc: '2026 TYT/AYT/YDT resmî kitapçık ve cevap anahtarları.', url: osymBookletUrl(2026) },
   { title: 'MEB Öğretim Programları', org: 'MEB', desc: 'Talim ve Terbiye Kurulu program arşivi.', url: 'https://mufredat.meb.gov.tr/Programlar.aspx' },
   { title: '2018 Matematik 9–12 Programı', org: 'MEB', desc: '2026–2027’de 12. sınıf için önceki program referansı.', url: 'https://mufredat.meb.gov.tr/Dosyalar/201821102727101-OGM%20MATEMAT%C4%B0K%20PRG%2020.01.2018.pdf' },
   { title: '2018 Fizik 9–12 Programı', org: 'MEB', desc: 'Ünite ve kazanım referansı.', url: 'https://mufredat.meb.gov.tr/Dosyalar/201812103112910-orta%C3%B6%C4%9Fretim_fizik_son.pdf' },
