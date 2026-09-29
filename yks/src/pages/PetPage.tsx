@@ -55,7 +55,7 @@ type HouseActivity =
 
 type PandaEmotion = 'neutral' | 'laugh' | 'angry' | 'shy' | 'yawn' | 'sneeze' | 'surprised';
 
-type ZeynepActivity = 'idle' | 'walking' | 'cooking' | 'serving';
+type ZeynepActivity = 'idle' | 'walking' | 'cooking' | 'serving' | 'relaxing' | 'studying' | 'gardening' | 'cleaning' | 'talking' | 'sleeping' | 'petting';
 
 const ROOM_ORDER: HouseRoom[] = ['living', 'kitchen', 'bedroom', 'bathroom', 'study', 'garden', 'balcony'];
 const ROOM_INFO: Record<HouseRoom, { icon: string; label: string; desc: string }> = {
@@ -361,6 +361,20 @@ function activityText(activity: HouseActivity, room: HouseRoom, name: string): s
   return ROOM_INFO[room].desc;
 }
 
+function zeynepActivityText(activity: ZeynepActivity, room: HouseRoom): string {
+  if (activity === 'walking') return 'Zeynep ' + ROOM_INFO[room].label.toLowerCase() + ' tarafına gidiyor…';
+  if (activity === 'cooking') return 'Zeynep mutfakta bir şeyler hazırlıyor 🍳';
+  if (activity === 'serving') return 'Zeynep Panda için servis hazırlıyor 🍽️';
+  if (activity === 'relaxing') return 'Zeynep biraz dinleniyor ☕';
+  if (activity === 'studying') return 'Zeynep çalışma odasında vakit geçiriyor 📚';
+  if (activity === 'gardening') return 'Zeynep bitkilerle ilgileniyor 🌿';
+  if (activity === 'cleaning') return 'Zeynep evi toparlıyor ✨';
+  if (activity === 'talking') return 'Zeynep Panda ile konuşuyor 💬';
+  if (activity === 'sleeping') return 'Zeynep dinleniyor 🌙';
+  if (activity === 'petting') return 'Zeynep Panda’yı seviyor ♡';
+  return 'Zeynep evde kendi halinde.';
+}
+
 export default function PetPage() {
   const state = useAppState();
   const pet = state.settings.pet;
@@ -372,6 +386,9 @@ export default function PetPage() {
   const [room, setRoom] = useState<HouseRoom>(initialLife.room);
   const [activity, setActivity] = useState<HouseActivity>('idle');
   const [zeynepActivity, setZeynepActivity] = useState<ZeynepActivity>('idle');
+  const [zeynepRoom, setZeynepRoom] = useState<HouseRoom>('living');
+  const [zeynepPos, setZeynepPos] = useState({ x: 72, y: 8 });
+  const [zeynepMessage, setZeynepMessage] = useState<string | null>(null);
   const [roomMode, setRoomMode] = useState<'day' | 'night'>(() => {
     const h = new Date().getHours();
     return h >= 19 || h < 7 ? 'night' : 'day';
@@ -387,6 +404,7 @@ export default function PetPage() {
   const [voiceOn, setVoiceOn] = useState(true);
   const [emotion, setEmotion] = useState<PandaEmotion>('neutral');
   const timers = useRef<number[]>([]);
+  const zeynepTimers = useRef<number[]>([]);
   const greeted = useRef(false);
 
   const sad = needs.hungry || needs.thirsty;
@@ -395,6 +413,16 @@ export default function PetPage() {
   const later = (fn: () => void, ms: number) => {
     const id = window.setTimeout(fn, ms);
     timers.current.push(id);
+  };
+
+  const zLater = (fn: () => void, ms: number) => {
+    const id = window.setTimeout(fn, ms);
+    zeynepTimers.current.push(id);
+  };
+
+  const clearZeynepTimers = () => {
+    for (const id of zeynepTimers.current) window.clearTimeout(id);
+    zeynepTimers.current = [];
   };
 
   const clearTimers = () => {
@@ -641,8 +669,105 @@ export default function PetPage() {
     // Her idle dönüşünde yeni bir doğal davranış planlanır.
   }, [activity, room, pet.name, petPos.x, needs.hungry, needs.thirsty, cleanliness, energy, happiness, voiceOn]);
 
+  useEffect(() => {
+    if (zeynepActivity !== 'idle') return;
+    let cancelled = false;
+    const wait = 6500 + Math.floor(Math.random() * 5500);
+    const id = window.setTimeout(() => {
+      if (cancelled) return;
+      const hour = new Date().getHours();
+
+      const travel = (target: HouseRoom, next: ZeynepActivity, message: string, duration = 4200) => {
+        setZeynepActivity('walking');
+        setZeynepRoom(target);
+        setZeynepPos({ x: 18, y: 8 });
+        setZeynepMessage(message);
+        zLater(() => {
+          setZeynepPos({ x: target === 'kitchen' ? 76 : target === 'study' ? 70 : target === 'garden' || target === 'balcony' ? 68 : 72, y: 8 });
+          setZeynepActivity(next);
+          setZeynepMessage(zeynepActivityText(next, target));
+        }, 900);
+        zLater(() => {
+          setZeynepActivity('idle');
+          setZeynepMessage(null);
+        }, duration);
+      };
+
+      // Öncelik: Panda gerçekten acıkmış/susamışsa ve elde kaynak varsa Zeynep kendi karar verip bakım yapabilir.
+      if ((needs.hungry && needs.bamboo > 0) || (needs.thirsty && needs.drops > 0)) {
+        const kind: 'bambu' | 'su' = needs.hungry && needs.bamboo > 0 ? 'bambu' : 'su';
+        setZeynepRoom('kitchen');
+        setZeynepPos({ x: 74, y: 8 });
+        setZeynepActivity('cooking');
+        setZeynepMessage(kind === 'bambu' ? 'Zeynep Panda acıktığı için yemek hazırlıyor 🍳' : 'Zeynep Panda için su hazırlıyor 💧');
+        zLater(() => {
+          update((st) => kind === 'bambu' ? feedPet(st) : waterPet(st));
+          setHolding(kind);
+          setActivity(kind === 'bambu' ? 'eating' : 'drinking');
+          setZeynepActivity('serving');
+          setZeynepMessage(kind === 'bambu' ? 'Zeynep yemeği Panda’ya verdi ♡' : 'Zeynep Panda’ya suyunu verdi ♡');
+          setHappiness((v) => clampLife(v + 4));
+        }, 1800);
+        zLater(() => {
+          setHolding(null);
+          setActivity('idle');
+          setZeynepActivity('idle');
+          setZeynepMessage(null);
+        }, 4300);
+        return;
+      }
+
+      // Gece rutini.
+      if (hour >= 23 || hour < 7) {
+        travel('bedroom', 'sleeping', 'Zeynep gece olduğu için yatak odasına geçiyor 🌙', 7200);
+        return;
+      }
+
+      const roll = Math.random();
+      if (roll < 0.16) {
+        travel('study', 'studying', 'Zeynep çalışma odasına geçiyor 📚', 5200);
+        return;
+      }
+      if (roll < 0.31) {
+        travel('balcony', 'relaxing', 'Zeynep balkonda biraz hava almaya gidiyor 🌇', 5000);
+        return;
+      }
+      if (roll < 0.45) {
+        travel('garden', 'gardening', 'Zeynep bahçeye çıkıp bitkilerle ilgileniyor 🌿', 5200);
+        return;
+      }
+      if (roll < 0.57) {
+        travel('living', 'relaxing', 'Zeynep salonda biraz dinlenecek ☕', 4700);
+        return;
+      }
+      if (roll < 0.69) {
+        travel('bathroom', 'cleaning', 'Zeynep evi toparlamaya başladı ✨', 4400);
+        return;
+      }
+      if (roll < 0.84 && room === zeynepRoom && activity === 'idle') {
+        setZeynepActivity('petting');
+        setZeynepMessage('Zeynep Panda’nın yanına gelip onu seviyor ♡');
+        setHappiness((v) => clampLife(v + 5));
+        setHearts((v) => v + 1);
+        zLater(() => {
+          setZeynepActivity('idle');
+          setZeynepMessage(null);
+        }, 3000);
+        return;
+      }
+
+      travel('kitchen', 'cooking', 'Zeynep mutfağa gidip kendine bir şeyler hazırlıyor 🍳', 4800);
+    }, wait);
+    zeynepTimers.current.push(id);
+    return () => {
+      cancelled = true;
+      window.clearTimeout(id);
+    };
+  }, [zeynepActivity, needs.hungry, needs.thirsty, needs.bamboo, needs.drops, room, zeynepRoom, activity]);
+
   useEffect(() => () => {
     clearTimers();
+    clearZeynepTimers();
   }, []);
 
   const moveTo = (nextRoom: HouseRoom, nextActivity: HouseActivity = 'idle', message?: string) => {
@@ -677,6 +802,9 @@ export default function PetPage() {
     setPetPos({ x: 52, y: 2 });
     setFacing('right');
     setActivity('walking');
+    clearZeynepTimers();
+    setZeynepRoom('kitchen');
+    setZeynepPos({ x: 78, y: 8 });
     setZeynepActivity('walking');
     setSceneMessage('Zeynep mutfağa geliyor. ' + pet.name + ' masaya geçiyor…');
 
@@ -913,6 +1041,11 @@ export default function PetPage() {
           <NeedBubble icon="⚡" label="Enerji" value={energy} />
           <NeedBubble icon="♡" label="Mutluluk" value={happiness} />
         </div>
+        <div className="pet-zeynep-status" aria-live="polite">
+          <span>👩🏻 Zeynep</span>
+          <b>{ROOM_INFO[zeynepRoom].icon} {ROOM_INFO[zeynepRoom].label}</b>
+          <small>{zeynepActivityText(zeynepActivity, zeynepRoom)}</small>
+        </div>
 
         <div className={'pet-stage scene-' + room + ' activity-' + activity}>
           <RoomBackdrop
@@ -957,12 +1090,39 @@ export default function PetPage() {
             {activity === 'sleeping' && <span className="pet-game-sleep">Z z z</span>}
           </button>
 
-          {zeynepActivity !== 'idle' && room === 'kitchen' && (
-            <div className={'pet-game-zeynep z-' + zeynepActivity}>
+          {room === zeynepRoom && (
+            <button
+              type="button"
+              className={'pet-game-zeynep z-' + zeynepActivity}
+              style={{ '--z-x': zeynepPos.x + '%', '--z-y': zeynepPos.y + '%' } as CSSProperties}
+              onClick={() => {
+                clearZeynepTimers();
+                setZeynepActivity('talking');
+                setZeynepMessage('Zeynep: Ben de buradayım. Biraz kendi halimde takılıyorum ♡');
+                zLater(() => {
+                  setZeynepActivity('idle');
+                  setZeynepMessage(null);
+                }, 3000);
+              }}
+              aria-label={'Zeynep · ' + zeynepActivityText(zeynepActivity, zeynepRoom)}
+            >
               <div className="pet-zeynep-avatar">👩🏻</div>
               <b>Zeynep</b>
-              <span>{zeynepActivity === 'cooking' ? '🍳' : zeynepActivity === 'serving' ? '🍽️' : '→'}</span>
-            </div>
+              <span>
+                {zeynepActivity === 'cooking' ? '🍳'
+                  : zeynepActivity === 'serving' ? '🍽️'
+                  : zeynepActivity === 'studying' ? '📚'
+                  : zeynepActivity === 'gardening' ? '🌿'
+                  : zeynepActivity === 'cleaning' ? '✨'
+                  : zeynepActivity === 'relaxing' ? '☕'
+                  : zeynepActivity === 'sleeping' ? '🌙'
+                  : zeynepActivity === 'petting' ? '♡'
+                  : zeynepActivity === 'talking' ? '💬'
+                  : zeynepActivity === 'walking' ? '→'
+                  : '•'}
+              </span>
+              {zeynepMessage && <small className="pet-zeynep-bubble">{zeynepMessage}</small>}
+            </button>
           )}
 
           <div className={'pet-game-talk' + (['talking','greeting','laughing','angry','shy','yawning','sneezing','surprised'].includes(activity) ? ' speaking' : '')} aria-live="polite">
