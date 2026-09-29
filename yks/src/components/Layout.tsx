@@ -32,6 +32,14 @@ export const NAV_ALL: NavItem[] = [
   { path: '/kaynaklar', label: 'Kaynaklar', icon: 'link' },
   { path: '/cikmis', label: 'ÖSYM Çıkmış Sorular', icon: 'archive' },
   { path: '/ayarlar', label: 'Ayarlar', icon: 'settings' },
+  { path: '/daha', label: 'Daha Fazla', icon: 'more' },
+];
+
+const SIDEBAR_GROUPS: { label: string; paths: string[] }[] = [
+  { label: 'Çalış', paths: ['/', '/calis', '/dersler', '/testler', '/denemeler', '/plan'] },
+  { label: 'Takip', paths: ['/tekrar', '/yanlislar', '/gelisim', '/karne'] },
+  { label: 'Araçlar', paths: ['/defterim', '/kartlar', '/formuller', '/kaydedilenler'] },
+  { label: 'Kişisel', paths: ['/ogretmen', '/pandam', '/ayarlar', '/daha'] },
 ];
 
 export function sectionOf(path: string): string {
@@ -54,19 +62,34 @@ export function Layout({ children }: { children: ReactNode }) {
         İçeriğe geç
       </a>
       <aside className="sidebar" aria-label="Ana menü">
-        <div className="brand">
-          İyi ki <span className="heart" aria-hidden="true">♡</span>
+        <div className="brand-lockup">
+          <div className="brand-mark" aria-hidden="true">♡</div>
+          <div>
+            <div className="brand">İyi ki • YKS</div>
+            <div className="tiny muted">TYT + AYT Sayısal çalışma alanı</div>
+          </div>
         </div>
-        <div className="tiny muted">YKS Çalışma Odası · TYT + AYT Sayısal</div>
-        <nav>
-          {NAV_ALL.map((n) => (
-            <a key={n.path} href={`#${n.path}`} aria-current={section === n.path ? 'page' : undefined}>
-              <Icon name={n.icon} />
-              {n.path === '/ogretmen' ? `${teacherName} ♡` : n.label}
-            </a>
+        <nav className="sidebar-nav">
+          {SIDEBAR_GROUPS.map((group) => (
+            <div className="sidebar-group" key={group.label}>
+              <div className="sidebar-group-label">{group.label}</div>
+              {group.paths.map((path) => {
+                const n = NAV_ALL.find((item) => item.path === path);
+                if (!n) return null;
+                return (
+                  <a key={n.path} href={`#${n.path}`} aria-current={section === n.path ? 'page' : undefined}>
+                    <Icon name={n.icon} />
+                    <span>{n.path === '/ogretmen' ? `${teacherName} ♡` : n.label}</span>
+                  </a>
+                );
+              })}
+            </div>
           ))}
         </nav>
-        <div className="sidebar-foot">ÖSYM ile bağlantılı değildir. Pratik sorular özgündür.</div>
+        <div className="sidebar-foot">
+          <span className="sidebar-foot-dot" aria-hidden="true" />
+          Kişisel çalışma verilerin cihazında saklanır.
+        </div>
       </aside>
       <main id="main" className="main" tabIndex={-1}>
         {children}
