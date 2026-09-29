@@ -19,6 +19,7 @@ import { recentTopicPerformance, weakTopics } from '../utils/analysis';
 import { dayKey, formatDay } from '../utils/date';
 import { isDue, stageLabel } from '../utils/srs';
 import { topicMastery } from '../services/adaptiveStudy';
+import { osymBookletPdfUrl } from '../data/officialResources';
 
 const LEVEL: Record<string, string> = { kolay: 'Kolay', orta: 'Orta', zor: 'Zor' };
 
@@ -72,6 +73,14 @@ function LessonView({ lesson }: { lesson: LessonSeed }) {
           Konu sonu soruları ✎
         </a>
       </nav>
+
+      <div className="lesson-route" aria-label="Öğrenme rotası">
+        <div><span>1</span><b>Temel fikir</b><small>Kavramları anla</small></div>
+        <div><span>2</span><b>Formül + mantık</b><small>Nedenini öğren</small></div>
+        <div><span>3</span><b>Çözümlü örnek</b><small>{lesson.examples.length} örnekle uygula</small></div>
+        <div><span>4</span><b>Sınav mantığı</b><small>Nasıl sorulur?</small></div>
+        <div><span>5</span><b>Mini test</b><small>Bilgiyi doğrula</small></div>
+      </div>
 
       <section id="sec-giris">
         <h2>Konuya giriş</h2>
@@ -144,6 +153,10 @@ function LessonView({ lesson }: { lesson: LessonSeed }) {
         <h2>ÖSYM tarzında düşünme</h2>
         <div className="callout">
           <Paragraphs text={lesson.osymThinking} />
+        </div>
+        <div className="lesson-osym-note">
+          <b>Çıkmış soruyla kontrol et</b>
+          <span>Bu bölüm konuya ait sınav düşünme biçimini özetler. Resmî soru metni uygulamaya kopyalanmaz; aşağıdaki ÖSYM kitapçıklarından aynı kazanımı ayrıca çalışabilirsin.</span>
         </div>
       </section>
 
@@ -455,6 +468,27 @@ export default function TopicPage({ params }: { params: string[] }) {
           />
         )}
       </div>
+
+      <section className="card section topic-osym-archive" aria-labelledby="topic-osym-h">
+        <div className="card-head">
+          <div>
+            <div className="eyebrow">Çıkmış soru kontrolü</div>
+            <h2 id="topic-osym-h">Resmî YKS kitapçıklarında bu konuyu ara</h2>
+          </div>
+          <SourceBadge type="osym-resmi" />
+        </div>
+        <p className="small muted">
+          Konu anlatımındaki sınav mantığını okuduktan sonra resmî kitapçıkta benzer kazanımı bulup çöz. Sorular uygulamaya kopyalanmaz.
+        </p>
+        <div className="topic-osym-years">
+          {[2026, 2025, 2024].map((year) => (
+            <a key={year} className="btn small" href={osymBookletPdfUrl(year, ref.subject.exam)}>
+              {year} {ref.subject.exam} PDF
+            </a>
+          ))}
+          <a className="btn small ghost" href="#/cikmis">Tüm yıllar</a>
+        </div>
+      </section>
 
       <div className="card section topic-resources-card">
         <div className="card-head">
