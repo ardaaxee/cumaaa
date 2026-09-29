@@ -1,69 +1,114 @@
 /* İyi ki • YKS — service worker (derleme sırasında üretilir) */
-const CACHE = 'iyiki-yks-__VERSION__';
+const VERSION = '__VERSION__';
+const SHELL_CACHE = `iyiki-yks-shell-${VERSION}`;
+const CONTENT_CACHE = `iyiki-yks-content-${VERSION}`;
+const CRITICAL = __CRITICAL__;
 const PRECACHE = __PRECACHE__;
+
+async function cacheOptional(cache, urls) {
+  await Promise.allSettled(
+    urls.map(async (url) => {
+      try {
+        await cache.add(url);
+      } catch {
+        // İkon gibi opsiyonel bir dosya tüm SW kurulumunu düşürmesin.
+      }
+    }),
+  );
+}
 
 self.addEventListener('install', (event) => {
   event.waitUntil(
-    caches.open(CACHE).then((cache) => cache.addAll(PRECACHE)).then(() => self.skipWaiting()),
+    caches.open(SHELL_CACHE)
+      .then(async (cache) => {
+        await cache.addAll(CRITICAL);
+        const optional = PRECACHE.filter((url) => !CRITICAL.includes(url));
+        await cacheOptional(cache, optional);
+      })
+      .then(() => self.skipWaiting()),
   );
 });
 
 self.addEventListener('activate', (event) => {
   event.waitUntil(
     caches.keys()
-      .then((keys) => Promise.all(keys.filter((k) => k.startsWith('iyiki-yks-') && k !== CACHE).map((k) => caches.delete(k))))
+      .then((keys) =>
+        Promise.all(
+          keys
+            .filter(
+              (key) =>
+                key.startsWith('iyiki-yks-') &&
+                key !== SHELL_CACHE &&
+                key !== CONTENT_CACHE,
+            )
+            .map((key) => caches.delete(key)),
+        ),
+      )
       .then(() => self.clients.claim()),
   );
 });
 
-// Önbellek stratejisi (eski sürümde takılı kalmamak için):
-// - Sayfa (HTML) ve sabit adlı dosyalar: önce ağ, ağ yoksa önbellek.
-// - /assets/ altındaki dosyalar içerik özetiyle adlandırıldığı için değişmez: önce önbellek.
-function networkFirst(request, fallbackUrl) {
-  return fetch(request)
-    .then((response) => {
-      if (response.ok && response.type === 'basic') {
-        const copy = response.clone();
-        caches.open(CACHE).then((cache) => cache.put(fallbackUrl || request, copy));
-      }
-      return response;
-    })
-    .catch(() => caches.match(fallbackUrl || request, { ignoreSearch: true }));
+async function networkFirst(request, fallbackUrl) {
+  try {
+    const response = await fetch(request);
+    if (response.ok && (response.type === 'basic' || response.type === 'cors')) {
+      const copy = response.clone();
+      const cache = await caches.open(SHELL_CACHE);
+      await cache.put(fallbackUrl || request, copy);
+    }
+    return response;
+  } catch {
+    return caches.match(fallbackUrl || request, { ignoreSearch: true });
+  }
+}
+
+async function cacheFirstRuntime(request) {
+  const cached = await caches.match(request);
+  if (cached) return cached;
+
+  const response = await fetch(request);
+  if (response.ok && (response.type === 'basic' || response.type === 'cors')) {
+    const copy = response.clone();
+    const cache = await caches.open(CONTENT_CACHE);
+    await cache.put(request, copy);
+  }
+  return response;
 }
 
 self.addEventListener('fetch', (event) => {
   const request = event.request;
   if (request.method !== 'GET') return;
+
   const url = new URL(request.url);
   if (url.origin !== self.location.origin) return;
   if (url.pathname.includes('/api/')) return;
 
-  if (request.mode === 'navigate') {
+  // HTML daima ağ öncelikli: yeni deploy eski index ile karışmasın.
+  if (request.mode === 'navigate' || /\/index\.html$/.test(url.pathname)) {
     event.respondWith(networkFirst(request, './index.html'));
     return;
   }
 
+  // Sabit adlı sürüm/manifest dosyaları da ağ öncelikli.
+  if (
+    /\/manifest\.webmanifest$/.test(url.pathname) ||
+    /\/theme-init\.js$/.test(url.pathname) ||
+    /\/sw\.js$/.test(url.pathname)
+  ) {
+    event.respondWith(networkFirst(request));
+    return;
+  }
+
+  // Vite'ın hashli assets dosyaları değişmez. Soru ve ders içerikleri ilk
+  // kullanıldığında indirilip runtime cache'e girer; install sırasında topluca çekilmez.
   if (url.pathname.includes('/assets/')) {
-    event.respondWith(
-      caches.match(request).then(
-        (cached) =>
-          cached ||
-          fetch(request).then((response) => {
-            if (response.ok && response.type === 'basic') {
-              const copy = response.clone();
-              caches.open(CACHE).then((cache) => cache.put(request, copy));
-            }
-            return response;
-          }),
-      ),
-    );
+    event.respondWith(cacheFirstRuntime(request));
     return;
   }
 
   event.respondWith(networkFirst(request));
 });
 
-// Bildirime dokununca uygulama açılır (açıksa öne gelir); panda bildirimi panda sayfasına götürür.
 self.addEventListener('notificationclick', (event) => {
   event.notification.close();
   const hash = event.notification.tag === 'panda-ihtiyac' ? '#/pandam' : '#/';
