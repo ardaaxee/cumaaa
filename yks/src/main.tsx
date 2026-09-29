@@ -24,11 +24,41 @@ if ('serviceWorker' in navigator) {
       window.location.reload();
     });
 
+    let knownVersion: string | null = null;
+
+    const fetchVersion = async () => {
+      try {
+        const response = await fetch('./app-version.json?t=' + Date.now(), { cache: 'no-store' });
+        if (!response.ok) return;
+        const data = (await response.json()) as { version?: string };
+        if (!data.version) return;
+        if (knownVersion && data.version !== knownVersion) {
+          const registration = await navigator.serviceWorker.getRegistration();
+          await registration?.update();
+          const next = new URL(window.location.href);
+          next.searchParams.set('v', data.version);
+          window.location.replace(next.toString());
+          return;
+        }
+        knownVersion = data.version;
+      } catch {
+        // Çevrimdışıyken mevcut önbellek kullanılmaya devam eder.
+      }
+    };
+
     window.addEventListener('load', () => {
       navigator.serviceWorker
         .register('./sw.js', { updateViaCache: 'none' })
-        .then((registration) => registration.update())
+        .then(async (registration) => {
+          await registration.update();
+          await fetchVersion();
+        })
         .catch(() => undefined);
+    });
+
+    window.addEventListener('focus', () => void fetchVersion());
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState === 'visible') void fetchVersion();
     });
   } else {
     navigator.serviceWorker.getRegistrations().then((regs) => regs.forEach((r) => r.unregister()));
