@@ -6,7 +6,7 @@ import { PageHeader } from '../components/Layout';
 import { ConfirmDialog, Empty, Modal, Segmented, Stat, toast } from '../components/ui';
 import { addMock, deleteMock } from '../store/actions';
 import { loadQuestionsFor } from '../data/content';
-import { launchWithIds, makeConfig, hasActiveTest } from '../services/testLauncher';
+import { launchTest, launchWithIds, makeConfig, hasActiveTest } from '../services/testLauncher';
 import { getState } from '../store/store';
 import { FULL_MOCKS, buildFullMock, totalQuestions } from '../utils/fullMock';
 import type { MockExam } from '../store/schema';
@@ -164,6 +164,24 @@ export default function MocksPage() {
     if (err) toast(err);
   };
 
+  const startPhysicsMock = async (e: Exam) => {
+    const subjectId = e === 'TYT' ? 'tyt-fizik' : 'ayt-fizik';
+    const count = e === 'TYT' ? 7 : 14;
+    const durationMin = e === 'TYT' ? 12 : 25;
+    const err = await launchTest(
+      makeConfig({
+        exam: e,
+        subjectId,
+        count,
+        mode: 'sinav',
+        origin: 'filtre',
+        durationMin,
+        title: `${e} Fizik Branş Denemesi`,
+      }),
+    );
+    if (err) toast(err);
+  };
+
   const list = useMemo(() => sortMocks(mocks.filter((m) => m.exam === exam)), [mocks, exam]);
   const shown = list.slice(-Number(range));
   const analysis = useMemo(() => analyzeMocks(exam, shown).filter((a) => a.key !== 'genel'), [exam, shown]);
@@ -183,33 +201,69 @@ export default function MocksPage() {
           </button>
         }
       />
-      <section className="card hero full-mock" aria-labelledby="fm-h">
-        <div className="row nowrap" style={{ gap: 12 }}>
-          <div style={{ fontSize: '2.4rem' }} aria-hidden="true">
-            🐱
+      <div className="mock-exam-switch" aria-label="Deneme türü">
+        <Segmented
+          label="Sınav"
+          value={exam}
+          onChange={setExam}
+          options={[
+            { value: 'TYT', label: 'TYT' },
+            { value: 'AYT', label: 'AYT Sayısal' },
+          ]}
+        />
+      </div>
+
+      <section className={`mock-exam-hero ${exam.toLowerCase()}`} aria-labelledby="fm-h">
+        <div className="mock-exam-copy">
+          <div className="eyebrow">{exam} sınav modu</div>
+          <h2 id="fm-h">{exam === 'TYT' ? 'TYT Tam Deneme' : 'AYT Sayısal Tam Deneme'}</h2>
+          <p>
+            {exam === 'TYT'
+              ? '120 soru · 165 dakika. Türkçe, Sosyal, Temel Matematik ve Fen dağılımıyla tek oturum.'
+              : '80 soru · 180 dakika. Sayısal puan türü için Matematik ve Fen testleri.'}
+            {' '}Kronometre ve kalan süre birlikte görünür; uygulama arka planda olsa da sınav saati durmaz.
+          </p>
+          <div className="row">
+            <button type="button" className="btn primary" onClick={() => setStartExam(exam)}>
+              <Icon name="play" /> Tam denemeyi başlat
+            </button>
+            <button type="button" className="btn" onClick={() => void startPhysicsMock(exam)}>
+              ⚡ {exam} Fizik branş denemesi
+            </button>
           </div>
-          <div className="grow">
-            <h2 id="fm-h" style={{ margin: 0 }}>
-              Uygulamada tam deneme çöz
-            </h2>
-            <p className="small muted" style={{ margin: '4px 0 10px' }}>
-              2026 YKS oturum yapısına göre süreli simülasyon. Soru sayısı tam değilse deneme başlamaz; bitince netlerin ders ders çıkar ve deneme listene otomatik eklenir.
-            </p>
-            <div className="row">
-              {(['TYT', 'AYT'] as const).map((e) => (
-                <button key={e} type="button" className="btn primary" onClick={() => setStartExam(e)}>
-                  {e === 'TYT' ? 'TYT · 120 soru · 165 dk' : 'AYT Sayısal · 80 soru · 180 dk'}
-                </button>
-              ))}
-            </div>
-          </div>
+        </div>
+        <div className="mock-clock-preview" aria-hidden="true">
+          <span>{exam}</span>
+          <b>{exam === 'TYT' ? '02:45' : '03:00'}</b>
+          <small>arka planda da devam eder</small>
         </div>
       </section>
 
-      <div className="tiny muted mt-8">Kaynak referansı: ÖSYM 2026-YKS sınav yapısı. Uygulamadaki sorular özgün pratik sorularıdır; resmî ÖSYM soruları değildir.</div>
+      <section className="mock-source-grid section" aria-label="Deneme kaynakları">
+        <div className="card mock-source-card">
+          <span className="mock-source-icon" aria-hidden="true">✎</span>
+          <div className="grow">
+            <b>Uygulama içi özgün YKS denemeleri</b>
+            <p>Çıkmış YKS’lerin konu dağılımı ve ölçme mantığına göre hazırlanmış özgün sorular. Fizikte işlem ve yorum soruları ağırlıklı.</p>
+          </div>
+        </div>
+        <a
+          className="card mock-source-card official"
+          href="https://www.osym.gov.tr/2026yks-tyt-ayt-ve-ydt-temel-soru-kitapciklari-ve-cevap-anahtarlari"
+          target="_blank"
+          rel="noreferrer"
+        >
+          <span className="mock-source-icon" aria-hidden="true">Ö</span>
+          <div className="grow">
+            <b>Gerçek 2026 YKS çıkmış soruları</b>
+            <p>ÖSYM’nin resmî soru kitapçığı ve cevap anahtarını aç. Telif nedeniyle gerçek ÖSYM soruları uygulama içine kopyalanmaz.</p>
+          </div>
+          <Icon name="external" />
+        </a>
+      </section>
 
       <div className="row between section">
-        <Segmented label="Sınav" value={exam} onChange={setExam} options={[{ value: 'TYT', label: 'TYT' }, { value: 'AYT', label: 'AYT (Sayısal)' }]} />
+        <div className="small muted"><b>{exam}</b> sonuçların ve net trendin</div>
         <Segmented label="Aralık" value={range} onChange={setRange} options={[{ value: '5', label: 'Son 5' }, { value: '10', label: 'Son 10' }]} />
       </div>
 
