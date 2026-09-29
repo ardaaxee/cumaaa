@@ -5,6 +5,7 @@ const GROUPS: { title: string; items: { path: string; label: string; desc: strin
   {
     title: 'Çalışma araçları',
     items: [
+      { path: '/koc', label: 'Akıllı Koç', desc: 'Seviye tespiti, adaptif test ve kişisel 7 günlük plan', icon: 'target' },
       { path: '/ogretmen', label: 'Öğretmen', desc: 'Konu anlatımı, ipucu ve mini quiz', icon: 'teacher' },
       { path: '/tekrar', label: 'Genel tekrar', desc: 'Aralıklı tekrar takvimi', icon: 'repeat' },
       { path: '/kartlar', label: 'Bilgi kartları', desc: 'Kavram ve formül ezberi', icon: 'cards' },
