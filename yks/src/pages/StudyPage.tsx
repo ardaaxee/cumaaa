@@ -30,7 +30,7 @@ function Chooser() {
   return (
     <>
       <PageHeader title="Ders çalış" sub="Bir konu seç, adım adım birlikte çalışalım ♡" />
-      <section className="card" aria-labelledby="sug-h">
+      <section className="card study-suggest-card" aria-labelledby="sug-h">
         <h2 id="sug-h" className="mb-8">
           Bugün için önerim
         </h2>
@@ -54,7 +54,7 @@ function Chooser() {
           })}
         </ul>
       </section>
-      <section className="card section" aria-labelledby="pick-h">
+      <section className="card section study-picker-card" aria-labelledby="pick-h">
         <h2 id="pick-h" className="mb-8">
           Kendin seç
         </h2>
