@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState, type CSSProperties } from 'react';
+import { useEffect, useMemo, useRef, useState, type CSSProperties, type PointerEvent as ReactPointerEvent } from 'react';
 import { RealisticPanda } from '../components/RealisticPanda';
 import { Icon } from '../components/Icon';
 import { ProgressBar, toast } from '../components/ui';
@@ -27,11 +27,12 @@ const HOUSE_UPGRADES = [
   { level: 3, icon: '🛁', label: 'Banyo detayları' },
   { level: 4, icon: '🛏️', label: 'Yatak odası' },
   { level: 6, icon: '🌿', label: 'Bahçe alanı' },
+  { level: 7, icon: '🌇', label: 'Balkon yaşamı' },
   { level: 8, icon: '🌙', label: 'Gece aydınlatması' },
   { level: 10, icon: '🏆', label: 'Başarı duvarı' },
 ];
 
-type HouseRoom = 'living' | 'kitchen' | 'bedroom' | 'bathroom' | 'study' | 'garden';
+type HouseRoom = 'living' | 'kitchen' | 'bedroom' | 'bathroom' | 'study' | 'garden' | 'balcony';
 type HouseActivity =
   | 'idle'
   | 'walking'
@@ -56,7 +57,7 @@ type PandaEmotion = 'neutral' | 'laugh' | 'angry' | 'shy' | 'yawn' | 'sneeze' | 
 
 type ZeynepActivity = 'idle' | 'walking' | 'cooking' | 'serving';
 
-const ROOM_ORDER: HouseRoom[] = ['living', 'kitchen', 'bedroom', 'bathroom', 'study', 'garden'];
+const ROOM_ORDER: HouseRoom[] = ['living', 'kitchen', 'bedroom', 'bathroom', 'study', 'garden', 'balcony'];
 const ROOM_INFO: Record<HouseRoom, { icon: string; label: string; desc: string }> = {
   living: { icon: '🛋️', label: 'Salon', desc: 'Dinlenme ve oyun alanı' },
   kitchen: { icon: '🍽️', label: 'Mutfak', desc: 'Yemek ve su burada' },
@@ -64,6 +65,7 @@ const ROOM_INFO: Record<HouseRoom, { icon: string; label: string; desc: string }
   bathroom: { icon: '🛁', label: 'Banyo', desc: 'Temizlik ve bakım' },
   study: { icon: '📚', label: 'Çalışma Odası', desc: 'Ders ve odak zamanı' },
   garden: { icon: '🌿', label: 'Bahçe', desc: 'Oyun ve temiz hava' },
+  balcony: { icon: '🌇', label: 'Balkon', desc: 'Manzara, bitkiler ve sakin mola' },
 };
 
 const PANDA_TALK: Record<HouseRoom, string[]> = {
@@ -97,6 +99,11 @@ const PANDA_TALK: Record<HouseRoom, string[]> = {
     'Bahçede dolaşmak enerjimi yerine getiriyor.',
     'Topu görüyor musun? Biraz oynayalım!',
   ],
+  balcony: [
+    'Balkonda biraz hava alalım mı? Manzara güzel.',
+    'Bitkilere bakmak beni sakinleştiriyor.',
+    'Burada kısa bir mola çok iyi geliyor.',
+  ],
 };
 
 const PANDA_REACTIONS: { activity: HouseActivity; emotion: PandaEmotion; line: string; voice: 'laugh' | 'angry' | 'shy' | 'yawn' | 'sneeze' | 'surprised' }[] = [
@@ -115,7 +122,41 @@ const ROOM_TARGET: Record<HouseRoom, { x: number; y: number }> = {
   bathroom: { x: 59, y: 2 },
   study: { x: 48, y: 2 },
   garden: { x: 52, y: 2 },
+  balcony: { x: 56, y: 3 },
 };
+
+interface PandaLifeSnapshot {
+  cleanliness: number;
+  energy: number;
+  happiness: number;
+  room: HouseRoom;
+  lastSeen: number;
+}
+
+const PANDA_LIFE_KEY = 'iyiki-panda-life-v1';
+const clampLife = (v: number) => Math.max(0, Math.min(100, v));
+
+function loadPandaLife(): PandaLifeSnapshot {
+  const fallback: PandaLifeSnapshot = { cleanliness: 82, energy: 76, happiness: 84, room: 'living', lastSeen: Date.now() };
+  if (typeof window === 'undefined') return fallback;
+  try {
+    const raw = window.localStorage.getItem(PANDA_LIFE_KEY);
+    if (!raw) return fallback;
+    const saved = JSON.parse(raw) as Partial<PandaLifeSnapshot>;
+    const lastSeen = typeof saved.lastSeen === 'number' ? saved.lastSeen : Date.now();
+    const elapsedHours = Math.max(0, Math.min(72, (Date.now() - lastSeen) / 3_600_000));
+    const room = saved.room && ROOM_ORDER.includes(saved.room) ? saved.room : 'living';
+    return {
+      cleanliness: clampLife((saved.cleanliness ?? fallback.cleanliness) - elapsedHours * 0.75),
+      energy: clampLife((saved.energy ?? fallback.energy) - elapsedHours * 1.15),
+      happiness: clampLife((saved.happiness ?? fallback.happiness) - elapsedHours * 0.45),
+      room,
+      lastSeen,
+    };
+  } catch {
+    return fallback;
+  }
+}
 
 function NeedBubble({ icon, label, value }: { icon: string; label: string; value: number }) {
   const v = Math.max(0, Math.min(100, Math.round(value)));
@@ -255,6 +296,23 @@ function RoomBackdrop({
       </>
     );
   }
+  if (room === 'balcony') {
+    return (
+      <>
+        <div className="pet-room-wall garden-wall">
+          <div className="scene-sky-cloud one">☁</div>
+          <div className="scene-sky-cloud two">☁</div>
+          <div className="scene-garden-sun">☀</div>
+          <div className="scene-fence"><span /><span /><span /><span /><span /></div>
+        </div>
+        <div className="scene-garden-tree">🌆</div>
+        <div className="scene-garden-flowers">🪴 🌿 🌷</div>
+        <button className="scene-object scene-garden-ball" type="button" onClick={onRelax} aria-label="Balkonda dinlen">☕</button>
+        <div className="scene-garden-bench" />
+        <div className="scene-garden-path" />
+      </>
+    );
+  }
   return (
     <>
       <div className="pet-room-wall garden-wall">
@@ -308,9 +366,10 @@ export default function PetPage() {
   const pet = state.settings.pet;
   const p = useMemo(() => petStatus(state), [state]);
   const needs = usePetNeeds();
+  const initialLife = useMemo(() => loadPandaLife(), []);
 
   const [holding, setHolding] = useState<'bambu' | 'su' | null>(null);
-  const [room, setRoom] = useState<HouseRoom>('living');
+  const [room, setRoom] = useState<HouseRoom>(initialLife.room);
   const [activity, setActivity] = useState<HouseActivity>('idle');
   const [zeynepActivity, setZeynepActivity] = useState<ZeynepActivity>('idle');
   const [roomMode, setRoomMode] = useState<'day' | 'night'>(() => {
@@ -318,9 +377,9 @@ export default function PetPage() {
     return h >= 19 || h < 7 ? 'night' : 'day';
   });
   const [hearts, setHearts] = useState(0);
-  const [cleanliness, setCleanliness] = useState(82);
-  const [energy, setEnergy] = useState(76);
-  const [happiness, setHappiness] = useState(84);
+  const [cleanliness, setCleanliness] = useState(initialLife.cleanliness);
+  const [energy, setEnergy] = useState(initialLife.energy);
+  const [happiness, setHappiness] = useState(initialLife.happiness);
   const [sceneMessage, setSceneMessage] = useState<string | null>(null);
   const [name, setName] = useState(pet.name);
   const [petPos, setPetPos] = useState({ x: 50, y: 2 });
@@ -358,7 +417,10 @@ export default function PetPage() {
     setFacing('right');
     setEmotion('neutral');
     setActivity('greeting');
-    const text = 'Selam! Ben ' + pet.name + '. Hoş geldin! 👋';
+    const awayHours = Math.max(0, (Date.now() - initialLife.lastSeen) / 3_600_000);
+    const text = awayHours >= 8
+      ? 'Seni özledim! Yeniden geldin ya, çok sevindim 👋♡'
+      : 'Selam! Ben ' + pet.name + '. Hoş geldin! 👋';
     setSceneMessage(text);
     if (withVoice) speak(text, 'greet');
     later(() => {
@@ -403,11 +465,93 @@ export default function PetPage() {
   }, []);
 
   useEffect(() => {
+    const saveLife = () => {
+      try {
+        window.localStorage.setItem(PANDA_LIFE_KEY, JSON.stringify({ cleanliness, energy, happiness, room, lastSeen: Date.now() } satisfies PandaLifeSnapshot));
+      } catch { /* depolama kapalıysa oyun yine çalışır */ }
+    };
+    saveLife();
+    window.addEventListener('pagehide', saveLife);
+    return () => window.removeEventListener('pagehide', saveLife);
+  }, [cleanliness, energy, happiness, room]);
+
+  useEffect(() => {
+    const id = window.setInterval(() => {
+      setCleanliness((v) => clampLife(v - (activity === 'bathing' ? 0 : 0.12)));
+      setEnergy((v) => clampLife(v + (activity === 'sleeping' ? 0.9 : -0.16)));
+      setHappiness((v) => clampLife(v - (activity === 'playing' || activity === 'laughing' ? -0.12 : 0.07)));
+    }, 60_000);
+    return () => window.clearInterval(id);
+  }, [activity]);
+
+  useEffect(() => {
     if (activity !== 'idle') return;
     let cancelled = false;
     const wait = 2600 + Math.floor(Math.random() * 2800);
     const id = window.setTimeout(() => {
       if (cancelled) return;
+      const hour = new Date().getHours();
+      if ((needs.hungry || needs.thirsty) && room !== 'kitchen') {
+        setFacing('right');
+        setActivity('walking');
+        setSceneMessage(pet.name + ' acıktığı için mutfağa gidiyor…');
+        setRoom('kitchen');
+        setPetPos({ x: 52, y: 2 });
+        later(() => {
+          setActivity('waiting');
+          setSceneMessage(pet.name + ' mutfakta seni bekliyor 🍽️');
+          later(() => setActivity('idle'), 3000);
+        }, 1200);
+        return;
+      }
+      if (cleanliness < 28 && room !== 'bathroom') {
+        setActivity('walking');
+        setRoom('bathroom');
+        setPetPos({ x: 59, y: 2 });
+        setSceneMessage(pet.name + ' kendi kendine banyoya gidiyor…');
+        later(() => {
+          setActivity('bathing');
+          void playPandaVoice('Banyo zamanı', 'bath', voiceOn);
+          later(() => {
+            setCleanliness(100);
+            setActivity('idle');
+            setSceneMessage(pet.name + ' tertemiz oldu ✨');
+          }, 3200);
+        }, 1000);
+        return;
+      }
+      if ((energy < 24 || ((hour >= 22 || hour < 7) && energy < 55)) && room !== 'bedroom') {
+        setActivity('walking');
+        setRoom('bedroom');
+        setPetPos({ x: 42, y: 2 });
+        setSceneMessage(pet.name + ' uykusu geldiği için yatağına gidiyor…');
+        later(() => {
+          setActivity('sleeping');
+          setRoomMode('night');
+          void playPandaVoice('İyi geceler', 'sleepy', voiceOn);
+          later(() => {
+            setEnergy(100);
+            setActivity('idle');
+          }, 5200);
+        }, 1100);
+        return;
+      }
+      if (happiness < 35 && room !== 'garden' && room !== 'balcony') {
+        setActivity('walking');
+        setRoom('garden');
+        setPetPos({ x: 52, y: 2 });
+        setSceneMessage(pet.name + ' biraz neşelenmek için bahçeye çıkıyor…');
+        later(() => {
+          setActivity('playing');
+          void playPandaVoice('Oyun zamanı', 'play', voiceOn);
+          later(() => {
+            setHappiness(100);
+            setActivity('idle');
+          }, 3600);
+        }, 1100);
+        return;
+      }
+
       const roll = Math.random();
 
       if (roll < 0.52) {
@@ -483,6 +627,7 @@ export default function PetPage() {
         living: 'relaxing',
         study: 'studying',
         garden: 'playing',
+        balcony: 'relaxing',
       };
       const nextActivity = contextual[room] ?? 'idle';
       setActivity(nextActivity);
@@ -494,7 +639,7 @@ export default function PetPage() {
       window.clearTimeout(id);
     };
     // Her idle dönüşünde yeni bir doğal davranış planlanır.
-  }, [activity, room, pet.name, petPos.x]);
+  }, [activity, room, pet.name, petPos.x, needs.hungry, needs.thirsty, cleanliness, energy, happiness, voiceOn]);
 
   useEffect(() => () => {
     clearTimers();
@@ -664,6 +809,47 @@ export default function PetPage() {
     }, 2800);
   };
 
+  const touchPanda = (e: ReactPointerEvent<HTMLButtonElement>) => {
+    const rect = e.currentTarget.getBoundingClientRect();
+    const y = (e.clientY - rect.top) / Math.max(1, rect.height);
+    clearTimers();
+    void unlockPandaVoice();
+
+    if (activity === 'sleeping') {
+      setActivity('idle');
+      setRoomMode('day');
+      setEnergy(100);
+      setEmotion('surprised');
+      speak('Günaydın! Beni uyandırdın 😮', 'surprised');
+      later(() => { setEmotion('neutral'); setSceneMessage(null); }, 2200);
+      return;
+    }
+
+    if (y < 0.38) {
+      setEmotion('shy');
+      setActivity('shy');
+      setHappiness((v) => clampLife(v + 5));
+      speak('Başımı okşayınca çok hoşuma gidiyor 🙈♡', 'shy');
+    } else if (y < 0.72) {
+      setEmotion('laugh');
+      setActivity('laughing');
+      setHappiness((v) => clampLife(v + 7));
+      speak('Hıhıhı! Gıdıklanıyorum 😄', 'laugh');
+    } else {
+      setEmotion('surprised');
+      setActivity('surprised');
+      setHappiness((v) => clampLife(v + 3));
+      speak('Patime dokundun! 😮🐾', 'surprised');
+    }
+
+    setHearts((v) => v + 1);
+    later(() => {
+      setEmotion('neutral');
+      setActivity('idle');
+      setSceneMessage(null);
+    }, 2400);
+  };
+
   const nextItem = PET_ITEMS.find((i) => i.level > p.level);
   const nextUpgrade = HOUSE_UPGRADES.find((i) => i.level > p.level);
   const pct = ((p.xp - p.levelStartXp) / Math.max(1, p.nextLevelXp - p.levelStartXp)) * 100;
@@ -750,7 +936,8 @@ export default function PetPage() {
               '--pet-y': petPos.y + '%',
               '--pet-depth': String(Math.max(0.9, 1 - petPos.y * 0.008)),
             } as CSSProperties}
-            onClick={petPanda}
+            onPointerUp={touchPanda}
+            onClick={(e) => { if (e.detail === 0) petPanda(); }}
             aria-label={pet.name + ' pandayı sev'}
           >
             <RealisticPanda
