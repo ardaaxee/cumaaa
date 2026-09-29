@@ -42,6 +42,11 @@ function base64UrlBytes(value: string) {
   return Uint8Array.from(binary, (c) => c.charCodeAt(0));
 }
 
+async function roomTopic(room: string) {
+  const digest = await crypto.subtle.digest('SHA-256', cryptoEncoder.encode(room));
+  return base64Url(digest).slice(0, 32);
+}
+
 async function deriveRoomKey(room: string) {
   const material = await crypto.subtle.importKey(
     'raw',
@@ -308,7 +313,8 @@ export default function LiveTogetherPage() {
       });
       supabaseRef.current = supabase;
 
-      const channel = supabase.channel('yks-live:' + normalizedRoom, {
+      const topic = await roomTopic(normalizedRoom);
+      const channel = supabase.channel('yks-live:' + topic, {
         config: {
           broadcast: { ack: true, self: false },
           presence: { key: clientId },
