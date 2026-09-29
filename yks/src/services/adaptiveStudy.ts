@@ -96,7 +96,7 @@ export function topicMastery(state: AppState, topicId: string, today: DayKey = d
   const observed = weightedTotal ? (weightedCorrect / weightedTotal) * 100 : 0;
   const status = state.topicProgress[topicId]?.status;
   const statusBase = status === 'tamamlandi' ? 72 : status === 'calisiliyor' ? 45 : 22;
-  const evidence = clamp(topicAttempts.length * 8, 0, 82);
+  const evidence = clamp(topicAttempts.length * 10, 0, 85);
   let score = topicAttempts.length ? statusBase * (1 - evidence / 100) + observed * (evidence / 100) : statusBase;
   score -= Math.min(24, openWrongs * 6);
   if (reviewDue) score -= 7;
