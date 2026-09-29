@@ -19,8 +19,17 @@ export default function TestSetupPage() {
   const state = useAppState();
   const route = useRoute();
   const [cfg, setCfg] = useState<TestConfig>(() => {
-    const preset = route.query.get('sinav');
-    return makeConfig(preset === 'TYT' || preset === 'AYT' ? { exam: preset } : {});
+    const presetExam = route.query.get('sinav');
+    const presetSubjectId = route.query.get('ders');
+    const presetTopicId = route.query.get('konu');
+    const presetSubject = presetSubjectId ? getSubject(presetSubjectId) : undefined;
+    const presetTopic = presetTopicId ? getTopicRef(presetTopicId) : undefined;
+
+    return makeConfig({
+      exam: presetExam === 'TYT' || presetExam === 'AYT' ? presetExam : presetSubject?.exam ?? presetTopic?.subject.exam ?? 'all',
+      subjectId: presetSubject?.id ?? presetTopic?.subject.id ?? 'all',
+      topicId: presetTopic?.topic.id ?? 'all',
+    });
   });
   const [confirm, setConfirm] = useState<null | (() => Promise<string | null>)>(null);
 
