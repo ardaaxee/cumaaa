@@ -9,6 +9,7 @@ import { addTask, deleteTask } from '../store/actions';
 import { update, useAppState } from '../store/store';
 import { dayKey, formatMinutes } from '../utils/date';
 import { dashboard } from '../utils/stats';
+import { dueReviews } from '../utils/srs';
 
 const BAND_LABEL = {
   yeni: 'Yeni',
@@ -48,6 +49,17 @@ export default function CoachPage() {
       : 0;
   const pendingToday = state.tasks.filter((t) => t.date === today && !t.done);
   const smartFuture = state.tasks.filter((t) => t.date >= today && !t.done && t.title.startsWith('Akıllı ·'));
+  const dueToday = dueReviews(state.reviews, today);
+  const openWrongs = Object.values(state.wrongs).filter((w) => !w.learned).length;
+  const lead = next[0];
+  const leadRef = lead ? getTopicRef(lead.topicId) : undefined;
+  const target =
+    d.lastMockExam === 'TYT'
+      ? state.profile.tytTarget
+      : d.lastMockExam === 'AYT'
+        ? state.profile.aytTarget
+        : null;
+  const targetGap = target != null && d.lastMockNet != null ? Math.round((target - d.lastMockNet) * 100) / 100 : null;
 
   const runDiagnostic = async () => {
     setConfirmDiagnostic(false);
@@ -115,6 +127,59 @@ export default function CoachPage() {
         <Stat label="Bugün çalışma" value={formatMinutes(d.todayMinutes) + '/' + formatMinutes(state.profile.dailyStudyMinutes)} />
         <Stat label="Bekleyen görev" value={pendingToday.length} />
         <Stat label="Çalışma serisi" value={d.streak + ' gün'} />
+      </section>
+
+      <section className="card section coach-today-route" aria-labelledby="today-route-h">
+        <div className="card-head">
+          <div>
+            <div className="eyebrow">Bugünün akışı</div>
+            <h2 id="today-route-h">Ne yapacağım diye düşünme</h2>
+          </div>
+          <span className="badge brand">{pendingToday.length ? pendingToday.length + ' plan görevi' : 'Koç rotası'}</span>
+        </div>
+        <div className="coach-route-grid">
+          <a className="coach-route-step" href={dueToday.length ? '#/tekrar' : leadRef ? '#/konu/' + leadRef.topic.id : '#/dersler'}>
+            <span className="coach-route-no">1</span>
+            <span>
+              <b>{dueToday.length ? 'Kısa tekrar' : 'Konuya hazırlan'}</b>
+              <small>
+                {dueToday.length
+                  ? dueToday.length + ' tekrar bekliyor · 10–15 dk'
+                  : leadRef
+                    ? leadRef.topic.name + ' · temel anlatım ve özet'
+                    : 'Bir konu seç ve 10 dakika başla'}
+              </small>
+            </span>
+          </a>
+          <button type="button" className="coach-route-step" onClick={() => void launchAdaptivePractice(12).then((e) => e && toast(e))}>
+            <span className="coach-route-no">2</span>
+            <span>
+              <b>Adaptif pratik</b>
+              <small>{leadRef ? leadRef.topic.name + ' öncelikli · seviyene göre 12 soru' : 'Seviyene göre 12 soru'}</small>
+            </span>
+          </button>
+          <a className="coach-route-step" href={openWrongs ? '#/yanlislar' : '#/plan'}>
+            <span className="coach-route-no">3</span>
+            <span>
+              <b>{openWrongs ? 'Yanlışı kapat' : 'Planı tamamla'}</b>
+              <small>{openWrongs ? openWrongs + ' açık yanlış · 2 doğruyla öğrenilmiş sayılır' : 'Bugünün görevlerini bitir ve serini koru'}</small>
+            </span>
+          </a>
+        </div>
+        {d.lastMockNet != null && (
+          <div className="coach-target-strip">
+            <span>
+              Son {d.lastMockExam} denemen: <b>{d.lastMockNet} net</b>
+            </span>
+            <span>
+              {targetGap == null
+                ? 'Hedef netini Ayarlar’dan girersen koç aradaki farkı takip eder.'
+                : targetGap > 0
+                  ? 'Hedefe ' + targetGap + ' net kaldı.'
+                  : 'Hedef net seviyene ulaştın; süre ve doğruluk istikrarını koru.'}
+            </span>
+          </div>
+        )}
       </section>
 
       <section className="card section coach-plan-card" aria-labelledby="smart-plan-h">
