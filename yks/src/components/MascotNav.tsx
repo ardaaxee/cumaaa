@@ -1,7 +1,7 @@
 import { useEffect, useId, useRef, useState } from 'react';
 import { Icon, type IconName } from './Icon';
 import { sectionOf } from './Layout';
-import { href, useRoute } from '../hooks/useRoute';
+import { useRoute } from '../hooks/useRoute';
 import { useSelector } from '../store/store';
 import { usePetNeeds } from '../hooks/usePetNeeds';
 
@@ -287,8 +287,6 @@ export function MascotNav() {
   const needs = usePetNeeds();
   const teacherName = useSelector((s) => s.settings.teacherName);
   const menuOpen = phase === 'stood';
-  const exam = route.query.get('sinav');
-  const onTests = section === '/testler';
 
   const later = (fn: () => void, ms: number) => {
     timers.current.push(window.setTimeout(fn, ms));
@@ -386,17 +384,17 @@ export function MascotNav() {
       </div>
 
       <nav className="mascot-dock" aria-label="Hızlı gezinme">
-        <a href={href('/testler', { sinav: 'TYT' })} className="dock-item" aria-label="TYT testleri" data-active={onTests && exam !== 'AYT'}>
+        <a href="#/" className="dock-item" aria-label="Ana sayfa" data-active={section === '/'}>
           <span className="dock-animal hop">
             <RabbitFace />
           </span>
-          <span className="dock-label">TYT</span>
+          <span className="dock-label">Ana sayfa</span>
         </a>
-        <a href={href('/testler', { sinav: 'AYT' })} className="dock-item" aria-label="AYT testleri" data-active={onTests && exam === 'AYT'}>
+        <a href="#/dersler" className="dock-item" aria-label="Dersler" data-active={section === '/dersler'}>
           <span className="dock-animal hop">
             <FoxFace />
           </span>
-          <span className="dock-label">AYT</span>
+          <span className="dock-label">Dersler</span>
         </a>
         <button
           ref={pandaBtnRef}
@@ -419,17 +417,17 @@ export function MascotNav() {
           )}
           <span className="dock-label">Menü</span>
         </button>
-        <a href="#/denemeler" className="dock-item" aria-label="Denemeler" data-active={section === '/denemeler'}>
+        <a href="#/plan" className="dock-item" aria-label="Planım" data-active={section === '/plan'}>
           <span className="dock-animal hop">
             <CatFace />
           </span>
-          <span className="dock-label">Deneme</span>
+          <span className="dock-label">Plan</span>
         </a>
-        <a href="#/defterim" className="dock-item" aria-label="Defterim" data-active={section === '/defterim'}>
+        <a href="#/ogretmen" className="dock-item" aria-label={`${teacherName} öğretmen`} data-active={section === '/ogretmen'}>
           <span className="dock-animal hop">
             <BearFace />
           </span>
-          <span className="dock-label">Defter</span>
+          <span className="dock-label">Öğretmen</span>
         </a>
       </nav>
     </>
