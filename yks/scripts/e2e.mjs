@@ -86,7 +86,8 @@ async function assertQuestionOpened(page) {
     if ((await options.count()) < 5) throw new Error('Soru seçenekleri açılmadı.');
   } catch (error) {
     const body = (await page.locator('body').innerText()).slice(0, 5000);
-    throw new Error(`Soru ekranı açılmadı. URL=${page.url()}\nBODY:\n${body}\nORIGINAL: ${error}`);
+    const stored = await page.evaluate(() => localStorage.getItem('iyikiYks.state.v3'));
+    throw new Error(`Soru ekranı açılmadı. URL=${page.url()}\nBODY:\n${body}\nSTORAGE:\n${stored?.slice(0, 5000)}\nORIGINAL: ${error}`);
   }
 }
 
