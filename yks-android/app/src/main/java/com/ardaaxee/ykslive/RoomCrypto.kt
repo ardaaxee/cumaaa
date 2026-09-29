@@ -2,6 +2,7 @@ package com.ardaaxee.ykslive
 
 import android.util.Base64
 import com.ardaaxee.ykslive.model.SecurePacket
+import java.security.MessageDigest
 import java.security.SecureRandom
 import javax.crypto.Cipher
 import javax.crypto.SecretKey
@@ -63,4 +64,16 @@ class RoomCrypto(roomCode: String) {
 
     private fun decode(value: String): ByteArray =
         Base64.decode(value, Base64.URL_SAFE or Base64.NO_WRAP or Base64.NO_PADDING)
+
+    companion object {
+        fun topicId(roomCode: String): String {
+            val normalized = roomCode.trim().uppercase(Locale.ROOT)
+            val digest = MessageDigest.getInstance("SHA-256")
+                .digest(normalized.toByteArray(Charsets.UTF_8))
+            return Base64.encodeToString(
+                digest,
+                Base64.URL_SAFE or Base64.NO_WRAP or Base64.NO_PADDING,
+            ).take(32)
+        }
+    }
 }
