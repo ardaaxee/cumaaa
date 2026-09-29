@@ -15,6 +15,7 @@ import { dayKey, formatDay, isValidDayKey } from '../utils/date';
 import { MOCK_SECTIONS, analyzeMocks, buildSections, mockNet, mockTotals, sectionDef, sectionNet, sortMocks, type SectionInput } from '../utils/mock';
 import { calcNet, formatNet, round2 } from '../utils/net';
 import { pickQuestions } from '../utils/testEngine';
+import { osymBookletPdfUrl, osymBookletUrl } from '../data/officialResources';
 
 function MockForm({ exam, onClose }: { exam: Exam; onClose: () => void }) {
   const defs = MOCK_SECTIONS[exam];
@@ -266,19 +267,17 @@ export default function MocksPage() {
             <p>Çıkmış YKS’lerin konu dağılımı ve ölçme mantığına göre hazırlanmış özgün sorular. Fizikte işlem ve yorum soruları ağırlıklı.</p>
           </div>
         </div>
-        <a
-          className="card mock-source-card official"
-          href="https://www.osym.gov.tr/2026yks-tyt-ayt-ve-ydt-temel-soru-kitapciklari-ve-cevap-anahtarlari"
-          target="_blank"
-          rel="noreferrer"
-        >
+        <div className="card mock-source-card official">
           <span className="mock-source-icon" aria-hidden="true">Ö</span>
           <div className="grow">
-            <b>Gerçek 2026 YKS çıkmış soruları</b>
-            <p>ÖSYM’nin resmî soru kitapçığı ve cevap anahtarını aç. Telif nedeniyle gerçek ÖSYM soruları uygulama içine kopyalanmaz.</p>
+            <b>2026 ${exam} çıkmış soruları</b>
+            <p>ÖSYM’nin resmî ${exam} PDF kitapçığını doğrudan aç. Mobilde ara sayfa kullanılmaz.</p>
+            <div className="row mt-8">
+              <a className="btn small primary" href={osymBookletPdfUrl(2026, exam)}>PDF’yi aç</a>
+              <a className="btn small ghost" href={osymBookletUrl(2026)}>ÖSYM sayfası</a>
+            </div>
           </div>
-          <Icon name="external" />
-        </a>
+        </div>
       </section>
 
       <div className="row between section">
