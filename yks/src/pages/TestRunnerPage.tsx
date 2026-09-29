@@ -17,6 +17,7 @@ import {
   finishTest,
   goToQuestion,
   revealQuestion,
+  syncTestElapsed,
   toggleMark,
 } from '../store/actions';
 import { getState, update, useSelector } from '../store/store';
@@ -67,14 +68,22 @@ export default function TestRunnerPage() {
     commitTime();
     let resultId: string | null = null;
     update((s) => {
-      const r = finishTest(s, byId);
+      const active = s.activeTest;
+      let synced = s;
+      if (active?.timeLimitMs != null) {
+        const deadline = active.deadlineAt ?? (Date.parse(active.startedAt) + active.timeLimitMs);
+        const wallElapsed = Math.max(0, Math.min(active.timeLimitMs, active.timeLimitMs - Math.max(0, deadline - Date.now())));
+        synced = syncTestElapsed(synced, wallElapsed);
+      }
+      const r = finishTest(synced, byId);
       resultId = r.result?.id ?? null;
       return r.state;
     });
     if (resultId) navigate(`/sonuc/${resultId}`, { replace: true });
   }, [byId, commitTime]);
 
-  // Zamanlayıcı: yalnız sayfa görünürken süre sayılır.
+  // Süreli sınavlarda duvar saati kullanılır: sekme arka planda, ekran kilitli
+  // veya tarayıcı zamanlayıcıyı yavaşlatmış olsa bile TYT/AYT saati durmaz.
   useEffect(() => {
     if (!test) return;
     lastRef.current = Date.now();
@@ -91,20 +100,29 @@ export default function TestRunnerPage() {
       }
       force((n) => n + 1);
     }, 1000);
-    const onHide = () => {
+    const onVisibility = () => {
       if (document.visibilityState === 'hidden') commitTime();
       lastRef.current = Date.now();
+      force((n) => n + 1);
     };
-    document.addEventListener('visibilitychange', onHide);
+    document.addEventListener('visibilitychange', onVisibility);
     return () => {
       clearInterval(id);
-      document.removeEventListener('visibilitychange', onHide);
+      document.removeEventListener('visibilitychange', onVisibility);
       commitTime();
     };
   }, [test?.id, commitTime]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  const elapsed = (test?.elapsedMs ?? 0) + pendingRef.current;
-  const remaining = test?.timeLimitMs != null ? Math.max(0, test.timeLimitMs - elapsed) : null;
+  const activeElapsed = (test?.elapsedMs ?? 0) + pendingRef.current;
+  const deadlineAt =
+    test?.timeLimitMs != null
+      ? (test.deadlineAt ?? (Date.parse(test.startedAt) + test.timeLimitMs))
+      : null;
+  const remaining = test?.timeLimitMs != null && deadlineAt != null ? Math.max(0, deadlineAt - Date.now()) : null;
+  const elapsed =
+    test?.timeLimitMs != null && remaining != null
+      ? Math.max(activeElapsed, Math.min(test.timeLimitMs, test.timeLimitMs - remaining))
+      : activeElapsed;
 
   useEffect(() => {
     if (remaining === 0 && test && byId) {
@@ -203,10 +221,16 @@ export default function TestRunnerPage() {
               Soru {test.current + 1} / {test.questionIds.length}
             </div>
           </div>
-          <div className="center runner-time" aria-live="off">
-            <div className="tiny muted">{remaining != null ? 'Kalan süre' : 'Geçen süre'}</div>
-            <div style={{ color: remaining != null && remaining < 60_000 ? 'var(--bad)' : undefined }}>
-              {formatClock(remaining ?? elapsed)}
+          <div className={`runner-time-grid${remaining != null ? ' timed' : ''}`} aria-live="off">
+            {remaining != null && (
+              <div className="runner-time">
+                <div className="tiny muted">Kalan süre</div>
+                <div style={{ color: remaining < 5 * 60_000 ? 'var(--bad)' : undefined }}>{formatClock(remaining)}</div>
+              </div>
+            )}
+            <div className="runner-time">
+              <div className="tiny muted">Kronometre</div>
+              <div>{formatClock(elapsed)}</div>
             </div>
           </div>
           <div className="row nowrap">
