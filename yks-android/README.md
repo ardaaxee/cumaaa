@@ -5,6 +5,9 @@ Native Android layer for **Cuma ♡ Zeynep Canlı**.
 - Explicit Android MediaProjection consent.
 - Visible mediaProjection foreground-service notification.
 - Direct WebRTC screen video.
+- Signaling and chat payloads are end-to-end encrypted with AES-256-GCM using a PBKDF2 key derived from the room code.
+- Room codes are stored on-device encrypted with Android Keystore.
+- Invite links and QR codes can open the matching web/native room.
 - Supabase Realtime for signaling + chat only.
 - Automatic Supabase reconnect + ICE restart.
 - 24-character room codes by default.
