@@ -23,18 +23,6 @@ function formatTimer(ms: number): string {
   return String(m).padStart(2, '0') + ':' + String(s).padStart(2, '0');
 }
 
-interface WakeLockSentinelLike {
-  released?: boolean;
-  release(): Promise<void>;
-  addEventListener(type: 'release', listener: () => void): void;
-}
-
-interface WakeLockNavigator extends Navigator {
-  wakeLock?: {
-    request(type: 'screen'): Promise<WakeLockSentinelLike>;
-  };
-}
-
 function notifyFinished(title: string, body: string) {
   if (typeof Notification === 'undefined' || Notification.permission !== 'granted') return;
   const options: NotificationOptions = { body, icon: 'icon-192.png', badge: 'icon-192.png', tag: 'yks-focus' };
@@ -87,16 +75,15 @@ export default function FocusPage() {
       return;
     }
 
-    const nav = navigator as WakeLockNavigator;
-    if (!nav.wakeLock?.request) return;
+    if (!('wakeLock' in navigator) || !navigator.wakeLock?.request) return;
 
-    let lock: WakeLockSentinelLike | null = null;
+    let lock: WakeLockSentinel | null = null;
     let cancelled = false;
 
     const requestLock = async () => {
       if (cancelled || lock) return;
       try {
-        const next = await nav.wakeLock!.request('screen');
+        const next = await navigator.wakeLock.request('screen');
         if (cancelled) {
           await next.release().catch(() => undefined);
           return;
