@@ -203,6 +203,29 @@ export default function TopicPage({ params }: { params: string[] }) {
   const perf = useMemo(() => recentTopicPerformance(state.attempts, topicId, 5), [state.attempts, topicId]);
   const mastery = useMemo(() => topicMastery(state, topicId), [state, topicId]);
   const weak = useMemo(() => weakTopics(state).find((w) => w.topicId === topicId), [state, topicId]);
+  const subtopicStats = useMemo(() => {
+    if (!ref) return [];
+    return ref.topic.subtopics.map((subtopic) => {
+      const questions = topicQs.filter((q) => q.subtopic === subtopic.id);
+      const ids = new Set(questions.map((q) => q.id));
+      const attempts = state.attempts.filter((a) => ids.has(a.questionId) && a.answer != null);
+      const correct = attempts.filter((a) => a.correct).length;
+      return {
+        subtopic,
+        questionCount: questions.length,
+        attempts: attempts.length,
+        accuracy: attempts.length ? Math.round((correct / attempts.length) * 100) : null,
+      };
+    });
+  }, [ref, topicQs, state.attempts]);
+  const difficultyCounts = useMemo(
+    () =>
+      ['kolay', 'orta', 'zor', 'yeni-nesil'].map((difficulty) => ({
+        difficulty,
+        count: topicQs.filter((q) => q.difficulty === difficulty).length,
+      })),
+    [topicQs],
+  );
   // Tur başına sabit 5 soru; önce hiç çözülmemiş sorular. (Cevap verdikçe yeniden karışmaz.)
   const quizSet = useMemo(() => {
     const ids = pickQuestions(topicQs, 5, getState().attempts);
@@ -342,14 +365,58 @@ export default function TopicPage({ params }: { params: string[] }) {
         {qCount != null && qCount < 10 && qCount > 0 && <div className="tiny muted mt-8">Bu konuda {qCount} soru var; normal test mevcut soruların tamamını kullanır.</div>}
       </div>
 
+      <section className="card section topic-roadmap-card" aria-labelledby="roadmap-h">
+        <div className="card-head">
+          <div>
+            <div className="eyebrow">Konu haritası</div>
+            <h2 id="roadmap-h">Alt konuları tek tek öğren</h2>
+          </div>
+          <span className="badge brand">{ref.topic.subtopics.length} alt konu</span>
+        </div>
+        <p className="small muted">Her alt konunun kazanımını gör, o bölüme ait soruları ayrı çöz ve eksik kaldığın yeri kolayca bul.</p>
+        <div className="topic-roadmap-grid">
+          {subtopicStats.map(({ subtopic, questionCount, attempts, accuracy }, index) => (
+            <article className="topic-roadmap-item" key={subtopic.id}>
+              <div className="topic-roadmap-index">{index + 1}</div>
+              <div className="grow">
+                <h3>{subtopic.name}</h3>
+                <ul>
+                  {subtopic.outcomes.map((o) => <li key={o.id}>{o.text}</li>)}
+                </ul>
+                <div className="topic-roadmap-meta">
+                  <span>{questionCount} soru</span>
+                  <span>{attempts ? attempts + ' çözüm' : 'Henüz çözülmedi'}</span>
+                  {accuracy != null && <span className={accuracy >= 70 ? 'good' : 'needs-work'}>%{accuracy} doğruluk</span>}
+                </div>
+              </div>
+              <a
+                className="btn small"
+                href={href('/testler', { konu: topicId, altkonu: subtopic.id })}
+                aria-label={subtopic.name + ' sorularını çöz'}
+              >
+                Soru çöz
+              </a>
+            </article>
+          ))}
+        </div>
+      </section>
+
       <div className="card section lesson-card">
         <div className="lesson-card-head">
           <div>
             <div className="eyebrow">Konu anlatımı</div>
-            <h2>Ders notu</h2>
+            <h2>{ref.topic.name} · ders anlatımı</h2>
           </div>
           <span className="lesson-reading-hint">Oku · dinle · uygula</span>
         </div>
+        {lesson && (
+          <div className="lesson-glance" aria-label="Konu anlatımı içeriği">
+            <span><b>{lesson.concepts.length}</b> kavram</span>
+            <span><b>{lesson.formulas.length}</b> formül/bağıntı</span>
+            <span><b>{lesson.examples.length}</b> çözümlü örnek</span>
+            <span><b>{lesson.commonMistakes.length}</b> sık hata</span>
+          </div>
+        )}
         {lessonLoad.failed ? <LoadFailed what="Konu anlatımı" onRetry={lessonLoad.retry} /> : lesson === undefined ? <Spinner label="Konu anlatımı yükleniyor" /> : lesson === null ? <Empty title="Bu konunun anlatımı henüz eklenmedi." /> : <LessonView lesson={lesson} />}
       </div>
 
@@ -358,7 +425,21 @@ export default function TopicPage({ params }: { params: string[] }) {
           <h2>Konu sonu soruları</h2>
           <SourceBadge type="ozgun-pratik" />
         </div>
-        <p className="small muted">Anlatımı bitirdin mi? Şimdi ÖSYM tarzında hazırlanmış {Math.min(5, topicQs.length)} soruyla kendini dene. Cevabını seçer seçmez doğru/yanlış ve çözüm açılır.</p>
+        <p className="small muted">Anlatımı bitirdin mi? Şimdi bu konu için hazırlanmış {Math.min(5, topicQs.length)} özgün soruyla kendini dene. Cevabını seçer seçmez doğru/yanlış, çözüm yolu, ana fikir ve sık hata açıklaması açılır.</p>
+        {topicQs.length > 0 && (
+          <div className="question-bank-distribution" aria-label="Soru bankası zorluk dağılımı">
+            {difficultyCounts.map(({ difficulty, count }) => (
+              <a
+                key={difficulty}
+                className="question-bank-chip"
+                href={href('/testler', { konu: topicId, zorluk: difficulty })}
+              >
+                <span>{LEVEL[difficulty] ?? (difficulty === 'yeni-nesil' ? 'Yeni nesil' : difficulty)}</span>
+                <b>{count}</b>
+              </a>
+            ))}
+          </div>
+        )}
         {qLoad.failed ? (
           <LoadFailed what="Sorular" onRetry={qLoad.retry} />
         ) : qCount == null ? (
@@ -373,24 +454,6 @@ export default function TopicPage({ params }: { params: string[] }) {
             onMore={topicQs.length > 5 ? () => setQuizRound((r) => r + 1) : undefined}
           />
         )}
-      </div>
-
-      <div className="card section topic-details-card">
-        <details>
-          <summary className="card-head" style={{ cursor: 'pointer', marginBottom: 0 }}>
-            <h2>Alt konular ve kazanımlar</h2>
-          </summary>
-          {ref.topic.subtopics.map((st) => (
-            <div key={st.id} className="mt-12">
-              <b>{st.name}</b>
-              <ul className="small muted" style={{ margin: '4px 0 0', paddingLeft: '1.2em' }}>
-                {st.outcomes.map((o) => (
-                  <li key={o.id}>{o.text}</li>
-                ))}
-              </ul>
-            </div>
-          ))}
-        </details>
       </div>
 
       <div className="card section topic-resources-card">
