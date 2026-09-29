@@ -8,6 +8,8 @@ export function RealisticPanda({
   drinking = false,
   bathing = false,
   playing = false,
+  waving = false,
+  talking = false,
 }: {
   size?: number;
   sleepy?: boolean;
@@ -16,6 +18,8 @@ export function RealisticPanda({
   drinking?: boolean;
   bathing?: boolean;
   playing?: boolean;
+  waving?: boolean;
+  talking?: boolean;
 }) {
   const style = { '--real-panda-size': size + 'px' } as CSSProperties;
 
@@ -32,6 +36,8 @@ export function RealisticPanda({
         drinking ? 'is-drinking' : '',
         bathing ? 'is-bathing' : '',
         playing ? 'is-playing' : '',
+        waving ? 'is-waving' : '',
+        talking ? 'is-talking' : '',
       ].filter(Boolean).join(' ')}
       style={style}
       aria-hidden="true"
@@ -151,6 +157,7 @@ export function RealisticPanda({
           <path d="M100 106 C102 98 118 98 120 106 C119 113 113 117 110 118 C106 117 101 113 100 106Z" fill="#1c191b" />
           <ellipse cx="106" cy="104" rx="4" ry="2" fill="#696064" opacity=".35" />
           <path className="rp-mouth" d="M110 117 C109 126 101 128 97 125 M110 117 C111 126 119 128 123 125" stroke="#332d31" strokeWidth="2.3" fill="none" strokeLinecap="round" />
+          {talking && <ellipse className="rp-talk-mouth" cx="110" cy="128" rx="7" ry="5" fill="#5b343b" />}
           <path className="rp-tongue" d="M103 126 Q110 137 117 126 Q111 131 103 126Z" fill="#d88091" opacity="0" />
         </g>
 
