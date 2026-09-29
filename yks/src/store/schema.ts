@@ -127,6 +127,8 @@ export interface TestResult {
   net: number;
 }
 
+export type WrongReason = 'kavram' | 'islem' | 'yorum' | 'dikkat' | 'zaman' | 'bos';
+
 export interface WrongEntry {
   questionId: string;
   topicId: string;
@@ -137,6 +139,8 @@ export interface WrongEntry {
   lastAt: string;
   /** Yanlıştan sonra doğru çözme sayısı (arka arkaya). */
   correctStreak: number;
+  /** Yanlışın olası nedeni; kullanıcı değiştirebilir. */
+  reason?: WrongReason;
   learned: boolean;
   learnedAt?: string;
 }
