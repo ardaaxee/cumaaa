@@ -7,6 +7,7 @@ import io.github.jan.supabase.createSupabaseClient
 import io.github.jan.supabase.realtime.Realtime
 import io.github.jan.supabase.realtime.broadcast
 import io.github.jan.supabase.realtime.broadcastFlow
+import io.github.jan.supabase.realtime.channel
 import io.github.jan.supabase.realtime.realtime
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
@@ -37,7 +38,7 @@ class SignalingClient(
         install(Realtime) { reconnectDelay = 2.seconds }
     }
 
-    private val channel = supabase.realtime.createChannel("yks-live:$roomCode")
+    private val channel = supabase.channel("yks-live:$roomCode")
     private var heartbeat: Job? = null
 
     suspend fun connect() {
@@ -60,8 +61,7 @@ class SignalingClient(
             .onEach { if (it.from != clientId) listener.onChat(it) }
             .launchIn(scope)
 
-        supabase.realtime.connect()
-        channel.join(blockUntilJoined = true)
+        channel.subscribe(blockUntilSubscribed = true)
         listener.onStatus("Odaya bağlandı")
         sendHello()
 
@@ -84,7 +84,8 @@ class SignalingClient(
     suspend fun close() {
         heartbeat?.cancel()
         heartbeat = null
-        runCatching { channel.leave() }
+        runCatching { channel.unsubscribe() }
+        runCatching { supabase.realtime.removeChannel(channel) }
         supabase.realtime.disconnect()
     }
 }
