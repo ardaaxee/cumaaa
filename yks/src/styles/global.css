@@ -6190,3 +6190,34 @@ body {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
+
+
+/* ===== SUBTOPIC RESULT GUIDANCE ===== */
+.result-learning-next {
+  display: grid;
+  gap: 14px;
+  padding: clamp(17px, 3vw, 24px);
+  border-color: color-mix(in srgb, var(--brand) 18%, var(--line));
+  background:
+    radial-gradient(circle at 100% 0%, color-mix(in srgb, var(--brand-soft) 55%, transparent) 0 8rem, transparent 8.1rem),
+    var(--surface);
+}
+.result-learning-next h2 {
+  margin-top: 3px;
+  font-size: clamp(1.2rem, 3vw, 1.55rem);
+  letter-spacing: -.035em;
+}
+.result-learning-next p {
+  max-width: 70ch;
+  margin: 5px 0 0;
+  line-height: 1.5;
+}
+@media (min-width: 720px) {
+  .result-learning-next {
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center;
+  }
+  .result-learning-next > .row {
+    justify-content: end;
+  }
+}
