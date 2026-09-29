@@ -79,3 +79,32 @@ export function parseBackup(text: string, ctx: MigrationContext = migrationConte
   const photo = typeof wrapper.teacherPhoto === 'string' && wrapper.teacherPhoto.startsWith('data:image/') ? wrapper.teacherPhoto : null;
   return { state, teacherPhoto: photo, report };
 }
+
+
+/**
+ * Yalnız İyi ki • YKS verilerini temizler.
+ * Aynı GitHub Pages alan adındaki diğer projelerin localStorage verilerine dokunmaz.
+ */
+export async function clearAppData(storage: Storage | undefined = globalThis.localStorage): Promise<void> {
+  try {
+    if (storage) {
+      const keys: string[] = [];
+      for (let i = 0; i < storage.length; i++) {
+        const key = storage.key(i);
+        if (key && (key === LEGACY_KEY || key === STORAGE_KEY || key.startsWith('iyikiYks.'))) keys.push(key);
+      }
+      for (const key of keys) storage.removeItem(key);
+    }
+  } catch {
+    // Depolama erişimi engelliyse IndexedDB temizleme yine denenir.
+  }
+
+  if (typeof indexedDB !== 'undefined') {
+    await new Promise<void>((resolve) => {
+      const req = indexedDB.deleteDatabase('iyiki-yks');
+      req.onsuccess = () => resolve();
+      req.onerror = () => resolve();
+      req.onblocked = () => resolve();
+    });
+  }
+}
