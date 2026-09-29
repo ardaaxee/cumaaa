@@ -6,6 +6,7 @@ import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.content.ServiceConnection
+import android.graphics.Bitmap
 import android.graphics.Color
 import android.media.projection.MediaProjectionManager
 import android.net.Uri
@@ -13,6 +14,7 @@ import android.os.Build
 import android.os.Bundle
 import android.os.IBinder
 import android.view.Gravity
+import android.widget.ImageView
 import android.view.ViewGroup
 import android.widget.Button
 import android.widget.EditText
@@ -20,6 +22,8 @@ import android.widget.LinearLayout
 import android.widget.ScrollView
 import android.widget.TextView
 import com.ardaaxee.ykslive.model.ChatLine
+import com.google.zxing.BarcodeFormat
+import com.google.zxing.MultiFormatWriter
 import org.webrtc.SurfaceViewRenderer
 import java.security.SecureRandom
 import java.text.SimpleDateFormat
@@ -38,6 +42,7 @@ class MainActivity : Activity(), ScreenShareService.UiListener {
     private var bound = false
     private val projectionRequest = 8480
     private val random = SecureRandom()
+    private lateinit var roomStore: SecureRoomStore
 
     private val connection = object : ServiceConnection {
         override fun onServiceConnected(name: ComponentName?, binder: IBinder?) {
@@ -60,8 +65,18 @@ class MainActivity : Activity(), ScreenShareService.UiListener {
         if (Build.VERSION.SDK_INT >= 33) {
             requestPermissions(arrayOf(Manifest.permission.POST_NOTIFICATIONS), 910)
         }
+        roomStore = SecureRoomStore(this)
         buildUi()
-        roomInput.setText(savedInstanceState?.getString("room") ?: generateRoomCode())
+        val restored = savedInstanceState?.getString("room") ?: roomFromIntent(intent) ?: roomStore.load() ?: generateRoomCode()
+        roomInput.setText(restored)
+    }
+
+    override fun onNewIntent(intent: Intent?) {
+        super.onNewIntent(intent)
+        setIntent(intent)
+        roomFromIntent(intent)?.let {
+            if (!ScreenShareService.running) roomInput.setText(it)
+        }
     }
 
     override fun onStart() {
@@ -140,10 +155,20 @@ class MainActivity : Activity(), ScreenShareService.UiListener {
         root.addView(Button(this).apply {
             text = "Web YKS canlı sayfasını aç"
             setOnClickListener {
-                val url = "https://ardaaxee.github.io/cumaaa/yks/#/canli?room=" + Uri.encode(normalizedRoom())
-                startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(url)))
+                startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(webInviteUrl())))
             }
         }, lp(-1, dp(48)))
+
+        val inviteRow = LinearLayout(this).apply { orientation = LinearLayout.HORIZONTAL }
+        inviteRow.addView(Button(this).apply {
+            text = "Davet et"
+            setOnClickListener { shareInvite() }
+        }, LinearLayout.LayoutParams(0, dp(48), 1f))
+        inviteRow.addView(Button(this).apply {
+            text = "QR göster"
+            setOnClickListener { showQr() }
+        }, LinearLayout.LayoutParams(0, dp(48), 1f).apply { marginStart = dp(8) })
+        root.addView(inviteRow)
 
         root.addView(TextView(this).apply {
             text = "Mesajlar"
@@ -197,6 +222,7 @@ class MainActivity : Activity(), ScreenShareService.UiListener {
             return
         }
         roomInput.setText(room)
+        roomStore.save(room)
         val manager = getSystemService(MediaProjectionManager::class.java)
         startActivityForResult(manager.createScreenCaptureIntent(), projectionRequest)
     }
@@ -225,6 +251,69 @@ class MainActivity : Activity(), ScreenShareService.UiListener {
 
     private fun normalizedRoom(): String =
         roomInput.text.toString().uppercase(Locale.ROOT).filter { it.isLetterOrDigit() }.take(32)
+
+    private fun roomFromIntent(intent: Intent?): String? {
+        val uri = intent?.data ?: return null
+        val queryRoom = uri.getQueryParameter("room")
+        val fragmentRoom = Regex("""(?:^|[?&])room=([A-Za-z0-9]+)""")
+            .find(uri.fragment.orEmpty())
+            ?.groupValues
+            ?.getOrNull(1)
+        return (queryRoom ?: fragmentRoom)
+            ?.uppercase(Locale.ROOT)
+            ?.filter { it.isLetterOrDigit() }
+            ?.take(32)
+            ?.takeIf { it.length >= 12 }
+    }
+
+    private fun webInviteUrl(): String =
+        "https://ardaaxee.github.io/cumaaa/yks/?room=" + Uri.encode(normalizedRoom()) + "#/canli"
+
+    private fun shareInvite() {
+        val room = normalizedRoom()
+        if (room.length < 12) {
+            status.text = "Önce geçerli bir oda kodu oluştur."
+            return
+        }
+        roomStore.save(room)
+        val text = "YKS Canlı odasına katıl:\n" + webInviteUrl() + "\n\nUygulama yüklüyse: ykslive://join?room=" + Uri.encode(room)
+        startActivity(
+            Intent.createChooser(
+                Intent(Intent.ACTION_SEND).apply {
+                    type = "text/plain"
+                    putExtra(Intent.EXTRA_TEXT, text)
+                },
+                "Davet bağlantısını paylaş",
+            )
+        )
+    }
+
+    private fun showQr() {
+        val room = normalizedRoom()
+        if (room.length < 12) {
+            status.text = "Önce geçerli bir oda kodu oluştur."
+            return
+        }
+        roomStore.save(room)
+        val matrix = MultiFormatWriter().encode(webInviteUrl(), BarcodeFormat.QR_CODE, 720, 720)
+        val bitmap = Bitmap.createBitmap(matrix.width, matrix.height, Bitmap.Config.RGB_565)
+        for (y in 0 until matrix.height) {
+            for (x in 0 until matrix.width) {
+                bitmap.setPixel(x, y, if (matrix[x, y]) Color.BLACK else Color.WHITE)
+            }
+        }
+        val image = ImageView(this).apply {
+            setImageBitmap(bitmap)
+            adjustViewBounds = true
+            setPadding(dp(18), dp(18), dp(18), dp(18))
+        }
+        android.app.AlertDialog.Builder(this)
+            .setTitle("Odaya katıl")
+            .setMessage("Zeynep kamerayla bu QR'ı tarayabilir.")
+            .setView(image)
+            .setPositiveButton("Kapat", null)
+            .show()
+    }
 
     private fun generateRoomCode(): String {
         val alphabet = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"
