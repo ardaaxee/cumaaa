@@ -17,8 +17,18 @@ createRoot(document.getElementById('root')!).render(
 if ('serviceWorker' in navigator) {
   const embedded = window.top !== window.self;
   if (import.meta.env.PROD && !embedded) {
+    let refreshing = false;
+    navigator.serviceWorker.addEventListener('controllerchange', () => {
+      if (refreshing) return;
+      refreshing = true;
+      window.location.reload();
+    });
+
     window.addEventListener('load', () => {
-      navigator.serviceWorker.register('./sw.js').catch(() => undefined);
+      navigator.serviceWorker
+        .register('./sw.js', { updateViaCache: 'none' })
+        .then((registration) => registration.update())
+        .catch(() => undefined);
     });
   } else {
     navigator.serviceWorker.getRegistrations().then((regs) => regs.forEach((r) => r.unregister()));
