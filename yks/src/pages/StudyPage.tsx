@@ -12,6 +12,8 @@ import { addStudyMinutes, setTopicStatus } from '../store/actions';
 import { getState, update, useAppState } from '../store/store';
 import { pickQuestions } from '../utils/testEngine';
 import { suggestTopics } from '../utils/studyPick';
+import { topicMastery } from '../services/adaptiveStudy';
+import { launchTest, makeConfig } from '../services/testLauncher';
 
 /**
  * Adım adım ders çalışma: konu özeti → formül ve örnekler → konu soruları → bitiş.
@@ -182,6 +184,7 @@ function Session({ topicId }: { topicId: string }) {
   const startedAt = useRef(Date.now());
   const logged = useRef(false);
   const state = useAppState();
+  const mastery = useMemo(() => topicMastery(state, topicId), [state, topicId]);
   const petName = state.settings.pet.name;
 
   if (!ref) return <Empty title="Bu konu bulunamadı." action={<a className="btn" href="#/calis">Konu seç</a>} />;
@@ -208,8 +211,39 @@ function Session({ topicId }: { topicId: string }) {
   };
 
   const complete = () => {
+    const qs = qLoad.data ?? [];
+    const required = qs.length === 0 ? 0 : Math.min(5, qs.length);
+    const current = topicMastery(getState(), topicId);
+    const ready = required === 0 || (current.attempts >= required && current.score >= 60);
+    if (!ready) {
+      toast(
+        'Henüz tamamlanmadı: en az ' + required + ' soru ve %60 konu hakimiyeti gerekiyor. Şu an %' + current.score + '.',
+        5000,
+      );
+      return;
+    }
     update((s) => setTopicStatus(s, topicId, 'tamamlandi'));
-    toast(`Konu tamamlandı 🎉 ${petName} 2 bambu kazandı!`);
+    toast(`Öğrenme doğrulandı 🎉 ${petName} 2 bambu kazandı!`);
+  };
+
+  const reinforce = async () => {
+    const err = await launchTest(
+      makeConfig({
+        subjectId: ref.subject.id,
+        topicId,
+        difficulty: mastery.recommendedDifficulty,
+        count: 10,
+        mode: 'ogrenme',
+        origin: 'adaptif',
+        title: ref.topic.name + ' pekiştirme',
+      }),
+    );
+    if (err) {
+      const retry = await launchTest(
+        makeConfig({ subjectId: ref.subject.id, topicId, count: 10, mode: 'ogrenme', origin: 'adaptif', title: ref.topic.name + ' pekiştirme' }),
+      );
+      if (retry) toast(retry);
+    }
   };
 
   const status = state.topicProgress[topicId]?.status;
@@ -261,12 +295,30 @@ function Session({ topicId }: { topicId: string }) {
               {score.answered ? `${score.answered} sorudan ${score.correct} doğru. ` : ''}
               Çalışma süren günlüğüne eklendi; {petName} için yemek ve su kazandın 🎋💧
             </p>
+            <div className="study-mastery-check">
+              <div>
+                <span>Konu hakimiyeti</span>
+                <b>%{mastery.score}</b>
+              </div>
+              <div>
+                <span>Kanıt</span>
+                <b>{mastery.attempts} soru</b>
+              </div>
+              <div>
+                <span>Önerilen seviye</span>
+                <b>{mastery.recommendedDifficulty}</b>
+              </div>
+            </div>
             <div className="row" style={{ justifyContent: 'center' }}>
-              {status !== 'tamamlandi' && (
+              {status !== 'tamamlandi' && mastery.attempts >= Math.min(5, qLoad.data?.length ?? 5) && mastery.score >= 60 ? (
                 <button type="button" className="btn primary" onClick={complete}>
-                  Konuyu tamamla
+                  Öğrendim · doğrula
                 </button>
-              )}
+              ) : status !== 'tamamlandi' ? (
+                <button type="button" className="btn primary" onClick={() => void reinforce()}>
+                  10 soruyla pekiştir
+                </button>
+              ) : null}
               <a className="btn" href={href('/kartlar', { ders: ref.subject.id, konu: topicId })}>
                 Kartlarla pekiştir
               </a>
