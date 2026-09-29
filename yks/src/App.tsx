@@ -75,7 +75,7 @@ function useThemeEffect() {
     else root.dataset.theme = theme;
     const meta = document.querySelector('meta[name="theme-color"]');
     const dark = theme === 'dark' || (theme === 'system' && window.matchMedia?.('(prefers-color-scheme: dark)').matches);
-    meta?.setAttribute('content', dark ? '#131019' : '#f7f5fb');
+    meta?.setAttribute('content', dark ? '#131019' : '#fbfaff');
   }, [theme]);
 }
 
