@@ -60,6 +60,7 @@ export default function LiveTogetherPage() {
   const polite = useRef(false);
   const pendingCandidates = useRef<RTCIceCandidateInit[]>([]);
   const reconnectTimer = useRef<number | null>(null);
+  const helloTimer = useRef<number | null>(null);
 
   const normalizedRoom = roomCode.trim().toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 24);
   const shareSupported = typeof navigator !== 'undefined' && !!navigator.mediaDevices?.getDisplayMedia;
@@ -190,6 +191,8 @@ export default function LiveTogetherPage() {
   };
 
   const leaveRoom = async () => {
+    if (helloTimer.current) window.clearInterval(helloTimer.current);
+    helloTimer.current = null;
     localStreamRef.current?.getTracks().forEach((t) => t.stop());
     localStreamRef.current = null;
     setSharing(false);
@@ -233,6 +236,17 @@ export default function LiveTogetherPage() {
 
       channel
         .on('broadcast', { event: 'signal' }, ({ payload }: any) => void handleSignal(payload as SignalPayload))
+        .on('broadcast', { event: 'hello' }, ({ payload }: any) => {
+          if (!payload || payload.from === clientId) return;
+          setOnlineCount((n) => Math.max(2, n));
+          setConnection('connecting');
+          ensurePeer();
+          void channel.send({
+            type: 'broadcast',
+            event: 'hello',
+            payload: { from: clientId, at: Date.now() },
+          });
+        })
         .on('broadcast', { event: 'chat' }, ({ payload }: any) => {
           if (!payload || payload.from === clientId || typeof payload.text !== 'string') return;
           setMessages((m) => [...m.slice(-99), {
@@ -264,6 +278,19 @@ export default function LiveTogetherPage() {
         .subscribe(async (status: string) => {
           if (status === 'SUBSCRIBED') {
             await channel.track({ id: clientId, onlineAt: new Date().toISOString() });
+            await channel.send({
+              type: 'broadcast',
+              event: 'hello',
+              payload: { from: clientId, at: Date.now() },
+            });
+            if (helloTimer.current) window.clearInterval(helloTimer.current);
+            helloTimer.current = window.setInterval(() => {
+              void channel.send({
+                type: 'broadcast',
+                event: 'hello',
+                payload: { from: clientId, at: Date.now() },
+              });
+            }, 10_000);
             setJoined(true);
             setConnection('connecting');
             const url = new URL(window.location.href);
