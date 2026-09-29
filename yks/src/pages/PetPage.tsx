@@ -769,7 +769,7 @@ export default function PetPage() {
         <button type="button" onClick={roam}>
           <span>🐾</span><b>Evde gez</b><small>Kendi kendine dolaşsın</small>
         </button>
-        <button type="button" onClick={greet}>
+        <button type="button" onClick={() => greet()}>
           <span>👋</span><b>Selam ver</b><small>Sana dönüp tepki versin</small>
         </button>
         <button type="button" onClick={() => kitchenGive('su')}>
