@@ -9,12 +9,6 @@ const AP = "tytkim-atom-periyodik";
 const ET = "tytkim-etkilesimler";
 const MH = "tytkim-maddenin-halleri";
 const DK = "tytkim-doga-ve-kimya";
-const TK = "tytkim-temel-kanunlar";
-const MOL = "tytkim-mol-kavrami";
-const KT = "tytkim-kimyasal-tepkimeler";
-const KR = "tytkim-karisimlar";
-const ABT = "tytkim-asit-baz-tuz";
-const KHY = "tytkim-kimya-her-yerde";
 
 const ONCUL_STD = ["Yalnız I", "Yalnız II", "I ve II", "I ve III", "I, II ve III"];
 const ONCUL_B = ["Yalnız I", "I ve II", "I ve III", "II ve III", "I, II ve III"];
@@ -529,3 +523,4 @@ export const questions: QuestionSeed[] = [
     commonMistake: "Kükürdün kütlesini (16 kg) doğrudan SO₂ kütlesi sanmak.",
     teacherNote: "Asit yağmurunun kaynağı olan SO₂ salımı, yakıttaki kükürt oranıyla doğrudan hesaplanabilir; bu da kükürdü giderilmiş yakıt kullanımının önemini gösterir.",
   },
+];
