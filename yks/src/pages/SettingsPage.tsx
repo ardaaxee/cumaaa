@@ -22,22 +22,27 @@ export default function SettingsPage() {
 
   const exportData = async () => {
     setBusy(true);
-    const photo = await getTeacherPhoto();
-    const notebookEntries = await Promise.all(
-      state.notebookPages.map(async (page) => [page.id, await getPageImage(page.id)] as const),
-    );
-    const notebookImages = Object.fromEntries(
-      notebookEntries.filter((entry): entry is readonly [string, string] => typeof entry[1] === 'string'),
-    );
-    const backup = createBackup(state, photo, notebookImages);
-    const blob = new Blob([JSON.stringify(backup, null, 2)], { type: 'application/json' });
-    const a = document.createElement('a');
-    a.href = URL.createObjectURL(blob);
-    a.download = `iyi-ki-yks-yedek-${new Date().toISOString().slice(0, 10)}.json`;
-    a.click();
-    URL.revokeObjectURL(a.href);
-    toast(`Yedek indirildi · ${Object.keys(notebookImages).length} defter çizimi dahil.`);
-    setBusy(false);
+    try {
+      const photo = await getTeacherPhoto();
+      const notebookEntries = await Promise.all(
+        state.notebookPages.map(async (page) => [page.id, await getPageImage(page.id)] as const),
+      );
+      const notebookImages = Object.fromEntries(
+        notebookEntries.filter((entry): entry is readonly [string, string] => typeof entry[1] === 'string'),
+      );
+      const backup = createBackup(state, photo, notebookImages);
+      const blob = new Blob([JSON.stringify(backup, null, 2)], { type: 'application/json' });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = `iyi-ki-yks-yedek-${new Date().toISOString().slice(0, 10)}.json`;
+      a.click();
+      URL.revokeObjectURL(a.href);
+      toast(`Yedek indirildi · ${Object.keys(notebookImages).length} defter çizimi dahil.`);
+    } catch {
+      toast('Yedek hazırlanamadı. Cihaz depolamasını kontrol edip tekrar dene.');
+    } finally {
+      setBusy(false);
+    }
   };
 
   const importData = async (file: File) => {
