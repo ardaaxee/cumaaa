@@ -79,10 +79,15 @@ async function makePage(browser) {
 }
 
 async function assertQuestionOpened(page) {
-  await page.getByText(/Soru 1 \/ \d+/).waitFor({ timeout: 20_000 });
-  await page.locator('.question-text').waitFor({ timeout: 20_000 });
-  const options = page.locator('.option');
-  if ((await options.count()) < 5) throw new Error('Soru seçenekleri açılmadı.');
+  try {
+    await page.getByText(/Soru 1 \/ \d+/).waitFor({ timeout: 20_000 });
+    await page.locator('.question-text').waitFor({ timeout: 20_000 });
+    const options = page.locator('.option');
+    if ((await options.count()) < 5) throw new Error('Soru seçenekleri açılmadı.');
+  } catch (error) {
+    const body = (await page.locator('body').innerText()).slice(0, 5000);
+    throw new Error(`Soru ekranı açılmadı. URL=${page.url()}\nBODY:\n${body}\nORIGINAL: ${error}`);
+  }
 }
 
 let browser;
