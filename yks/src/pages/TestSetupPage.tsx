@@ -53,6 +53,18 @@ export default function TestSetupPage() {
   const topics = subject ? subject.units.flatMap((u) => u.topics) : [];
   const topic = cfg.topicId !== 'all' ? getTopicRef(cfg.topicId)?.topic : undefined;
   const openWrongIds = Object.values(state.wrongs).filter((w) => !w.learned).map((w) => w.questionId);
+  const poolDifficulty = useMemo(
+    () => Object.entries(DIFFICULTY_LABEL).map(([key, label]) => ({ key, label, count: pool.filter((q) => q.difficulty === key).length })),
+    [pool],
+  );
+  const poolTypes = useMemo(
+    () =>
+      Object.entries(TYPE_LABEL)
+        .map(([key, label]) => ({ key, label, count: pool.filter((q) => q.type === key).length }))
+        .filter((x) => x.count > 0)
+        .sort((a, b) => b.count - a.count),
+    [pool],
+  );
 
   const run = (fn: () => Promise<string | null>) => {
     const go = async () => {
@@ -171,6 +183,30 @@ export default function TestSetupPage() {
             </div>
           </div>
         </div>
+        {questions && pool.length > 0 && (
+          <div className="test-pool-map" aria-label="Soru havuzu dağılımı">
+            <div className="test-pool-head">
+              <span>Soru havuzu</span>
+              <b>{pool.length} soru</b>
+            </div>
+            <div className="test-pool-chips">
+              {poolDifficulty.filter((x) => x.count > 0).map((x) => (
+                <button
+                  key={x.key}
+                  type="button"
+                  className={'chip' + (cfg.difficulty === x.key ? ' on' : '')}
+                  onClick={() => set({ difficulty: cfg.difficulty === x.key ? 'all' : (x.key as Difficulty) })}
+                >
+                  {x.label} · {x.count}
+                </button>
+              ))}
+            </div>
+            <div className="test-pool-types">
+              {poolTypes.slice(0, 5).map((x) => <span key={x.key}>{x.label} {x.count}</span>)}
+            </div>
+          </div>
+        )}
+
         <p className="small muted mt-12" style={{ marginBottom: 0 }}>
           {cfg.mode === 'ogrenme'
             ? 'Öğrenme modu: her cevaptan sonra doğru/yanlış, çözüm, öğretmene sor ve benzer soru seçenekleri görünür.'
