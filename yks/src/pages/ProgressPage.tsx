@@ -9,6 +9,7 @@ import { weakTopics } from '../utils/analysis';
 import { dayKey, formatDay, formatMinutes } from '../utils/date';
 import { percent } from '../utils/net';
 import { dailySeries, dashboard, summarize, topicPerformance } from '../utils/stats';
+import { nextBestTopics, subjectMastery, subjectMomentum } from '../services/adaptiveStudy';
 
 export default function ProgressPage() {
   const state = useAppState();
@@ -31,6 +32,18 @@ export default function ProgressPage() {
   });
 
   const best = [...perf.values()].filter((p) => p.attempts >= 5).sort((a, b) => (b.accuracy ?? 0) - (a.accuracy ?? 0)).slice(0, 5);
+  const priorities = useMemo(() => nextBestTopics(state, 3, today), [state, today]);
+  const masteryRows = useMemo(
+    () =>
+      SUBJECTS.map((s) => ({
+        subject: s,
+        mastery: subjectMastery(state, s.id, today),
+        momentum: subjectMomentum(state, s.id),
+      }))
+        .filter((x) => x.mastery.confidence > 0)
+        .sort((a, b) => a.mastery.score - b.mastery.score),
+    [state, today],
+  );
 
   return (
     <>
@@ -50,6 +63,40 @@ export default function ProgressPage() {
         <div className="progress-overview-item"><span>Toplam çalışma</span><b>{formatMinutes(d.totalMinutes)}</b></div>
       </section>
       {state.legacy && <p className="tiny muted mt-8">Toplamlara eski sürümden aktarılan {state.legacy.answered} soru ve {state.legacy.minutes} dk dahildir (güne atanamadıkları için günlük grafiklerde yoktur).</p>}
+
+      <section className="card section progress-insight-card" aria-labelledby="insight-h">
+        <div className="card-head">
+          <div>
+            <div className="eyebrow">Akıllı analiz</div>
+            <h2 id="insight-h">Neden yükseliyor / neden zorlanıyorsun?</h2>
+          </div>
+          <a className="btn small" href="#/koc">Akıllı Koç</a>
+        </div>
+        {masteryRows.length === 0 ? (
+          <Empty title="Henüz analiz için veri yok.">Kısa seviye tespit testi çözdüğünde burada ders bazlı hakimiyet ve trend açıklamaları görünür.</Empty>
+        ) : (
+          <div className="progress-insights">
+            {masteryRows.slice(0, 6).map(({ subject, mastery, momentum }) => (
+              <a className="progress-insight-row" href={'#/ders/' + subject.id} key={subject.id}>
+                <span className={'trend-mark ' + momentum.label} aria-hidden="true">
+                  {momentum.label === 'yukseliyor' ? '↗' : momentum.label === 'dusuyor' ? '↘' : '→'}
+                </span>
+                <span className="grow">
+                  <b>{subjectLabel(subject)} · hakimiyet %{mastery.score}</b>
+                  <small>{momentum.explanation}</small>
+                </span>
+                <span className="badge">{mastery.attemptedTopics}/{mastery.totalTopics} konu</span>
+              </a>
+            ))}
+          </div>
+        )}
+        {priorities.length > 0 && (
+          <div className="progress-priority-note">
+            <b>Şu an ilk öncelik:</b>{' '}
+            {getTopicRef(priorities[0].topicId)?.topic.name ?? priorities[0].topicId} · {priorities[0].reason}
+          </div>
+        )}
+      </section>
 
       <section className="card section" aria-labelledby="ts-h">
         <div className="card-head">
