@@ -91,6 +91,11 @@ export function addTimeToQuestion(state: AppState, questionId: string, ms: numbe
   }));
 }
 
+export function syncTestElapsed(state: AppState, elapsedMs: number): AppState {
+  if (!Number.isFinite(elapsedMs) || elapsedMs < 0) return state;
+  return updateActive(state, (t) => ({ ...t, elapsedMs: Math.max(t.elapsedMs, elapsedMs) }));
+}
+
 export function appendQuestionToTest(state: AppState, questionId: string): AppState {
   return updateActive(state, (t) =>
     t.questionIds.includes(questionId) ? t : { ...t, questionIds: [...t.questionIds, questionId] },
