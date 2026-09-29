@@ -9239,3 +9239,191 @@ body {
   .live-status i,
   .live-messages { animation:none !important; scroll-behavior:auto; }
 }
+
+
+/* ===== APP CONTINUITY + RESUME CENTER v1 ===== */
+.app-status-bar {
+  position: fixed;
+  left: 50%;
+  bottom: calc(76px + env(safe-area-inset-bottom));
+  z-index: 45;
+  transform: translateX(-50%);
+  width: min(760px, calc(100vw - 24px));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  pointer-events: none;
+}
+.app-status-item {
+  pointer-events: auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  min-height: 36px;
+  padding: 7px 11px;
+  border-radius: 999px;
+  border: 1px solid var(--line);
+  background: color-mix(in srgb, var(--surface) 94%, transparent);
+  box-shadow: 0 9px 28px rgba(42, 31, 58, .12);
+  color: var(--text);
+  font: inherit;
+  font-size: .72rem;
+  font-weight: 800;
+  text-decoration: none;
+  backdrop-filter: blur(16px);
+}
+.app-status-item.action:hover {
+  border-color: var(--line-strong);
+  transform: translateY(-1px);
+}
+.app-status-item.offline {
+  color: var(--warn);
+  background: color-mix(in srgb, var(--warn-soft) 86%, var(--surface));
+}
+.app-status-item.offline > span {
+  animation: live-pulse 1.25s ease-in-out infinite;
+}
+.app-status-item.install {
+  cursor: pointer;
+  background: color-mix(in srgb, var(--brand) 11%, var(--surface));
+  color: var(--brand-strong, var(--brand));
+}
+
+.home-resume-card {
+  display: grid;
+  grid-template-columns: minmax(180px, .7fr) minmax(0, 1.3fr);
+  gap: 16px;
+  margin-top: 14px;
+  padding: 16px;
+  background:
+    radial-gradient(circle at 12% 0%, color-mix(in srgb, var(--brand) 9%, transparent), transparent 34%),
+    var(--surface);
+}
+.home-resume-copy h2 {
+  margin: 4px 0 5px;
+}
+.home-resume-copy p {
+  margin: 0;
+  line-height: 1.45;
+}
+.home-resume-actions {
+  display: grid;
+  gap: 8px;
+}
+.home-resume-item {
+  display: grid;
+  grid-template-columns: 36px minmax(0, 1fr) auto;
+  gap: 10px;
+  align-items: center;
+  min-width: 0;
+  padding: 10px 11px;
+  border: 1px solid var(--line);
+  border-radius: 15px;
+  background: var(--surface-2);
+  text-decoration: none;
+  color: inherit;
+  transition: transform .16s ease, border-color .16s ease, box-shadow .16s ease;
+}
+.home-resume-item:hover {
+  transform: translateY(-1px);
+  border-color: var(--line-strong);
+  box-shadow: 0 8px 20px rgba(50, 40, 65, .07);
+}
+.home-resume-item.primary {
+  background: color-mix(in srgb, var(--brand) 9%, var(--surface));
+  border-color: color-mix(in srgb, var(--brand) 28%, var(--line));
+}
+.home-resume-item > span:nth-child(2) {
+  min-width: 0;
+  display: grid;
+  gap: 2px;
+}
+.home-resume-item b {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.home-resume-item small {
+  color: var(--muted);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.home-resume-icon {
+  width: 36px;
+  height: 36px;
+  display: grid;
+  place-items: center;
+  border-radius: 12px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  font-weight: 900;
+}
+
+.plan-smart-notice {
+  margin-top: 12px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  justify-content: space-between;
+  background: color-mix(in srgb, var(--brand) 7%, var(--surface));
+  border-color: color-mix(in srgb, var(--brand) 24%, var(--line));
+}
+.plan-smart-notice b {
+  display: block;
+  margin-bottom: 2px;
+}
+
+@media (min-width: 901px) {
+  .app-status-bar {
+    left: calc(50% + 120px);
+    bottom: 18px;
+  }
+}
+@media (max-width: 720px) {
+  .home-resume-card {
+    grid-template-columns: 1fr;
+  }
+  .home-resume-copy p {
+    max-width: 46ch;
+  }
+  .plan-smart-notice {
+    align-items: stretch;
+    flex-direction: column;
+  }
+}
+@media (max-width: 520px) {
+  .app-status-bar {
+    width: calc(100vw - 18px);
+    bottom: calc(72px + env(safe-area-inset-bottom));
+    justify-content: stretch;
+  }
+  .app-status-item {
+    max-width: 100%;
+    flex: 1 1 auto;
+    justify-content: center;
+    font-size: .68rem;
+  }
+  .home-resume-card {
+    padding: 13px;
+  }
+  .home-resume-item {
+    grid-template-columns: 34px minmax(0, 1fr) auto;
+    padding: 9px;
+  }
+  .home-resume-icon {
+    width: 34px;
+    height: 34px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .app-status-item,
+  .home-resume-item {
+    transition: none !important;
+  }
+  .app-status-item.offline > span {
+    animation: none !important;
+  }
+}
