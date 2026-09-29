@@ -214,15 +214,31 @@ export default function PlanPage() {
           </button>
         }
       />
-      <Segmented
-        label="Görünüm"
-        value={view}
-        onChange={setView}
-        options={[
-          { value: 'gun', label: 'Günlük' },
-          { value: 'hafta', label: 'Haftalık' },
-        ]}
-      />
+      <div className="plan-toolbar">
+        <Segmented
+          label="Görünüm"
+          value={view}
+          onChange={setView}
+          options={[
+            { value: 'gun', label: 'Günlük' },
+            { value: 'hafta', label: 'Haftalık' },
+          ]}
+        />
+        {view === 'gun' && day !== today && (
+          <button type="button" className="btn small ghost" onClick={() => setDay(today)}>
+            Bugüne dön
+          </button>
+        )}
+      </div>
+
+      {view === 'gun' && (
+        <div className="plan-summary" aria-label="Seçili gün özeti">
+          <div><b>{dayTasks.length}</b><span>görev</span></div>
+          <div><b>{doneCount}</b><span>tamamlandı</span></div>
+          <div><b>{unfinished}</b><span>kaldı</span></div>
+          <div><b>{minutes || 0}</b><span>planlanan dk</span></div>
+        </div>
+      )}
 
       {overdue.length > 0 && (
         <div className="notice warn section">
@@ -246,7 +262,7 @@ export default function PlanPage() {
       )}
 
       {view === 'gun' ? (
-        <section className="card section" aria-labelledby="day-h">
+        <section className="card section plan-day-card" aria-labelledby="day-h">
           <div className="row between">
             <button type="button" className="icon-btn" aria-label="Önceki gün" onClick={() => setDay(addDays(day, -1))}>
               <Icon name="left" />
@@ -285,7 +301,7 @@ export default function PlanPage() {
           )}
         </section>
       ) : (
-        <section className="section" aria-labelledby="week-h">
+        <section className="section plan-week-section" aria-labelledby="week-h">
           <div className="row between mb-8">
             <button type="button" className="icon-btn" aria-label="Önceki hafta" onClick={() => setWeekAnchor(addDays(weekAnchor, -7))}>
               <Icon name="left" />
