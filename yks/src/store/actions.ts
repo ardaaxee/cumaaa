@@ -146,7 +146,15 @@ export function finishTest(state: AppState, byId: Map<string, Question>, now: Da
     });
     if (item.state === 'dogru') {
       const prev = wrongs[q.id];
-      if (prev) wrongs[q.id] = { ...prev, correctStreak: prev.correctStreak + 1 };
+      if (prev) {
+        const correctStreak = prev.correctStreak + 1;
+        wrongs[q.id] = {
+          ...prev,
+          correctStreak,
+          learned: correctStreak >= 2,
+          learnedAt: correctStreak >= 2 ? iso : prev.learnedAt,
+        };
+      }
     } else {
       wrongs[q.id] = upsertWrong(wrongs[q.id], q, item.answer, iso);
       if (item.state === 'yanlis') reviews[q.topic] = onWrongInTopic(q.topic, today, reviews[q.topic]);
@@ -250,7 +258,15 @@ export function recordPractice(
   const reviews = { ...state.reviews };
   if (correct) {
     const prev = wrongs[q.id];
-    if (prev) wrongs[q.id] = { ...prev, correctStreak: prev.correctStreak + 1 };
+    if (prev) {
+      const correctStreak = prev.correctStreak + 1;
+      wrongs[q.id] = {
+        ...prev,
+        correctStreak,
+        learned: correctStreak >= 2,
+        learnedAt: correctStreak >= 2 ? iso : prev.learnedAt,
+      };
+    }
   } else {
     wrongs[q.id] = upsertWrong(wrongs[q.id], q, answer, iso);
     if (answer != null) reviews[q.topic] = onWrongInTopic(q.topic, today, reviews[q.topic]);
