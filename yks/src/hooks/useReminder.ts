@@ -3,6 +3,7 @@ import { getReminderTime, msUntil } from '../services/reminder';
 import { getState } from '../store/store';
 import { dayKey } from '../utils/date';
 import { dueReviews } from '../utils/srs';
+import { dashboard } from '../utils/stats';
 
 /** Uygulama açıkken, seçilen saatte tarayıcı bildirimi gösterir. */
 export function useReminder(): void {
@@ -21,12 +22,22 @@ export function useReminder(): void {
         const today = dayKey();
         const cards = Object.values(s.cards).filter((c) => c.dueDay <= today).length;
         const reviews = dueReviews(s.reviews, today).length;
-        const body = [cards ? `${cards} kart` : '', reviews ? `${reviews} konu tekrarı` : ''].filter(Boolean).join(' ve ');
-        try {
-          new Notification('YKS çalışma zamanı ♡', { body: body ? `Bugün ${body} seni bekliyor.` : 'Küçük bir adım at: 10 soru yeter!', icon: 'icon-192.png' });
-        } catch {
-          /* bazı mobil tarayıcılar yalnız service worker bildirimi destekler */
-        }
+        const pending = s.tasks.filter((t) => t.date === today && !t.done).length;
+        const d = dashboard(s, today);
+        const left = Math.max(0, s.profile.dailyQuestionGoal - d.todayQuestions);
+        const parts = [
+          pending ? pending + ' görev' : '',
+          reviews ? reviews + ' konu tekrarı' : '',
+          cards ? cards + ' kart' : '',
+          left ? left + ' soru hedefi' : '',
+        ].filter(Boolean);
+        const body = parts.length ? 'Bugün ' + parts.slice(0, 3).join(' · ') + ' bekliyor.' : 'Bugünkü hedeflerini tamamladın. Kısa bir tekrar yeter ♡';
+        const options: NotificationOptions = { body, icon: 'icon-192.png', badge: 'icon-192.png', tag: 'yks-calisma' };
+        navigator.serviceWorker?.getRegistration?.()
+          .then((reg) => (reg ? reg.showNotification('YKS çalışma zamanı ♡', options) : new Notification('YKS çalışma zamanı ♡', options)))
+          .catch(() => {
+            try { new Notification('YKS çalışma zamanı ♡', options); } catch { /* desteklenmiyor */ }
+          });
         schedule();
       }, msUntil(time));
     };
