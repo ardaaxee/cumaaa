@@ -86,7 +86,7 @@ export default function ResourcesPage() {
                 <b>{r.title}</b> <span className="badge outline">{r.org}</span>
                 <div className="small muted">{r.desc}</div>
               </div>
-              <a className="btn small" href={r.url} target="_blank" rel="noopener noreferrer">
+              <a className="btn small" href={r.url}>
                 Aç <Icon name="external" />
               </a>
             </li>
