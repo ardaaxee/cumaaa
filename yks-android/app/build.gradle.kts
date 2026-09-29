@@ -52,4 +52,5 @@ dependencies {
     implementation("io.ktor:ktor-client-okhttp:3.4.2")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.10.2")
     implementation("io.github.webrtc-sdk:android:150.7871.01")
+    implementation("com.google.zxing:core:3.5.3")
 }
