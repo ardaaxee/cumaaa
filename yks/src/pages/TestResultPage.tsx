@@ -59,15 +59,24 @@ export default function TestResultPage({ params }: { params: string[] }) {
     <>
       <PageHeader title="Test sonucu" sub={`${formatDay(result.day)} · ${result.config.mode === 'sinav' ? 'Sınav modu' : 'Öğrenme modu'}`} back="#/testler" />
 
-      <section className="grid grid-4" aria-label="Özet">
-        <Stat label="Doğru" value={score.correct} />
-        <Stat label="Yanlış" value={score.wrong} />
-        <Stat label="Boş" value={score.blank} />
-        <Stat label="Net" value={formatNet(score.net)} sub="Doğru − Yanlış / 4" />
+      <section className="result-hero" aria-label="Test özeti">
+        <div className="result-score">
+          <div className="eyebrow">Test sonucu</div>
+          <div className="result-net">{formatNet(score.net)} <span>net</span></div>
+          <div className="result-success">%{percent(score.correct, score.items.length) ?? 0} başarı</div>
+        </div>
+        <div className="result-breakdown">
+          <div className="result-pill ok"><b>{score.correct}</b><span>Doğru</span></div>
+          <div className="result-pill bad"><b>{score.wrong}</b><span>Yanlış</span></div>
+          <div className="result-pill"><b>{score.blank}</b><span>Boş</span></div>
+        </div>
+      </section>
+
+      <section className="grid grid-4 section result-stats" aria-label="Detaylı özet">
         <Stat label="Doğruluk" value={score.accuracy != null ? `%${score.accuracy}` : '—'} sub="doğru / cevaplanan" />
-        <Stat label="Başarı" value={`%${percent(score.correct, score.items.length) ?? 0}`} sub="doğru / toplam" />
         <Stat label="Süre" value={formatDuration(score.durationMs)} />
         <Stat label="Soru başına" value={formatDuration(score.avgMsPerQuestion)} sub="ortalama" />
+        <Stat label="Toplam soru" value={score.items.length} />
       </section>
 
       {result.config.origin === 'deneme' && (result.config.exam === 'TYT' || result.config.exam === 'AYT') && (
@@ -110,7 +119,7 @@ export default function TestResultPage({ params }: { params: string[] }) {
         </section>
       )}
 
-      <div className="row section">
+      <div className="row section result-actions">
         {wrongIds.length > 0 && (
           <button type="button" className="btn primary" onClick={() => void retryWrongs()}>
             Yanlış ve boşları tekrar çöz ({wrongIds.length})
@@ -161,7 +170,7 @@ export default function TestResultPage({ params }: { params: string[] }) {
         </section>
       </div>
 
-      <section className="card section" aria-labelledby="rv-h">
+      <section className="card section result-review-card" aria-labelledby="rv-h">
         <div className="card-head">
           <h2 id="rv-h">Soru soru inceleme</h2>
           <Segmented
