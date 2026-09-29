@@ -10,6 +10,7 @@ import { FOOD_PER_BAMBOO, WATER_PER_DROP, feedPet, needsMessage, waterPet } from
 import { PetNotifyToggle } from '../hooks/usePetAlerts';
 import { dashboard } from '../utils/stats';
 import { dayKey } from '../utils/date';
+import { playPandaVoice, unlockPandaVoice } from '../utils/pandaVoice';
 
 const EARN_RULES = [
   ['🎋 1 bambu', '5 doğru cevap'],
@@ -318,22 +319,9 @@ export default function PetPage() {
     timers.current = [];
   };
 
-  const speak = (text: string) => {
+  const speak = (text: string, intent: 'greet' | 'talk' | 'happy' | 'hungry' | 'sleepy' | 'eat' | 'drink' | 'bath' | 'play' = 'talk') => {
     setSceneMessage(text);
-    if (!voiceOn || typeof window === 'undefined' || !('speechSynthesis' in window)) return;
-    try {
-      window.speechSynthesis.cancel();
-      const utter = new SpeechSynthesisUtterance(text);
-      utter.lang = 'tr-TR';
-      utter.rate = 0.96;
-      utter.pitch = 1.08;
-      const voices = window.speechSynthesis.getVoices();
-      const tr = voices.find((v) => v.lang.toLowerCase().startsWith('tr'));
-      if (tr) utter.voice = tr;
-      window.speechSynthesis.speak(utter);
-    } catch {
-      // Konuşma balonu yine çalışır; bazı mobil tarayıcılar ses sentezini engelleyebilir.
-    }
+    void playPandaVoice(text, intent, voiceOn);
   };
 
   const randomLine = (where: HouseRoom = room) => {
@@ -347,7 +335,7 @@ export default function PetPage() {
     setActivity('greeting');
     const text = 'Selam! Ben ' + pet.name + '. Hoş geldin! 👋';
     setSceneMessage(text);
-    if (withVoice) speak(text);
+    if (withVoice) speak(text, 'greet');
     later(() => {
       setActivity('idle');
       setSceneMessage(null);
@@ -358,7 +346,7 @@ export default function PetPage() {
     clearTimers();
     setActivity('talking');
     const text = randomLine();
-    speak(text);
+    speak(text, 'talk');
     later(() => {
       setActivity('idle');
       setSceneMessage(null);
@@ -423,7 +411,7 @@ export default function PetPage() {
       if (roll < 0.84) {
         setActivity('greeting');
         setFacing('right');
-        setSceneMessage('Selam! Buradayım 👋');
+        speak('Selam! Buradayım 👋', 'greet');
         later(() => {
           setActivity('idle');
           setSceneMessage(null);
@@ -434,7 +422,7 @@ export default function PetPage() {
       if (roll < 0.96) {
         setActivity('talking');
         const text = randomLine();
-        speak(text);
+        speak(text, 'talk');
         later(() => {
           setActivity('idle');
           setSceneMessage(null);
@@ -462,7 +450,6 @@ export default function PetPage() {
 
   useEffect(() => () => {
     clearTimers();
-    if (typeof window !== 'undefined' && 'speechSynthesis' in window) window.speechSynthesis.cancel();
   }, []);
 
   const moveTo = (nextRoom: HouseRoom, nextActivity: HouseActivity = 'idle', message?: string) => {
@@ -511,7 +498,8 @@ export default function PetPage() {
       setHolding(kind);
       setActivity(kind === 'bambu' ? 'eating' : 'drinking');
       setZeynepActivity('serving');
-      setSceneMessage(kind === 'bambu' ? 'Yemek hazır. Afiyet olsun ♡' : 'Suyu hazır. Ohh, ferahladı ♡');
+      const line = kind === 'bambu' ? 'Yemek hazır. Afiyet olsun ♡' : 'Suyu hazır. Ohh, ferahladı ♡';
+      speak(line, kind === 'bambu' ? 'eat' : 'drink');
       setHappiness((v) => Math.min(100, v + 5));
     }, 2200);
 
@@ -533,7 +521,7 @@ export default function PetPage() {
     setSceneMessage(pet.name + ' banyoya gidiyor…');
     later(() => {
       setActivity('bathing');
-      setSceneMessage('Köpükler hazır. Banyo zamanı 🫧');
+      speak('Köpükler hazır. Banyo zamanı 🫧', 'bath');
     }, 850);
     later(() => {
       setCleanliness(100);
@@ -564,13 +552,14 @@ export default function PetPage() {
     later(() => {
       setActivity('sleeping');
       setRoomMode('night');
-      setSceneMessage('Işıkları kapattık. ' + pet.name + ' uyuyor 🌙');
+      speak('Işıkları kapattık. ' + pet.name + ' uyuyor 🌙', 'sleepy');
     }, 900);
     later(() => setEnergy(100), 4200);
   };
 
   const garden = () => {
     moveTo('garden', 'playing', 'Bahçeye çıkıyoruz 🌿');
+    void playPandaVoice('Bahçeye çıkıyoruz', 'play', voiceOn);
     later(() => {
       setHappiness(100);
       setEnergy((v) => Math.max(35, v - 4));
@@ -620,7 +609,7 @@ export default function PetPage() {
     setHappiness((v) => Math.min(100, v + 3));
     setActivity('greeting');
     const text = Math.random() > 0.5 ? 'Selam! Beni mi çağırdın? 👋' : 'Buradayım! Seninle takılmayı seviyorum.';
-    speak(text);
+    speak(text, 'happy');
     later(() => {
       setActivity('idle');
       setSceneMessage(null);
@@ -654,7 +643,11 @@ export default function PetPage() {
 
   return (
     <div className="pet-game-page">
-      <section className={'pet-game ' + roomMode + ' room-' + room} aria-label={pet.name + ' sanal evcil hayvan evi'}>
+      <section
+        className={'pet-game ' + roomMode + ' room-' + room}
+        aria-label={pet.name + ' sanal evcil hayvan evi'}
+        onPointerDown={() => void unlockPandaVoice()}
+      >
         <header className="pet-game-top">
           <a className="pet-game-iconbtn" href="#/" aria-label="Ana sayfaya dön">
             <Icon name="home" />
@@ -669,14 +662,13 @@ export default function PetPage() {
           <button
             className="pet-game-iconbtn"
             type="button"
-            onClick={() => setVoiceOn((v) => {
-              const next = !v;
-              if (!next && typeof window !== 'undefined' && 'speechSynthesis' in window) window.speechSynthesis.cancel();
-              return next;
-            })}
-            aria-label={voiceOn ? 'Panda sesini kapat' : 'Panda sesini aç'}
+            onClick={() => {
+              void unlockPandaVoice();
+              setVoiceOn((v) => !v);
+            }}
+            aria-label={voiceOn ? 'Özel panda sesini kapat' : 'Özel panda sesini aç'}
           >
-            {voiceOn ? '🔊' : '🔇'}
+            {voiceOn ? '🐼♪' : '🐼×'}
           </button>
         </header>
 
