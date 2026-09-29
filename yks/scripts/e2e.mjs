@@ -74,11 +74,21 @@ async function makePage(browser) {
   }, seed);
   const page = await context.newPage();
   const pageErrors = [];
+  const networkErrors = [];
   page.on('pageerror', (error) => pageErrors.push(error.message));
-  return { context, page, pageErrors };
+  page.on('console', (message) => {
+    if (message.type() === 'error') pageErrors.push(`console: ${message.text()}`);
+  });
+  page.on('requestfailed', (request) => {
+    networkErrors.push(`${request.url()} :: ${request.failure()?.errorText ?? 'failed'}`);
+  });
+  page.on('response', (response) => {
+    if (response.status() >= 400) networkErrors.push(`${response.status()} ${response.url()}`);
+  });
+  return { context, page, pageErrors, networkErrors };
 }
 
-async function assertQuestionOpened(page) {
+async function assertQuestionOpened(page, diagnostics = { pageErrors: [], networkErrors: [] }) {
   try {
     await page.getByText(/Soru 1 \/ \d+/).waitFor({ timeout: 20_000 });
     await page.locator('.question-text').waitFor({ timeout: 20_000 });
@@ -87,7 +97,7 @@ async function assertQuestionOpened(page) {
   } catch (error) {
     const body = (await page.locator('body').innerText()).slice(0, 5000);
     const stored = await page.evaluate(() => localStorage.getItem('iyikiYks.state.v3'));
-    throw new Error(`Soru ekranı açılmadı. URL=${page.url()}\nBODY:\n${body}\nSTORAGE:\n${stored?.slice(0, 5000)}\nORIGINAL: ${error}`);
+    throw new Error(`Soru ekranı açılmadı. URL=${page.url()}\nBODY:\n${body}\nSTORAGE:\n${stored?.slice(0, 5000)}\nPAGE_ERRORS:\n${diagnostics.pageErrors.join('\n')}\nNETWORK_ERRORS:\n${diagnostics.networkErrors.join('\n')}\nORIGINAL: ${error}`);
   }
 }
 
@@ -102,36 +112,36 @@ try {
 
   // TYT Matematik: setup -> test -> soru -> çözüm -> reload sonrası devam.
   {
-    const { context, page, pageErrors } = await makePage(browser);
+    const { context, page, pageErrors, networkErrors } = await makePage(browser);
     await page.goto(`${base}/#/testler?sinav=TYT`, { waitUntil: 'networkidle' });
     await page.getByRole('heading', { name: 'Test oluştur' }).waitFor();
     await page.locator('.form-grid.two label.field select').nth(1).selectOption('tyt-matematik');
     const start = page.getByRole('button', { name: 'Testi başlat' });
     await start.click();
-    await assertQuestionOpened(page);
+    await assertQuestionOpened(page, { pageErrors, networkErrors });
     await page.locator('.option').first().click();
     await page.locator('.feedback').waitFor({ timeout: 10_000 });
     await page.reload({ waitUntil: 'networkidle' });
-    await assertQuestionOpened(page);
+    await assertQuestionOpened(page, { pageErrors, networkErrors });
     if (pageErrors.length) throw new Error(`TYT sayfa hatası: ${pageErrors.join(' | ')}`);
     await context.close();
   }
 
   // AYT Fizik: yalnız gerekli paketler yüklenerek soru açılmalı.
   {
-    const { context, page, pageErrors } = await makePage(browser);
+    const { context, page, pageErrors, networkErrors } = await makePage(browser);
     await page.goto(`${base}/#/testler?sinav=AYT`, { waitUntil: 'networkidle' });
     await page.getByRole('heading', { name: 'Test oluştur' }).waitFor();
     await page.locator('.form-grid.two label.field select').nth(1).selectOption('ayt-fizik');
     await page.getByRole('button', { name: 'Testi başlat' }).click();
-    await assertQuestionOpened(page);
+    await assertQuestionOpened(page, { pageErrors, networkErrors });
     if (pageErrors.length) throw new Error(`AYT sayfa hatası: ${pageErrors.join(' | ')}`);
     await context.close();
   }
 
   // Konu sayfası: konu sonu soruları tüm ders bankasını beklemeden açılmalı.
   {
-    const { context, page, pageErrors } = await makePage(browser);
+    const { context, page, pageErrors, networkErrors } = await makePage(browser);
     await page.goto(`${base}/#/konu/tytmat-temel-kavramlar`, { waitUntil: 'networkidle' });
     await page.getByRole('heading', { name: 'Konu sonu soruları' }).waitFor({ timeout: 20_000 });
     await page.locator('#konu-sonu .option').first().waitFor({ timeout: 20_000 });
