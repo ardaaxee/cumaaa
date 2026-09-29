@@ -2,7 +2,16 @@ import { useState } from 'react';
 import { EXAM_ARCHIVE, OSYM_YKS_PAGE } from '../data/officialResources';
 import { Icon } from '../components/Icon';
 import { PageHeader } from '../components/Layout';
-import { Segmented, SourceBadge } from '../components/ui';
+import { Segmented, SourceBadge, toast } from '../components/ui';
+
+async function copyLink(url: string) {
+  try {
+    await navigator.clipboard.writeText(url);
+    toast('Resmî ÖSYM PDF bağlantısı kopyalandı.');
+  } catch {
+    toast('Bağlantı kopyalanamadı. “PDF’yi aç” düğmesini kullan.', 4500);
+  }
+}
 
 export default function OsymPage() {
   const years = [...new Set(EXAM_ARCHIVE.map((e) => e.year))].sort((a, b) => b - a);
@@ -11,11 +20,13 @@ export default function OsymPage() {
 
   return (
     <>
-      <PageHeader title="ÖSYM Çıkmış Sorular" sub="Yıl bazlı resmî kaynak bağlantıları" />
-      <div className="notice">
+      <PageHeader title="ÖSYM Çıkmış Sorular" sub="TYT ve AYT resmî soru kitapçıkları · doğrudan PDF" />
+
+      <div className="notice osym-notice">
         <Icon name="alert" />
         <div>
-          Bu bölümde soru metni <b>kopyalanmaz</b>. Her yıl için resmî ÖSYM kitapçık ve cevap anahtarı sayfasına yönlendirilirsin. Uygulama ÖSYM’ye bağlı değildir.
+          <b>Mobil açılma sorunu düzeltildi.</b> Artık ara ÖSYM sayfası yerine doğrudan
+          <b> dokuman.osym.gov.tr</b> üzerindeki resmî PDF kitapçığı açılır. Sorular uygulamaya kopyalanmaz.
         </div>
       </div>
 
@@ -23,37 +34,49 @@ export default function OsymPage() {
         <Segmented label="Yıl" value={year} onChange={setYear} options={years.map((y) => ({ value: String(y), label: String(y) }))} />
       </div>
 
-      <section className="card section" aria-label={`${year} sınavları`}>
-        <div className="osym-grid">
-          {entries.map((e) => (
-            <article key={`${e.year}-${e.exam}`} className="osym-card">
-              <div className="row between nowrap">
-                <h3 style={{ margin: 0 }}>
-                  {e.year} {e.exam}
-                </h3>
-                <SourceBadge type="osym-resmi" />
+      <section className="osym-booklet-grid section" aria-label={year + ' ÖSYM kitapçıkları'}>
+        {entries.map((e) => (
+          <article key={e.year + '-' + e.exam} className={'card osym-booklet-card ' + e.exam.toLowerCase()}>
+            <div className="osym-booklet-top">
+              <div>
+                <div className="eyebrow">Resmî ÖSYM kitapçığı</div>
+                <h2>{e.year} {e.exam}</h2>
+                <p>{e.exam === 'TYT' ? 'Temel Yeterlilik Testi' : 'Alan Yeterlilik Testleri'} ve cevap anahtarı</p>
               </div>
-              <p className="small muted" style={{ margin: '6px 0 12px' }}>
-                Soru kitapçıkları ve cevap anahtarları ÖSYM’nin resmî sayfasında.
-              </p>
-              <a className="btn primary block" href={e.url} target="_blank" rel="noopener noreferrer">
-                Resmî ÖSYM sayfasını aç <Icon name="external" />
+              <SourceBadge type="osym-resmi" />
+            </div>
+
+            <div className="osym-booklet-actions">
+              <a className="btn primary" href={e.pdfUrl}>
+                <Icon name="book" /> PDF’yi aç
               </a>
-              <a className="btn ghost small block mt-8" href={e.searchUrl} target="_blank" rel="noopener noreferrer">
-                Sayfa açılmazsa ÖSYM’de ara <Icon name="external" />
+              <a className="btn" href={e.pageUrl}>
+                <Icon name="external" /> ÖSYM sayfası
               </a>
-            </article>
-          ))}
-        </div>
+              <button type="button" className="btn ghost" onClick={() => void copyLink(e.pdfUrl)}>
+                <Icon name="link" /> Bağlantıyı kopyala
+              </button>
+            </div>
+
+            <div className="osym-mobile-help">
+              PDF düğmesine dokunduğunda telefonun PDF görüntüleyicisi açılır. Açılmazsa bağlantıyı kopyalayıp Chrome’a yapıştırabilirsin.
+            </div>
+          </article>
+        ))}
       </section>
 
-      <p className="tiny muted section">
-        Aynı sayfada TYT ve AYT kitapçıkları birlikte yer alır. Tüm yıllar ve duyurular için{' '}
-        <a href={OSYM_YKS_PAGE} target="_blank" rel="noopener noreferrer">
-          ÖSYM YKS sayfası
+      <section className="card section osym-info-card" aria-labelledby="osym-info-h">
+        <div>
+          <div className="eyebrow">Kaynak doğrulama</div>
+          <h2 id="osym-info-h">Yalnız resmî ÖSYM bağlantıları</h2>
+          <p className="small muted">
+            Buradaki TYT ve AYT düğmeleri ÖSYM’nin resmî doküman alanına gider. Uygulamadaki özgün soru bankasıyla çıkmış ÖSYM soruları birbirine karıştırılmaz.
+          </p>
+        </div>
+        <a className="btn" href={OSYM_YKS_PAGE}>
+          Tüm ÖSYM YKS sayfası <Icon name="external" />
         </a>
-        .
-      </p>
+      </section>
     </>
   );
 }
