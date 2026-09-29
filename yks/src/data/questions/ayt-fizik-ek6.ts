@@ -161,7 +161,7 @@ export const questions: QuestionSeed[] = [
     question: 'Hızı 24 m/s olan periyodik bir dalganın frekansı 6 Hz’dir. Dalga boyu kaç metredir?',
     options: ['2', '3', '4', '6', '8'],
     correctAnswer: 2,
-    solution: 'v = fλ olduğundan λ = v/f = 24/6 = 4 m.',
+    solution: 'Dalga bağıntısı v = f·λ şeklindedir. Buradan dalga boyu λ = v/f olur. Verilen değerler yerine yazılırsa λ = 24/6 = 4 m bulunur.',
     hint: 'Dalga bağıntısı v = fλ.',
     commonMistake: '24 ile 6’yı çarpmak.',
     teacherNote: 'Temel dalga bağıntısını uygulatır.',
