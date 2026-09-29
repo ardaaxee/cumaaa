@@ -6,7 +6,7 @@ import { PageHeader } from '../components/Layout';
 import { ConfirmDialog, Empty, Modal, Segmented, Stat, toast } from '../components/ui';
 import { addMock, deleteMock } from '../store/actions';
 import { loadQuestionsFor } from '../data/content';
-import { launchTest, launchWithIds, makeConfig, hasActiveTest } from '../services/testLauncher';
+import { launchWithIds, makeConfig, hasActiveTest } from '../services/testLauncher';
 import { getState } from '../store/store';
 import { FULL_MOCKS, buildFullMock, totalQuestions } from '../utils/fullMock';
 import type { MockExam } from '../store/schema';
@@ -14,6 +14,7 @@ import { update, useSelector } from '../store/store';
 import { dayKey, formatDay, isValidDayKey } from '../utils/date';
 import { MOCK_SECTIONS, analyzeMocks, buildSections, mockNet, mockTotals, sectionDef, sectionNet, sortMocks, type SectionInput } from '../utils/mock';
 import { calcNet, formatNet, round2 } from '../utils/net';
+import { pickQuestions } from '../utils/testEngine';
 
 function MockForm({ exam, onClose }: { exam: Exam; onClose: () => void }) {
   const defs = MOCK_SECTIONS[exam];
@@ -168,15 +169,33 @@ export default function MocksPage() {
     const subjectId = e === 'TYT' ? 'tyt-fizik' : 'ayt-fizik';
     const count = e === 'TYT' ? 7 : 14;
     const durationMin = e === 'TYT' ? 12 : 25;
-    const err = await launchTest(
+    let pool;
+    try {
+      pool = await loadQuestionsFor({ exam: e, subjectId, topicId: 'all' });
+    } catch {
+      toast('Fizik soru havuzu yüklenemedi.');
+      return;
+    }
+    const preferredTypes = new Set(['islem', 'yorum', 'grafik', 'cok-adimli', 'yeni-nesil']);
+    const preferred = pool.filter((q) => preferredTypes.has(q.type));
+    const first = pickQuestions(preferred, Math.min(count, Math.ceil(count * 0.85)), getState().attempts);
+    const used = new Set(first);
+    const rest = pickQuestions(pool.filter((q) => !used.has(q.id)), count - first.length, getState().attempts);
+    const ids = [...first, ...rest];
+    if (ids.length < Math.min(count, 5)) {
+      toast('Bu branş denemesi için yeterli fizik sorusu yok.');
+      return;
+    }
+    const err = await launchWithIds(
+      ids,
       makeConfig({
         exam: e,
         subjectId,
-        count,
+        count: ids.length,
         mode: 'sinav',
         origin: 'filtre',
         durationMin,
-        title: `${e} Fizik Branş Denemesi`,
+        title: `${e} Fizik Branş Denemesi · İşlem + Yorum`,
       }),
     );
     if (err) toast(err);
