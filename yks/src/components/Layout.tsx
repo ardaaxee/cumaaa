@@ -2,7 +2,7 @@ import type { ReactNode } from 'react';
 import { useRoute } from '../hooks/useRoute';
 import { update, useSelector } from '../store/store';
 import { Icon, type IconName } from './Icon';
-import { CatFace, MascotNav, RabbitFace } from './MascotNav';
+import { MascotNav } from './MascotNav';
 import { Companion } from './Companion';
 
 interface NavItem {
@@ -96,19 +96,6 @@ export function Layout({ children }: { children: ReactNode }) {
       </main>
       {!focusMode && <MascotNav />}
       <Companion />
-      <EdgeFriends />
-    </div>
-  );
-}
-
-/** Kenarlardan bakan süs hayvanları — işlevsizdir, içeriğin arkasında kalır. */
-function EdgeFriends() {
-  return (
-    <div aria-hidden="true">
-      <span className="edge-friend edge-rabbit"><RabbitFace size={36} /></span>
-      <span className="edge-friend edge-cat"><CatFace size={36} /></span>
-      <span className="edge-friend edge-kitten"><CatFace size={30} /></span>
-      <span className="edge-friend edge-bunny"><RabbitFace size={30} /></span>
     </div>
   );
 }
