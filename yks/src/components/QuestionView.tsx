@@ -62,7 +62,7 @@ export function FavoriteButton({ id }: { id: string }) {
 
 export function QuestionBody({ q }: { q: Question }) {
   return (
-    <div>
+    <div className="question-body">
       <div className="question-text">{q.question}</div>
       {q.premises && q.premises.length > 0 && (
         <ol className="premises" aria-label="Öncüller">
@@ -148,7 +148,7 @@ export function Options({
 
 export function SolutionBlock({ q }: { q: Question }) {
   return (
-    <div className="stack">
+    <div className="stack solution-block">
       <div>
         <div className="eyebrow">Çözüm</div>
         <div className="pre-line">{q.solution}</div>
