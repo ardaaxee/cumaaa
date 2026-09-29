@@ -6,6 +6,7 @@ import { ConnectSettings } from '../components/ConnectSettings';
 import { CompanionToggle } from '../components/Companion';
 import { PageHeader } from '../components/Layout';
 import { ConfirmDialog, toast } from '../components/ui';
+import { getPageImage, setPageImage } from '../services/notebookStore';
 import { getTeacherPhoto, setTeacherPhoto } from '../services/photoStore';
 import { updateProfile, updateSettings } from '../store/actions';
 import { clearAppData, createBackup, migrationContext, parseBackup } from '../store/storage';
@@ -20,25 +21,44 @@ export default function SettingsPage() {
   const [resetConfirm, setResetConfirm] = useState(false);
 
   const exportData = async () => {
+    setBusy(true);
     const photo = await getTeacherPhoto();
-    const backup = createBackup(state, photo);
+    const notebookEntries = await Promise.all(
+      state.notebookPages.map(async (page) => [page.id, await getPageImage(page.id)] as const),
+    );
+    const notebookImages = Object.fromEntries(
+      notebookEntries.filter((entry): entry is readonly [string, string] => typeof entry[1] === 'string'),
+    );
+    const backup = createBackup(state, photo, notebookImages);
     const blob = new Blob([JSON.stringify(backup, null, 2)], { type: 'application/json' });
     const a = document.createElement('a');
     a.href = URL.createObjectURL(blob);
     a.download = `iyi-ki-yks-yedek-${new Date().toISOString().slice(0, 10)}.json`;
     a.click();
     URL.revokeObjectURL(a.href);
-    toast('Yedek indirildi.');
+    toast(`Yedek indirildi · ${Object.keys(notebookImages).length} defter çizimi dahil.`);
+    setBusy(false);
   };
 
   const importData = async (file: File) => {
     setBusy(true);
     try {
       const text = await file.text();
-      const { state: next, teacherPhoto, report } = parseBackup(text, migrationContext());
+      const { state: next, teacherPhoto, notebookImages, report } = parseBackup(text, migrationContext());
       replaceState(next);
       if (teacherPhoto) await setTeacherPhoto(teacherPhoto);
-      toast(report.notes.length ? `Yedek içe aktarıldı. ${report.notes[0]}` : 'Yedek içe aktarıldı.', 5000);
+      await Promise.all(
+        Object.entries(notebookImages)
+          .filter(([id]) => next.notebookPages.some((page) => page.id === id))
+          .map(([id, image]) => setPageImage(id, image)),
+      );
+      const restoredDrawings = Object.keys(notebookImages).length;
+      toast(
+        report.notes.length
+          ? `Yedek içe aktarıldı. ${report.notes[0]}`
+          : `Yedek içe aktarıldı${restoredDrawings ? ` · ${restoredDrawings} defter çizimi geri yüklendi` : ''}.`,
+        5000,
+      );
     } catch (e) {
       toast(e instanceof Error ? e.message : 'Geçersiz yedek dosyası.');
     } finally {
@@ -135,7 +155,9 @@ export default function SettingsPage() {
         <h2 id="d-h" className="mb-8">
           Veri
         </h2>
-        <p className="small muted">Tüm verilerin bu cihazda saklanır. JSON olarak dışa aktarabilir, başka cihazda içe aktarabilirsin.</p>
+        <p className="small muted">
+          Profil, test geçmişi, plan, Panda durumu, öğretmen fotoğrafı ve dijital defter çizimleri dahil YKS verilerini tek yedek dosyasına alabilirsin.
+        </p>
         <div className="row">
           <button type="button" className="btn primary" onClick={() => void exportData()} disabled={busy}>
             Veriyi dışa aktar
