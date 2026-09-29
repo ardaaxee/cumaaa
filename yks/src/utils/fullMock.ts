@@ -85,7 +85,17 @@ export function buildFullMock(plan: FullMockPlan, all: Question[], attempts: Que
   for (const part of plan.parts) {
     for (const s of part.subjects) {
       const pool = all.filter((q) => q.subject === s.subjectId);
-      ids.push(...pickQuestions(pool, s.count, attempts));
+      if (s.subjectId === 'tyt-fizik' || s.subjectId === 'ayt-fizik') {
+        const preferredTypes = new Set(['islem', 'yorum', 'grafik', 'cok-adimli', 'yeni-nesil']);
+        const preferred = pool.filter((q) => preferredTypes.has(q.type));
+        const preferredCount = Math.min(s.count, Math.ceil(s.count * 0.8));
+        const first = pickQuestions(preferred, preferredCount, attempts);
+        const used = new Set(first);
+        const rest = pickQuestions(pool.filter((q) => !used.has(q.id)), s.count - first.length, attempts);
+        ids.push(...first, ...rest);
+      } else {
+        ids.push(...pickQuestions(pool, s.count, attempts));
+      }
     }
   }
   return ids;
