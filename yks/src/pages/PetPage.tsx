@@ -41,7 +41,9 @@ type HouseActivity =
   | 'bathing'
   | 'playing'
   | 'studying'
-  | 'relaxing';
+  | 'relaxing'
+  | 'greeting'
+  | 'talking';
 
 type ZeynepActivity = 'idle' | 'walking' | 'cooking' | 'serving';
 
@@ -53,6 +55,48 @@ const ROOM_INFO: Record<HouseRoom, { icon: string; label: string; desc: string }
   bathroom: { icon: '🛁', label: 'Banyo', desc: 'Temizlik ve bakım' },
   study: { icon: '📚', label: 'Çalışma Odası', desc: 'Ders ve odak zamanı' },
   garden: { icon: '🌿', label: 'Bahçe', desc: 'Oyun ve temiz hava' },
+};
+
+const PANDA_TALK: Record<HouseRoom, string[]> = {
+  living: [
+    'Selam! Geldiğine sevindim. Biraz salonda takılalım mı?',
+    'Bugün nasılsın? Ben biraz dolaşıp sonra dinleneceğim.',
+    'Beni sevince moralim yükseliyor, biliyor muydun?',
+  ],
+  kitchen: [
+    'Mutfakta güzel bir şeyler var mı? Biraz acıkmış olabilirim.',
+    'Zeynep gelirse beraber yemek yiyelim.',
+    'Su içmeyi unutma, ben de unutmamaya çalışıyorum.',
+  ],
+  bedroom: [
+    'Burası çok rahat. Yorulursam biraz uyuyabilirim.',
+    'Gece olunca ışıkları kısalım, tamam mı?',
+    'İyi bir uyku yarınki dersleri de kolaylaştırır.',
+  ],
+  bathroom: [
+    'Banyo zamanı gelince köpükleri çok seviyorum.',
+    'Temiz olunca kendimi daha iyi hissediyorum.',
+    'Aynadaki panda baya iyi görünüyor, değil mi?',
+  ],
+  study: [
+    'Hadi biraz çalışalım. Sen çöz, ben yanında durayım.',
+    'Bir konuyu anlamayınca bırakma; küçük parçalara bölelim.',
+    'Bugün birkaç soru bile çözsek ilerleme sayılır.',
+  ],
+  garden: [
+    'Hava güzel! Biraz koşup oynayalım.',
+    'Bahçede dolaşmak enerjimi yerine getiriyor.',
+    'Topu görüyor musun? Biraz oynayalım!',
+  ],
+};
+
+const ROOM_TARGET: Record<HouseRoom, { x: number; y: number }> = {
+  living: { x: 50, y: 2 },
+  kitchen: { x: 54, y: 2 },
+  bedroom: { x: 43, y: 2 },
+  bathroom: { x: 59, y: 2 },
+  study: { x: 48, y: 2 },
+  garden: { x: 52, y: 2 },
 };
 
 function NeedBubble({ icon, label, value }: { icon: string; label: string; value: number }) {
@@ -230,6 +274,8 @@ function activityText(activity: HouseActivity, room: HouseRoom, name: string): s
   if (activity === 'playing') return name + ' bahçede oyun oynuyor.';
   if (activity === 'studying') return name + ' çalışma masasında seninle ders çalışıyor.';
   if (activity === 'relaxing') return name + ' koltukta dinleniyor.';
+  if (activity === 'greeting') return name + ' sana selam veriyor 👋';
+  if (activity === 'talking') return name + ' seninle konuşuyor.';
   return ROOM_INFO[room].desc;
 }
 
@@ -255,7 +301,9 @@ export default function PetPage() {
   const [name, setName] = useState(pet.name);
   const [petPos, setPetPos] = useState({ x: 50, y: 2 });
   const [facing, setFacing] = useState<'left' | 'right'>('right');
+  const [voiceOn, setVoiceOn] = useState(true);
   const timers = useRef<number[]>([]);
+  const greeted = useRef(false);
 
   const sad = needs.hungry || needs.thirsty;
   const need = needsMessage(pet.name, needs);
@@ -270,38 +318,157 @@ export default function PetPage() {
     timers.current = [];
   };
 
+  const speak = (text: string) => {
+    setSceneMessage(text);
+    if (!voiceOn || typeof window === 'undefined' || !('speechSynthesis' in window)) return;
+    try {
+      window.speechSynthesis.cancel();
+      const utter = new SpeechSynthesisUtterance(text);
+      utter.lang = 'tr-TR';
+      utter.rate = 0.96;
+      utter.pitch = 1.08;
+      const voices = window.speechSynthesis.getVoices();
+      const tr = voices.find((v) => v.lang.toLowerCase().startsWith('tr'));
+      if (tr) utter.voice = tr;
+      window.speechSynthesis.speak(utter);
+    } catch {
+      // Konuşma balonu yine çalışır; bazı mobil tarayıcılar ses sentezini engelleyebilir.
+    }
+  };
+
+  const randomLine = (where: HouseRoom = room) => {
+    const lines = PANDA_TALK[where];
+    return lines[Math.floor(Math.random() * lines.length)];
+  };
+
+  const greet = (withVoice = true) => {
+    clearTimers();
+    setFacing('right');
+    setActivity('greeting');
+    const text = 'Selam! Ben ' + pet.name + '. Hoş geldin! 👋';
+    setSceneMessage(text);
+    if (withVoice) speak(text);
+    later(() => {
+      setActivity('idle');
+      setSceneMessage(null);
+    }, 2600);
+  };
+
+  const talk = () => {
+    clearTimers();
+    setActivity('talking');
+    const text = randomLine();
+    speak(text);
+    later(() => {
+      setActivity('idle');
+      setSceneMessage(null);
+    }, 3300);
+  };
+
+  useEffect(() => {
+    if (greeted.current) return;
+    greeted.current = true;
+    const id = window.setTimeout(() => greet(false), 500);
+    return () => window.clearTimeout(id);
+    // İlk karşılama yalnızca sayfa açılışında bir kez çalışır.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   useEffect(() => {
     if (activity !== 'idle') return;
     let cancelled = false;
-    const schedule = () => {
-      const wait = 4200 + Math.floor(Math.random() * 4200);
-      const id = window.setTimeout(() => {
-        if (cancelled) return;
-        const nextX = 30 + Math.round(Math.random() * 40);
-        setFacing((prev) => (nextX < petPos.x ? 'left' : nextX > petPos.x ? 'right' : prev));
+    const wait = 2600 + Math.floor(Math.random() * 2800);
+    const id = window.setTimeout(() => {
+      if (cancelled) return;
+      const roll = Math.random();
+
+      if (roll < 0.52) {
+        // Aynı odada gerçek bir yürüyüş: sahnenin bir ucundan diğerine kadar dolaşır.
+        let nextX = 16 + Math.round(Math.random() * 68);
+        if (Math.abs(nextX - petPos.x) < 22) nextX = petPos.x < 50 ? 76 : 24;
+        const nextY = 1 + Math.round(Math.random() * 9);
+        setFacing(nextX < petPos.x ? 'left' : 'right');
         setActivity('walking');
-        setPetPos({ x: nextX, y: 2 + Math.round(Math.random() * 4) });
-        const stopId = window.setTimeout(() => {
-          if (cancelled) return;
+        setPetPos({ x: nextX, y: nextY });
+        later(() => setActivity('idle'), 1500);
+        return;
+      }
+
+      if (roll < 0.70) {
+        // Odadan çıkar, başka odaya gir ve yürümeye devam et.
+        const choices = ROOM_ORDER.filter((x) => x !== room);
+        const nextRoom = choices[Math.floor(Math.random() * choices.length)];
+        const exitRight = Math.random() > 0.5;
+        setFacing(exitRight ? 'right' : 'left');
+        setActivity('walking');
+        setSceneMessage(pet.name + ' ' + ROOM_INFO[nextRoom].label.toLowerCase() + 'a gidiyor…');
+        setPetPos({ x: exitRight ? 90 : 10, y: 3 });
+        later(() => {
+          setRoom(nextRoom);
+          setPetPos({ x: exitRight ? 10 : 90, y: 3 });
+          setFacing(exitRight ? 'right' : 'left');
+          later(() => {
+            const target = ROOM_TARGET[nextRoom];
+            setFacing(target.x < (exitRight ? 10 : 90) ? 'left' : 'right');
+            setPetPos(target);
+            later(() => {
+              setActivity('idle');
+              setSceneMessage(null);
+            }, 1200);
+          }, 80);
+        }, 1050);
+        return;
+      }
+
+      if (roll < 0.84) {
+        setActivity('greeting');
+        setFacing('right');
+        setSceneMessage('Selam! Buradayım 👋');
+        later(() => {
           setActivity('idle');
-        }, 1150);
-        timers.current.push(stopId);
-      }, wait);
-      timers.current.push(id);
-    };
-    schedule();
+          setSceneMessage(null);
+        }, 2200);
+        return;
+      }
+
+      if (roll < 0.96) {
+        setActivity('talking');
+        setSceneMessage(randomLine());
+        later(() => {
+          setActivity('idle');
+          setSceneMessage(null);
+        }, 3000);
+        return;
+      }
+
+      // Odaya uygun küçük bir kendi-kendine davranış.
+      const contextual: Partial<Record<HouseRoom, HouseActivity>> = {
+        living: 'relaxing',
+        study: 'studying',
+        garden: 'playing',
+      };
+      const nextActivity = contextual[room] ?? 'idle';
+      setActivity(nextActivity);
+      later(() => setActivity('idle'), 3200);
+    }, wait);
+    timers.current.push(id);
     return () => {
       cancelled = true;
+      window.clearTimeout(id);
     };
-  }, [activity, petPos.x]);
+    // Her idle dönüşünde yeni bir doğal davranış planlanır.
+  }, [activity, room, pet.name, petPos.x]);
 
-  useEffect(() => () => clearTimers(), []);
+  useEffect(() => () => {
+    clearTimers();
+    if (typeof window !== 'undefined' && 'speechSynthesis' in window) window.speechSynthesis.cancel();
+  }, []);
 
   const moveTo = (nextRoom: HouseRoom, nextActivity: HouseActivity = 'idle', message?: string) => {
     clearTimers();
     setHolding(null);
     setRoom(nextRoom);
-    setPetPos({ x: 50, y: 2 });
+    setPetPos(ROOM_TARGET[nextRoom]);
     setActivity('walking');
     setSceneMessage(message ?? ROOM_INFO[nextRoom].label + 'a gidiyor…');
     later(() => {
@@ -430,15 +597,33 @@ export default function PetPage() {
   };
 
   const roam = () => {
-    const choices = ROOM_ORDER.filter((x) => x !== room);
-    const nextRoom = choices[Math.floor(Math.random() * choices.length)];
-    moveTo(nextRoom, 'idle', pet.name + ' evde biraz geziyor…');
+    clearTimers();
+    let nextX = petPos.x < 50 ? 78 : 22;
+    setFacing(nextX < petPos.x ? 'left' : 'right');
+    setActivity('walking');
+    setSceneMessage(pet.name + ' odada dolaşıyor…');
+    setPetPos({ x: nextX, y: 8 });
+    later(() => {
+      nextX = nextX < 50 ? 66 : 34;
+      setFacing(nextX < petPos.x ? 'left' : 'right');
+      setPetPos({ x: nextX, y: 2 });
+    }, 1400);
+    later(() => {
+      setActivity('idle');
+      setSceneMessage(null);
+    }, 2800);
   };
 
   const petPanda = () => {
     setHearts((v) => v + 1);
     setHappiness((v) => Math.min(100, v + 3));
-    toast(pet.name + ' çok mutlu oldu ♡');
+    setActivity('greeting');
+    const text = Math.random() > 0.5 ? 'Selam! Beni mi çağırdın? 👋' : 'Buradayım! Seninle takılmayı seviyorum.';
+    speak(text);
+    later(() => {
+      setActivity('idle');
+      setSceneMessage(null);
+    }, 2800);
   };
 
   const nextItem = PET_ITEMS.find((i) => i.level > p.level);
@@ -480,8 +665,17 @@ export default function PetPage() {
               <small>{pet.name} · Seviye {p.level}</small>
             </div>
           </div>
-          <button className="pet-game-iconbtn" type="button" onClick={() => setRoomMode((m) => (m === 'day' ? 'night' : 'day'))} aria-label="Gündüz gece değiştir">
-            {roomMode === 'day' ? '☾' : '☀'}
+          <button
+            className="pet-game-iconbtn"
+            type="button"
+            onClick={() => setVoiceOn((v) => {
+              const next = !v;
+              if (!next && typeof window !== 'undefined' && 'speechSynthesis' in window) window.speechSynthesis.cancel();
+              return next;
+            })}
+            aria-label={voiceOn ? 'Panda sesini kapat' : 'Panda sesini aç'}
+          >
+            {voiceOn ? '🔊' : '🔇'}
           </button>
         </header>
 
@@ -522,6 +716,8 @@ export default function PetPage() {
               drinking={activity === 'drinking'}
               bathing={activity === 'bathing'}
               playing={activity === 'playing'}
+              waving={activity === 'greeting'}
+              talking={activity === 'talking' || activity === 'greeting'}
             />
             <span className="pet-floor-shadow" />
             {hearts > 0 && <span key={hearts} className="pet-game-heart" aria-hidden="true">♡</span>}
@@ -536,7 +732,7 @@ export default function PetPage() {
             </div>
           )}
 
-          <div className="pet-game-talk" aria-live="polite">
+          <div className={'pet-game-talk' + (activity === 'talking' || activity === 'greeting' ? ' speaking' : '')} aria-live="polite">
             <span>{roomMessage}</span>
           </div>
         </div>
@@ -563,13 +759,19 @@ export default function PetPage() {
           <button type="button" onClick={garden}>
             <span>⚽</span><b>Oyun</b>
           </button>
-          <button type="button" onClick={roam}>
-            <span>🐾</span><b>Gez</b>
+          <button type="button" onClick={talk}>
+            <span>💬</span><b>Konuş</b>
           </button>
         </div>
       </section>
 
       <section className="pet-game-quick section">
+        <button type="button" onClick={roam}>
+          <span>🐾</span><b>Evde gez</b><small>Kendi kendine dolaşsın</small>
+        </button>
+        <button type="button" onClick={greet}>
+          <span>👋</span><b>Selam ver</b><small>Sana dönüp tepki versin</small>
+        </button>
         <button type="button" onClick={() => kitchenGive('su')}>
           <span>💧</span><b>Su ver</b><small>{needs.drops} damla</small>
         </button>
