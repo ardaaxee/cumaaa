@@ -1,0 +1,1 @@
+import{Bt as e,Ht as t,Ut as n,Vt as r}from"./actions-CH-oafwP.js";var i={topicName:e=>r(e)?.topic.name??e,subjectName:n=>{let r=e(n);return r?t(r):n},subjectTopicIds:e=>n(e).map(e=>e.id)};function a(e){let t=r(e);return t?`${t.subject.exam} ${t.subject.name} · ${t.topic.name}`:e}export{a as n,i as t};
