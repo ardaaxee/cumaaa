@@ -1,0 +1,1 @@
+import{ct as e}from"./actions-DA1iRL-m.js";import{j as t,x as n}from"./index-CGr4j2hB.js";var r=e();function i(){return(0,r.jsxs)(r.Fragment,{children:[(0,r.jsx)(t,{title:`Sayfa bulunamadı`}),(0,r.jsx)(n,{title:`Aradığın sayfa yok.`,action:(0,r.jsx)(`a`,{className:`btn primary`,href:`#/`,children:`Ana sayfaya dön`})})]})}export{i as default};
