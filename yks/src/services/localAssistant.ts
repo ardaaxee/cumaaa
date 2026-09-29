@@ -11,6 +11,7 @@ import { dashboard } from '../utils/stats';
 import type { TeacherAction } from './ai';
 import { lookup } from './lookup';
 import { buildRecommendations } from './recommendations';
+import { studyBrief } from './adaptiveStudy';
 
 /**
  * Yerel asistan: gerçek bir AI bağlantısı yokken çalışır. Yanıtlarını yalnızca
@@ -199,8 +200,13 @@ export async function assistantReply(input: AssistantInput): Promise<string> {
   // 3) Veriye dayalı istekler
   if (action === 'bugun' || has(m, 'ne calis', 'bugun ne', 'plan', 'nereden basla')) {
     const recs = buildRecommendations(state, lookup, today);
-    if (!recs.length) return `Bugün için verine göre ek bir öneri yok${name}. Planındaki görevlere devam et; istersen Testler’den karışık 20 soru çöz, sonuçlara göre sana yol çizeyim.`;
-    return [`Verine göre bugün şunları öneriyorum${name}:`, ...recs.slice(0, 4).map((r, i) => `${i + 1}) ${r.title} — ${r.detail}`)].join('\n');
+    const adaptive = studyBrief(state, today);
+    if (!recs.length) return `Bugün için verine göre ek bir öneri yok${name}. Akıllı koç özeti: ${adaptive} Akıllı Koç sayfasından seviye tespiti veya adaptif 12 soru başlatabilirsin.`;
+    return [
+      `Verine göre bugün şunları öneriyorum${name}:`,
+      ...recs.slice(0, 3).map((r, i) => `${i + 1}) ${r.title} — ${r.detail}`),
+      `Akıllı koç özeti: ${adaptive}`,
+    ].join('\n');
   }
   if (action === 'yanlislar' || has(m, 'yanlis', 'hatam', 'hatalarim', 'zayif', 'eksik')) {
     const weak = weakTopics(state).slice(0, 5);
