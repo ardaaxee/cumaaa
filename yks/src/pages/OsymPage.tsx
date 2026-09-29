@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { EXAM_ARCHIVE } from '../data/officialResources';
+import { EXAM_ARCHIVE, OSYM_YKS_PAGE } from '../data/officialResources';
 import { Icon } from '../components/Icon';
 import { PageHeader } from '../components/Layout';
 import { Segmented, SourceBadge } from '../components/ui';
@@ -39,10 +39,21 @@ export default function OsymPage() {
               <a className="btn primary block" href={e.url} target="_blank" rel="noopener noreferrer">
                 Resmî ÖSYM sayfasını aç <Icon name="external" />
               </a>
+              <a className="btn ghost small block mt-8" href={e.searchUrl} target="_blank" rel="noopener noreferrer">
+                Sayfa açılmazsa ÖSYM’de ara <Icon name="external" />
+              </a>
             </article>
           ))}
         </div>
       </section>
+
+      <p className="tiny muted section">
+        Aynı sayfada TYT ve AYT kitapçıkları birlikte yer alır. Tüm yıllar ve duyurular için{' '}
+        <a href={OSYM_YKS_PAGE} target="_blank" rel="noopener noreferrer">
+          ÖSYM YKS sayfası
+        </a>
+        .
+      </p>
     </>
   );
 }
