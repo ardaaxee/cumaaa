@@ -46,21 +46,43 @@ export default function OnboardingPage() {
   const back = () => setStep((s) => Math.max(0, s - 1));
 
   return (
-    <div className="card hero">
-      <div className="eyebrow">İyi ki • YKS Çalışma Odası</div>
-      <h1 style={{ marginTop: 4 }}>
-        Hoş geldin <span style={{ color: '#c0668f' }}>♡</span>
-      </h1>
-      <p className="muted">Sana özel bir başlangıç planı hazırlayabilmemiz için birkaç şey soralım.</p>
+    <div className="onboarding-shell">
+      <aside className="onboarding-intro" aria-label="İyi ki YKS">
+        <div className="onboarding-logo">♡</div>
+        <div className="eyebrow">İyi ki • YKS</div>
+        <h1>Sana ait bir çalışma odası.</h1>
+        <p>Planın, derslerin, tekrarların ve ilerlemen tek yerde. İlk kurulumu bitirince sana 7 günlük başlangıç planı hazırlayacağız.</p>
+        <div className="onboarding-benefits" aria-label="Özellikler">
+          <span>✓ TYT + AYT Sayısal</span>
+          <span>✓ Kişisel günlük hedef</span>
+          <span>✓ Konu + soru + tekrar</span>
+        </div>
+      </aside>
 
-      <div className="progress mb-8" role="progressbar" aria-valuenow={step + 1} aria-valuemin={1} aria-valuemax={STEPS.length} aria-label="Adım">
-        <span style={{ width: `${((step + 1) / STEPS.length) * 100}%` }} />
-      </div>
-      <div className="tiny muted mb-8">
-        Adım {step + 1}/{STEPS.length}: {STEPS[step]}
-      </div>
+      <div className="card onboarding-card">
+        <div className="onboarding-card-head">
+          <div>
+            <div className="eyebrow">Kişisel kurulum</div>
+            <h2>Hoş geldin <span className="heart">♡</span></h2>
+            <p className="muted">Sadece birkaç adım. Sonra doğrudan çalışmaya başlayabilirsin.</p>
+          </div>
+          <span className="onboarding-step-count">{step + 1}/{STEPS.length}</span>
+        </div>
 
-      <form
+        <div className="onboarding-steps" aria-label="Kurulum adımları">
+          {STEPS.map((label, i) => (
+            <div key={label} className={`onboarding-step${i === step ? ' current' : ''}${i < step ? ' done' : ''}`}>
+              <span>{i < step ? '✓' : i + 1}</span>
+              <small>{label}</small>
+            </div>
+          ))}
+        </div>
+
+        <div className="progress onboarding-progress" role="progressbar" aria-valuenow={step + 1} aria-valuemin={1} aria-valuemax={STEPS.length} aria-label="Adım">
+          <span style={{ width: `${((step + 1) / STEPS.length) * 100}%` }} />
+        </div>
+
+        <form
         className="stack"
         onSubmit={(e) => {
           e.preventDefault();
@@ -135,7 +157,8 @@ export default function OnboardingPage() {
             {step < STEPS.length - 1 ? 'Devam et' : 'Başla'}
           </button>
         </div>
-      </form>
+        </form>
+      </div>
     </div>
   );
 }
