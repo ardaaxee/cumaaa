@@ -251,8 +251,8 @@ export default function TopicPage({ params }: { params: string[] }) {
     <>
       <PageHeader title={ref.topic.name} sub={`${subjectLabel(ref.subject)} · ${ref.unit.name}`} back={`#/ders/${ref.subject.id}`} />
 
-      <div className="card">
-        <div className="row">
+      <div className="card topic-overview-card">
+        <div className="row topic-badges">
           <SourceBadge type="meb-program" />
           <span className="badge">{ref.topic.grade}. sınıf</span>
           {weak && <span className="badge bad">Zayıf konu: {weak.reasons.join(', ')}</span>}
@@ -283,15 +283,18 @@ export default function TopicPage({ params }: { params: string[] }) {
         )}
       </div>
 
-      <div className="grid grid-3 section">
+      <div className="grid grid-3 section topic-stats">
         <Stat label="Soru bankası" value={qCount ?? '…'} sub="özgün pratik soru" />
         <Stat label="Son testlerde" value={perf.accuracy != null ? `%${perf.accuracy}` : '—'} sub={perf.total ? `${perf.total} sorudan ${perf.correct} doğru` : 'Henüz çözülmedi'} />
         <Stat label="Açık yanlış" value={openWrongs} sub={openWrongs ? <a href="#/yanlislar">Yanlışlarıma git</a> : 'yok'} />
       </div>
 
-      <div className="card section">
+      <div className="card section topic-actions-card">
         <div className="card-head">
-          <h2>Pratik yap</h2>
+          <div>
+            <div className="eyebrow">Aktif öğrenme</div>
+            <h2>Pratik yap</h2>
+          </div>
           <SourceBadge type="ozgun-pratik" />
         </div>
         <div className="row">
@@ -322,11 +325,18 @@ export default function TopicPage({ params }: { params: string[] }) {
         {qCount != null && qCount < 10 && qCount > 0 && <div className="tiny muted mt-8">Bu konuda {qCount} soru var; normal test mevcut soruların tamamını kullanır.</div>}
       </div>
 
-      <div className="card section">
+      <div className="card section lesson-card">
+        <div className="lesson-card-head">
+          <div>
+            <div className="eyebrow">Konu anlatımı</div>
+            <h2>Ders notu</h2>
+          </div>
+          <span className="lesson-reading-hint">Oku · dinle · uygula</span>
+        </div>
         {lessonLoad.failed ? <LoadFailed what="Konu anlatımı" onRetry={lessonLoad.retry} /> : lesson === undefined ? <Spinner label="Konu anlatımı yükleniyor" /> : lesson === null ? <Empty title="Bu konunun anlatımı henüz eklenmedi." /> : <LessonView lesson={lesson} />}
       </div>
 
-      <div className="card section" id="konu-sonu">
+      <div className="card section topic-quiz-card" id="konu-sonu">
         <div className="card-head">
           <h2>Konu sonu soruları</h2>
           <SourceBadge type="ozgun-pratik" />
@@ -348,7 +358,7 @@ export default function TopicPage({ params }: { params: string[] }) {
         )}
       </div>
 
-      <div className="card section">
+      <div className="card section topic-details-card">
         <details>
           <summary className="card-head" style={{ cursor: 'pointer', marginBottom: 0 }}>
             <h2>Alt konular ve kazanımlar</h2>
@@ -366,7 +376,7 @@ export default function TopicPage({ params }: { params: string[] }) {
         </details>
       </div>
 
-      <div className="card section">
+      <div className="card section topic-resources-card">
         <div className="card-head">
           <h2>Video kaynaklarım</h2>
           <a className="btn small" href={href('/kaynaklar', { konu: topicId })}>
