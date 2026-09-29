@@ -209,9 +209,14 @@ export default function PlanPage() {
         title="Planım"
         sub="Günlük ve haftalık çalışma planı"
         actions={
-          <button type="button" className="btn primary" onClick={() => setForm({ date: view === 'gun' ? day : today })}>
-            <Icon name="plus" /> <span>Görev</span>
-          </button>
+          <div className="row nowrap">
+            <a className="btn" href="#/koc">
+              <Icon name="target" /> <span>Akıllı plan</span>
+            </a>
+            <button type="button" className="btn primary" onClick={() => setForm({ date: view === 'gun' ? day : today })}>
+              <Icon name="plus" /> <span>Görev</span>
+            </button>
+          </div>
         }
       />
       <div className="plan-toolbar">
