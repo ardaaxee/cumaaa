@@ -23,6 +23,18 @@ function formatTimer(ms: number): string {
   return String(m).padStart(2, '0') + ':' + String(s).padStart(2, '0');
 }
 
+interface WakeLockSentinelLike {
+  released?: boolean;
+  release(): Promise<void>;
+  addEventListener(type: 'release', listener: () => void): void;
+}
+
+interface WakeLockNavigator extends Navigator {
+  wakeLock?: {
+    request(type: 'screen'): Promise<WakeLockSentinelLike>;
+  };
+}
+
 function notifyFinished(title: string, body: string) {
   if (typeof Notification === 'undefined' || Notification.permission !== 'granted') return;
   const options: NotificationOptions = { body, icon: 'icon-192.png', badge: 'icon-192.png', tag: 'yks-focus' };
@@ -42,6 +54,7 @@ export default function FocusPage() {
   const today = dayKey();
   const [now, setNow] = useState(Date.now());
   const [immersive, setImmersive] = useState(false);
+  const [wakeHeld, setWakeHeld] = useState(false);
   const completing = useRef(false);
   const d = useMemo(() => dashboard(state, today), [state, today]);
 
@@ -67,6 +80,53 @@ export default function FocusPage() {
     document.body.classList.toggle('focus-immersive-mode', immersive);
     return () => document.body.classList.remove('focus-immersive-mode');
   }, [immersive]);
+
+  useEffect(() => {
+    if (!p.running || p.phase !== 'odak') {
+      setWakeHeld(false);
+      return;
+    }
+
+    const nav = navigator as WakeLockNavigator;
+    if (!nav.wakeLock?.request) return;
+
+    let lock: WakeLockSentinelLike | null = null;
+    let cancelled = false;
+
+    const requestLock = async () => {
+      if (cancelled || lock) return;
+      try {
+        const next = await nav.wakeLock!.request('screen');
+        if (cancelled) {
+          await next.release().catch(() => undefined);
+          return;
+        }
+        lock = next;
+        setWakeHeld(true);
+        next.addEventListener('release', () => {
+          lock = null;
+          setWakeHeld(false);
+        });
+      } catch {
+        setWakeHeld(false);
+      }
+    };
+
+    void requestLock();
+    const onVisibility = () => {
+      if (document.visibilityState === 'visible') void requestLock();
+    };
+    document.addEventListener('visibilitychange', onVisibility);
+
+    return () => {
+      cancelled = true;
+      document.removeEventListener('visibilitychange', onVisibility);
+      const current = lock;
+      lock = null;
+      setWakeHeld(false);
+      if (current) void current.release().catch(() => undefined);
+    };
+  }, [p.running, p.phase]);
 
   const finishPhase = () => {
     if (completing.current) return;
@@ -219,6 +279,12 @@ export default function FocusPage() {
       </section>
 
       <section className="card section focus-controls-card" aria-label="Odak kontrolleri">
+        {p.running && p.phase === 'odak' && (
+          <div className="focus-runtime-status" aria-live="polite">
+            <span className={wakeHeld ? 'ok' : ''}>◉</span>
+            <span>{wakeHeld ? 'Ekran odak boyunca açık tutuluyor' : 'Odak sürüyor · ekran kilitlenirse süre yine devam eder'}</span>
+          </div>
+        )}
         <div className="focus-main-controls">
           {!p.running ? (
             <button type="button" className="btn primary focus-start" onClick={start}>
