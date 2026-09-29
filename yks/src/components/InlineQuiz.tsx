@@ -60,6 +60,12 @@ export function InlineQuiz({
             <div className="mt-12">
               <QuestionBody q={q} />
             </div>
+            {!revealed && (
+              <details className="question-hint">
+                <summary>İpucu ister misin?</summary>
+                <p>{q.hint}</p>
+              </details>
+            )}
             <Options q={q} selected={chosen} onSelect={(i) => answer(q, i)} reveal={revealed} disabled={revealed} />
             {revealed && (
               <div className={`feedback ${ok ? 'ok' : 'bad'}`} role="status">
