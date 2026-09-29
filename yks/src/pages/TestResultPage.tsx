@@ -38,6 +38,19 @@ export default function TestResultPage({ params }: { params: string[] }) {
     [score, byId],
   );
   const byDiff = useMemo(() => (score && byId ? breakdown(score.items, byId, (q) => q.difficulty) : []), [score, byId]);
+  const errorReasons = useMemo(() => {
+    if (!score || !byId) return [];
+    const labels: Record<string, string> = { kavram: 'Kavram eksiği', islem: 'İşlem hatası', yorum: 'Yorum / okuma', dikkat: 'Dikkat', zaman: 'Zaman baskısı', bos: 'Boş bırakıldı' };
+    const counts = new Map<string, number>();
+    for (const item of score.items) {
+      if (item.state === 'dogru') continue;
+      const q = byId.get(item.questionId);
+      if (!q) continue;
+      const r = inferWrongReason(q, item.answer, item.timeMs);
+      counts.set(r, (counts.get(r) ?? 0) + 1);
+    }
+    return [...counts.entries()].map(([key, count]) => ({ key, label: labels[key] ?? key, count })).sort((a, b) => b.count - a.count);
+  }, [score, byId]);
 
   if (!result) {
     return (
@@ -167,6 +180,27 @@ export default function TestResultPage({ params }: { params: string[] }) {
           </button>
         )}
       </div>
+
+      {errorReasons.length > 0 && (
+        <section className="card section result-error-analysis" aria-labelledby="error-reason-h">
+          <div className="card-head">
+            <div>
+              <div className="eyebrow">Yanlışın neden?</div>
+              <h2 id="error-reason-h">Hata türü analizi</h2>
+            </div>
+            <a className="btn small" href="#/yanlislar">Yanlış defterini aç</a>
+          </div>
+          <div className="error-reason-grid">
+            {errorReasons.map((r) => (
+              <div className="error-reason-item" key={r.key}>
+                <b>{r.count}</b>
+                <span>{r.label}</span>
+              </div>
+            ))}
+          </div>
+          <p className="tiny muted mt-8">Bu sınıflandırma soru tipi, boş bırakma ve çözüm süresine göre otomatik tahmindir; yanlış defterinde nedeni değiştirebilirsin.</p>
+        </section>
+      )}
 
       {weakestSubtopic && (
         <section className="card section result-learning-next" aria-labelledby="next-learning-h">
