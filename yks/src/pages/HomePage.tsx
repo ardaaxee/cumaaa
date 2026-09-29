@@ -136,10 +136,10 @@ export default function HomePage() {
           <b>Konu çalış</b>
           <span className="tiny muted">TYT + AYT konu anlatımları</span>
         </a>
-        <a className="quick-tile t-mint" href="#/plan">
-          <span className="quick-emoji" aria-hidden="true">✓</span>
-          <b>Planı tamamla</b>
-          <span className="tiny muted">{todayTasks.length ? `${todayTasks.filter((t) => !t.done).length} görev kaldı` : 'Bugün için görev ekle'}</span>
+        <a className="quick-tile t-mint" href="#/odak">
+          <span className="quick-emoji" aria-hidden="true">◷</span>
+          <b>Odak Modu</b>
+          <span className="tiny muted">{state.settings.focusMinutes} dk çalış · süre otomatik kaydolur</span>
         </a>
         <a className="quick-tile t-rose" href="#/ogretmen">
           <span className="quick-emoji" aria-hidden="true">✦</span>
