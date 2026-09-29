@@ -44,7 +44,15 @@ type HouseActivity =
   | 'studying'
   | 'relaxing'
   | 'greeting'
-  | 'talking';
+  | 'talking'
+  | 'laughing'
+  | 'angry'
+  | 'shy'
+  | 'yawning'
+  | 'sneezing'
+  | 'surprised';
+
+type PandaEmotion = 'neutral' | 'laugh' | 'angry' | 'shy' | 'yawn' | 'sneeze' | 'surprised';
 
 type ZeynepActivity = 'idle' | 'walking' | 'cooking' | 'serving';
 
@@ -90,6 +98,15 @@ const PANDA_TALK: Record<HouseRoom, string[]> = {
     'Topu görüyor musun? Biraz oynayalım!',
   ],
 };
+
+const PANDA_REACTIONS: { activity: HouseActivity; emotion: PandaEmotion; line: string; voice: 'laugh' | 'angry' | 'shy' | 'yawn' | 'sneeze' | 'surprised' }[] = [
+  { activity: 'laughing', emotion: 'laugh', line: 'Hıhıhı! Çok komikti! 😄', voice: 'laugh' },
+  { activity: 'shy', emotion: 'shy', line: 'Şey… beni böyle izleyince biraz utanıyorum 🙈', voice: 'shy' },
+  { activity: 'yawning', emotion: 'yawn', line: 'Uaaah… biraz uykum geldi.', voice: 'yawn' },
+  { activity: 'sneezing', emotion: 'sneeze', line: 'Hapşuu! Burnuma bir şey kaçtı 😳', voice: 'sneeze' },
+  { activity: 'surprised', emotion: 'surprised', line: 'Ooo! Bunu beklemiyordum! 😮', voice: 'surprised' },
+  { activity: 'angry', emotion: 'angry', line: 'Hımm! Biraz huysuzlandım ama geçecek 😤', voice: 'angry' },
+];
 
 const ROOM_TARGET: Record<HouseRoom, { x: number; y: number }> = {
   living: { x: 50, y: 2 },
@@ -277,6 +294,12 @@ function activityText(activity: HouseActivity, room: HouseRoom, name: string): s
   if (activity === 'relaxing') return name + ' koltukta dinleniyor.';
   if (activity === 'greeting') return name + ' sana selam veriyor 👋';
   if (activity === 'talking') return name + ' seninle konuşuyor.';
+  if (activity === 'laughing') return name + ' kahkaha atıyor 😄';
+  if (activity === 'angry') return name + ' biraz huysuzlandı 😤';
+  if (activity === 'shy') return name + ' utandı 🙈';
+  if (activity === 'yawning') return name + ' esniyor 🥱';
+  if (activity === 'sneezing') return name + ' hapşırdı 🤧';
+  if (activity === 'surprised') return name + ' şaşırdı 😮';
   return ROOM_INFO[room].desc;
 }
 
@@ -303,6 +326,7 @@ export default function PetPage() {
   const [petPos, setPetPos] = useState({ x: 50, y: 2 });
   const [facing, setFacing] = useState<'left' | 'right'>('right');
   const [voiceOn, setVoiceOn] = useState(true);
+  const [emotion, setEmotion] = useState<PandaEmotion>('neutral');
   const timers = useRef<number[]>([]);
   const greeted = useRef(false);
 
@@ -319,7 +343,7 @@ export default function PetPage() {
     timers.current = [];
   };
 
-  const speak = (text: string, intent: 'greet' | 'talk' | 'happy' | 'hungry' | 'sleepy' | 'eat' | 'drink' | 'bath' | 'play' = 'talk') => {
+  const speak = (text: string, intent: 'greet' | 'talk' | 'happy' | 'hungry' | 'sleepy' | 'eat' | 'drink' | 'bath' | 'play' | 'laugh' | 'angry' | 'shy' | 'yawn' | 'sneeze' | 'surprised' = 'talk') => {
     setSceneMessage(text);
     void playPandaVoice(text, intent, voiceOn);
   };
@@ -332,6 +356,7 @@ export default function PetPage() {
   const greet = (withVoice = true) => {
     clearTimers();
     setFacing('right');
+    setEmotion('neutral');
     setActivity('greeting');
     const text = 'Selam! Ben ' + pet.name + '. Hoş geldin! 👋';
     setSceneMessage(text);
@@ -351,6 +376,21 @@ export default function PetPage() {
       setActivity('idle');
       setSceneMessage(null);
     }, 3300);
+  };
+
+  const triggerReaction = (forced?: (typeof PANDA_REACTIONS)[number]) => {
+    clearTimers();
+    const reaction = forced ?? PANDA_REACTIONS[Math.floor(Math.random() * PANDA_REACTIONS.length)];
+    setEmotion(reaction.emotion);
+    setActivity(reaction.activity);
+    speak(reaction.line, reaction.voice);
+    if (reaction.activity === 'angry') setHappiness((v) => Math.max(0, v - 2));
+    if (reaction.activity === 'laughing') setHappiness((v) => Math.min(100, v + 3));
+    later(() => {
+      setEmotion('neutral');
+      setActivity('idle');
+      setSceneMessage(null);
+    }, reaction.activity === 'yawning' ? 3600 : 2600);
   };
 
   useEffect(() => {
@@ -419,7 +459,7 @@ export default function PetPage() {
         return;
       }
 
-      if (roll < 0.96) {
+      if (roll < 0.90) {
         setActivity('talking');
         const text = randomLine();
         speak(text, 'talk');
@@ -427,6 +467,14 @@ export default function PetPage() {
           setActivity('idle');
           setSceneMessage(null);
         }, 3000);
+        return;
+      }
+
+      if (roll < 0.98) {
+        const pool = sad
+          ? PANDA_REACTIONS.filter((r) => r.emotion === 'angry' || r.emotion === 'yawn' || r.emotion === 'sneeze')
+          : PANDA_REACTIONS.filter((r) => r.emotion !== 'angry');
+        triggerReaction(pool[Math.floor(Math.random() * pool.length)]);
         return;
       }
 
@@ -656,7 +704,7 @@ export default function PetPage() {
             <span>{ROOM_INFO[room].icon}</span>
             <div>
               <b>{ROOM_INFO[room].label}</b>
-              <small>{pet.name} · Seviye {p.level}</small>
+              <small>{pet.name} · meraklı · sevecen · biraz yaramaz</small>
             </div>
           </div>
           <button
@@ -715,6 +763,7 @@ export default function PetPage() {
               playing={activity === 'playing'}
               waving={activity === 'greeting'}
               talking={activity === 'talking' || activity === 'greeting'}
+              emotion={emotion}
             />
             <span className="pet-floor-shadow" />
             {hearts > 0 && <span key={hearts} className="pet-game-heart" aria-hidden="true">♡</span>}
@@ -729,7 +778,7 @@ export default function PetPage() {
             </div>
           )}
 
-          <div className={'pet-game-talk' + (activity === 'talking' || activity === 'greeting' ? ' speaking' : '')} aria-live="polite">
+          <div className={'pet-game-talk' + (['talking','greeting','laughing','angry','shy','yawning','sneezing','surprised'].includes(activity) ? ' speaking' : '')} aria-live="polite">
             <span>{roomMessage}</span>
           </div>
         </div>
@@ -777,6 +826,9 @@ export default function PetPage() {
         </button>
         <button type="button" onClick={relax}>
           <span>🛋️</span><b>Mola ver</b><small>Salonda dinlensin</small>
+        </button>
+        <button type="button" onClick={() => triggerReaction()}>
+          <span>🎭</span><b>Sürpriz tepki</b><small>Kahkaha · utanma · hapşırma…</small>
         </button>
       </section>
 
