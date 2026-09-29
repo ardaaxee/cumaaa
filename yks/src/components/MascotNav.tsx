@@ -22,6 +22,7 @@ interface MenuItem {
 const MENU: MenuItem[] = [
   { path: '/', label: 'Ana Sayfa', icon: 'home', tint: '#efe6fb' },
   { path: '/koc', label: 'Akıllı Koç', icon: 'target', tint: '#eee6ff' },
+  { path: '/odak', label: 'Odak Modu', icon: 'timer', tint: '#e4f0ff' },
   { path: '/calis', label: 'Ders çalış', icon: 'play', tint: '#fde6ec' },
   { path: '/dersler', label: 'Dersler', icon: 'book', tint: '#e3effd' },
   { path: '/testler', label: 'Testler', icon: 'check', tint: '#e5f5ec' },
