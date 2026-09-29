@@ -1,0 +1,81 @@
+name: YKS stability CI and deploy
+
+on:
+  push:
+    branches:
+      - chatgpt/yks-stability-fix
+      - claude/yks-study-platform-p15aod
+    paths:
+      - 'yks/**'
+      - '.github/workflows/yks-stability-ci.yml'
+  pull_request:
+    paths:
+      - 'yks/**'
+      - '.github/workflows/yks-stability-ci.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: yks
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: yks/package-lock.json
+
+      - uses: browser-actions/setup-chrome@v1
+
+      - name: Install
+        run: npm ci
+
+      - name: Typecheck
+        run: npm run typecheck
+
+      - name: Unit tests
+        run: npm test
+
+      - name: Production build
+        run: npm run build
+
+      - name: Mobile E2E smoke
+        run: npm run e2e
+
+  deploy:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/claude/yks-study-platform-p15aod'
+    needs: verify
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: yks/package-lock.json
+
+      - name: Install
+        working-directory: yks
+        run: npm ci
+
+      - name: Configure git
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+      - name: Build and deploy GitHub Pages
+        run: bash yks/scripts/deploy-pages.sh
