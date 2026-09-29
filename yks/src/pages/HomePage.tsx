@@ -87,11 +87,11 @@ export default function HomePage() {
               : 'Bugün küçük ama tamamlanmış bir çalışma, yarım kalan büyük plandan daha değerlidir.'}
           </p>
           <div className="hero-actions">
-            <a className="btn primary study-cta" href="#/calis">
-              <Icon name="play" /> Çalışmaya başla
+            <a className="btn primary study-cta" href="#/dersler">
+              <Icon name="play" /> Konu çalışmaya başla
             </a>
-            <a className="btn hero-secondary" href="#/plan">
-              <Icon name="calendar" /> Bugünün planı
+            <a className="btn hero-secondary" href="#/testler">
+              <Icon name="target" /> Soru çöz
             </a>
           </div>
           <div className="hero-kpis" aria-label="Bugünün özeti">
@@ -126,20 +126,20 @@ export default function HomePage() {
       </section>
 
       <nav className="quick-grid home-quick-grid" aria-label="Hızlı başla">
-        <a className="quick-tile t-lilac" href="#/koc">
-          <span className="quick-emoji" aria-hidden="true">◎</span>
-          <b>Akıllı Koç</b>
-          <span className="tiny muted">Seviyene göre bugün ne çalışacağını seç</span>
-        </a>
         <a className="quick-tile t-sky" href="#/dersler">
           <span className="quick-emoji" aria-hidden="true">📚</span>
-          <b>Konu çalış</b>
-          <span className="tiny muted">TYT + AYT konu anlatımları</span>
+          <b>Konu anlatımı</b>
+          <span className="tiny muted">Alt konular, formüller, çözümlü örnekler ve özet</span>
         </a>
-        <a className="quick-tile t-mint" href="#/odak">
-          <span className="quick-emoji" aria-hidden="true">◷</span>
-          <b>Odak Modu</b>
-          <span className="tiny muted">{state.settings.focusMinutes} dk çalış · süre otomatik kaydolur</span>
+        <a className="quick-tile t-lilac" href="#/testler">
+          <span className="quick-emoji" aria-hidden="true">✎</span>
+          <b>Soru bankası</b>
+          <span className="tiny muted">Konu · alt konu · zorluk · soru tipi seç</span>
+        </a>
+        <a className="quick-tile t-mint" href="#/koc">
+          <span className="quick-emoji" aria-hidden="true">◎</span>
+          <b>Akıllı Koç</b>
+          <span className="tiny muted">Yanlışlarına ve hakimiyetine göre sıradaki konuyu seç</span>
         </a>
         <a className="quick-tile t-rose" href="#/ogretmen">
           <span className="quick-emoji" aria-hidden="true">✦</span>
