@@ -75,23 +75,29 @@ export function RealisticPanda({
           strokeWidth="2"
         />
         <path
+          className="rp-arm rp-arm-left"
           d="M63 137 C43 150 35 174 40 196 C43 210 53 218 65 215 C76 212 76 194 73 178 C71 165 73 151 80 139Z"
           fill="url(#rp-black-fur)"
         />
         <path
+          className="rp-arm rp-arm-right"
           d="M156 138 C176 150 184 174 179 196 C176 210 166 218 154 215 C143 212 143 194 146 178 C148 165 146 151 139 140Z"
           fill="url(#rp-black-fur)"
         />
         <path
+          className="rp-leg rp-leg-left"
           d="M72 219 C60 228 55 241 62 249 C68 257 86 258 95 250 C101 245 99 236 93 226Z"
           fill="url(#rp-black-fur)"
         />
         <path
+          className="rp-leg rp-leg-right"
           d="M147 219 C159 228 164 241 157 249 C151 257 133 258 124 250 C118 245 120 236 126 226Z"
           fill="url(#rp-black-fur)"
         />
-        <ellipse cx="78" cy="248" rx="18" ry="8" fill="#0f0e10" />
-        <ellipse cx="142" cy="248" rx="18" ry="8" fill="#0f0e10" />
+        <ellipse className="rp-foot rp-foot-left" cx="78" cy="248" rx="18" ry="8" fill="#0f0e10" />
+        <ellipse className="rp-foot rp-foot-right" cx="142" cy="248" rx="18" ry="8" fill="#0f0e10" />
+        <ellipse cx="110" cy="208" rx="24" ry="18" fill="#f5f1e9" opacity=".72" />
+        <path d="M95 206 Q110 217 125 206" stroke="#d7d0c6" strokeWidth="1.8" fill="none" strokeLinecap="round" opacity=".7" />
       </g>
 
       <g className="rp-head">
@@ -155,6 +161,11 @@ export function RealisticPanda({
             <path className="rp-tear" d="M148 96 C154 105 153 112 148 115 C143 111 142 104 148 96Z" fill="#79bfe8" opacity=".85" />
           </>
         )}
+      </g>
+
+      <g className="rp-whisker-fur" opacity=".32">
+        <path d="M68 112 C59 115 53 119 48 125 M71 117 C61 121 56 126 51 132" stroke="#c9c2b8" strokeWidth="1.3" fill="none" strokeLinecap="round" />
+        <path d="M152 112 C161 115 167 119 172 125 M149 117 C159 121 164 126 169 132" stroke="#c9c2b8" strokeWidth="1.3" fill="none" strokeLinecap="round" />
       </g>
 
       <g className="rp-chest-fur" opacity=".52">
