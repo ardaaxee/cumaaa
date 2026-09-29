@@ -368,7 +368,7 @@ export default function PetPage() {
   useEffect(() => {
     if (greeted.current) return;
     greeted.current = true;
-    const id = window.setTimeout(() => greet(false), 500);
+    const id = window.setTimeout(() => greet(true), 650);
     return () => window.clearTimeout(id);
     // İlk karşılama yalnızca sayfa açılışında bir kez çalışır.
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -433,7 +433,8 @@ export default function PetPage() {
 
       if (roll < 0.96) {
         setActivity('talking');
-        setSceneMessage(randomLine());
+        const text = randomLine();
+        speak(text);
         later(() => {
           setActivity('idle');
           setSceneMessage(null);
@@ -704,7 +705,11 @@ export default function PetPage() {
           <button
             type="button"
             className={'pet-stage-panda act-' + activity + ' facing-' + facing}
-            style={{ '--pet-x': petPos.x + '%', '--pet-y': petPos.y + '%' } as CSSProperties}
+            style={{
+              '--pet-x': petPos.x + '%',
+              '--pet-y': petPos.y + '%',
+              '--pet-depth': String(Math.max(0.9, 1 - petPos.y * 0.008)),
+            } as CSSProperties}
             onClick={petPanda}
             aria-label={pet.name + ' pandayı sev'}
           >
