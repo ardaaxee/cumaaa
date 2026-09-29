@@ -26,7 +26,7 @@ export const questions: QuestionSeed[] = [
     question: '0,50 mol NaCl kullanılarak hacmi 2,0 L’ye tamamlanan çözeltinin molaritesi kaç M’dır?',
     options: ['0,10', '0,20', '0,25', '0,50', '1,00'],
     correctAnswer: 2,
-    solution: 'M = n/V = 0,50/2,0 = 0,25 M.',
+    solution: 'Molarite, çözünen maddenin mol sayısının çözeltinin litre cinsinden hacmine oranıdır. M = n/V = 0,50/2,0 = 0,25 M bulunur.',
     hint: 'Molarite = mol / litre.',
     commonMistake: '2/0,5 yaparak 4 M bulmak.',
     teacherNote: 'Molariteyi doğrudan uygulatır.',
