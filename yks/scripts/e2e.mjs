@@ -99,7 +99,7 @@ try {
     const { context, page, pageErrors } = await makePage(browser);
     await page.goto(`${base}/#/testler?sinav=TYT`, { waitUntil: 'networkidle' });
     await page.getByRole('heading', { name: 'Test oluştur' }).waitFor();
-    await page.getByLabel('Ders').selectOption('tyt-matematik');
+    await page.locator('.form-grid.two label.field select').nth(1).selectOption('tyt-matematik');
     const start = page.getByRole('button', { name: 'Testi başlat' });
     await start.click();
     await assertQuestionOpened(page);
@@ -116,7 +116,7 @@ try {
     const { context, page, pageErrors } = await makePage(browser);
     await page.goto(`${base}/#/testler?sinav=AYT`, { waitUntil: 'networkidle' });
     await page.getByRole('heading', { name: 'Test oluştur' }).waitFor();
-    await page.getByLabel('Ders').selectOption('ayt-fizik');
+    await page.locator('.form-grid.two label.field select').nth(1).selectOption('ayt-fizik');
     await page.getByRole('button', { name: 'Testi başlat' }).click();
     await assertQuestionOpened(page);
     if (pageErrors.length) throw new Error(`AYT sayfa hatası: ${pageErrors.join(' | ')}`);
