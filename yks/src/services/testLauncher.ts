@@ -4,7 +4,7 @@ import { describeContentLoadError, recoverFromChunkError } from '../utils/chunkR
 import { navigate } from '../hooks/useRoute';
 import { startTest } from '../store/actions';
 import type { TestConfig } from '../store/schema';
-import { getState, update } from '../store/store';
+import { getState, replaceState } from '../store/store';
 import { filterPool, pickQuestions } from '../utils/testEngine';
 import type { Question } from '../domain/types';
 
@@ -64,7 +64,7 @@ export function launchTestFromPool(config: TestConfig, pool: Question[]): string
   if (!pool.length) return 'Bu filtrelere uyan soru bulunamadı. Filtreleri genişletmeyi dene.';
   const ids = pickQuestions(pool, config.count, getState().attempts);
   if (!ids.length) return 'Test için soru seçilemedi. Filtreleri değiştirip tekrar dene.';
-  update((state) => startTest(state, { ...config, count: ids.length }, ids));
+  replaceState(startTest(getState(), { ...config, count: ids.length }, ids));
   navigate('/test');
   return null;
 }
@@ -97,7 +97,7 @@ export async function launchWithIds(ids: string[], config: TestConfig): Promise<
     const known = await loadQuestionsByIds(ids);
     const valid = ids.filter((id) => known.has(id));
     if (!valid.length) return 'Soru bulunamadı.';
-    update((state) => startTest(state, { ...config, count: valid.length }, valid));
+    replaceState(startTest(getState(), { ...config, count: valid.length }, valid));
     navigate('/test');
     return null;
   } catch (error) {
