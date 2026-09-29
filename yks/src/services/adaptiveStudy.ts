@@ -254,3 +254,39 @@ export function subjectLabelSafe(subjectId: SubjectId): string {
   const s = getSubject(subjectId);
   return s ? `${s.exam} ${s.name}` : subjectId;
 }
+
+
+export interface SubjectMomentum {
+  subjectId: SubjectId;
+  recentAccuracy: number | null;
+  previousAccuracy: number | null;
+  delta: number | null;
+  label: 'yukseliyor' | 'dusuyor' | 'stabil' | 'veri-yok';
+  explanation: string;
+}
+
+/** Son 20 cevaplanan soru ile önceki 20'yi karşılaştırır; neden değiştiğini veriyle açıklar. */
+export function subjectMomentum(state: AppState, subjectId: SubjectId): SubjectMomentum {
+  const all = state.attempts.filter((a) => a.subjectId === subjectId && a.answer != null);
+  const recent = all.slice(-20);
+  const previous = all.slice(Math.max(0, all.length - 40), Math.max(0, all.length - 20));
+  const r = accuracy(recent);
+  const p = accuracy(previous);
+  if (r == null) {
+    return { subjectId, recentAccuracy: null, previousAccuracy: null, delta: null, label: 'veri-yok', explanation: 'Henüz karşılaştırma için soru verisi yok.' };
+  }
+  if (p == null || previous.length < 5) {
+    return { subjectId, recentAccuracy: r, previousAccuracy: p, delta: null, label: 'veri-yok', explanation: 'Trend için biraz daha soru çözmen gerekiyor.' };
+  }
+  const delta = r - p;
+  const label = delta >= 5 ? 'yukseliyor' : delta <= -5 ? 'dusuyor' : 'stabil';
+  const recentWrongs = recent.filter((a) => !a.correct).length;
+  const slow = recent.filter((a) => a.timeMs > 120_000).length;
+  const explanation =
+    label === 'yukseliyor'
+      ? `Son 20 soruda doğruluk %${r}; önceki gruba göre +${delta} puan.`
+      : label === 'dusuyor'
+        ? `Son 20 soruda doğruluk %${r}; önceki gruba göre ${delta} puan. ${recentWrongs} yanlış${slow ? `, ${slow} soruda 2 dakikadan uzun süre` : ''} görüldü.`
+        : `Son 20 soruda doğruluk %${r}; önceki gruba göre belirgin değişim yok.`;
+  return { subjectId, recentAccuracy: r, previousAccuracy: p, delta, label, explanation };
+}
