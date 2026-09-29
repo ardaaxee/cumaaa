@@ -5,10 +5,11 @@ import { Icon } from '../components/Icon';
 import { PageHeader } from '../components/Layout';
 import { ConfirmDialog, Empty, Modal, Segmented, toast } from '../components/ui';
 import { navigate } from '../hooks/useRoute';
+import { buildAdaptivePlan } from '../services/adaptiveStudy';
 import { launchTest, makeConfig } from '../services/testLauncher';
 import { addTask, carryAllUnfinished, carryTask, deleteTask, toggleTask, updateTask, type NewTask } from '../store/actions';
 import type { PlanTask, TaskType } from '../store/schema';
-import { update, useSelector } from '../store/store';
+import { getState, update, useSelector } from '../store/store';
 import { addDays, dayKey, formatDay, isValidDayKey, weekDays } from '../utils/date';
 
 export const TASK_TYPES: { value: TaskType; label: string }[] = [
@@ -195,6 +196,7 @@ export default function PlanPage() {
   const [weekAnchor, setWeekAnchor] = useState(today);
   const [form, setForm] = useState<(Partial<PlanTask> & { date: string }) | null>(null);
   const [del, setDel] = useState<PlanTask | null>(null);
+  const [smartBusy, setSmartBusy] = useState(false);
 
   const dayTasks = tasks.filter((t) => t.date === day).sort((a, b) => (a.time ?? '99').localeCompare(b.time ?? '99'));
   const unfinished = dayTasks.filter((t) => !t.done).length;
@@ -203,6 +205,28 @@ export default function PlanPage() {
   const doneCount = dayTasks.filter((t) => t.done).length;
   const minutes = dayTasks.reduce((s, t) => s + (t.estMinutes ?? 0), 0);
 
+  const refreshSmartWeek = () => {
+    if (smartBusy) return;
+    setSmartBusy(true);
+    try {
+      const current = getState();
+      const smart = buildAdaptivePlan(current, today, 7);
+      update((state) => {
+        const kept = state.tasks.filter(
+          (t) => !(t.date >= today && !t.done && t.title.startsWith('Akıllı ·')),
+        );
+        let next = { ...state, tasks: kept };
+        for (const task of smart.tasks) next = addTask(next, task);
+        return next;
+      });
+      setWeekAnchor(today);
+      setDay(today);
+      toast('Akıllı 7 günlük plan güncellendi. Kendi eklediğin görevler korundu.', 5000);
+    } finally {
+      setSmartBusy(false);
+    }
+  };
+
   return (
     <>
       <PageHeader
@@ -210,15 +234,25 @@ export default function PlanPage() {
         sub="Günlük ve haftalık çalışma planı"
         actions={
           <div className="row nowrap">
-            <a className="btn" href="#/koc">
-              <Icon name="target" /> <span>Akıllı plan</span>
-            </a>
+            <button type="button" className="btn" disabled={smartBusy} onClick={refreshSmartWeek}>
+              <Icon name="target" /> <span>{smartBusy ? 'Hazırlanıyor…' : '7 günü akıllı yenile'}</span>
+            </button>
             <button type="button" className="btn primary" onClick={() => setForm({ date: view === 'gun' ? day : today })}>
               <Icon name="plus" /> <span>Görev</span>
             </button>
           </div>
         }
       />
+      <div className="notice plan-smart-notice">
+        <div className="grow">
+          <b>Akıllı plan artık gerçek verine göre yenileniyor.</b>
+          <div className="small muted">
+            Son doğruluk, açık yanlışlar, tekrar zamanı ve günlük hedeflerin birlikte değerlendirilir. Elle eklediğin görevler silinmez.
+          </div>
+        </div>
+        <a className="btn small ghost" href="#/koc">Neden bu konular?</a>
+      </div>
+
       <div className="plan-toolbar">
         <Segmented
           label="Görünüm"
