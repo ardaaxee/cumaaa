@@ -26,6 +26,7 @@ export const NAV_ALL: NavItem[] = [
   { path: '/formuller', label: 'Formül Defteri', icon: 'formula' },
   { path: '/rozetler', label: 'Rozetlerim', icon: 'trophy' },
   { path: '/pandam', label: 'Panda arkadaşım', icon: 'sparkle' },
+  { path: '/canli', label: 'Cuma ♡ Zeynep Canlı', icon: 'link' },
   { path: '/kaydedilenler', label: 'Kaydettiğim sorular', icon: 'star' },
   { path: '/karne', label: 'Haftalık karne', icon: 'chart' },
   { path: '/ogretmen', label: 'Cuma ♡', icon: 'teacher' },
@@ -40,7 +41,7 @@ export const NAV_ALL: NavItem[] = [
 const SIDEBAR_GROUPS: { label: string; paths: string[] }[] = [
   { label: 'Çalış', paths: ['/', '/koc', '/dersler', '/testler', '/denemeler', '/plan'] },
   { label: 'Takip', paths: ['/tekrar', '/yanlislar', '/gelisim'] },
-  { label: 'Kişisel', paths: ['/ogretmen', '/pandam', '/defterim', '/daha'] },
+  { label: 'Kişisel', paths: ['/ogretmen', '/pandam', '/canli', '/defterim', '/daha'] },
 ];
 
 export function sectionOf(path: string): string {
