@@ -40,9 +40,9 @@ export default function MorePage() {
       <PageHeader title="Tüm araçlar" sub="İhtiyacın olan her şey tek ve düzenli bir yerde." />
       <div className="tools-groups">
         {GROUPS.map((group) => (
-          <section className="tools-group" key={group.title} aria-labelledby={`tools-${group.title}`}>
+          <section className="tools-group" key={group.title} aria-label={group.title}>
             <div className="tools-group-head">
-              <h2 id={`tools-${group.title}`}>{group.title}</h2>
+              <h2>{group.title}</h2>
             </div>
             <div className="tools-grid">
               {group.items.map((it) => (
