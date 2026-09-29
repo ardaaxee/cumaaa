@@ -54,17 +54,34 @@ export interface BackupFile {
   exportedAt: string;
   state: AppState;
   teacherPhoto: string | null;
+  /** Dijital defter çizimleri: sayfa id -> PNG data URL. Eski yedeklerde bulunmayabilir. */
+  notebookImages?: Record<string, string>;
 }
 
-export function createBackup(state: AppState, teacherPhoto: string | null, now: Date = new Date()): BackupFile {
-  return { app: BACKUP_APP_ID, schemaVersion: SCHEMA_VERSION, exportedAt: now.toISOString(), state, teacherPhoto };
+export function createBackup(
+  state: AppState,
+  teacherPhoto: string | null,
+  notebookImages: Record<string, string> = {},
+  now: Date = new Date(),
+): BackupFile {
+  return {
+    app: BACKUP_APP_ID,
+    schemaVersion: SCHEMA_VERSION,
+    exportedAt: now.toISOString(),
+    state,
+    teacherPhoto,
+    notebookImages,
+  };
 }
 
 /**
  * Yedek dosyasını okur. Hem bu sürümün yedeğini hem de eski sürümün
  * düz JSON dışa aktarımını kabul eder.
  */
-export function parseBackup(text: string, ctx: MigrationContext = migrationContext()): { state: AppState; teacherPhoto: string | null; report: MigrationReport } {
+export function parseBackup(
+  text: string,
+  ctx: MigrationContext = migrationContext(),
+): { state: AppState; teacherPhoto: string | null; notebookImages: Record<string, string>; report: MigrationReport } {
   let raw: unknown;
   try {
     raw = JSON.parse(text);
@@ -77,7 +94,15 @@ export function parseBackup(text: string, ctx: MigrationContext = migrationConte
   const { state, report } = migrate(payload, ctx);
   if (report.from === 0) throw new Error('Bu dosyada İyi ki • YKS verisi bulunamadı.');
   const photo = typeof wrapper.teacherPhoto === 'string' && wrapper.teacherPhoto.startsWith('data:image/') ? wrapper.teacherPhoto : null;
-  return { state, teacherPhoto: photo, report };
+  const notebookImages =
+    wrapper.app === BACKUP_APP_ID && wrapper.notebookImages && typeof wrapper.notebookImages === 'object'
+      ? Object.fromEntries(
+          Object.entries(wrapper.notebookImages).filter(
+            ([id, value]) => typeof id === 'string' && typeof value === 'string' && value.startsWith('data:image/'),
+          ),
+        )
+      : {};
+  return { state, teacherPhoto: photo, notebookImages, report };
 }
 
 
