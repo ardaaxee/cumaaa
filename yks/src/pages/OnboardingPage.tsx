@@ -7,6 +7,7 @@ import { toast } from '../components/ui';
 import { addTask, updateProfile } from '../store/actions';
 import { getState, update } from '../store/store';
 import { dayKey, isValidDayKey } from '../utils/date';
+import { navigate } from '../hooks/useRoute';
 
 const STEPS = ['Adın', 'Sınıf ve alan', 'Hedefler', 'Sınav tarihi'] as const;
 
@@ -39,7 +40,8 @@ export default function OnboardingPage() {
     const today = dayKey();
     const tasks = generateStarterPlan({ ...getState().profile, ...profilePatch }, getState().topicProgress, lookup, today);
     update((s) => tasks.reduce((st, t) => addTask(st, t), s));
-    toast('Hoş geldin! 7 günlük başlangıç planın hazır. ♡', 4000);
+    toast('Hoş geldin! Şimdi kısa seviye tespitiyle planını kişiselleştirelim. ♡', 4500);
+    navigate('/koc');
   };
 
   const next = () => setStep((s) => Math.min(STEPS.length - 1, s + 1));
@@ -51,10 +53,10 @@ export default function OnboardingPage() {
         <div className="onboarding-logo">♡</div>
         <div className="eyebrow">İyi ki • YKS</div>
         <h1>Sana ait bir çalışma odası.</h1>
-        <p>Planın, derslerin, tekrarların ve ilerlemen tek yerde. İlk kurulumu bitirince sana 7 günlük başlangıç planı hazırlayacağız.</p>
+        <p>Planın, derslerin, tekrarların ve ilerlemen tek yerde. İlk kurulumu bitirince kısa seviye tespiti ve kişisel 7 günlük çalışma rotası hazırlayacağız.</p>
         <div className="onboarding-benefits" aria-label="Özellikler">
           <span>✓ TYT + AYT Sayısal</span>
-          <span>✓ Kişisel günlük hedef</span>
+          <span>✓ Adaptif kişisel plan</span>
           <span>✓ Konu + soru + tekrar</span>
         </div>
       </aside>
@@ -154,7 +156,7 @@ export default function OnboardingPage() {
             </button>
           )}
           <button type="submit" className="btn primary block" disabled={step === 0 && !name.trim()}>
-            {step < STEPS.length - 1 ? 'Devam et' : 'Başla'}
+            {step < STEPS.length - 1 ? 'Devam et' : 'Profilimi oluştur'}
           </button>
         </div>
         </form>
