@@ -8,7 +8,7 @@ import { PageHeader } from '../components/Layout';
 import { ConfirmDialog, toast } from '../components/ui';
 import { getTeacherPhoto, setTeacherPhoto } from '../services/photoStore';
 import { updateProfile, updateSettings } from '../store/actions';
-import { createBackup, migrationContext, parseBackup } from '../store/storage';
+import { clearAppData, createBackup, migrationContext, parseBackup } from '../store/storage';
 import { replaceState, update, useAppState } from '../store/store';
 import { isValidDayKey } from '../utils/date';
 
@@ -158,8 +158,8 @@ export default function SettingsPage() {
           danger
           onCancel={() => setResetConfirm(false)}
           onConfirm={() => {
-            localStorage.clear();
-            location.reload();
+            setResetConfirm(false);
+            void clearAppData().finally(() => location.reload());
           }}
         />
       )}
