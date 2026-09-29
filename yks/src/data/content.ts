@@ -26,12 +26,12 @@ function timeoutError(): Error {
 async function withTimeout<T>(promise: Promise<T>): Promise<T> {
   let timer = 0;
   const timeout = new Promise<never>((_, reject) => {
-    timer = window.setTimeout(() => reject(timeoutError()), LOAD_TIMEOUT_MS);
+    timer = globalThis.setTimeout(() => reject(timeoutError()), LOAD_TIMEOUT_MS) as unknown as number;
   });
   try {
     return await Promise.race([promise, timeout]);
   } finally {
-    window.clearTimeout(timer);
+    globalThis.clearTimeout(timer);
   }
 }
 
