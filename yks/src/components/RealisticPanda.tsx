@@ -10,6 +10,7 @@ export function RealisticPanda({
   playing = false,
   waving = false,
   talking = false,
+  emotion = 'neutral',
 }: {
   size?: number;
   sleepy?: boolean;
@@ -20,6 +21,7 @@ export function RealisticPanda({
   playing?: boolean;
   waving?: boolean;
   talking?: boolean;
+  emotion?: 'neutral' | 'laugh' | 'angry' | 'shy' | 'yawn' | 'sneeze' | 'surprised';
 }) {
   const style = { '--real-panda-size': size + 'px' } as CSSProperties;
 
@@ -38,6 +40,7 @@ export function RealisticPanda({
         playing ? 'is-playing' : '',
         waving ? 'is-waving' : '',
         talking ? 'is-talking' : '',
+        'emotion-' + emotion,
       ].filter(Boolean).join(' ')}
       style={style}
       aria-hidden="true"
@@ -157,8 +160,19 @@ export function RealisticPanda({
           <path d="M100 106 C102 98 118 98 120 106 C119 113 113 117 110 118 C106 117 101 113 100 106Z" fill="#1c191b" />
           <ellipse cx="106" cy="104" rx="4" ry="2" fill="#696064" opacity=".35" />
           <path className="rp-mouth" d="M110 117 C109 126 101 128 97 125 M110 117 C111 126 119 128 123 125" stroke="#332d31" strokeWidth="2.3" fill="none" strokeLinecap="round" />
-          {talking && <ellipse className="rp-talk-mouth" cx="110" cy="128" rx="7" ry="5" fill="#5b343b" />}
+          {(talking || emotion === 'laugh' || emotion === 'yawn' || emotion === 'surprised' || emotion === 'sneeze') && (
+            <ellipse className="rp-talk-mouth" cx="110" cy="128" rx="7" ry="5" fill="#5b343b" />
+          )}
           <path className="rp-tongue" d="M103 126 Q110 137 117 126 Q111 131 103 126Z" fill="#d88091" opacity="0" />
+        </g>
+
+        <g className="rp-expression-layer">
+          <ellipse className="rp-blush rp-blush-left" cx="67" cy="111" rx="13" ry="7" fill="#e9a0ad" opacity="0" />
+          <ellipse className="rp-blush rp-blush-right" cx="153" cy="111" rx="13" ry="7" fill="#e9a0ad" opacity="0" />
+          <path className="rp-angry-brow left" d="M70 70 Q82 64 92 72" stroke="#242126" strokeWidth="4" fill="none" strokeLinecap="round" opacity="0" />
+          <path className="rp-angry-brow right" d="M128 72 Q138 64 150 70" stroke="#242126" strokeWidth="4" fill="none" strokeLinecap="round" opacity="0" />
+          <path className="rp-laugh-eye left" d="M75 85 Q83 77 91 85" stroke="#171518" strokeWidth="5" fill="none" strokeLinecap="round" opacity="0" />
+          <path className="rp-laugh-eye right" d="M129 85 Q137 77 145 85" stroke="#171518" strokeWidth="5" fill="none" strokeLinecap="round" opacity="0" />
         </g>
 
         {sad && (
