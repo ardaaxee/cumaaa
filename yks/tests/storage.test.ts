@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import { clearAppData, LEGACY_KEY, STORAGE_KEY } from '../src/store/storage';
+import { clearAppData, createBackup, LEGACY_KEY, parseBackup, STORAGE_KEY } from '../src/store/storage';
+import { defaultState } from '../src/store/schema';
 
 class MemoryStorage implements Storage {
   private data = new Map<string, string>();
@@ -25,5 +26,14 @@ describe('clearAppData', () => {
     expect(storage.getItem(LEGACY_KEY)).toBeNull();
     expect(storage.getItem('iyikiYks.teacherPhoto')).toBeNull();
     expect(storage.getItem('baska-proje.settings')).toBe('keep-me');
+    it('defter çizimlerini yedek dosyasında korur', () => {
+    const state = defaultState();
+    const image = 'data:image/png;base64,abc123';
+    const backup = createBackup(state, null, { note1: image });
+    const parsed = parseBackup(JSON.stringify(backup));
+
+    expect(parsed.notebookImages.note1).toBe(image);
+    expect(parsed.state.schemaVersion).toBe(state.schemaVersion);
   });
+});
 });
