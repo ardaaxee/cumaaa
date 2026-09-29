@@ -1,4 +1,4 @@
-type PandaVoiceIntent = 'greet' | 'talk' | 'happy' | 'hungry' | 'sleepy' | 'eat' | 'drink' | 'bath' | 'play';
+type PandaVoiceIntent = 'greet' | 'talk' | 'happy' | 'hungry' | 'sleepy' | 'eat' | 'drink' | 'bath' | 'play' | 'laugh' | 'angry' | 'shy' | 'yawn' | 'sneeze' | 'surprised';
 
 let ctx: AudioContext | null = null;
 let unlocked = false;
@@ -49,6 +49,12 @@ function intentProfile(intent: PandaVoiceIntent) {
     case 'drink': return { base: 315, spread: 65, rate: .96, count: 3, wave: 'sine' as OscillatorType };
     case 'bath': return { base: 355, spread: 90, rate: 1.0, count: 4, wave: 'sine' as OscillatorType };
     case 'play': return { base: 455, spread: 150, rate: 1.18, count: 6, wave: 'triangle' as OscillatorType };
+    case 'laugh': return { base: 510, spread: 175, rate: 1.34, count: 8, wave: 'sine' as OscillatorType };
+    case 'angry': return { base: 185, spread: 70, rate: 1.08, count: 5, wave: 'sawtooth' as OscillatorType };
+    case 'shy': return { base: 345, spread: 55, rate: .86, count: 4, wave: 'sine' as OscillatorType };
+    case 'yawn': return { base: 145, spread: 24, rate: .58, count: 4, wave: 'sine' as OscillatorType };
+    case 'sneeze': return { base: 430, spread: 220, rate: 1.7, count: 3, wave: 'triangle' as OscillatorType };
+    case 'surprised': return { base: 565, spread: 130, rate: 1.42, count: 4, wave: 'triangle' as OscillatorType };
     default: return { base: 320, spread: 105, rate: 1.0, count: 7, wave: 'triangle' as OscillatorType };
   }
 }
