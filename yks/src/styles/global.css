@@ -3752,3 +3752,219 @@ body {
     border-color: rgba(255,255,255,.08);
   }
 }
+
+
+/* ===== COACH + PLAN + PROGRESS v5 ===== */
+.teacher-hero {
+  min-height: 230px;
+  padding: clamp(18px, 4vw, 30px) clamp(18px, 4vw, 34px) 0;
+  border-color: color-mix(in srgb, var(--brand) 15%, var(--line));
+  border-radius: 30px;
+  background:
+    radial-gradient(circle at 92% 12%, rgba(255,255,255,.72) 0 6rem, transparent 6.1rem),
+    radial-gradient(circle at 6% 115%, rgba(180,220,199,.42) 0 10rem, transparent 10.1rem),
+    linear-gradient(145deg, #eee6ff, #fff8fb 62%, #eef8f3);
+  box-shadow: 0 20px 60px rgba(61,41,87,.10);
+}
+.teacher-hero .asst-say {
+  max-height: 210px;
+  padding: 14px 16px;
+  border-radius: 20px 20px 20px 7px;
+  border-color: rgba(79,58,105,.11);
+  background: rgba(255,255,255,.72);
+  backdrop-filter: blur(12px);
+  box-shadow: 0 12px 30px rgba(58,39,78,.08);
+}
+.teacher-hero .asst-name {
+  margin-bottom: 3px;
+  font-size: 1.08rem;
+  letter-spacing: -.025em;
+}
+.teacher-context {
+  align-items: center;
+  background: color-mix(in srgb, var(--brand-soft) 42%, var(--surface));
+  border-color: color-mix(in srgb, var(--brand) 13%, var(--line));
+}
+.teacher-chat-card { padding: clamp(17px, 3vw, 25px); }
+.teacher-chat-head {
+  display: flex;
+  align-items: start;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+.teacher-chat-head h2 {
+  margin-top: 3px;
+  font-size: clamp(1.2rem, 2.5vw, 1.5rem);
+  letter-spacing: -.035em;
+}
+.teacher-quick { gap: 7px; padding-bottom: 2px; }
+.teacher-quick .chip {
+  min-height: 36px;
+  padding-inline: 12px;
+  background: color-mix(in srgb, var(--surface) 88%, var(--brand-soft));
+  border-color: color-mix(in srgb, var(--brand) 14%, var(--line));
+  font-size: .78rem;
+}
+.teacher-chat {
+  min-height: 250px;
+  max-height: min(54vh, 540px);
+  padding: 14px;
+  border: 1px solid var(--line);
+  border-radius: 20px;
+  background:
+    linear-gradient(var(--line) 1px, transparent 1px),
+    var(--surface);
+  background-size: 100% 34px;
+}
+.teacher-chat .bubble { box-shadow: 0 6px 18px rgba(57,39,80,.055); }
+.teacher-chat .bubble.teacher {
+  border: 1px solid var(--line);
+  background: color-mix(in srgb, var(--surface) 82%, var(--brand-soft));
+}
+.teacher-composer {
+  position: sticky;
+  bottom: calc(78px + var(--safe-b));
+  z-index: 8;
+  padding: 9px;
+  border: 1px solid color-mix(in srgb, var(--line) 85%, transparent);
+  border-radius: 18px;
+  background: color-mix(in srgb, var(--surface) 90%, transparent);
+  box-shadow: 0 12px 34px rgba(50,32,70,.12);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+}
+.teacher-composer .input {
+  min-height: 46px;
+  border-radius: 14px;
+  background: var(--surface);
+}
+:root[data-theme='dark'] .teacher-hero {
+  background:
+    radial-gradient(circle at 6% 115%, rgba(65,110,86,.26) 0 10rem, transparent 10.1rem),
+    linear-gradient(145deg, #2b213a, #211c29 62%, #19231e);
+}
+:root[data-theme='dark'] .teacher-hero .asst-say {
+  background: rgba(27,22,34,.78);
+  border-color: rgba(255,255,255,.08);
+}
+
+.plan-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+.plan-summary {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
+  margin-top: 14px;
+}
+.plan-summary > div {
+  display: grid;
+  gap: 2px;
+  padding: 12px 13px;
+  border: 1px solid var(--premium-line);
+  border-radius: 16px;
+  background: var(--surface);
+  box-shadow: 0 6px 20px rgba(54,37,76,.045);
+}
+.plan-summary b {
+  font-size: 1.22rem;
+  line-height: 1.1;
+  letter-spacing: -.04em;
+}
+.plan-summary span {
+  color: var(--muted);
+  font-size: .68rem;
+  font-weight: 700;
+}
+.plan-day-card { padding: clamp(18px, 3vw, 26px); }
+.plan-day-card > .row:first-child {
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--line);
+}
+.plan-day-card .task {
+  margin: 7px 0;
+  padding: 12px;
+  border: 1px solid var(--line);
+  background: var(--surface);
+}
+.plan-day-card .task.done {
+  background: color-mix(in srgb, var(--ok-soft) 38%, var(--surface));
+}
+.plan-week-section .week { gap: 9px; }
+.plan-week-section .day-col {
+  border-radius: 18px;
+  box-shadow: 0 8px 24px rgba(57,39,80,.045);
+}
+
+.progress-hero-stats .stat {
+  min-height: 112px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 17px;
+  border-radius: 22px;
+  background:
+    radial-gradient(circle at 100% 0%, rgba(255,255,255,.38) 0 4.5rem, transparent 4.6rem),
+    linear-gradient(145deg, color-mix(in srgb, var(--brand-soft) 42%, var(--surface)), var(--surface));
+}
+.progress-hero-stats .stat-value {
+  margin-top: 7px;
+  font-size: clamp(1.7rem, 4vw, 2.15rem);
+}
+.progress-overview-card {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0;
+  padding: 8px;
+}
+.progress-overview-item {
+  display: grid;
+  gap: 3px;
+  padding: 13px 14px;
+  border-right: 1px solid var(--line);
+}
+.progress-overview-item:last-child { border-right: 0; }
+.progress-overview-item span {
+  color: var(--muted);
+  font-size: .72rem;
+  font-weight: 700;
+}
+.progress-overview-item b {
+  font-size: 1.12rem;
+  letter-spacing: -.03em;
+}
+@media (max-width: 680px) {
+  .teacher-chat-head { display: block; }
+  .teacher-chat-head .badge { margin-top: 8px; }
+  .teacher-composer { bottom: calc(82px + var(--safe-b)); }
+  .plan-summary,
+  .progress-overview-card { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .progress-overview-item:nth-child(2) { border-right: 0; }
+  .progress-overview-item:nth-child(-n+2) { border-bottom: 1px solid var(--line); }
+}
+@media (max-width: 420px) {
+  .teacher-hero { padding-inline: 14px; }
+  .teacher-chat { padding: 10px; }
+  .teacher-composer { gap: 6px; padding: 7px; }
+  .teacher-composer .icon-btn { width: 40px; height: 40px; }
+  .teacher-composer .btn.primary { width: 42px; min-width: 42px; padding: 0; }
+  .plan-summary > div { padding: 11px; }
+}
+@media (min-width: 900px) {
+  .teacher-composer { bottom: 12px; }
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) .teacher-hero {
+    background:
+      radial-gradient(circle at 6% 115%, rgba(65,110,86,.26) 0 10rem, transparent 10.1rem),
+      linear-gradient(145deg, #2b213a, #211c29 62%, #19231e);
+  }
+  :root:not([data-theme='light']) .teacher-hero .asst-say {
+    background: rgba(27,22,34,.78);
+    border-color: rgba(255,255,255,.08);
+  }
+}
