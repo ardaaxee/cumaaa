@@ -42,7 +42,7 @@ export default function WrongsPage() {
 
   return (
     <>
-      <PageHeader title="Yanlışlarım" sub={`${openCount} açık soru · yanlış ve boş bıraktıkların otomatik eklenir`} />
+      <PageHeader title="Yanlışlarım" sub={`${openCount} açık soru · bir yanlış 2 kez doğru çözülünce otomatik öğrenilmiş sayılır`} />
 
       {weak.length > 0 && (
         <section className="card" aria-labelledby="weak-h">
@@ -155,7 +155,8 @@ export default function WrongsPage() {
                       <Options q={q} selected={w.lastAnswer} reveal disabled />
                       <p className="small mt-12">
                         Verdiğin cevap: <b>{w.lastAnswer == null ? 'Boş' : optionLetter(w.lastAnswer)}</b> · Doğru cevap: <b>{optionLetter(q.correctAnswer)}</b> · {w.wrongCount} kez yanlış/boş
-                        {w.correctStreak > 0 && <> · Sonra {w.correctStreak} kez doğru çözdün</>}
+                        {!w.learned && <> · Doğrulama {Math.min(2, w.correctStreak)}/2</>}
+                        {w.learned && <> · 2 kez üst üste doğru çözülerek öğrenildi</>}
                       </p>
                       <SolutionBlock q={q} />
                       <div className="tiny muted mt-8">İlk: {formatDay(dayKey(new Date(w.firstAt)))} · Son: {formatDay(dayKey(new Date(w.lastAt)))}</div>
@@ -165,16 +166,26 @@ export default function WrongsPage() {
                     <button type="button" className="btn small" onClick={() => void run(launchWithIds([q.id], makeConfig({ origin: 'tek-soru', mode: 'ogrenme', title: 'Tekrar çöz' })))}>
                       Tekrar çöz
                     </button>
-                    <button
-                      type="button"
-                      className="btn small"
-                      onClick={() => {
-                        update((s) => setWrongLearned(s, q.id, !w.learned));
-                        toast(w.learned ? 'Tekrar açık yanlışlara alındı.' : 'Öğrenildi olarak işaretlendi.');
-                      }}
-                    >
-                      {w.learned ? 'Geri al' : 'Öğrendim'}
-                    </button>
+                    {w.learned ? (
+                      <button
+                        type="button"
+                        className="btn small"
+                        onClick={() => {
+                          update((s) => setWrongLearned(s, q.id, false));
+                          toast('Tekrar açık yanlışlara alındı.');
+                        }}
+                      >
+                        Tekrar çalışacağım
+                      </button>
+                    ) : (
+                      <button
+                        type="button"
+                        className="btn small"
+                        onClick={() => void run(launchWithIds([q.id], makeConfig({ origin: 'yanlislar', mode: 'ogrenme', title: 'Yanlış doğrulama' })))}
+                      >
+                        Doğru çözerek doğrula ({Math.min(2, w.correctStreak)}/2)
+                      </button>
+                    )}
                     <a className="btn small" href={href('/ogretmen', { soru: q.id, cevap: w.lastAnswer != null ? String(w.lastAnswer) : undefined, eylem: 'hatam' })}>
                       <Icon name="teacher" /> <AskLabel />
                     </a>
