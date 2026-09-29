@@ -36,19 +36,18 @@ export default function ProgressPage() {
     <>
       <PageHeader title="Gelişimim" sub="Tüm değerler senin gerçek kayıtlarından hesaplanır" />
 
-      <section className="grid grid-4" aria-label="Gelişim özeti">
-        <Stat label="Bugün çözülen soru" value={d.todayQuestions} />
-        <Stat label="Bu hafta çözülen" value={d.weekQuestions} />
-        <Stat label="Toplam soru" value={d.totalQuestions} />
-        <Stat label="Doğruluk" value={d.accuracy != null ? `%${d.accuracy}` : '—'} sub={d.accuracy == null ? 'Henüz veri yok' : 'doğru / cevaplanan'} />
-        <Stat label="Bugünkü çalışma" value={formatMinutes(d.todayMinutes)} />
-        <Stat label="Haftalık çalışma" value={formatMinutes(d.weekMinutes)} />
-        <Stat label="Tamamlanan konu" value={d.completedTopics} />
-        <Stat label="Seri" value={`${d.streak} gün`} />
-        <Stat label="Toplam deneme" value={d.mockCount} />
-        <Stat label="Son deneme neti" value={d.lastMockNet != null ? formatNet(d.lastMockNet) : '—'} sub={d.lastMockExam ?? 'Henüz deneme yok'} />
-        <Stat label="Toplam çalışma" value={formatMinutes(d.totalMinutes)} />
-        <Stat label="Çözülen test" value={state.testResults.length} />
+      <section className="grid grid-4 progress-hero-stats" aria-label="Gelişim özeti">
+        <Stat label="Bugün çözülen" value={d.todayQuestions} sub="soru" />
+        <Stat label="Bu hafta çalışma" value={formatMinutes(d.weekMinutes)} />
+        <Stat label="Doğruluk" value={d.accuracy != null ? `%${d.accuracy}` : '—'} sub={d.accuracy == null ? 'Henüz veri yok' : 'tüm sorular'} />
+        <Stat label="Çalışma serisi" value={`${d.streak} gün`} />
+      </section>
+
+      <section className="card section progress-overview-card" aria-label="Genel istatistikler">
+        <div className="progress-overview-item"><span>Tamamlanan konu</span><b>{d.completedTopics}</b></div>
+        <div className="progress-overview-item"><span>Toplam soru</span><b>{d.totalQuestions}</b></div>
+        <div className="progress-overview-item"><span>Toplam deneme</span><b>{d.mockCount}</b></div>
+        <div className="progress-overview-item"><span>Toplam çalışma</span><b>{formatMinutes(d.totalMinutes)}</b></div>
       </section>
       {state.legacy && <p className="tiny muted mt-8">Toplamlara eski sürümden aktarılan {state.legacy.answered} soru ve {state.legacy.minutes} dk dahildir (güne atanamadıkları için günlük grafiklerde yoktur).</p>}
 
