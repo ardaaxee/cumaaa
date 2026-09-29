@@ -55,7 +55,7 @@ const BOOKLET_PDFS: Record<number, Record<'TYT' | 'AYT', string>> = {
  * PDF bağlantıları ayrı tutulur; Android/PWA'da sayfa içindeki yeni-sekme davranışına güvenmeyiz.
  */
 export function osymBookletUrl(year: number): string {
-  return \`https://www.osym.gov.tr/\${year}yks-tyt-ayt-ve-ydt-temel-soru-kitapciklari-ve-cevap-anahtarlari\`;
+  return `https://www.osym.gov.tr/${year}yks-tyt-ayt-ve-ydt-temel-soru-kitapciklari-ve-cevap-anahtarlari`;
 }
 
 export function osymBookletPdfUrl(year: number, exam: 'TYT' | 'AYT'): string | undefined {
