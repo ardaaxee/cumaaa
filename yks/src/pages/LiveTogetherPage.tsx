@@ -102,6 +102,8 @@ function makeId(len = 12) {
 
 function roomFromHash(): string {
   try {
+    const direct = new URLSearchParams(window.location.search).get('room');
+    if (direct) return direct.toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 24);
     const hash = window.location.hash;
     const q = hash.indexOf('?');
     if (q < 0) return '';
@@ -290,8 +292,8 @@ export default function LiveTogetherPage() {
   };
 
   const joinRoom = async () => {
-    if (joined || normalizedRoom.length < 8) {
-      if (normalizedRoom.length < 8) toast('Oda kodu en az 8 karakter olmalı.');
+    if (joined || normalizedRoom.length < 12) {
+      if (normalizedRoom.length < 12) toast('Oda kodu en az 12 karakter olmalı.');
       return;
     }
 
@@ -471,7 +473,8 @@ export default function LiveTogetherPage() {
   const inviteUrl = (() => {
     try {
       const u = new URL(window.location.href);
-      u.hash = '#/canli?room=' + normalizedRoom;
+      u.searchParams.set('room', normalizedRoom);
+      u.hash = '#/canli';
       return u.toString();
     } catch {
       return '';
