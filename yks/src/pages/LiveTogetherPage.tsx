@@ -18,6 +18,81 @@ type SignalPayload =
   | { from: string; description: RTCSessionDescriptionInit }
   | { from: string; candidate: RTCIceCandidateInit };
 
+type SecurePacket = {
+  v: 2;
+  from: string;
+  iv: string;
+  data: string;
+  at: number;
+};
+
+const cryptoEncoder = new TextEncoder();
+
+function base64Url(bytes: ArrayBuffer | Uint8Array) {
+  const view = bytes instanceof Uint8Array ? bytes : new Uint8Array(bytes);
+  let binary = '';
+  for (const b of view) binary += String.fromCharCode(b);
+  return btoa(binary).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/g, '');
+}
+
+function base64UrlBytes(value: string) {
+  const normalized = value.replace(/-/g, '+').replace(/_/g, '/');
+  const padded = normalized + '='.repeat((4 - (normalized.length % 4)) % 4);
+  const binary = atob(padded);
+  return Uint8Array.from(binary, (c) => c.charCodeAt(0));
+}
+
+async function deriveRoomKey(room: string) {
+  const material = await crypto.subtle.importKey(
+    'raw',
+    cryptoEncoder.encode(room),
+    'PBKDF2',
+    false,
+    ['deriveKey'],
+  );
+  return crypto.subtle.deriveKey(
+    {
+      name: 'PBKDF2',
+      salt: cryptoEncoder.encode('yks-live-e2ee-v2'),
+      iterations: 120_000,
+      hash: 'SHA-256',
+    },
+    material,
+    { name: 'AES-GCM', length: 256 },
+    false,
+    ['encrypt', 'decrypt'],
+  );
+}
+
+async function encryptPacket(key: CryptoKey, event: string, from: string, payload: unknown): Promise<SecurePacket> {
+  const iv = crypto.getRandomValues(new Uint8Array(12));
+  const encrypted = await crypto.subtle.encrypt(
+    { name: 'AES-GCM', iv, additionalData: cryptoEncoder.encode(event) },
+    key,
+    cryptoEncoder.encode(JSON.stringify(payload)),
+  );
+  return { v: 2, from, iv: base64Url(iv), data: base64Url(encrypted), at: Date.now() };
+}
+
+async function decryptPacket<T>(key: CryptoKey | null, event: string, packet: SecurePacket): Promise<T | null> {
+  if (!key || !packet || packet.v !== 2 || typeof packet.data !== 'string' || typeof packet.iv !== 'string') return null;
+  if (Math.abs(Date.now() - Number(packet.at || 0)) > 10 * 60 * 1000) return null;
+  try {
+    const clear = await crypto.subtle.decrypt(
+      {
+        name: 'AES-GCM',
+        iv: base64UrlBytes(packet.iv),
+        additionalData: cryptoEncoder.encode(event),
+      },
+      key,
+      base64UrlBytes(packet.data),
+    );
+    return JSON.parse(new TextDecoder().decode(clear)) as T;
+  } catch {
+    return null;
+  }
+}
+
 function makeId(len = 12) {
   const alphabet = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
   const bytes = new Uint8Array(len);
@@ -38,7 +113,7 @@ function roomFromHash(): string {
 
 export default function LiveTogetherPage() {
   const clientId = useMemo(() => makeId(16), []);
-  const [roomCode, setRoomCode] = useState(() => roomFromHash() || makeId(12));
+  const [roomCode, setRoomCode] = useState(() => roomFromHash() || makeId(24));
   const [joined, setJoined] = useState(false);
   const [onlineCount, setOnlineCount] = useState(0);
   const [connection, setConnection] = useState<'offline' | 'connecting' | 'connected' | 'reconnecting'>('offline');
@@ -61,15 +136,18 @@ export default function LiveTogetherPage() {
   const pendingCandidates = useRef<RTCIceCandidateInit[]>([]);
   const reconnectTimer = useRef<number | null>(null);
   const helloTimer = useRef<number | null>(null);
+  const cryptoKeyRef = useRef<CryptoKey | null>(null);
 
   const normalizedRoom = roomCode.trim().toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 24);
   const shareSupported = typeof navigator !== 'undefined' && !!navigator.mediaDevices?.getDisplayMedia;
 
   const sendBroadcast = async (event: string, payload: unknown) => {
     const ch = channelRef.current;
-    if (!ch) return;
+    const key = cryptoKeyRef.current;
+    if (!ch || !key) return;
     try {
-      await ch.send({ type: 'broadcast', event, payload });
+      const encrypted = await encryptPacket(key, event, clientId, payload);
+      await ch.send({ type: 'broadcast', event, payload: encrypted });
     } catch {
       setConnection('reconnecting');
     }
@@ -207,6 +285,7 @@ export default function LiveTogetherPage() {
     setJoined(false);
     setOnlineCount(0);
     setRoomFull(false);
+    cryptoKeyRef.current = null;
     setConnection('offline');
   };
 
@@ -218,6 +297,7 @@ export default function LiveTogetherPage() {
 
     setConnection('connecting');
     try {
+      cryptoKeyRef.current = await deriveRoomKey(normalizedRoom);
       const moduleUrl = SUPABASE_ESM;
       const supabaseModule: any = await import(/* @vite-ignore */ moduleUrl);
       const supabase = supabaseModule.createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, {
@@ -235,27 +315,37 @@ export default function LiveTogetherPage() {
       channelRef.current = channel;
 
       channel
-        .on('broadcast', { event: 'signal' }, ({ payload }: any) => void handleSignal(payload as SignalPayload))
+        .on('broadcast', { event: 'signal' }, ({ payload }: any) => {
+          if (!payload || payload.from === clientId) return;
+          void decryptPacket<SignalPayload>(cryptoKeyRef.current, 'signal', payload as SecurePacket)
+            .then((clear) => {
+              if (clear) void handleSignal(clear);
+            });
+        })
         .on('broadcast', { event: 'hello' }, ({ payload }: any) => {
           if (!payload || payload.from === clientId) return;
-          setOnlineCount((n) => Math.max(2, n));
-          setConnection('connecting');
-          ensurePeer();
-          void channel.send({
-            type: 'broadcast',
-            event: 'hello',
-            payload: { from: clientId, at: Date.now() },
-          });
+          void decryptPacket<{ from: string; at: number }>(cryptoKeyRef.current, 'hello', payload as SecurePacket)
+            .then((clear) => {
+              if (!clear || clear.from === clientId) return;
+              setOnlineCount((n) => Math.max(2, n));
+              setConnection('connecting');
+              ensurePeer();
+              void sendBroadcast('hello', { from: clientId, at: Date.now() });
+            });
         })
         .on('broadcast', { event: 'chat' }, ({ payload }: any) => {
-          if (!payload || payload.from === clientId || typeof payload.text !== 'string') return;
-          setMessages((m) => [...m.slice(-99), {
-            id: payload.id ?? makeId(10),
-            sender: 'Zeynep',
-            text: payload.text.slice(0, 1000),
-            at: payload.at ?? Date.now(),
-            mine: false,
-          }]);
+          if (!payload || payload.from === clientId) return;
+          void decryptPacket<{ id: string; from: string; text: string; at: number }>(cryptoKeyRef.current, 'chat', payload as SecurePacket)
+            .then((clear) => {
+              if (!clear || clear.from === clientId || typeof clear.text !== 'string') return;
+              setMessages((m) => [...m.slice(-99), {
+                id: clear.id ?? makeId(10),
+                sender: 'Zeynep',
+                text: clear.text.slice(0, 1000),
+                at: clear.at ?? Date.now(),
+                mine: false,
+              }]);
+            });
         })
         .on('presence', { event: 'sync' }, () => {
           const state = channel.presenceState() as Record<string, unknown[]>;
@@ -278,18 +368,10 @@ export default function LiveTogetherPage() {
         .subscribe(async (status: string) => {
           if (status === 'SUBSCRIBED') {
             await channel.track({ id: clientId, onlineAt: new Date().toISOString() });
-            await channel.send({
-              type: 'broadcast',
-              event: 'hello',
-              payload: { from: clientId, at: Date.now() },
-            });
+            await sendBroadcast('hello', { from: clientId, at: Date.now() });
             if (helloTimer.current) window.clearInterval(helloTimer.current);
             helloTimer.current = window.setInterval(() => {
-              void channel.send({
-                type: 'broadcast',
-                event: 'hello',
-                payload: { from: clientId, at: Date.now() },
-              });
+              void sendBroadcast('hello', { from: clientId, at: Date.now() });
             }, 10_000);
             setJoined(true);
             setConnection('connecting');
@@ -366,10 +448,18 @@ export default function LiveTogetherPage() {
     const ch = channelRef.current;
     if (!ch) return;
     ch.on('broadcast', { event: 'screen-started' }, ({ payload }: any) => {
-      if (payload?.from !== clientId) setRemoteSharing(true);
+      if (!payload || payload.from === clientId) return;
+      void decryptPacket<{ from: string }>(cryptoKeyRef.current, 'screen-started', payload as SecurePacket)
+        .then((clear) => {
+          if (clear?.from !== clientId) setRemoteSharing(true);
+        });
     });
     ch.on('broadcast', { event: 'screen-stopped' }, ({ payload }: any) => {
-      if (payload?.from !== clientId) setRemoteSharing(false);
+      if (!payload || payload.from === clientId) return;
+      void decryptPacket<{ from: string }>(cryptoKeyRef.current, 'screen-stopped', payload as SecurePacket)
+        .then((clear) => {
+          if (clear?.from !== clientId) setRemoteSharing(false);
+        });
     });
   }, [joined, clientId]);
 
@@ -398,7 +488,7 @@ export default function LiveTogetherPage() {
             <div className="eyebrow">İki kişilik özel oda</div>
             <h2 style={{ margin: '4px 0 2px' }}>Birbirinizi canlı görün</h2>
             <p className="small muted" style={{ margin: 0 }}>
-              Ekran görüntüsü WebRTC ile cihazdan cihaza akar. Paylaşım yalnız sen başlattığında açıktır.
+              Ekran görüntüsü WebRTC ile cihazdan cihaza akar; sinyal ve mesajlar oda kodundan türetilen AES‑GCM anahtarıyla uçtan uca şifrelenir.
             </p>
           </div>
           <span className={'live-status ' + connection}>
@@ -427,7 +517,7 @@ export default function LiveTogetherPage() {
 
         {joined && (
           <div className="live-room-meta">
-            <span>👥 {Math.min(onlineCount, 2)}/2 çevrimiçi</span>
+            <span>🔒 Uçtan uca şifreli · 👥 {Math.min(onlineCount, 2)}/2 çevrimiçi</span>
             <button
               className="btn tiny-btn"
               type="button"
