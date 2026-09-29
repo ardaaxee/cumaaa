@@ -32,7 +32,7 @@ for (const file of files) {
     [...source.matchAll(/\bconst\s+([A-Za-z_$][\w$]*)\s*=\s*['"`]([^'"`]+)['"`]\s*;/g)].map((match) => [match[1], match[2]]),
   );
 
-  const topics = [...source.matchAll(/\btopic\s*:\s*(['"`][^'"`]+['"`]|[A-Za-z_$][\w$]*)/g)]
+  const topics = [...source.matchAll(/["']?\btopic\b["']?\s*:\s*(['"`][^'"`]+['"`]|[A-Za-z_$][\w$]*)/g)]
     .map((match) => {
       const expression = match[1];
       if (/^['"`]/.test(expression)) return expression.slice(1, -1);
