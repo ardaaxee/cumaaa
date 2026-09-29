@@ -85,7 +85,7 @@ export interface TestConfig {
   count: number;
   mode: TestMode;
   /** Testin nereden oluşturulduğu (bilgi amaçlı). */
-  origin: 'filtre' | 'yanlislar' | 'konu-mini' | 'konu-normal' | 'tekrar' | 'tek-soru' | 'ogretmen' | 'plan' | 'deneme';
+  origin: 'filtre' | 'yanlislar' | 'konu-mini' | 'konu-normal' | 'tekrar' | 'tek-soru' | 'ogretmen' | 'plan' | 'deneme' | 'seviye' | 'adaptif';
   title?: string;
   /** Sınav modunda toplam süre (dk). Verilmezse soru başına 90 sn. */
   durationMin?: number;
