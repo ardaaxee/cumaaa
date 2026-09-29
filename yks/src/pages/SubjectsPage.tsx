@@ -47,7 +47,7 @@ export default function SubjectsPage() {
   return (
     <>
       <PageHeader title="Dersler" sub="TYT + AYT Sayısal · konu haritası" />
-      <div className="card" style={{ position: 'relative', overflow: 'visible' }}>
+      <div className="card subject-filter-card">
         <span className="peek peek-rabbit" aria-hidden="true">
           <RabbitFace />
         </span>
@@ -127,12 +127,12 @@ export default function SubjectsPage() {
             return (
               <a
                 key={s.id}
-                className="card link-row"
+                className="card link-row subject-card"
                 href={`#/ders/${s.id}`}
-                style={{ margin: 0, display: 'block', borderColor: accent.fg, borderWidth: 2, background: accent.soft }}
+                style={{ ['--subject-fg' as string]: accent.fg, ['--subject-soft' as string]: accent.soft }}
               >
                 <div className="row nowrap">
-                  <span className="subject-icon" aria-hidden="true" style={{ background: 'var(--surface)', color: accent.fg }}>
+                  <span className="subject-icon subject-card-icon" aria-hidden="true">
                     {s.icon}
                   </span>
                   <div className="grow">
