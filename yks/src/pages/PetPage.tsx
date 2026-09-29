@@ -9,6 +9,8 @@ import { PET_ITEMS, petStatus } from '../utils/pet';
 import { usePetNeeds } from '../hooks/usePetNeeds';
 import { FOOD_PER_BAMBOO, WATER_PER_DROP, feedPet, needsMessage, waterPet } from '../utils/petCare';
 import { PetNotifyToggle } from '../hooks/usePetAlerts';
+import { dashboard } from '../utils/stats';
+import { dayKey } from '../utils/date';
 
 const EARN_RULES = [
   ['🎋 1 bambu', '5 doğru cevap'],
@@ -115,6 +117,17 @@ export default function PetPage() {
   const roomUnlocked = ROOM_UNLOCKS.filter((i) => i.level <= p.level).length;
   const roomPct = (roomUnlocked / ROOM_UNLOCKS.length) * 100;
   const roomMessage = activityText(activity, pet.name) || need || p.moodText;
+  const today = dayKey();
+  const d = dashboard(state, today);
+  const doneTasks = state.tasks.filter((t) => t.date === today && t.done).length;
+  const questQuestions = Math.max(10, Math.min(30, Math.round(state.profile.dailyQuestionGoal * 0.35)));
+  const questMinutes = Math.max(20, Math.min(60, Math.round(state.profile.dailyStudyMinutes * 0.25)));
+  const quests = [
+    { icon: '⚡', label: questQuestions + ' soru çöz', current: Math.min(questQuestions, d.todayQuestions), target: questQuestions, done: d.todayQuestions >= questQuestions, reward: '+ çalışma XP' },
+    { icon: '⏱️', label: questMinutes + ' dk odaklan', current: Math.min(questMinutes, d.todayMinutes), target: questMinutes, done: d.todayMinutes >= questMinutes, reward: '+ oda enerjisi' },
+    { icon: '✓', label: '1 plan görevi bitir', current: Math.min(1, doneTasks), target: 1, done: doneTasks >= 1, reward: '+ seri desteği' },
+  ];
+  const questDone = quests.filter((q) => q.done).length;
 
   const toggle = (id: string) =>
     update((s) => {
@@ -248,6 +261,34 @@ export default function PetPage() {
             <span>💧 {needs.drops}</span>
           </div>
         </div>
+      </section>
+
+      <section className="card section panda-quest-card" aria-labelledby="quest-h">
+        <div className="card-head">
+          <div>
+            <div className="eyebrow">Günlük görevler</div>
+            <h2 id="quest-h">{pet.name} ile bugünün mini görevleri</h2>
+          </div>
+          <span className={'badge ' + (questDone === quests.length ? 'ok' : 'brand')}>{questDone}/{quests.length}</span>
+        </div>
+        <div className="panda-quests">
+          {quests.map((q) => (
+            <div className={'panda-quest ' + (q.done ? 'done' : '')} key={q.label}>
+              <span className="panda-quest-icon" aria-hidden="true">{q.done ? '✓' : q.icon}</span>
+              <span className="grow">
+                <b>{q.label}</b>
+                <small>{q.reward}</small>
+                <ProgressBar value={(q.current / Math.max(1, q.target)) * 100} label={q.label} />
+              </span>
+              <span className="tiny muted">{q.current}/{q.target}</span>
+            </div>
+          ))}
+        </div>
+        {questDone === quests.length ? (
+          <div className="panda-quest-complete">🎉 Bugünün görevleri tamamlandı. {pet.name} çok mutlu!</div>
+        ) : (
+          <a className="btn small primary mt-12" href="#/koc">Akıllı Koç ile devam et</a>
+        )}
       </section>
 
       <section className="pet-dashboard section">
