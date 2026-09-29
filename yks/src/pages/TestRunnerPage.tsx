@@ -203,9 +203,9 @@ export default function TestRunnerPage() {
               Soru {test.current + 1} / {test.questionIds.length}
             </div>
           </div>
-          <div className="center" aria-live="off">
+          <div className="center runner-time" aria-live="off">
             <div className="tiny muted">{remaining != null ? 'Kalan süre' : 'Geçen süre'}</div>
-            <div style={{ fontWeight: 800, fontVariantNumeric: 'tabular-nums', color: remaining != null && remaining < 60_000 ? 'var(--bad)' : undefined }}>
+            <div style={{ color: remaining != null && remaining < 60_000 ? 'var(--bad)' : undefined }}>
               {formatClock(remaining ?? elapsed)}
             </div>
           </div>
@@ -218,15 +218,18 @@ export default function TestRunnerPage() {
             </button>
           </div>
         </div>
-        <div className="row tiny muted mt-8">
-          <span>Çözülen: {counts.answered}</span>
-          <span>· Boş: {counts.blank}</span>
-          <span>· İşaretli: {counts.marked}</span>
+        <div className="runner-progress-track" aria-hidden="true">
+          <span style={{ width: `${((test.current + 1) / test.questionIds.length) * 100}%` }} />
+        </div>
+        <div className="runner-counts">
+          <span><b>{counts.answered}</b> çözülen</span>
+          <span><b>{counts.blank}</b> boş</span>
+          <span><b>{counts.marked}</b> işaretli</span>
         </div>
       </div>
 
       {paletteOpen && (
-        <div className="card mb-8">
+        <div className="card mb-8 runner-palette-card">
           <div className="palette" role="group" aria-label="Soru numaraları">
             {test.questionIds.map((id, i) => {
               const a = test.answers[id];
@@ -256,7 +259,7 @@ export default function TestRunnerPage() {
         </div>
       )}
 
-      <article className="card" aria-labelledby="q-title">
+      <article className="card runner-question-card" aria-labelledby="q-title">
         <h2 id="q-title" className="sr-only">
           Soru {test.current + 1}
         </h2>
@@ -266,7 +269,7 @@ export default function TestRunnerPage() {
         </div>
         <Options q={q} selected={chosen} onSelect={select} reveal={isLearn && revealed} disabled={isLearn && revealed} />
 
-        <div className="row mt-12">
+        <div className="row mt-12 runner-question-actions">
           <button type="button" className="btn small" aria-pressed={!!test.marked[q.id]} onClick={() => update((s) => toggleMark(s, q.id))}>
             <Icon name="flag" /> {test.marked[q.id] ? 'İşareti kaldır' : 'Soruyu işaretle'}
           </button>
