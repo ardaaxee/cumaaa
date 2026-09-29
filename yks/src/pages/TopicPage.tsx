@@ -18,6 +18,7 @@ import { getState, update, useAppState } from '../store/store';
 import { recentTopicPerformance, weakTopics } from '../utils/analysis';
 import { dayKey, formatDay } from '../utils/date';
 import { isDue, stageLabel } from '../utils/srs';
+import { topicMastery } from '../services/adaptiveStudy';
 
 const LEVEL: Record<string, string> = { kolay: 'Kolay', orta: 'Orta', zor: 'Zor' };
 
@@ -200,6 +201,7 @@ export default function TopicPage({ params }: { params: string[] }) {
   const [pending, setPending] = useState<null | (() => void)>(null);
 
   const perf = useMemo(() => recentTopicPerformance(state.attempts, topicId, 5), [state.attempts, topicId]);
+  const mastery = useMemo(() => topicMastery(state, topicId), [state, topicId]);
   const weak = useMemo(() => weakTopics(state).find((w) => w.topicId === topicId), [state, topicId]);
   // Tur başına sabit 5 soru; önce hiç çözülmemiş sorular. (Cevap verdikçe yeniden karışmaz.)
   const quizSet = useMemo(() => {
@@ -224,8 +226,22 @@ export default function TopicPage({ params }: { params: string[] }) {
   const openWrongs = Object.values(state.wrongs).filter((w) => w.topicId === topicId && !w.learned).length;
 
   const setStatus = (s: TopicStatus) => {
+    if (s === 'tamamlandi') {
+      const required = qCount === 0 ? 0 : Math.min(5, qCount ?? 5);
+      const enoughEvidence = required === 0 || (mastery.attempts >= required && mastery.score >= 60);
+      if (!enoughEvidence) {
+        update((st) => setTopicStatus(st, topicId, 'calisiliyor'));
+        toast(
+          required > 0
+            ? 'Konuyu tamamlamak için önce en az ' + required + ' soru çöz ve hakimiyetini %60 üzerine çıkar.'
+            : 'Bu konuda doğrulama sorusu olmadığı için ilerlemeyi manuel takip edebilirsin.',
+          5000,
+        );
+        return;
+      }
+    }
     update((st) => setTopicStatus(st, topicId, s));
-    if (s === 'tamamlandi') toast('Konu tamamlandı. İlk tekrar yarın için planlandı.');
+    if (s === 'tamamlandi') toast('Öğrenme doğrulandı. İlk tekrar yarın için planlandı.');
   };
 
   const start = (count: number, origin: 'konu-mini' | 'konu-normal') => {
@@ -283,7 +299,8 @@ export default function TopicPage({ params }: { params: string[] }) {
         )}
       </div>
 
-      <div className="grid grid-3 section topic-stats">
+      <div className="grid grid-4 section topic-stats">
+        <Stat label="Hakimiyet" value={mastery.confidence ? `%${mastery.score}` : 'Yeni'} sub={mastery.reason} />
         <Stat label="Soru bankası" value={qCount ?? '…'} sub="özgün pratik soru" />
         <Stat label="Son testlerde" value={perf.accuracy != null ? `%${perf.accuracy}` : '—'} sub={perf.total ? `${perf.total} sorudan ${perf.correct} doğru` : 'Henüz çözülmedi'} />
         <Stat label="Açık yanlış" value={openWrongs} sub={openWrongs ? <a href="#/yanlislar">Yanlışlarıma git</a> : 'yok'} />
@@ -405,9 +422,12 @@ export default function TopicPage({ params }: { params: string[] }) {
 
       {status !== 'tamamlandi' && (
         <div className="card section center">
-          <p className="muted">Konuyu anladığından eminsen tamamlandı olarak işaretle; tekrar takvimi başlasın.</p>
+          <div className="eyebrow">Öğrenmeyi doğrula</div>
+          <p className="muted">
+            Konuyu tamamlamak için kısa soru kanıtı kullanıyoruz. Şu anki hakimiyetin {mastery.confidence ? `%${mastery.score}` : 'henüz ölçülmedi'}.
+          </p>
           <button type="button" className="btn primary" onClick={() => setStatus('tamamlandi')}>
-            Konuyu tamamla
+            Öğrendim · doğrula
           </button>
         </div>
       )}
