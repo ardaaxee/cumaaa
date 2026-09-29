@@ -10,16 +10,27 @@ import { Options, QuestionBody, QuestionMeta, SolutionBlock } from '../component
 import { ConfirmDialog, Empty, Segmented, LoadFailed, Spinner, toast } from '../components/ui';
 import { href } from '../hooks/useRoute';
 import { launchTest, launchWithIds, makeConfig } from '../services/testLauncher';
-import { removeWrong, setWrongLearned } from '../store/actions';
+import { removeWrong, setWrongLearned, setWrongReason } from '../store/actions';
+import type { WrongReason } from '../store/schema';
 import { update, useAppState } from '../store/store';
 import { weakTopics } from '../utils/analysis';
 import { formatDay, dayKey } from '../utils/date';
 import { optionLetter } from '../utils/ids';
 
+const REASON_LABEL: Record<WrongReason, string> = {
+  kavram: 'Kavram eksiği',
+  islem: 'İşlem hatası',
+  yorum: 'Yorum / okuma',
+  dikkat: 'Dikkat',
+  zaman: 'Zaman baskısı',
+  bos: 'Boş bırakıldı',
+};
+
 export default function WrongsPage() {
   const state = useAppState();
   const [show, setShow] = useState<'acik' | 'ogrenildi'>('acik');
   const [subject, setSubject] = useState('all');
+  const [reason, setReason] = useState<'all' | WrongReason>('all');
   const [open, setOpen] = useState<string | null>(null);
   const [toDelete, setToDelete] = useState<string | null>(null);
 
@@ -32,6 +43,7 @@ export default function WrongsPage() {
   const entries = Object.values(state.wrongs)
     .filter((w) => (show === 'acik' ? !w.learned : w.learned))
     .filter((w) => subject === 'all' || w.subjectId === subject)
+    .filter((w) => reason === 'all' || w.reason === reason)
     .sort((a, b) => b.lastAt.localeCompare(a.lastAt));
   const openCount = Object.values(state.wrongs).filter((w) => !w.learned).length;
 
@@ -79,17 +91,28 @@ export default function WrongsPage() {
               { value: 'ogrenildi', label: 'Öğrendiklerim' },
             ]}
           />
-          <label className="field" style={{ minWidth: 180 }}>
-            <span className="sr-only">Ders filtresi</span>
-            <select className="select" value={subject} onChange={(e) => setSubject(e.target.value)}>
-              <option value="all">Tüm dersler</option>
-              {SUBJECTS.map((s) => (
-                <option key={s.id} value={s.id}>
-                  {subjectLabel(s)}
-                </option>
-              ))}
-            </select>
-          </label>
+          <div className="row">
+            <label className="field" style={{ minWidth: 180 }}>
+              <span className="sr-only">Ders filtresi</span>
+              <select className="select" value={subject} onChange={(e) => setSubject(e.target.value)}>
+                <option value="all">Tüm dersler</option>
+                {SUBJECTS.map((s) => (
+                  <option key={s.id} value={s.id}>
+                    {subjectLabel(s)}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <label className="field" style={{ minWidth: 170 }}>
+              <span className="sr-only">Yanlış nedeni</span>
+              <select className="select" value={reason} onChange={(e) => setReason(e.target.value as 'all' | WrongReason)}>
+                <option value="all">Tüm nedenler</option>
+                {Object.entries(REASON_LABEL).map(([key, label]) => (
+                  <option key={key} value={key}>{label}</option>
+                ))}
+              </select>
+            </label>
+          </div>
         </div>
         {show === 'acik' && entries.length > 0 && (
           <button
@@ -145,6 +168,7 @@ export default function WrongsPage() {
                       </span>
                     </span>
                     <span className="badge bad">{w.wrongCount}×</span>
+                    {w.reason && <span className="badge outline">{REASON_LABEL[w.reason]}</span>}
                   </button>
                   {isOpen && (
                     <div className="mt-8">
@@ -158,6 +182,18 @@ export default function WrongsPage() {
                         {!w.learned && <> · Doğrulama {Math.min(2, w.correctStreak)}/2</>}
                         {w.learned && <> · 2 kez üst üste doğru çözülerek öğrenildi</>}
                       </p>
+                      <label className="field wrong-reason-field">
+                        <span>Bu yanlışın nedeni</span>
+                        <select
+                          className="select"
+                          value={w.reason ?? 'dikkat'}
+                          onChange={(e) => update((s) => setWrongReason(s, q.id, e.target.value as WrongReason))}
+                        >
+                          {Object.entries(REASON_LABEL).map(([key, label]) => (
+                            <option key={key} value={key}>{label}</option>
+                          ))}
+                        </select>
+                      </label>
                       <SolutionBlock q={q} />
                       <div className="tiny muted mt-8">İlk: {formatDay(dayKey(new Date(w.firstAt)))} · Son: {formatDay(dayKey(new Date(w.lastAt)))}</div>
                     </div>
