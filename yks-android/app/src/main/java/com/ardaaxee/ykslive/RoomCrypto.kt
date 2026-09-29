@@ -9,13 +9,14 @@ import javax.crypto.SecretKeyFactory
 import javax.crypto.spec.GCMParameterSpec
 import javax.crypto.spec.PBEKeySpec
 import javax.crypto.spec.SecretKeySpec
+import java.util.Locale
 
 class RoomCrypto(roomCode: String) {
     private val random = SecureRandom()
     private val key: SecretKey
 
     init {
-        val normalized = roomCode.trim().uppercase()
+        val normalized = roomCode.trim().uppercase(Locale.ROOT)
         val spec = PBEKeySpec(
             normalized.toCharArray(),
             "yks-live-e2ee-v2".toByteArray(Charsets.UTF_8),
