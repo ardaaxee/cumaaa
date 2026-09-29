@@ -8900,3 +8900,170 @@ body {
   text-overflow:ellipsis;
   white-space:nowrap;
 }
+
+
+/* ===== ZEYNEP AUTONOMOUS HOME CHARACTER v1 ===== */
+.pet-zeynep-status {
+  display:flex;
+  align-items:center;
+  gap:8px;
+  padding:7px 10px 9px;
+  border-top:1px solid color-mix(in srgb, var(--line) 78%, transparent);
+  background:color-mix(in srgb, var(--surface) 88%, transparent);
+  font-size:.72rem;
+  line-height:1.25;
+}
+.pet-zeynep-status > span {
+  font-weight:900;
+  white-space:nowrap;
+}
+.pet-zeynep-status > b {
+  white-space:nowrap;
+  color:var(--text-2);
+}
+.pet-zeynep-status > small {
+  min-width:0;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+  color:var(--muted);
+}
+
+.pet-game-zeynep {
+  position:absolute;
+  z-index:7;
+  left:var(--z-x,72%);
+  right:auto;
+  bottom:var(--z-y,8%);
+  transform:translateX(-50%);
+  border:0;
+  background:transparent;
+  color:inherit;
+  padding:0;
+  font:inherit;
+  cursor:pointer;
+  display:grid;
+  justify-items:center;
+  gap:2px;
+  transition:left .9s cubic-bezier(.35,.05,.2,1), bottom .7s ease, transform .22s ease;
+  filter:drop-shadow(0 10px 9px rgba(50,35,55,.14));
+}
+.pet-game-zeynep:active {
+  transform:translateX(-50%) scale(.97);
+}
+.pet-zeynep-avatar {
+  display:grid;
+  place-items:center;
+  width:62px;
+  height:62px;
+  border-radius:50% 50% 46% 46%;
+  background:linear-gradient(160deg,#fff5f7,#ead7ef);
+  border:2px solid rgba(255,255,255,.82);
+  box-shadow:0 7px 18px rgba(75,48,78,.14);
+  font-size:2.15rem;
+  line-height:1;
+}
+.pet-game-zeynep > b {
+  padding:2px 7px;
+  border-radius:999px;
+  background:rgba(255,255,255,.88);
+  font-size:.66rem;
+  box-shadow:0 3px 8px rgba(55,40,60,.1);
+}
+.pet-game-zeynep > span {
+  position:absolute;
+  top:-8px;
+  right:-6px;
+  display:grid;
+  place-items:center;
+  min-width:25px;
+  height:25px;
+  padding:0 5px;
+  border-radius:999px;
+  background:var(--surface);
+  border:1px solid var(--line);
+  font-size:.78rem;
+}
+.pet-zeynep-bubble {
+  position:absolute;
+  left:50%;
+  bottom:calc(100% + 8px);
+  width:max-content;
+  max-width:min(240px,70vw);
+  transform:translateX(-50%);
+  border:1px solid var(--line-strong);
+  border-radius:14px 14px 14px 5px;
+  background:rgba(255,255,255,.95);
+  box-shadow:0 10px 24px rgba(60,42,70,.16);
+  padding:7px 9px;
+  font-size:.68rem;
+  line-height:1.35;
+  text-align:left;
+  color:var(--text);
+  pointer-events:none;
+}
+:root[data-theme='dark'] .pet-zeynep-bubble,
+:root[data-theme='dark'] .pet-game-zeynep > b {
+  background:rgba(35,31,42,.94);
+}
+
+.pet-game-zeynep.z-walking .pet-zeynep-avatar { animation:zeynep-walk .42s ease-in-out infinite; }
+.pet-game-zeynep.z-cooking .pet-zeynep-avatar { animation:zeynep-work .7s ease-in-out infinite alternate; }
+.pet-game-zeynep.z-serving .pet-zeynep-avatar { animation:zeynep-serve .9s ease-in-out infinite alternate; }
+.pet-game-zeynep.z-studying .pet-zeynep-avatar { animation:zeynep-study 2.6s ease-in-out infinite; }
+.pet-game-zeynep.z-gardening .pet-zeynep-avatar { animation:zeynep-garden 1.6s ease-in-out infinite; }
+.pet-game-zeynep.z-cleaning .pet-zeynep-avatar { animation:zeynep-clean .75s ease-in-out infinite alternate; }
+.pet-game-zeynep.z-talking .pet-zeynep-avatar { animation:zeynep-talk .8s ease-in-out infinite alternate; }
+.pet-game-zeynep.z-petting .pet-zeynep-avatar { animation:zeynep-pet 1s ease-in-out infinite; }
+.pet-game-zeynep.z-sleeping { opacity:.82; }
+.pet-game-zeynep.z-sleeping .pet-zeynep-avatar { animation:zeynep-sleep 3.6s ease-in-out infinite; }
+
+@keyframes zeynep-walk {
+  0%,100% { transform:translateY(0) rotate(-2deg); }
+  50% { transform:translateY(-5px) rotate(2deg); }
+}
+@keyframes zeynep-work {
+  from { transform:rotate(-3deg) translateY(0); }
+  to { transform:rotate(3deg) translateY(-3px); }
+}
+@keyframes zeynep-serve {
+  from { transform:translateX(-2px) rotate(-2deg); }
+  to { transform:translateX(3px) rotate(2deg); }
+}
+@keyframes zeynep-study {
+  0%,100% { transform:rotate(0) translateY(0); }
+  50% { transform:rotate(-3deg) translateY(2px); }
+}
+@keyframes zeynep-garden {
+  0%,100% { transform:rotate(-2deg); }
+  50% { transform:rotate(4deg) translateY(-2px); }
+}
+@keyframes zeynep-clean {
+  from { transform:translateX(-4px) rotate(-3deg); }
+  to { transform:translateX(4px) rotate(3deg); }
+}
+@keyframes zeynep-talk {
+  from { transform:translateY(0) rotate(-1deg); }
+  to { transform:translateY(-3px) rotate(2deg); }
+}
+@keyframes zeynep-pet {
+  0%,100% { transform:translateX(0) rotate(0); }
+  50% { transform:translateX(-5px) rotate(-4deg); }
+}
+@keyframes zeynep-sleep {
+  0%,100% { transform:scale(1) translateY(0); }
+  50% { transform:scale(.98,1.02) translateY(2px); }
+}
+@media (max-width:560px) {
+  .pet-zeynep-status { font-size:.65rem; gap:6px; }
+  .pet-zeynep-status > small { max-width:42vw; }
+  .pet-zeynep-avatar { width:54px; height:54px; font-size:1.85rem; }
+  .pet-zeynep-bubble { max-width:min(210px,72vw); font-size:.64rem; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .pet-game-zeynep,
+  .pet-game-zeynep * {
+    animation:none !important;
+    transition:none !important;
+  }
+}
