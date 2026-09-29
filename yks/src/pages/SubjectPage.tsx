@@ -3,12 +3,14 @@ import { subjectColorFor, topicColorStep } from '../data/subjectColors';
 import { PageHeader } from '../components/Layout';
 import { Empty, ProgressBar, SourceBadge } from '../components/ui';
 import { useIsDark } from '../hooks/useIsDark';
-import { useSelector } from '../store/store';
+import { useAppState } from '../store/store';
+import { subjectMastery } from '../services/adaptiveStudy';
 import { STATUS_LABEL } from './SubjectsPage';
 
 export default function SubjectPage({ params }: { params: string[] }) {
   const subject = getSubject(params[0] ?? '');
-  const progress = useSelector((s) => s.topicProgress);
+  const state = useAppState();
+  const progress = state.topicProgress;
   const isDark = useIsDark();
 
   if (!subject) {
@@ -28,6 +30,7 @@ export default function SubjectPage({ params }: { params: string[] }) {
     topics.find((t) => progress[t.id]?.status !== 'tamamlandi') ??
     topics[0];
   const pct = topics.length ? Math.round((done / topics.length) * 100) : 0;
+  const mastery = subjectMastery(state, subject.id);
   const accent = subjectColorFor(subject.id, isDark);
 
   return (
@@ -69,10 +72,14 @@ export default function SubjectPage({ params }: { params: string[] }) {
             </a>
           )}
           <a className="btn" href={`#/testler?ders=${subject.id}`}>Bu dersten test çöz</a>
+          <a className="btn ghost" href="#/koc">Akıllı çalışma önerisi</a>
         </div>
 
         <div className="subject-hero-meta">
           <SourceBadge type="meb-program" />
+          <span className={`badge ${mastery.confidence ? 'brand' : ''}`}>
+            {mastery.confidence ? `Hakimiyet %${mastery.score} · güven %${mastery.confidence}` : 'Hakimiyet henüz ölçülmedi'}
+          </span>
           {subject.examQuestionCount != null && <span className="badge">Sınavda yaklaşık {subject.examQuestionCount} soru</span>}
           {subject.note && <span className="tiny muted">{subject.note}</span>}
         </div>
