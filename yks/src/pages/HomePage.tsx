@@ -10,7 +10,9 @@ import { Empty, ProgressBar, Stat, toast } from '../components/ui';
 import { navigate } from '../hooks/useRoute';
 import { lookup, topicLabel } from '../services/lookup';
 import { buildRecommendations, hasAnyData, type Recommendation } from '../services/recommendations';
-import { launchTest, makeConfig } from '../services/testLauncher';
+import { launchQuickMix, launchTest, makeConfig } from '../services/testLauncher';
+import { usePetNeeds } from '../hooks/usePetNeeds';
+import { needsMessage } from '../utils/petCare';
 import { toggleTask } from '../store/actions';
 import { update, useAppState } from '../store/store';
 import { dayKey, diffDays, formatDay, formatMinutes } from '../utils/date';
@@ -68,6 +70,8 @@ export default function HomePage() {
   const { profile } = state;
   const cardsDue = Object.values(state.cards).filter((c) => c.dueDay <= today).length;
   const pet = useMemo(() => petStatus(state, today), [state, today]);
+  const needs = usePetNeeds();
+  const petNeed = needsMessage(state.settings.pet.name, needs);
   const earnedBadges = useMemo(() => computeBadges(state, today).filter((b) => b.earned).length, [state, today]);
   const daysLeft = profile.examDate ? diffDays(today, profile.examDate) : null;
   const qPct = profile.dailyQuestionGoal ? (d.todayQuestions / profile.dailyQuestionGoal) * 100 : 0;
@@ -88,11 +92,20 @@ export default function HomePage() {
               ? `Sınavına ${daysLeft} gün var. Bugün küçük ama net bir adım at.`
               : 'Küçük adımlar, büyük hayaller. Bugün kendin için bir adım at.'}
           </p>
+          <a className="btn primary mt-12 study-cta" href="#/calis">
+            <Icon name="play" /> Ders çalışmaya başla
+          </a>
         </div>
         <div className="hero-mascot-wrap">
-          <div className="speech">{cheerOfDay(today)}</div>
-          <a className="hero-mascot" href="#/pandam" aria-label={`${state.settings.pet.name}: seviye ${pet.level}`}>
-            <PandaBody size={96} waving={pet.mood !== 'uykulu'} sleepy={pet.mood === 'uykulu'} items={state.settings.pet.items} />
+          <div className="speech">{petNeed ? (needs.hungry ? 'Acıktım 🎋' : 'Susadım 💧') : cheerOfDay(today)}</div>
+          <a className="hero-mascot" href="#/pandam" aria-label={`${state.settings.pet.name}: seviye ${pet.level}${petNeed ? `. ${petNeed}` : ''}`}>
+            <PandaBody
+              size={96}
+              waving={!petNeed && pet.mood !== 'uykulu'}
+              sleepy={!petNeed && pet.mood === 'uykulu'}
+              sad={!!petNeed}
+              items={state.settings.pet.items}
+            />
             <span className="pet-level">Sv. {pet.level}</span>
           </a>
         </div>
@@ -104,7 +117,7 @@ export default function HomePage() {
         <button
           type="button"
           className="quick-tile t-lilac"
-          onClick={() => void launchTest(makeConfig({ count: 10, title: 'Hızlı 10 soru' })).then((e) => e && toast(e))}
+          onClick={() => void launchQuickMix(10, 'Hızlı 10 soru').then((e) => e && toast(e))}
         >
           <span className="quick-emoji" aria-hidden="true">⚡</span>
           <b>Hızlı 10 soru</b>
@@ -123,7 +136,9 @@ export default function HomePage() {
         <a className="quick-tile t-mint" href="#/pandam">
           <span className="quick-emoji" aria-hidden="true">🐼</span>
           <b>{state.settings.pet.name}</b>
-          <span className="tiny muted">Seviye {pet.level} · {pet.todayXp} XP bugün</span>
+          <span className="tiny muted">
+            {needs.hungry || needs.thirsty ? `${needs.hungry ? 'Acıktı 🎋' : ''}${needs.hungry && needs.thirsty ? ' · ' : ''}${needs.thirsty ? 'Susadı 💧' : ''}` : `Tok %${Math.round(needs.food)} · Su %${Math.round(needs.water)}`}
+          </span>
         </a>
         <a className="quick-tile t-sky" href="#/karne">
           <span className="quick-emoji" aria-hidden="true">📊</span>

@@ -13,6 +13,7 @@ interface NavItem {
 
 export const NAV_ALL: NavItem[] = [
   { path: '/', label: 'Ana Sayfa', icon: 'home' },
+  { path: '/calis', label: 'Ders çalış', icon: 'play' },
   { path: '/dersler', label: 'Dersler', icon: 'book' },
   { path: '/testler', label: 'Testler', icon: 'check' },
   { path: '/denemeler', label: 'Denemeler', icon: 'trophy' },

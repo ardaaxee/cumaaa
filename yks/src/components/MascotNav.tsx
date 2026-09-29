@@ -21,6 +21,7 @@ interface MenuItem {
 
 const MENU: MenuItem[] = [
   { path: '/', label: 'Ana Sayfa', icon: 'home', tint: '#efe6fb' },
+  { path: '/calis', label: 'Ders çalış', icon: 'play', tint: '#fde6ec' },
   { path: '/dersler', label: 'Dersler', icon: 'book', tint: '#e3effd' },
   { path: '/testler', label: 'Testler', icon: 'check', tint: '#e5f5ec' },
   { path: '/denemeler', label: 'Denemeler', icon: 'trophy', tint: '#fdeedd' },

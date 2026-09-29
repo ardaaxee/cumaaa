@@ -346,7 +346,7 @@ export function deleteMock(state: AppState, id: string): AppState {
 export function addStudyMinutes(
   state: AppState,
   minutes: number,
-  source: 'pomodoro' | 'manuel',
+  source: 'pomodoro' | 'manuel' | 'calisma',
   now: Date = new Date(),
   subjectId?: SubjectId,
 ): AppState {

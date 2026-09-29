@@ -295,7 +295,10 @@ export default function TopicPage({ params }: { params: string[] }) {
           <SourceBadge type="ozgun-pratik" />
         </div>
         <div className="row">
-          <button type="button" className="btn primary" onClick={() => start(5, 'konu-mini')} disabled={!qCount}>
+          <a className="btn primary" href={`#/calis/${topicId}`}>
+            <Icon name="play" /> Adım adım çalış
+          </a>
+          <button type="button" className="btn" onClick={() => start(5, 'konu-mini')} disabled={!qCount}>
             Mini test (5 soru)
           </button>
           <button type="button" className="btn" onClick={() => start(Math.min(20, Math.max(10, qCount ?? 10)), 'konu-normal')} disabled={!qCount}>

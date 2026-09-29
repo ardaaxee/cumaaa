@@ -2016,3 +2016,30 @@ body { overflow-x: clip; }
 @media (prefers-reduced-motion: reduce) {
   .dock-need, .panda-tear, .panda-chew, .panda-hold { animation: none; }
 }
+
+/* ---------- Adım adım ders çalışma ---------- */
+.study-steps { display: flex; gap: 6px; list-style: none; margin: 0 0 4px; padding: 0; counter-reset: none; }
+.study-steps li {
+  flex: 1 1 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.78rem;
+  color: var(--muted);
+  text-align: center;
+}
+.study-steps li span {
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: var(--surface-2, #eee9f5);
+  font-weight: 800;
+}
+.study-steps li.current { color: var(--text); font-weight: 700; }
+.study-steps li.current span { background: var(--brand); color: #fff; }
+.study-steps li.done span { background: var(--ok-soft, #dff3e4); color: var(--ok, #2f8a4c); }
+.study-done h2 { margin: 8px 0 4px; }
+.study-done .notice { text-decoration: none; color: inherit; text-align: left; }

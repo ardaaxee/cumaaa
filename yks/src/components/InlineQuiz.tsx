@@ -17,11 +17,14 @@ export function InlineQuiz({
   topicName,
   onMore,
   moreLabel = 'Yeni sorular getir',
+  onProgress,
 }: {
   questions: Question[];
   topicName?: string;
   onMore?: () => void;
   moreLabel?: string;
+  /** Her cevaptan sonra: cevaplanan ve doğru sayısı. */
+  onProgress?: (answered: number, correct: number) => void;
 }) {
   const sessionRef = useRef(uid('inline'));
   const shownAt = useRef(Date.now());
@@ -29,7 +32,9 @@ export function InlineQuiz({
 
   const answer = (q: Question, i: number) => {
     if (answers[q.id] != null) return;
-    setAnswers((a) => ({ ...a, [q.id]: i }));
+    const next = { ...answers, [q.id]: i };
+    setAnswers(next);
+    onProgress?.(Object.keys(next).length, questions.filter((x) => next[x.id] === x.correctAnswer).length);
     update((s) => recordPractice(s, q, i, sessionRef.current, Math.min(Date.now() - shownAt.current, 10 * 60_000)));
     shownAt.current = Date.now();
   };

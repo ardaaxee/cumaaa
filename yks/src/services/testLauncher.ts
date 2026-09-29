@@ -1,4 +1,5 @@
-import { loadQuestionsByIds, loadQuestionsFor } from '../data/content';
+import { SUBJECTS } from '../data/curriculum';
+import { loadQuestionsByIds, loadQuestionsFor, loadSubjectQuestions } from '../data/content';
 import { recoverFromChunkError } from '../utils/chunkRecovery';
 import { navigate } from '../hooks/useRoute';
 import { startTest } from '../store/actions';
@@ -56,6 +57,29 @@ export async function launchWithIds(ids: string[], config: TestConfig): Promise<
   const valid = ids.filter((id) => known.has(id));
   if (!valid.length) return 'Soru bulunamadı.';
   update((s) => startTest(s, { ...config, count: valid.length }, valid));
+  navigate('/test');
+  return null;
+}
+
+const QUICK_SUBJECTS = 3;
+
+/**
+ * Hızlı karışık test: tüm bankayı indirmek yerine rastgele birkaç dersten soru seçer
+ * (telefonda saniyeler içinde açılır). Her seferinde farklı dersler gelir.
+ */
+export async function launchQuickMix(count: number, title: string): Promise<string | null> {
+  const subjects = [...SUBJECTS].sort(() => Math.random() - 0.5).slice(0, QUICK_SUBJECTS);
+  let pool;
+  try {
+    pool = (await Promise.all(subjects.map((s) => loadSubjectQuestions(s.id)))).flat();
+  } catch (e) {
+    recoverFromChunkError(e);
+    return LOAD_ERROR;
+  }
+  if (!pool.length) return 'Soru bulunamadı.';
+  const config = makeConfig({ count, title });
+  const ids = pickQuestions(pool, count, getState().attempts);
+  update((s) => startTest(s, config, ids));
   navigate('/test');
   return null;
 }
