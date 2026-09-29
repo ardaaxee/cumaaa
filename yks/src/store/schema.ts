@@ -230,6 +230,10 @@ export interface PomodoroState {
   remainingMs: number;
   completedFocusCount: number;
   subjectId?: SubjectId;
+  /** İsteğe bağlı: odak oturumunun bağlı olduğu plan görevi. */
+  taskId?: string;
+  /** Odak tamamlanınca bağlı görev otomatik tamamlanır. */
+  completeTaskOnFinish?: boolean;
 }
 
 export interface ChatMessage {
