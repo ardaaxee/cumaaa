@@ -8,7 +8,7 @@ import { Empty, ProgressBar, toast } from '../components/ui';
 import { navigate } from '../hooks/useRoute';
 import { lookup, topicLabel } from '../services/lookup';
 import { buildRecommendations, hasAnyData, type Recommendation } from '../services/recommendations';
-import { launchQuickMix, launchTest, makeConfig } from '../services/testLauncher';
+import { launchAdaptivePractice, launchTest, makeConfig } from '../services/testLauncher';
 import { usePetNeeds } from '../hooks/usePetNeeds';
 import { needsMessage } from '../utils/petCare';
 import { toggleTask } from '../store/actions';
@@ -126,15 +126,11 @@ export default function HomePage() {
       </section>
 
       <nav className="quick-grid home-quick-grid" aria-label="Hızlı başla">
-        <button
-          type="button"
-          className="quick-tile t-lilac"
-          onClick={() => void launchQuickMix(10, 'Hızlı 10 soru').then((e) => e && toast(e))}
-        >
-          <span className="quick-emoji" aria-hidden="true">⚡</span>
-          <b>10 soruluk mini test</b>
-          <span className="tiny muted">Karışık ve kısa bir başlangıç</span>
-        </button>
+        <a className="quick-tile t-lilac" href="#/koc">
+          <span className="quick-emoji" aria-hidden="true">◎</span>
+          <b>Akıllı Koç</b>
+          <span className="tiny muted">Seviyene göre bugün ne çalışacağını seç</span>
+        </a>
         <a className="quick-tile t-sky" href="#/dersler">
           <span className="quick-emoji" aria-hidden="true">📚</span>
           <b>Konu çalış</b>
@@ -233,8 +229,8 @@ export default function HomePage() {
             <Empty
               title="Seni tanımaya başlayalım."
               action={
-                <button type="button" className="btn primary small" onClick={() => navigate('/testler')}>
-                  İlk testini çöz
+                <button type="button" className="btn primary small" onClick={() => navigate('/koc')}>
+                  Seviye tespitini başlat
                 </button>
               }
             >
@@ -259,6 +255,9 @@ export default function HomePage() {
               </div>
               <button type="button" className="btn small primary" onClick={() => void runRecommendation(recs[0])}>
                 {recs[0].actionLabel}
+              </button>
+              <button type="button" className="btn small ghost" onClick={() => void launchAdaptivePractice(12).then((e) => e && toast(e))}>
+                Adaptif 12 soru
               </button>
             </div>
           )}
