@@ -104,7 +104,9 @@ export interface ActiveTest {
   startedAt: string;
   /** Sınav modunda süre sınırı (ms). */
   timeLimitMs: number | null;
-  /** Sayfa arka plandayken geçen süreyi doğru saymak için: toplam aktif süre. */
+  /** Süreli testin mutlak bitiş zamanı. Sekme arka planda veya ekran kilitliyken de sınav saati akar. */
+  deadlineAt?: number | null;
+  /** Toplam geçen süre. */
   elapsedMs: number;
 }
 
