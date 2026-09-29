@@ -26,7 +26,7 @@ export const questions: QuestionSeed[] = [
     question: 'Molar kütlesi 44 g/mol olan CO₂ gazının 22 gramında kaç mol CO₂ vardır?',
     options: ['0,25', '0,5', '1', '2', '22'],
     correctAnswer: 1,
-    solution: 'n = m/M = 22/44 = 0,5 mol.',
+    solution: 'Mol sayısı n = m/M bağıntısıyla bulunur. Kütle 22 g ve molar kütle 44 g/mol olduğundan n = 22/44 = 0,5 mol CO₂ elde edilir.',
     hint: 'Mol sayısı = kütle / molar kütle.',
     commonMistake: '44/22 yaparak 2 mol bulmak.',
     teacherNote: 'Temel mol-kütle dönüşümünü ölçer.',
