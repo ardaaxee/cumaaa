@@ -26,9 +26,18 @@ for (const file of files) {
   const exam = subjectId.startsWith('tyt-') ? 'TYT' : 'AYT';
   const modulePath = `./questions/${file}`;
   const source = readFileSync(resolve(questionDir, file), 'utf8');
-  const topics = [...source.matchAll(/\btopic\s*:\s*['"`]([^'"`]+)['"`]/g)].map((match) => match[1]);
+  const constants = Object.fromEntries(
+    [...source.matchAll(/\\bconst\\s+([A-Za-z_$][\\w$]*)\\s*=\\s*['"`]([^'"`]+)['"`]\\s*;/g)].map((match) => [match[1], match[2]]),
+  );
+  const topics = [...source.matchAll(/\\btopic\\s*:\\s*(['"`][^'"`]+['"`]|[A-Za-z_$][\\w$]*)/g)]
+    .map((match) => {
+      const expression = match[1];
+      if (/^['"`]/.test(expression)) return expression.slice(1, -1);
+      return constants[expression];
+    })
+    .filter(Boolean);
 
-  if (!topics.length) throw new Error(`Soru bulunamadı veya topic alanı okunamadı: ${file}`);
+  if (!topics.length) throw new Error(`Soru bulunamadı veya topic alanı çözümlenemedi: ${file}`);
 
   countsBySubject[subjectId] = (countsBySubject[subjectId] ?? 0) + topics.length;
   countsByExam[exam] += topics.length;
