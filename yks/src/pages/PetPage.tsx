@@ -724,6 +724,53 @@ export default function PetPage() {
       }
 
       const roll = Math.random();
+
+      // Aynı odadaysalar bazen birbirlerini gerçekten fark edip ortak bir davranış başlatırlar.
+      if (room === zeynepRoom && activity === 'idle' && roll < 0.30) {
+        clearTimers();
+        const interaction = Math.random();
+        const meetX = Math.max(28, Math.min(72, petPos.x));
+        setPetPos({ x: meetX - 7, y: Math.max(2, petPos.y) });
+        setZeynepPos({ x: meetX + 7, y: 8 });
+        setHappiness((v) => clampLife(v + 6));
+        setHearts((v) => v + 1);
+
+        if (interaction < 0.34) {
+          setActivity('shy');
+          setEmotion('shy');
+          setZeynepActivity('petting');
+          setSceneMessage('Zeynep ' + pet.name + '’nın yanına gelip başını seviyor ♡');
+          setZeynepMessage('Zeynep ' + pet.name + '’yı seviyor ♡');
+          void playPandaVoice('Hihi… biraz utandım.', 'shy', voiceOn);
+        } else if (interaction < 0.68) {
+          setActivity('talking');
+          setZeynepActivity('talking');
+          setSceneMessage(pet.name + ' ile Zeynep kendi aralarında sohbet ediyor 💬');
+          setZeynepMessage('Zeynep ' + pet.name + ' ile konuşuyor 💬');
+          void playPandaVoice('Burada beraber olmak güzel.', 'happy', voiceOn);
+        } else if (room === 'garden' || room === 'balcony') {
+          setActivity('playing');
+          setZeynepActivity('gardening');
+          setSceneMessage(pet.name + ' oynarken Zeynep de yanında vakit geçiriyor 🌿');
+          setZeynepMessage('Zeynep bahçede ' + pet.name + ' ile vakit geçiriyor 🌿');
+          void playPandaVoice('Hadi biraz oynayalım!', 'play', voiceOn);
+        } else {
+          setActivity('relaxing');
+          setZeynepActivity('relaxing');
+          setSceneMessage(pet.name + ' ile Zeynep aynı odada birlikte dinleniyor ☕');
+          setZeynepMessage('Zeynep ' + pet.name + ' ile biraz dinleniyor ☕');
+        }
+
+        zLater(() => {
+          setEmotion('neutral');
+          setActivity('idle');
+          setZeynepActivity('idle');
+          setSceneMessage(null);
+          setZeynepMessage(null);
+        }, 3800);
+        return;
+      }
+
       if (roll < 0.16) {
         travel('study', 'studying', 'Zeynep çalışma odasına geçiyor 📚', 5200);
         return;
@@ -744,15 +791,12 @@ export default function PetPage() {
         travel('bathroom', 'cleaning', 'Zeynep evi toparlamaya başladı ✨', 4400);
         return;
       }
-      if (roll < 0.84 && room === zeynepRoom && activity === 'idle') {
-        setZeynepActivity('petting');
-        setZeynepMessage('Zeynep Panda’nın yanına gelip onu seviyor ♡');
-        setHappiness((v) => clampLife(v + 5));
-        setHearts((v) => v + 1);
+      if (roll < 0.84 && room !== zeynepRoom && activity === 'idle') {
+        travel(room, 'petting', 'Zeynep ' + pet.name + '’nın yanına gitmeye karar verdi ♡', 4300);
         zLater(() => {
-          setZeynepActivity('idle');
-          setZeynepMessage(null);
-        }, 3000);
+          setHappiness((v) => clampLife(v + 4));
+          setHearts((v) => v + 1);
+        }, 1300);
         return;
       }
 
@@ -763,7 +807,7 @@ export default function PetPage() {
       cancelled = true;
       window.clearTimeout(id);
     };
-  }, [zeynepActivity, needs.hungry, needs.thirsty, needs.bamboo, needs.drops, room, zeynepRoom, activity]);
+  }, [zeynepActivity, needs.hungry, needs.thirsty, needs.bamboo, needs.drops, room, zeynepRoom, activity, pet.name, petPos.x, petPos.y, voiceOn]);
 
   useEffect(() => () => {
     clearTimers();
