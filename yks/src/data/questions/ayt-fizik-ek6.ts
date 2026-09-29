@@ -70,7 +70,7 @@ export const questions: QuestionSeed[] = [
     type: 'islem',
     question: '2 kg kütleli cisim 4 m/s hızla giderken üzerine hareket yönünde 12 J net iş yapılıyor. Cismin son hızı kaç m/s olur?',
     options: ['4', '5', '√20', '√28', '6'],
-    correctAnswer: 2,
+    correctAnswer: 3,
     solution: 'Başlangıç kinetik enerjisi ½·2·4² = 16 J.\nNet iş 12 J olduğundan son kinetik enerji 28 J olur.\n½·2·v² = 28 ⇒ v² = 28 ⇒ v = √28 m/s.',
     hint: 'Net iş = kinetik enerji değişimi.',
     commonMistake: '12 J’ü doğrudan hız artışı gibi kullanmak.',
