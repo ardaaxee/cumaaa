@@ -8631,3 +8631,127 @@ body {
   67% { transform:rotate(3deg) translateY(1px); }
   74% { transform:rotate(-2deg); }
 }
+
+
+/* ===== TALKING PANDA BEHAVIOR v6 ===== */
+.pet-stage-panda.act-greeting .real-panda,
+.pet-stage-panda.act-talking .real-panda {
+  animation: rp-social-body 1.5s ease-in-out infinite;
+}
+.real-panda.is-waving .rp-arm-right {
+  transform-box: fill-box;
+  transform-origin: 28% 16%;
+  animation: rp-wave-human .34s ease-in-out infinite alternate !important;
+}
+.real-panda.is-waving .rp-head {
+  animation: rp-social-head 1.15s ease-in-out infinite alternate;
+}
+.real-panda.is-talking .rp-talk-mouth {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: rp-talk-mouth-open .22s ease-in-out infinite alternate;
+}
+.real-panda.is-talking .rp-mouth {
+  opacity:.45;
+}
+.real-panda.is-talking .rp-head {
+  animation: rp-talk-head 1.4s ease-in-out infinite;
+}
+.real-panda.is-talking .rp-arm-left {
+  transform-box: fill-box;
+  transform-origin:72% 16%;
+  animation: rp-talk-gesture-left 1.1s ease-in-out infinite alternate;
+}
+.real-panda.is-talking .rp-arm-right:not(.never) {
+  transform-box: fill-box;
+  transform-origin:28% 16%;
+}
+.pet-stage-panda.act-talking .rp-arm-right {
+  animation: rp-talk-gesture-right 1.25s ease-in-out infinite alternate;
+}
+
+@keyframes rp-wave-human {
+  from { transform:rotate(-8deg) translate(-1px,-1px); }
+  to { transform:rotate(-38deg) translate(-5px,-9px); }
+}
+@keyframes rp-social-body {
+  0%,100% { transform:translateY(0) rotate(0); }
+  50% { transform:translateY(-4px) rotate(.8deg); }
+}
+@keyframes rp-social-head {
+  from { transform:rotate(-2deg); }
+  to { transform:rotate(3deg); }
+}
+@keyframes rp-talk-head {
+  0%,100% { transform:rotate(0) translateY(0); }
+  35% { transform:rotate(-1.8deg) translateY(1px); }
+  70% { transform:rotate(2deg) translateY(0); }
+}
+@keyframes rp-talk-mouth-open {
+  from { transform:scale(.9,.55); }
+  to { transform:scale(1.08,1.35); }
+}
+@keyframes rp-talk-gesture-left {
+  from { transform:rotate(1deg); }
+  to { transform:rotate(9deg) translateY(-2px); }
+}
+@keyframes rp-talk-gesture-right {
+  from { transform:rotate(-1deg); }
+  to { transform:rotate(-11deg) translateY(-3px); }
+}
+
+.pet-game-talk.speaking {
+  top:4%;
+  border-color:rgba(121,84,166,.22);
+  background:rgba(255,255,255,.94);
+  box-shadow:0 13px 30px rgba(69,45,82,.18);
+  animation:pet-speech-pop .28s cubic-bezier(.2,.9,.2,1) both;
+}
+.pet-game-talk.speaking::after {
+  content:"";
+  position:absolute;
+  left:50%;
+  bottom:-10px;
+  width:18px;
+  height:18px;
+  transform:translateX(-50%) rotate(45deg);
+  background:inherit;
+  border-right:1px solid rgba(121,84,166,.14);
+  border-bottom:1px solid rgba(121,84,166,.14);
+}
+@keyframes pet-speech-pop {
+  from { opacity:0; transform:translateX(-50%) translateY(-5px) scale(.96); }
+  to { opacity:1; transform:translateX(-50%) translateY(0) scale(1); }
+}
+
+/* Daha belirgin ev içi yürüyüş: sağa-sola küçük kayma yerine sahnenin büyük bölümünü kullanır. */
+.pet-stage-panda.act-walking {
+  filter:drop-shadow(0 18px 14px rgba(50,40,50,.15));
+}
+.pet-stage-panda.act-walking .real-panda {
+  animation-duration:.44s;
+}
+.pet-stage-panda.act-walking .rp-head {
+  animation:rp-walk-head .44s ease-in-out infinite alternate;
+}
+@keyframes rp-walk-head {
+  from { transform:rotate(-1.5deg) translateY(0); }
+  to { transform:rotate(1.5deg) translateY(-2px); }
+}
+
+/* Odada derine yürürken karakter çok hafif küçülür; düz bir sticker hissini azaltır. */
+.pet-stage-panda {
+  transform:translateX(-50%) scale(var(--pet-depth,1));
+}
+.pet-stage-panda.act-sleeping {
+  transform:translateX(-50%) scale(calc(var(--pet-depth,1) * .92)) rotate(-7deg);
+}
+.pet-stage-panda.act-bathing {
+  transform:translateX(-50%) scale(calc(var(--pet-depth,1) * .88));
+}
+
+@media (max-width:560px) {
+  .pet-game-talk.speaking {
+    width:min(86%,390px);
+  }
+}
