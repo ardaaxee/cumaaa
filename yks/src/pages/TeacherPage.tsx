@@ -17,6 +17,7 @@ import { update, useAppState } from '../store/store';
 import { formatMinutes } from '../utils/date';
 import { optionLetter } from '../utils/ids';
 import { dashboard } from '../utils/stats';
+import { studyBrief } from '../services/adaptiveStudy';
 
 const VOICE_KEY = 'iyikiYks.asistanSes';
 
@@ -103,7 +104,7 @@ export default function TeacherPage() {
     const weak = weakTopics(state);
     if (weak.length) ctx.wrongsSummary = weak.slice(0, 5).map((w) => `${getTopicRef(w.topicId)?.topic.name ?? w.topicId}: ${w.reasons.join(', ')}`).join(' | ');
     const d = dashboard(state);
-    ctx.statsSummary = `Bugün ${d.todayQuestions} soru, ${formatMinutes(d.todayMinutes)} çalışma. Bu hafta ${d.weekQuestions} soru. Doğruluk: ${d.accuracy != null ? `%${d.accuracy}` : 'veri yok'}. Seri: ${d.streak} gün.`;
+    ctx.statsSummary = `Bugün ${d.todayQuestions} soru, ${formatMinutes(d.todayMinutes)} çalışma. Bu hafta ${d.weekQuestions} soru. Doğruluk: ${d.accuracy != null ? `%${d.accuracy}` : 'veri yok'}. Seri: ${d.streak} gün. Adaptif çalışma özeti: ${studyBrief(state)}`;
     return ctx;
   }, [ref, topicId, question, answerIdx, state, lesson]);
 
