@@ -146,7 +146,7 @@ export async function launchAdaptivePractice(count = 12): Promise<string | null>
   if (!candidates.length) return launchQuickMix(count, 'Adaptif başlangıç testi');
 
   for (const row of candidates) {
-    const config = makeConfig({
+    let config = makeConfig({
       subjectId: row.subjectId,
       topicId: row.topicId,
       difficulty: row.recommendedDifficulty,
@@ -155,11 +155,45 @@ export async function launchAdaptivePractice(count = 12): Promise<string | null>
       origin: 'adaptif',
       title: 'Adaptif çalışma testi',
     });
-    const err = await launchTest(config);
-    if (!err) return null;
 
-    const fallback = await launchTest({ ...config, difficulty: 'all' });
-    if (!fallback) return null;
+    let all;
+    try {
+      all = await loadQuestionsFor(config);
+    } catch (e) {
+      recoverFromChunkError(e);
+      continue;
+    }
+    let pool = filterPool(all, config);
+
+    // Önerilen seviyede yeterli soru yoksa konuyu koruyup zorluk filtresini aç.
+    if (pool.length < Math.min(5, count)) {
+      config = { ...config, difficulty: 'all' };
+      try {
+        all = await loadQuestionsFor(config);
+      } catch (e) {
+        recoverFromChunkError(e);
+        continue;
+      }
+      pool = filterPool(all, config);
+    }
+    if (!pool.length) continue;
+
+    // Aynı hataların unutulmaması için açık yanlışlardan en fazla 3'ünü teste geri getir.
+    const openWrongIds = new Set(
+      Object.values(state.wrongs)
+        .filter((w) => !w.learned && w.topicId === row.topicId)
+        .map((w) => w.questionId),
+    );
+    const wrongPool = pool.filter((q) => openWrongIds.has(q.id));
+    const wrongIds = pickQuestions(wrongPool, Math.min(3, count), state.attempts);
+    const used = new Set(wrongIds);
+    const rest = pickQuestions(pool.filter((q) => !used.has(q.id)), Math.max(0, count - wrongIds.length), state.attempts);
+    const ids = [...wrongIds, ...rest].slice(0, count);
+    if (!ids.length) continue;
+
+    update((s) => startTest(s, { ...config, count: ids.length }, ids));
+    navigate('/test');
+    return null;
   }
   return launchQuickMix(count, 'Adaptif karışık test');
 }
