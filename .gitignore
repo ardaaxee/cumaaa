@@ -34,3 +34,4 @@ yks/node_modules/
 yks/dist/
 yks/coverage/
 yks/*.tsbuildinfo
+yks/tests/_count*.test.ts
