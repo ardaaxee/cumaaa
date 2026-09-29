@@ -70,6 +70,9 @@ export default function HomePage() {
   const daysLeft = profile.examDate ? diffDays(today, profile.examDate) : null;
   const qPct = profile.dailyQuestionGoal ? (d.todayQuestions / profile.dailyQuestionGoal) * 100 : 0;
   const mPct = profile.dailyStudyMinutes ? (d.todayMinutes / profile.dailyStudyMinutes) * 100 : 0;
+  const activeTest = state.activeTest;
+  const nextTask = todayTasks.find((t) => !t.done) ?? overdue[0] ?? null;
+  const focusRunning = state.pomodoro.running && state.pomodoro.phase === 'odak';
 
   return (
     <>
@@ -114,6 +117,63 @@ export default function HomePage() {
           </a>
         </div>
       </section>
+
+      {(activeTest || nextTask || due.length > 0 || focusRunning) && (
+        <section className="card home-resume-card" aria-label="Kaldığın yerden devam et">
+          <div className="home-resume-copy">
+            <div className="eyebrow">Kaldığın yer</div>
+            <h2>Tek dokunuşla devam et</h2>
+            <p className="small muted">
+              Uygulamayı kapatıp geri gelsen bile test, odak ve plan akışın kaybolmaz.
+            </p>
+          </div>
+          <div className="home-resume-actions">
+            {activeTest && (
+              <a className="home-resume-item primary" href="#/test">
+                <span className="home-resume-icon">▶</span>
+                <span>
+                  <b>{activeTest.config.title ?? (activeTest.config.mode === 'sinav' ? 'Devam eden sınav' : 'Devam eden çalışma')}</b>
+                  <small>Soru {activeTest.current + 1}/{activeTest.questionIds.length} · kaldığın yerden aç</small>
+                </span>
+                <Icon name="right" />
+              </a>
+            )}
+            {focusRunning && (
+              <a className="home-resume-item" href="#/odak">
+                <span className="home-resume-icon">⏱</span>
+                <span>
+                  <b>Odak oturumu sürüyor</b>
+                  <small>Zamanlayıcıyı ve oturumu aç</small>
+                </span>
+                <Icon name="right" />
+              </a>
+            )}
+            {nextTask && (
+              <a className="home-resume-item" href="#/plan">
+                <span className="home-resume-icon">✓</span>
+                <span>
+                  <b>{nextTask.title}</b>
+                  <small>
+                    {nextTask.date < today ? 'Gecikmiş görev' : 'Bugünün sıradaki görevi'}
+                    {nextTask.estMinutes ? ' · ' + nextTask.estMinutes + ' dk' : ''}
+                  </small>
+                </span>
+                <Icon name="right" />
+              </a>
+            )}
+            {due.length > 0 && (
+              <a className="home-resume-item" href="#/tekrar">
+                <span className="home-resume-icon">↻</span>
+                <span>
+                  <b>{due.length} tekrar bekliyor</b>
+                  <small>Unutmadan kısa tekrarını tamamla</small>
+                </span>
+                <Icon name="right" />
+              </a>
+            )}
+          </div>
+        </section>
+      )}
 
       <PartnerMessages />
 
