@@ -1,4 +1,5 @@
 import type { Question } from '../domain/types';
+import { getTopicRef } from '../data/curriculum';
 import { OPTION_LETTERS } from '../utils/ids';
 import { SourceBadge, toast } from './ui';
 import { toggleFavorite } from '../store/actions';
@@ -27,14 +28,19 @@ export const TYPE_LABEL: Record<string, string> = {
 };
 
 export function QuestionMeta({ q, topicName }: { q: Question; topicName?: string }) {
+  const ref = getTopicRef(q.topic);
+  const subtopic = q.subtopic ? ref?.topic.subtopics.find((s) => s.id === q.subtopic) : undefined;
   return (
-    <div className="row gap-4">
-      <SourceBadge type="ozgun-pratik" />
-      <span className="badge">{q.exam}</span>
-      {topicName && <span className="badge">{topicName}</span>}
-      <span className="badge outline">{DIFFICULTY_LABEL[q.difficulty]}</span>
-      <span className="badge outline">{TYPE_LABEL[q.type]}</span>
-      <FavoriteButton id={q.id} />
+    <div className="question-meta">
+      <div className="row gap-4">
+        <SourceBadge type="ozgun-pratik" />
+        <span className="badge">{q.exam}</span>
+        {topicName && <span className="badge">{topicName}</span>}
+        <span className="badge outline">{DIFFICULTY_LABEL[q.difficulty]}</span>
+        <span className="badge outline">{TYPE_LABEL[q.type]}</span>
+        <FavoriteButton id={q.id} />
+      </div>
+      {subtopic && <div className="question-subtopic">{subtopic.name}</div>}
     </div>
   );
 }
@@ -147,15 +153,28 @@ export function Options({
 }
 
 export function SolutionBlock({ q }: { q: Question }) {
+  const steps = q.solution.split(/\n+/).map((s) => s.trim()).filter(Boolean);
   return (
     <div className="stack solution-block">
-      <div>
-        <div className="eyebrow">Çözüm</div>
-        <div className="pre-line">{q.solution}</div>
+      <div className="solution-main">
+        <div className="eyebrow">Çözüm yolu</div>
+        {steps.length > 1 ? (
+          <ol className="solution-steps">
+            {steps.map((step, i) => <li key={i} className="pre-line">{step.replace(/^\d+[.)]\s*/, '')}</li>)}
+          </ol>
+        ) : (
+          <div className="pre-line">{q.solution}</div>
+        )}
       </div>
-      <div className="callout warn">
-        <b>Sık yapılan hata: </b>
-        {q.commonMistake}
+      <div className="solution-learning-grid">
+        <div className="callout solution-hint">
+          <b>Bu soruda ana fikir: </b>
+          {q.hint}
+        </div>
+        <div className="callout warn">
+          <b>Sık yapılan hata: </b>
+          {q.commonMistake}
+        </div>
       </div>
       {q.teacherNote && (
         <div className="callout">
@@ -163,7 +182,10 @@ export function SolutionBlock({ q }: { q: Question }) {
           {q.teacherNote}
         </div>
       )}
-      <div className="tiny muted">Kazanım: {q.outcome}</div>
+      <div className="solution-outcome">
+        <span>Ölçülen kazanım</span>
+        <b>{q.outcome}</b>
+      </div>
     </div>
   );
 }
