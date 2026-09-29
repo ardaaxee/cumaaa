@@ -207,7 +207,7 @@ export const questions: QuestionSeed[] = [
       "18"
     ],
     "correctAnswer": 2,
-    "solution": "F = mv²/r = 0,5·36/2 = 9 N.",
+    "solution": "Düzgün çembersel harekette gerekli merkezcil kuvvet F = mv²/r bağıntısıyla bulunur. m = 0,5 kg, v = 6 m/s ve r = 2 m olduğundan F = 0,5·6²/2 = 0,5·36/2 = 18/2 = 9 N olur. Kuvvetin yönü her an çemberin merkezine doğrudur.",
     "hint": "Merkezcil kuvvet için mv²/r bağıntısını kullan.",
     "commonMistake": "r yerine r² kullanmak.",
     "teacherNote": "Temel merkezcil kuvvet hesabını ölçer."
