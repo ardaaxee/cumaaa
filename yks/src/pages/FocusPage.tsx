@@ -3,7 +3,7 @@ import { Icon } from '../components/Icon';
 import { PageHeader } from '../components/Layout';
 import { PandaBody } from '../components/MascotNav';
 import { SUBJECTS, subjectLabel } from '../data/curriculum';
-import { addStudyMinutes, updateSettings } from '../store/actions';
+import { addStudyMinutes, toggleTask, updateSettings } from '../store/actions';
 import { update, useAppState } from '../store/store';
 import type { PomodoroState } from '../store/schema';
 import { dayKey, formatMinutes } from '../utils/date';
@@ -49,6 +49,8 @@ export default function FocusPage() {
     () => state.studyLog.filter((s) => s.day === today && s.source === 'pomodoro').reduce((sum, s) => sum + s.minutes, 0),
     [state.studyLog, today],
   );
+  const todayTasks = useMemo(() => state.tasks.filter((t) => t.date === today && !t.done), [state.tasks, today]);
+  const boundTask = p.taskId ? state.tasks.find((t) => t.id === p.taskId) : undefined;
   const remaining = p.running && p.endsAt ? Math.max(0, p.endsAt - now) : p.remainingMs;
   const total = phaseDurationMs(state, p.phase);
   const progress = total > 0 ? ((total - remaining) / total) * 100 : 0;
@@ -76,7 +78,11 @@ export default function FocusPage() {
         const completed = s.pomodoro.completedFocusCount + 1;
         const long = completed % Math.max(1, s.settings.cyclesBeforeLongBreak) === 0;
         const nextPhase: PomodoroState['phase'] = long ? 'uzun-mola' : 'mola';
-        const logged = addStudyMinutes(s, s.settings.focusMinutes, 'pomodoro', new Date(), s.pomodoro.subjectId);
+        let logged = addStudyMinutes(s, s.settings.focusMinutes, 'pomodoro', new Date(), s.pomodoro.subjectId);
+        if (s.pomodoro.completeTaskOnFinish && s.pomodoro.taskId) {
+          const task = logged.tasks.find((t) => t.id === s.pomodoro.taskId);
+          if (task && !task.done) logged = toggleTask(logged, task.id);
+        }
         return {
           ...logged,
           pomodoro: {
@@ -86,6 +92,8 @@ export default function FocusPage() {
             endsAt: null,
             remainingMs: phaseDurationMs(logged, nextPhase),
             completedFocusCount: completed,
+            taskId: undefined,
+            completeTaskOnFinish: false,
           },
         };
       }
@@ -104,7 +112,12 @@ export default function FocusPage() {
 
     if (finished === 'odak') {
       notifyFinished('Odak tamamlandı ✓', petName + ' seninle gurur duyuyor. Şimdi kısa bir mola.');
-      toast('Odak oturumu tamamlandı. Çalışma süren kaydedildi ✓', 4500);
+      toast(
+        boundTask && p.completeTaskOnFinish !== false
+          ? 'Odak tamamlandı. Süre kaydedildi ve plan görevin tamamlandı ✓'
+          : 'Odak oturumu tamamlandı. Çalışma süren kaydedildi ✓',
+        4500,
+      );
     } else {
       notifyFinished('Mola bitti', 'Hazırsan yeni odak oturumuna başlayabilirsin.');
       toast('Mola bitti. Yeni odak için hazırsın.', 3500);
@@ -233,6 +246,50 @@ export default function FocusPage() {
               {minutes} dk
             </button>
           ))}
+        </div>
+
+        <div className="focus-task-bind">
+          <label className="field">
+            <span>Bugünkü plana bağla</span>
+            <select
+              className="select"
+              value={p.taskId ?? ''}
+              disabled={p.running}
+              onChange={(e) => {
+                const task = state.tasks.find((t) => t.id === e.target.value);
+                update((s) => ({
+                  ...s,
+                  pomodoro: {
+                    ...s.pomodoro,
+                    taskId: task?.id,
+                    subjectId: task?.subjectId ?? s.pomodoro.subjectId,
+                    completeTaskOnFinish: task ? true : false,
+                  },
+                }));
+              }}
+            >
+              <option value="">Göreve bağlama</option>
+              {todayTasks.map((task) => (
+                <option key={task.id} value={task.id}>{task.title}</option>
+              ))}
+            </select>
+          </label>
+          {boundTask && (
+            <label className="check focus-task-check">
+              <input
+                type="checkbox"
+                checked={p.completeTaskOnFinish !== false}
+                disabled={p.running}
+                onChange={(e) =>
+                  update((s) => ({
+                    ...s,
+                    pomodoro: { ...s.pomodoro, completeTaskOnFinish: e.target.checked },
+                  }))
+                }
+              />
+              <span>Süre bitince bu görevi tamamlandı işaretle</span>
+            </label>
+          )}
         </div>
 
         <label className="field focus-subject">
