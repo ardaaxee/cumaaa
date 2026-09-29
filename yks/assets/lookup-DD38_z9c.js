@@ -1,0 +1,1 @@
+import{Gt as e,Kt as t,Ut as n,Wt as r}from"./actions-DA1iRL-m.js";var i={topicName:e=>r(e)?.topic.name??e,subjectName:t=>{let r=n(t);return r?e(r):t},subjectTopicIds:e=>t(e).map(e=>e.id)};function a(e){let t=r(e);return t?`${t.subject.exam} ${t.subject.name} · ${t.topic.name}`:e}export{a as n,i as t};
