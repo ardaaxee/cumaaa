@@ -25,8 +25,9 @@ export default function OsymPage() {
       <div className="notice osym-notice">
         <Icon name="alert" />
         <div>
-          <b>Mobil açılma sorunu düzeltildi.</b> Artık ara ÖSYM sayfası yerine doğrudan
-          <b> dokuman.osym.gov.tr</b> üzerindeki resmî PDF kitapçığı açılır. Sorular uygulamaya kopyalanmaz.
+          <b>Bağlantılar ÖSYM’nin resmî arşiviyle doğrulandı.</b> Önce doğrudan
+          <b> dokuman.osym.gov.tr</b> PDF’sini açabilirsin; telefon PDF’yi açmazsa aynı karttaki
+          “ÖSYM sayfası” düğmesi resmî yedek yoldur. Sorular uygulamaya kopyalanmaz.
         </div>
       </div>
 
@@ -59,7 +60,7 @@ export default function OsymPage() {
             </div>
 
             <div className="osym-mobile-help">
-              PDF düğmesine dokunduğunda telefonun PDF görüntüleyicisi açılır. Açılmazsa bağlantıyı kopyalayıp Chrome’a yapıştırabilirsin.
+              PDF telefonunda açılmazsa “ÖSYM sayfası”na dokunup aynı yılın TYT/AYT bağlantısını oradan aç. İstersen PDF adresini ayrıca kopyalayabilirsin.
             </div>
           </article>
         ))}
