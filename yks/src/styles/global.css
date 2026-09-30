@@ -9740,3 +9740,37 @@ textarea:focus-visible {
     transition:none !important;
   }
 }
+
+
+/* ===== TEACHER AI TRANSPARENCY v1 ===== */
+.teacher-source-label {
+  display:block;
+  margin-top:7px;
+  padding-top:6px;
+  border-top:1px solid color-mix(in srgb,var(--line) 72%,transparent);
+  color:var(--muted);
+  font-size:.61rem;
+  font-weight:750;
+}
+.teacher-ai-disclosure {
+  margin-top:10px;
+  display:grid;
+  gap:2px;
+  padding:9px 10px;
+  border-radius:13px;
+  border:1px solid var(--line);
+  background:var(--surface-2);
+  font-size:.69rem;
+}
+.teacher-ai-disclosure b { font-size:.72rem; }
+.teacher-ai-disclosure span {
+  color:var(--muted);
+  line-height:1.4;
+}
+.teacher-ai-disclosure.connected {
+  border-color:color-mix(in srgb,var(--ok) 28%,var(--line));
+  background:color-mix(in srgb,var(--ok-soft) 72%,var(--surface));
+}
+.teacher-ai-disclosure.local {
+  border-color:color-mix(in srgb,var(--warn) 24%,var(--line));
+}
