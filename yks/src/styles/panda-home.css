@@ -168,3 +168,8 @@
 .panda-memory-list p { white-space:pre-wrap; overflow-wrap:anywhere; }
 .panda-moments textarea { width:100%; resize:vertical; min-height:90px; }
 @media(max-width:560px) { .panda-moments { padding:18px; } .panda-moment-actions .btn { flex:1 1 120px; } }
+.panda-home-v7 .panda-moments { background:#251d2d; color:#f6effb; border:1px solid #493956; box-shadow:none; }
+.panda-home-v7 .panda-moments h2, .panda-home-v7 .panda-moments h3, .panda-home-v7 .panda-moments p, .panda-home-v7 .panda-moments summary { color:#f6effb; }
+.panda-home-v7 .panda-moments .muted, .panda-home-v7 .panda-moments-heading small, .panda-home-v7 .panda-letter span, .panda-home-v7 .panda-memory-list small { color:#d4c6df; }
+.panda-home-v7 .panda-letter, .panda-home-v7 .panda-letter-button, .panda-home-v7 .panda-memory-list article { background:#30233d; border-color:#655170; color:#f6effb; }
+.panda-home-v7 .panda-moments-heading > span { background:#453152; color:#e7c8ff; }
