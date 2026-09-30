@@ -10028,3 +10028,353 @@ textarea:focus-visible {
   .home-smart-start-copy b { white-space:normal; }
   .home-smart-start .study-cta { width:100%; }
 }
+
+
+/* ===== PANDA HOUSE 3D v1 ===== */
+.panda3d-page {
+  display:grid;
+  gap:0;
+}
+.panda3d-stage {
+  position:relative;
+  min-height:clamp(520px,68vh,760px);
+  border:1px solid var(--line);
+  border-radius:26px;
+  overflow:hidden;
+  background:#f5edff;
+  box-shadow:0 22px 60px rgba(62,45,86,.14);
+  isolation:isolate;
+}
+.panda3d-stage:fullscreen {
+  width:100vw;
+  height:100vh;
+  border:0;
+  border-radius:0;
+  background:#15182a;
+}
+.panda3d-stage:fullscreen .panda3d-viewport { height:100vh; }
+.panda3d-viewport {
+  position:absolute;
+  inset:0;
+  min-height:520px;
+  touch-action:none;
+  user-select:none;
+  -webkit-user-select:none;
+  background:
+    radial-gradient(circle at 50% 18%,rgba(255,255,255,.92),transparent 34%),
+    linear-gradient(180deg,#eee5ff,#f8f1f6 70%);
+}
+.panda3d-canvas {
+  display:block;
+  width:100%;
+  height:100%;
+  touch-action:none;
+  cursor:grab;
+}
+.panda3d-canvas:active { cursor:grabbing; }
+.panda3d-loading {
+  position:absolute;
+  inset:0;
+  z-index:5;
+  display:grid;
+  place-items:center;
+  align-content:center;
+  gap:8px;
+  padding:24px;
+  text-align:center;
+  background:
+    radial-gradient(circle at 50% 42%,rgba(255,255,255,.96),rgba(241,231,255,.94) 55%,rgba(226,216,245,.96));
+  color:#3b3148;
+}
+.panda3d-loading span {
+  max-width:300px;
+  font-size:.78rem;
+  opacity:.7;
+}
+.panda3d-loading.error { background:var(--surface); color:var(--text); }
+.panda3d-loader-orb {
+  width:82px;
+  height:82px;
+  display:grid;
+  place-items:center;
+  border-radius:28px;
+  background:rgba(255,255,255,.84);
+  border:1px solid rgba(255,255,255,.9);
+  box-shadow:0 18px 42px rgba(80,56,110,.16);
+  font-size:2.45rem;
+  animation:panda3d-float 1.8s ease-in-out infinite;
+}
+@keyframes panda3d-float {
+  0%,100% { transform:translateY(0) rotate(-2deg); }
+  50% { transform:translateY(-9px) rotate(2deg); }
+}
+.panda3d-top-hud {
+  position:absolute;
+  z-index:4;
+  top:14px;
+  left:14px;
+  right:14px;
+  display:flex;
+  justify-content:space-between;
+  align-items:flex-start;
+  gap:10px;
+  pointer-events:none;
+}
+.panda3d-status {
+  pointer-events:auto;
+  min-width:0;
+  max-width:min(520px,calc(100% - 58px));
+  display:flex;
+  align-items:center;
+  gap:9px;
+  padding:10px 12px;
+  border:1px solid rgba(255,255,255,.5);
+  border-radius:18px;
+  background:rgba(28,24,37,.66);
+  color:#fff;
+  backdrop-filter:blur(14px) saturate(1.15);
+  -webkit-backdrop-filter:blur(14px) saturate(1.15);
+  box-shadow:0 12px 30px rgba(19,15,28,.18);
+}
+.panda3d-status > div {
+  display:grid;
+  gap:2px;
+  min-width:0;
+}
+.panda3d-status b {
+  font-size:.78rem;
+  white-space:nowrap;
+}
+.panda3d-status small {
+  font-size:.66rem;
+  color:rgba(255,255,255,.76);
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+}
+.panda3d-live-dot {
+  width:9px;
+  height:9px;
+  flex:0 0 auto;
+  border-radius:50%;
+  background:#8ef0b7;
+  box-shadow:0 0 0 5px rgba(142,240,183,.16),0 0 16px rgba(142,240,183,.52);
+}
+.panda3d-icon-btn {
+  pointer-events:auto;
+  width:44px;
+  height:44px;
+  display:grid;
+  place-items:center;
+  border:1px solid rgba(255,255,255,.5);
+  border-radius:16px;
+  background:rgba(28,24,37,.62);
+  color:#fff;
+  font-size:1.1rem;
+  backdrop-filter:blur(14px);
+  -webkit-backdrop-filter:blur(14px);
+}
+.panda3d-roombar {
+  position:absolute;
+  z-index:4;
+  left:50%;
+  bottom:18px;
+  transform:translateX(-50%);
+  width:min(720px,calc(100% - 28px));
+  display:grid;
+  grid-template-columns:repeat(5,minmax(0,1fr));
+  gap:6px;
+  padding:7px;
+  border-radius:22px;
+  border:1px solid rgba(255,255,255,.56);
+  background:rgba(26,22,34,.68);
+  backdrop-filter:blur(16px) saturate(1.15);
+  -webkit-backdrop-filter:blur(16px) saturate(1.15);
+  box-shadow:0 18px 40px rgba(20,14,31,.20);
+}
+.panda3d-roombar button {
+  min-width:0;
+  height:58px;
+  display:grid;
+  place-items:center;
+  align-content:center;
+  gap:2px;
+  border:0;
+  border-radius:16px;
+  background:transparent;
+  color:rgba(255,255,255,.72);
+}
+.panda3d-roombar button span { font-size:1.16rem; line-height:1; }
+.panda3d-roombar button b {
+  font-size:.62rem;
+  overflow:hidden;
+  max-width:100%;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+}
+.panda3d-roombar button.active {
+  background:rgba(255,255,255,.95);
+  color:#3a3046;
+  box-shadow:0 8px 22px rgba(12,9,18,.18);
+}
+.panda3d-controls-hint {
+  position:absolute;
+  z-index:3;
+  right:14px;
+  top:72px;
+  display:flex;
+  gap:5px;
+  flex-direction:column;
+  align-items:flex-end;
+  pointer-events:none;
+}
+.panda3d-controls-hint span {
+  padding:5px 8px;
+  border-radius:999px;
+  background:rgba(32,28,42,.48);
+  color:rgba(255,255,255,.82);
+  font-size:.58rem;
+  backdrop-filter:blur(8px);
+  -webkit-backdrop-filter:blur(8px);
+}
+.panda3d-dashboard {
+  display:grid;
+  grid-template-columns:minmax(0,1.05fr) minmax(0,.95fr);
+  gap:12px;
+}
+.panda3d-needs,
+.panda3d-progress-card {
+  min-width:0;
+}
+.panda3d-needs h2,
+.panda3d-progress-card h2 {
+  margin:3px 0 10px;
+  font-size:1rem;
+}
+.panda3d-meter {
+  display:grid;
+  gap:5px;
+  margin-top:12px;
+}
+.panda3d-meter .row {
+  font-size:.78rem;
+}
+.panda3d-action-grid {
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:8px;
+  margin-top:14px;
+}
+.panda3d-action-grid .btn {
+  min-width:0;
+  padding-inline:12px;
+}
+.panda3d-action-grid small {
+  display:inline-grid;
+  place-items:center;
+  min-width:22px;
+  height:22px;
+  padding:0 6px;
+  border-radius:999px;
+  background:rgba(0,0,0,.08);
+  font-size:.62rem;
+}
+.panda3d-progress-card {
+  position:relative;
+  overflow:hidden;
+}
+.panda3d-progress-card::after {
+  content:'🐼';
+  position:absolute;
+  right:-12px;
+  top:-18px;
+  font-size:6.8rem;
+  opacity:.055;
+  transform:rotate(12deg);
+  pointer-events:none;
+}
+.panda3d-progress-number {
+  margin-top:4px;
+  font-size:clamp(2.3rem,6vw,4.2rem);
+  font-weight:950;
+  line-height:1;
+  letter-spacing:-.06em;
+}
+.panda3d-milestones {
+  display:grid;
+  grid-template-columns:repeat(4,minmax(0,1fr));
+  gap:6px;
+  margin:14px 0 10px;
+}
+.panda3d-milestones > div {
+  display:grid;
+  gap:4px;
+  justify-items:center;
+  text-align:center;
+  padding:8px 5px;
+  border:1px solid var(--line);
+  border-radius:12px;
+  background:var(--surface-2);
+  opacity:.58;
+}
+.panda3d-milestones > div.done {
+  opacity:1;
+  border-color:color-mix(in srgb,var(--ok) 34%,var(--line));
+  background:color-mix(in srgb,var(--ok) 8%,var(--surface));
+}
+.panda3d-milestones span {
+  display:grid;
+  place-items:center;
+  width:28px;
+  height:28px;
+  border-radius:50%;
+  background:var(--surface);
+  font-size:.68rem;
+  font-weight:900;
+}
+.panda3d-milestones .done span {
+  background:var(--ok);
+  color:#fff;
+}
+.panda3d-milestones small {
+  font-size:.58rem;
+  line-height:1.22;
+}
+
+@media (max-width:760px) {
+  .panda3d-stage {
+    min-height:620px;
+    border-radius:22px;
+    margin-left:-2px;
+    margin-right:-2px;
+  }
+  .panda3d-viewport { min-height:620px; }
+  .panda3d-dashboard { grid-template-columns:1fr; }
+  .panda3d-controls-hint { display:none; }
+  .panda3d-roombar {
+    bottom:12px;
+    width:calc(100% - 20px);
+    padding:6px;
+    border-radius:19px;
+  }
+  .panda3d-roombar button {
+    height:54px;
+    border-radius:14px;
+  }
+  .panda3d-roombar button b { font-size:.56rem; }
+  .panda3d-status {
+    max-width:calc(100% - 54px);
+    padding:9px 10px;
+  }
+}
+@media (max-width:420px) {
+  .panda3d-stage { min-height:590px; }
+  .panda3d-viewport { min-height:590px; }
+  .panda3d-roombar button span { font-size:1.04rem; }
+  .panda3d-roombar button b { font-size:.52rem; }
+  .panda3d-action-grid { grid-template-columns:1fr 1fr; }
+  .panda3d-milestones { grid-template-columns:repeat(2,minmax(0,1fr)); }
+}
+@media (prefers-reduced-motion:reduce) {
+  .panda3d-loader-orb { animation:none !important; }
+}
