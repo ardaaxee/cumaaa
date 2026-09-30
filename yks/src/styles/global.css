@@ -9451,3 +9451,136 @@ body {
   color:var(--ok);
   text-shadow:0 0 10px color-mix(in srgb,var(--ok) 45%,transparent);
 }
+
+
+/* ===== GUIDED DAILY STUDY LOOP v1 ===== */
+.study-flow-card {
+  display:grid;
+  gap:14px;
+  padding:16px;
+  background:
+    radial-gradient(circle at 92% 0%, color-mix(in srgb,var(--brand) 10%,transparent), transparent 30%),
+    var(--surface);
+}
+.study-flow-head {
+  display:flex;
+  align-items:flex-start;
+  justify-content:space-between;
+  gap:14px;
+}
+.study-flow-head h2 {
+  margin:4px 0 4px;
+}
+.study-flow-head p {
+  margin:0;
+  max-width:62ch;
+  line-height:1.45;
+}
+.study-flow-progress {
+  flex:0 0 auto;
+  min-width:84px;
+  display:grid;
+  justify-items:center;
+  padding:9px 11px;
+  border-radius:16px;
+  border:1px solid color-mix(in srgb,var(--brand) 24%,var(--line));
+  background:color-mix(in srgb,var(--brand) 7%,var(--surface));
+}
+.study-flow-progress b {
+  font-size:1.05rem;
+}
+.study-flow-progress span {
+  color:var(--muted);
+  font-size:.64rem;
+}
+.study-flow-steps {
+  display:grid;
+  grid-template-columns:repeat(5,minmax(0,1fr));
+  gap:8px;
+}
+.study-flow-step {
+  position:relative;
+  min-width:0;
+  display:grid;
+  grid-template-columns:34px minmax(0,1fr) auto;
+  align-items:center;
+  gap:8px;
+  padding:10px;
+  border:1px solid var(--line);
+  border-radius:14px;
+  background:var(--surface-2);
+  color:inherit;
+  text-decoration:none;
+  transition:transform .16s ease,border-color .16s ease,box-shadow .16s ease;
+}
+.study-flow-step:hover {
+  transform:translateY(-1px);
+  border-color:var(--line-strong);
+  box-shadow:0 7px 18px rgba(55,42,72,.07);
+}
+.study-flow-step.current {
+  border-color:color-mix(in srgb,var(--brand) 45%,var(--line));
+  background:color-mix(in srgb,var(--brand) 8%,var(--surface));
+  box-shadow:0 0 0 2px color-mix(in srgb,var(--brand) 7%,transparent);
+}
+.study-flow-step.done {
+  border-color:color-mix(in srgb,var(--ok) 24%,var(--line));
+}
+.study-flow-number {
+  width:34px;
+  height:34px;
+  display:grid;
+  place-items:center;
+  border-radius:11px;
+  border:1px solid var(--line);
+  background:var(--surface);
+  font-weight:900;
+  font-size:.78rem;
+}
+.study-flow-step.done .study-flow-number {
+  background:var(--ok-soft);
+  border-color:color-mix(in srgb,var(--ok) 28%,var(--line));
+  color:var(--ok);
+}
+.study-flow-step > span:nth-child(2) {
+  display:grid;
+  min-width:0;
+  gap:2px;
+}
+.study-flow-step b,
+.study-flow-step small {
+  overflow:hidden;
+  white-space:nowrap;
+  text-overflow:ellipsis;
+}
+.study-flow-step small {
+  color:var(--muted);
+  font-size:.66rem;
+}
+
+@media (max-width:980px) {
+  .study-flow-steps {
+    grid-template-columns:repeat(2,minmax(0,1fr));
+  }
+}
+@media (max-width:560px) {
+  .study-flow-head {
+    flex-direction:column;
+  }
+  .study-flow-progress {
+    grid-auto-flow:column;
+    gap:6px;
+    justify-content:start;
+    align-items:baseline;
+    min-width:0;
+  }
+  .study-flow-steps {
+    grid-template-columns:1fr;
+  }
+  .study-flow-step {
+    grid-template-columns:34px minmax(0,1fr) auto;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .study-flow-step { transition:none !important; }
+}
