@@ -1,1 +1,0 @@
-import{Gt as e,Jt as t,Kt as n,qt as r}from"./actions-CRuIsyNn.js";var i={topicName:e=>n(e)?.topic.name??e,subjectName:t=>{let n=e(t);return n?r(n):t},subjectTopicIds:e=>t(e).map(e=>e.id)};function a(e){let t=n(e);return t?`${t.subject.exam} ${t.subject.name} · ${t.topic.name}`:e}export{a as n,i as t};
