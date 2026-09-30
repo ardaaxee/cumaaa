@@ -222,7 +222,7 @@ export default function Panda3DPage() {
         // --- Panda ---
         const panda = new THREE.Group();
         panda.name = 'panda';
-        const body = sphere([0.72, 0.84, 0.62], [0, 0.95, 0], 0xf8f8f7, panda);
+        sphere([0.72, 0.84, 0.62], [0, 0.95, 0], 0xf8f8f7, panda);
         const head = sphere([0.68, 0.62, 0.62], [0, 1.92, 0], 0xfafafa, panda);
         sphere([0.23, 0.24, 0.18], [-0.47, 2.38, -0.02], 0x18181b, panda);
         sphere([0.23, 0.24, 0.18], [0.47, 2.38, -0.02], 0x18181b, panda);
