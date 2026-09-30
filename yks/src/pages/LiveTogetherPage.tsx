@@ -6,6 +6,7 @@ import { useSelector } from '../store/store';
 const SUPABASE_URL = 'https://wvtkcjutgcigxyenwkfs.supabase.co';
 const SUPABASE_PUBLISHABLE_KEY = 'sb_publishable_mDx9F5vv4aUuRjrGbP1vkQ_LzdiYAJi';
 const SUPABASE_ESM = 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
+const LIVE_ROOM_KEY = 'iyikiYks.liveRoom.v1';
 
 type ChatMessage = {
   id: string;
@@ -160,11 +161,24 @@ function roomFromHash(): string {
   }
 }
 
+function rememberedRoom(): string {
+  const linked = roomFromHash();
+  if (linked) return linked;
+  try {
+    const saved = localStorage.getItem(LIVE_ROOM_KEY) ?? '';
+    const clean = saved.toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 24);
+    if (clean.length >= 12) return clean;
+  } catch {
+    /* gizli oda kodu yerel depolamada tutulamıyorsa yeni oda açılır */
+  }
+  return makeId(24);
+}
+
 export default function LiveTogetherPage() {
   const clientId = useMemo(() => makeId(16), []);
   const localName = useSelector((state) => state.profile.name.trim() || 'Ben');
   const [remoteName, setRemoteName] = useState('Karşı taraf');
-  const [roomCode, setRoomCode] = useState(() => roomFromHash() || makeId(24));
+  const [roomCode, setRoomCode] = useState(rememberedRoom);
   const [joined, setJoined] = useState(false);
   const [onlineCount, setOnlineCount] = useState(0);
   const [connection, setConnection] = useState<'offline' | 'connecting' | 'connected' | 'reconnecting'>('offline');
@@ -375,6 +389,7 @@ export default function LiveTogetherPage() {
     setConnection('connecting');
     try {
       cryptoKeyRef.current = await deriveRoomKey(normalizedRoom);
+      try { localStorage.setItem(LIVE_ROOM_KEY, normalizedRoom); } catch { /* oda yine bu oturumda çalışır */ }
       const moduleUrl = SUPABASE_ESM;
       const supabaseModule: any = await import(/* @vite-ignore */ moduleUrl);
       const supabase = supabaseModule.createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, {
@@ -538,6 +553,15 @@ export default function LiveTogetherPage() {
       toast('Canlı oda bağlantısı kurulamadı. İnternet bağlantısını kontrol et.');
     }
   };
+
+
+  useEffect(() => {
+    if (joined || connection !== 'offline' || !roomFromHash() || normalizedRoom.length < 12) return;
+    const timer = window.setTimeout(() => void joinRoom(), 120);
+    return () => window.clearTimeout(timer);
+    // Davet bağlantısıyla gelen kişi kod yazmadan yalnız odaya bağlanır; ekran paylaşımı ayrıca açık izin ister.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const startScreenShare = async () => {
     if (!joined) return toast('Önce canlı odaya bağlan.');
@@ -749,7 +773,21 @@ export default function LiveTogetherPage() {
             />
           </label>
           {!joined ? (
-            <button className="btn primary" type="button" onClick={() => void joinRoom()}>Odaya bağlan</button>
+            <>
+              <button className="btn primary" type="button" onClick={() => void joinRoom()}>Odaya bağlan</button>
+              <button
+                className="btn ghost"
+                type="button"
+                onClick={() => {
+                  const next = makeId(24);
+                  setRoomCode(next);
+                  try { localStorage.setItem(LIVE_ROOM_KEY, next); } catch { /* noop */ }
+                  toast('Yeni özel oda oluşturuldu.');
+                }}
+              >
+                Yeni oda
+              </button>
+            </>
           ) : (
             <button className="btn" type="button" onClick={() => void leaveRoom()}>Odadan çık</button>
           )}
@@ -757,7 +795,7 @@ export default function LiveTogetherPage() {
 
         {joined && (
           <div className="live-room-meta">
-            <span>🔒 Uçtan uca şifreli · 👥 {Math.min(onlineCount, 2)}/2 çevrimiçi</span>
+            <span>🔒 Uçtan uca şifreli · ♡ Kalıcı oda · 👥 {Math.min(onlineCount, 2)}/2 çevrimiçi</span>
             <button
               className="btn tiny-btn"
               type="button"
