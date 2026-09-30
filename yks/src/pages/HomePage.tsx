@@ -38,6 +38,14 @@ function cheerOfDay(day: string): string {
   return CHEERS[h % CHEERS.length];
 }
 
+function recommendationTopic(recs: Recommendation[]): string | undefined {
+  for (const rec of recs) {
+    const action = rec.action;
+    if (action.kind === 'topic' || action.kind === 'topic-test') return action.topicId;
+  }
+  return undefined;
+}
+
 export async function runRecommendation(r: Recommendation): Promise<void> {
   const a = r.action;
   if (a.kind === 'topic') return navigate(`/konu/${a.topicId}`);
@@ -73,6 +81,56 @@ export default function HomePage() {
   const activeTest = state.activeTest;
   const nextTask = todayTasks.find((t) => !t.done) ?? overdue[0] ?? null;
   const focusRunning = state.pomodoro.running && state.pomodoro.phase === 'odak';
+  const focusTopicId = recommendationTopic(recs);
+  const topicTouchedToday = Object.values(state.topicProgress).some(
+    (p) => p.startedAt?.startsWith(today) || p.completedAt?.startsWith(today),
+  );
+  const todayWrongOpen = Object.values(state.wrongs).filter(
+    (w) => !w.learned && w.lastAt.startsWith(today),
+  ).length;
+  const studyFlow = [
+    {
+      key: 'konu',
+      label: 'Konu',
+      detail: focusTopicId ? topicLabel(focusTopicId) : 'Bugünün konusunu seç',
+      done: topicTouchedToday,
+      href: focusTopicId ? `#/konu/${focusTopicId}` : '#/dersler',
+      icon: '1',
+    },
+    {
+      key: 'ornek',
+      label: 'Örnek',
+      detail: 'Öğretmenle çözümlü örnek',
+      done: state.chat.some((m) => m.at?.startsWith?.(today) && m.role === 'teacher'),
+      href: focusTopicId ? `#/ogretmen?konu=${encodeURIComponent(focusTopicId)}&eylem=ornek` : '#/ogretmen',
+      icon: '2',
+    },
+    {
+      key: 'soru',
+      label: '10 soru',
+      detail: `${Math.min(10, d.todayQuestions)}/10 tamamlandı`,
+      done: d.todayQuestions >= 10,
+      href: '#/testler',
+      icon: '3',
+    },
+    {
+      key: 'yanlis',
+      label: 'Yanlış analizi',
+      detail: todayWrongOpen > 0 ? `${todayWrongOpen} açık yanlış` : 'Bugünün yanlışları temiz',
+      done: d.todayQuestions > 0 && todayWrongOpen === 0,
+      href: '#/yanlislar',
+      icon: '4',
+    },
+    {
+      key: 'tekrar',
+      label: 'Tekrar',
+      detail: due.length > 0 ? `${due.length} konu bekliyor` : 'Tekrarlar tamam',
+      done: due.length === 0,
+      href: '#/tekrar',
+      icon: '5',
+    },
+  ];
+  const flowDone = studyFlow.filter((step) => step.done).length;
 
   return (
     <>
@@ -174,6 +232,36 @@ export default function HomePage() {
           </div>
         </section>
       )}
+
+      <section className="card section study-flow-card" aria-labelledby="study-flow-title">
+        <div className="study-flow-head">
+          <div>
+            <div className="eyebrow">Bugünün çalışma döngüsü</div>
+            <h2 id="study-flow-title">Konu → örnek → soru → yanlış → tekrar</h2>
+            <p className="small muted">Bir adımı bitirince sıradaki otomatik olarak anlam kazanır; ne yapacağını aramana gerek kalmaz.</p>
+          </div>
+          <div className="study-flow-progress" aria-label={`5 adımın ${flowDone} tanesi tamamlandı`}>
+            <b>{flowDone}/5</b>
+            <span>tamamlandı</span>
+          </div>
+        </div>
+        <div className="study-flow-steps">
+          {studyFlow.map((step, index) => (
+            <a
+              key={step.key}
+              className={`study-flow-step${step.done ? ' done' : ''}${!step.done && index === flowDone ? ' current' : ''}`}
+              href={step.href}
+            >
+              <span className="study-flow-number">{step.done ? '✓' : step.icon}</span>
+              <span className="grow">
+                <b>{step.label}</b>
+                <small>{step.detail}</small>
+              </span>
+              <Icon name="right" />
+            </a>
+          ))}
+        </div>
+      </section>
 
       <PartnerMessages />
 
