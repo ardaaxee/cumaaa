@@ -9615,3 +9615,128 @@ body {
 @media (prefers-reduced-motion: reduce) {
   .runner-time-critical { animation:none !important; }
 }
+
+
+/* ===== PRODUCT POLISH SYSTEM v1 ===== */
+:root {
+  --tap-size:44px;
+  --content-gutter:clamp(12px,3vw,24px);
+  --ease-out:cubic-bezier(.22,.8,.24,1);
+}
+html {
+  scroll-behavior:smooth;
+  overscroll-behavior-y:none;
+}
+body {
+  -webkit-tap-highlight-color:transparent;
+  text-rendering:optimizeLegibility;
+}
+button,
+a,
+input,
+select,
+textarea {
+  touch-action:manipulation;
+}
+button,
+a {
+  -webkit-user-select:none;
+  user-select:none;
+}
+input,
+textarea {
+  -webkit-user-select:text;
+  user-select:text;
+}
+.main {
+  width:100%;
+  padding-left:var(--content-gutter);
+  padding-right:var(--content-gutter);
+}
+.card {
+  transition:border-color .18s ease,box-shadow .18s ease,transform .18s ease;
+}
+.card:focus-within {
+  border-color:color-mix(in srgb,var(--brand) 28%,var(--line));
+}
+.btn,
+.icon-btn,
+.bottom-nav a,
+.sidebar a,
+.quick-tile {
+  transition:
+    background .16s ease,
+    border-color .16s ease,
+    color .16s ease,
+    transform .12s ease,
+    box-shadow .16s ease;
+}
+.btn:focus-visible,
+.icon-btn:focus-visible,
+a:focus-visible,
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+  outline:3px solid color-mix(in srgb,var(--focus) 34%,transparent);
+  outline-offset:2px;
+}
+@media (hover:hover) {
+  .btn:hover,
+  .icon-btn:hover,
+  .quick-tile:hover {
+    transform:translateY(-1px);
+  }
+}
+@media (max-width:560px) {
+  body {
+    background-size:22px 22px;
+  }
+  .main {
+    padding-top:12px;
+  }
+  .card {
+    border-radius:20px;
+    padding:14px;
+  }
+  .topbar {
+    margin-bottom:12px;
+  }
+  .topbar-title h1 {
+    font-size:1.26rem;
+  }
+  .btn:not(.small),
+  .input,
+  .select {
+    min-height:46px;
+  }
+  .input,
+  .select,
+  .textarea {
+    font-size:16px; /* iOS/Android browser zoom sürprizini engeller */
+  }
+  .bottom-nav {
+    padding-left:max(5px,env(safe-area-inset-left));
+    padding-right:max(5px,env(safe-area-inset-right));
+  }
+}
+.app-standalone body {
+  min-height:100dvh;
+}
+.app-standalone .main {
+  padding-top:max(14px,env(safe-area-inset-top));
+}
+.app-standalone .bottom-nav {
+  padding-bottom:max(7px,env(safe-area-inset-bottom));
+}
+@media (prefers-reduced-motion:reduce) {
+  html { scroll-behavior:auto; }
+  .card,
+  .btn,
+  .icon-btn,
+  .bottom-nav a,
+  .sidebar a,
+  .quick-tile {
+    transition:none !important;
+  }
+}
