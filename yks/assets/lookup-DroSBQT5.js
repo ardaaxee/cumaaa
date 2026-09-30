@@ -1,1 +1,0 @@
-import{Gt as e,Kt as t,Wt as n,qt as r}from"./actions-DvSdE5BA.js";var i={topicName:t=>e(t)?.topic.name??t,subjectName:e=>{let r=n(e);return r?t(r):e},subjectTopicIds:e=>r(e).map(e=>e.id)};function a(t){let n=e(t);return n?`${n.subject.exam} ${n.subject.name} · ${n.topic.name}`:t}export{a as n,i as t};
