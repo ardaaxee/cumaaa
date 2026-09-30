@@ -14019,3 +14019,164 @@ textarea:focus-visible {
     animation:none !important;
   }
 }
+
+
+/* ===== PANDA BALL GAME V6 ===== */
+.pet-ball-game-hud {
+  position:absolute;
+  z-index:38;
+  left:50%;
+  top:52px;
+  width:min(410px,calc(100% - 28px));
+  transform:translateX(-50%);
+  display:grid;
+  grid-template-columns:auto minmax(90px,1fr) auto auto;
+  align-items:center;
+  gap:8px;
+  padding:7px 8px 7px 10px;
+  border:1px solid rgba(255,255,255,.58);
+  border-radius:16px;
+  background:rgba(31,24,37,.78);
+  color:#fff;
+  box-shadow:0 12px 28px rgba(18,12,22,.18);
+  backdrop-filter:blur(14px) saturate(1.08);
+  -webkit-backdrop-filter:blur(14px) saturate(1.08);
+}
+.pet-ball-game-hud > div:first-child {
+  min-width:0;
+  display:grid;
+  gap:1px;
+}
+.pet-ball-game-hud b {
+  font-size:.62rem;
+  white-space:nowrap;
+}
+.pet-ball-game-hud small {
+  color:rgba(255,255,255,.58);
+  font-size:.48rem;
+}
+.pet-ball-game-hud strong {
+  min-width:34px;
+  text-align:center;
+  font-size:.63rem;
+  font-variant-numeric:tabular-nums;
+}
+.pet-ball-game-hud > button {
+  height:30px;
+  padding:0 9px;
+  border:1px solid rgba(255,255,255,.13);
+  border-radius:10px;
+  background:rgba(255,255,255,.09);
+  color:#fff;
+  font:inherit;
+  font-size:.52rem;
+  font-weight:850;
+}
+.pet-ball-game-progress {
+  position:relative;
+  height:8px;
+  overflow:hidden;
+  border-radius:999px;
+  background:rgba(255,255,255,.12);
+  box-shadow:inset 0 1px 2px rgba(0,0,0,.16);
+}
+.pet-ball-game-progress > span {
+  position:absolute;
+  inset:0 auto 0 0;
+  border-radius:inherit;
+  background:linear-gradient(90deg,#a98aee,#82e3ad);
+  box-shadow:0 0 12px rgba(164,133,232,.34);
+  transition:width .28s cubic-bezier(.2,.8,.2,1);
+}
+.pet-stage.room-garden:has(.pet-ball-game-hud) .pet-stage-room-badge,
+.pet-stage.room-garden:has(.pet-ball-game-hud) .pet-stage-study-progress {
+  opacity:.25;
+}
+.pet-stage:has(.pet-ball-game-hud) .pet-control-hint {
+  display:none;
+}
+.pet-stage:has(.pet-ball-game-hud) .pet-scene-arrow {
+  opacity:.28;
+  pointer-events:none;
+}
+.pet-stage:has(.pet-ball-game-hud) .scene-garden-ball {
+  opacity:.18;
+}
+.pet-tom-ball {
+  outline:none;
+  will-change:left,bottom,transform;
+}
+.pet-tom-ball::after {
+  content:'';
+  position:absolute;
+  left:50%;
+  bottom:-10px;
+  width:44px;
+  height:12px;
+  transform:translateX(-50%);
+  border-radius:50%;
+  background:rgba(37,30,39,.18);
+  filter:blur(5px);
+  z-index:-1;
+}
+.pet-tom-ball:focus-visible {
+  box-shadow:
+    0 0 0 4px rgba(174,137,238,.24),
+    0 14px 20px rgba(47,35,42,.20),
+    inset 0 -5px 8px rgba(37,37,44,.08);
+}
+
+/* Direct-control feel */
+.pet-stage-panda.is-dragging .pet-floor-shadow {
+  transform:translateX(-50%) scale(.82);
+  opacity:.62;
+}
+.pet-stage-panda.is-dragging {
+  z-index:35;
+}
+.pet-stage-panda.is-dragging .real-panda {
+  filter:drop-shadow(0 18px 10px rgba(38,28,42,.18));
+}
+.pet-control-hint::before {
+  content:'Zeynep kontrolü';
+  padding:4px 7px;
+  border-radius:999px;
+  background:rgba(151,113,211,.64);
+  color:#fff;
+  font-size:.46rem;
+  font-weight:850;
+  white-space:nowrap;
+}
+
+/* Keep all dialogue attached to Panda, never a full-screen card */
+.pet-game-talk,
+.pet-stage > .pet-game-talk {
+  display:none !important;
+  width:0 !important;
+  height:0 !important;
+  min-height:0 !important;
+  padding:0 !important;
+  border:0 !important;
+  opacity:0 !important;
+  pointer-events:none !important;
+}
+
+@media (max-width:560px) {
+  .pet-ball-game-hud {
+    top:47px;
+    width:calc(100% - 20px);
+    grid-template-columns:auto minmax(70px,1fr) auto auto;
+    gap:6px;
+    padding:6px 7px 6px 8px;
+  }
+  .pet-ball-game-hud b { font-size:.57rem; }
+  .pet-ball-game-hud small { font-size:.43rem; }
+  .pet-ball-game-hud > button { height:28px; padding-inline:8px; }
+}
+@media (max-width:390px) {
+  .pet-ball-game-hud > div:first-child small { display:none; }
+  .pet-ball-game-hud {
+    grid-template-columns:auto minmax(64px,1fr) auto auto;
+  }
+  .pet-control-hint::before { display:none; }
+}
