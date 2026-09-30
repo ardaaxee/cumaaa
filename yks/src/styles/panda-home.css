@@ -1,0 +1,143 @@
+/* Scoped to the interactive home; study pages keep their existing theme. */
+.panda-home-v7 {
+  --panda-ink: #f7f2ff;
+  --panda-muted: #c6bbd1;
+  --panda-line: #493956;
+  --panda-accent: #cfb5ff;
+  color: var(--panda-ink);
+  padding-bottom: max(24px, env(safe-area-inset-bottom));
+}
+.panda-home-v7 .pet-game { min-height: 0; }
+.panda-home-v7 button, .panda-home-v7 a { -webkit-tap-highlight-color: transparent; }
+.panda-home-v7 button:focus-visible, .panda-home-v7 a:focus-visible, .panda-home-v7 summary:focus-visible {
+  outline: 3px solid #e4ccff; outline-offset: 3px;
+}
+.panda-home-v7 .pet-game-top { min-height: 68px; }
+.panda-home-v7 .pet-game-room-title b { font-size: 1.125rem; }
+.panda-home-v7 .pet-game-room-title small { font-size: .875rem; color: var(--panda-muted); }
+.panda-home-v7 .pet-game-iconbtn { width: 44px; height: 44px; }
+.panda-home-v7 .pet-game-needs {
+  display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 7px;
+  padding: 10px 12px; box-shadow: none;
+}
+.panda-home-v7 .pet-need-bubble {
+  width: 100%; aspect-ratio: auto; min-height: 72px; padding: 6px 2px 10px;
+  border-radius: 12px; border: 1px solid var(--panda-line); background: #2c2135;
+  display: grid; grid-template-columns: auto auto; justify-content: center; gap: 4px;
+  position: relative; overflow: hidden; color: var(--panda-ink); box-shadow: none;
+}
+.panda-home-v7 .pet-need-bubble::after {
+  content: ''; position: absolute; left: 0; bottom: 0; height: 3px;
+  width: var(--need); background: var(--panda-accent);
+}
+.panda-home-v7 .pet-need-bubble.low::after { background: #ffb0ae; }
+.panda-home-v7 .pet-need-bubble span { font-size: 1.1rem; }
+.panda-home-v7 .pet-need-bubble b { font-size: .875rem; margin: 0; }
+.panda-home-v7 .pet-need-bubble small { grid-column: 1 / -1; font-size: .875rem; line-height: 1.3; color: var(--panda-muted); }
+.panda-inventory {
+  display: flex; align-items: center; justify-content: center; flex-wrap: wrap; gap: 6px 16px;
+  min-height: 44px; padding: 4px 12px 10px; font-size: .875rem;
+  background: #1b151f; color: #e9e1ef;
+}
+.panda-inventory b { font-variant-numeric: tabular-nums; }
+.panda-inventory a { color: #dec6ff; text-underline-offset: 4px; padding: 7px 0; }
+.panda-home-v7 .pet-stage { min-height: clamp(400px, 54svh, 550px); max-height: none; touch-action: pan-y; }
+.panda-home-v7 .pet-stage-room-badge { top: 14px; left: 14px; max-width: calc(100% - 106px); }
+.panda-home-v7 .pet-stage-room-badge b { font-size: .875rem; }
+.panda-home-v7 .pet-stage-room-badge small { font-size: .75rem; line-height: 1.4; }
+.panda-home-v7 .pet-stage-study-progress { top: 17px; right: 14px; min-width: 68px; height: 32px; }
+.panda-home-v7 .pet-stage-study-progress b { font-size: .875rem; }
+.panda-home-v7 .pet-stage-panda { max-width: 75%; }
+.panda-home-v7 .pet-panda-mini-talk { max-width: min(245px, 67vw); padding: 9px 11px; }
+.panda-home-v7 .pet-panda-mini-talk b { font-size: .875rem; line-height: 1.4; }
+.panda-home-v7 .pet-panda-mini-talk i { display: none; }
+.panda-home-v7 .pet-control-hint { width: 100%; justify-content: center; gap: 8px; }
+.panda-home-v7 .pet-control-hint::before { content: none; }
+.panda-home-v7 .pet-control-hint span { font-size: .75rem; line-height: 1.4; padding: 5px 8px; }
+.panda-home-v7 .pet-room-strip { justify-content: flex-start; gap: 6px; padding: 10px 12px; scroll-snap-type: x proximity; }
+.panda-home-v7 .pet-room-strip button { flex: 1 0 72px; min-height: 64px; padding: 6px; scroll-snap-align: center; border: 1px solid transparent; border-radius: 12px; }
+.panda-home-v7 .pet-room-strip button.active { background: #44314f; border-color: #a285bb; color: #fff; }
+.panda-home-v7 .pet-room-strip button span { width: 28px; height: 26px; font-size: 1.2rem; background: none; }
+.panda-home-v7 .pet-room-strip button b { font-size: .875rem; }
+.panda-home-v7 .pet-game-actions { padding: 10px 8px 14px; gap: 5px; background: #261c30; }
+.panda-home-v7 .pet-game-actions button { min-height: 64px; padding: 2px; gap: 5px; }
+.panda-home-v7 .pet-game-actions button span { width: 42px; height: 40px; font-size: 1.4rem; }
+.panda-home-v7 .pet-game-actions button b { font-size: .875rem; line-height: 1.4; }
+.panda-home-v7 .pet-scene-arrow { width: 36px; min-height: 56px; }
+.panda-home-v7 .has-ball-game .pet-stage-room-badge, .panda-home-v7 .has-ball-game .pet-stage-study-progress,
+.panda-home-v7 .has-ball-game .pet-control-hint, .panda-home-v7 .has-ball-game .pet-scene-arrow,
+.panda-home-v7 .has-ball-game .scene-garden-ball, .panda-home-v7 .has-ball-game .pet-panda-mini-talk { display: none; }
+.panda-home-v7 .has-ball-game .pet-stage-panda { pointer-events: none; }
+.panda-home-v7 .pet-stage-panda:disabled { opacity: 1; cursor: default; }
+.panda-home-v7 .pet-ball-game-hud {
+  top: 14px; width: calc(100% - 28px); padding: 10px; gap: 10px;
+  grid-template-columns: 1fr auto auto; background: #2a2033; border-color: #a285bb;
+}
+.panda-home-v7 .pet-ball-game-hud b, .panda-home-v7 .pet-ball-game-hud strong { font-size: 1rem; }
+.panda-home-v7 .pet-ball-game-hud small { display: block; font-size: .75rem; color: #d1c3dc; }
+.panda-home-v7 .pet-ball-game-hud > button { min-height: 44px; font-size: .875rem; padding-inline: 14px; }
+.panda-home-v7 .pet-ball-game-progress { grid-row: 2; grid-column: 1 / -1; height: 6px; }
+.panda-home-v7 .pet-tom-ball { width: 68px; height: 68px; font-size: 2.3rem; touch-action: manipulation; }
+.panda-home-v7 .pet-tom-ball small { font-size: .875rem; min-width: 24px; min-height: 24px; }
+.panda-game-result {
+  position: absolute; z-index: 40; top: 24px; left: 50%; transform: translateX(-50%);
+  width: min(360px, calc(100% - 32px)); padding: 22px; border-radius: 20px;
+  background: #291f33; color: #fff; border: 1px solid #a88cbc; text-align: center;
+  box-shadow: 0 16px 48px #1a122833;
+}
+.panda-game-result > span { font-size: 2.25rem; }
+.panda-game-result h2 { font-size: 1.75rem; margin: 6px 0; }
+.panda-game-result p { font-size: 1rem; margin: 8px 0; }
+.panda-game-result strong { font-size: .875rem; color: #d9f3ca; }
+.panda-game-result > div { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 16px; }
+.panda-game-result button { flex: 1; min-height: 44px; padding: 10px; font-size: .875rem; font-weight: 700; border-radius: 12px; border: 1px solid #8e769e; background: #473155; color: #fff; }
+.panda-game-result button:first-child { background: #ddc4ff; color: #291b34; }
+.panda-study-card {
+  margin: 16px 12px; padding: 20px; border: 1px solid #554262; border-radius: 20px;
+  display: grid; gap: 16px; background: linear-gradient(115deg, #35253f, #251d31);
+}
+.panda-study-label { font-size: .75rem; font-weight: 750; letter-spacing: .1em; color: #dfc7fb; }
+.panda-study-card h2 { font-size: 1.25rem; line-height: 1.35; margin: 8px 0; }
+.panda-study-card p { font-size: .875rem; color: var(--panda-muted); margin-bottom: 12px; }
+.panda-study-links { display: flex; gap: 8px; flex-wrap: wrap; }
+.panda-study-links a { display: grid; place-items: center; min-height: 46px; padding: 10px 14px; border-radius: 12px; font-size: .875rem; font-weight: 700; text-decoration: none; color: #f7f0ff; border: 1px solid #816892; }
+.panda-study-links a:first-child { background: #dbbfff; color: #2b1c35; border-color: transparent; }
+.panda-home-v7 .pet-game-quick { margin: 16px 12px; gap: 10px; }
+.panda-home-v7 .pet-game-quick button { min-height: 82px; background: #291f33; border: 1px solid #493956; border-radius: 16px; padding: 14px; color: #f6effb; }
+.panda-home-v7 .pet-game-quick button > span { font-size: 1.5rem; }
+.panda-home-v7 .pet-game-quick b { font-size: 1rem; }
+.panda-home-v7 .pet-game-quick small { font-size: .875rem; line-height: 1.4; color: var(--panda-muted); }
+.panda-home-v7 .pet-game-drawer { margin: 12px; padding: 16px; background: #251d2d; border: 1px solid #493956; color: #f6effb; box-shadow: none; }
+.panda-home-v7 .pet-game-drawer summary { min-height: 48px; }
+.panda-home-v7 .pet-game-drawer summary b { font-size: 1rem; }
+.panda-home-v7 .pet-game-drawer summary small { font-size: .875rem; line-height: 1.4; color: var(--panda-muted); }
+.panda-home-v7 .pet-game-drawer-body { --text: #f7f2ff; --muted: #c6bbd1; --surface: #2c2335; --surface-2: #382b42; --brand-soft: #423052; --brand: #dfbaff; --line: #493956; }
+.panda-home-v7 .pet-game-drawer-body :is(.tiny, .small) { font-size: .875rem; }
+.panda-home-v7 .pet-game-drawer-body .life-meter-grid b { font-variant-numeric: tabular-nums; }
+.panda-home-v7 .pet-items { grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); }
+.panda-home-v7 .pet-item b, .panda-home-v7 .room-unlock b { font-size: .875rem; }
+.panda-home-v7 .pet-item, .panda-home-v7 .room-unlock { background: #30233d; color: #fff; }
+.panda-home-v7 .pet-item.locked, .panda-home-v7 .room-unlock.locked { opacity: .75; }
+.panda-home-v7 .pet-item.on { border-color: #d1abff; background: #453152; }
+.panda-home-v7 .chat-form { flex-wrap: wrap; }
+.panda-home-v7 .chat-form input { min-width: 0; flex: 1 1 140px; font-size: 1rem; }
+@media (min-width: 760px) {
+  .panda-home-v7 { max-width: 900px; }
+  .panda-home-v7 .pet-stage { min-height: 520px; }
+  .panda-home-v7 .pet-game-needs { padding-inline: 24px; gap: 12px; }
+  .panda-study-card { grid-template-columns: minmax(0, 1fr) auto; align-items: center; }
+  .panda-study-links { flex-direction: column; }
+}
+@media (max-width: 390px) {
+  .panda-home-v7 .pet-game-needs { gap: 4px; padding-inline: 8px; }
+  .panda-home-v7 .pet-need-bubble { grid-template-columns: 1fr; gap: 3px; min-height: 84px; }
+  .panda-home-v7 .pet-need-bubble small { font-size: .75rem; }
+  .panda-home-v7 .pet-game-room-title > span { display: none; }
+  .panda-home-v7 .pet-game-quick { grid-template-columns: 1fr; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .panda-home-v7 *, .panda-home-v7 *::before, .panda-home-v7 *::after { animation: none !important; transition: none !important; }
+}
+
+.panda-home-v7 .pet-game-drawer-body :is(.life-meter-grid span, .pet-next-unlock .grow span, .room-unlock small, .panda-quest .grow b) { font-size: .875rem; }
+.panda-home-v7 .panda-quest-card { background: #2c2335; }

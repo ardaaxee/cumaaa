@@ -10,7 +10,11 @@ import { FOOD_PER_BAMBOO, WATER_PER_DROP, feedPet, needsMessage, waterPet } from
 import { PetNotifyToggle } from '../hooks/usePetAlerts';
 import { dashboard } from '../utils/stats';
 import { dayKey } from '../utils/date';
-import { playPandaVoice, unlockPandaVoice } from '../utils/pandaVoice';
+import { playPandaVoice, stopPandaVoice, unlockPandaVoice } from '../utils/pandaVoice';
+import { usePandaBallGame } from '../hooks/usePandaBallGame';
+import { BALL_GOAL, ballPosition } from '../utils/pandaBallGame';
+import { ROOM_ORDER, PANDA_LIFE_KEY, clampLife, loadPandaLife, type HouseRoom, type PandaLifeSnapshot } from '../utils/pandaLife';
+import '../styles/panda-home.css';
 
 const EARN_RULES = [
   ['🎋 1 bambu', '5 doğru cevap'],
@@ -32,7 +36,6 @@ const HOUSE_UPGRADES = [
   { level: 10, icon: '🏆', label: 'Başarı duvarı' },
 ];
 
-type HouseRoom = 'living' | 'kitchen' | 'bedroom' | 'bathroom' | 'study' | 'garden' | 'balcony';
 type HouseActivity =
   | 'idle'
   | 'walking'
@@ -56,7 +59,6 @@ type HouseActivity =
 type PandaEmotion = 'neutral' | 'laugh' | 'angry' | 'shy' | 'yawn' | 'sneeze' | 'surprised';
 
 
-const ROOM_ORDER: HouseRoom[] = ['living', 'kitchen', 'bedroom', 'bathroom', 'study', 'garden', 'balcony'];
 const ROOM_INFO: Record<HouseRoom, { icon: string; label: string; desc: string }> = {
   living: { icon: '🛋️', label: 'Salon', desc: 'Dinlenme ve oyun alanı' },
   kitchen: { icon: '🍽️', label: 'Mutfak', desc: 'Yemek ve su burada' },
@@ -124,50 +126,13 @@ const ROOM_TARGET: Record<HouseRoom, { x: number; y: number }> = {
   balcony: { x: 56, y: 3 },
 };
 
-interface PandaLifeSnapshot {
-  cleanliness: number;
-  energy: number;
-  happiness: number;
-  room: HouseRoom;
-  lastSeen: number;
-}
-
-const PANDA_LIFE_KEY = 'iyiki-panda-life-v1';
-const clampLife = (v: number) => Math.max(0, Math.min(100, v));
-
-function loadPandaLife(): PandaLifeSnapshot {
-  const fallback: PandaLifeSnapshot = { cleanliness: 82, energy: 76, happiness: 84, room: 'living', lastSeen: Date.now() };
-  if (typeof window === 'undefined') return fallback;
-  try {
-    const raw = window.localStorage.getItem(PANDA_LIFE_KEY);
-    if (!raw) return fallback;
-    const saved = JSON.parse(raw) as Partial<PandaLifeSnapshot>;
-    const lastSeen = typeof saved.lastSeen === 'number' ? saved.lastSeen : Date.now();
-    const elapsedHours = Math.max(0, Math.min(72, (Date.now() - lastSeen) / 3_600_000));
-    const room = saved.room && ROOM_ORDER.includes(saved.room) ? saved.room : 'living';
-    return {
-      cleanliness: clampLife((saved.cleanliness ?? fallback.cleanliness) - elapsedHours * 0.75),
-      energy: clampLife((saved.energy ?? fallback.energy) - elapsedHours * 1.15),
-      happiness: clampLife((saved.happiness ?? fallback.happiness) - elapsedHours * 0.45),
-      room,
-      lastSeen,
-    };
-  } catch {
-    return fallback;
-  }
-}
-
-function NeedBubble({ icon, label, value }: { icon: string; label: string; value: number }) {
+function NeedBubble({ icon, label, value, onClick }: { icon: string; label: string; value: number; onClick: () => void }) {
   const v = Math.max(0, Math.min(100, Math.round(value)));
   return (
-    <div
-      className={'pet-need-bubble' + (v < 30 ? ' low' : '')}
-      style={{ '--need': v + '%' } as CSSProperties}
-      aria-label={label + ' yüzde ' + v}
-    >
-      <span>{icon}</span>
-      <b>{v}</b>
-    </div>
+    <button type="button" onClick={onClick} className={'pet-need-bubble' + (v < 30 ? ' low' : '')}
+      style={{ '--need': v + '%' } as CSSProperties} aria-label={label + ' yüzde ' + v + ', bakım yap'}>
+      <span aria-hidden="true">{icon}</span><b>%{v}</b><small>{label}</small>
+    </button>
   );
 }
 
@@ -380,18 +345,18 @@ export default function PetPage() {
   const [happiness, setHappiness] = useState(initialLife.happiness);
   const [sceneMessage, setSceneMessage] = useState<string | null>(null);
   const [name, setName] = useState(pet.name);
-  const [petPos, setPetPos] = useState({ x: 50, y: 2 });
+  const [petPos, setPetPos] = useState(ROOM_TARGET[initialLife.room]);
   const [facing, setFacing] = useState<'left' | 'right'>('right');
-  const [voiceOn, setVoiceOn] = useState(true);
+  const [voiceOn, setVoiceOn] = useState(initialLife.voiceOn);
   const [emotion, setEmotion] = useState<PandaEmotion>('neutral');
-  const [playScore, setPlayScore] = useState(0);
-  const [ballGameActive, setBallGameActive] = useState(false);
-  const [playHighScore, setPlayHighScore] = useState(() => {
-    try { return Math.max(0, Number(localStorage.getItem('iyikiPanda.ballHigh') ?? 0) || 0); }
-    catch { return 0; }
-  });
+  const ballGame = usePandaBallGame();
+  const playScore = ballGame.score;
+  const ballGameActive = ballGame.phase === 'playing';
+  const playHighScore = ballGame.highScore;
   const [dragging, setDragging] = useState(false);
   const stageRef = useRef<HTMLDivElement>(null);
+  const ballRef = useRef<HTMLButtonElement>(null);
+  const resultRef = useRef<HTMLDivElement>(null);
   const pandaDragRef = useRef<{ pointerId: number; startX: number; startY: number; x: number; y: number; moved: boolean } | null>(null);
   const lastUserActionRef = useRef(Date.now());
   const timers = useRef<number[]>([]);
@@ -402,7 +367,10 @@ export default function PetPage() {
   const need = needsMessage(pet.name, needs);
 
   const later = (fn: () => void, ms: number) => {
-    const id = window.setTimeout(fn, ms);
+    const id = window.setTimeout(() => {
+      timers.current = timers.current.filter((timer) => timer !== id);
+      fn();
+    }, ms);
     timers.current.push(id);
   };
 
@@ -410,6 +378,21 @@ export default function PetPage() {
     for (const id of timers.current) window.clearTimeout(id);
     timers.current = [];
   };
+
+  const beginAction = () => {
+    greeted.current = true;
+    lastUserActionRef.current = Date.now();
+    clearTimers();
+    ballGame.stop();
+    setHolding(null);
+    setEmotion('neutral');
+    stopPandaVoice();
+  };
+
+  useEffect(() => {
+    if (ballGame.phase === 'completed') resultRef.current?.focus({ preventScroll: true });
+    if (ballGame.phase === 'playing') ballRef.current?.focus({ preventScroll: true });
+  }, [ballGame.phase]);
 
   const speak = (text: string, intent: 'greet' | 'talk' | 'happy' | 'hungry' | 'sleepy' | 'eat' | 'drink' | 'bath' | 'play' | 'laugh' | 'angry' | 'shy' | 'yawn' | 'sneeze' | 'surprised' = 'talk') => {
     setSceneMessage(text);
@@ -422,7 +405,7 @@ export default function PetPage() {
   };
 
   const greet = (withVoice = true) => {
-    clearTimers();
+    beginAction();
     setFacing('right');
     setEmotion('neutral');
     setActivity('greeting');
@@ -441,7 +424,7 @@ export default function PetPage() {
 
 
   const triggerReaction = (forced?: (typeof PANDA_REACTIONS)[number]) => {
-    clearTimers();
+    beginAction();
     const reaction = forced ?? PANDA_REACTIONS[Math.floor(Math.random() * PANDA_REACTIONS.length)];
     setEmotion(reaction.emotion);
     setActivity(reaction.activity);
@@ -456,9 +439,11 @@ export default function PetPage() {
   };
 
   useEffect(() => {
-    if (greeted.current) return;
-    greeted.current = true;
-    const id = window.setTimeout(() => greet(true), 650);
+    const id = window.setTimeout(() => {
+      if (greeted.current || Date.now() - lastUserActionRef.current < 600) return;
+      greeted.current = true;
+      greet(true);
+    }, 650);
     return () => window.clearTimeout(id);
     // İlk karşılama yalnızca sayfa açılışında bir kez çalışır.
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -467,13 +452,13 @@ export default function PetPage() {
   useEffect(() => {
     const saveLife = () => {
       try {
-        window.localStorage.setItem(PANDA_LIFE_KEY, JSON.stringify({ cleanliness, energy, happiness, room, lastSeen: Date.now() } satisfies PandaLifeSnapshot));
+        window.localStorage.setItem(PANDA_LIFE_KEY, JSON.stringify({ cleanliness, energy, happiness, room, voiceOn, lastSeen: Date.now() } satisfies PandaLifeSnapshot));
       } catch { /* depolama kapalıysa oyun yine çalışır */ }
     };
     saveLife();
     window.addEventListener('pagehide', saveLife);
     return () => window.removeEventListener('pagehide', saveLife);
-  }, [cleanliness, energy, happiness, room]);
+  }, [cleanliness, energy, happiness, room, voiceOn]);
 
   useEffect(() => {
     const id = window.setInterval(() => {
@@ -485,7 +470,7 @@ export default function PetPage() {
   }, [activity]);
 
   useEffect(() => {
-    if (activity !== 'idle') return;
+    if (activity !== 'idle' || ballGame.phase !== 'idle' || dragging) return;
     let cancelled = false;
     const wait = 8500 + Math.floor(Math.random() * 6500);
     const id = window.setTimeout(() => {
@@ -640,10 +625,10 @@ export default function PetPage() {
       window.clearTimeout(id);
     };
     // Her idle dönüşünde yeni bir doğal davranış planlanır.
-  }, [activity, room, pet.name, petPos.x, needs.hungry, needs.thirsty, cleanliness, energy, happiness, voiceOn]);
+  }, [activity, room, pet.name, petPos.x, needs.hungry, needs.thirsty, cleanliness, energy, happiness, voiceOn, ballGame.phase, dragging]);
 
   useEffect(() => {
-    if (activity !== 'idle' || needs.hungry || needs.thirsty) return;
+    if (activity !== 'idle' || ballGame.phase !== 'idle' || dragging || needs.hungry || needs.thirsty) return;
     const now = new Date();
     const hour = now.getHours();
     const preferredHour = state.profile.preferredStudyTime
@@ -692,7 +677,7 @@ export default function PetPage() {
     if (dailyRoutineRef.current === stamp) return;
     dailyRoutineRef.current = stamp;
 
-    clearTimers();
+    beginAction();
     setSceneMessage(message);
     setActivity('walking');
     setRoom(target);
@@ -710,6 +695,8 @@ export default function PetPage() {
     }, pandaNext === 'sleeping' ? 12_000 : 5_500);
   }, [
     activity,
+    ballGame.phase,
+    dragging,
     needs.hungry,
     needs.thirsty,
     state.profile.preferredStudyTime,
@@ -720,12 +707,12 @@ export default function PetPage() {
 
   useEffect(() => () => {
     clearTimers();
+    stopPandaVoice();
   }, []);
 
   const moveTo = (nextRoom: HouseRoom, nextActivity: HouseActivity = 'idle', message?: string) => {
     lastUserActionRef.current = Date.now();
-    if (nextRoom !== 'garden') ballGameActive && setBallGameActive(false);
-    clearTimers();
+    beginAction();
     setHolding(null);
     setRoom(nextRoom);
     setPetPos(ROOM_TARGET[nextRoom]);
@@ -752,7 +739,7 @@ export default function PetPage() {
       return toast(kind === 'bambu' ? 'Bambun kalmadı. 5 doğru cevap = 1 bambu 🎋' : 'Suyun kalmadı. 4 soru çöz = 1 damla su 💧');
     }
 
-    clearTimers();
+    beginAction();
     setRoom('kitchen');
     setPetPos({ x: 52, y: 2 });
     setFacing('right');
@@ -782,7 +769,7 @@ export default function PetPage() {
   };
 
   const bath = () => {
-    clearTimers();
+    beginAction();
     setRoom('bathroom');
     setPetPos({ x: 59, y: 2 });
     setFacing('right');
@@ -804,7 +791,7 @@ export default function PetPage() {
 
   const sleep = () => {
     if (activity === 'sleeping') {
-      clearTimers();
+      beginAction();
       setActivity('idle');
       setRoomMode('day');
       setEnergy(100);
@@ -812,7 +799,7 @@ export default function PetPage() {
       later(() => setSceneMessage(null), 1800);
       return;
     }
-    clearTimers();
+    beginAction();
     setRoom('bedroom');
     setPetPos({ x: 42, y: 2 });
     setFacing('left');
@@ -826,17 +813,6 @@ export default function PetPage() {
     later(() => setEnergy(100), 4200);
   };
 
-  const garden = () => {
-    moveTo('garden', 'playing', 'Bahçeye çıkıyoruz 🌿');
-    void playPandaVoice('Bahçeye çıkıyoruz', 'play', voiceOn);
-    later(() => {
-      setHappiness(100);
-      setEnergy((v) => Math.max(35, v - 4));
-      setActivity('idle');
-      setSceneMessage(null);
-    }, 5200);
-  };
-
   const studyTogether = () => {
     moveTo('study', 'studying', 'Çalışma odasına geçiyoruz 📚');
     later(() => setHappiness((v) => Math.min(100, v + 2)), 2500);
@@ -847,7 +823,8 @@ export default function PetPage() {
   };
 
   const relax = () => {
-    moveTo('living', 'relaxing', 'Salonda kısa bir mola 🛋️');
+    const outside = room === 'balcony';
+    moveTo(outside ? 'balcony' : 'living', 'relaxing', outside ? 'Balkonda kısa bir mola 🌇' : 'Salonda kısa bir mola 🛋️');
     later(() => setEnergy((v) => Math.min(100, v + 5)), 2400);
     later(() => {
       setActivity('idle');
@@ -856,7 +833,7 @@ export default function PetPage() {
   };
 
   const roam = () => {
-    clearTimers();
+    beginAction();
     let nextX = petPos.x < 50 ? 78 : 22;
     setFacing(nextX < petPos.x ? 'left' : 'right');
     setActivity('walking');
@@ -884,7 +861,7 @@ export default function PetPage() {
     const rawBottom = ((rect.bottom - clientY) / Math.max(1, rect.height)) * 100 - 13;
     const nextY = clampPos(rawBottom, 1, 14);
     lastUserActionRef.current = Date.now();
-    clearTimers();
+    beginAction();
     setFacing(nextX < petPos.x ? 'left' : 'right');
     setActivity('walking');
     setPetPos({ x: nextX, y: nextY });
@@ -892,16 +869,20 @@ export default function PetPage() {
     later(() => setActivity('idle'), 900);
   };
 
+  const stageTouch = useRef<{ x: number; y: number } | null>(null);
+
   const stagePointerUp = (e: ReactPointerEvent<HTMLDivElement>) => {
+    const start = stageTouch.current;
+    stageTouch.current = null;
     const target = e.target as HTMLElement;
-    if (target.closest('button,a')) return;
+    if (target.closest('button,a') || !start || Math.hypot(e.clientX - start.x, e.clientY - start.y) > 10 || ballGame.phase !== 'idle') return;
     userWalkTo(e.clientX, e.clientY);
   };
 
   const pandaPointerDown = (e: ReactPointerEvent<HTMLButtonElement>) => {
-    if (activity === 'sleeping') return;
+    if (activity === 'sleeping' || ballGame.phase !== 'idle') return;
     lastUserActionRef.current = Date.now();
-    clearTimers();
+    beginAction();
     pandaDragRef.current = {
       pointerId: e.pointerId,
       startX: e.clientX,
@@ -942,75 +923,52 @@ export default function PetPage() {
       later(() => setSceneMessage(null), 1300);
       return;
     }
-    touchPanda(e);
+    if (drag || activity === 'sleeping') touchPanda(e);
   };
 
-  const ballPosition = (score: number) => ({
-    x: 22 + (score * 31) % 58,
-    y: 3 + (score * 17) % 10,
-  });
+  const finishBallGame = () => {
+    if (ballGame.phase === 'completed') {
+      setRoom('living');
+      setPetPos(ROOM_TARGET.living);
+    }
+    beginAction();
+    setActivity('idle');
+    setSceneMessage(playScore > 0 ? `Top oyunu bitti · ${playScore}/${BALL_GOAL} ⚽` : null);
+    later(() => setSceneMessage(null), 1600);
+  };
 
-  const finishBallGame = (completed = false) => {
-    setBallGameActive(false);
-    if (completed) {
+  const playGame = () => {
+    beginAction();
+    setRoom('garden');
+    setPetPos({ x: 38, y: 2 });
+    setFacing('right');
+    ballGame.start();
+    setActivity('playing');
+    setSceneMessage('10 kez topa dokun. Ben peşinden koşayım! ⚽');
+  };
+
+  const kickBall = () => {
+    const next = ballGame.hit();
+    if (!next) return;
+    lastUserActionRef.current = Date.now();
+    const target = ballPosition(next.score - 1);
+    setFacing(target.x < petPos.x ? 'left' : 'right');
+    setPetPos(target);
+    if (next.phase === 'completed') {
       setHappiness((v) => clampLife(v + 12));
       setHearts((v) => v + 1);
       setEmotion('laugh');
       setActivity('laughing');
       speak('On numara! Top oyununu bitirdik! ⚽🏆', 'happy');
-      try { navigator.vibrate?.([45, 55, 45, 55, 90]); } catch { /* noop */ }
-      later(() => {
-        setEmotion('neutral');
-        setActivity('idle');
-        setSceneMessage(null);
-      }, 2600);
+      try { navigator.vibrate?.([45, 55, 45]); } catch { /* Optional haptics. */ }
     } else {
-      setActivity('idle');
-      setSceneMessage(playScore > 0 ? `Top oyunu bitti · skor ${playScore} ⚽` : null);
-      later(() => setSceneMessage(null), 1600);
-    }
-  };
-
-  const playGame = () => {
-    lastUserActionRef.current = Date.now();
-    clearTimers();
-    setRoom('garden');
-    setPetPos({ x: 38, y: 2 });
-    setFacing('right');
-    setPlayScore(0);
-    setBallGameActive(true);
-    setActivity('playing');
-    setSceneMessage('10 kez topa dokun. Ben peşinden koşayım! ⚽');
-    setHappiness((v) => clampLife(v + 4));
-  };
-
-  const kickBall = () => {
-    if (!ballGameActive) return;
-    lastUserActionRef.current = Date.now();
-    const currentBall = ballPosition(playScore);
-    const nextScore = playScore + 1;
-    setFacing(currentBall.x < petPos.x ? 'left' : 'right');
-    setPetPos({ x: currentBall.x, y: currentBall.y });
-    setActivity('playing');
-    setPlayScore(nextScore);
-    setHappiness((v) => clampLife(v + 2));
-
-    if (nextScore > playHighScore) {
-      setPlayHighScore(nextScore);
-      try { localStorage.setItem('iyikiPanda.ballHigh', String(nextScore)); } catch { /* noop */ }
-    }
-
-    if (nextScore >= 10) {
-      setSceneMessage('10/10! Şampiyonuz! 🏆🐼');
-      window.setTimeout(() => finishBallGame(true), 650);
-    } else {
-      setSceneMessage(`${nextScore}/10 · devam! ⚽`);
-      try { navigator.vibrate?.(28); } catch { /* noop */ }
+      setSceneMessage(`${next.score}/${BALL_GOAL} · devam! ⚽`);
+      try { navigator.vibrate?.(28); } catch { /* Optional haptics. */ }
     }
   };
 
   const petPanda = () => {
-    lastUserActionRef.current = Date.now();
+    beginAction();
     setHearts((v) => v + 1);
     setHappiness((v) => Math.min(100, v + 3));
     setActivity('greeting');
@@ -1025,7 +983,7 @@ export default function PetPage() {
   const touchPanda = (e: ReactPointerEvent<HTMLButtonElement>) => {
     const rect = e.currentTarget.getBoundingClientRect();
     const y = (e.clientY - rect.top) / Math.max(1, rect.height);
-    clearTimers();
+    beginAction();
     void unlockPandaVoice();
 
     if (activity === 'sleeping') {
@@ -1071,7 +1029,7 @@ export default function PetPage() {
   const roomMessage = sceneMessage || need || activityText(activity, room, pet.name);
 
   const today = dayKey();
-  const d = dashboard(state, today);
+  const d = useMemo(() => dashboard(state, today), [state, today]);
   const doneTasks = state.tasks.filter((t) => t.date === today && t.done).length;
   const questQuestions = Math.max(10, Math.min(30, Math.round(state.profile.dailyQuestionGoal * 0.35)));
   const questMinutes = Math.max(20, Math.min(60, Math.round(state.profile.dailyStudyMinutes * 0.25)));
@@ -1093,7 +1051,7 @@ export default function PetPage() {
   );
 
   useEffect(() => {
-    if (activity !== 'idle') return;
+    if (activity !== 'idle' || ballGame.phase !== 'idle' || dragging) return;
     const threshold = dailyStudyProgress >= 75 ? 75 : dailyStudyProgress >= 50 ? 50 : dailyStudyProgress >= 25 ? 25 : 0;
     if (!threshold) return;
 
@@ -1105,7 +1063,7 @@ export default function PetPage() {
       /* kalıcı işaret tutulamazsa olay yine gösterilebilir */
     }
 
-    clearTimers();
+    beginAction();
     setHearts((v) => v + 1);
     setHappiness((v) => clampLife(v + 5));
 
@@ -1135,10 +1093,10 @@ export default function PetPage() {
     }, 4600);
     // Bu olay yalnız yeni bir günlük eşik ilk kez aşıldığında çalışır.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [activity, dailyStudyProgress, today, pet.name, voiceOn]);
+  }, [activity, dailyStudyProgress, today, pet.name, voiceOn, ballGame.phase, dragging]);
 
   useEffect(() => {
-    if (activity !== 'idle') return;
+    if (activity !== 'idle' || ballGame.phase !== 'idle' || dragging) return;
     const key = 'iyiki-panda-surprise-' + today;
     try {
       if (window.localStorage.getItem(key) === '1') return;
@@ -1159,7 +1117,7 @@ export default function PetPage() {
     if (!line) return;
 
     try { window.localStorage.setItem(key, '1'); } catch { /* noop */ }
-    clearTimers();
+    beginAction();
     setActivity('surprised');
     setEmotion('surprised');
     setSceneMessage(line);
@@ -1179,6 +1137,8 @@ export default function PetPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     activity,
+    ballGame.phase,
+    dragging,
     today,
     d.todayQuestions,
     d.todayMinutes,
@@ -1193,16 +1153,17 @@ export default function PetPage() {
 
   const toggle = (id: string) =>
     update((s) => {
+      if (!PET_ITEMS.some((item) => item.id === id && item.level <= petStatus(s).level)) return s;
       const items = s.settings.pet.items.includes(id) ? s.settings.pet.items.filter((x) => x !== id) : [...s.settings.pet.items, id];
       return updateSettings(s, { pet: { ...s.settings.pet, items } });
     });
 
   return (
-    <div className="pet-game-page">
+    <div className="pet-game-page panda-home-v7">
       <section
         className={'pet-game ' + roomMode + ' room-' + room}
         aria-label={pet.name + ' sanal evcil hayvan evi'}
-        onPointerDown={() => void unlockPandaVoice()}
+        onPointerDown={() => { if (voiceOn) void unlockPandaVoice(); }}
       >
         <header className="pet-game-top">
           <a className="pet-game-iconbtn" href="#/" aria-label="Ana sayfaya dön">
@@ -1211,33 +1172,42 @@ export default function PetPage() {
           <div className="pet-game-room-title">
             <span>{ROOM_INFO[room].icon}</span>
             <div>
-              <b>{ROOM_INFO[room].label}</b>
-              <small>{state.profile.name || 'Zeynep'} kontrol ediyor · {pet.name} Sv. {p.level}</small>
+              <b>{pet.name} ile evde</b>
+              <small>Seviye {p.level} · {p.xp} XP</small>
             </div>
           </div>
           <button
             className="pet-game-iconbtn"
             type="button"
             onClick={() => {
-              void unlockPandaVoice();
+              if (voiceOn) stopPandaVoice();
+              else void unlockPandaVoice();
               setVoiceOn((v) => !v);
             }}
-            aria-label={voiceOn ? 'Özel panda sesini kapat' : 'Özel panda sesini aç'}
+            aria-label={voiceOn ? 'Panda sesini kapat' : 'Panda sesini aç'}
+            aria-pressed={voiceOn}
           >
             {voiceOn ? '🐼♪' : '🐼×'}
           </button>
         </header>
 
         <div className="pet-game-needs" aria-label="Panda ihtiyaçları">
-          <NeedBubble icon="🎋" label="Tokluk" value={needs.food} />
-          <NeedBubble icon="💧" label="Su" value={needs.water} />
-          <NeedBubble icon="🫧" label="Temizlik" value={cleanliness} />
-          <NeedBubble icon="⚡" label="Enerji" value={energy} />
-          <NeedBubble icon="♡" label="Mutluluk" value={happiness} />
+          <NeedBubble icon="🎋" label="Tokluk" value={needs.food} onClick={() => kitchenGive('bambu')} />
+          <NeedBubble icon="💧" label="Su" value={needs.water} onClick={() => kitchenGive('su')} />
+          <NeedBubble icon="🫧" label="Temizlik" value={cleanliness} onClick={bath} />
+          <NeedBubble icon="⚡" label="Enerji" value={energy} onClick={sleep} />
+          <NeedBubble icon="♡" label="Neşe" value={happiness} onClick={petPanda} />
+        </div>
+        <div className="panda-inventory" aria-label="Bakım çantası">
+          <span>🎋 <b>{needs.bamboo}</b> bambu</span>
+          <span>💧 <b>{needs.drops}</b> damla</span>
+          <a href="#/testler">Soru çöz, kazan</a>
         </div>
         <div
           ref={stageRef}
-          className={'pet-stage scene-' + room + ' activity-' + activity}
+          className={'pet-stage scene-' + room + ' activity-' + activity + (ballGame.phase !== 'idle' ? ' has-ball-game' : '')}
+          onPointerDown={(e) => { stageTouch.current = { x: e.clientX, y: e.clientY }; }}
+          onPointerCancel={() => { stageTouch.current = null; }}
           onPointerUp={stagePointerUp}
         >
           <div className="pet-stage-room-badge">
@@ -1254,7 +1224,7 @@ export default function PetPage() {
             onSleep={sleep}
             onBath={bath}
             onStudy={studyTogether}
-            onGarden={garden}
+            onGarden={playGame}
             onRelax={relax}
           />
 
@@ -1274,10 +1244,12 @@ export default function PetPage() {
             onPointerUp={pandaPointerUp}
             onPointerCancel={() => { pandaDragRef.current = null; setDragging(false); setActivity('idle'); }}
             onClick={(e) => { if (e.detail === 0) petPanda(); }}
+            disabled={ballGame.phase !== 'idle'}
             aria-label={pet.name + ' pandayı sev'}
           >
             <RealisticPanda
               size={292}
+              items={pet.items.filter((id) => PET_ITEMS.some((item) => item.id === id && item.level <= p.level))}
               sleepy={activity === 'sleeping'}
               sad={!holding && sad}
               eating={activity === 'eating'}
@@ -1292,7 +1264,8 @@ export default function PetPage() {
             {hearts > 0 && <span key={hearts} className="pet-game-heart" aria-hidden="true">♡</span>}
             {activity === 'sleeping' && <span className="pet-game-sleep">Z z z</span>}
             {roomMessage && (
-              <span className="pet-panda-mini-talk" aria-live="polite">
+              <span className="pet-panda-mini-talk" aria-live="polite"
+                style={{ left: petPos.x < 30 ? '65%' : petPos.x > 70 ? '35%' : '50%' }}>
                 <i>🐼</i><b>{roomMessage}</b>
               </span>
             )}
@@ -1308,11 +1281,11 @@ export default function PetPage() {
                 <div className="pet-ball-game-progress" aria-label={'Top oyunu ' + playScore + ' / 10'}>
                   <span style={{ width: Math.min(100, playScore * 10) + '%' }} />
                 </div>
-                <strong>{playScore}/10</strong>
-                <button type="button" onClick={(e) => { e.stopPropagation(); finishBallGame(false); }}>Bitir</button>
+                <strong aria-live="polite">{playScore}/10</strong>
+                <button type="button" onClick={(e) => { e.stopPropagation(); finishBallGame(); }}>Bitir</button>
               </div>
               <button
-                key={playScore}
+                ref={ballRef}
                 type="button"
                 className="pet-tom-ball"
                 style={{
@@ -1327,6 +1300,16 @@ export default function PetPage() {
             </>
           )}
 
+          {ballGame.phase === 'completed' && (
+            <div ref={resultRef} tabIndex={-1} className="panda-game-result" role="region" aria-label="Top oyunu sonucu">
+              <span aria-hidden="true">🏆</span>
+              <h2>10’da 10!</h2>
+              <p>{pet.name} seninle çok eğlendi.</p>
+              <strong>Neşe +12 · En iyi skor {playHighScore}/10</strong>
+              <div><button type="button" onClick={playGame}>Tekrar oyna</button>
+                <button type="button" onClick={finishBallGame}>Eve dön</button></div>
+            </div>
+          )}
           <div className="pet-control-hint">
             <span>☝️ Zemine dokun: yürü</span>
             <span>↔️ Panda’yı sürükle</span>
@@ -1335,7 +1318,7 @@ export default function PetPage() {
 
         <nav className="pet-room-strip" aria-label="Ev odaları">
           {ROOM_ORDER.map((id) => (
-            <button key={id} type="button" className={room === id ? 'active' : ''} onClick={() => moveTo(id)}>
+            <button key={id} type="button" className={room === id ? 'active' : ''} aria-pressed={room === id} onClick={() => moveTo(id)}>
               <span>{ROOM_INFO[id].icon}</span>
               <b>{ROOM_INFO[id].label.replace(' Odası', '')}</b>
             </button>
@@ -1361,6 +1344,14 @@ export default function PetPage() {
         </div>
       </section>
 
+      <section className="panda-study-card" aria-label="Bugünkü çalışma">
+        <div><span className="panda-study-label">BİRLİKTE İLERLEYELİM</span>
+          <h2>Bir mola, sonra küçük bir adım.</h2>
+          <p>Bugün {d.todayQuestions} soru · {Math.round(d.todayMinutes)} dk çalışma</p>
+          <ProgressBar value={dailyStudyProgress} label="Günlük hedef" />
+        </div>
+        <div className="panda-study-links"><a href="#/odak">Odaklanmaya geç</a><a href="#/testler">Soru çöz</a></div>
+      </section>
       <section className="pet-game-quick section">
         <button type="button" onClick={roam}>
           <span>🐾</span><b>Evde gez</b><small>Kendi kendine dolaşsın</small>
@@ -1372,7 +1363,7 @@ export default function PetPage() {
           <span>🫧</span><b>Banyo</b><small>Temizliği yenile</small>
         </button>
         <button type="button" onClick={studyTogether}>
-          <span>📚</span><b>Birlikte çalış</b><small>Çalışma odasına geç</small>
+          <span>📚</span><b>Çalışma odası</b><small>Masaya birlikte geç</small>
         </button>
         <button type="button" onClick={playGame}>
           <span>⚽</span><b>Top oyunu</b><small>Topa dokun, Panda peşinden koşsun</small>
@@ -1396,9 +1387,9 @@ export default function PetPage() {
               <Meter label="Tokluk 🎋" value={needs.food} kind="food" />
               <Meter label="Su 💧" value={needs.water} kind="water" />
               <div className="life-meter-grid">
-                <div><span>Temizlik</span><b>%{cleanliness}</b></div>
-                <div><span>Enerji</span><b>%{energy}</b></div>
-                <div><span>Mutluluk</span><b>%{happiness}</b></div>
+                <div><span>Temizlik</span><b>%{Math.round(cleanliness)}</b></div>
+                <div><span>Enerji</span><b>%{Math.round(energy)}</b></div>
+                <div><span>Mutluluk</span><b>%{Math.round(happiness)}</b></div>
               </div>
             </div>
             <div className="pet-growth-card">

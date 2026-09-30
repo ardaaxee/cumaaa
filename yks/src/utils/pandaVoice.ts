@@ -12,7 +12,7 @@ function getContext(): AudioContext | null {
   return ctx;
 }
 
-function stopActive() {
+export function stopPandaVoice() {
   for (const node of activeNodes) {
     try { node.stop(); } catch { /* already stopped */ }
   }
@@ -125,7 +125,7 @@ export async function playPandaVoice(
   intent: PandaVoiceIntent = 'talk',
   enabled = true,
 ): Promise<number> {
-  if (!enabled) return 0;
+  if (!enabled || (typeof document !== 'undefined' && document.hidden)) return 0;
 
   const c = getContext();
   if (!c) return 0;
@@ -138,7 +138,7 @@ export async function playPandaVoice(
 
   if (c.state !== 'running') return 0;
   unlocked = true;
-  stopActive();
+  stopPandaVoice();
 
   const profile = intentProfile(intent);
   const hash = hashText(text);

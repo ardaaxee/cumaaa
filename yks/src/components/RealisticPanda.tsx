@@ -11,8 +11,10 @@ export function RealisticPanda({
   waving = false,
   talking = false,
   emotion = 'neutral',
+  items = [],
 }: {
   size?: number;
+  items?: string[];
   sleepy?: boolean;
   sad?: boolean;
   eating?: boolean;
@@ -210,6 +212,21 @@ export function RealisticPanda({
           )}
         </g>
       )}
+
+      {items.map((id) => {
+        const accessories: Record<string, { icon: string; x: number; y: number; size: number }> = {
+          kalem: { icon: '✏️', x: 160, y: 190, size: 32 },
+          gozluk: { icon: '👓', x: 110, y: 108, size: 62 },
+          papyon: { icon: '🎀', x: 110, y: 172, size: 38 },
+          atki: { icon: '🧣', x: 110, y: 179, size: 48 },
+          cicek: { icon: '🌸', x: 110, y: 42, size: 42 },
+          kulaklik: { icon: '🎧', x: 110, y: 88, size: 94 },
+          kep: { icon: '🎓', x: 110, y: 48, size: 65 },
+          tac: { icon: '👑', x: 110, y: 44, size: 54 },
+        };
+        const item = accessories[id];
+        return item ? <text key={id} data-accessory={id} x={item.x} y={item.y} fontSize={item.size} textAnchor="middle">{item.icon}</text> : null;
+      })}
 
       {bathing && (
         <g className="rp-bath-bubbles">
