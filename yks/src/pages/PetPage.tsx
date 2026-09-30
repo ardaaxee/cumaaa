@@ -449,16 +449,7 @@ export default function PetPage() {
     }, 2600);
   };
 
-  const talk = () => {
-    clearTimers();
-    setActivity('talking');
-    const text = randomLine();
-    speak(text, 'talk');
-    later(() => {
-      setActivity('idle');
-      setSceneMessage(null);
-    }, 3300);
-  };
+
 
   const triggerReaction = (forced?: (typeof PANDA_REACTIONS)[number]) => {
     clearTimers();
