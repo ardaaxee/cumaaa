@@ -406,6 +406,7 @@ export default function PetPage() {
   const timers = useRef<number[]>([]);
   const zeynepTimers = useRef<number[]>([]);
   const greeted = useRef(false);
+  const dailyRoutineRef = useRef('');
 
   const sad = needs.hungry || needs.thirsty;
   const need = needsMessage(pet.name, needs);
@@ -668,6 +669,97 @@ export default function PetPage() {
     };
     // Her idle dönüşünde yeni bir doğal davranış planlanır.
   }, [activity, room, pet.name, petPos.x, needs.hungry, needs.thirsty, cleanliness, energy, happiness, voiceOn]);
+
+  useEffect(() => {
+    if (activity !== 'idle' || zeynepActivity !== 'idle' || needs.hungry || needs.thirsty) return;
+    const now = new Date();
+    const hour = now.getHours();
+    const preferredHour = state.profile.preferredStudyTime
+      ? Number(state.profile.preferredStudyTime.slice(0, 2))
+      : null;
+
+    let key = '';
+    let target: HouseRoom | null = null;
+    let pandaNext: HouseActivity = 'idle';
+    let zeynepNext: ZeynepActivity = 'idle';
+    let message = '';
+
+    if (hour >= 23 || hour < 7) {
+      key = 'night';
+      target = 'bedroom';
+      pandaNext = 'sleeping';
+      zeynepNext = 'sleeping';
+      message = 'Evde gece rutini başladı. Zeynep ve ' + pet.name + ' dinlenmeye geçiyor 🌙';
+    } else if (preferredHour != null && hour === preferredHour) {
+      key = 'preferred-study-' + preferredHour;
+      target = 'study';
+      pandaNext = 'studying';
+      zeynepNext = 'studying';
+      message = 'Zeynep’in seçtiği çalışma saati geldi. ' + pet.name + ' da çalışma odasına geliyor 📚♡';
+    } else if (hour >= 7 && hour < 9) {
+      key = 'breakfast';
+      target = 'kitchen';
+      pandaNext = 'relaxing';
+      zeynepNext = 'cooking';
+      message = 'Günaydın! Evde kahvaltı rutini başladı ☀️🍳';
+    } else if (hour >= 9 && hour < 12) {
+      key = 'morning-study';
+      target = 'study';
+      pandaNext = 'studying';
+      zeynepNext = 'studying';
+      message = 'Sabah çalışma zamanı. Zeynep ile ' + pet.name + ' çalışma odasına geçti 📚';
+    } else if (hour >= 18 && hour < 20) {
+      key = 'dinner';
+      target = 'kitchen';
+      pandaNext = 'relaxing';
+      zeynepNext = 'cooking';
+      message = 'Akşam oldu; evde yemek hazırlığı başladı 🍽️';
+    } else if (hour >= 20 && hour < 23) {
+      key = 'evening';
+      target = 'balcony';
+      pandaNext = 'relaxing';
+      zeynepNext = 'relaxing';
+      message = 'Günün sonunda Zeynep ile ' + pet.name + ' balkonda biraz dinleniyor 🌇♡';
+    }
+
+    if (!key || !target) return;
+    const stamp = today + ':' + key;
+    if (dailyRoutineRef.current === stamp) return;
+    dailyRoutineRef.current = stamp;
+
+    clearTimers();
+    clearZeynepTimers();
+    setSceneMessage(message);
+    setZeynepMessage(message);
+    setActivity('walking');
+    setZeynepActivity('walking');
+    setRoom(target);
+    setZeynepRoom(target);
+    setPetPos({ x: 42, y: 2 });
+    setZeynepPos({ x: 68, y: 8 });
+
+    later(() => {
+      setActivity(pandaNext);
+      setZeynepActivity(zeynepNext);
+      if (pandaNext === 'sleeping') setRoomMode('night');
+      else if (hour >= 7 && hour < 19) setRoomMode('day');
+    }, 950);
+
+    later(() => {
+      if (pandaNext !== 'sleeping') setActivity('idle');
+      if (zeynepNext !== 'sleeping') setZeynepActivity('idle');
+      if (pandaNext !== 'sleeping') setSceneMessage(null);
+      if (zeynepNext !== 'sleeping') setZeynepMessage(null);
+    }, pandaNext === 'sleeping' ? 12_000 : 5_500);
+  }, [
+    activity,
+    zeynepActivity,
+    needs.hungry,
+    needs.thirsty,
+    state.profile.preferredStudyTime,
+    today,
+    pet.name,
+  ]);
 
   useEffect(() => {
     if (zeynepActivity !== 'idle') return;
