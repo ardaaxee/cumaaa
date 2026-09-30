@@ -1,3 +1,4 @@
+import { PandaFurniture } from '../components/PandaFurniture';
 import { PandaMoments } from '../components/PandaMoments';
 import { useEffect, useMemo, useRef, useState, type CSSProperties, type PointerEvent as ReactPointerEvent } from 'react';
 import { PandaCareSession, type CareSession } from '../components/PandaCareSession';
@@ -1244,6 +1245,8 @@ export default function PetPage() {
             onGarden={playGame}
             onRelax={relax}
           />
+
+          <PandaFurniture room={room} onWater={() => kitchenGive('su')} onStudy={studyTogether} bamboo={needs.bamboo} drops={needs.drops} />
 
           <button className="pet-scene-arrow prev" type="button" onClick={() => changeRoom(-1)} aria-label="Önceki oda">‹</button>
           <button className="pet-scene-arrow next" type="button" onClick={() => changeRoom(1)} aria-label="Sonraki oda">›</button>

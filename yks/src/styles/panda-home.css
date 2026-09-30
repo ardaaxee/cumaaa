@@ -174,3 +174,24 @@
 .panda-home-v7 .panda-letter, .panda-home-v7 .panda-letter-button, .panda-home-v7 .panda-memory-list article { background:#30233d; border-color:#655170; color:#f6effb; }
 .panda-home-v7 .panda-moments-heading > span { background:#453152; color:#e7c8ff; }
 .panda-home-v7 .panda-moments .field > span { color:#f6effb; }
+
+/* Dokunulabilir eşyalar: ahşap, kumaş, metal ve cam yüzeyler. */
+.panda-home-v7 .scene-sofa { background:linear-gradient(110deg,#8b6b79,#bd95a4 45%,#947684); border:2px solid #76596a; box-shadow:inset 0 5px 10px #fff3,inset 0 -8px 10px #533b5633,0 18px 22px #27182530; }
+.panda-home-v7 .scene-cushion { background:repeating-linear-gradient(45deg,#fff1 0 1px,transparent 1px 4px),linear-gradient(130deg,#f2dfd9,#d8bfbf); border:1px solid #c7aab2; box-shadow:2px 4px 5px #5f405c30; }
+.panda-home-v7 .scene-study-desk, .panda-home-v7 .scene-table { background:repeating-linear-gradient(3deg,#855e3a12 0 2px,transparent 2px 7px),linear-gradient(100deg,#9b724d,#d1a77b 50%,#a67a52); border-bottom:5px solid #795537; }
+.panda-home-v7 .scene-blanket { background:repeating-linear-gradient(90deg,#fff1 0 1px,transparent 1px 5px),linear-gradient(110deg,#836d9e,#b09cc5); box-shadow:inset 0 8px 12px #fff2; }
+.furniture-object { position:absolute; z-index:9; width:90px; padding:0; border:0; background:transparent; cursor:pointer; color:#392d29; touch-action:manipulation; }
+.furniture-object svg { width:100%; height:100%; display:block; filter:drop-shadow(3px 7px 5px #21142533); }
+.furniture-object > span { display:block; padding:4px 6px; border-radius:7px; background:#fff9e8ee; font-size:10px; font-weight:700; line-height:1.3; }
+.furniture-light { right:7%; bottom:18%; width:58px; height:140px; }
+.furniture-light.lit::before { content:''; position:absolute; inset:-22px -36px; border-radius:50%; background:radial-gradient(ellipse,#ffeaba77,transparent 70%); pointer-events:none; }
+.furniture-book { left:5%; bottom:27%; width:100px; height:72px; }
+.furniture-cabinet { right:5%; top:25%; width:92px; height:123px; }
+.furniture-glass { right:21%; bottom:24%; width:54px; height:72px; }
+.furniture-watering { right:5%; bottom:20%; width:132px; height:120px; }
+.furniture-object:disabled { opacity:1; cursor:default; }
+.furniture-reading { position:absolute; z-index:35; left:50%; top:25%; transform:translateX(-50%); width:min(320px,calc(100% - 28px)); padding:16px; border:1px solid #a99265; border-radius:12px; background:#fff8e9; color:#392d29; box-shadow:0 12px 40px #21142544; }
+.furniture-reading p { line-height:1.5; font-size:14px; }
+.furniture-reading button,.furniture-reading a { display:block; width:100%; min-height:44px; margin-top:6px; padding:10px; border:1px solid #c7b389; background:#f0e6ce; border-radius:8px; color:#392d29; font:inherit; text-align:center; }
+.panda-home-v7 .has-ball-game .furniture-object,.panda-home-v7 .has-ball-game .furniture-reading { display:none; }
+@media(max-width:560px) { .furniture-light { width:48px; height:115px; right:5%; } .furniture-book { width:80px; height:62px; } .furniture-cabinet { width:74px; height:104px; } .furniture-watering { width:110px; height:104px; } }
