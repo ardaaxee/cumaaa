@@ -390,6 +390,7 @@ export default function PetPage() {
   const [voiceOn, setVoiceOn] = useState(true);
   const [emotion, setEmotion] = useState<PandaEmotion>('neutral');
   const [playScore, setPlayScore] = useState(0);
+  const [dragging, setDragging] = useState(false);
   const stageRef = useRef<HTMLDivElement>(null);
   const pandaDragRef = useRef<{ pointerId: number; startX: number; startY: number; x: number; y: number; moved: boolean } | null>(null);
   const lastUserActionRef = useRef(Date.now());
@@ -952,6 +953,7 @@ export default function PetPage() {
       y: petPos.y,
       moved: false,
     };
+    setDragging(true);
     e.currentTarget.setPointerCapture?.(e.pointerId);
   };
 
@@ -974,6 +976,7 @@ export default function PetPage() {
   const pandaPointerUp = (e: ReactPointerEvent<HTMLButtonElement>) => {
     const drag = pandaDragRef.current;
     pandaDragRef.current = null;
+    setDragging(false);
     try { e.currentTarget.releasePointerCapture?.(e.pointerId); } catch { /* noop */ }
     if (drag?.moved) {
       setActivity('idle');
@@ -1291,7 +1294,7 @@ export default function PetPage() {
 
           <button
             type="button"
-            className={'pet-stage-panda act-' + activity + ' facing-' + facing}
+            className={'pet-stage-panda act-' + activity + ' facing-' + facing + (dragging ? ' is-dragging' : '')}
             style={{
               '--pet-x': petPos.x + '%',
               '--pet-y': petPos.y + '%',
@@ -1300,7 +1303,7 @@ export default function PetPage() {
             onPointerDown={pandaPointerDown}
             onPointerMove={pandaPointerMove}
             onPointerUp={pandaPointerUp}
-            onPointerCancel={() => { pandaDragRef.current = null; setActivity('idle'); }}
+            onPointerCancel={() => { pandaDragRef.current = null; setDragging(false); setActivity('idle'); }}
             onClick={(e) => { if (e.detail === 0) petPanda(); }}
             aria-label={pet.name + ' pandayı sev'}
           >
