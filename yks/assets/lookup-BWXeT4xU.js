@@ -1,0 +1,1 @@
+import{G as e,K as t,U as n,W as r}from"./net-DOccn4KM.js";var i={topicName:e=>r(e)?.topic.name??e,subjectName:t=>{let r=n(t);return r?e(r):t},subjectTopicIds:e=>t(e).map(e=>e.id)};function a(e){let t=r(e);return t?`${t.subject.exam} ${t.subject.name} · ${t.topic.name}`:e}export{a as n,i as t};
