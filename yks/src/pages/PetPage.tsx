@@ -389,6 +389,10 @@ export default function PetPage() {
   const [facing, setFacing] = useState<'left' | 'right'>('right');
   const [voiceOn, setVoiceOn] = useState(true);
   const [emotion, setEmotion] = useState<PandaEmotion>('neutral');
+  const [playScore, setPlayScore] = useState(0);
+  const stageRef = useRef<HTMLDivElement>(null);
+  const pandaDragRef = useRef<{ pointerId: number; startX: number; startY: number; x: number; y: number; moved: boolean } | null>(null);
+  const lastUserActionRef = useRef(Date.now());
   const timers = useRef<number[]>([]);
   const zeynepTimers = useRef<number[]>([]);
   const greeted = useRef(false);
@@ -502,9 +506,10 @@ export default function PetPage() {
   useEffect(() => {
     if (activity !== 'idle') return;
     let cancelled = false;
-    const wait = 2600 + Math.floor(Math.random() * 2800);
+    const wait = 8500 + Math.floor(Math.random() * 6500);
     const id = window.setTimeout(() => {
       if (cancelled) return;
+      if (Date.now() - lastUserActionRef.current < 6500) return;
       const hour = new Date().getHours();
       if ((needs.hungry || needs.thirsty) && room !== 'kitchen') {
         setFacing('right');
@@ -754,6 +759,7 @@ export default function PetPage() {
   }, []);
 
   const moveTo = (nextRoom: HouseRoom, nextActivity: HouseActivity = 'idle', message?: string) => {
+    lastUserActionRef.current = Date.now();
     clearTimers();
     setHolding(null);
     setRoom(nextRoom);
@@ -773,6 +779,7 @@ export default function PetPage() {
   };
 
   const kitchenGive = (kind: 'bambu' | 'su') => {
+    lastUserActionRef.current = Date.now();
     const full = kind === 'bambu' ? needs.food >= 100 : needs.water >= 100;
     const have = kind === 'bambu' ? needs.bamboo : needs.drops;
     if (full) return toast(kind === 'bambu' ? pet.name + ' şu an tok ♡' : pet.name + ' şu an susamadı ♡');
@@ -908,7 +915,102 @@ export default function PetPage() {
     }, 2800);
   };
 
+
+  const clampPos = (value: number, min: number, max: number) => Math.max(min, Math.min(max, value));
+
+  const userWalkTo = (clientX: number, clientY: number) => {
+    const stage = stageRef.current;
+    if (!stage || activity === 'sleeping' || activity === 'bathing') return;
+    const rect = stage.getBoundingClientRect();
+    const nextX = clampPos(((clientX - rect.left) / Math.max(1, rect.width)) * 100, 14, 86);
+    const rawBottom = ((rect.bottom - clientY) / Math.max(1, rect.height)) * 100 - 13;
+    const nextY = clampPos(rawBottom, 1, 14);
+    lastUserActionRef.current = Date.now();
+    clearTimers();
+    setFacing(nextX < petPos.x ? 'left' : 'right');
+    setActivity('walking');
+    setPetPos({ x: nextX, y: nextY });
+    setSceneMessage(null);
+    later(() => setActivity('idle'), 900);
+  };
+
+  const stagePointerUp = (e: ReactPointerEvent<HTMLDivElement>) => {
+    const target = e.target as HTMLElement;
+    if (target.closest('button,a')) return;
+    userWalkTo(e.clientX, e.clientY);
+  };
+
+  const pandaPointerDown = (e: ReactPointerEvent<HTMLButtonElement>) => {
+    if (activity === 'sleeping') return;
+    lastUserActionRef.current = Date.now();
+    clearTimers();
+    pandaDragRef.current = {
+      pointerId: e.pointerId,
+      startX: e.clientX,
+      startY: e.clientY,
+      x: petPos.x,
+      y: petPos.y,
+      moved: false,
+    };
+    e.currentTarget.setPointerCapture?.(e.pointerId);
+  };
+
+  const pandaPointerMove = (e: ReactPointerEvent<HTMLButtonElement>) => {
+    const drag = pandaDragRef.current;
+    const stage = stageRef.current;
+    if (!drag || drag.pointerId !== e.pointerId || !stage) return;
+    const rect = stage.getBoundingClientRect();
+    const dx = e.clientX - drag.startX;
+    const dy = e.clientY - drag.startY;
+    if (Math.hypot(dx, dy) > 7) drag.moved = true;
+    if (!drag.moved) return;
+    const nextX = clampPos(drag.x + (dx / Math.max(1, rect.width)) * 100, 14, 86);
+    const nextY = clampPos(drag.y - (dy / Math.max(1, rect.height)) * 100, 1, 14);
+    setFacing(dx < 0 ? 'left' : 'right');
+    setActivity('walking');
+    setPetPos({ x: nextX, y: nextY });
+  };
+
+  const pandaPointerUp = (e: ReactPointerEvent<HTMLButtonElement>) => {
+    const drag = pandaDragRef.current;
+    pandaDragRef.current = null;
+    try { e.currentTarget.releasePointerCapture?.(e.pointerId); } catch { /* noop */ }
+    if (drag?.moved) {
+      setActivity('idle');
+      setSceneMessage('Buraya geldim 🐾');
+      setHappiness((v) => clampLife(v + 1));
+      later(() => setSceneMessage(null), 1300);
+      return;
+    }
+    touchPanda(e);
+  };
+
+  const playGame = () => {
+    lastUserActionRef.current = Date.now();
+    clearTimers();
+    setRoom('garden');
+    setPetPos({ x: 38, y: 2 });
+    setFacing('right');
+    setPlayScore(0);
+    setActivity('playing');
+    setSceneMessage('Topa dokun! Panda topun peşinden koşsun ⚽');
+    setHappiness((v) => clampLife(v + 4));
+  };
+
+  const kickBall = () => {
+    lastUserActionRef.current = Date.now();
+    setPlayScore((v) => v + 1);
+    setHappiness((v) => clampLife(v + 2));
+    const nextX = playScore % 2 === 0 ? 68 : 34;
+    setFacing(nextX < petPos.x ? 'left' : 'right');
+    setPetPos({ x: nextX, y: 3 + (playScore % 3) * 2 });
+    setActivity('playing');
+    setSceneMessage(`Harika! ${playScore + 1}. vuruş ⚽`);
+    try { navigator.vibrate?.(28); } catch { /* noop */ }
+  };
+
   const petPanda = () => {
+    lastUserActionRef.current = Date.now();
     setHearts((v) => v + 1);
     setHappiness((v) => Math.min(100, v + 3));
     setActivity('greeting');
@@ -1138,7 +1240,7 @@ export default function PetPage() {
             <span>{ROOM_INFO[room].icon}</span>
             <div>
               <b>{ROOM_INFO[room].label}</b>
-              <small>{pet.name} · Sv. {p.level} · {activityText(activity, room, pet.name)}</small>
+              <small>{state.profile.name || 'Zeynep'} kontrol ediyor · {pet.name} Sv. {p.level}</small>
             </div>
           </div>
           <button
@@ -1161,7 +1263,11 @@ export default function PetPage() {
           <NeedBubble icon="⚡" label="Enerji" value={energy} />
           <NeedBubble icon="♡" label="Mutluluk" value={happiness} />
         </div>
-        <div className={'pet-stage scene-' + room + ' activity-' + activity}>
+        <div
+          ref={stageRef}
+          className={'pet-stage scene-' + room + ' activity-' + activity}
+          onPointerUp={stagePointerUp}
+        >
           <div className="pet-stage-room-badge">
             <span>{ROOM_INFO[room].icon}</span>
             <div><b>{ROOM_INFO[room].label}</b><small>{ROOM_INFO[room].desc}</small></div>
@@ -1191,7 +1297,10 @@ export default function PetPage() {
               '--pet-y': petPos.y + '%',
               '--pet-depth': String(Math.max(0.9, 1 - petPos.y * 0.008)),
             } as CSSProperties}
-            onPointerUp={touchPanda}
+            onPointerDown={pandaPointerDown}
+            onPointerMove={pandaPointerMove}
+            onPointerUp={pandaPointerUp}
+            onPointerCancel={() => { pandaDragRef.current = null; setActivity('idle'); }}
             onClick={(e) => { if (e.detail === 0) petPanda(); }}
             aria-label={pet.name + ' pandayı sev'}
           >
@@ -1210,11 +1319,32 @@ export default function PetPage() {
             <span className="pet-floor-shadow" />
             {hearts > 0 && <span key={hearts} className="pet-game-heart" aria-hidden="true">♡</span>}
             {activity === 'sleeping' && <span className="pet-game-sleep">Z z z</span>}
+            {roomMessage && (
+              <span className="pet-panda-mini-talk" aria-live="polite">
+                <i>🐼</i><b>{roomMessage}</b>
+              </span>
+            )}
           </button>
 
+          {room === 'garden' && activity === 'playing' && (
+            <button
+              key={playScore}
+              type="button"
+              className="pet-tom-ball"
+              style={{
+                left: (22 + (playScore * 31) % 58) + '%',
+                bottom: (13 + (playScore * 17) % 20) + '%',
+              }}
+              onClick={(e) => { e.stopPropagation(); kickBall(); }}
+              aria-label={'Top · skor ' + playScore}
+            >
+              ⚽<small>{playScore}</small>
+            </button>
+          )}
 
-          <div className={'pet-game-talk' + (['talking','greeting','laughing','angry','shy','yawning','sneezing','surprised'].includes(activity) ? ' speaking' : '')} aria-live="polite">
-            <span>{roomMessage}</span>
+          <div className="pet-control-hint">
+            <span>☝️ Zemine dokun: yürü</span>
+            <span>↔️ Panda’yı sürükle</span>
           </div>
         </div>
 
@@ -1237,8 +1367,8 @@ export default function PetPage() {
           <button type="button" onClick={() => kitchenGive('su')} className="water">
             <span>💧</span><b>Su</b>
           </button>
-          <button type="button" onClick={talk}>
-            <span>💬</span><b>Konuş</b>
+          <button type="button" onClick={playGame} className="play">
+            <span>⚽</span><b>Oyna</b>
           </button>
           <button type="button" onClick={sleep}>
             <span>🌙</span><b>{activity === 'sleeping' ? 'Uyandır' : 'Uyku'}</b>
@@ -1259,8 +1389,8 @@ export default function PetPage() {
         <button type="button" onClick={studyTogether}>
           <span>📚</span><b>Birlikte çalış</b><small>Çalışma odasına geç</small>
         </button>
-        <button type="button" onClick={garden}>
-          <span>⚽</span><b>Oyun</b><small>Bahçede enerjisini atsın</small>
+        <button type="button" onClick={playGame}>
+          <span>⚽</span><b>Top oyunu</b><small>Topa dokun, Panda peşinden koşsun</small>
         </button>
         <button type="button" onClick={() => triggerReaction()}>
           <span>🎭</span><b>Sürpriz tepki</b><small>Kahkaha · utanma · hapşırma…</small>
