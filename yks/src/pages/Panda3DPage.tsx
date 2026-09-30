@@ -18,9 +18,9 @@ const ROOMS: { id: RoomId; icon: string; label: string }[] = [
 ];
 
 const ROOM_COPY: Record<RoomId, string> = {
-  living: 'Sıcak salon · birlikte dinlenme',
+  living: 'Panda salonu · dinlenme ve oyun',
   kitchen: 'Mutfak · bambu ve su zamanı',
-  study: 'Çalışma odası · beraber odak',
+  study: 'Çalışma odası · Panda yanında odak',
   bedroom: 'Yatak odası · dinlenme zamanı',
   balcony: 'Balkon · kısa nefes molası',
 };
@@ -28,7 +28,7 @@ const ROOM_COPY: Record<RoomId, string> = {
 function progressEvent(progress: number): { room: RoomId; text: string } | null {
   if (progress >= 100) return { room: 'living', text: 'Bugünkü hedef tamamlandı! Panda kutlama modunda 🎉' };
   if (progress >= 75) return { room: 'balcony', text: 'Hedefin %75’i bitti. Kısa balkon molası 🌇' };
-  if (progress >= 50) return { room: 'study', text: 'Yarıladın! Panda çalışma masasına geldi 📚' };
+  if (progress >= 50) return { room: 'study', text: 'Yarıladın! Panda çalışma köşesine geçti 📚' };
   if (progress >= 25) return { room: 'kitchen', text: 'İlk çeyrek tamam. Küçük bir enerji molası ☕' };
   return null;
 }
@@ -53,30 +53,6 @@ function PandaCharacter({ celebrating, petting }: { celebrating: boolean; pettin
       <span className="p3dv2-panda-foot left" />
       <span className="p3dv2-panda-foot right" />
       {celebrating && <span className="p3dv2-party">✦ ♡ ✨</span>}
-    </div>
-  );
-}
-
-function ZeynepCharacter() {
-  return (
-    <div className="p3dv2-zeynep" aria-label="Zeynep">
-      <span className="p3dv2-z-shadow" />
-      <div className="p3dv2-z-hair-back" />
-      <div className="p3dv2-z-head">
-        <span className="p3dv2-z-fringe" />
-        <span className="p3dv2-z-eye left" />
-        <span className="p3dv2-z-eye right" />
-        <span className="p3dv2-z-mouth" />
-        <span className="p3dv2-z-blush left" />
-        <span className="p3dv2-z-blush right" />
-      </div>
-      <span className="p3dv2-z-arm left" />
-      <span className="p3dv2-z-arm right" />
-      <div className="p3dv2-z-body"><span>♡</span></div>
-      <span className="p3dv2-z-leg left" />
-      <span className="p3dv2-z-leg right" />
-      <span className="p3dv2-z-shoe left" />
-      <span className="p3dv2-z-shoe right" />
     </div>
   );
 }
@@ -253,7 +229,7 @@ export default function Panda3DPage() {
     window.setTimeout(() => { window.location.hash = '#/odak'; }, 650);
   };
 
-  const onRelax = () => setMessage(room === 'balcony' ? 'Biraz hava almak iyi geldi 🌇♡' : 'Panda koltuğa kurulup seninle dinleniyor ☕');
+  const onRelax = () => setMessage(room === 'balcony' ? 'Panda balkonda manzarayı izliyor 🌇' : 'Panda koltuğa kurulup keyif yapıyor ☕');
   const onSleep = () => {
     setMessage('Işıklar kısıldı. Panda biraz dinleniyor 🌙');
     setPetting(false);
@@ -334,10 +310,13 @@ export default function Panda3DPage() {
             {room === 'bedroom' && <BedroomRoom onSleep={onSleep} />}
             {room === 'balcony' && <BalconyRoom onRelax={onRelax} />}
 
-            <button className="p3dv2-panda-button" type="button" onClick={petPanda} aria-label="Pandayı sev">
-              <PandaCharacter celebrating={celebrating} petting={petting} />
-            </button>
-            <div className="p3dv2-zeynep-anchor"><ZeynepCharacter /></div>
+            <div className="p3dv3-panda-zone">
+              <div className="p3dv3-panda-glow" />
+              <button className="p3dv2-panda-button" type="button" onClick={petPanda} aria-label="Pandayı sev">
+                <PandaCharacter celebrating={celebrating} petting={petting} />
+              </button>
+              <div className="p3dv3-panda-name">{state.settings.pet.name}</div>
+            </div>
           </div>
         </div>
 
