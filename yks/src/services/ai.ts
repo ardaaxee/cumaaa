@@ -51,21 +51,35 @@ export function apiBase(): string {
   return `${configured.replace(/\/+$/, '')}/api`;
 }
 
-export async function checkAiStatus(timeoutMs = 8000): Promise<AiStatus> {
+async function fetchHealth(timeoutMs: number): Promise<Response> {
   const ctrl = new AbortController();
   const timer = setTimeout(() => ctrl.abort(), timeoutMs);
   try {
-    const res = await fetch(`${apiBase()}/health`, { signal: ctrl.signal, cache: 'no-store' });
-    if (!res.ok) return { configured: false, model: null, reason: 'AI sunucusu bulunamadı.' };
-    const data = (await res.json()) as { ai?: boolean; model?: string | null };
-    return data.ai
-      ? { configured: true, model: data.model ?? null, reason: '' }
-      : { configured: false, model: null, reason: 'Sunucuda AI anahtarı tanımlı değil.' };
-  } catch {
-    return { configured: false, model: null, reason: navigator.onLine ? 'AI sunucusuna ulaşılamadı.' : 'İnternet bağlantısı yok.' };
+    return await fetch(`${apiBase()}/health`, { signal: ctrl.signal, cache: 'no-store' });
   } finally {
     clearTimeout(timer);
   }
+}
+
+export async function checkAiStatus(timeoutMs = 15_000): Promise<AiStatus> {
+  if (!navigator.onLine) return { configured: false, model: null, reason: 'İnternet bağlantısı yok.' };
+
+  let lastError: unknown = null;
+  for (const wait of [timeoutMs, 45_000]) {
+    try {
+      const res = await fetchHealth(wait);
+      if (!res.ok) return { configured: false, model: null, reason: `AI sunucusu hata verdi (HTTP ${res.status}).` };
+      const data = (await res.json()) as { ai?: boolean; model?: string | null };
+      return data.ai
+        ? { configured: true, model: data.model ?? null, reason: '' }
+        : { configured: false, model: null, reason: 'Sunucuda AI anahtarı tanımlı değil.' };
+    } catch (error) {
+      lastError = error;
+      await new Promise((resolve) => setTimeout(resolve, 1200));
+    }
+  }
+  void lastError;
+  return { configured: false, model: null, reason: 'AI sunucusu uyanamadı veya ulaşılamıyor. Tekrar dene.' };
 }
 
 export interface AskInput {
@@ -78,19 +92,34 @@ export interface AskInput {
   image?: { mediaType: string; data: string };
 }
 
+async function teacherRequest(input: AskInput, signal?: AbortSignal): Promise<Response> {
+  return fetch(`${apiBase()}/teacher`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(input),
+    signal,
+  });
+}
+
 export async function askTeacher(input: AskInput, signal?: AbortSignal): Promise<string> {
-  let res: Response;
-  try {
-    res = await fetch(`${apiBase()}/teacher`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(input),
-      signal,
-    });
-  } catch {
-    throw new Error('AI sunucusuna ulaşılamadı.');
+  let res: Response | null = null;
+  let networkError = false;
+
+  for (let attempt = 0; attempt < 2; attempt++) {
+    try {
+      res = await teacherRequest(input, signal);
+      networkError = false;
+    } catch {
+      networkError = true;
+      if (signal?.aborted || attempt === 1) break;
+    }
+
+    if (res && ![502, 503, 504].includes(res.status)) break;
+    if (attempt === 0) await new Promise((resolve) => setTimeout(resolve, 1800));
   }
+
+  if (!res) throw new Error(networkError ? 'AI sunucusuna ulaşılamadı.' : 'AI yanıtı alınamadı.');
   const data = (await res.json().catch(() => ({}))) as { text?: string; error?: string };
-  if (!res.ok || !data.text) throw new Error(data.error || 'AI yanıtı alınamadı.');
+  if (!res.ok || !data.text) throw new Error(data.error || `AI yanıtı alınamadı (HTTP ${res.status}).`);
   return data.text;
 }
