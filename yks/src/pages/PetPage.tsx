@@ -1132,6 +1132,80 @@ export default function PetPage() {
   ];
   const questDone = quests.filter((q) => q.done).length;
 
+  const dailyStudyProgress = Math.min(
+    100,
+    Math.round(
+      (((state.profile.dailyQuestionGoal > 0 ? Math.min(1, d.todayQuestions / state.profile.dailyQuestionGoal) : 1) +
+        (state.profile.dailyStudyMinutes > 0 ? Math.min(1, d.todayMinutes / state.profile.dailyStudyMinutes) : 1)) /
+        2) *
+        100,
+    ),
+  );
+
+  useEffect(() => {
+    if (activity !== 'idle' || zeynepActivity !== 'idle') return;
+    const threshold = dailyStudyProgress >= 75 ? 75 : dailyStudyProgress >= 50 ? 50 : dailyStudyProgress >= 25 ? 25 : 0;
+    if (!threshold) return;
+    const key = `iyiki-panda-progress-${today}-${threshold}`;
+    try {
+      if (window.localStorage.getItem(key) === '1') return;
+      window.localStorage.setItem(key, '1');
+    } catch {
+      /* kalıcı işaret tutulamazsa olay yine gösterilebilir */
+    }
+
+    clearTimers();
+    clearZeynepTimers();
+    setHearts((v) => v + 1);
+    setHappiness((v) => clampLife(v + 5));
+
+    if (threshold === 25) {
+      setRoom('kitchen');
+      setZeynepRoom('kitchen');
+      setPetPos({ x: 46, y: 2 });
+      setZeynepPos({ x: 72, y: 8 });
+      setActivity('greeting');
+      setZeynepActivity('cooking');
+      setSceneMessage('Günün ilk çeyreği tamam! Zeynep küçük bir çalışma molası hazırlıyor ☕♡');
+      setZeynepMessage('Zeynep: Güzel başladık, biraz enerji toplayalım ☕');
+      void playPandaVoice('Güzel başladık!', 'happy', voiceOn);
+    } else if (threshold === 50) {
+      setRoom('study');
+      setZeynepRoom('study');
+      setPetPos({ x: 48, y: 2 });
+      setZeynepPos({ x: 67, y: 8 });
+      setActivity('studying');
+      setZeynepActivity('studying');
+      setSceneMessage('Günün yarısı tamamlandı! ' + pet.name + ' çalışma masasında sana eşlik ediyor 📚🐼');
+      setZeynepMessage('Zeynep: Yarıladık. Birlikte devam ediyoruz 💪');
+      void playPandaVoice('Yarıladık, devam!', 'happy', voiceOn);
+    } else {
+      setRoom('balcony');
+      setZeynepRoom('balcony');
+      setPetPos({ x: 45, y: 2 });
+      setZeynepPos({ x: 68, y: 8 });
+      setActivity('relaxing');
+      setZeynepActivity('relaxing');
+      setSceneMessage('Hedefin %75’i bitti. Zeynep ile ' + pet.name + ' balkonda kısa bir nefes molasında 🌇♡');
+      setZeynepMessage('Zeynep: Son bölüm kaldı, sonra tamamız ♡');
+      void playPandaVoice('Az kaldı!', 'happy', voiceOn);
+    }
+
+    zLater(() => {
+      setActivity('idle');
+      setZeynepActivity('idle');
+      setSceneMessage(null);
+      setZeynepMessage(null);
+    }, 4600);
+  }, [
+    activity,
+    zeynepActivity,
+    dailyStudyProgress,
+    today,
+    pet.name,
+    voiceOn,
+  ]);
+
   useEffect(() => {
     if (activity !== 'idle' || zeynepActivity !== 'idle') return;
     const key = 'iyiki-panda-surprise-' + today;
