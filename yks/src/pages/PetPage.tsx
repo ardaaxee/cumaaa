@@ -76,7 +76,7 @@ const PANDA_TALK: Record<HouseRoom, string[]> = {
   ],
   kitchen: [
     'Mutfakta güzel bir şeyler var mı? Biraz acıkmış olabilirim.',
-    'Zeynep gelirse beraber yemek yiyelim.',
+    'Bambu verirsen beraber küçük bir yemek molası yapalım.',
     'Su içmeyi unutma, ben de unutmamaya çalışıyorum.',
   ],
   bedroom: [
@@ -342,7 +342,7 @@ const XP_RULES = [
 
 function activityText(activity: HouseActivity, room: HouseRoom, name: string): string {
   if (activity === 'walking') return name + ' ' + ROOM_INFO[room].label.toLowerCase() + ' tarafına gidiyor…';
-  if (activity === 'waiting') return name + ' Zeynep’in yemeği hazırlamasını bekliyor.';
+  if (activity === 'waiting') return name + ' mutfakta yemeğini bekliyor.';
   if (activity === 'eating') return name + ' afiyetle yemeğini yiyor.';
   if (activity === 'drinking') return name + ' suyunu içiyor.';
   if (activity === 'sleeping') return name + ' uyuyor. Tatlı rüyalar 🌙';
@@ -689,13 +689,13 @@ export default function PetPage() {
       target = 'bedroom';
       pandaNext = 'sleeping';
       zeynepNext = 'sleeping';
-      message = 'Evde gece rutini başladı. Zeynep ve ' + pet.name + ' dinlenmeye geçiyor 🌙';
+      message = 'Evde gece rutini başladı. ' + pet.name + ' yatağına geçiyor 🌙';
     } else if (preferredHour != null && hour === preferredHour) {
       key = 'preferred-study-' + preferredHour;
       target = 'study';
       pandaNext = 'studying';
       zeynepNext = 'studying';
-      message = 'Zeynep’in seçtiği çalışma saati geldi. ' + pet.name + ' da çalışma odasına geliyor 📚♡';
+      message = 'Çalışma saati geldi. ' + pet.name + ' çalışma odasına geçiyor 📚♡';
     } else if (hour >= 7 && hour < 9) {
       key = 'breakfast';
       target = 'kitchen';
@@ -707,7 +707,7 @@ export default function PetPage() {
       target = 'study';
       pandaNext = 'studying';
       zeynepNext = 'studying';
-      message = 'Sabah çalışma zamanı. Zeynep ile ' + pet.name + ' çalışma odasına geçti 📚';
+      message = 'Sabah çalışma zamanı. ' + pet.name + ' çalışma odasına geçti 📚';
     } else if (hour >= 18 && hour < 20) {
       key = 'dinner';
       target = 'kitchen';
@@ -719,7 +719,7 @@ export default function PetPage() {
       target = 'balcony';
       pandaNext = 'relaxing';
       zeynepNext = 'relaxing';
-      message = 'Günün sonunda Zeynep ile ' + pet.name + ' balkonda biraz dinleniyor 🌇♡';
+      message = 'Günün sonunda ' + pet.name + ' balkonda biraz dinleniyor 🌇♡';
     }
 
     if (!key || !target) return;
@@ -941,12 +941,12 @@ export default function PetPage() {
     setZeynepRoom('kitchen');
     setZeynepPos({ x: 78, y: 8 });
     setZeynepActivity('walking');
-    setSceneMessage('Zeynep mutfağa geliyor. ' + pet.name + ' masaya geçiyor…');
+    setSceneMessage(pet.name + ' mutfağa koşuyor…');
 
     later(() => {
       setActivity('waiting');
       setZeynepActivity('cooking');
-      setSceneMessage(kind === 'bambu' ? 'Zeynep yemeği hazırlıyor 🍳' : 'Zeynep suyu hazırlıyor 💧');
+      setSceneMessage(kind === 'bambu' ? pet.name + ' bambusunu bekliyor 🎋' : pet.name + ' su kabını bekliyor 💧');
     }, 900);
 
     later(() => {
@@ -954,7 +954,7 @@ export default function PetPage() {
       setHolding(kind);
       setActivity(kind === 'bambu' ? 'eating' : 'drinking');
       setZeynepActivity('serving');
-      const line = kind === 'bambu' ? 'Yemek hazır. Afiyet olsun ♡' : 'Suyu hazır. Ohh, ferahladı ♡';
+      const line = kind === 'bambu' ? 'Bambu hazır. Afiyet olsun 🎋' : 'Su hazır. Ohh, ferahladı 💧';
       speak(line, kind === 'bambu' ? 'eat' : 'drink');
       setHappiness((v) => Math.min(100, v + 5));
     }, 2200);
@@ -1166,7 +1166,7 @@ export default function PetPage() {
       setZeynepPos({ x: 72, y: 8 });
       setActivity('greeting');
       setZeynepActivity('cooking');
-      setSceneMessage('Günün ilk çeyreği tamam! Zeynep küçük bir çalışma molası hazırlıyor ☕♡');
+      setSceneMessage('Günün ilk çeyreği tamam! ' + pet.name + ' mutfakta küçük bir mola veriyor ☕♡');
       setZeynepMessage('Zeynep: Güzel başladık, biraz enerji toplayalım ☕');
       void playPandaVoice('Güzel başladık!', 'happy', voiceOn);
     } else if (threshold === 50) {
@@ -1186,7 +1186,7 @@ export default function PetPage() {
       setZeynepPos({ x: 68, y: 8 });
       setActivity('relaxing');
       setZeynepActivity('relaxing');
-      setSceneMessage('Hedefin %75’i bitti. Zeynep ile ' + pet.name + ' balkonda kısa bir nefes molasında 🌇♡');
+      setSceneMessage('Hedefin %75’i bitti. ' + pet.name + ' balkonda kısa bir nefes molasında 🌇♡');
       setZeynepMessage('Zeynep: Son bölüm kaldı, sonra tamamız ♡');
       void playPandaVoice('Az kaldı!', 'happy', voiceOn);
     }
@@ -1217,9 +1217,9 @@ export default function PetPage() {
 
     let line: string | null = null;
     if (d.todayQuestions >= state.profile.dailyQuestionGoal && state.profile.dailyQuestionGoal > 0) {
-      line = `${state.profile.name || 'Zeynep'}, bugün soru hedefini tamamladın! ${pet.name} ile küçük bir kutlama yapıyoruz 🎉♡`;
+      line = `${state.profile.name || 'Sen'}, bugün soru hedefini tamamladın! ${pet.name} küçük bir kutlama yapıyor 🎉♡`;
     } else if (d.todayMinutes >= state.profile.dailyStudyMinutes && state.profile.dailyStudyMinutes > 0) {
-      line = `${state.profile.name || 'Zeynep'}, bugünkü çalışma süresi hedefin tamam! Biraz dinlenmeyi hak ettin ☕♡`;
+      line = `${state.profile.name || 'Sen'}, bugünkü çalışma süresi hedefin tamam! Biraz dinlenmeyi hak ettin ☕♡`;
     } else if (d.streak >= 7) {
       line = `${d.streak} günlük serin var! ${pet.name} bile seninle gurur duyuyor 🐼🏆`;
     } else if (doneTasks >= 3) {
@@ -1290,7 +1290,7 @@ export default function PetPage() {
             <span>{ROOM_INFO[room].icon}</span>
             <div>
               <b>{ROOM_INFO[room].label}</b>
-              <small>{pet.name} · meraklı · sevecen · biraz yaramaz</small>
+              <small>{pet.name} · Sv. {p.level} · {activityText(activity, room, pet.name)}</small>
             </div>
           </div>
           <button
@@ -1313,13 +1313,15 @@ export default function PetPage() {
           <NeedBubble icon="⚡" label="Enerji" value={energy} />
           <NeedBubble icon="♡" label="Mutluluk" value={happiness} />
         </div>
-        <div className="pet-zeynep-status" aria-live="polite">
-          <span>👩🏻 Zeynep</span>
-          <b>{ROOM_INFO[zeynepRoom].icon} {ROOM_INFO[zeynepRoom].label}</b>
-          <small>{zeynepActivityText(zeynepActivity, zeynepRoom)}</small>
-        </div>
-
         <div className={'pet-stage scene-' + room + ' activity-' + activity}>
+          <div className="pet-stage-room-badge">
+            <span>{ROOM_INFO[room].icon}</span>
+            <div><b>{ROOM_INFO[room].label}</b><small>{ROOM_INFO[room].desc}</small></div>
+          </div>
+          <div className="pet-stage-study-progress" aria-label={'Günlük çalışma ilerlemesi yüzde ' + dailyStudyProgress}>
+            <span style={{ width: dailyStudyProgress + '%' }} />
+            <b>%{dailyStudyProgress}</b>
+          </div>
           <RoomBackdrop
             room={room}
             onFood={() => kitchenGive('bambu')}
@@ -1346,7 +1348,7 @@ export default function PetPage() {
             aria-label={pet.name + ' pandayı sev'}
           >
             <RealisticPanda
-              size={250}
+              size={292}
               sleepy={activity === 'sleeping'}
               sad={!holding && sad}
               eating={activity === 'eating'}
@@ -1362,40 +1364,6 @@ export default function PetPage() {
             {activity === 'sleeping' && <span className="pet-game-sleep">Z z z</span>}
           </button>
 
-          {room === zeynepRoom && (
-            <button
-              type="button"
-              className={'pet-game-zeynep z-' + zeynepActivity}
-              style={{ '--z-x': zeynepPos.x + '%', '--z-y': zeynepPos.y + '%' } as CSSProperties}
-              onClick={() => {
-                clearZeynepTimers();
-                setZeynepActivity('talking');
-                setZeynepMessage('Zeynep: Ben de buradayım. Biraz kendi halimde takılıyorum ♡');
-                zLater(() => {
-                  setZeynepActivity('idle');
-                  setZeynepMessage(null);
-                }, 3000);
-              }}
-              aria-label={'Zeynep · ' + zeynepActivityText(zeynepActivity, zeynepRoom)}
-            >
-              <div className="pet-zeynep-avatar">👩🏻</div>
-              <b>Zeynep</b>
-              <span>
-                {zeynepActivity === 'cooking' ? '🍳'
-                  : zeynepActivity === 'serving' ? '🍽️'
-                  : zeynepActivity === 'studying' ? '📚'
-                  : zeynepActivity === 'gardening' ? '🌿'
-                  : zeynepActivity === 'cleaning' ? '✨'
-                  : zeynepActivity === 'relaxing' ? '☕'
-                  : zeynepActivity === 'sleeping' ? '🌙'
-                  : zeynepActivity === 'petting' ? '♡'
-                  : zeynepActivity === 'talking' ? '💬'
-                  : zeynepActivity === 'walking' ? '→'
-                  : '•'}
-              </span>
-              {zeynepMessage && <small className="pet-zeynep-bubble">{zeynepMessage}</small>}
-            </button>
-          )}
 
           <div className={'pet-game-talk' + (['talking','greeting','laughing','angry','shy','yawning','sneezing','surprised'].includes(activity) ? ' speaking' : '')} aria-live="polite">
             <span>{roomMessage}</span>
@@ -1412,20 +1380,20 @@ export default function PetPage() {
         </nav>
 
         <div className="pet-game-actions" aria-label="Panda eylemleri">
+          <button type="button" onClick={petPanda} className="love">
+            <span>♡</span><b>Sev</b>
+          </button>
           <button type="button" onClick={() => kitchenGive('bambu')} className="feed">
-            <span>🍽️</span><b>Yemek</b>
+            <span>🎋</span><b>Besle</b>
           </button>
-          <button type="button" onClick={bath}>
-            <span>🛁</span><b>Banyo</b>
-          </button>
-          <button type="button" onClick={sleep}>
-            <span>🛏️</span><b>{activity === 'sleeping' ? 'Uyandır' : 'Uyku'}</b>
-          </button>
-          <button type="button" onClick={garden}>
-            <span>⚽</span><b>Oyun</b>
+          <button type="button" onClick={() => kitchenGive('su')} className="water">
+            <span>💧</span><b>Su</b>
           </button>
           <button type="button" onClick={talk}>
             <span>💬</span><b>Konuş</b>
+          </button>
+          <button type="button" onClick={sleep}>
+            <span>🌙</span><b>{activity === 'sleeping' ? 'Uyandır' : 'Uyku'}</b>
           </button>
         </div>
       </section>
@@ -1437,14 +1405,14 @@ export default function PetPage() {
         <button type="button" onClick={() => greet()}>
           <span>👋</span><b>Selam ver</b><small>Sana dönüp tepki versin</small>
         </button>
-        <button type="button" onClick={() => kitchenGive('su')}>
-          <span>💧</span><b>Su ver</b><small>{needs.drops} damla</small>
+        <button type="button" onClick={bath}>
+          <span>🫧</span><b>Banyo</b><small>Temizliği yenile</small>
         </button>
         <button type="button" onClick={studyTogether}>
           <span>📚</span><b>Birlikte çalış</b><small>Çalışma odasına geç</small>
         </button>
-        <button type="button" onClick={relax}>
-          <span>🛋️</span><b>Mola ver</b><small>Salonda dinlensin</small>
+        <button type="button" onClick={garden}>
+          <span>⚽</span><b>Oyun</b><small>Bahçede enerjisini atsın</small>
         </button>
         <button type="button" onClick={() => triggerReaction()}>
           <span>🎭</span><b>Sürpriz tepki</b><small>Kahkaha · utanma · hapşırma…</small>
