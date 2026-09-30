@@ -1,3 +1,4 @@
+import { PandaMoments } from '../components/PandaMoments';
 import { useEffect, useMemo, useRef, useState, type CSSProperties, type PointerEvent as ReactPointerEvent } from 'react';
 import { PandaCareSession, type CareSession } from '../components/PandaCareSession';
 import { RealisticPanda } from '../components/RealisticPanda';
@@ -1360,6 +1361,14 @@ export default function PetPage() {
         </div>
       </section>
 
+      <PandaMoments onMoment={(kind, message) => {
+        beginAction();
+        setActivity(kind === 'rest' ? 'relaxing' : kind === 'flower' ? 'shy' : 'greeting');
+        setEmotion(kind === 'flower' ? 'shy' : 'neutral');
+        if (kind !== 'rest') setHearts(value => value + 1);
+        setSceneMessage(message);
+        later(() => { setActivity('idle'); setEmotion('neutral'); setSceneMessage(null); }, 6500);
+      }} />
       <section className="panda-study-card" aria-label="Bugünkü çalışma">
         <div><span className="panda-study-label">BİRLİKTE İLERLEYELİM</span>
           <h2>Bir mola, sonra küçük bir adım.</h2>

@@ -41,7 +41,7 @@ export interface Settings {
   /** Bulut eşitleme (Firebase Firestore). Boş alanlar = kapalı. */
   cloud: CloudSettings;
   /** Panda arkadaşın adı, taktığı aksesuarlar ve yemek/su durumu. */
-  pet: { name: string; items: string[]; care?: PetCare };
+  pet: { name: string; items: string[]; care?: PetCare; memories?: import('../utils/pandaMoments').PandaMemory[] };
   /** Asistan karakterinin sayfalarda dolaşması. */
   companion: boolean;
 }

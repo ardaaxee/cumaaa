@@ -150,3 +150,21 @@
 .panda-home-v7 .panda-daily-quests { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:8px; grid-column:1/-1; width:100%; }
 .panda-daily-quests a { display:flex; flex-wrap:wrap; gap:8px; justify-content:space-between; padding:12px; border:1px solid #ffffff30; border-radius:12px; color:inherit; text-decoration:none; }
 @media(max-width:600px) { .panda-home-v7 .panda-daily-quests { grid-template-columns:1fr; } }
+
+.panda-moments { margin-block:20px; padding:24px; }
+.panda-moments-heading { display:flex; gap:14px; align-items:center; }
+.panda-moments-heading > span { display:grid; place-items:center; width:48px; height:48px; border-radius:16px; background:var(--surface-2); font-size:30px; color:var(--brand); }
+.panda-moments-heading small { font-size:11px; letter-spacing:.08em; color:var(--muted); }
+.panda-moments h2 { margin:4px 0; font-size:1.25rem; }
+.panda-moments p { line-height:1.6; }
+.panda-moment-actions { display:flex; flex-wrap:wrap; gap:10px; }
+.panda-moment-actions .btn { min-height:44px; }
+.panda-letter-button { width:100%; margin:18px 0 0; padding:16px; border:1px solid var(--line); border-radius:12px; background:var(--surface-2); color:var(--text); text-align:left; font:inherit; cursor:pointer; }
+.panda-letter { padding:20px; margin-top:10px; border:1px solid var(--line); border-radius:12px; background:var(--surface); }
+.panda-letter span { display:block; text-align:right; color:var(--muted); }
+.panda-memory-list { display:grid; gap:12px; margin-top:12px; }
+.panda-memory-list article { padding:12px; border:1px solid var(--line); border-radius:10px; }
+.panda-memory-list small { display:block; margin-top:4px; color:var(--muted); }
+.panda-memory-list p { white-space:pre-wrap; overflow-wrap:anywhere; }
+.panda-moments textarea { width:100%; resize:vertical; min-height:90px; }
+@media(max-width:560px) { .panda-moments { padding:18px; } .panda-moment-actions .btn { flex:1 1 120px; } }

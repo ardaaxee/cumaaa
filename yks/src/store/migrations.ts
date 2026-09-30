@@ -1,3 +1,4 @@
+import { sanitizePandaMemories } from '../utils/pandaMoments';
 import type { SubjectId } from '../domain/types';
 import { dayKey, isValidDayKey } from '../utils/date';
 import { uid } from '../utils/ids';
@@ -281,6 +282,7 @@ export function sanitize(raw: Json): AppState {
         name: str(petRaw.name).trim().slice(0, 20) || 'Bambu',
         items: arr(petRaw.items).filter((x): x is string => typeof x === 'string').slice(0, 12),
         care: sanitizeCare(petRaw.care),
+        memories: sanitizePandaMemories(petRaw.memories),
       },
       companion: settings.companion !== false,
       aiServerUrl: /^https:\/\/[^\s]+$/.test(str(settings.aiServerUrl)) ? str(settings.aiServerUrl).slice(0, 200) : '',
