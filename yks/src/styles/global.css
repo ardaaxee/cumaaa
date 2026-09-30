@@ -9986,3 +9986,45 @@ textarea:focus-visible {
 @media (prefers-reduced-motion:reduce) {
   .live-reaction-pop { animation:none !important; }
 }
+
+
+/* ===== SMART START v1 ===== */
+.home-smart-start {
+  margin-top:14px;
+  display:grid;
+  grid-template-columns:minmax(0,1fr) auto;
+  align-items:center;
+  gap:12px;
+  padding:11px 12px;
+  border:1px solid color-mix(in srgb,var(--brand) 22%,var(--line));
+  border-radius:18px;
+  background:color-mix(in srgb,var(--brand) 5%,var(--surface));
+}
+.home-smart-start-copy {
+  min-width:0;
+  display:grid;
+  gap:2px;
+}
+.home-smart-start-copy b {
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+  font-size:.87rem;
+}
+.home-smart-start-copy small {
+  color:var(--muted);
+  font-size:.67rem;
+  line-height:1.35;
+}
+.home-smart-start .study-cta {
+  min-height:44px;
+  white-space:nowrap;
+}
+@media (max-width:560px) {
+  .home-smart-start {
+    grid-template-columns:1fr;
+    align-items:stretch;
+  }
+  .home-smart-start-copy b { white-space:normal; }
+  .home-smart-start .study-cta { width:100%; }
+}
