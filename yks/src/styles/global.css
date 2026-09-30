@@ -13182,3 +13182,571 @@ textarea:focus-visible {
   0%,100% { transform:translate(0,0) scale(.9); opacity:.45; }
   50% { transform:translate(8px,-10px) scale(1.04); opacity:1; }
 }
+
+
+/* ===== PANDA 2D HOME V4 ===== */
+.pet-game-page {
+  background:
+    radial-gradient(circle at 50% 0,rgba(158,121,219,.12),transparent 28%),
+    #17131e;
+}
+.pet-game {
+  overflow:hidden;
+  background:#17131e;
+  color:#f4eef8;
+}
+.pet-game-top {
+  min-height:66px;
+  padding:11px 12px 9px;
+  background:
+    radial-gradient(circle at 50% -20%,rgba(188,148,255,.19),transparent 48%),
+    linear-gradient(180deg,#2b2035,#211827);
+  border-bottom:1px solid rgba(255,255,255,.07);
+  box-shadow:0 9px 24px rgba(8,5,12,.20);
+}
+.pet-game-iconbtn {
+  border-color:rgba(255,255,255,.14);
+  background:linear-gradient(145deg,rgba(255,255,255,.12),rgba(255,255,255,.055));
+  box-shadow:inset 0 1px rgba(255,255,255,.09),0 8px 18px rgba(0,0,0,.16);
+}
+.pet-game-room-title > span {
+  width:36px;
+  height:36px;
+  display:grid;
+  place-items:center;
+  border-radius:12px;
+  background:rgba(255,255,255,.075);
+  font-size:1.15rem;
+}
+.pet-game-room-title b { font-size:.94rem; }
+.pet-game-room-title small {
+  max-width:min(48vw,360px);
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+  color:rgba(255,255,255,.62);
+}
+
+.pet-game-needs {
+  z-index:32;
+  gap:7px;
+  padding:7px 8px;
+  background:linear-gradient(180deg,#211927,#1b151f);
+  border-bottom:1px solid rgba(255,255,255,.055);
+  box-shadow:0 9px 20px rgba(0,0,0,.13);
+}
+.pet-need-bubble {
+  width:clamp(44px,10.4vw,54px);
+  border:1px solid rgba(255,255,255,.055);
+  background:
+    radial-gradient(circle at center,#2a2232 0 57%,transparent 58%),
+    conic-gradient(#b491ee var(--need),rgba(255,255,255,.11) 0);
+  box-shadow:
+    inset 0 0 0 2px rgba(255,255,255,.025),
+    0 5px 12px rgba(0,0,0,.13);
+}
+.pet-need-bubble.low {
+  background:
+    radial-gradient(circle at center,#30212b 0 57%,transparent 58%),
+    conic-gradient(#f07f94 var(--need),rgba(255,255,255,.11) 0);
+  animation:pet-v4-need-low 1.8s ease-in-out infinite;
+}
+.pet-need-bubble span { font-size:1rem; }
+.pet-need-bubble b { font-size:.59rem; color:#efe8f5; }
+@keyframes pet-v4-need-low {
+  50% { transform:translateY(-2px); box-shadow:0 0 0 4px rgba(239,126,148,.08),0 5px 12px rgba(0,0,0,.13); }
+}
+
+/* Main room scene */
+.pet-stage {
+  min-height:clamp(500px,61svh,660px);
+  max-height:none;
+  perspective:1000px;
+  background:#d9c4b1;
+  animation:pet-v4-room-in .42s cubic-bezier(.2,.82,.25,1);
+}
+.pet-stage::after {
+  background:
+    linear-gradient(180deg,rgba(18,17,35,.38),rgba(11,12,26,.32)),
+    radial-gradient(circle at 50% 32%,transparent,rgba(7,6,13,.16) 86%);
+}
+.pet-game.night .pet-stage::after { opacity:.92; }
+@keyframes pet-v4-room-in {
+  from { opacity:.45; filter:saturate(.72); }
+  to { opacity:1; filter:saturate(1); }
+}
+
+.pet-room-wall {
+  inset:0 0 31%;
+  box-shadow:inset 0 -1px rgba(87,62,55,.09);
+}
+.pet-room-wall::before {
+  content:'';
+  position:absolute;
+  inset:0;
+  pointer-events:none;
+  background:linear-gradient(125deg,rgba(255,255,255,.18),transparent 38%,rgba(68,44,58,.035));
+  z-index:20;
+}
+.pet-room-wall::after {
+  left:-8%;
+  right:-8%;
+  bottom:-31%;
+  height:44%;
+  transform:perspective(500px) rotateX(61deg);
+  box-shadow:0 -3px rgba(70,45,40,.10);
+}
+
+/* richer room palettes */
+.living-wall {
+  background:
+    linear-gradient(90deg,transparent 0 72%,rgba(255,255,255,.13) 72% 73%,transparent 73%),
+    linear-gradient(180deg,#f1e7e0 0%,#e2d4cc 70%,#d4c3ba 100%);
+}
+.living-wall::after {
+  background:
+    linear-gradient(180deg,rgba(255,255,255,.11),transparent 20%),
+    repeating-linear-gradient(90deg,#c79e79 0 62px,#be916b 62px 65px);
+}
+.kitchen-wall {
+  background:
+    linear-gradient(90deg,rgba(255,255,255,.22) 1px,transparent 1px),
+    linear-gradient(180deg,#f0f0e9 0 62%,#d9d6cb 62%);
+  background-size:72px 100%,100% 100%;
+}
+.kitchen-wall::after {
+  background:repeating-linear-gradient(90deg,#ccb08f 0 70px,#c3a382 70px 73px);
+}
+.bedroom-wall {
+  background:
+    radial-gradient(circle at 70% 20%,rgba(255,255,255,.25),transparent 25%),
+    linear-gradient(180deg,#eadde8 0 68%,#d8c7d3 68%);
+}
+.bedroom-wall::after {
+  background:repeating-linear-gradient(90deg,#c19b82 0 60px,#b88f76 60px 63px);
+}
+.bathroom-wall {
+  background:
+    linear-gradient(90deg,rgba(255,255,255,.34) 1px,transparent 1px),
+    linear-gradient(rgba(255,255,255,.34) 1px,transparent 1px),
+    linear-gradient(180deg,#cde4e4,#b8d4d5);
+  background-size:42px 42px,42px 42px,100% 100%;
+}
+.study-wall {
+  background:
+    radial-gradient(circle at 48% 14%,rgba(255,255,255,.28),transparent 29%),
+    linear-gradient(180deg,#e6eaf4 0 68%,#d3d8e4 68%);
+}
+.study-wall::after {
+  background:repeating-linear-gradient(90deg,#b79375 0 58px,#ad876a 58px 61px);
+}
+.garden-wall {
+  background:
+    radial-gradient(circle at 77% 16%,rgba(255,233,139,.38),transparent 12%),
+    linear-gradient(180deg,#95d2ef 0 57%,#8dc775 57% 68%,#70ad5c 68% 100%);
+}
+
+/* new scene badges */
+.pet-stage-room-badge {
+  position:absolute;
+  z-index:23;
+  left:12px;
+  top:12px;
+  max-width:min(230px,54%);
+  display:flex;
+  align-items:center;
+  gap:8px;
+  padding:7px 9px;
+  border:1px solid rgba(255,255,255,.56);
+  border-radius:15px;
+  background:rgba(255,255,255,.76);
+  color:#473b49;
+  box-shadow:0 9px 22px rgba(54,39,58,.10);
+  backdrop-filter:blur(12px);
+  -webkit-backdrop-filter:blur(12px);
+}
+.pet-stage-room-badge > span {
+  width:31px;
+  height:31px;
+  display:grid;
+  place-items:center;
+  border-radius:10px;
+  background:rgba(116,82,147,.08);
+  font-size:1rem;
+}
+.pet-stage-room-badge > div {
+  min-width:0;
+  display:grid;
+  gap:1px;
+}
+.pet-stage-room-badge b {
+  font-size:.65rem;
+  color:#413546;
+}
+.pet-stage-room-badge small {
+  overflow:hidden;
+  color:#776c7b;
+  font-size:.52rem;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+}
+.pet-stage-study-progress {
+  position:absolute;
+  z-index:23;
+  right:12px;
+  top:16px;
+  width:98px;
+  height:26px;
+  overflow:hidden;
+  border:1px solid rgba(255,255,255,.54);
+  border-radius:999px;
+  background:rgba(255,255,255,.68);
+  box-shadow:0 8px 18px rgba(54,39,58,.09);
+  backdrop-filter:blur(10px);
+}
+.pet-stage-study-progress > span {
+  position:absolute;
+  inset:0 auto 0 0;
+  border-radius:inherit;
+  background:linear-gradient(90deg,#a986e6,#c9a5ef);
+  opacity:.64;
+  transition:width .65s cubic-bezier(.2,.8,.2,1);
+}
+.pet-stage-study-progress b {
+  position:absolute;
+  inset:0;
+  display:grid;
+  place-items:center;
+  color:#423449;
+  font-size:.55rem;
+  font-variant-numeric:tabular-nums;
+}
+
+/* Make Panda the clear protagonist */
+.pet-stage-panda {
+  z-index:18;
+  width:310px;
+  height:330px;
+  bottom:1.5%;
+  filter:drop-shadow(0 22px 18px rgba(44,32,46,.19));
+  transition:
+    left 1.05s cubic-bezier(.22,.72,.25,1),
+    bottom .6s cubic-bezier(.22,.72,.25,1),
+    transform .25s ease;
+}
+.pet-stage-panda > .real-panda {
+  width:292px;
+  height:auto;
+  max-width:none;
+}
+.pet-stage-panda .pet-floor-shadow {
+  bottom:12px;
+  width:63%;
+  height:10%;
+  background:rgba(46,34,43,.17);
+  filter:blur(7px);
+}
+.pet-stage-panda:active {
+  filter:drop-shadow(0 16px 13px rgba(44,32,46,.18));
+}
+.pet-stage-panda.act-idle .real-panda {
+  animation:pet-v4-panda-idle 3.1s ease-in-out infinite;
+  transform-origin:50% 100%;
+}
+@keyframes pet-v4-panda-idle {
+  0%,100% { transform:translateY(0) rotate(0); }
+  50% { transform:translateY(-4px) rotate(.7deg); }
+}
+.pet-stage-panda.act-walking {
+  animation:pet-v4-walk .34s ease-in-out infinite alternate;
+}
+@keyframes pet-v4-walk {
+  from { transform:translateX(-50%) rotate(-3.4deg) translateY(0); }
+  to { transform:translateX(-50%) rotate(3.4deg) translateY(-8px); }
+}
+.pet-stage-panda.act-relaxing .real-panda {
+  animation:pet-v4-relax 2.7s ease-in-out infinite;
+}
+@keyframes pet-v4-relax {
+  50% { transform:translateY(3px) scale(.985); }
+}
+.pet-stage-panda.act-studying .real-panda {
+  animation:pet-v4-study 1.35s ease-in-out infinite;
+}
+@keyframes pet-v4-study {
+  0%,100% { transform:rotate(-1deg); }
+  50% { transform:rotate(1deg) translateY(-2px); }
+}
+.pet-stage-panda.act-bathing .real-panda { filter:drop-shadow(0 10px 12px rgba(45,61,65,.16)); }
+
+/* richer object treatment */
+.scene-sofa,
+.scene-table,
+.scene-bed,
+.scene-study-desk,
+.scene-bathtub,
+.scene-garden-bench {
+  transition:transform .16s ease,filter .16s ease;
+}
+.scene-sofa:active,
+.scene-table:active,
+.scene-bed:active,
+.scene-study-desk:active,
+.scene-bathtub:active,
+.scene-garden-ball:active {
+  transform:scale(.97);
+  filter:brightness(1.03);
+}
+.scene-window {
+  border-radius:12px;
+  box-shadow:0 10px 28px rgba(56,59,76,.10),inset 0 0 0 1px rgba(255,255,255,.42);
+}
+.scene-tv {
+  border-width:7px;
+  background:
+    radial-gradient(circle at 50% 35%,rgba(179,217,228,.30),transparent 35%),
+    linear-gradient(145deg,#455f70,#86aebb);
+  box-shadow:0 12px 26px rgba(39,35,46,.17),0 0 22px rgba(114,166,188,.08);
+}
+.scene-frame { border-radius:7px; }
+.scene-sofa {
+  box-shadow:inset 0 -20px 0 rgba(61,46,84,.11),0 18px 32px rgba(52,41,62,.18);
+}
+.scene-rug { opacity:.94; }
+.scene-lamp::before { box-shadow:0 0 24px rgba(250,199,137,.27); }
+.scene-food-bowl { filter:drop-shadow(0 7px 8px rgba(60,43,30,.12)); }
+.scene-bedroom-window {
+  border-radius:11px;
+  box-shadow:0 10px 26px rgba(56,51,80,.13),0 0 25px rgba(255,223,157,.06);
+}
+.scene-bed { box-shadow:0 18px 28px rgba(62,44,58,.16); }
+.scene-bathtub { box-shadow:0 18px 30px rgba(48,83,86,.15); }
+.scene-study-desk { box-shadow:0 18px 30px rgba(56,40,31,.18); }
+.scene-laptop {
+  box-shadow:0 0 24px rgba(113,91,208,.17),0 8px 14px rgba(34,27,45,.14);
+}
+.scene-garden-ball { filter:drop-shadow(0 8px 7px rgba(48,62,34,.15)); }
+
+/* dialogue is now a game speech card */
+.pet-game-talk {
+  z-index:25;
+  top:auto;
+  bottom:16px;
+  width:min(82%,480px);
+  min-height:48px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:9px 14px;
+  border:1px solid rgba(255,255,255,.62);
+  border-radius:18px;
+  background:rgba(255,255,255,.82);
+  color:#443849;
+  box-shadow:0 12px 30px rgba(50,37,55,.15);
+  backdrop-filter:blur(15px) saturate(1.06);
+  -webkit-backdrop-filter:blur(15px) saturate(1.06);
+  font-size:.69rem;
+  font-weight:760;
+  line-height:1.38;
+}
+.pet-game-talk::before {
+  content:'🐼';
+  flex:0 0 auto;
+  width:30px;
+  height:30px;
+  display:grid;
+  place-items:center;
+  margin-right:8px;
+  border-radius:10px;
+  background:rgba(104,72,135,.08);
+  font-size:1rem;
+}
+.pet-game-talk.speaking {
+  border-color:rgba(172,131,223,.45);
+  animation:pet-v4-talk-card .4s ease both;
+}
+@keyframes pet-v4-talk-card {
+  from { transform:translateX(-50%) translateY(8px); opacity:.2; }
+  to { transform:translateX(-50%) translateY(0); opacity:1; }
+}
+
+/* quieter room arrows */
+.pet-scene-arrow {
+  top:53%;
+  width:36px;
+  height:52px;
+  border-color:rgba(255,255,255,.4);
+  background:rgba(32,25,38,.18);
+  font-size:2rem;
+  opacity:.72;
+}
+.pet-scene-arrow:active { opacity:1; background:rgba(32,25,38,.35); }
+.pet-scene-arrow.prev { left:6px; border-radius:0 15px 15px 0; }
+.pet-scene-arrow.next { right:6px; border-radius:15px 0 0 15px; }
+
+/* room rail */
+.pet-room-strip {
+  gap:5px;
+  padding:7px 8px;
+  background:linear-gradient(180deg,#27202e,#211a27);
+  border-top:1px solid rgba(255,255,255,.055);
+}
+.pet-room-strip button {
+  flex:1 0 78px;
+  min-height:52px;
+  padding:5px 5px;
+  border-radius:14px;
+  color:#a99eaf;
+}
+.pet-room-strip button span {
+  width:28px;
+  height:25px;
+  display:grid;
+  place-items:center;
+  border-radius:9px;
+  font-size:1rem;
+}
+.pet-room-strip button b { font-size:.55rem; }
+.pet-room-strip button.active {
+  border-color:rgba(202,176,255,.27);
+  background:linear-gradient(180deg,#5a466f,#453655);
+  color:#fff;
+  box-shadow:inset 0 1px rgba(255,255,255,.08),0 7px 15px rgba(0,0,0,.12);
+}
+.pet-room-strip button.active span { background:rgba(255,255,255,.09); }
+
+/* primary pet controls */
+.pet-game-actions {
+  gap:5px;
+  padding:8px 8px max(10px,env(safe-area-inset-bottom,0px));
+  background:linear-gradient(180deg,#211a27,#18131d);
+  border-top:1px solid rgba(255,255,255,.05);
+}
+.pet-game-actions button {
+  min-height:60px;
+  border-radius:14px;
+  transition:transform .12s ease,background .12s ease;
+}
+.pet-game-actions button:active {
+  transform:scale(.94);
+  background:rgba(255,255,255,.04);
+}
+.pet-game-actions button span {
+  width:43px;
+  height:43px;
+  border-width:1px;
+  border-color:rgba(255,255,255,.10);
+  border-radius:14px;
+  background:linear-gradient(145deg,#493a55,#302638);
+  box-shadow:inset 0 1px rgba(255,255,255,.08),0 6px 13px rgba(0,0,0,.16);
+  font-size:1.25rem;
+}
+.pet-game-actions button.love span {
+  color:#ffc0d8;
+  background:linear-gradient(145deg,#69445c,#493040);
+}
+.pet-game-actions button.feed span {
+  background:linear-gradient(145deg,#67533c,#493a2d);
+}
+.pet-game-actions button.water span {
+  background:linear-gradient(145deg,#3c5e70,#294453);
+}
+.pet-game-actions button b {
+  color:#d9d0de;
+  font-size:.55rem;
+}
+
+/* quick actions */
+.pet-game-quick {
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:8px;
+  padding:12px;
+}
+.pet-game-quick button {
+  min-height:68px;
+  border-color:color-mix(in srgb,var(--line) 90%,transparent);
+  border-radius:18px;
+  background:
+    linear-gradient(145deg,color-mix(in srgb,var(--surface) 96%,var(--brand-soft)),var(--surface));
+  box-shadow:0 7px 18px rgba(77,51,86,.055);
+}
+.pet-game-quick button > span {
+  width:40px;
+  height:40px;
+  border-radius:13px;
+}
+.pet-game-quick b { font-size:.72rem; }
+.pet-game-quick small { font-size:.6rem; }
+
+/* Panda-only cleanup */
+.pet-zeynep-status,
+.pet-game-zeynep,
+.pet-zeynep-avatar,
+.pet-zeynep-bubble { display:none !important; }
+
+@media (min-width:760px) {
+  .pet-stage { min-height:650px; }
+  .pet-stage-panda {
+    width:350px;
+    height:365px;
+  }
+  .pet-stage-panda > .real-panda { width:330px; }
+  .pet-game-talk { bottom:20px; }
+}
+@media (max-width:560px) {
+  .pet-stage {
+    min-height:56svh;
+    max-height:610px;
+  }
+  .pet-stage-panda {
+    width:270px;
+    height:292px;
+    bottom:1%;
+  }
+  .pet-stage-panda > .real-panda {
+    width:264px;
+    height:auto;
+  }
+  .pet-stage-room-badge {
+    left:8px;
+    top:8px;
+    max-width:52%;
+    padding:6px 7px;
+  }
+  .pet-stage-room-badge > span { width:28px; height:28px; }
+  .pet-stage-study-progress {
+    right:8px;
+    top:10px;
+    width:80px;
+    height:24px;
+  }
+  .pet-game-talk {
+    bottom:10px;
+    width:calc(100% - 72px);
+    min-height:45px;
+    font-size:.64rem;
+  }
+  .pet-room-strip button { flex:0 0 72px; }
+  .pet-game-actions button { min-height:56px; }
+  .pet-game-actions button span { width:40px; height:40px; font-size:1.16rem; }
+  .pet-game-quick { grid-template-columns:1fr 1fr; }
+}
+@media (max-width:390px) {
+  .pet-game-needs { gap:4px; padding-inline:5px; }
+  .pet-need-bubble { width:41px; }
+  .pet-stage-panda {
+    width:245px;
+    height:266px;
+  }
+  .pet-stage-panda > .real-panda { width:240px; }
+  .pet-stage-room-badge small { display:none; }
+  .pet-stage-room-badge { max-width:46%; }
+  .pet-game-talk { width:calc(100% - 62px); }
+}
+@media (prefers-reduced-motion:reduce) {
+  .pet-stage,
+  .pet-stage-panda,
+  .pet-stage-panda .real-panda,
+  .pet-game-talk,
+  .pet-need-bubble { animation:none !important; transition:none !important; }
+}
