@@ -372,9 +372,9 @@ export default function PetPage() {
   const [room, setRoom] = useState<HouseRoom>(initialLife.room);
   const [activity, setActivity] = useState<HouseActivity>('idle');
   const [zeynepActivity, setZeynepActivity] = useState<ZeynepActivity>('idle');
-  const [zeynepRoom, setZeynepRoom] = useState<HouseRoom>('living');
-  const [zeynepPos, setZeynepPos] = useState({ x: 72, y: 8 });
-  const [zeynepMessage, setZeynepMessage] = useState<string | null>(null);
+  const [, setZeynepRoom] = useState<HouseRoom>('living');
+  const [, setZeynepPos] = useState({ x: 72, y: 8 });
+  const [, setZeynepMessage] = useState<string | null>(null);
   const [roomMode, setRoomMode] = useState<'day' | 'night'>(() => {
     const h = new Date().getHours();
     return h >= 19 || h < 7 ? 'night' : 'day';
