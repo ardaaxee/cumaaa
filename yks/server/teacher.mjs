@@ -10,7 +10,7 @@ export const TEACHER_ACTIONS = {
   ornek: 'Seçili konudan orta zorlukta bir örnek soru kur ve adım adım çöz.',
   ipucu: 'Bağlamdaki soru için çözümü vermeden, düşünmeyi yönlendiren kısa bir ipucu ver.',
   coz: 'Bağlamdaki soruyu adım adım çöz; her adımın gerekçesini yaz.',
-  hatam: 'Öğrencinin verdiği yanlış cevaba bakarak büyük olasılıkla nerede hata yaptığını açıkla ve doğru düşünme yolunu göster.',
+  hatam: 'Öğrencinin verdiği yanlış cevabı öğretici bir toparlanma akışına çevir: (1) hata türünü somut olarak söyle, (2) o eksiği kapatan yaklaşık 60 saniyelik mini ders ver, (3) doğru düşünme yolunu adım adım göster, (4) benzer hatayı önleyen tek kontrol alışkanlığı ver, (5) aynı kazanımı ölçen kısa ve özgün bir kontrol sorusu sor. Kontrol sorusunun cevabını hemen verme; öğrencinin denemesini bekle.',
   benzer: 'Bağlamdaki soruyla aynı kazanımı ölçen, özgün ve farklı sayılarla yeni bir soru yaz (5 seçenekli, cevabı ve çözümü en sonda ayrı başlıkla).',
   quiz: 'Seçili konudan 5 soruluk özgün mini quiz hazırla (her soru 5 seçenekli). Cevap anahtarını ve kısa çözümleri en sona koy.',
   yanlislar: 'Öğrencinin yanlışlar listesine bakarak ortak hata kalıplarını bul ve somut bir çalışma önerisi ver.',
@@ -77,7 +77,7 @@ export function buildSystemPrompt(teacherName, studentName = '') {
     'Yazdığın soruların özgün olduğunu belirt; hiçbir soruyu "ÖSYM sorusu" veya "çıkmış soru" olarak sunma, gerçek ÖSYM sorularını kopyalama.',
     'Emin olmadığın bilgiyi uydurma; emin değilsen bunu söyle ve öğrenciyi resmî kaynağa (MEB ders kitabı, ÖSYM) yönlendir.',
     'Öğrenci verisi (istatistik, yanlışlar) verilmişse yalnız o veriye dayan; veri yoksa varsayım yapma.',
-    'Bir yanlış cevap verilmişse öğrenciyi küçümseme; önce hatanın türünü somutlaştır, sonra doğru yöntemi göster ve benzer hatayı önlemek için tek kontrol alışkanlığı öner.',
+    'Bir yanlış cevap verilmişse öğrenciyi küçümseme; önce hatanın türünü somutlaştır, kısa mini dersle eksik kavramı kapat, doğru yöntemi göster, benzer hatayı önlemek için tek kontrol alışkanlığı öner ve en sonda cevabını vermediğin kısa bir kontrol sorusu sor.',
     'Fotoğraflı soruda okunamayan sayı/sembol varsa tahmin etme; hangi kısmın okunamadığını açıkça iste.',
     'Yanıtı en fazla ~450 kelimede tut; başlık ve madde işaretlerini ölçülü kullan.',
   ].join('\n');
