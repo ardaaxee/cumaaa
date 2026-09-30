@@ -9,10 +9,11 @@ import { PageHeader } from '../components/Layout';
 import { DIFFICULTY_LABEL, Options, QuestionBody, QuestionMeta, SolutionBlock } from '../components/QuestionView';
 import { Empty, Segmented, LoadFailed, Spinner, Stat, toast } from '../components/ui';
 import { href } from '../hooks/useRoute';
+import { buildAdaptivePlan } from '../services/adaptiveStudy';
 import { launchAdaptivePractice, launchWithIds, makeConfig } from '../services/testLauncher';
-import { inferWrongReason } from '../store/actions';
-import { useAppState } from '../store/store';
-import { formatDay, formatDuration } from '../utils/date';
+import { addTask, inferWrongReason } from '../store/actions';
+import { getState, update, useAppState } from '../store/store';
+import { dayKey, formatDay, formatDuration } from '../utils/date';
 import { optionLetter } from '../utils/ids';
 import { formatNet, percent } from '../utils/net';
 import { breakdown, scoreTest, type AnswerState } from '../utils/testEngine';
@@ -83,6 +84,20 @@ export default function TestResultPage({ params }: { params: string[] }) {
   const retryWrongs = async () => {
     const err = await launchWithIds(wrongIds, makeConfig({ origin: 'yanlislar', mode: 'ogrenme', title: 'Bu testin yanlışları' }));
     if (err) toast(err);
+  };
+
+  const createRecoveryWeek = () => {
+    const today = dayKey();
+    const smart = buildAdaptivePlan(getState(), today, 7);
+    update((current) => {
+      const kept = current.tasks.filter(
+        (task) => !(task.date >= today && !task.done && task.title.startsWith('Akıllı ·')),
+      );
+      let next = { ...current, tasks: kept };
+      for (const task of smart.tasks) next = addTask(next, task);
+      return next;
+    });
+    toast('Sonuçlarına göre 7 günlük toparlanma planın güncellendi.', 5000);
   };
 
   return (
@@ -175,6 +190,11 @@ export default function TestResultPage({ params }: { params: string[] }) {
         <a className="btn ghost" href="#/yanlislar">
           Yanlışlarıma git
         </a>
+        {(wrongIds.length > 0 || result.config.origin === 'deneme') && (
+          <button type="button" className="btn ghost" onClick={createRecoveryWeek}>
+            7 günlük toparlanma planı oluştur
+          </button>
+        )
         {(result.config.origin === 'adaptif' || result.config.origin === 'seviye') && (
           <button type="button" className="btn ghost" onClick={() => void launchAdaptivePractice(12).then((e) => e && toast(e))}>
             Sonraki adaptif test
