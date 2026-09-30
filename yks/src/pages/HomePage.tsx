@@ -12,6 +12,7 @@ import { launchAdaptivePractice, launchTest, makeConfig } from '../services/test
 import { usePetNeeds } from '../hooks/usePetNeeds';
 import { needsMessage } from '../utils/petCare';
 import { toggleTask } from '../store/actions';
+import type { PlanTask } from '../store/schema';
 import { update, useAppState } from '../store/store';
 import { dayKey, diffDays, formatDay, formatMinutes } from '../utils/date';
 import { dueReviews } from '../utils/srs';
@@ -61,6 +62,29 @@ export async function runRecommendation(r: Recommendation): Promise<void> {
   if (a.kind === 'reviews') return navigate('/tekrar');
   if (a.kind === 'mocks') return navigate('/denemeler');
   return navigate('/testler');
+}
+
+async function runPlanTask(t: PlanTask): Promise<void> {
+  if (t.type === 'konu' || t.type === 'tekrar') return navigate(t.topicId ? `/konu/${t.topicId}` : '/tekrar');
+  if (t.type === 'test') {
+    const target = t.targetQuestions ?? 10;
+    const count = [5, 10, 20, 40].find((n) => n >= target) ?? 40;
+    const err = await launchTest(
+      makeConfig({
+        subjectId: t.subjectId ?? 'all',
+        topicId: t.topicId ?? 'all',
+        count,
+        origin: 'plan',
+        title: t.title,
+      }),
+    );
+    if (err) toast(err);
+    return;
+  }
+  if (t.type === 'yanlis') return navigate('/yanlislar');
+  if (t.type === 'deneme') return navigate('/denemeler');
+  if (t.type === 'video') return navigate('/kaynaklar');
+  return navigate('/plan');
 }
 
 export default function HomePage() {
@@ -133,6 +157,41 @@ export default function HomePage() {
   const flowDone = studyFlow.filter((step) => step.done).length;
   const targetLabel = [profile.targetUniversity, profile.targetDepartment].filter(Boolean).join(' · ');
 
+  const smartStartLabel = activeTest
+    ? 'Devam eden teste dön'
+    : focusRunning
+      ? 'Odak oturumuna dön'
+      : nextTask
+        ? nextTask.title
+        : todayWrongOpen > 0
+          ? `${todayWrongOpen} yanlışı düzelt`
+          : due.length > 0
+            ? `${due.length} tekrarı tamamla`
+            : recs[0]?.title ?? 'Adaptif çalışma başlat';
+
+  const smartStartDetail = activeTest
+    ? `Soru ${activeTest.current + 1}/${activeTest.questionIds.length} · kaldığın yerden`
+    : focusRunning
+      ? 'Sayaç çalışıyor · kaldığın yerden devam et'
+      : nextTask
+        ? [nextTask.time, nextTask.estMinutes ? `${nextTask.estMinutes} dk` : '', nextTask.targetQuestions ? `${nextTask.targetQuestions} soru` : ''].filter(Boolean).join(' · ') || 'Bugünün sıradaki plan görevi'
+        : todayWrongOpen > 0
+          ? 'Önce bugünkü açık yanlışları temizle'
+          : due.length > 0
+            ? 'Unutmadan zamanı gelen konuları tekrar et'
+            : recs[0]?.detail ?? 'Verine göre 12 soruluk adaptif pratik';
+
+  const smartStart = async () => {
+    if (activeTest) return navigate('/test');
+    if (focusRunning) return navigate('/odak');
+    if (nextTask) return runPlanTask(nextTask);
+    if (todayWrongOpen > 0) return navigate('/yanlislar');
+    if (due.length > 0) return navigate('/tekrar');
+    if (recs[0]) return runRecommendation(recs[0]);
+    const err = await launchAdaptivePractice(12);
+    if (err) toast(err);
+  };
+
   return (
     <>
       <PageHeader title="Odam" sub={formatDay(today, { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })} />
@@ -154,12 +213,22 @@ export default function HomePage() {
               {profile.preferredStudyTime && <span>🕒 Rahat çalışma saatin: <b>{profile.preferredStudyTime}</b></span>}
             </div>
           )}
+          <div className="home-smart-start">
+            <div className="home-smart-start-copy">
+              <span className="eyebrow">Şimdi sıradaki</span>
+              <b>{smartStartLabel}</b>
+              <small>{smartStartDetail}</small>
+            </div>
+            <button type="button" className="btn primary study-cta" onClick={() => void smartStart()}>
+              <Icon name="play" /> Şimdi başla
+            </button>
+          </div>
           <div className="hero-actions">
-            <a className="btn primary study-cta" href="#/dersler">
-              <Icon name="play" /> Konu çalışmaya başla
+            <a className="btn hero-secondary" href="#/dersler">
+              <Icon name="book" /> Dersleri aç
             </a>
             <a className="btn hero-secondary" href="#/testler">
-              <Icon name="target" /> Soru çöz
+              <Icon name="target" /> Soru bankası
             </a>
           </div>
           <div className="hero-kpis" aria-label="Bugünün özeti">
