@@ -77,7 +77,7 @@ export default function SettingsPage() {
 
   return (
     <>
-      <PageHeader title="Ayarlar" />
+      <PageHeader title="Ayarlar" sub={<a href="#/kullanim">Sürüm 3.1 · Kullanım rehberi</a>} />
 
       <section className="card" aria-labelledby="prof-h">
         <h2 id="prof-h" className="mb-8">

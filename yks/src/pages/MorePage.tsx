@@ -33,6 +33,7 @@ const GROUPS: { title: string; items: { path: string; label: string; desc: strin
       { path: '/kaynaklar', label: 'Kaynaklar', desc: 'Resmî kaynaklar ve çalışma içerikleri', icon: 'link' },
       { path: '/pandam', label: 'Panda arkadaşım', desc: 'Seviye, bakım ve aksesuarlar', icon: 'sparkle' },
       { path: '/canli', label: 'Cuma ♡ Zeynep Canlı', desc: 'İzinli canlı ekran paylaşımı ve mesajlaşma', icon: 'link' },
+      { path: '/kullanim', label: 'Kullanım rehberi', desc: 'Telefona ekle, linki paylaş ve verilerini koru', icon: 'book' },
       { path: '/ayarlar', label: 'Ayarlar', desc: 'Profil, görünüm, bulut ve yedek', icon: 'settings' },
     ],
   },

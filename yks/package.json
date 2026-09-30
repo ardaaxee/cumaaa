@@ -1,7 +1,7 @@
 {
   "name": "iyi-ki-yks",
   "private": true,
-  "version": "3.0.0",
+  "version": "3.1.0",
   "type": "module",
   "description": "İyi ki • YKS Çalışma Odası — TYT + AYT sayısal hazırlık uygulaması",
   "scripts": {
@@ -13,7 +13,7 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "coverage": "vitest run --coverage",
-    "e2e": "node scripts/e2e.mjs"
+    "release:check": "npm test && npm run build && node scripts/check-release.mjs"
   },
   "engines": {
     "node": ">=20"

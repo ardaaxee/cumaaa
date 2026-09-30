@@ -9,6 +9,7 @@ import { useReminder } from './hooks/useReminder';
 import { usePetAlerts } from './hooks/usePetAlerts';
 
 const pages = {
+  guide: lazy(() => import('./pages/GuidePage')),
   home: lazy(() => import('./pages/HomePage')),
   coach: lazy(() => import('./pages/CoachPage')),
   focus: lazy(() => import('./pages/FocusPage')),
@@ -65,6 +66,7 @@ export const ROUTES: Record<string, { page: ComponentType<{ params: string[] }>;
   cikmis: { page: pages.osym, title: 'ÖSYM Çıkmış Sorular' },
   ogretmen: { page: pages.teacher, title: 'Cuma' },
   ayarlar: { page: pages.settings, title: 'Ayarlar' },
+  kullanim: { page: pages.guide, title: 'Kullanım rehberi' },
   daha: { page: pages.more, title: 'Daha Fazla' },
   kartlar: { page: pages.cards, title: 'Bilgi Kartları' },
   formuller: { page: pages.formulas, title: 'Formül Defteri' },

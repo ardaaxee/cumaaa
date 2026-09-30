@@ -13,7 +13,7 @@ export function serviceWorkerPlugin(): Plugin {
     apply: 'build',
     generateBundle(_options, bundle) {
       const files = Object.keys(bundle).filter((f) => !f.endsWith('.map'));
-      const staticFiles = ['manifest.webmanifest', 'icon.svg', 'icon-192.png', 'icon-512.png', 'icon-maskable-512.png', 'apple-touch-icon.png'];
+      const staticFiles = ['theme-init.js', 'manifest.webmanifest', 'icon.svg', 'icon-192.png', 'icon-512.png', 'icon-maskable-512.png', 'apple-touch-icon.png'];
       const precache = ['./', './index.html', ...[...files, ...staticFiles].map((f) => `./${f}`)];
       const unique = [...new Set(precache)];
       const contentSignature = Object.entries(bundle)

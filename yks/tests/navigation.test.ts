@@ -24,7 +24,7 @@ describe('navigation integrity', () => {
   });
 
   it('kritik kullanıcı akışları route kayıtlarında bulunur', () => {
-    for (const key of ['dersler', 'konu', 'testler', 'test', 'sonuc', 'plan', 'ogretmen', 'pandam', 'canli', 'ayarlar']) {
+    for (const key of ['dersler', 'konu', 'testler', 'test', 'sonuc', 'plan', 'ogretmen', 'pandam', 'canli', 'ayarlar', 'kullanim', 'pekistir']) {
       expect(ROUTES[key], key + ' route eksik').toBeTruthy();
     }
   });
