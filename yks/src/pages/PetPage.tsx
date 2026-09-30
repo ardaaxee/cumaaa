@@ -55,7 +55,6 @@ type HouseActivity =
 
 type PandaEmotion = 'neutral' | 'laugh' | 'angry' | 'shy' | 'yawn' | 'sneeze' | 'surprised';
 
-type ZeynepActivity = 'idle' | 'walking' | 'cooking' | 'serving' | 'relaxing' | 'studying' | 'gardening' | 'cleaning' | 'talking' | 'sleeping' | 'petting';
 
 const ROOM_ORDER: HouseRoom[] = ['living', 'kitchen', 'bedroom', 'bathroom', 'study', 'garden', 'balcony'];
 const ROOM_INFO: Record<HouseRoom, { icon: string; label: string; desc: string }> = {
@@ -371,10 +370,6 @@ export default function PetPage() {
   const [holding, setHolding] = useState<'bambu' | 'su' | null>(null);
   const [room, setRoom] = useState<HouseRoom>(initialLife.room);
   const [activity, setActivity] = useState<HouseActivity>('idle');
-  const [zeynepActivity, setZeynepActivity] = useState<ZeynepActivity>('idle');
-  const [, setZeynepRoom] = useState<HouseRoom>('living');
-  const [, setZeynepPos] = useState({ x: 72, y: 8 });
-  const [, setZeynepMessage] = useState<string | null>(null);
   const [roomMode, setRoomMode] = useState<'day' | 'night'>(() => {
     const h = new Date().getHours();
     return h >= 19 || h < 7 ? 'night' : 'day';
@@ -395,7 +390,6 @@ export default function PetPage() {
   const pandaDragRef = useRef<{ pointerId: number; startX: number; startY: number; x: number; y: number; moved: boolean } | null>(null);
   const lastUserActionRef = useRef(Date.now());
   const timers = useRef<number[]>([]);
-  const zeynepTimers = useRef<number[]>([]);
   const greeted = useRef(false);
   const dailyRoutineRef = useRef('');
 
@@ -405,16 +399,6 @@ export default function PetPage() {
   const later = (fn: () => void, ms: number) => {
     const id = window.setTimeout(fn, ms);
     timers.current.push(id);
-  };
-
-  const zLater = (fn: () => void, ms: number) => {
-    const id = window.setTimeout(fn, ms);
-    zeynepTimers.current.push(id);
-  };
-
-  const clearZeynepTimers = () => {
-    for (const id of zeynepTimers.current) window.clearTimeout(id);
-    zeynepTimers.current = [];
   };
 
   const clearTimers = () => {
@@ -654,7 +638,7 @@ export default function PetPage() {
   }, [activity, room, pet.name, petPos.x, needs.hungry, needs.thirsty, cleanliness, energy, happiness, voiceOn]);
 
   useEffect(() => {
-    if (activity !== 'idle' || zeynepActivity !== 'idle' || needs.hungry || needs.thirsty) return;
+    if (activity !== 'idle' || needs.hungry || needs.thirsty) return;
     const now = new Date();
     const hour = now.getHours();
     const preferredHour = state.profile.preferredStudyTime
@@ -664,44 +648,37 @@ export default function PetPage() {
     let key = '';
     let target: HouseRoom | null = null;
     let pandaNext: HouseActivity = 'idle';
-    let zeynepNext: ZeynepActivity = 'idle';
     let message = '';
 
     if (hour >= 23 || hour < 7) {
       key = 'night';
       target = 'bedroom';
       pandaNext = 'sleeping';
-      zeynepNext = 'sleeping';
       message = 'Evde gece rutini başladı. ' + pet.name + ' yatağına geçiyor 🌙';
     } else if (preferredHour != null && hour === preferredHour) {
       key = 'preferred-study-' + preferredHour;
       target = 'study';
       pandaNext = 'studying';
-      zeynepNext = 'studying';
       message = 'Çalışma saati geldi. ' + pet.name + ' çalışma odasına geçiyor 📚♡';
     } else if (hour >= 7 && hour < 9) {
       key = 'breakfast';
       target = 'kitchen';
       pandaNext = 'relaxing';
-      zeynepNext = 'cooking';
       message = 'Günaydın! Evde kahvaltı rutini başladı ☀️🍳';
     } else if (hour >= 9 && hour < 12) {
       key = 'morning-study';
       target = 'study';
       pandaNext = 'studying';
-      zeynepNext = 'studying';
       message = 'Sabah çalışma zamanı. ' + pet.name + ' çalışma odasına geçti 📚';
     } else if (hour >= 18 && hour < 20) {
       key = 'dinner';
       target = 'kitchen';
       pandaNext = 'relaxing';
-      zeynepNext = 'cooking';
       message = 'Akşam oldu; evde yemek hazırlığı başladı 🍽️';
     } else if (hour >= 20 && hour < 23) {
       key = 'evening';
       target = 'balcony';
       pandaNext = 'relaxing';
-      zeynepNext = 'relaxing';
       message = 'Günün sonunda ' + pet.name + ' balkonda biraz dinleniyor 🌇♡';
     }
 
@@ -711,32 +688,23 @@ export default function PetPage() {
     dailyRoutineRef.current = stamp;
 
     clearTimers();
-    clearZeynepTimers();
     setSceneMessage(message);
-    setZeynepMessage(message);
     setActivity('walking');
-    setZeynepActivity('walking');
     setRoom(target);
-    setZeynepRoom(target);
     setPetPos({ x: 42, y: 2 });
-    setZeynepPos({ x: 68, y: 8 });
 
     later(() => {
       setActivity(pandaNext);
-      setZeynepActivity(zeynepNext);
       if (pandaNext === 'sleeping') setRoomMode('night');
       else if (hour >= 7 && hour < 19) setRoomMode('day');
     }, 950);
 
     later(() => {
       if (pandaNext !== 'sleeping') setActivity('idle');
-      if (zeynepNext !== 'sleeping') setZeynepActivity('idle');
       if (pandaNext !== 'sleeping') setSceneMessage(null);
-      if (zeynepNext !== 'sleeping') setZeynepMessage(null);
     }, pandaNext === 'sleeping' ? 12_000 : 5_500);
   }, [
     activity,
-    zeynepActivity,
     needs.hungry,
     needs.thirsty,
     state.profile.preferredStudyTime,
@@ -747,7 +715,6 @@ export default function PetPage() {
 
   useEffect(() => () => {
     clearTimers();
-    clearZeynepTimers();
   }, []);
 
   const moveTo = (nextRoom: HouseRoom, nextActivity: HouseActivity = 'idle', message?: string) => {
@@ -784,15 +751,10 @@ export default function PetPage() {
     setPetPos({ x: 52, y: 2 });
     setFacing('right');
     setActivity('walking');
-    clearZeynepTimers();
-    setZeynepRoom('kitchen');
-    setZeynepPos({ x: 78, y: 8 });
-    setZeynepActivity('walking');
     setSceneMessage(pet.name + ' mutfağa koşuyor…');
 
     later(() => {
       setActivity('waiting');
-      setZeynepActivity('cooking');
       setSceneMessage(kind === 'bambu' ? pet.name + ' bambusunu bekliyor 🎋' : pet.name + ' su kabını bekliyor 💧');
     }, 900);
 
@@ -800,7 +762,6 @@ export default function PetPage() {
       update((s) => (kind === 'bambu' ? feedPet(s) : waterPet(s)));
       setHolding(kind);
       setActivity(kind === 'bambu' ? 'eating' : 'drinking');
-      setZeynepActivity('serving');
       const line = kind === 'bambu' ? 'Bambu hazır. Afiyet olsun 🎋' : 'Su hazır. Ohh, ferahladı 💧';
       speak(line, kind === 'bambu' ? 'eat' : 'drink');
       setHappiness((v) => Math.min(100, v + 5));
@@ -809,7 +770,6 @@ export default function PetPage() {
     later(() => {
       setHolding(null);
       setActivity('idle');
-      setZeynepActivity('idle');
       setSceneMessage(null);
       toast(kind === 'bambu' ? 'Yemeğini bitirdi 🎋' : 'Suyunu içti 💧');
     }, 4700);
@@ -1087,7 +1047,7 @@ export default function PetPage() {
   );
 
   useEffect(() => {
-    if (activity !== 'idle' || zeynepActivity !== 'idle') return;
+    if (activity !== 'idle') return;
     const threshold = dailyStudyProgress >= 75 ? 75 : dailyStudyProgress >= 50 ? 50 : dailyStudyProgress >= 25 ? 25 : 0;
     if (!threshold) return;
     const key = `iyiki-panda-progress-${today}-${threshold}`;
@@ -1099,51 +1059,34 @@ export default function PetPage() {
     }
 
     clearTimers();
-    clearZeynepTimers();
     setHearts((v) => v + 1);
     setHappiness((v) => clampLife(v + 5));
 
     if (threshold === 25) {
       setRoom('kitchen');
-      setZeynepRoom('kitchen');
-      setPetPos({ x: 46, y: 2 });
-      setZeynepPos({ x: 72, y: 8 });
+        setPetPos({ x: 46, y: 2 });
       setActivity('greeting');
-      setZeynepActivity('cooking');
       setSceneMessage('Günün ilk çeyreği tamam! ' + pet.name + ' mutfakta küçük bir mola veriyor ☕♡');
-      setZeynepMessage('Zeynep: Güzel başladık, biraz enerji toplayalım ☕');
       void playPandaVoice('Güzel başladık!', 'happy', voiceOn);
     } else if (threshold === 50) {
       setRoom('study');
-      setZeynepRoom('study');
       setPetPos({ x: 48, y: 2 });
-      setZeynepPos({ x: 67, y: 8 });
       setActivity('studying');
-      setZeynepActivity('studying');
       setSceneMessage('Günün yarısı tamamlandı! ' + pet.name + ' çalışma masasında sana eşlik ediyor 📚🐼');
-      setZeynepMessage('Zeynep: Yarıladık. Birlikte devam ediyoruz 💪');
       void playPandaVoice('Yarıladık, devam!', 'happy', voiceOn);
     } else {
       setRoom('balcony');
-      setZeynepRoom('balcony');
       setPetPos({ x: 45, y: 2 });
-      setZeynepPos({ x: 68, y: 8 });
       setActivity('relaxing');
-      setZeynepActivity('relaxing');
       setSceneMessage('Hedefin %75’i bitti. ' + pet.name + ' balkonda kısa bir nefes molasında 🌇♡');
-      setZeynepMessage('Zeynep: Son bölüm kaldı, sonra tamamız ♡');
       void playPandaVoice('Az kaldı!', 'happy', voiceOn);
     }
 
-    zLater(() => {
       setActivity('idle');
-      setZeynepActivity('idle');
       setSceneMessage(null);
-      setZeynepMessage(null);
     }, 4600);
   }, [
     activity,
-    zeynepActivity,
     dailyStudyProgress,
     today,
     pet.name,
@@ -1172,33 +1115,22 @@ export default function PetPage() {
     if (!line) return;
 
     try { window.localStorage.setItem(key, '1'); } catch { /* noop */ }
-    clearZeynepTimers();
     clearTimers();
-    setZeynepRoom(room);
-    setZeynepPos({ x: Math.min(78, petPos.x + 12), y: 8 });
-    setZeynepActivity('walking');
     setActivity('surprised');
     setEmotion('surprised');
     setSceneMessage(line);
-    setZeynepMessage('Zeynep: ' + line);
     setHappiness((v) => clampLife(v + 10));
     setHearts((v) => v + 1);
     void playPandaVoice('Yaşasın! Bugün çok güzel ilerledik!', 'happy', voiceOn);
-    zLater(() => {
-      setZeynepActivity('talking');
       setActivity('playing');
       setEmotion('laugh');
     }, 800);
-    zLater(() => {
-      setZeynepActivity('idle');
       setActivity('idle');
       setEmotion('neutral');
       setSceneMessage(null);
-      setZeynepMessage(null);
     }, 4300);
   }, [
     activity,
-    zeynepActivity,
     today,
     d.todayQuestions,
     d.todayMinutes,
