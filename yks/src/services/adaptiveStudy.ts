@@ -218,9 +218,10 @@ export function buildAdaptivePlan(state: AppState, startDay: DayKey = dayKey(), 
     }
   }
 
-  // Haftada bir gerçek süreli deneme: mevcut özel görevleri silmeden plana eklenir.
-  const mockDay = addDays(startDay, Math.min(days - 1, 6));
-  if (days >= 4) {
+  // Her tamamlanan haftada bir gerçek süreli deneme eklenir.
+  const mockOffsets = days >= 11 ? [6, 13] : days >= 4 ? [Math.min(days - 1, 6)] : [];
+  for (const offset of mockOffsets) {
+    const mockDay = addDays(startDay, offset);
     tasks.push({ date: mockDay, time: '10:00', type: 'deneme', title: 'Akıllı · Süreli TYT denemesi', estMinutes: 165 });
     tasks.push({ date: mockDay, type: 'yanlis', title: 'Akıllı · Deneme yanlışlarını analiz et', estMinutes: 25 });
   }
