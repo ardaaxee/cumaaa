@@ -286,10 +286,71 @@ function ReminderSection() {
   );
 }
 
+function HealthSection() {
+  const [checking, setChecking] = useState(false);
+  const [ai, setAi] = useState<AiStatus | null>(null);
+  const [storageOk, setStorageOk] = useState<boolean | null>(null);
+
+  const checkAll = async () => {
+    setChecking(true);
+    try {
+      let ok = false;
+      try {
+        const key = 'iyikiYks.healthCheck';
+        localStorage.setItem(key, '1');
+        ok = localStorage.getItem(key) === '1';
+        localStorage.removeItem(key);
+      } catch {
+        ok = false;
+      }
+      setStorageOk(ok);
+      setAi(await checkAiStatus(12_000));
+    } finally {
+      setChecking(false);
+    }
+  };
+
+  const swSupported = 'serviceWorker' in navigator;
+  const swActive = swSupported && !!navigator.serviceWorker.controller;
+
+  return (
+    <section className="card section" aria-labelledby="health-h">
+      <div className="row between">
+        <div>
+          <h2 id="health-h" className="mb-8">🩺 Uygulama sağlık kontrolü</h2>
+          <p className="small muted">Bağlantı, kayıt, uygulama kabuğu ve gerçek AI sunucusunu tek yerden kontrol eder.</p>
+        </div>
+        <button type="button" className="btn" onClick={() => void checkAll()} disabled={checking}>
+          {checking ? 'Kontrol ediliyor…' : 'Şimdi kontrol et'}
+        </button>
+      </div>
+      <div className="app-health-grid">
+        <div className={`app-health-item ${navigator.onLine ? 'ok' : 'warn'}`}>
+          <b>{navigator.onLine ? '✓ İnternet' : '⚠ İnternet'}</b>
+          <span>{navigator.onLine ? 'Bağlantı var' : 'Çevrimdışı çalışma modu'}</span>
+        </div>
+        <div className={`app-health-item ${storageOk == null ? '' : storageOk ? 'ok' : 'warn'}`}>
+          <b>{storageOk == null ? '• Yerel kayıt' : storageOk ? '✓ Yerel kayıt' : '⚠ Yerel kayıt'}</b>
+          <span>{storageOk == null ? 'Kontrol bekliyor' : storageOk ? 'Kayıt çalışıyor' : 'Tarayıcı depolaması engelli'}</span>
+        </div>
+        <div className={`app-health-item ${swActive || !swSupported ? (swSupported ? 'ok' : 'warn') : ''}`}>
+          <b>{swActive ? '✓ PWA' : swSupported ? '• PWA' : '⚠ PWA'}</b>
+          <span>{swActive ? 'Service Worker aktif' : swSupported ? 'İlk yenilemede aktifleşebilir' : 'Tarayıcı desteklemiyor'}</span>
+        </div>
+        <div className={`app-health-item ${ai == null ? '' : ai.configured ? 'ok' : 'warn'}`}>
+          <b>{ai == null ? '• Gerçek AI' : ai.configured ? '✓ Gerçek AI' : '⚠ Gerçek AI'}</b>
+          <span>{ai == null ? 'Kontrol bekliyor' : ai.configured ? ai.model ?? 'Bağlı' : ai.reason}</span>
+        </div>
+      </div>
+    </section>
+  );
+}
+
 export function ConnectSettings() {
   return (
     <>
       <AiSection />
+      <HealthSection />
       <CloudSection />
       <ShareSection />
       <ReminderSection />
