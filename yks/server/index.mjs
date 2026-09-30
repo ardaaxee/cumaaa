@@ -6,7 +6,8 @@
  * Ortam değişkenleri:
  *   PORT                (varsayılan 8787)
  *   GEMINI_API_KEY      (ÜCRETSİZ seçenek: Google AI Studio anahtarı; ANTHROPIC_API_KEY yoksa kullanılır)
- *   GEMINI_MODEL        (varsayılan gemini-2.5-flash)
+ *   GEMINI_MODEL        (varsayılan gemini-3.5-flash)
+ *   GEMINI_FALLBACK_MODEL (varsayılan gemini-3.5-flash-lite)
  *   ANTHROPIC_API_KEY   (ücretli Claude seçeneği; tanımlıysa önceliklidir)
  *   AI_MODEL            (Claude modeli, varsayılan claude-opus-5)
  *   İkisi de yoksa AI bölümü "yapılandırılmadı" olarak görünür.
@@ -27,7 +28,8 @@ const PORT = Number(process.env.PORT) || 8787;
 const MODEL = process.env.AI_MODEL || 'claude-opus-5';
 const API_KEY = process.env.ANTHROPIC_API_KEY || '';
 const GEMINI_KEY = process.env.GEMINI_API_KEY || '';
-const GEMINI_MODEL = process.env.GEMINI_MODEL || 'gemini-2.5-flash';
+const GEMINI_MODEL = process.env.GEMINI_MODEL || 'gemini-3.5-flash';
+const GEMINI_FALLBACK_MODEL = process.env.GEMINI_FALLBACK_MODEL || 'gemini-3.5-flash-lite';
 const MAX_BODY = 8 * 1024 * 1024; // fotoğraflı sorular için
 const ALLOWED_ORIGINS = (process.env.ALLOWED_ORIGINS || 'https://ardaaxee.github.io')
   .split(',')
@@ -164,26 +166,45 @@ async function handleTeacher(req, res) {
   }
 }
 
+async function runGeminiModel(value, model) {
+  return askGemini({
+    apiKey: GEMINI_KEY,
+    model,
+    system: buildSystemPrompt(value.teacherName, value.context.studentName),
+    history: value.history,
+    userContent: buildUserContent(value),
+    signal: AbortSignal.timeout(120_000),
+  });
+}
+
 async function handleGemini(res, value, sendJson) {
+  let model = GEMINI_MODEL;
   try {
-    const { text, truncated } = await askGemini({
-      apiKey: GEMINI_KEY,
-      model: GEMINI_MODEL,
-      system: buildSystemPrompt(value.teacherName, value.context.studentName),
-      history: value.history,
-      userContent: buildUserContent(value),
-      signal: AbortSignal.timeout(120_000),
-    });
-    return sendJson(res, 200, { text, model: GEMINI_MODEL, truncated });
+    let result;
+    try {
+      result = await runGeminiModel(value, model);
+    } catch (err) {
+      // Model yeni projede kullanılamıyorsa daha hafif kararlı modele otomatik düş.
+      if (err instanceof GeminiError && err.status === 404 && GEMINI_FALLBACK_MODEL !== model) {
+        console.warn('[teacher/gemini] model bulunamadı, fallback:', model, '->', GEMINI_FALLBACK_MODEL);
+        model = GEMINI_FALLBACK_MODEL;
+        result = await runGeminiModel(value, model);
+      } else {
+        throw err;
+      }
+    }
+    return sendJson(res, 200, { text: result.text, model, truncated: result.truncated });
   } catch (err) {
     if (err instanceof GeminiError) {
       console.error('[teacher/gemini]', err.status, err.message);
-      if (err.status === 429) return sendJson(res, 429, { error: 'Ücretsiz kota şu an doldu. Biraz sonra tekrar dene.' });
-      if (err.status === 400 || err.status === 403) return sendJson(res, 502, { error: 'AI bağlantısı yapılandırma hatası (anahtar veya model).' });
-      return sendJson(res, 502, { error: 'AI servisine ulaşılamadı. Biraz sonra tekrar dene.' });
+      if (err.status === 429) return sendJson(res, 429, { error: 'Ücretsiz Gemini kotası şu an doldu. Biraz sonra tekrar dene.' });
+      if (err.status === 401 || err.status === 403) return sendJson(res, 502, { error: 'Gemini API anahtarı geçersiz veya bu modele erişimi yok.' });
+      if (err.status === 400) return sendJson(res, 502, { error: 'Gemini isteği işlenemedi. Model ayarını kontrol et.' });
+      if (err.status === 404) return sendJson(res, 502, { error: 'Gemini modeli bu API anahtarında kullanılamıyor.' });
+      return sendJson(res, 502, { error: 'Gemini servisine ulaşılamadı. Biraz sonra tekrar dene.' });
     }
     console.error('[teacher/gemini] beklenmeyen hata:', err);
-    return sendJson(res, 502, { error: 'AI servisine ulaşılamadı. Biraz sonra tekrar dene.' });
+    return sendJson(res, 502, { error: 'Gemini servisine ulaşılamadı. Biraz sonra tekrar dene.' });
   }
 }
 
