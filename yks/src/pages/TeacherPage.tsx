@@ -12,9 +12,9 @@ import { assistantReply } from '../services/localAssistant';
 import { useListener, useSpeaker } from '../hooks/useVoice';
 import { resizeImage } from '../services/photoStore';
 import { weakTopics } from '../utils/analysis';
-import { addChatMessage, clearChat } from '../store/actions';
-import { update, useAppState } from '../store/store';
-import { formatMinutes } from '../utils/date';
+import { addChatMessage, addTask, clearChat } from '../store/actions';
+import { getState, update, useAppState } from '../store/store';
+import { dayKey, formatMinutes } from '../utils/date';
 import { optionLetter } from '../utils/ids';
 import { dashboard } from '../utils/stats';
 import { studyBrief } from '../services/adaptiveStudy';
@@ -81,6 +81,23 @@ export default function TeacherPage() {
     if (topicId) loadLesson(topicId).then((l) => setLesson(l ?? null)).catch(() => setLesson(null));
     else setLesson(null);
   }, [topicId]);
+
+  useEffect(() => {
+    if (!question || answerIdx == null || Number(answerIdx) === question.correctAnswer) return;
+    const today = dayKey();
+    const topicName = getTopicRef(question.topic)?.topic.name ?? question.topic;
+    const current = getState();
+    if (current.tasks.some((task) => task.date === today && !task.done && task.type === 'yanlis' && task.topicId === question.topic)) return;
+    update((state) => addTask(state, {
+      date: today,
+      type: 'yanlis',
+      title: `Öğretmen · ${topicName} yanlışını tekrar et`,
+      subjectId: question.subject,
+      topicId: question.topic,
+      estMinutes: 15,
+    }));
+    toast(`${topicName} bugünkü toparlanma planına eklendi.`, 3500);
+  }, [question, answerIdx]);
   useEffect(() => {
     listRef.current?.scrollTo({ top: listRef.current.scrollHeight, behavior: 'smooth' });
   }, [state.chat.length]);
