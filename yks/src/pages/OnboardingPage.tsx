@@ -9,7 +9,7 @@ import { getState, update } from '../store/store';
 import { dayKey, isValidDayKey } from '../utils/date';
 import { navigate } from '../hooks/useRoute';
 
-const STEPS = ['Adın', 'Sınıf ve alan', 'Hedefler', 'Sınav tarihi'] as const;
+const STEPS = ['Adın', 'Sınıf ve alan', 'Hedef okul', 'Hedefler', 'Sınav tarihi'] as const;
 
 export default function OnboardingPage() {
   const [step, setStep] = useState(0);
@@ -17,6 +17,9 @@ export default function OnboardingPage() {
   const [grade, setGrade] = useState('12. sınıf');
   const [field, setField] = useState('Sayısal');
   const [hardest, setHardest] = useState<SubjectId | ''>('');
+  const [targetUniversity, setTargetUniversity] = useState('');
+  const [targetDepartment, setTargetDepartment] = useState('');
+  const [preferredStudyTime, setPreferredStudyTime] = useState('');
   const [dailyQuestionGoal, setDailyQuestionGoal] = useState(60);
   const [dailyStudyMinutes, setDailyStudyMinutes] = useState(180);
   const [tytTarget, setTytTarget] = useState('');
@@ -29,6 +32,9 @@ export default function OnboardingPage() {
       grade,
       field,
       hardestSubject: hardest,
+      targetUniversity: targetUniversity.trim().slice(0, 80),
+      targetDepartment: targetDepartment.trim().slice(0, 80),
+      preferredStudyTime,
       dailyQuestionGoal: Math.max(1, dailyQuestionGoal),
       dailyStudyMinutes: Math.max(10, dailyStudyMinutes),
       tytTarget: tytTarget ? Number(tytTarget) : null,
@@ -124,6 +130,22 @@ export default function OnboardingPage() {
         {step === 2 && (
           <div className="form-grid two">
             <label className="field">
+              <span>Hedef üniversite (isteğe bağlı)</span>
+              <input className="input" value={targetUniversity} maxLength={80} onChange={(e) => setTargetUniversity(e.target.value)} placeholder="Örn. Hacettepe Üniversitesi" />
+            </label>
+            <label className="field">
+              <span>Hedef bölüm (isteğe bağlı)</span>
+              <input className="input" value={targetDepartment} maxLength={80} onChange={(e) => setTargetDepartment(e.target.value)} placeholder="Örn. Tıp" />
+            </label>
+            <label className="field" style={{ gridColumn: '1 / -1' }}>
+              <span>Çalışmaya en rahat başladığın saat</span>
+              <input className="input" type="time" value={preferredStudyTime} onChange={(e) => setPreferredStudyTime(e.target.value)} />
+            </label>
+          </div>
+        )}
+        {step === 3 && (
+          <div className="form-grid two">
+            <label className="field">
               <span>Günlük soru hedefin</span>
               <input className="input" type="number" min={5} max={500} value={dailyQuestionGoal} onChange={(e) => setDailyQuestionGoal(Number(e.target.value) || 0)} />
             </label>
@@ -141,7 +163,7 @@ export default function OnboardingPage() {
             </label>
           </div>
         )}
-        {step === 3 && (
+        {step === 4 && (
           <label className="field">
             <span>Sınav tarihin (isteğe bağlı)</span>
             <input className="input" type="date" value={examDate} onChange={(e) => setExamDate(e.target.value)} />
