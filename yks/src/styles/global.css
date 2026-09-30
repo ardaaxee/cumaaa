@@ -13750,3 +13750,272 @@ textarea:focus-visible {
   .pet-game-talk,
   .pet-need-bubble { animation:none !important; transition:none !important; }
 }
+
+
+/* ===== PANDA 2D TOM CONTROLS V5 ===== */
+/* Eski büyük konuşma kartını tamamen kapat: yeni mesaj Panda'ya bağlı küçük balondur. */
+.pet-game-talk { display:none !important; }
+
+.pet-stage {
+  touch-action:manipulation;
+  cursor:pointer;
+}
+.pet-stage-panda {
+  appearance:none !important;
+  -webkit-appearance:none !important;
+  border:0 !important;
+  outline:0;
+  padding:0 !important;
+  margin:0;
+  background:transparent !important;
+  box-shadow:none !important;
+  overflow:visible !important;
+  touch-action:none;
+  user-select:none;
+  -webkit-user-select:none;
+  cursor:grab;
+}
+.pet-stage-panda.is-dragging {
+  cursor:grabbing;
+  transition:none !important;
+  animation:none !important;
+  filter:drop-shadow(0 15px 13px rgba(44,32,46,.19));
+}
+.pet-stage-panda.is-dragging .real-panda {
+  animation:none !important;
+  transform:scale(1.025);
+}
+.pet-stage-panda:focus-visible {
+  outline:3px solid rgba(174,137,238,.55);
+  outline-offset:3px;
+  border-radius:34px;
+}
+
+.pet-panda-mini-talk {
+  position:absolute;
+  z-index:40;
+  left:50%;
+  bottom:88%;
+  width:max-content;
+  max-width:min(250px,72vw);
+  min-height:38px;
+  transform:translateX(-50%);
+  display:flex;
+  align-items:center;
+  gap:7px;
+  padding:7px 10px;
+  border:1px solid rgba(111,81,129,.13);
+  border-radius:15px 15px 15px 5px;
+  background:rgba(255,255,255,.94);
+  color:#45384a;
+  box-shadow:0 10px 24px rgba(52,37,56,.14);
+  backdrop-filter:blur(12px);
+  -webkit-backdrop-filter:blur(12px);
+  text-align:left;
+  pointer-events:none;
+  animation:pet-mini-talk-in .22s cubic-bezier(.2,.9,.2,1) both;
+}
+.pet-panda-mini-talk::after {
+  content:'';
+  position:absolute;
+  left:34%;
+  bottom:-7px;
+  width:13px;
+  height:13px;
+  transform:rotate(45deg);
+  background:inherit;
+  border-right:1px solid rgba(111,81,129,.10);
+  border-bottom:1px solid rgba(111,81,129,.10);
+}
+.pet-panda-mini-talk i {
+  flex:0 0 auto;
+  width:26px;
+  height:26px;
+  display:grid;
+  place-items:center;
+  border-radius:9px;
+  background:#f2eafa;
+  font-style:normal;
+  font-size:.9rem;
+}
+.pet-panda-mini-talk b {
+  min-width:0;
+  font-size:.62rem;
+  line-height:1.32;
+  font-weight:780;
+}
+@keyframes pet-mini-talk-in {
+  from { opacity:0; transform:translateX(-50%) translateY(5px) scale(.96); }
+  to { opacity:1; transform:translateX(-50%) translateY(0) scale(1); }
+}
+
+.pet-control-hint {
+  position:absolute;
+  z-index:24;
+  left:50%;
+  bottom:7px;
+  transform:translateX(-50%);
+  display:flex;
+  gap:5px;
+  pointer-events:none;
+}
+.pet-control-hint span {
+  padding:4px 7px;
+  border-radius:999px;
+  background:rgba(31,24,36,.52);
+  color:rgba(255,255,255,.78);
+  box-shadow:0 5px 14px rgba(0,0,0,.10);
+  backdrop-filter:blur(8px);
+  -webkit-backdrop-filter:blur(8px);
+  font-size:.48rem;
+  font-weight:720;
+  white-space:nowrap;
+}
+
+/* Talking-Tom tarzı top mini oyunu */
+.pet-tom-ball {
+  position:absolute;
+  z-index:29;
+  width:62px;
+  height:62px;
+  display:grid;
+  place-items:center;
+  border:0;
+  border-radius:50%;
+  background:
+    radial-gradient(circle at 36% 28%,rgba(255,255,255,.85),transparent 16%),
+    radial-gradient(circle,#fff 0 43%,#e9e9ec 44% 58%,#d7d7db 59% 100%);
+  box-shadow:
+    0 14px 20px rgba(47,35,42,.20),
+    inset 0 -5px 8px rgba(37,37,44,.08);
+  transform:translate(-50%,0);
+  font-size:2rem;
+  cursor:pointer;
+  touch-action:manipulation;
+  animation:pet-tom-ball-hop .52s cubic-bezier(.22,.9,.25,1) both;
+}
+.pet-tom-ball small {
+  position:absolute;
+  right:-6px;
+  top:-6px;
+  min-width:22px;
+  height:22px;
+  padding:0 5px;
+  display:grid;
+  place-items:center;
+  border:2px solid #fff;
+  border-radius:999px;
+  background:#5b466e;
+  color:#fff;
+  font-size:.55rem;
+  font-weight:900;
+}
+.pet-tom-ball:active { transform:translate(-50%,0) scale(.90); }
+@keyframes pet-tom-ball-hop {
+  0% { opacity:.15; transform:translate(-50%,20px) scale(.72) rotate(-20deg); }
+  58% { opacity:1; transform:translate(-50%,-12px) scale(1.08) rotate(10deg); }
+  100% { opacity:1; transform:translate(-50%,0) scale(1) rotate(0); }
+}
+.pet-game-actions button.play span {
+  background:linear-gradient(145deg,#4c6d46,#344d31);
+}
+
+/* Oyun sırasında Panda topun peşinden daha enerjik hareket eder. */
+.pet-stage-panda.act-playing {
+  animation:none !important;
+}
+.pet-stage-panda.act-playing .real-panda {
+  animation:pet-tom-panda-play .48s ease-in-out infinite alternate;
+}
+@keyframes pet-tom-panda-play {
+  from { transform:translateY(0) rotate(-2deg) scale(1); }
+  to { transform:translateY(-10px) rotate(3deg) scale(1.025); }
+}
+
+/* Eski beyaz blok ihtimalini sıfırlamak için sahnedeki ana panda katmanı sabit kutu olmaktan çıkarılır. */
+.pet-stage-panda::before,
+.pet-stage-panda::after {
+  background:transparent;
+}
+.pet-stage-panda > .real-panda {
+  display:block;
+  max-width:none !important;
+  background:transparent !important;
+}
+
+/* Oda mobilyalarının üstüne biraz daha yaşam katmanı */
+.scene-lamp::after {
+  content:'';
+  position:absolute;
+  left:50%;
+  top:-46px;
+  width:92px;
+  height:92px;
+  transform:translateX(-50%);
+  border-radius:50%;
+  background:radial-gradient(circle,rgba(255,213,153,.24),transparent 68%);
+  pointer-events:none;
+}
+.scene-window,
+.scene-bedroom-window,
+.scene-study-board,
+.scene-bath-mirror {
+  overflow:hidden;
+}
+.scene-window::after,
+.scene-bedroom-window::after {
+  box-shadow:0 0 22px rgba(255,255,255,.22);
+}
+
+/* Panda mesajı geldiğinde top ipucunu kapat ki ekran kalabalık olmasın */
+.pet-stage:has(.pet-panda-mini-talk) .pet-control-hint {
+  opacity:.28;
+}
+
+/* Mobile */
+@media (max-width:560px) {
+  .pet-stage {
+    min-height:58svh;
+    max-height:630px;
+  }
+  .pet-stage-panda {
+    width:272px;
+    height:304px;
+  }
+  .pet-stage-panda > .real-panda { width:268px; }
+  .pet-panda-mini-talk {
+    bottom:86%;
+    max-width:min(225px,68vw);
+    padding:6px 8px;
+  }
+  .pet-panda-mini-talk b { font-size:.58rem; }
+  .pet-control-hint {
+    bottom:5px;
+    gap:4px;
+  }
+  .pet-control-hint span {
+    padding:3px 6px;
+    font-size:.44rem;
+  }
+  .pet-tom-ball {
+    width:56px;
+    height:56px;
+    font-size:1.8rem;
+  }
+}
+@media (max-width:390px) {
+  .pet-stage-panda {
+    width:248px;
+    height:280px;
+  }
+  .pet-stage-panda > .real-panda { width:244px; }
+  .pet-panda-mini-talk { max-width:205px; }
+  .pet-control-hint span:last-child { display:none; }
+}
+@media (prefers-reduced-motion:reduce) {
+  .pet-panda-mini-talk,
+  .pet-tom-ball,
+  .pet-stage-panda.act-playing .real-panda {
+    animation:none !important;
+  }
+}
