@@ -194,6 +194,7 @@ export default function LiveTogetherPage() {
   const cryptoKeyRef = useRef<CryptoKey | null>(null);
   const sharedStudyRef = useRef<SharedStudyState>(sharedStudy);
   const reactionTimerRef = useRef<number | null>(null);
+  const studyStorageKeyRef = useRef<string | null>(null);
 
   const normalizedRoom = roomCode.trim().toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 24);
   const shareSupported = typeof navigator !== 'undefined' && !!navigator.mediaDevices?.getDisplayMedia;
@@ -216,6 +217,10 @@ export default function LiveTogetherPage() {
   const applySharedStudy = (next: SharedStudyState) => {
     sharedStudyRef.current = next;
     setSharedStudy(next);
+    const key = studyStorageKeyRef.current;
+    if (key) {
+      try { localStorage.setItem(key, JSON.stringify(next)); } catch { /* cihaz depolaması dolu/kapalı olabilir */ }
+    }
   };
 
   const syncStudy = async (next: SharedStudyState) => {
@@ -379,6 +384,36 @@ export default function LiveTogetherPage() {
       supabaseRef.current = supabase;
 
       const topic = await roomTopic(normalizedRoom);
+      studyStorageKeyRef.current = 'iyiki-live-study-' + topic;
+      try {
+        const stored = localStorage.getItem(studyStorageKeyRef.current);
+        if (stored) {
+          const parsed = JSON.parse(stored) as Partial<SharedStudyState>;
+          if (Array.isArray(parsed.tasks)) {
+            const restored: SharedStudyState = {
+              running: !!parsed.running,
+              endsAt: typeof parsed.endsAt === 'number' ? parsed.endsAt : null,
+              remainingMs: Math.max(0, Number(parsed.remainingMs) || 25 * 60_000),
+              durationMin: Math.min(120, Math.max(5, Number(parsed.durationMin) || 25)),
+              tasks: parsed.tasks
+                .filter((task): task is SharedTask => !!task && typeof task.id === 'string' && typeof task.text === 'string')
+                .slice(0, 20)
+                .map((task) => ({ id: task.id.slice(0, 32), text: task.text.slice(0, 120), done: !!task.done })),
+              updatedAt: Number(parsed.updatedAt) || Date.now(),
+              updatedBy: typeof parsed.updatedBy === 'string' ? parsed.updatedBy : clientId,
+            };
+            if (restored.running && restored.endsAt != null && restored.endsAt <= Date.now()) {
+              restored.running = false;
+              restored.endsAt = null;
+              restored.remainingMs = 0;
+              restored.updatedAt = Date.now();
+            }
+            applySharedStudy(restored);
+          }
+        }
+      } catch {
+        /* bozuk yerel ortak-oda kaydı görmezden gelinir */
+      }
       const channel = supabase.channel('yks-live:' + topic, {
         config: {
           broadcast: { ack: true, self: false },
