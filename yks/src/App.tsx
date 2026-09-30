@@ -42,7 +42,7 @@ const pages = {
   notFound: lazy(() => import('./pages/NotFoundPage')),
 };
 
-const ROUTES: Record<string, { page: ComponentType<{ params: string[] }>; title: string }> = {
+export const ROUTES: Record<string, { page: ComponentType<{ params: string[] }>; title: string }> = {
   '': { page: pages.home, title: 'Odam' },
   koc: { page: pages.coach, title: 'Akıllı Koç' },
   odak: { page: pages.focus, title: 'Odak Modu' },
