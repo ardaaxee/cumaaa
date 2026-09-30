@@ -8,7 +8,7 @@ import { Icon } from '../components/Icon';
 import { PageHeader } from '../components/Layout';
 import { Options, QuestionBody, QuestionMeta, SolutionBlock } from '../components/QuestionView';
 import { ConfirmDialog, Empty, Segmented, LoadFailed, Spinner, toast } from '../components/ui';
-import { href } from '../hooks/useRoute';
+import { href, useRoute } from '../hooks/useRoute';
 import { launchTest, launchWithIds, makeConfig } from '../services/testLauncher';
 import { removeWrong, setWrongLearned, setWrongReason } from '../store/actions';
 import type { WrongReason } from '../store/schema';
@@ -28,6 +28,8 @@ const REASON_LABEL: Record<WrongReason, string> = {
 
 export default function WrongsPage() {
   const state = useAppState();
+  const route = useRoute();
+  const [topicFilter, setTopicFilter] = useState(() => getTopicRef(route.query.get('konu') ?? '')?.topic.id ?? 'all');
   const [show, setShow] = useState<'acik' | 'ogrenildi'>('acik');
   const [subject, setSubject] = useState('all');
   const [reason, setReason] = useState<'all' | WrongReason>('all');
@@ -43,6 +45,7 @@ export default function WrongsPage() {
   const entries = Object.values(state.wrongs)
     .filter((w) => (show === 'acik' ? !w.learned : w.learned))
     .filter((w) => subject === 'all' || w.subjectId === subject)
+    .filter((w) => topicFilter === 'all' || w.topicId === topicFilter)
     .filter((w) => reason === 'all' || w.reason === reason)
     .sort((a, b) => b.lastAt.localeCompare(a.lastAt));
   const openCount = Object.values(state.wrongs).filter((w) => !w.learned).length;
@@ -114,6 +117,7 @@ export default function WrongsPage() {
             </label>
           </div>
         </div>
+        {topicFilter !== 'all' && <div className="notice mt-12"><span className="grow">Konu: {getTopicRef(topicFilter)?.topic.name} · {entries.length} soru</span><button className="btn small" onClick={() => setTopicFilter('all')}>Tüm yanlışları göster</button></div>}
         {show === 'acik' && entries.length > 0 && (
           <button
             type="button"
@@ -199,9 +203,6 @@ export default function WrongsPage() {
                     </div>
                   )}
                   <div className="row mt-8">
-                    <button type="button" className="btn small" onClick={() => void run(launchWithIds([q.id], makeConfig({ origin: 'tek-soru', mode: 'ogrenme', title: 'Tekrar çöz' })))}>
-                      Tekrar çöz
-                    </button>
                     {w.learned ? (
                       <button
                         type="button"

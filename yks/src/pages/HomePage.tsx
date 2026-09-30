@@ -3,7 +3,7 @@ import { Icon } from '../components/Icon';
 import { PageHeader } from '../components/Layout';
 import { PandaBody } from '../components/MascotNav';
 import { DailyQuestion } from '../components/DailyQuestion';
-import { PartnerMessages } from '../components/PartnerMessages';
+import { StudyQueue } from '../components/StudyQueue';
 import { Empty, ProgressBar, toast } from '../components/ui';
 import { navigate } from '../hooks/useRoute';
 import { lookup, topicLabel } from '../services/lookup';
@@ -37,14 +37,6 @@ function cheerOfDay(day: string): string {
   let h = 0;
   for (const ch of day) h = (h * 31 + ch.charCodeAt(0)) >>> 0;
   return CHEERS[h % CHEERS.length];
-}
-
-function recommendationTopic(recs: Recommendation[]): string | undefined {
-  for (const rec of recs) {
-    const action = rec.action;
-    if (action.kind === 'topic' || action.kind === 'topic-test') return action.topicId;
-  }
-  return undefined;
 }
 
 export async function runRecommendation(r: Recommendation): Promise<void> {
@@ -105,56 +97,7 @@ export default function HomePage() {
   const activeTest = state.activeTest;
   const nextTask = todayTasks.find((t) => !t.done) ?? overdue[0] ?? null;
   const focusRunning = state.pomodoro.running && state.pomodoro.phase === 'odak';
-  const focusTopicId = recommendationTopic(recs);
-  const topicTouchedToday = Object.values(state.topicProgress).some(
-    (p) => p.startedAt?.startsWith(today) || p.completedAt?.startsWith(today),
-  );
-  const todayWrongOpen = Object.values(state.wrongs).filter(
-    (w) => !w.learned && w.lastAt.startsWith(today),
-  ).length;
-  const studyFlow = [
-    {
-      key: 'konu',
-      label: 'Konu',
-      detail: focusTopicId ? topicLabel(focusTopicId) : 'Bugünün konusunu seç',
-      done: topicTouchedToday,
-      href: focusTopicId ? `#/konu/${focusTopicId}` : '#/dersler',
-      icon: '1',
-    },
-    {
-      key: 'ornek',
-      label: 'Örnek',
-      detail: 'Öğretmenle çözümlü örnek',
-      done: state.chat.some((m) => m.at?.startsWith?.(today) && m.role === 'teacher'),
-      href: focusTopicId ? `#/ogretmen?konu=${encodeURIComponent(focusTopicId)}&eylem=ornek` : '#/ogretmen',
-      icon: '2',
-    },
-    {
-      key: 'soru',
-      label: '10 soru',
-      detail: `${Math.min(10, d.todayQuestions)}/10 tamamlandı`,
-      done: d.todayQuestions >= 10,
-      href: '#/testler',
-      icon: '3',
-    },
-    {
-      key: 'yanlis',
-      label: 'Yanlış analizi',
-      detail: todayWrongOpen > 0 ? `${todayWrongOpen} açık yanlış` : 'Bugünün yanlışları temiz',
-      done: d.todayQuestions > 0 && todayWrongOpen === 0,
-      href: '#/yanlislar',
-      icon: '4',
-    },
-    {
-      key: 'tekrar',
-      label: 'Tekrar',
-      detail: due.length > 0 ? `${due.length} konu bekliyor` : 'Tekrarlar tamam',
-      done: due.length === 0,
-      href: '#/tekrar',
-      icon: '5',
-    },
-  ];
-  const flowDone = studyFlow.filter((step) => step.done).length;
+  const todayWrongOpen = Object.values(state.wrongs).filter((w) => !w.learned).length;
   const targetLabel = [profile.targetUniversity, profile.targetDepartment].filter(Boolean).join(' · ');
 
   const smartStartLabel = activeTest
@@ -176,7 +119,7 @@ export default function HomePage() {
       : nextTask
         ? [nextTask.time, nextTask.estMinutes ? `${nextTask.estMinutes} dk` : '', nextTask.targetQuestions ? `${nextTask.targetQuestions} soru` : ''].filter(Boolean).join(' · ') || 'Bugünün sıradaki plan görevi'
         : todayWrongOpen > 0
-          ? 'Önce bugünkü açık yanlışları temizle'
+          ? 'Önce açık yanlışlarını düzelt'
           : due.length > 0
             ? 'Unutmadan zamanı gelen konuları tekrar et'
             : recs[0]?.detail ?? 'Verine göre 12 soruluk adaptif pratik';
@@ -194,7 +137,7 @@ export default function HomePage() {
 
   return (
     <>
-      <PageHeader title="Odam" sub={formatDay(today, { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })} />
+      <PageHeader title="Çalışma merkezim" sub={formatDay(today, { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })} />
 
       <section className="card hero hero-panda" aria-labelledby="hello">
         <div className="hero-text">
@@ -252,125 +195,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      {(activeTest || nextTask || due.length > 0 || focusRunning) && (
-        <section className="card home-resume-card" aria-label="Kaldığın yerden devam et">
-          <div className="home-resume-copy">
-            <div className="eyebrow">Kaldığın yer</div>
-            <h2>Tek dokunuşla devam et</h2>
-            <p className="small muted">
-              Uygulamayı kapatıp geri gelsen bile test, odak ve plan akışın kaybolmaz.
-            </p>
-          </div>
-          <div className="home-resume-actions">
-            {activeTest && (
-              <a className="home-resume-item primary" href="#/test">
-                <span className="home-resume-icon">▶</span>
-                <span>
-                  <b>{activeTest.config.title ?? (activeTest.config.mode === 'sinav' ? 'Devam eden sınav' : 'Devam eden çalışma')}</b>
-                  <small>Soru {activeTest.current + 1}/{activeTest.questionIds.length} · kaldığın yerden aç</small>
-                </span>
-                <Icon name="right" />
-              </a>
-            )}
-            {focusRunning && (
-              <a className="home-resume-item" href="#/odak">
-                <span className="home-resume-icon">⏱</span>
-                <span>
-                  <b>Odak oturumu sürüyor</b>
-                  <small>Zamanlayıcıyı ve oturumu aç</small>
-                </span>
-                <Icon name="right" />
-              </a>
-            )}
-            {nextTask && (
-              <a className="home-resume-item" href="#/plan">
-                <span className="home-resume-icon">✓</span>
-                <span>
-                  <b>{nextTask.title}</b>
-                  <small>
-                    {nextTask.date < today ? 'Gecikmiş görev' : 'Bugünün sıradaki görevi'}
-                    {nextTask.estMinutes ? ' · ' + nextTask.estMinutes + ' dk' : ''}
-                  </small>
-                </span>
-                <Icon name="right" />
-              </a>
-            )}
-            {due.length > 0 && (
-              <a className="home-resume-item" href="#/tekrar">
-                <span className="home-resume-icon">↻</span>
-                <span>
-                  <b>{due.length} tekrar bekliyor</b>
-                  <small>Unutmadan kısa tekrarını tamamla</small>
-                </span>
-                <Icon name="right" />
-              </a>
-            )}
-          </div>
-        </section>
-      )}
-
-      <section className="card section study-flow-card" aria-labelledby="study-flow-title">
-        <div className="study-flow-head">
-          <div>
-            <div className="eyebrow">Bugünün çalışma döngüsü</div>
-            <h2 id="study-flow-title">Konu → örnek → soru → yanlış → tekrar</h2>
-            <p className="small muted">Bir adımı bitirince sıradaki otomatik olarak anlam kazanır; ne yapacağını aramana gerek kalmaz.</p>
-          </div>
-          <div className="study-flow-progress" aria-label={`5 adımın ${flowDone} tanesi tamamlandı`}>
-            <b>{flowDone}/5</b>
-            <span>tamamlandı</span>
-          </div>
-        </div>
-        <div className="study-flow-steps">
-          {studyFlow.map((step, index) => (
-            <a
-              key={step.key}
-              className={`study-flow-step${step.done ? ' done' : ''}${!step.done && index === flowDone ? ' current' : ''}`}
-              href={step.href}
-            >
-              <span className="study-flow-number">{step.done ? '✓' : step.icon}</span>
-              <span className="grow">
-                <b>{step.label}</b>
-                <small>{step.detail}</small>
-              </span>
-              <Icon name="right" />
-            </a>
-          ))}
-        </div>
-      </section>
-
-      <PartnerMessages />
-
-      <section className="section home-section-head">
-        <div>
-          <div className="eyebrow">Hızlı başla</div>
-          <h2>Şimdi ne yapmak istiyorsun?</h2>
-        </div>
-        <a className="text-link" href="#/daha">Tüm araçlar <Icon name="right" /></a>
-      </section>
-
-      <nav className="quick-grid home-quick-grid" aria-label="Hızlı başla">
-        <a className="quick-tile t-sky" href="#/dersler">
-          <span className="quick-emoji" aria-hidden="true">📚</span>
-          <b>Konu anlatımı</b>
-          <span className="tiny muted">Alt konular, formüller, çözümlü örnekler ve özet</span>
-        </a>
-        <a className="quick-tile t-lilac" href="#/testler">
-          <span className="quick-emoji" aria-hidden="true">✎</span>
-          <b>Soru bankası</b>
-          <span className="tiny muted">Konu · alt konu · zorluk · soru tipi seç</span>
-        </a>
-        <a className="quick-tile t-mint" href="#/koc">
-          <span className="quick-emoji" aria-hidden="true">◎</span>
-          <b>Akıllı Koç</b>
-          <span className="tiny muted">Yanlışlarına ve hakimiyetine göre sıradaki konuyu seç</span>
-        </a>
-        <a className="quick-tile t-rose" href="#/ogretmen">
-          <span className="quick-emoji" aria-hidden="true">✦</span>
-          <b>{state.settings.teacherName} ile çalış</b>
-          <span className="tiny muted">Sor, anlatsın; yanlışını birlikte çöz</span>
-        </a>
-      </nav>
+      <StudyQueue />
 
       <section className="home-today-grid section" aria-label="Bugünün çalışma merkezi">
         <div className="card home-focus-card">
@@ -513,13 +338,8 @@ export default function HomePage() {
         </div>
       </section>
 
-      <DailyQuestion />
+      <details className="card section home-daily-practice"><summary>Bir soruyla ısın</summary><DailyQuestion /></details>
 
-      <section className="home-footer-actions section" aria-label="Diğer çalışma alanları">
-        <a href="#/gelisim"><Icon name="chart" /><span><b>Gelişimim</b><small>İstatistikleri gör</small></span><Icon name="right" /></a>
-        <a href="#/denemeler"><Icon name="trophy" /><span><b>Denemeler</b><small>Netlerini takip et</small></span><Icon name="right" /></a>
-        <a href="#/defterim"><Icon name="sparkle" /><span><b>Defterim</b><small>Notlarını aç</small></span><Icon name="right" /></a>
-      </section>
     </>
   );
 }

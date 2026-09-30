@@ -39,9 +39,9 @@ export const NAV_ALL: NavItem[] = [
 ];
 
 const SIDEBAR_GROUPS: { label: string; paths: string[] }[] = [
-  { label: 'Çalış', paths: ['/', '/koc', '/dersler', '/testler', '/denemeler', '/plan'] },
-  { label: 'Takip', paths: ['/tekrar', '/yanlislar', '/gelisim'] },
-  { label: 'Kişisel', paths: ['/ogretmen', '/pandam', '/canli', '/defterim', '/daha'] },
+  { label: 'Çalış', paths: ['/', '/dersler', '/testler', '/odak', '/plan'] },
+  { label: 'Takip', paths: ['/yanlislar', '/tekrar', '/denemeler', '/gelisim'] },
+  { label: 'Araçlar', paths: ['/ogretmen', '/daha'] },
 ];
 
 export function sectionOf(path: string): string {

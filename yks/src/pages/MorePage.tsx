@@ -5,6 +5,7 @@ const GROUPS: { title: string; items: { path: string; label: string; desc: strin
   {
     title: 'Çalışma araçları',
     items: [
+      { path: '/calis', label: 'Adım adım çalış', desc: 'Konu, çözümlü örnek ve kısa soru seti', icon: 'play' },
       { path: '/koc', label: 'Akıllı Koç', desc: 'Seviye tespiti, adaptif test ve kişisel 7 günlük plan', icon: 'target' },
       { path: '/odak', label: 'Odak Modu', desc: '25/50/90 dakikalık gerçek çalışma sayacı', icon: 'timer' },
       { path: '/ogretmen', label: 'Öğretmen', desc: 'Konu anlatımı, ipucu ve mini quiz', icon: 'teacher' },
