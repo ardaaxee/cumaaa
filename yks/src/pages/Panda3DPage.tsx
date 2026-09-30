@@ -33,9 +33,9 @@ function progressEvent(progress: number): { room: RoomId; text: string } | null 
   return null;
 }
 
-function PandaCharacter({ celebrating, petting }: { celebrating: boolean; petting: boolean }) {
+function PandaCharacter({ room, celebrating, petting }: { room: RoomId; celebrating: boolean; petting: boolean }) {
   return (
-    <div className={`p3dv2-panda${celebrating ? ' is-celebrating' : ''}${petting ? ' is-petting' : ''}`} aria-label="Panda">
+    <div className={`p3dv2-panda room-${room}${celebrating ? ' is-celebrating' : ''}${petting ? ' is-petting' : ''}`} aria-label="Panda">
       <span className="p3dv2-shadow" />
       <span className="p3dv2-panda-ear left" />
       <span className="p3dv2-panda-ear right" />
@@ -52,6 +52,10 @@ function PandaCharacter({ celebrating, petting }: { celebrating: boolean; pettin
       <div className="p3dv2-panda-body"><span className="p3dv2-belly" /></div>
       <span className="p3dv2-panda-foot left" />
       <span className="p3dv2-panda-foot right" />
+      {room === 'kitchen' && <span className="p3dv3-panda-prop bamboo">🎋</span>}
+      {room === 'study' && <span className="p3dv3-panda-prop book">📖</span>}
+      {room === 'bedroom' && <span className="p3dv3-panda-prop sleep">zZ</span>}
+      {room === 'balcony' && <span className="p3dv3-panda-prop mug">☕</span>}
       {celebrating && <span className="p3dv2-party">✦ ♡ ✨</span>}
     </div>
   );
@@ -313,7 +317,7 @@ export default function Panda3DPage() {
             <div className="p3dv3-panda-zone">
               <div className="p3dv3-panda-glow" />
               <button className="p3dv2-panda-button" type="button" onClick={petPanda} aria-label="Pandayı sev">
-                <PandaCharacter celebrating={celebrating} petting={petting} />
+                <PandaCharacter room={room} celebrating={celebrating} petting={petting} />
               </button>
               <div className="p3dv3-panda-name">{state.settings.pet.name}</div>
             </div>
