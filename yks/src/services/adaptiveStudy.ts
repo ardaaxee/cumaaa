@@ -194,6 +194,7 @@ export function buildAdaptivePlan(state: AppState, startDay: DayKey = dayKey(), 
 
     tasks.push({
       date,
+      time: state.profile.preferredStudyTime || undefined,
       type: 'konu',
       title: `Akıllı · ${ref.subject.name}: ${ref.topic.name} konu çalışması`,
       subjectId: row.subjectId,
