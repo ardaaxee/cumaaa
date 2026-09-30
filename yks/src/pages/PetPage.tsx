@@ -1041,6 +1041,69 @@ export default function PetPage() {
   ];
   const questDone = quests.filter((q) => q.done).length;
 
+  useEffect(() => {
+    if (activity !== 'idle' || zeynepActivity !== 'idle') return;
+    const key = 'iyiki-panda-surprise-' + today;
+    try {
+      if (window.localStorage.getItem(key) === '1') return;
+    } catch {
+      /* sürpriz kalıcı olmasa da çalışabilir */
+    }
+
+    let line: string | null = null;
+    if (d.todayQuestions >= state.profile.dailyQuestionGoal && state.profile.dailyQuestionGoal > 0) {
+      line = `${state.profile.name || 'Zeynep'}, bugün soru hedefini tamamladın! ${pet.name} ile küçük bir kutlama yapıyoruz 🎉♡`;
+    } else if (d.todayMinutes >= state.profile.dailyStudyMinutes && state.profile.dailyStudyMinutes > 0) {
+      line = `${state.profile.name || 'Zeynep'}, bugünkü çalışma süresi hedefin tamam! Biraz dinlenmeyi hak ettin ☕♡`;
+    } else if (d.streak >= 7) {
+      line = `${d.streak} günlük serin var! ${pet.name} bile seninle gurur duyuyor 🐼🏆`;
+    } else if (doneTasks >= 3) {
+      line = `Bugün ${doneTasks} plan görevi bitirdin. Evde küçük bir başarı kutlaması var ✨`;
+    }
+    if (!line) return;
+
+    try { window.localStorage.setItem(key, '1'); } catch { /* noop */ }
+    clearZeynepTimers();
+    clearTimers();
+    setZeynepRoom(room);
+    setZeynepPos({ x: Math.min(78, petPos.x + 12), y: 8 });
+    setZeynepActivity('walking');
+    setActivity('surprised');
+    setEmotion('surprised');
+    setSceneMessage(line);
+    setZeynepMessage('Zeynep: ' + line);
+    setHappiness((v) => clampLife(v + 10));
+    setHearts((v) => v + 1);
+    void playPandaVoice('Yaşasın! Bugün çok güzel ilerledik!', 'happy', voiceOn);
+    zLater(() => {
+      setZeynepActivity('talking');
+      setActivity('playing');
+      setEmotion('laugh');
+    }, 800);
+    zLater(() => {
+      setZeynepActivity('idle');
+      setActivity('idle');
+      setEmotion('neutral');
+      setSceneMessage(null);
+      setZeynepMessage(null);
+    }, 4300);
+  }, [
+    activity,
+    zeynepActivity,
+    today,
+    d.todayQuestions,
+    d.todayMinutes,
+    d.streak,
+    doneTasks,
+    state.profile.dailyQuestionGoal,
+    state.profile.dailyStudyMinutes,
+    state.profile.name,
+    pet.name,
+    room,
+    petPos.x,
+    voiceOn,
+  ]);
+
   const toggle = (id: string) =>
     update((s) => {
       const items = s.settings.pet.items.includes(id) ? s.settings.pet.items.filter((x) => x !== id) : [...s.settings.pet.items, id];
