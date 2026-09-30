@@ -6,7 +6,7 @@ import { DailyQuestion } from '../components/DailyQuestion';
 import { StudyQueue } from '../components/StudyQueue';
 import { Empty, ProgressBar, toast } from '../components/ui';
 import { navigate } from '../hooks/useRoute';
-import { lookup, topicLabel } from '../services/lookup';
+import { lookup } from '../services/lookup';
 import { buildRecommendations, hasAnyData, type Recommendation } from '../services/recommendations';
 import { launchAdaptivePractice, launchTest, makeConfig } from '../services/testLauncher';
 import { usePetNeeds } from '../hooks/usePetNeeds';
@@ -311,30 +311,7 @@ export default function HomePage() {
             </div>
           )}
 
-          <div className="home-review-block">
-            <div className="row between nowrap">
-              <div>
-                <b>Tekrar zamanı</b>
-                <div className="tiny muted">Unutmadan kısa tekrar yap</div>
-              </div>
-              <a className="btn small ghost" href="#/tekrar">Tümü</a>
-            </div>
-            {due.length === 0 ? (
-              <div className="home-review-empty">Bugün bekleyen tekrar yok.</div>
-            ) : (
-              <ul className="list home-review-list">
-                {due.slice(0, 3).map((r) => (
-                  <li key={r.topicId}>
-                    <a className="link-row" href={`#/konu/${r.topicId}`}>
-                      <Icon name="repeat" />
-                      <span className="grow">{topicLabel(r.topicId)}</span>
-                      <span className={`badge ${r.dueDay < today ? 'warn' : 'brand'}`}>{r.dueDay < today ? 'Gecikti' : 'Bugün'}</span>
-                    </a>
-                  </li>
-                ))}
-              </ul>
-            )}
-          </div>
+
         </div>
       </section>
 
