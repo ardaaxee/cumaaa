@@ -129,7 +129,7 @@ export function Layout({ children }: { children: ReactNode }) {
   const section = sectionOf(route.path);
   const teacherName = useSelector((s) => s.settings.teacherName);
   // Test ve Panda Evi tam ekran deneyimdir; global alt şerit gizlenir.
-  const petMode = route.path === '/pandam';
+  const petMode = route.path === '/pandam' || route.path === '/pandam-klasik';
   const focusMode = route.path === '/test' || petMode;
   return (
     <div className={`shell${focusMode ? ' no-dock' : ''}${petMode ? ' pet-shell' : ''}`}>
@@ -171,7 +171,7 @@ export function Layout({ children }: { children: ReactNode }) {
       </main>
       {!focusMode && <AppStatusBar />}
       {!focusMode && <MascotNav />}
-      <Companion />
+      {!petMode && <Companion />}
     </div>
   );
 }
