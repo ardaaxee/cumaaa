@@ -12657,3 +12657,449 @@ textarea:focus-visible {
   .p3dv2-scene-camera,
   .p3dv2-room { animation:none !important; transition:none !important; }
 }
+
+
+/* ===== PANDA HOUSE 3D V3 POLISH ===== */
+.p3dv2-stage {
+  min-height: min(100svh, 860px);
+  background:
+    radial-gradient(circle at 50% 18%, rgba(171,132,227,.15), transparent 28%),
+    linear-gradient(180deg,#1d1526 0%,#17111f 58%,#120e18 100%);
+}
+.p3dv2-stage::before {
+  content:'';
+  position:absolute;
+  inset:0;
+  z-index:0;
+  pointer-events:none;
+  background:
+    radial-gradient(circle at 18% 28%,rgba(255,255,255,.045),transparent 14%),
+    radial-gradient(circle at 82% 24%,rgba(191,155,255,.06),transparent 18%);
+}
+.p3dv2-scene-camera {
+  inset: 112px 0 146px;
+  perspective: 1400px;
+  transform: translateY(var(--p3dv2-y)) scale(var(--p3dv2-zoom));
+}
+.p3dv2-room {
+  width:min(650px,94vw);
+  height:min(520px,59vh);
+  transform-style:preserve-3d;
+  transform:rotateY(calc(var(--p3dv2-yaw) * .45));
+}
+.p3dv2-back-wall {
+  left:4%;
+  right:4%;
+  top:3%;
+  bottom:31%;
+  border-radius:28px 28px 8px 8px;
+  transform:translateZ(-22px);
+  box-shadow:
+    inset 0 0 0 1px rgba(99,72,84,.08),
+    0 30px 70px rgba(0,0,0,.17);
+}
+.p3dv2-back-wall::before {
+  content:'';
+  position:absolute;
+  left:0;
+  right:0;
+  bottom:0;
+  height:11px;
+  background:linear-gradient(180deg,#d1c0b7,#a88f82);
+  box-shadow:0 -1px 0 rgba(255,255,255,.45);
+}
+.p3dv2-back-wall::after {
+  content:'';
+  position:absolute;
+  left:4%;
+  right:4%;
+  top:7%;
+  height:1px;
+  background:rgba(122,96,104,.10);
+  box-shadow:0 5px 0 rgba(255,255,255,.18);
+}
+.p3dv2-left-wall,
+.p3dv2-right-wall {
+  top:5%;
+  bottom:31%;
+  width:10%;
+  opacity:.76;
+  z-index:1;
+}
+.p3dv2-left-wall {
+  left:-1%;
+  transform:skewY(8deg) translateZ(-10px);
+  border-radius:18px 5px 5px 18px;
+}
+.p3dv2-right-wall {
+  right:-1%;
+  transform:skewY(-8deg) translateZ(-10px);
+  border-radius:5px 18px 18px 5px;
+}
+.p3dv2-floor {
+  z-index:2;
+  left:3%;
+  right:3%;
+  bottom:1%;
+  height:39%;
+  transform:none;
+  transform-origin:center;
+  clip-path:polygon(7% 0,93% 0,100% 100%,0 100%);
+  border-radius:0 0 30px 30px;
+  background:
+    linear-gradient(90deg,rgba(104,68,44,.12) 1px,transparent 1px) 0 0/52px 100%,
+    linear-gradient(180deg,#d5b18a 0%,#bf956c 56%,#a97d57 100%);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.38),
+    0 28px 45px rgba(24,14,24,.20);
+}
+.p3dv2-floor::before {
+  content:'';
+  position:absolute;
+  inset:0;
+  background:linear-gradient(180deg,rgba(255,255,255,.10),transparent 30%,rgba(71,42,27,.06));
+  pointer-events:none;
+}
+.p3dv2-floor > span { opacity:.56; }
+
+.p3dv3-panda-zone {
+  position:absolute;
+  z-index:30;
+  left:50%;
+  bottom:8%;
+  width:178px;
+  height:230px;
+  transform:translateX(-50%) translateZ(165px);
+  pointer-events:none;
+}
+.p3dv3-panda-glow {
+  position:absolute;
+  left:50%;
+  bottom:18px;
+  width:150px;
+  height:72px;
+  transform:translateX(-50%);
+  border-radius:50%;
+  background:radial-gradient(ellipse,rgba(182,147,239,.23),rgba(182,147,239,0) 68%);
+  filter:blur(3px);
+}
+.p3dv3-panda-zone .p3dv2-panda-button {
+  pointer-events:auto;
+  left:50%;
+  bottom:23px;
+  width:165px;
+  height:205px;
+  transform:translateX(-50%);
+}
+.p3dv3-panda-name {
+  position:absolute;
+  left:50%;
+  bottom:0;
+  transform:translateX(-50%);
+  min-width:74px;
+  padding:4px 9px;
+  border:1px solid rgba(255,255,255,.5);
+  border-radius:999px;
+  background:rgba(255,255,255,.82);
+  color:#403247;
+  box-shadow:0 7px 18px rgba(43,27,49,.12);
+  text-align:center;
+  font-size:.55rem;
+  font-weight:900;
+  letter-spacing:.01em;
+}
+.p3dv3-panda-zone .p3dv2-panda {
+  filter:drop-shadow(0 18px 15px rgba(26,18,30,.22));
+}
+.p3dv3-panda-zone .p3dv2-panda-head {
+  width:112px;
+  height:98px;
+  left:26px;
+  top:11px;
+}
+.p3dv3-panda-zone .p3dv2-panda-body {
+  left:34px;
+  bottom:18px;
+  width:98px;
+  height:114px;
+}
+.p3dv3-panda-zone .p3dv2-panda-ear {
+  width:42px;
+  height:42px;
+  top:3px;
+}
+.p3dv3-panda-zone .p3dv2-panda-ear.left { left:20px; }
+.p3dv3-panda-zone .p3dv2-panda-ear.right { right:20px; }
+.p3dv3-panda-zone .p3dv2-panda-arm {
+  top:91px;
+  width:34px;
+  height:80px;
+}
+.p3dv3-panda-zone .p3dv2-panda-foot {
+  bottom:3px;
+  width:52px;
+  height:39px;
+}
+.p3dv3-panda-zone .p3dv2-panda-patch {
+  top:29px;
+  width:35px;
+  height:41px;
+}
+.p3dv3-panda-zone .p3dv2-panda-nose { top:59px; }
+.p3dv3-panda-zone .p3dv2-panda-mouth { top:70px; }
+.p3dv3-panda-zone .p3dv2-panda-blush { top:68px; }
+.p3dv2-panda::after {
+  content:'';
+  position:absolute;
+  right:3px;
+  bottom:47px;
+  width:24px;
+  height:24px;
+  border-radius:50%;
+  background:#fff;
+  box-shadow:inset -4px -4px 6px rgba(43,43,49,.08);
+  z-index:2;
+}
+
+/* Remove old secondary character completely */
+.p3dv2-zeynep-anchor,
+.p3dv2-zeynep { display:none !important; }
+
+/* Furniture is kept behind the panda and above the floor */
+.p3dv2-sofa,
+.p3dv2-coffee-table,
+.p3dv2-floor-plant,
+.p3dv2-lamp,
+.p3dv2-dining-table,
+.p3dv2-water-bowl,
+.p3dv2-chair,
+.p3dv2-kitchen-plant,
+.p3dv2-study-desk,
+.p3dv2-desk-chair,
+.p3dv2-desk-lamp,
+.p3dv2-bed,
+.p3dv2-nightstand,
+.p3dv2-wardrobe,
+.p3dv2-balcony-seat,
+.p3dv2-balcony-table,
+.p3dv2-balcony-plants {
+  transform-style:preserve-3d;
+}
+
+/* Salon composition */
+.p3dv2-stage.room-living .p3dv2-sofa {
+  left:8%;
+  bottom:21%;
+  width:43%;
+  height:21%;
+  transform:translateZ(56px);
+}
+.p3dv2-stage.room-living .p3dv2-rug {
+  left:11%;
+  bottom:7%;
+  width:50%;
+  height:20%;
+  transform:none;
+  z-index:3;
+  opacity:.92;
+}
+.p3dv2-stage.room-living .p3dv2-coffee-table {
+  left:39%;
+  bottom:15%;
+  transform:translateZ(72px);
+}
+.p3dv2-stage.room-living .p3dv2-floor-plant {
+  right:5%;
+  bottom:19%;
+  transform:translateZ(48px);
+}
+.p3dv2-stage.room-living .p3dv2-tv {
+  right:9%;
+  top:30%;
+  width:25%;
+  height:17%;
+}
+.p3dv2-stage.room-living .p3dv2-lamp {
+  right:5%;
+  bottom:17%;
+  opacity:.92;
+}
+
+/* Kitchen composition */
+.p3dv2-stage.room-kitchen .p3dv2-dining-table {
+  left:34%;
+  bottom:15%;
+  transform:translateZ(74px);
+}
+.p3dv2-stage.room-kitchen .p3dv2-water-bowl {
+  left:68%;
+  bottom:19%;
+  transform:translateZ(68px);
+}
+.p3dv2-stage.room-kitchen .p3dv2-chair.one { left:20%; bottom:14%; }
+.p3dv2-stage.room-kitchen .p3dv2-chair.two { right:15%; bottom:14%; }
+
+/* Study composition */
+.p3dv2-stage.room-study .p3dv2-study-desk {
+  left:13%;
+  bottom:17%;
+  width:48%;
+  transform:translateZ(70px);
+}
+.p3dv2-stage.room-study .p3dv2-desk-chair {
+  left:29%;
+  bottom:4%;
+  transform:translateZ(52px);
+}
+.p3dv2-stage.room-study .p3dv2-study-rug {
+  left:14%;
+  bottom:3%;
+  width:52%;
+  transform:none;
+  z-index:3;
+}
+.p3dv2-stage.room-study .p3dv2-bookshelf {
+  right:7%;
+  width:20%;
+}
+.p3dv2-stage.room-study .p3dv2-study-board {
+  left:37%;
+  width:22%;
+}
+
+/* Bedroom composition */
+.p3dv2-stage.room-bedroom .p3dv2-bed {
+  left:8%;
+  bottom:15%;
+  width:52%;
+  transform:translateZ(58px);
+}
+.p3dv2-stage.room-bedroom .p3dv2-bedroom-rug {
+  left:10%;
+  bottom:4%;
+  width:55%;
+  transform:none;
+  z-index:3;
+}
+.p3dv2-stage.room-bedroom .p3dv2-nightstand {
+  right:21%;
+  bottom:18%;
+}
+.p3dv2-stage.room-bedroom .p3dv2-wardrobe {
+  right:5%;
+  width:18%;
+}
+
+/* Balcony composition */
+.p3dv2-stage.room-balcony .p3dv2-back-wall {
+  background:linear-gradient(180deg,#877ead 0%,#cc8795 51%,#e9ad79 100%);
+}
+.p3dv2-stage.room-balcony .p3dv2-floor {
+  background:
+    linear-gradient(90deg,rgba(78,75,75,.13) 1px,transparent 1px) 0 0/50px 100%,
+    linear-gradient(180deg,#c9c3b9,#a9a197);
+}
+.p3dv2-stage.room-balcony .p3dv2-balcony-seat {
+  left:9%;
+  bottom:14%;
+  transform:translateZ(74px);
+}
+.p3dv2-stage.room-balcony .p3dv2-balcony-table {
+  left:41%;
+  bottom:15%;
+  transform:translateZ(72px);
+}
+.p3dv2-stage.room-balcony .p3dv2-balcony-plants {
+  right:5%;
+  bottom:17%;
+}
+
+/* Slimmer overlays */
+.p3dv2-camera-tools { display:none; }
+.p3dv2-dialogue {
+  bottom:154px;
+  width:min(480px,calc(100% - 28px));
+  min-height:54px;
+  padding:8px 10px;
+  border-radius:17px;
+  background:rgba(24,17,31,.76);
+}
+.p3dv2-dialogue .speaker {
+  width:32px;
+  height:32px;
+  border-radius:10px;
+}
+.p3dv2-dialogue p {
+  white-space:normal;
+  display:-webkit-box;
+  -webkit-line-clamp:2;
+  -webkit-box-orient:vertical;
+}
+.p3dv2-actions {
+  bottom:96px;
+  gap:4px;
+  padding:4px;
+  border-radius:16px;
+}
+.p3dv2-actions button {
+  min-width:54px;
+  height:44px;
+  border-radius:11px;
+}
+.p3dv2-room-nav {
+  height:72px;
+  bottom:max(8px,env(safe-area-inset-bottom,0px));
+  border-radius:20px;
+}
+.p3dv2-room-nav button {
+  border-radius:14px;
+}
+.p3dv2-day-strip {
+  display:none;
+}
+
+@media (max-width:700px) {
+  .p3dv2-scene-camera {
+    inset:108px -8px 142px;
+  }
+  .p3dv2-room {
+    width:690px;
+    height:520px;
+    transform:rotateY(calc(var(--p3dv2-yaw) * .35)) scale(.86);
+  }
+  .p3dv3-panda-zone {
+    bottom:7%;
+  }
+}
+@media (max-width:430px) {
+  .p3dv2-stage {
+    min-height:100svh;
+  }
+  .p3dv2-scene-camera {
+    inset:104px -52px 140px;
+  }
+  .p3dv2-room {
+    width:710px;
+    height:520px;
+    transform:rotateY(calc(var(--p3dv2-yaw) * .28)) scale(.72);
+  }
+  .p3dv3-panda-zone {
+    width:170px;
+    height:222px;
+    bottom:5%;
+  }
+  .p3dv3-panda-zone .p3dv2-panda-button {
+    width:158px;
+    height:197px;
+  }
+  .p3dv2-hud {
+    top:max(64px,calc(env(safe-area-inset-top,0px) + 59px));
+  }
+  .p3dv2-profile {
+    padding:7px 9px;
+  }
+  .p3dv2-needs span {
+    min-width:39px;
+    min-height:39px;
+  }
+}
