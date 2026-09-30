@@ -4,6 +4,7 @@ import { update, useSelector } from '../store/store';
 import { Icon, type IconName } from './Icon';
 import { MascotNav } from './MascotNav';
 import { Companion } from './Companion';
+import { usePwaStatus } from '../services/pwa';
 
 interface NavItem {
   path: string;
@@ -59,6 +60,7 @@ interface InstallPromptEvent extends Event {
 }
 
 function AppStatusBar() {
+  const { offlineReady } = usePwaStatus();
   const activeTest = useSelector((s) => s.activeTest);
   const pomodoro = useSelector((s) => s.pomodoro);
   const [online, setOnline] = useState(() => (typeof navigator === 'undefined' ? true : navigator.onLine));
@@ -91,7 +93,7 @@ function AppStatusBar() {
     <div className="app-status-bar" aria-label="Uygulama durumu">
       {!online && (
         <span className="app-status-item offline">
-          <span aria-hidden="true">●</span> Çevrimdışı · kayıtların cihazda çalışmaya devam eder
+          <span aria-hidden="true">●</span> {offlineReady ? 'Çevrimdışı · dersler ve kayıtların hazır' : 'Çevrimdışı · kayıtların cihazda; henüz indirilmeyen içerikler için bağlantı gerekli'}
         </span>
       )}
       {activeTest && (
@@ -113,8 +115,8 @@ function AppStatusBar() {
           onClick={async () => {
             const prompt = installPrompt;
             setInstallPrompt(null);
-            await prompt.prompt();
-            await prompt.userChoice.catch(() => ({ outcome: 'dismissed' as const }));
+            try { await prompt.prompt(); await prompt.userChoice; }
+            catch { /* Native installation may be unavailable after the prompt expires. */ }
           }}
         >
           <Icon name="plus" /> Uygulamayı telefona yükle

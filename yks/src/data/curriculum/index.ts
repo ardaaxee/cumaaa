@@ -1,6 +1,20 @@
 import type { Subject, SubjectId, Topic, Unit, Subtopic } from '../../domain/types';
 
-const modules = import.meta.glob<{ subject: Subject }>('./*.ts', { eager: true });
+import { subject as tytTurkce } from './tyt-turkce';
+import { subject as tytMatematik } from './tyt-matematik';
+import { subject as tytGeometri } from './tyt-geometri';
+import { subject as tytFizik } from './tyt-fizik';
+import { subject as tytKimya } from './tyt-kimya';
+import { subject as tytBiyoloji } from './tyt-biyoloji';
+import { subject as tytTarih } from './tyt-tarih';
+import { subject as tytCografya } from './tyt-cografya';
+import { subject as tytFelsefe } from './tyt-felsefe';
+import { subject as tytDin } from './tyt-din';
+import { subject as aytMatematik } from './ayt-matematik';
+import { subject as aytGeometri } from './ayt-geometri';
+import { subject as aytFizik } from './ayt-fizik';
+import { subject as aytKimya } from './ayt-kimya';
+import { subject as aytBiyoloji } from './ayt-biyoloji';
 
 const SUBJECT_ORDER: SubjectId[] = [
   'tyt-turkce',
@@ -20,10 +34,8 @@ const SUBJECT_ORDER: SubjectId[] = [
   'ayt-biyoloji',
 ];
 
-export const SUBJECTS: Subject[] = Object.entries(modules)
-  .filter(([path]) => !path.endsWith('/index.ts'))
-  .map(([, mod]) => mod.subject)
-  .filter(Boolean)
+// Explicit imports keep startup independent of Vite's glob transform and avoid importing this index into itself.
+export const SUBJECTS: Subject[] = [tytTurkce, tytMatematik, tytGeometri, tytFizik, tytKimya, tytBiyoloji, tytTarih, tytCografya, tytFelsefe, tytDin, aytMatematik, aytGeometri, aytFizik, aytKimya, aytBiyoloji]
   // Bazı ders adları "TYT ..." önekiyle yazılmış; etiket tekrarını ("TYT TYT") önlemek için normalize edilir.
   .map((s) => ({ ...s, name: s.name.replace(new RegExp(`^${s.exam}\\s+`), '') }))
   .sort((a, b) => SUBJECT_ORDER.indexOf(a.id) - SUBJECT_ORDER.indexOf(b.id));

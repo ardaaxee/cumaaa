@@ -14,11 +14,11 @@ let saveTimer: ReturnType<typeof setTimeout> | null = null;
 let storageFailed = false;
 
 export const startupReport = initial.report;
-export const startupError = initial.error;
+export let startupError = initial.error;
 
 function flush() {
   saveTimer = null;
-  const ok = saveState(state);
+  const ok = !startupError && saveState(state);
   if (!ok && !storageFailed) {
     storageFailed = true;
     window.dispatchEvent(new CustomEvent('iyiki:storage-error'));
@@ -47,6 +47,25 @@ export function replaceState(next: AppState): void {
   state = next;
   flush();
   listeners.forEach((l) => l());
+}
+
+/** Persist first, so a failed restore leaves both the current profile and pending edits intact. */
+export function replaceStatePersisted(next: AppState): boolean {
+  if (!saveState(next)) return false;
+  if (saveTimer) clearTimeout(saveTimer);
+  saveTimer = null;
+  state = next;
+  startupError = null;
+  storageFailed = false;
+  listeners.forEach((listener) => listener());
+  return true;
+}
+
+export function persistNow(): boolean {
+  if (saveTimer) clearTimeout(saveTimer);
+  saveTimer = null;
+  if (startupError) return false;
+  return saveState(state);
 }
 
 export function subscribe(listener: () => void): () => void {

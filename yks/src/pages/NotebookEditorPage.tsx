@@ -322,17 +322,22 @@ export default function NotebookEditorPage({ params }: { params: string[] }) {
   const save = async (silent = false) => {
     const c = canvasRef.current;
     if (!c) return;
-    await setPageImage(id, c.toDataURL('image/png'));
-    update((s) => touchNotebookPage(s, id));
-    dirtyRef.current = false;
-    if (!silent) toast('Sayfa kaydedildi.');
+    const image = c.toDataURL('image/png');
+    try {
+      await setPageImage(id, image);
+      update((s) => touchNotebookPage(s, id));
+      if (canvasRef.current?.toDataURL('image/png') === image) dirtyRef.current = false;
+      if (!silent) toast('Sayfa kaydedildi.');
+    } catch {
+      toast('Çizim kaydedilemedi. Sayfadan ayrılmadan görsel olarak indir ve cihazında yer aç.', 5000);
+    }
   };
 
   useEffect(() => {
     const iv = setInterval(() => {
       if (dirtyRef.current) void save(true);
     }, 8000);
-    const onHide = () => dirtyRef.current && void save(true);
+    const onHide = () => { if (document.visibilityState === 'hidden' && dirtyRef.current) void save(true); };
     document.addEventListener('visibilitychange', onHide);
     return () => {
       clearInterval(iv);

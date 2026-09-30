@@ -35,6 +35,17 @@ function activeTestBlocked(replaceActive = false): string | null {
   return getState().activeTest && !replaceActive ? ACTIVE_TEST_ERROR : null;
 }
 
+// Recheck after asynchronous loading: a second click must not replace a newly started test.
+function activate(config: TestConfig, ids: string[], replaceActive = false): string | null {
+  const blocked = activeTestBlocked(replaceActive);
+  if (blocked) return blocked;
+  const uniqueIds = [...new Set(ids)];
+  if (!uniqueIds.length) return 'Soru bulunamadı.';
+  update((state) => startTest(state, { ...config, count: uniqueIds.length }, uniqueIds));
+  navigate('/test');
+  return null;
+}
+
 export async function launchTest(config: TestConfig, replaceActive = false): Promise<string | null> {
   const blocked = activeTestBlocked(replaceActive);
   if (blocked) return blocked;
@@ -48,9 +59,7 @@ export async function launchTest(config: TestConfig, replaceActive = false): Pro
   const pool = filterPool(all, config);
   if (!pool.length) return 'Bu filtrelere uyan soru bulunamadı. Filtreleri genişletmeyi dene.';
   const ids = pickQuestions(pool, config.count, getState().attempts);
-  update((s) => startTest(s, config, ids));
-  navigate('/test');
-  return null;
+  return activate(config, ids, replaceActive);
 }
 
 /** Belirli soru kimlikleriyle test başlatır (yanlışlar, tek soru). */
@@ -66,9 +75,7 @@ export async function launchWithIds(ids: string[], config: TestConfig, replaceAc
   }
   const valid = ids.filter((id) => known.has(id));
   if (!valid.length) return 'Soru bulunamadı.';
-  update((s) => startTest(s, { ...config, count: valid.length }, valid));
-  navigate('/test');
-  return null;
+  return activate(config, valid, replaceActive);
 }
 
 const QUICK_SUBJECTS = 3;
@@ -91,9 +98,7 @@ export async function launchQuickMix(count: number, title: string): Promise<stri
   if (!pool.length) return 'Soru bulunamadı.';
   const config = makeConfig({ count, title });
   const ids = pickQuestions(pool, count, getState().attempts);
-  update((s) => startTest(s, config, ids));
-  navigate('/test');
-  return null;
+  return activate(config, ids);
 }
 
 export function hasActiveTest(): boolean {
@@ -144,9 +149,7 @@ export async function launchDiagnostic(): Promise<string | null> {
     durationMin: Math.max(20, Math.ceil(ids.length * 1.25)),
     title: 'Akıllı Seviye Tespit Testi',
   });
-  update((st) => startTest(st, config, ids));
-  navigate('/test');
-  return null;
+  return activate(config, ids);
 }
 
 /**
@@ -206,9 +209,7 @@ export async function launchAdaptivePractice(count = 12): Promise<string | null>
     const ids = [...wrongIds, ...rest].slice(0, count);
     if (!ids.length) continue;
 
-    update((s) => startTest(s, { ...config, count: ids.length }, ids));
-    navigate('/test');
-    return null;
+    return activate(config, ids);
   }
   return launchQuickMix(count, 'Adaptif karışık test');
 }

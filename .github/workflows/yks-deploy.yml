@@ -34,9 +34,9 @@ jobs:
         working-directory: yks
         run: npm ci
 
-      - name: Build
+      - name: Verify release
         working-directory: yks
-        run: npm run build
+        run: npm run verify
 
       - name: Checkout gh-pages
         uses: actions/checkout@v4
@@ -46,8 +46,8 @@ jobs:
 
       - name: Replace YKS build
         run: |
-          rm -rf gh-pages/yks
           mkdir -p gh-pages/yks
+          # Keep hashed assets used by tabs that are still running the previous version.
           cp -R yks/dist/. gh-pages/yks/
           touch gh-pages/.nojekyll
 
@@ -63,7 +63,15 @@ jobs:
           fi
           git commit -m "deploy: latest YKS site"
           if ! git push origin gh-pages; then
-            echo "gh-pages changed during deploy; publishing newest YKS build."
+            echo "gh-pages changed during deploy; reapplying the build to the latest branch."
             git fetch origin gh-pages
-            git push --force-with-lease origin HEAD:gh-pages
+            git reset --hard origin/gh-pages
+            mkdir -p yks
+            cp -R "$GITHUB_WORKSPACE/yks/dist/." yks/
+            touch .nojekyll
+            git add yks .nojekyll
+            if ! git diff --cached --quiet; then
+              git commit -m "deploy: latest YKS site"
+              git push origin gh-pages
+            fi
           fi

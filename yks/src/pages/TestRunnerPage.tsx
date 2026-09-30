@@ -20,7 +20,7 @@ import {
   syncTestElapsed,
   toggleMark,
 } from '../store/actions';
-import { getState, update, useSelector } from '../store/store';
+import { getState, persistNow, update, useSelector } from '../store/store';
 import { formatClock } from '../utils/date';
 import { optionLetter } from '../utils/ids';
 import { answeredCount, findSimilar } from '../utils/testEngine';
@@ -107,9 +107,12 @@ export default function TestRunnerPage() {
       force((n) => n + 1);
     };
     document.addEventListener('visibilitychange', onVisibility);
+    const onPageHide = () => { commitTime(); persistNow(); };
+    window.addEventListener('pagehide', onPageHide);
     return () => {
       clearInterval(id);
       document.removeEventListener('visibilitychange', onVisibility);
+      window.removeEventListener('pagehide', onPageHide);
       commitTime();
     };
   }, [test?.id, commitTime]); // eslint-disable-line react-hooks/exhaustive-deps
