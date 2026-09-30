@@ -6,11 +6,24 @@ import { installChunkRecovery } from './utils/chunkRecovery';
 
 installChunkRecovery();
 
+const standalone =
+  window.matchMedia?.('(display-mode: standalone)').matches ||
+  (navigator as Navigator & { standalone?: boolean }).standalone === true;
+document.documentElement.classList.toggle('app-standalone', standalone);
+
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <App />
   </StrictMode>,
 );
+
+requestAnimationFrame(() => {
+  requestAnimationFrame(() => {
+    const splash = document.getElementById('boot-splash');
+    splash?.classList.add('hide');
+    window.setTimeout(() => splash?.remove(), 360);
+  });
+});
 
 // Çevrimdışı destek: yalnız üretim derlemesinde ve üst düzey pencerede (gömülü önizlemelerde değil).
 // HTML her zaman önce ağdan alındığı için yeni sürümler gecikmeden görünür.
