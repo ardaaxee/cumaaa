@@ -86,9 +86,9 @@ export default function TestResultPage({ params }: { params: string[] }) {
     if (err) toast(err);
   };
 
-  const createRecoveryWeek = () => {
+  const createRecoveryPlan = (days: 3 | 7 | 14) => {
     const today = dayKey();
-    const smart = buildAdaptivePlan(getState(), today, 7);
+    const smart = buildAdaptivePlan(getState(), today, days);
     update((current) => {
       const kept = current.tasks.filter(
         (task) => !(task.date >= today && !task.done && task.title.startsWith('Akıllı ·')),
@@ -97,7 +97,7 @@ export default function TestResultPage({ params }: { params: string[] }) {
       for (const task of smart.tasks) next = addTask(next, task);
       return next;
     });
-    toast('Sonuçlarına göre 7 günlük toparlanma planın güncellendi.', 5000);
+    toast(`Sonuçlarına göre ${days} günlük toparlanma planın güncellendi.`, 5000);
   };
 
   return (
@@ -191,9 +191,12 @@ export default function TestResultPage({ params }: { params: string[] }) {
           Yanlışlarıma git
         </a>
         {(wrongIds.length > 0 || result.config.origin === 'deneme') && (
-          <button type="button" className="btn ghost" onClick={createRecoveryWeek}>
-            7 günlük toparlanma planı oluştur
-          </button>
+          <div className="recovery-plan-actions" role="group" aria-label="Toparlanma planı süresi">
+            <span className="tiny muted">Toparlanma planı:</span>
+            <button type="button" className="btn ghost small" onClick={() => createRecoveryPlan(3)}>3 gün</button>
+            <button type="button" className="btn ghost small" onClick={() => createRecoveryPlan(7)}>7 gün</button>
+            <button type="button" className="btn ghost small" onClick={() => createRecoveryPlan(14)}>14 gün</button>
+          </div>
         )}
         {(result.config.origin === 'adaptif' || result.config.origin === 'seviye') && (
           <button type="button" className="btn ghost" onClick={() => void launchAdaptivePractice(12).then((e) => e && toast(e))}>
