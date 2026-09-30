@@ -1,0 +1,22 @@
+.app-info-card { margin-bottom: 20px; }
+.app-info-card summary { cursor: pointer; font-weight: 650; }
+.app-update-notice {
+  position: fixed;
+  z-index: 120;
+  right: max(16px, env(safe-area-inset-right));
+  bottom: calc(105px + env(safe-area-inset-bottom));
+  display: flex;
+  gap: 18px;
+  align-items: center;
+  width: min(440px, calc(100vw - 32px));
+  padding: 18px;
+  border: 1px solid var(--line, #ddd2f3);
+  border-radius: 18px;
+  background: var(--surface, #fff);
+  color: var(--text, #271e38);
+  box-shadow: 0 12px 44px #271e3826;
+}
+.app-update-notice p { margin: 6px 0 0; }
+.app-update-notice .btn { flex-shrink: 0; }
+@media (min-width: 900px) { .app-update-notice { bottom: 24px; } }
+@media (max-width: 390px) { .app-update-notice { gap: 10px; padding: 14px; } }

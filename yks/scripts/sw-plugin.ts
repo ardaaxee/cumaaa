@@ -13,7 +13,7 @@ export function serviceWorkerPlugin(): Plugin {
     apply: 'build',
     generateBundle(_options, bundle) {
       const files = Object.keys(bundle).filter((f) => !f.endsWith('.map'));
-      const staticFiles = ['manifest.webmanifest', 'icon.svg', 'icon-192.png', 'icon-512.png', 'icon-maskable-512.png', 'apple-touch-icon.png'];
+      const staticFiles = ['manifest.webmanifest', 'theme-init.js', 'icon.svg', 'icon-192.png', 'icon-512.png', 'icon-maskable-512.png', 'apple-touch-icon.png'];
       const precache = ['./', './index.html', ...[...files, ...staticFiles].map((f) => `./${f}`)];
       const unique = [...new Set(precache)];
       const contentSignature = Object.entries(bundle)
@@ -26,11 +26,13 @@ export function serviceWorkerPlugin(): Plugin {
           return name + ':' + createHash('sha256').update(item.code).digest('hex');
         })
         .join('|');
+      const template = readFileSync(fileURLToPath(new URL('./sw-template.js', import.meta.url)), 'utf8');
+      const staticSignature = staticFiles.map((name) => name + ':' + createHash('sha256')
+        .update(readFileSync(fileURLToPath(new URL('../public/' + name, import.meta.url)))).digest('hex')).join('|');
       const version = createHash('sha256')
-        .update(unique.join('|') + '|' + contentSignature)
+        .update(unique.join('|') + '|' + contentSignature + '|' + staticSignature + '|' + template)
         .digest('hex')
         .slice(0, 12);
-      const template = readFileSync(fileURLToPath(new URL('./sw-template.js', import.meta.url)), 'utf8');
       const source = template
         .replace('__VERSION__', version)
         .replace('__PRECACHE__', JSON.stringify(unique));

@@ -7,6 +7,8 @@ import { getState, startupError, startupReport, useSelector } from './store/stor
 import { cloudConfig, startAutoSync } from './services/cloud';
 import { useReminder } from './hooks/useReminder';
 import { usePetAlerts } from './hooks/usePetAlerts';
+import { StorageRecovery } from './components/StorageRecovery';
+import { AppUpdateNotice } from './components/AppInfo';
 
 const pages = {
   home: lazy(() => import('./pages/HomePage')),
@@ -90,6 +92,7 @@ function useThemeEffect() {
 export function App() {
   const route = useRoute();
   const onboarded = useSelector((s) => s.profile.onboarded);
+  const recoveryError = useSelector(() => startupError);
   const cloudKey = useSelector((s) => `${s.settings.cloud.projectId}|${s.settings.cloud.apiKey}|${s.settings.cloud.syncCode}`);
   useThemeEffect();
   useReminder();
@@ -117,6 +120,8 @@ export function App() {
     document.title = `${onboarded ? match?.title ?? 'Bulunamadı' : 'Hoş geldin'} · İyi ki • YKS`;
     window.scrollTo(0, 0);
   }, [route.path, onboarded, match]);
+
+  if (recoveryError) return <><StorageRecovery error={recoveryError} /><ToastHost /></>;
 
   // Sevgili/ortak ekranı: bağlantıyla gelen kişi uygulamayı kurmadan görebilsin.
   if (key === 'ortak') {
@@ -150,6 +155,7 @@ export function App() {
         </main>
       )}
       <ToastHost />
+      <AppUpdateNotice />
     </>
   );
 }

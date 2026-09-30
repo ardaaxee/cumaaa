@@ -10,14 +10,6 @@ export function migrationContext(): MigrationContext {
   return { topics: allTopics().map((r) => ({ id: r.topic.id, subjectId: r.subject.id, name: r.topic.name })) };
 }
 
-function safeGet(storage: Storage | undefined, key: string): string | null {
-  try {
-    return storage?.getItem(key) ?? null;
-  } catch {
-    return null;
-  }
-}
-
 export interface LoadResult {
   state: AppState;
   report: MigrationReport | null;
@@ -25,23 +17,26 @@ export interface LoadResult {
 }
 
 /** Kayıtlı durumu yükler; yoksa eski sürüm verisini taşır; o da yoksa yeni profil açar. */
-export function loadState(storage: Storage | undefined = globalThis.localStorage, ctx: MigrationContext = migrationContext()): LoadResult {
-  const current = safeGet(storage, STORAGE_KEY);
-  const legacy = current ? null : safeGet(storage, LEGACY_KEY);
-  const text = current ?? legacy;
-  if (!text) return { state: defaultState(), report: null, error: null };
+export function loadState(storage?: Storage, ctx: MigrationContext = migrationContext()): LoadResult {
   try {
+    const deviceStorage = storage ?? globalThis.localStorage;
+    const current = deviceStorage?.getItem(STORAGE_KEY);
+    const text = current ?? deviceStorage?.getItem(LEGACY_KEY);
+    if (!text) return { state: defaultState(), report: null, error: null };
     const { state, report } = migrate(JSON.parse(text), ctx);
+    if (report.from === 0) throw new Error('Kayıtlı veri tanınmadı. Mevcut kayıtlar değiştirilmedi.');
     return { state, report: report.from !== SCHEMA_VERSION ? report : null, error: null };
   } catch (e) {
-    return { state: defaultState(), report: null, error: e instanceof Error ? e.message : 'Kayıtlı veri okunamadı.' };
+    return { state: defaultState(), report: null, error: `Cihaz depolamasındaki kayıtlar açılamadı: ${e instanceof Error ? e.message : 'Kayıtlı veri okunamadı.'}` };
   }
 }
 
 /** Durumu kaydeder. Depolama doluysa false döner (veri bellekte kalır). */
-export function saveState(state: AppState, storage: Storage | undefined = globalThis.localStorage): boolean {
+export function saveState(state: AppState, storage?: Storage): boolean {
   try {
-    storage?.setItem(STORAGE_KEY, JSON.stringify(state));
+    const deviceStorage = storage ?? globalThis.localStorage;
+    if (!deviceStorage) return false;
+    deviceStorage.setItem(STORAGE_KEY, JSON.stringify(state));
     return true;
   } catch {
     return false;
@@ -110,8 +105,9 @@ export function parseBackup(
  * Yalnız İyi ki • YKS verilerini temizler.
  * Aynı GitHub Pages alan adındaki diğer projelerin localStorage verilerine dokunmaz.
  */
-export async function clearAppData(storage: Storage | undefined = globalThis.localStorage): Promise<void> {
+export async function clearAppData(storage?: Storage): Promise<void> {
   try {
+    storage ??= globalThis.localStorage;
     if (storage) {
       const keys: string[] = [];
       for (let i = 0; i < storage.length; i++) {

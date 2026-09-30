@@ -2,43 +2,20 @@
  * Öğretmen fotoğrafı IndexedDB'de saklanır (localStorage kotasını doldurmamak için).
  * IndexedDB yoksa localStorage'a düşer.
  */
-const DB_NAME = 'iyiki-yks';
-const STORE = 'files';
+import { imageRequest } from './imageDb';
+
 const KEY = 'teacherPhoto';
 const FALLBACK_KEY = 'iyikiYks.teacherPhoto';
 
-function openDb(): Promise<IDBDatabase> {
-  return new Promise((resolve, reject) => {
-    if (typeof indexedDB === 'undefined') return reject(new Error('IndexedDB yok'));
-    // Sürüm, notebookStore.ts ile aynı veritabanını paylaştığı için ortaktır.
-    const req = indexedDB.open(DB_NAME, 2);
-    req.onupgradeneeded = () => {
-      const db = req.result;
-      if (!db.objectStoreNames.contains(STORE)) db.createObjectStore(STORE);
-      if (!db.objectStoreNames.contains('notebook')) db.createObjectStore('notebook');
-    };
-    req.onsuccess = () => resolve(req.result);
-    req.onerror = () => reject(req.error);
-  });
-}
-
-function tx<T>(mode: IDBTransactionMode, run: (s: IDBObjectStore) => IDBRequest<T>): Promise<T> {
-  return openDb().then(
-    (db) =>
-      new Promise<T>((resolve, reject) => {
-        const t = db.transaction(STORE, mode);
-        const req = run(t.objectStore(STORE));
-        req.onsuccess = () => resolve(req.result);
-        req.onerror = () => reject(req.error);
-        t.oncomplete = () => db.close();
-      }),
-  );
+export function photoChanged(): void {
+  try { localStorage.removeItem(FALLBACK_KEY); } catch { /* IndexedDB is already committed. */ }
+  window.dispatchEvent(new CustomEvent('iyiki:teacher-photo'));
 }
 
 export async function getTeacherPhoto(): Promise<string | null> {
   try {
-    const v = await tx<string | undefined>('readonly', (s) => s.get(KEY) as IDBRequest<string | undefined>);
-    return typeof v === 'string' ? v : null;
+    const v = await imageRequest<string | undefined>('files', 'readonly', (s) => s.get(KEY));
+    return typeof v === 'string' ? v : localStorage.getItem(FALLBACK_KEY);
   } catch {
     try {
       return localStorage.getItem(FALLBACK_KEY);
@@ -50,8 +27,10 @@ export async function getTeacherPhoto(): Promise<string | null> {
 
 export async function setTeacherPhoto(dataUrl: string | null): Promise<void> {
   try {
-    if (dataUrl) await tx('readwrite', (s) => s.put(dataUrl, KEY));
-    else await tx('readwrite', (s) => s.delete(KEY));
+    if (dataUrl) await imageRequest('files', 'readwrite', (s) => s.put(dataUrl, KEY));
+    else await imageRequest('files', 'readwrite', (s) => s.delete(KEY));
+    photoChanged();
+    return;
   } catch {
     if (dataUrl) localStorage.setItem(FALLBACK_KEY, dataUrl);
     else localStorage.removeItem(FALLBACK_KEY);

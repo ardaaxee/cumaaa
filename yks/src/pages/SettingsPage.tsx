@@ -6,12 +6,14 @@ import { ConnectSettings } from '../components/ConnectSettings';
 import { CompanionToggle } from '../components/Companion';
 import { PageHeader } from '../components/Layout';
 import { ConfirmDialog, toast } from '../components/ui';
-import { deletePageImage, getPageImage, setPageImage } from '../services/notebookStore';
-import { getTeacherPhoto, setTeacherPhoto } from '../services/photoStore';
+import { getPageImageStrict } from '../services/notebookStore';
+import { getTeacherPhoto } from '../services/photoStore';
+import { restoreBackupFile } from '../services/backup';
+import { AppInfo } from '../components/AppInfo';
 import { updateProfile, updateSettings } from '../store/actions';
-import { clearAppData, createBackup, migrationContext, parseBackup } from '../store/storage';
-import { replaceState, update, useAppState } from '../store/store';
-import { isValidDayKey } from '../utils/date';
+import { clearAppData, createBackup } from '../store/storage';
+import { update, useAppState } from '../store/store';
+import { dayKey, isValidDayKey } from '../utils/date';
 
 export default function SettingsPage() {
   const state = useAppState();
@@ -19,13 +21,14 @@ export default function SettingsPage() {
   const fileRef = useRef<HTMLInputElement>(null);
   const [busy, setBusy] = useState(false);
   const [resetConfirm, setResetConfirm] = useState(false);
+  const [pendingImport, setPendingImport] = useState<File | null>(null);
 
   const exportData = async () => {
     setBusy(true);
     try {
       const photo = await getTeacherPhoto();
       const notebookEntries = await Promise.all(
-        state.notebookPages.map(async (page) => [page.id, await getPageImage(page.id)] as const),
+        state.notebookPages.map(async (page) => [page.id, await getPageImageStrict(page.id)] as const),
       );
       const notebookImages = Object.fromEntries(
         notebookEntries.filter((entry): entry is readonly [string, string] => typeof entry[1] === 'string'),
@@ -34,9 +37,9 @@ export default function SettingsPage() {
       const blob = new Blob([JSON.stringify(backup, null, 2)], { type: 'application/json' });
       const a = document.createElement('a');
       a.href = URL.createObjectURL(blob);
-      a.download = `iyi-ki-yks-yedek-${new Date().toISOString().slice(0, 10)}.json`;
+      a.download = `iyi-ki-yks-yedek-${dayKey()}.json`;
       a.click();
-      URL.revokeObjectURL(a.href);
+      window.setTimeout(() => URL.revokeObjectURL(a.href), 1000);
       toast(`Yedek indirildi · ${Object.keys(notebookImages).length} defter çizimi dahil.`);
     } catch {
       toast('Yedek hazırlanamadı. Cihaz depolamasını kontrol edip tekrar dene.');
@@ -48,17 +51,7 @@ export default function SettingsPage() {
   const importData = async (file: File) => {
     setBusy(true);
     try {
-      const text = await file.text();
-      const { state: next, teacherPhoto, notebookImages, report } = parseBackup(text, migrationContext());
-      await Promise.all(state.notebookPages.map((page) => deletePageImage(page.id)));
-      replaceState(next);
-      await setTeacherPhoto(teacherPhoto);
-      await Promise.all(
-        Object.entries(notebookImages)
-          .filter(([id]) => next.notebookPages.some((page) => page.id === id))
-          .map(([id, image]) => setPageImage(id, image)),
-      );
-      const restoredDrawings = Object.keys(notebookImages).length;
+      const { report, restoredDrawings } = await restoreBackupFile(file);
       toast(
         report.notes.length
           ? `Yedek içe aktarıldı. ${report.notes[0]}`
@@ -78,6 +71,8 @@ export default function SettingsPage() {
   return (
     <>
       <PageHeader title="Ayarlar" />
+
+      <AppInfo />
 
       <section className="card" aria-labelledby="prof-h">
         <h2 id="prof-h" className="mb-8">
@@ -199,13 +194,23 @@ export default function SettingsPage() {
           </button>
           <label className="btn">
             İçe aktar
-            <input ref={fileRef} type="file" accept="application/json" hidden disabled={busy} onChange={(e) => e.target.files?.[0] && void importData(e.target.files[0])} />
+            <input ref={fileRef} type="file" accept="application/json,.json" hidden disabled={busy} onChange={(e) => setPendingImport(e.target.files?.[0] ?? null)} />
           </label>
-          <button type="button" className="btn danger" onClick={() => setResetConfirm(true)}>
+          <button type="button" className="btn danger" disabled={busy} onClick={() => setResetConfirm(true)}>
             Tüm verileri sıfırla
           </button>
         </div>
       </section>
+
+      {pendingImport && (
+        <ConfirmDialog
+          title="Yedek geri yüklensin mi?"
+          message={`${pendingImport.name} dosyasındaki profil, plan ve kayıtlar mevcut verilerinin yerini alacak. Önce mevcut verilerini dışa aktarabilirsin.`}
+          confirmLabel="Yedeği geri yükle"
+          onCancel={() => { setPendingImport(null); if (fileRef.current) fileRef.current.value = ''; }}
+          onConfirm={() => { const file = pendingImport; setPendingImport(null); void importData(file); }}
+        />
+      )}
 
       {resetConfirm && (
         <ConfirmDialog

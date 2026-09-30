@@ -1,32 +1,17 @@
 import { useSyncExternalStore } from 'react';
+import { parseRoute, type Route } from '../utils/route';
+export type { Route } from '../utils/route';
 
 /**
  * Hash tabanlı yönlendirme: statik barındırmada ve çevrimdışı çalışır.
  * Örnek: #/konu/aytmat-turev?sekme=test
  */
 
-export interface Route {
-  path: string;
-  segments: string[];
-  query: URLSearchParams;
-}
-
-function parse(hash: string): Route {
-  const raw = hash.replace(/^#/, '') || '/';
-  const [pathPart, queryPart = ''] = raw.split('?');
-  const path = pathPart.startsWith('/') ? pathPart : `/${pathPart}`;
-  return {
-    path,
-    segments: path.split('/').filter(Boolean).map(decodeURIComponent),
-    query: new URLSearchParams(queryPart),
-  };
-}
-
-let current = parse(typeof location !== 'undefined' ? location.hash : '');
+let current = parseRoute(typeof location !== 'undefined' ? location.hash : '');
 
 function subscribe(cb: () => void) {
   const handler = () => {
-    current = parse(location.hash);
+    current = parseRoute(location.hash);
     cb();
   };
   window.addEventListener('hashchange', handler);

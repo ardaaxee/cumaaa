@@ -1,6 +1,7 @@
 import type { Question, SubjectId } from '../domain/types';
 import { dayKey, addDays, type DayKey } from '../utils/date';
 import { uid } from '../utils/ids';
+import { normalizeProfile } from '../utils/profile';
 import { completeReview, onWrongInTopic, scheduleFirstReview } from '../utils/srs';
 import { createActiveTest, scoreTest } from '../utils/testEngine';
 import { mockSectionsFromAnswers } from '../utils/fullMock';
@@ -64,7 +65,12 @@ function updateActive(state: AppState, fn: ActiveUpdater): AppState {
   return state.activeTest ? { ...state, activeTest: fn(state.activeTest) } : state;
 }
 
-export function answerQuestion(state: AppState, questionId: string, answer: number | null): AppState {
+export function answerQuestion(state: AppState, questionId: string, answer: number | null, now: Date = new Date()): AppState {
+  const test = state.activeTest;
+  if (!test || !test.questionIds.includes(questionId)) return state;
+  if (answer !== null && (!Number.isInteger(answer) || answer < 0 || answer > 4)) return state;
+  const deadline = test.deadlineAt ?? (test.timeLimitMs == null ? null : Date.parse(test.startedAt) + test.timeLimitMs);
+  if (deadline != null && now.getTime() >= deadline) return state;
   return updateActive(state, (t) => {
     if (t.config.mode === 'ogrenme' && t.revealed[questionId]) return t;
     return { ...t, answers: { ...t.answers, [questionId]: answer } };
@@ -444,7 +450,7 @@ export function deleteNotebookPage(state: AppState, id: string): AppState {
 // ---------- Profil / ayarlar ----------
 
 export function updateProfile(state: AppState, patch: Partial<Profile>): AppState {
-  return { ...state, profile: { ...state.profile, ...patch } };
+  return { ...state, profile: normalizeProfile(state.profile, patch) };
 }
 
 export function updateSettings(state: AppState, patch: Partial<Settings>): AppState {

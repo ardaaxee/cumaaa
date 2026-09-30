@@ -4,8 +4,12 @@ const PRECACHE = __PRECACHE__;
 
 self.addEventListener('install', (event) => {
   event.waitUntil(
-    caches.open(CACHE).then((cache) => cache.addAll(PRECACHE)).then(() => self.skipWaiting()),
+    caches.open(CACHE).then((cache) => cache.addAll(PRECACHE)),
   );
+});
+
+self.addEventListener('message', (event) => {
+  if (event.data?.type === 'SKIP_WAITING') event.waitUntil(self.skipWaiting());
 });
 
 self.addEventListener('activate', (event) => {
@@ -20,15 +24,21 @@ self.addEventListener('activate', (event) => {
 // - Sayfa (HTML) ve sabit adlı dosyalar: önce ağ, ağ yoksa önbellek.
 // - /assets/ altındaki dosyalar içerik özetiyle adlandırıldığı için değişmez: önce önbellek.
 function networkFirst(request, fallbackUrl) {
+  const cachedResponse = () => caches.open(CACHE).then((cache) => cache.match(fallbackUrl || request, { ignoreSearch: true }));
   return fetch(request)
-    .then((response) => {
-      if (response.ok && response.type === 'basic') {
+    .then(async (response) => {
+      if (!response.ok) {
+        const cached = await cachedResponse();
+        if (cached) return cached;
+      }
+      // Keep precached HTML paired with this worker's assets for a consistent offline version.
+      if (!fallbackUrl && response.ok && response.type === 'basic') {
         const copy = response.clone();
         caches.open(CACHE).then((cache) => cache.put(fallbackUrl || request, copy));
       }
       return response;
     })
-    .catch(() => caches.match(fallbackUrl || request, { ignoreSearch: true }));
+    .catch(async () => (await cachedResponse()) || Response.error());
 }
 
 self.addEventListener('fetch', (event) => {
@@ -36,6 +46,7 @@ self.addEventListener('fetch', (event) => {
   if (request.method !== 'GET') return;
   const url = new URL(request.url);
   if (url.origin !== self.location.origin) return;
+  if (!url.pathname.startsWith(new URL(self.registration.scope).pathname)) return;
   if (url.pathname.includes('/api/')) return;
 
   if (request.mode === 'navigate') {

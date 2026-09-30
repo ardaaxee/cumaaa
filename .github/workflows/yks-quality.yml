@@ -37,5 +37,24 @@ jobs:
       - name: Test
         run: npm test
 
+      - name: Release regression tests
+        run: npm run test:release
+
       - name: Build
         run: npm run build
+
+      - name: Verify offline build
+        run: npm run check:build
+
+      - name: Browser acceptance tests
+        run: npm run e2e
+
+      - name: Release files and screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: iyi-ki-yks-3.1-${{ github.sha }}
+          path: |
+            yks/dist/
+            yks/artifacts/
+          retention-days: 14

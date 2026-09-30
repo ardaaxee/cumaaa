@@ -4,8 +4,8 @@ import { recoverFromChunkError } from '../utils/chunkRecovery';
 async function clearAppCache() {
   try {
     if ('serviceWorker' in navigator) {
-      const regs = await navigator.serviceWorker.getRegistrations();
-      await Promise.all(regs.map((r) => r.unregister()));
+      const registration = await navigator.serviceWorker.getRegistration(new URL('./', location.href).href);
+      await registration?.unregister();
     }
     if ('caches' in window) {
       const keys = await caches.keys();

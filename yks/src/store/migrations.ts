@@ -2,6 +2,7 @@ import type { SubjectId } from '../domain/types';
 import { dayKey, isValidDayKey } from '../utils/date';
 import { uid } from '../utils/ids';
 import { freshCare } from '../utils/petCare';
+import { normalizeProfile } from '../utils/profile';
 import {
   SCHEMA_VERSION,
   defaultState,
@@ -242,7 +243,7 @@ export function sanitize(raw: Json): AppState {
   return {
     ...base,
     schemaVersion: SCHEMA_VERSION,
-    profile: {
+    profile: normalizeProfile(base.profile, {
       ...base.profile,
       ...profile,
       name: str(profile.name).slice(0, 40),
@@ -258,7 +259,7 @@ export function sanitize(raw: Json): AppState {
       aytTarget: typeof profile.aytTarget === 'number' ? profile.aytTarget : null,
       examDate: isValidDayKey(profile.examDate) ? profile.examDate : '',
       onboarded: !!profile.onboarded,
-    } as AppState['profile'],
+    } as AppState['profile']),
     settings: {
       ...base.settings,
       ...settings,
