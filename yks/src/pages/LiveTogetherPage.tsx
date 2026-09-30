@@ -355,6 +355,8 @@ export default function LiveTogetherPage() {
     setJoined(false);
     setOnlineCount(0);
     setRoomFull(false);
+    setRemoteName('Karşı taraf');
+    setReaction(null);
     cryptoKeyRef.current = null;
     setConnection('offline');
   };
@@ -395,27 +397,69 @@ export default function LiveTogetherPage() {
         })
         .on('broadcast', { event: 'hello' }, ({ payload }: any) => {
           if (!payload || payload.from === clientId) return;
-          void decryptPacket<{ from: string; at: number }>(cryptoKeyRef.current, 'hello', payload as SecurePacket)
+          void decryptPacket<{ from: string; at: number; name?: string }>(cryptoKeyRef.current, 'hello', payload as SecurePacket)
             .then((clear) => {
               if (!clear || clear.from === clientId) return;
+              if (clear.name?.trim()) setRemoteName(clear.name.trim().slice(0, 40));
               setOnlineCount((n) => Math.max(2, n));
               setConnection('connecting');
               ensurePeer();
-              void sendBroadcast('hello', { from: clientId, at: Date.now() });
+              void sendBroadcast('hello', { from: clientId, at: Date.now(), name: localName });
+              void sendBroadcast('study-sync', sharedStudyRef.current);
             });
         })
         .on('broadcast', { event: 'chat' }, ({ payload }: any) => {
           if (!payload || payload.from === clientId) return;
-          void decryptPacket<{ id: string; from: string; text: string; at: number }>(cryptoKeyRef.current, 'chat', payload as SecurePacket)
+          void decryptPacket<{ id: string; from: string; text: string; at: number; name?: string }>(cryptoKeyRef.current, 'chat', payload as SecurePacket)
             .then((clear) => {
               if (!clear || clear.from === clientId || typeof clear.text !== 'string') return;
+              if (clear.name?.trim()) setRemoteName(clear.name.trim().slice(0, 40));
               setMessages((m) => [...m.slice(-99), {
                 id: clear.id ?? makeId(10),
-                sender: 'Zeynep',
+                sender: clear.name?.trim().slice(0, 40) || remoteName,
                 text: clear.text.slice(0, 1000),
                 at: clear.at ?? Date.now(),
                 mine: false,
               }]);
+            });
+        })
+        .on('broadcast', { event: 'study-sync' }, ({ payload }: any) => {
+          if (!payload || payload.from === clientId) return;
+          void decryptPacket<SharedStudyState>(cryptoKeyRef.current, 'study-sync', payload as SecurePacket)
+            .then((clear) => {
+              if (!clear || !Array.isArray(clear.tasks)) return;
+              const safe: SharedStudyState = {
+                running: !!clear.running,
+                endsAt: typeof clear.endsAt === 'number' ? clear.endsAt : null,
+                remainingMs: Math.max(0, Number(clear.remainingMs) || 0),
+                durationMin: Math.min(120, Math.max(5, Number(clear.durationMin) || 25)),
+                tasks: clear.tasks
+                  .filter((task) => task && typeof task.id === 'string' && typeof task.text === 'string')
+                  .slice(0, 20)
+                  .map((task) => ({ id: task.id.slice(0, 32), text: task.text.slice(0, 120), done: !!task.done })),
+                updatedAt: Number(clear.updatedAt) || Date.now(),
+                updatedBy: typeof clear.updatedBy === 'string' ? clear.updatedBy : payload.from,
+              };
+              if (safe.updatedAt >= sharedStudyRef.current.updatedAt) applySharedStudy(safe);
+            });
+        })
+        .on('broadcast', { event: 'study-request' }, ({ payload }: any) => {
+          if (!payload || payload.from === clientId) return;
+          void decryptPacket<{ from: string }>(cryptoKeyRef.current, 'study-request', payload as SecurePacket)
+            .then((clear) => {
+              if (clear?.from && clear.from !== clientId) void sendBroadcast('study-sync', sharedStudyRef.current);
+            });
+        })
+        .on('broadcast', { event: 'reaction' }, ({ payload }: any) => {
+          if (!payload || payload.from === clientId) return;
+          void decryptPacket<{ from: string; emoji: string; at: number; name?: string }>(cryptoKeyRef.current, 'reaction', payload as SecurePacket)
+            .then((clear) => {
+              if (!clear || clear.from === clientId || typeof clear.emoji !== 'string') return;
+              const sender = clear.name?.trim().slice(0, 40) || remoteName;
+              if (clear.name?.trim()) setRemoteName(sender);
+              setReaction({ emoji: clear.emoji.slice(0, 8), sender, at: clear.at || Date.now() });
+              if (reactionTimerRef.current) window.clearTimeout(reactionTimerRef.current);
+              reactionTimerRef.current = window.setTimeout(() => setReaction(null), 2600);
             });
         })
         .on('presence', { event: 'sync' }, () => {
@@ -438,11 +482,12 @@ export default function LiveTogetherPage() {
         })
         .subscribe(async (status: string) => {
           if (status === 'SUBSCRIBED') {
-            await channel.track({ id: clientId, onlineAt: new Date().toISOString() });
-            await sendBroadcast('hello', { from: clientId, at: Date.now() });
+            await channel.track({ id: clientId, name: localName, onlineAt: new Date().toISOString() });
+            await sendBroadcast('hello', { from: clientId, at: Date.now(), name: localName });
+            await sendBroadcast('study-request', { from: clientId });
             if (helloTimer.current) window.clearInterval(helloTimer.current);
             helloTimer.current = window.setInterval(() => {
-              void sendBroadcast('hello', { from: clientId, at: Date.now() });
+              void sendBroadcast('hello', { from: clientId, at: Date.now(), name: localName });
             }, 10_000);
             setJoined(true);
             setConnection('connecting');
@@ -509,10 +554,71 @@ export default function LiveTogetherPage() {
   const sendMessage = async () => {
     const text = draft.trim();
     if (!text || !joined) return;
-    const msg = { id: makeId(10), from: clientId, text: text.slice(0, 1000), at: Date.now() };
-    setMessages((m) => [...m.slice(-99), { ...msg, sender: 'Ben', mine: true }]);
+    const msg = { id: makeId(10), from: clientId, name: localName, text: text.slice(0, 1000), at: Date.now() };
+    setMessages((m) => [...m.slice(-99), { ...msg, sender: localName, mine: true }]);
     setDraft('');
     await sendBroadcast('chat', msg);
+  };
+
+  const updateStudy = (patch: Partial<SharedStudyState>) => {
+    const next: SharedStudyState = {
+      ...sharedStudyRef.current,
+      ...patch,
+      updatedAt: Date.now(),
+      updatedBy: clientId,
+    };
+    void syncStudy(next);
+  };
+
+  const setStudyDuration = (minutes: number) => {
+    if (sharedStudy.running) return;
+    updateStudy({ durationMin: minutes, remainingMs: minutes * 60_000, endsAt: null });
+  };
+
+  const startSharedStudy = () => {
+    if (!joined) return toast('Önce odaya bağlan.');
+    const current = sharedStudyRef.current;
+    const remaining = current.remainingMs > 0 ? current.remainingMs : current.durationMin * 60_000;
+    updateStudy({ running: true, endsAt: Date.now() + remaining, remainingMs: remaining });
+  };
+
+  const pauseSharedStudy = () => {
+    const current = sharedStudyRef.current;
+    const remaining = current.running && current.endsAt ? Math.max(0, current.endsAt - Date.now()) : current.remainingMs;
+    updateStudy({ running: false, endsAt: null, remainingMs: remaining });
+  };
+
+  const resetSharedStudy = () => {
+    const current = sharedStudyRef.current;
+    updateStudy({ running: false, endsAt: null, remainingMs: current.durationMin * 60_000 });
+  };
+
+  const addSharedTask = () => {
+    const text = taskDraft.trim();
+    if (!joined || !text) return;
+    const current = sharedStudyRef.current;
+    if (current.tasks.length >= 20) return toast('Ortak listede en fazla 20 görev olabilir.');
+    setTaskDraft('');
+    updateStudy({ tasks: [...current.tasks, { id: makeId(10), text: text.slice(0, 120), done: false }] });
+  };
+
+  const toggleSharedTask = (id: string) => {
+    const current = sharedStudyRef.current;
+    updateStudy({ tasks: current.tasks.map((task) => task.id === id ? { ...task, done: !task.done } : task) });
+  };
+
+  const removeSharedTask = (id: string) => {
+    const current = sharedStudyRef.current;
+    updateStudy({ tasks: current.tasks.filter((task) => task.id !== id) });
+  };
+
+  const sendReaction = (emoji: string) => {
+    if (!joined) return;
+    const next = { emoji, sender: localName, at: Date.now() };
+    setReaction(next);
+    if (reactionTimerRef.current) window.clearTimeout(reactionTimerRef.current);
+    reactionTimerRef.current = window.setTimeout(() => setReaction(null), 2600);
+    void sendBroadcast('reaction', { from: clientId, name: localName, emoji, at: next.at });
   };
 
   useEffect(() => {
