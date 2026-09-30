@@ -1050,6 +1050,7 @@ export default function PetPage() {
     if (activity !== 'idle') return;
     const threshold = dailyStudyProgress >= 75 ? 75 : dailyStudyProgress >= 50 ? 50 : dailyStudyProgress >= 25 ? 25 : 0;
     if (!threshold) return;
+
     const key = `iyiki-panda-progress-${today}-${threshold}`;
     try {
       if (window.localStorage.getItem(key) === '1') return;
@@ -1064,7 +1065,7 @@ export default function PetPage() {
 
     if (threshold === 25) {
       setRoom('kitchen');
-        setPetPos({ x: 46, y: 2 });
+      setPetPos({ x: 46, y: 2 });
       setActivity('greeting');
       setSceneMessage('Günün ilk çeyreği tamam! ' + pet.name + ' mutfakta küçük bir mola veriyor ☕♡');
       void playPandaVoice('Güzel başladık!', 'happy', voiceOn);
@@ -1082,19 +1083,16 @@ export default function PetPage() {
       void playPandaVoice('Az kaldı!', 'happy', voiceOn);
     }
 
+    later(() => {
       setActivity('idle');
       setSceneMessage(null);
     }, 4600);
-  }, [
-    activity,
-    dailyStudyProgress,
-    today,
-    pet.name,
-    voiceOn,
-  ]);
+    // Bu olay yalnız yeni bir günlük eşik ilk kez aşıldığında çalışır.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activity, dailyStudyProgress, today, pet.name, voiceOn]);
 
   useEffect(() => {
-    if (activity !== 'idle' || zeynepActivity !== 'idle') return;
+    if (activity !== 'idle') return;
     const key = 'iyiki-panda-surprise-' + today;
     try {
       if (window.localStorage.getItem(key) === '1') return;
@@ -1122,13 +1120,17 @@ export default function PetPage() {
     setHappiness((v) => clampLife(v + 10));
     setHearts((v) => v + 1);
     void playPandaVoice('Yaşasın! Bugün çok güzel ilerledik!', 'happy', voiceOn);
+
+    later(() => {
       setActivity('playing');
       setEmotion('laugh');
     }, 800);
+    later(() => {
       setActivity('idle');
       setEmotion('neutral');
       setSceneMessage(null);
     }, 4300);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     activity,
     today,
@@ -1140,8 +1142,6 @@ export default function PetPage() {
     state.profile.dailyStudyMinutes,
     state.profile.name,
     pet.name,
-    room,
-    petPos.x,
     voiceOn,
   ]);
 
