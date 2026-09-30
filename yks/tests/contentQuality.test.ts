@@ -16,6 +16,8 @@ describe('YKS content quality gate', () => {
         .map((id) => ({ id, count: counts.get(id) ?? 0 }))
         .filter((x) => x.count < 5);
 
+      const emptySubtopics = subject.units.flatMap((unit) => unit.topics.flatMap((topic) => topic.subtopics.filter((sub) => !questions.some((q) => q.subtopic === sub.id)).map((sub) => sub.id)));
+      expect(emptySubtopics, 'Alt konu filtresi boş: ' + emptySubtopics.join(', ')).toEqual([]);
       expect(missingLessons, 'Konu anlatımı eksik: ' + missingLessons.join(', ')).toEqual([]);
       expect(
         lowQuestionTopics,
@@ -32,6 +34,7 @@ describe('YKS content quality gate', () => {
     for (const q of questions) {
       expect(ids.has(q.id), 'Tekrarlanan soru id: ' + q.id).toBe(false);
       ids.add(q.id);
+      expect(q.subtopic, q.id + ' alt konu eşleştirmesi gerekli').toBeTruthy();
       expect(q.options, q.id + ' tam 5 seçenek içermeli').toHaveLength(5);
       expect(q.correctAnswer, q.id + ' doğru cevap 0–4 aralığında olmalı').toBeGreaterThanOrEqual(0);
       expect(q.correctAnswer, q.id + ' doğru cevap 0–4 aralığında olmalı').toBeLessThanOrEqual(4);
@@ -43,6 +46,18 @@ describe('YKS content quality gate', () => {
     }
 
     expect(questions.length).toBeGreaterThan(500);
+  });
+
+  it('aynı sorunun seçenek sırası değiştirilerek tekrar eklenmesini önler', async () => {
+    const lists = await Promise.all(SUBJECTS.map((subject) => loadSubjectQuestions(subject.id)));
+    const seen = new Map<string, string>();
+    const duplicates: string[] = [];
+    for (const q of lists.flat()) {
+      const key = JSON.stringify([q.topic, q.question.trim(), q.premises ?? [], q.table ?? null, [...q.options].sort()]);
+      if (seen.has(key)) duplicates.push(seen.get(key)! + ' / ' + q.id);
+      seen.set(key, q.id);
+    }
+    expect(duplicates).toEqual([]);
   });
 
   it('konu anlatımları profesyonel iskeleti koruyor', async () => {

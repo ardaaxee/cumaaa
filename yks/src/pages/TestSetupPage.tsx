@@ -32,8 +32,8 @@ export default function TestSetupPage() {
     const validType = Object.prototype.hasOwnProperty.call(TYPE_LABEL, presetType ?? '') ? (presetType as QuestionType) : 'all';
 
     return makeConfig({
-      exam: presetExam === 'TYT' || presetExam === 'AYT' ? presetExam : presetSubject?.exam ?? presetTopic?.subject.exam ?? 'all',
-      subjectId: presetSubject?.id ?? presetTopic?.subject.id ?? 'all',
+      exam: presetTopic?.subject.exam ?? presetSubject?.exam ?? (presetExam === 'TYT' || presetExam === 'AYT' ? presetExam : 'all'),
+      subjectId: presetTopic?.subject.id ?? presetSubject?.id ?? 'all',
       topicId: presetTopic?.topic.id ?? 'all',
       subtopicId: validSubtopic,
       difficulty: validDifficulty,
@@ -53,9 +53,10 @@ export default function TestSetupPage() {
   const topics = subject ? subject.units.flatMap((u) => u.topics) : [];
   const topic = cfg.topicId !== 'all' ? getTopicRef(cfg.topicId)?.topic : undefined;
   const openWrongIds = Object.values(state.wrongs).filter((w) => !w.learned).map((w) => w.questionId);
+  const difficultyPool = useMemo(() => questions ? filterPool(questions, { ...cfg, difficulty: 'all' }) : [], [questions, cfg]);
   const poolDifficulty = useMemo(
-    () => Object.entries(DIFFICULTY_LABEL).map(([key, label]) => ({ key, label, count: pool.filter((q) => q.difficulty === key).length })),
-    [pool],
+    () => Object.entries(DIFFICULTY_LABEL).map(([key, label]) => ({ key, label, count: difficultyPool.filter((q) => q.difficulty === key).length })),
+    [difficultyPool],
   );
   const poolTypes = useMemo(
     () =>
@@ -209,6 +210,7 @@ export default function TestSetupPage() {
           </div>
         )}
 
+        {questions && pool.length === 0 && <div className="notice warn"><div className="grow">Bu seçimde soru bulunamadı. Konuyu koruyarak zorluk, soru tipi ve alt konu filtrelerini genişletebilirsin.</div><button className="btn small" type="button" onClick={() => set({ subtopicId: 'all', difficulty: 'all', type: 'all' })}>Filtreleri genişlet</button></div>}
         <p className="small muted mt-12" style={{ marginBottom: 0 }}>
           {cfg.mode === 'ogrenme'
             ? 'Öğrenme modu: her cevaptan sonra doğru/yanlış, çözüm, öğretmene sor ve benzer soru seçenekleri görünür.'

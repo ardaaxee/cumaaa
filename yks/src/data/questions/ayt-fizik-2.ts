@@ -15,7 +15,7 @@ export const questions: QuestionSeed[] = [
   // ---------------- Elektriksel kuvvet ve alan ----------------
   {
     id: `${EK}-q01`,
-    topic: EK,
+    topic: EK, subtopic: 'aytfiz-elektriksel-kuvvet-alan-s1',
     outcome: "Noktasal yükler arasındaki elektriksel kuvveti Coulomb yasasıyla hesaplar.",
     difficulty: "kolay",
     type: "islem",
@@ -29,7 +29,7 @@ export const questions: QuestionSeed[] = [
   },
   {
     id: `${EK}-q02`,
-    topic: EK,
+    topic: EK, subtopic: 'aytfiz-elektriksel-kuvvet-alan-s1',
     outcome: "Noktasal yükler arasındaki elektriksel kuvveti Coulomb yasasıyla hesaplar.",
     difficulty: "orta",
     type: "cok-adimli",
@@ -43,7 +43,7 @@ export const questions: QuestionSeed[] = [
   },
   {
     id: `${EK}-q03`,
-    topic: EK,
+    topic: EK, subtopic: 'aytfiz-elektriksel-kuvvet-alan-s2',
     outcome: "Noktasal yüklerin bir noktada oluşturduğu bileşke elektrik alanı hesaplar.",
     difficulty: "orta",
     type: "islem",
@@ -63,7 +63,7 @@ export const questions: QuestionSeed[] = [
   },
   {
     id: `${EK}-q04`,
-    topic: EK,
+    topic: EK, subtopic: 'aytfiz-elektriksel-kuvvet-alan-s2',
     outcome: "Noktasal yüklerin bir noktada oluşturduğu bileşke elektrik alanı hesaplar.",
     difficulty: "zor",
     type: "problem",
@@ -77,7 +77,7 @@ export const questions: QuestionSeed[] = [
   },
   {
     id: `${EK}-q05`,
-    topic: EK,
+    topic: EK, subtopic: 'aytfiz-elektriksel-kuvvet-alan-s2',
     outcome: "Elektrik alan çizgilerinin özelliklerini açıklar.",
     difficulty: "kolay",
     type: "onculu",
@@ -96,7 +96,7 @@ export const questions: QuestionSeed[] = [
   },
   {
     id: `${EK}-q06`,
-    topic: EK,
+    topic: EK, subtopic: 'aytfiz-elektriksel-kuvvet-alan-s3',
     outcome: "Düzgün elektrik alan içindeki yüklü parçacığa etki eden kuvveti ve hareketini yorumlar.",
     difficulty: "orta",
     type: "problem",
@@ -110,7 +110,7 @@ export const questions: QuestionSeed[] = [
   },
   {
     id: `${EK}-q07`,
-    topic: EK,
+    topic: EK, subtopic: 'aytfiz-elektriksel-kuvvet-alan-s2',
     outcome: "Noktasal yükün oluşturduğu elektrik alanın uzaklıkla değişimini grafikle yorumlar.",
     difficulty: "orta",
     type: "grafik",
@@ -124,7 +124,7 @@ export const questions: QuestionSeed[] = [
   },
   {
     id: `${EK}-q08`,
-    topic: EK,
+    topic: EK, subtopic: 'aytfiz-elektriksel-kuvvet-alan-s1',
     outcome: "Birden çok noktasal yükün bir yüke uyguladığı bileşke kuvveti hesaplar.",
     difficulty: "orta",
     type: "tablo",
@@ -147,7 +147,7 @@ export const questions: QuestionSeed[] = [
   },
   {
     id: `${EK}-q09`,
-    topic: EK,
+    topic: EK, subtopic: 'aytfiz-elektriksel-kuvvet-alan-s2',
     outcome: "Düzgün elektrik alan içindeki yüklü parçacığa etki eden kuvveti ve hareketini yorumlar.",
     difficulty: "yeni-nesil",
     type: "yeni-nesil",
@@ -161,7 +161,7 @@ export const questions: QuestionSeed[] = [
   },
   {
     id: `${EK}-q10`,
-    topic: EK,
+    topic: EK, subtopic: 'aytfiz-elektriksel-kuvvet-alan-s3',
     outcome: "Düzgün elektrik alan içindeki yüklü parçacığa etki eden kuvveti ve hareketini yorumlar.",
     difficulty: "orta",
     type: "onculu",
@@ -180,7 +180,7 @@ export const questions: QuestionSeed[] = [
   },
   {
     id: `${EK}-q11`,
-    topic: EK,
+    topic: EK, subtopic: 'aytfiz-elektriksel-kuvvet-alan-s2',
     outcome: "Noktasal yüklerin bir noktada oluşturduğu bileşke elektrik alanı hesaplar.",
     difficulty: "zor",
     type: "cok-adimli",
@@ -194,7 +194,7 @@ export const questions: QuestionSeed[] = [
   },
   {
     id: `${EK}-q12`,
-    topic: EK,
+    topic: EK, subtopic: 'aytfiz-elektriksel-kuvvet-alan-s3',
     outcome: "Düzgün elektrik alan içindeki yüklü parçacığa etki eden kuvveti ve hareketini yorumlar.",
     difficulty: "zor",
     type: "deney",
@@ -219,7 +219,7 @@ export const questions: QuestionSeed[] = [
   // ---------------- Elektriksel potansiyel ----------------
   {
     id: `${EP}-q01`,
-    topic: EP,
+    topic: EP, subtopic: 'aytfiz-elektriksel-potansiyel-s2',
     outcome: "Noktasal yüklerin oluşturduğu elektriksel potansiyeli hesaplar.",
     difficulty: "kolay",
     type: "islem",
@@ -233,7 +233,7 @@ export const questions: QuestionSeed[] = [
   },
   {
     id: `${EP}-q02`,
-    topic: EP,
+    topic: EP, subtopic: 'aytfiz-elektriksel-potansiyel-s2',
     outcome: "Noktasal yüklerin oluşturduğu elektriksel potansiyeli hesaplar.",
     difficulty: "orta",
     type: "islem",
@@ -247,7 +247,7 @@ export const questions: QuestionSeed[] = [
   },
   {
     id: `${EP}-q03`,
-    topic: EP,
+    topic: EP, subtopic: 'aytfiz-elektriksel-potansiyel-s3',
     outcome: "Elektrik alanda yükün yer değiştirmesinde yapılan işi potansiyel farkıyla ilişkilendirir.",
     difficulty: "orta",
     type: "islem",
@@ -267,7 +267,7 @@ export const questions: QuestionSeed[] = [
   },
   {
     id: `${EP}-q04`,
-    topic: EP,
+    topic: EP, subtopic: 'aytfiz-elektriksel-potansiyel-s1',
     outcome: "İki noktasal yükün elektriksel potansiyel enerjisini hesaplar.",
     difficulty: "orta",
     type: "cok-adimli",
@@ -281,7 +281,7 @@ export const questions: QuestionSeed[] = [
   },
   {
     id: `${EP}-q05`,
-    topic: EP,
+    topic: EP, subtopic: 'aytfiz-elektriksel-potansiyel-s4',
     outcome: "Paralel levhalar arasındaki düzgün elektrik alanı potansiyel farkı ve levha aralığıyla ilişkilendirir.",
     difficulty: "kolay",
     type: "islem",
@@ -295,7 +295,7 @@ export const questions: QuestionSeed[] = [
   },
   {
     id: `${EP}-q06`,
-    topic: EP,
+    topic: EP, subtopic: 'aytfiz-elektriksel-potansiyel-s4',
     outcome: "Potansiyel farkı altında hızlanan yüklü parçacığın kinetik enerjisini ve hızını hesaplar.",
     difficulty: "orta",
     type: "problem",
@@ -309,7 +309,7 @@ export const questions: QuestionSeed[] = [
   },
   {
     id: `${EP}-q07`,
-    topic: EP,
+    topic: EP, subtopic: 'aytfiz-elektriksel-potansiyel-s4',
     outcome: "Paralel levhalar arasındaki düzgün elektrik alanı potansiyel farkı ve levha aralığıyla ilişkilendirir.",
     difficulty: "orta",
     type: "grafik",
@@ -329,7 +329,7 @@ export const questions: QuestionSeed[] = [
   },
   {
     id: `${EP}-q08`,
-    topic: EP,
+    topic: EP, subtopic: 'aytfiz-elektriksel-potansiyel-s2',
     outcome: "Eş potansiyel yüzeylerin özelliklerini açıklar.",
     difficulty: "kolay",
     type: "onculu",
@@ -348,7 +348,7 @@ export const questions: QuestionSeed[] = [
   },
   {
     id: `${EP}-q09`,
-    topic: EP,
+    topic: EP, subtopic: 'aytfiz-elektriksel-potansiyel-s3',
     outcome: "Elektrik alanda yükün yer değiştirmesinde yapılan işi potansiyel farkıyla ilişkilendirir.",
     difficulty: "orta",
     type: "tablo",
@@ -366,7 +366,7 @@ export const questions: QuestionSeed[] = [
   },
   {
     id: `${EP}-q10`,
-    topic: EP,
+    topic: EP, subtopic: 'aytfiz-elektriksel-potansiyel-s4',
     outcome: "Potansiyel farkı altında hızlanan yüklü parçacığın kinetik enerjisini ve hızını hesaplar.",
     difficulty: "zor",
     type: "cok-adimli",
@@ -380,7 +380,7 @@ export const questions: QuestionSeed[] = [
   },
   {
     id: `${EP}-q11`,
-    topic: EP,
+    topic: EP, subtopic: 'aytfiz-elektriksel-potansiyel-s2',
     outcome: "Noktasal yüklerin oluşturduğu elektriksel potansiyeli hesaplar.",
     difficulty: "zor",
     type: "cok-adimli",
@@ -394,7 +394,7 @@ export const questions: QuestionSeed[] = [
   },
   {
     id: `${EP}-q12`,
-    topic: EP,
+    topic: EP, subtopic: 'aytfiz-elektriksel-potansiyel-s4',
     outcome: "Potansiyel farkı altında hızlanan yüklü parçacığın kinetik enerjisini ve hızını hesaplar.",
     difficulty: "yeni-nesil",
     type: "yeni-nesil",
@@ -410,7 +410,7 @@ export const questions: QuestionSeed[] = [
   // ---------------- Kondansatörler ----------------
   {
     id: `${KON}-q01`,
-    topic: KON,
+    topic: KON, subtopic: 'aytfiz-kondansatorler-s1',
     outcome: "Sığanın levha alanı, levhalar arası uzaklık ve yalıtkana bağlılığını açıklar.",
     difficulty: "kolay",
     type: "yorum",
@@ -424,7 +424,7 @@ export const questions: QuestionSeed[] = [
   },
   {
     id: `${KON}-q02`,
-    topic: KON,
+    topic: KON, subtopic: 'aytfiz-kondansatorler-s3',
     outcome: "Kondansatörde depolanan yükü ve enerjiyi hesaplar.",
     difficulty: "kolay",
     type: "islem",
@@ -438,7 +438,7 @@ export const questions: QuestionSeed[] = [
   },
   {
     id: `${KON}-q03`,
-    topic: KON,
+    topic: KON, subtopic: 'aytfiz-kondansatorler-s2',
     outcome: "Seri ve paralel bağlı kondansatörlerde eşdeğer sığa, yük ve gerilim paylaşımını hesaplar.",
     difficulty: "orta",
     type: "cok-adimli",
@@ -452,7 +452,7 @@ export const questions: QuestionSeed[] = [
   },
   {
     id: `${KON}-q04`,
-    topic: KON,
+    topic: KON, subtopic: 'aytfiz-kondansatorler-s1',
     outcome: "Üreteçten ayrılan ya da üretece bağlı kondansatörde geometrik değişimlerin yük, gerilim ve alana etkisini yorumlar.",
     difficulty: "orta",
     type: "onculu",
@@ -471,7 +471,7 @@ export const questions: QuestionSeed[] = [
   },
   {
     id: `${KON}-q05`,
-    topic: KON,
+    topic: KON, subtopic: 'aytfiz-kondansatorler-s3',
     outcome: "Kondansatörde depolanan yükü ve enerjiyi hesaplar.",
     difficulty: "orta",
     type: "grafik",
@@ -485,7 +485,7 @@ export const questions: QuestionSeed[] = [
   },
   {
     id: `${KON}-q06`,
-    topic: KON,
+    topic: KON, subtopic: 'aytfiz-kondansatorler-s3',
     outcome: "Kondansatörde depolanan yükü ve enerjiyi hesaplar.",
     difficulty: "yeni-nesil",
     type: "yeni-nesil",
@@ -501,7 +501,7 @@ export const questions: QuestionSeed[] = [
   // ---------------- Manyetizma ve indüksiyon ----------------
   {
     id: `${MAG}-q01`,
-    topic: MAG,
+    topic: MAG, subtopic: 'aytfiz-manyetizma-induksiyon-s1',
     outcome: "Akım geçen düz telin çevresinde oluşan manyetik alanı hesaplar.",
     difficulty: "kolay",
     type: "islem",
@@ -515,7 +515,7 @@ export const questions: QuestionSeed[] = [
   },
   {
     id: `${MAG}-q02`,
-    topic: MAG,
+    topic: MAG, subtopic: 'aytfiz-manyetizma-induksiyon-s1',
     outcome: "Akım geçen düz telin çevresinde oluşan manyetik alanı hesaplar.",
     difficulty: "orta",
     type: "islem",
@@ -529,7 +529,7 @@ export const questions: QuestionSeed[] = [
   },
   {
     id: `${MAG}-q03`,
-    topic: MAG,
+    topic: MAG, subtopic: 'aytfiz-manyetizma-induksiyon-s1',
     outcome: "Akım geçen çembersel telin merkezinde oluşan manyetik alanı hesaplar.",
     difficulty: "orta",
     type: "cok-adimli",
@@ -543,7 +543,7 @@ export const questions: QuestionSeed[] = [
   },
   {
     id: `${MAG}-q04`,
-    topic: MAG,
+    topic: MAG, subtopic: 'aytfiz-manyetizma-induksiyon-s1',
     outcome: "Akım makarasının içindeki manyetik alanın sarım sayısı, akım ve makara boyuna bağlılığını açıklar.",
     difficulty: "orta",
     type: "deney",
@@ -568,7 +568,7 @@ export const questions: QuestionSeed[] = [
   },
   {
     id: `${MAG}-q05`,
-    topic: MAG,
+    topic: MAG, subtopic: 'aytfiz-manyetizma-induksiyon-s2',
     outcome: "Manyetik alanda hareket eden yüklü parçacığa etki eden kuvveti ve parçacığın yörüngesini açıklar.",
     difficulty: "zor",
     type: "problem",
@@ -582,7 +582,7 @@ export const questions: QuestionSeed[] = [
   },
   {
     id: `${MAG}-q06`,
-    topic: MAG,
+    topic: MAG, subtopic: 'aytfiz-manyetizma-induksiyon-s2',
     outcome: "Manyetik alanda akım taşıyan tele etki eden kuvveti hesaplar.",
     difficulty: "kolay",
     type: "islem",
@@ -596,7 +596,7 @@ export const questions: QuestionSeed[] = [
   },
   {
     id: `${MAG}-q07`,
-    topic: MAG,
+    topic: MAG, subtopic: 'aytfiz-manyetizma-induksiyon-s2',
     outcome: "Manyetik kuvvetin yönünü sağ el kuralıyla belirler.",
     difficulty: "orta",
     type: "yorum",
@@ -610,7 +610,7 @@ export const questions: QuestionSeed[] = [
   },
   {
     id: `${MAG}-q08`,
-    topic: MAG,
+    topic: MAG, subtopic: 'aytfiz-manyetizma-induksiyon-s3',
     outcome: "Manyetik akıyı tanımlar ve akı değişiminden doğan indüksiyon emk’sını hesaplar.",
     difficulty: "orta",
     type: "cok-adimli",
@@ -624,7 +624,7 @@ export const questions: QuestionSeed[] = [
   },
   {
     id: `${MAG}-q09`,
-    topic: MAG,
+    topic: MAG, subtopic: 'aytfiz-manyetizma-induksiyon-s3',
     outcome: "Manyetik akıyı tanımlar ve akı değişiminden doğan indüksiyon emk’sını hesaplar.",
     difficulty: "orta",
     type: "grafik",
@@ -638,7 +638,7 @@ export const questions: QuestionSeed[] = [
   },
   {
     id: `${MAG}-q10`,
-    topic: MAG,
+    topic: MAG, subtopic: 'aytfiz-manyetizma-induksiyon-s3',
     outcome: "Manyetik alanda hareket eden iletken çubukta oluşan hareketsel emk’yı ve sonuçlarını hesaplar.",
     difficulty: "zor",
     type: "cok-adimli",
@@ -652,7 +652,7 @@ export const questions: QuestionSeed[] = [
   },
   {
     id: `${MAG}-q11`,
-    topic: MAG,
+    topic: MAG, subtopic: 'aytfiz-manyetizma-induksiyon-s3',
     outcome: "Lenz kuralını kullanarak indüksiyon akımının yönünü ve etkisini yorumlar.",
     difficulty: "orta",
     type: "onculu",
@@ -671,7 +671,7 @@ export const questions: QuestionSeed[] = [
   },
   {
     id: `${MAG}-q12`,
-    topic: MAG,
+    topic: MAG, subtopic: 'aytfiz-manyetizma-induksiyon-s3',
     outcome: "Manyetik alanda hareket eden iletken çubukta oluşan hareketsel emk’yı ve sonuçlarını hesaplar.",
     difficulty: "yeni-nesil",
     type: "yeni-nesil",
@@ -687,7 +687,7 @@ export const questions: QuestionSeed[] = [
   // ---------------- Alternatif akım ve transformatör ----------------
   {
     id: `${AC}-q01`,
-    topic: AC,
+    topic: AC, subtopic: 'aytfiz-alternatif-akim-transformator-s1',
     outcome: "Alternatif akımda etkin değer, tepe değer ve frekans kavramlarını ilişkilendirir.",
     difficulty: "kolay",
     type: "islem",
@@ -701,7 +701,7 @@ export const questions: QuestionSeed[] = [
   },
   {
     id: `${AC}-q02`,
-    topic: AC,
+    topic: AC, subtopic: 'aytfiz-alternatif-akim-transformator-s3',
     outcome: "İdeal transformatörde sarım sayıları ile gerilim ve akım arasındaki ilişkiyi hesaplar.",
     difficulty: "orta",
     type: "islem",
@@ -715,7 +715,7 @@ export const questions: QuestionSeed[] = [
   },
   {
     id: `${AC}-q03`,
-    topic: AC,
+    topic: AC, subtopic: 'aytfiz-alternatif-akim-transformator-s3',
     outcome: "Transformatörlerin kullanım alanlarını ve enerji iletimindeki önemini açıklar.",
     difficulty: "orta",
     type: "onculu",
@@ -734,7 +734,7 @@ export const questions: QuestionSeed[] = [
   },
   {
     id: `${AC}-q04`,
-    topic: AC,
+    topic: AC, subtopic: 'aytfiz-alternatif-akim-transformator-s2',
     outcome: "Alternatif akım devrelerinde bobin ve kondansatörün frekansa bağlı davranışını yorumlar.",
     difficulty: "orta",
     type: "grafik",
@@ -754,7 +754,7 @@ export const questions: QuestionSeed[] = [
   },
   {
     id: `${AC}-q05`,
-    topic: AC,
+    topic: AC, subtopic: 'aytfiz-alternatif-akim-transformator-s3',
     outcome: "Transformatörlerin kullanım alanlarını ve enerji iletimindeki önemini açıklar.",
     difficulty: "zor",
     type: "tablo",
@@ -775,7 +775,7 @@ export const questions: QuestionSeed[] = [
   },
   {
     id: `${AC}-q06`,
-    topic: AC,
+    topic: AC, subtopic: 'aytfiz-alternatif-akim-transformator-s3',
     outcome: "İdeal transformatörde sarım sayıları ile gerilim ve akım arasındaki ilişkiyi hesaplar.",
     difficulty: "yeni-nesil",
     type: "yeni-nesil",
@@ -791,7 +791,7 @@ export const questions: QuestionSeed[] = [
   // ---------------- Çembersel hareket ----------------
   {
     id: `${CH}-q01`,
-    topic: CH,
+    topic: CH, subtopic: 'aytfiz-cembersel-hareket-s1',
     outcome: "Düzgün çembersel harekette periyot, frekans, açısal hız ve çizgisel hız arasındaki ilişkileri hesaplar.",
     difficulty: "kolay",
     type: "islem",
@@ -805,7 +805,7 @@ export const questions: QuestionSeed[] = [
   },
   {
     id: `${CH}-q02`,
-    topic: CH,
+    topic: CH, subtopic: 'aytfiz-cembersel-hareket-s2',
     outcome: "Merkezcil ivme ve merkezcil kuvveti hesaplar.",
     difficulty: "kolay",
     type: "islem",
@@ -819,7 +819,7 @@ export const questions: QuestionSeed[] = [
   },
   {
     id: `${CH}-q03`,
-    topic: CH,
+    topic: CH, subtopic: 'aytfiz-cembersel-hareket-s3',
     outcome: "Yatay düzlemde çembersel hareket yapan cisimlerde merkezcil kuvveti sağlayan kuvveti belirler.",
     difficulty: "orta",
     type: "islem",
@@ -833,7 +833,7 @@ export const questions: QuestionSeed[] = [
   },
   {
     id: `${CH}-q04`,
-    topic: CH,
+    topic: CH, subtopic: 'aytfiz-cembersel-hareket-s3',
     outcome: "Düşey düzlemde çembersel hareket yapan cisimlerde ip gerilmesini ve kritik hızı hesaplar.",
     difficulty: "zor",
     type: "cok-adimli",
@@ -847,7 +847,7 @@ export const questions: QuestionSeed[] = [
   },
   {
     id: `${CH}-q05`,
-    topic: CH,
+    topic: CH, subtopic: 'aytfiz-cembersel-hareket-s3',
     outcome: "Yatay ve eğimli virajlarda aracın kaymadan dönebileceği hızı hesaplar.",
     difficulty: "orta",
     type: "problem",
@@ -861,7 +861,7 @@ export const questions: QuestionSeed[] = [
   },
   {
     id: `${CH}-q06`,
-    topic: CH,
+    topic: CH, subtopic: 'aytfiz-cembersel-hareket-s3',
     outcome: "Yatay ve eğimli virajlarda aracın kaymadan dönebileceği hızı hesaplar.",
     difficulty: "orta",
     type: "problem",
@@ -875,7 +875,7 @@ export const questions: QuestionSeed[] = [
   },
   {
     id: `${CH}-q07`,
-    topic: CH,
+    topic: CH, subtopic: 'aytfiz-cembersel-hareket-s2',
     outcome: "Merkezcil ivme ve merkezcil kuvveti hesaplar.",
     difficulty: "orta",
     type: "grafik",
@@ -889,7 +889,7 @@ export const questions: QuestionSeed[] = [
   },
   {
     id: `${CH}-q08`,
-    topic: CH,
+    topic: CH, subtopic: 'aytfiz-cembersel-hareket-s1',
     outcome: "Düzgün çembersel hareketin özelliklerini açıklar.",
     difficulty: "kolay",
     type: "onculu",
@@ -908,7 +908,7 @@ export const questions: QuestionSeed[] = [
   },
   {
     id: `${CH}-q09`,
-    topic: CH,
+    topic: CH, subtopic: 'aytfiz-cembersel-hareket-s3',
     outcome: "Yatay düzlemde çembersel hareket yapan cisimlerde merkezcil kuvveti sağlayan kuvveti belirler.",
     difficulty: "zor",
     type: "problem",
@@ -922,7 +922,7 @@ export const questions: QuestionSeed[] = [
   },
   {
     id: `${CH}-q10`,
-    topic: CH,
+    topic: CH, subtopic: 'aytfiz-cembersel-hareket-s1',
     outcome: "Düzgün çembersel harekette periyot, frekans, açısal hız ve çizgisel hız arasındaki ilişkileri hesaplar.",
     difficulty: "orta",
     type: "tablo",
@@ -940,7 +940,7 @@ export const questions: QuestionSeed[] = [
   },
   {
     id: `${CH}-q11`,
-    topic: CH,
+    topic: CH, subtopic: 'aytfiz-cembersel-hareket-s3',
     outcome: "Düşey düzlemde çembersel hareket yapan cisimlerde ip gerilmesini ve kritik hızı hesaplar.",
     difficulty: "yeni-nesil",
     type: "yeni-nesil",
@@ -960,7 +960,7 @@ export const questions: QuestionSeed[] = [
   },
   {
     id: `${CH}-q12`,
-    topic: CH,
+    topic: CH, subtopic: 'aytfiz-cembersel-hareket-s3',
     outcome: "Yatay düzlemde çembersel hareket yapan cisimlerde merkezcil kuvveti sağlayan kuvveti belirler.",
     difficulty: "zor",
     type: "problem",
@@ -976,7 +976,7 @@ export const questions: QuestionSeed[] = [
   // ---------------- Dönme ve açısal momentum ----------------
   {
     id: `${DON}-q01`,
-    topic: DON,
+    topic: DON, subtopic: 'aytfiz-donme-acisal-momentum-s2',
     outcome: "Dönerek öteleme hareketi yapan cismin kinetik enerjisini hesaplar.",
     difficulty: "kolay",
     type: "islem",
@@ -990,7 +990,7 @@ export const questions: QuestionSeed[] = [
   },
   {
     id: `${DON}-q02`,
-    topic: DON,
+    topic: DON, subtopic: 'aytfiz-donme-acisal-momentum-s3',
     outcome: "Açısal momentumun korunumunu uygular.",
     difficulty: "kolay",
     type: "islem",
@@ -1010,7 +1010,7 @@ export const questions: QuestionSeed[] = [
   },
   {
     id: `${DON}-q03`,
-    topic: DON,
+    topic: DON, subtopic: 'aytfiz-donme-acisal-momentum-s3',
     outcome: "Açısal momentumun korunumunu uygular.",
     difficulty: "orta",
     type: "cok-adimli",
@@ -1024,7 +1024,7 @@ export const questions: QuestionSeed[] = [
   },
   {
     id: `${DON}-q04`,
-    topic: DON,
+    topic: DON, subtopic: 'aytfiz-donme-acisal-momentum-s1',
     outcome: "Dönme eylemsizliği ve açısal momentum kavramlarını açıklar.",
     difficulty: "orta",
     type: "onculu",
@@ -1043,7 +1043,7 @@ export const questions: QuestionSeed[] = [
   },
   {
     id: `${DON}-q05`,
-    topic: DON,
+    topic: DON, subtopic: 'aytfiz-donme-acisal-momentum-s2',
     outcome: "Dönerek öteleme hareketi yapan cismin kinetik enerjisini hesaplar.",
     difficulty: "zor",
     type: "cok-adimli",
@@ -1063,7 +1063,7 @@ export const questions: QuestionSeed[] = [
   },
   {
     id: `${DON}-q06`,
-    topic: DON,
+    topic: DON, subtopic: 'aytfiz-donme-acisal-momentum-s3',
     outcome: "Açısal momentumun korunumunu uygular.",
     difficulty: "yeni-nesil",
     type: "yeni-nesil",
@@ -1079,7 +1079,7 @@ export const questions: QuestionSeed[] = [
   // ---------------- Kütle çekim ve Kepler ----------------
   {
     id: `${KEP}-q01`,
-    topic: KEP,
+    topic: KEP, subtopic: 'aytfiz-kutle-cekim-kepler-s1',
     outcome: "Evrensel kütle çekim yasasını kullanarak kuvvet değişimini hesaplar.",
     difficulty: "kolay",
     type: "islem",
@@ -1093,7 +1093,7 @@ export const questions: QuestionSeed[] = [
   },
   {
     id: `${KEP}-q02`,
-    topic: KEP,
+    topic: KEP, subtopic: 'aytfiz-kutle-cekim-kepler-s2',
     outcome: "Gezegenlerin yüzeyindeki çekim ivmesini kütle ve yarıçapla ilişkilendirir.",
     difficulty: "orta",
     type: "islem",
@@ -1107,7 +1107,7 @@ export const questions: QuestionSeed[] = [
   },
   {
     id: `${KEP}-q03`,
-    topic: KEP,
+    topic: KEP, subtopic: 'aytfiz-kutle-cekim-kepler-s3',
     outcome: "Kepler yasalarını gezegen hareketlerine uygular.",
     difficulty: "orta",
     type: "tablo",
@@ -1129,7 +1129,7 @@ export const questions: QuestionSeed[] = [
   },
   {
     id: `${KEP}-q04`,
-    topic: KEP,
+    topic: KEP, subtopic: 'aytfiz-kutle-cekim-kepler-s3',
     outcome: "Kepler yasalarını gezegen hareketlerine uygular.",
     difficulty: "kolay",
     type: "onculu",
@@ -1148,7 +1148,7 @@ export const questions: QuestionSeed[] = [
   },
   {
     id: `${KEP}-q05`,
-    topic: KEP,
+    topic: KEP, subtopic: 'aytfiz-kutle-cekim-kepler-s4',
     outcome: "Yörüngedeki uyduların hızını ve periyodunu yörünge yarıçapıyla ilişkilendirir.",
     difficulty: "orta",
     type: "islem",
@@ -1162,7 +1162,7 @@ export const questions: QuestionSeed[] = [
   },
   {
     id: `${KEP}-q06`,
-    topic: KEP,
+    topic: KEP, subtopic: 'aytfiz-kutle-cekim-kepler-s2',
     outcome: "Gezegenlerin yüzeyindeki çekim ivmesini kütle ve yarıçapla ilişkilendirir.",
     difficulty: "yeni-nesil",
     type: "yeni-nesil",

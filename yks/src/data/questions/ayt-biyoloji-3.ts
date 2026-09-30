@@ -6,7 +6,7 @@ export const questions: QuestionSeed[] = [
   // ===========================================================================
   {
     id: "aytbio-genden-proteine-q01",
-    topic: "aytbio-genden-proteine",
+    topic: "aytbio-genden-proteine", subtopic: 'aytbio-genden-proteine-s1',
     outcome: "DNA ve RNA’nın yapısal özelliklerini karşılaştırır.",
     difficulty: "kolay",
     type: "bilgi",
@@ -20,7 +20,7 @@ export const questions: QuestionSeed[] = [
   },
   {
     id: "aytbio-genden-proteine-q02",
-    topic: "aytbio-genden-proteine",
+    topic: "aytbio-genden-proteine", subtopic: 'aytbio-genden-proteine-s1',
     outcome: "DNA’da baz eşleşmesi ve hidrojen bağlarıyla ilgili hesaplamalar yapar.",
     difficulty: "orta",
     type: "islem",
@@ -34,7 +34,7 @@ export const questions: QuestionSeed[] = [
   },
   {
     id: "aytbio-genden-proteine-q03",
-    topic: "aytbio-genden-proteine",
+    topic: "aytbio-genden-proteine", subtopic: 'aytbio-genden-proteine-s1',
     outcome: "Çift zincirli DNA’da baz oranlarına ilişkin kuralları yorumlar.",
     difficulty: "orta",
     type: "onculu",
@@ -53,7 +53,7 @@ export const questions: QuestionSeed[] = [
   },
   {
     id: "aytbio-genden-proteine-q04",
-    topic: "aytbio-genden-proteine",
+    topic: "aytbio-genden-proteine", subtopic: 'aytbio-genden-proteine-s4',
     outcome: "Genetik şifre tablosunu kullanarak DNA dizisinden polipeptit dizisini belirler.",
     difficulty: "orta",
     type: "tablo",
@@ -77,7 +77,7 @@ export const questions: QuestionSeed[] = [
   },
   {
     id: "aytbio-genden-proteine-q05",
-    topic: "aytbio-genden-proteine",
+    topic: "aytbio-genden-proteine", subtopic: 'aytbio-genden-proteine-s3',
     outcome: "Genetik şifrenin özelliklerini açıklar.",
     difficulty: "kolay",
     type: "bilgi",
@@ -97,7 +97,7 @@ export const questions: QuestionSeed[] = [
   },
   {
     id: "aytbio-genden-proteine-q06",
-    topic: "aytbio-genden-proteine",
+    topic: "aytbio-genden-proteine", subtopic: 'aytbio-genden-proteine-s2',
     outcome: "DNA’nın yarı korunumlu eşlenmesini deney sonuçlarıyla ilişkilendirir.",
     difficulty: "orta",
     type: "deney",
@@ -117,7 +117,7 @@ export const questions: QuestionSeed[] = [
   },
   {
     id: "aytbio-genden-proteine-q07",
-    topic: "aytbio-genden-proteine",
+    topic: "aytbio-genden-proteine", subtopic: 'aytbio-genden-proteine-s4',
     outcome: "Mutasyon türlerinin protein yapısına olası etkilerini yorumlar.",
     difficulty: "zor",
     type: "onculu",
@@ -136,7 +136,7 @@ export const questions: QuestionSeed[] = [
   },
   {
     id: "aytbio-genden-proteine-q08",
-    topic: "aytbio-genden-proteine",
+    topic: "aytbio-genden-proteine", subtopic: 'aytbio-genden-proteine-s4',
     outcome: "Ekleme ve eksilme mutasyonlarının okuma çerçevesine etkisini açıklar.",
     difficulty: "orta",
     type: "yorum",
@@ -156,7 +156,7 @@ export const questions: QuestionSeed[] = [
   },
   {
     id: "aytbio-genden-proteine-q09",
-    topic: "aytbio-genden-proteine",
+    topic: "aytbio-genden-proteine", subtopic: 'aytbio-genden-proteine-s4',
     outcome: "Protein sentezinde nükleotit, kodon ve peptit bağı sayıları arasındaki ilişkiyi hesaplar.",
     difficulty: "zor",
     type: "islem",
@@ -176,7 +176,7 @@ export const questions: QuestionSeed[] = [
   },
   {
     id: "aytbio-genden-proteine-q10",
-    topic: "aytbio-genden-proteine",
+    topic: "aytbio-genden-proteine", subtopic: 'aytbio-genden-proteine-s4',
     outcome: "Protein sentezinin aşamalarını ve bu aşamalarda görev alan yapıları ilişkilendirir.",
     difficulty: "yeni-nesil",
     type: "tablo",
@@ -199,7 +199,7 @@ export const questions: QuestionSeed[] = [
   },
   {
     id: "aytbio-genden-proteine-q11",
-    topic: "aytbio-genden-proteine",
+    topic: "aytbio-genden-proteine", subtopic: 'aytbio-genden-proteine-s2',
     outcome: "DNA eşlenmesinde görev alan enzimlerin işlevlerini açıklar.",
     difficulty: "orta",
     type: "bilgi",
@@ -219,7 +219,7 @@ export const questions: QuestionSeed[] = [
   },
   {
     id: "aytbio-genden-proteine-q12",
-    topic: "aytbio-genden-proteine",
+    topic: "aytbio-genden-proteine", subtopic: 'aytbio-genden-proteine-s4',
     outcome: "Prokaryot ve ökaryot hücrelerde protein sentezinin gerçekleştiği yerleri karşılaştırır.",
     difficulty: "zor",
     type: "onculu",
@@ -238,7 +238,7 @@ export const questions: QuestionSeed[] = [
   },
   {
     id: "aytbio-genden-proteine-q13",
-    topic: "aytbio-genden-proteine",
+    topic: "aytbio-genden-proteine", subtopic: 'aytbio-genden-proteine-s3',
     outcome: "Genetik şifrenin neden üçlü olduğunu matematiksel olarak açıklar.",
     difficulty: "yeni-nesil",
     type: "problem",
@@ -256,7 +256,7 @@ export const questions: QuestionSeed[] = [
   // ===========================================================================
   {
     id: "aytbio-fotosentez-q01",
-    topic: "aytbio-fotosentez",
+    topic: "aytbio-fotosentez", subtopic: 'aytbio-fotosentez-s3',
     outcome: "Fotosentezin ışığa bağımlı reaksiyonlarını açıklar.",
     difficulty: "kolay",
     type: "bilgi",
@@ -270,7 +270,7 @@ export const questions: QuestionSeed[] = [
   },
   {
     id: "aytbio-fotosentez-q02",
-    topic: "aytbio-fotosentez",
+    topic: "aytbio-fotosentez", subtopic: 'aytbio-fotosentez-s3',
     outcome: "Fotosentezin ışığa bağımlı ve ışıktan bağımsız evrelerinde gerçekleşen olayları ayırt eder.",
     difficulty: "orta",
     type: "onculu",
@@ -289,7 +289,7 @@ export const questions: QuestionSeed[] = [
   },
   {
     id: "aytbio-fotosentez-q03",
-    topic: "aytbio-fotosentez",
+    topic: "aytbio-fotosentez", subtopic: 'aytbio-fotosentez-s4',
     outcome: "Calvin döngüsünün basamaklarını açıklar.",
     difficulty: "orta",
     type: "bilgi",
@@ -309,7 +309,7 @@ export const questions: QuestionSeed[] = [
   },
   {
     id: "aytbio-fotosentez-q04",
-    topic: "aytbio-fotosentez",
+    topic: "aytbio-fotosentez", subtopic: 'aytbio-fotosentez-s5',
     outcome: "Fotosentez hızını etkileyen faktörleri grafik üzerinde yorumlar.",
     difficulty: "orta",
     type: "grafik",
@@ -329,7 +329,7 @@ export const questions: QuestionSeed[] = [
   },
   {
     id: "aytbio-fotosentez-q05",
-    topic: "aytbio-fotosentez",
+    topic: "aytbio-fotosentez", subtopic: 'aytbio-fotosentez-s5',
     outcome: "Işığın dalga boyunun fotosentez hızına etkisini deney sonuçlarıyla açıklar.",
     difficulty: "zor",
     type: "deney",
@@ -349,7 +349,7 @@ export const questions: QuestionSeed[] = [
   },
   {
     id: "aytbio-fotosentez-q06",
-    topic: "aytbio-fotosentez",
+    topic: "aytbio-fotosentez", subtopic: 'aytbio-fotosentez-s5',
     outcome: "Fotosentez deneylerinde bağımlı ve bağımsız değişkenleri belirler.",
     difficulty: "orta",
     type: "tablo",
@@ -379,7 +379,7 @@ export const questions: QuestionSeed[] = [
   },
   {
     id: "aytbio-fotosentez-q07",
-    topic: "aytbio-fotosentez",
+    topic: "aytbio-fotosentez", subtopic: 'aytbio-fotosentez-s1',
     outcome: "Fotosentez ile kemosentezi karşılaştırır.",
     difficulty: "zor",
     type: "onculu",
@@ -398,7 +398,7 @@ export const questions: QuestionSeed[] = [
   },
   {
     id: "aytbio-fotosentez-q08",
-    topic: "aytbio-fotosentez",
+    topic: "aytbio-fotosentez", subtopic: 'aytbio-fotosentez-s3',
     outcome: "İşaretli atom deneylerini fotosentezin evreleriyle ilişkilendirir.",
     difficulty: "orta",
     type: "yorum",
@@ -412,7 +412,7 @@ export const questions: QuestionSeed[] = [
   },
   {
     id: "aytbio-fotosentez-q09",
-    topic: "aytbio-fotosentez",
+    topic: "aytbio-fotosentez", subtopic: 'aytbio-fotosentez-s4',
     outcome: "Calvin döngüsündeki ara ürünlerin koşullara bağlı değişimini yorumlar.",
     difficulty: "yeni-nesil",
     type: "grafik",
@@ -432,7 +432,7 @@ export const questions: QuestionSeed[] = [
   },
   {
     id: "aytbio-fotosentez-q10",
-    topic: "aytbio-fotosentez",
+    topic: "aytbio-fotosentez", subtopic: 'aytbio-fotosentez-s2',
     outcome: "Fotosentez evrelerinin kloroplastta gerçekleştiği yerleri açıklar.",
     difficulty: "kolay",
     type: "bilgi",
@@ -452,7 +452,7 @@ export const questions: QuestionSeed[] = [
   },
   {
     id: "aytbio-fotosentez-q11",
-    topic: "aytbio-fotosentez",
+    topic: "aytbio-fotosentez", subtopic: 'aytbio-fotosentez-s5',
     outcome: "Sıcaklığın fotosentez hızına etkisini açıklar.",
     difficulty: "zor",
     type: "grafik",
@@ -472,7 +472,7 @@ export const questions: QuestionSeed[] = [
   },
   {
     id: "aytbio-fotosentez-q12",
-    topic: "aytbio-fotosentez",
+    topic: "aytbio-fotosentez", subtopic: 'aytbio-fotosentez-s5',
     outcome: "Fotosentez ve solunumu indikatörlü deney düzeneklerinde yorumlar.",
     difficulty: "yeni-nesil",
     type: "deney",
@@ -502,7 +502,7 @@ export const questions: QuestionSeed[] = [
   },
   {
     id: "aytbio-fotosentez-q13",
-    topic: "aytbio-fotosentez",
+    topic: "aytbio-fotosentez", subtopic: 'aytbio-fotosentez-s1',
     outcome: "Kemosentezin tanımını yapar ve kemosentetik canlılara örnekler verir.",
     difficulty: "orta",
     type: "tablo",
@@ -535,7 +535,7 @@ export const questions: QuestionSeed[] = [
   // ===========================================================================
   {
     id: "aytbio-hucresel-solunum-q01",
-    topic: "aytbio-hucresel-solunum",
+    topic: "aytbio-hucresel-solunum", subtopic: 'aytbio-hucresel-solunum-s2',
     outcome: "Glikolizin gerçekleştiği yeri ve ürünlerini açıklar.",
     difficulty: "kolay",
     type: "bilgi",
@@ -549,7 +549,7 @@ export const questions: QuestionSeed[] = [
   },
   {
     id: "aytbio-hucresel-solunum-q02",
-    topic: "aytbio-hucresel-solunum",
+    topic: "aytbio-hucresel-solunum", subtopic: 'aytbio-hucresel-solunum-s3',
     outcome: "Oksijenli solunumda ATP hesaplaması yapar.",
     difficulty: "orta",
     type: "islem",
@@ -563,7 +563,7 @@ export const questions: QuestionSeed[] = [
   },
   {
     id: "aytbio-hucresel-solunum-q03",
-    topic: "aytbio-hucresel-solunum",
+    topic: "aytbio-hucresel-solunum", subtopic: 'aytbio-hucresel-solunum-s2',
     outcome: "Fermantasyon türlerini karşılaştırır.",
     difficulty: "orta",
     type: "onculu",
@@ -582,7 +582,7 @@ export const questions: QuestionSeed[] = [
   },
   {
     id: "aytbio-hucresel-solunum-q04",
-    topic: "aytbio-hucresel-solunum",
+    topic: "aytbio-hucresel-solunum", subtopic: 'aytbio-hucresel-solunum-s2',
     outcome: "Fermantasyonun hücre açısından önemini açıklar.",
     difficulty: "orta",
     type: "yorum",
@@ -602,7 +602,7 @@ export const questions: QuestionSeed[] = [
   },
   {
     id: "aytbio-hucresel-solunum-q05",
-    topic: "aytbio-hucresel-solunum",
+    topic: "aytbio-hucresel-solunum", subtopic: 'aytbio-hucresel-solunum-s3',
     outcome: "Oksijenli solunumun basamaklarını özelliklerine göre ayırt eder.",
     difficulty: "zor",
     type: "tablo",
@@ -632,7 +632,7 @@ export const questions: QuestionSeed[] = [
   },
   {
     id: "aytbio-hucresel-solunum-q06",
-    topic: "aytbio-hucresel-solunum",
+    topic: "aytbio-hucresel-solunum", subtopic: 'aytbio-hucresel-solunum-s3',
     outcome: "Elektron taşıma sisteminde oksijenin rolünü açıklar.",
     difficulty: "kolay",
     type: "bilgi",
@@ -652,7 +652,7 @@ export const questions: QuestionSeed[] = [
   },
   {
     id: "aytbio-hucresel-solunum-q07",
-    topic: "aytbio-hucresel-solunum",
+    topic: "aytbio-hucresel-solunum", subtopic: 'aytbio-hucresel-solunum-s3',
     outcome: "Maya hücrelerinde oksijenli solunum ve fermantasyonu grafik verileriyle yorumlar.",
     difficulty: "zor",
     type: "grafik",
@@ -672,7 +672,7 @@ export const questions: QuestionSeed[] = [
   },
   {
     id: "aytbio-hucresel-solunum-q08",
-    topic: "aytbio-hucresel-solunum",
+    topic: "aytbio-hucresel-solunum", subtopic: 'aytbio-hucresel-solunum-s3',
     outcome: "Oksijenli solunum ile fermantasyonun enerji verimini karşılaştırır.",
     difficulty: "yeni-nesil",
     type: "problem",
@@ -686,7 +686,7 @@ export const questions: QuestionSeed[] = [
   },
   {
     id: "aytbio-hucresel-solunum-q09",
-    topic: "aytbio-hucresel-solunum",
+    topic: "aytbio-hucresel-solunum", subtopic: 'aytbio-hucresel-solunum-s3',
     outcome: "Oksijenli solunum basamaklarının mitokondrideki yerlerini açıklar.",
     difficulty: "orta",
     type: "onculu",
@@ -705,7 +705,7 @@ export const questions: QuestionSeed[] = [
   },
   {
     id: "aytbio-hucresel-solunum-q10",
-    topic: "aytbio-hucresel-solunum",
+    topic: "aytbio-hucresel-solunum", subtopic: 'aytbio-hucresel-solunum-s3',
     outcome: "Hücresel solunumu inceleyen deney düzeneklerini yorumlar.",
     difficulty: "zor",
     type: "deney",
@@ -725,7 +725,7 @@ export const questions: QuestionSeed[] = [
   },
   {
     id: "aytbio-hucresel-solunum-q11",
-    topic: "aytbio-hucresel-solunum",
+    topic: "aytbio-hucresel-solunum", subtopic: 'aytbio-hucresel-solunum-s2',
     outcome: "İnsan kas hücrelerinde laktik asit fermantasyonunun gerçekleşme koşullarını açıklar.",
     difficulty: "yeni-nesil",
     type: "grafik",
@@ -745,7 +745,7 @@ export const questions: QuestionSeed[] = [
   },
   {
     id: "aytbio-hucresel-solunum-q12",
-    topic: "aytbio-hucresel-solunum",
+    topic: "aytbio-hucresel-solunum", subtopic: 'aytbio-hucresel-solunum-s2',
     outcome: "Oksijensiz solunumu fermantasyondan ayırt eder.",
     difficulty: "orta",
     type: "bilgi",
@@ -765,7 +765,7 @@ export const questions: QuestionSeed[] = [
   },
   {
     id: "aytbio-hucresel-solunum-q13",
-    topic: "aytbio-hucresel-solunum",
+    topic: "aytbio-hucresel-solunum", subtopic: 'aytbio-hucresel-solunum-s3',
     outcome: "Solunum basamakları arasındaki bağımlılığı açıklar.",
     difficulty: "zor",
     type: "cok-adimli",
@@ -789,7 +789,7 @@ export const questions: QuestionSeed[] = [
   // ===========================================================================
   {
     id: "aytbio-bitki-biyolojisi-q01",
-    topic: "aytbio-bitki-biyolojisi",
+    topic: "aytbio-bitki-biyolojisi", subtopic: 'aytbio-bitki-biyolojisi-s1',
     outcome: "Bitki dokularının yapı ve görevlerini açıklar.",
     difficulty: "kolay",
     type: "bilgi",
@@ -803,7 +803,7 @@ export const questions: QuestionSeed[] = [
   },
   {
     id: "aytbio-bitki-biyolojisi-q02",
-    topic: "aytbio-bitki-biyolojisi",
+    topic: "aytbio-bitki-biyolojisi", subtopic: 'aytbio-bitki-biyolojisi-s2',
     outcome: "Ksilem ve floem dokularını yapı ve taşınım bakımından karşılaştırır.",
     difficulty: "orta",
     type: "onculu",
@@ -822,7 +822,7 @@ export const questions: QuestionSeed[] = [
   },
   {
     id: "aytbio-bitki-biyolojisi-q03",
-    topic: "aytbio-bitki-biyolojisi",
+    topic: "aytbio-bitki-biyolojisi", subtopic: 'aytbio-bitki-biyolojisi-s2',
     outcome: "Kohezyon-gerilim teorisini ve terlemeyi etkileyen faktörleri açıklar.",
     difficulty: "orta",
     type: "yorum",
@@ -842,7 +842,7 @@ export const questions: QuestionSeed[] = [
   },
   {
     id: "aytbio-bitki-biyolojisi-q04",
-    topic: "aytbio-bitki-biyolojisi",
+    topic: "aytbio-bitki-biyolojisi", subtopic: 'aytbio-bitki-biyolojisi-s2',
     outcome: "Kök basıncını ve kanıtlarını açıklar.",
     difficulty: "kolay",
     type: "bilgi",
@@ -862,7 +862,7 @@ export const questions: QuestionSeed[] = [
   },
   {
     id: "aytbio-bitki-biyolojisi-q05",
-    topic: "aytbio-bitki-biyolojisi",
+    topic: "aytbio-bitki-biyolojisi", subtopic: 'aytbio-bitki-biyolojisi-s3',
     outcome: "Fototropizmayı oksin hormonuyla ilişkilendirir.",
     difficulty: "zor",
     type: "deney",
@@ -882,7 +882,7 @@ export const questions: QuestionSeed[] = [
   },
   {
     id: "aytbio-bitki-biyolojisi-q06",
-    topic: "aytbio-bitki-biyolojisi",
+    topic: "aytbio-bitki-biyolojisi", subtopic: 'aytbio-bitki-biyolojisi-s3',
     outcome: "Bitki hormonlarının etkilerini açıklar.",
     difficulty: "orta",
     type: "tablo",
@@ -907,7 +907,7 @@ export const questions: QuestionSeed[] = [
   },
   {
     id: "aytbio-bitki-biyolojisi-q07",
-    topic: "aytbio-bitki-biyolojisi",
+    topic: "aytbio-bitki-biyolojisi", subtopic: 'aytbio-bitki-biyolojisi-s3',
     outcome: "Bitkilerde tropizma ve nasti hareketlerini ayırt eder.",
     difficulty: "zor",
     type: "onculu",
@@ -926,7 +926,7 @@ export const questions: QuestionSeed[] = [
   },
   {
     id: "aytbio-bitki-biyolojisi-q08",
-    topic: "aytbio-bitki-biyolojisi",
+    topic: "aytbio-bitki-biyolojisi", subtopic: 'aytbio-bitki-biyolojisi-s4',
     outcome: "Kapalı tohumlu bitkilerde çift döllenmeyi açıklar.",
     difficulty: "orta",
     type: "bilgi",
@@ -940,7 +940,7 @@ export const questions: QuestionSeed[] = [
   },
   {
     id: "aytbio-bitki-biyolojisi-q09",
-    topic: "aytbio-bitki-biyolojisi",
+    topic: "aytbio-bitki-biyolojisi", subtopic: 'aytbio-bitki-biyolojisi-s2',
     outcome: "Stomaların açılıp kapanma mekanizmasını açıklar.",
     difficulty: "yeni-nesil",
     type: "tablo",
@@ -970,7 +970,7 @@ export const questions: QuestionSeed[] = [
   },
   {
     id: "aytbio-bitki-biyolojisi-q10",
-    topic: "aytbio-bitki-biyolojisi",
+    topic: "aytbio-bitki-biyolojisi", subtopic: 'aytbio-bitki-biyolojisi-s2',
     outcome: "Floemde madde taşınımını basınç akış hipoteziyle açıklar.",
     difficulty: "zor",
     type: "yorum",
@@ -990,7 +990,7 @@ export const questions: QuestionSeed[] = [
   },
   {
     id: "aytbio-bitki-biyolojisi-q11",
-    topic: "aytbio-bitki-biyolojisi",
+    topic: "aytbio-bitki-biyolojisi", subtopic: 'aytbio-bitki-biyolojisi-s4',
     outcome: "Bitkilerde eşeysiz (vejetatif) üreme yollarına örnekler verir.",
     difficulty: "kolay",
     type: "bilgi",
@@ -1010,7 +1010,7 @@ export const questions: QuestionSeed[] = [
   },
   {
     id: "aytbio-bitki-biyolojisi-q12",
-    topic: "aytbio-bitki-biyolojisi",
+    topic: "aytbio-bitki-biyolojisi", subtopic: 'aytbio-bitki-biyolojisi-s3',
     outcome: "Bitki hormonlarının etkilerini deney sonuçlarıyla yorumlar.",
     difficulty: "yeni-nesil",
     type: "deney",
@@ -1039,7 +1039,7 @@ export const questions: QuestionSeed[] = [
   },
   {
     id: "aytbio-bitki-biyolojisi-q13",
-    topic: "aytbio-bitki-biyolojisi",
+    topic: "aytbio-bitki-biyolojisi", subtopic: 'aytbio-bitki-biyolojisi-s2',
     outcome: "Ksilem ve floemin görevlerini deney sonuçlarıyla ilişkilendirir.",
     difficulty: "zor",
     type: "cok-adimli",
@@ -1056,5 +1056,15 @@ export const questions: QuestionSeed[] = [
     hint: "Hangi iletim dokusu kesildi, hangisi sağlam kaldı? Her birinin taşıdığı maddeyi düşün.",
     commonMistake: "Kabuk soyulunca su taşınımının hemen durduğunu sanmak.",
     teacherNote: "İletim dokularının işlevini kısa ve uzun vadeli sonuçlarla birlikte değerlendirme becerisini ölçer.",
+  },
+  {
+    id: 'aytbio-hucresel-solunum-q601', topic: 'aytbio-hucresel-solunum', subtopic: 'aytbio-hucresel-solunum-s4',
+    outcome: 'Fotosentez ile oksijenli solunumu enerji dönüşümü ve organik madde bakımından karşılaştırır.', difficulty: 'orta', type: 'yorum',
+    question: 'Işık alan bir bitkinin canlı yaprak hücrelerinde fotosentez ve oksijenli solunumla ilgili aşağıdaki ifadelerden hangisi doğrudur?',
+    options: ['Fotosentezde organik madde sentezlenir; oksijenli solunumda organik maddedeki enerji ATP üretiminde kullanılır.', 'Fotosentez yapan hücreler oksijenli solunum yapamaz.', 'Her iki olayda da ışık enerjisi doğrudan zorunludur.', 'Fotosentez yalnız mitokondride, solunum yalnız kloroplastta gerçekleşir.', 'Fotosentez ve solunumda enerji dönüşümü gerçekleşmez.'],
+    correctAnswer: 0,
+    solution: 'Fotosentez, ışık enerjisinin organik maddelerde kimyasal enerji olarak depolanmasını sağlar. Oksijenli solunum, organik maddelerin parçalanmasından elde edilen enerjiyle ATP üretir. Canlı yaprak hücrelerinde bu olaylar ışıklı ortamda birlikte gerçekleşebilir; solunum için doğrudan ışık gerekmez.',
+    hint: 'Organik maddeyi üretmek ile organik maddeden kullanılabilir enerji elde etmek arasındaki farkı düşün.',
+    commonMistake: 'Bitkilerin fotosentez yaptığı için solunum yapmadığını sanmak.',
   },
 ];

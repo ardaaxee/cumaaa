@@ -9,7 +9,7 @@ const ID = 'tytdin-islam-dusuncesinde-yorumlar';
 
 export const questions: QuestionSeed[] = [
   {
-    id: `${BI}-q01`, topic: BI, outcome: 'İslam düşüncesinde bilginin kaynaklarını açıklar.', difficulty: 'kolay', type: 'bilgi',
+    id: `${BI}-q01`, topic: BI, subtopic: 'tytdin-bilgi-ve-inanc-s1', outcome: 'İslam düşüncesinde bilginin kaynaklarını açıklar.', difficulty: 'kolay', type: 'bilgi',
     question: 'İslam düşüncesinde bilgi edinme yolları arasında sayılan "sağlam ve güvenilir kişilerden aktarılan bilgi" aşağıdaki kavramlardan hangisiyle ifade edilir?',
     options: ['Doğru haber (haber-i sadık)', 'Duyular', 'Akıl', 'Sezgi', 'Vahiy'],
     correctAnswer: 0,
@@ -19,7 +19,7 @@ export const questions: QuestionSeed[] = [
     teacherNote: 'İslam düşüncesindeki temel bilgi kaynaklarını ayırt etmeyi ölçer.',
   },
   {
-    id: `${BI}-q02`, topic: BI, outcome: 'Taklidi ve tahkiki iman arasındaki farkı yorumlar.', difficulty: 'orta', type: 'yorum',
+    id: `${BI}-q02`, topic: BI, subtopic: 'tytdin-bilgi-ve-inanc-s2', outcome: 'Taklidi ve tahkiki iman arasındaki farkı yorumlar.', difficulty: 'orta', type: 'yorum',
     question: 'Bir kişi inandığı esasları hiç sorgulamadan, sadece ailesinden gördüğü şekilde benimsemiştir; bu esasların gerekçelerini bilmez.\n\nBu kişinin iman biçimi aşağıdakilerden hangisiyle adlandırılır?',
     options: ['Tahkiki iman', 'Taklidi iman', 'İnkâr', 'Şüphecilik', 'İlhad'],
     correctAnswer: 1,
@@ -29,7 +29,7 @@ export const questions: QuestionSeed[] = [
     teacherNote: 'İman biçimleri arasındaki farkı ölçer.',
   },
   {
-    id: `${BI}-q03`, topic: BI, outcome: "Allah’ın zati ve subuti sıfatlarını ayırt eder.", difficulty: 'orta', type: 'bilgi',
+    id: `${BI}-q03`, topic: BI, subtopic: 'tytdin-bilgi-ve-inanc-s3', outcome: "Allah’ın zati ve subuti sıfatlarını ayırt eder.", difficulty: 'orta', type: 'bilgi',
     question: 'Allah’ın "Kıdem" (varlığının başlangıcı olmaması) sıfatı aşağıdaki sıfat gruplarından hangisine girer?',
     options: ['Subuti sıfatlar', 'Fiili sıfatlar', 'Zati sıfatlar', 'Haberi sıfatlar', 'İzafi sıfatlar'],
     correctAnswer: 2,
@@ -39,7 +39,7 @@ export const questions: QuestionSeed[] = [
     teacherNote: 'Zati ve subuti sıfat ayrımını ölçer.',
   },
   {
-    id: `${BI}-q04`, topic: BI, outcome: 'İslam düşüncesinde bilginin kaynaklarını açıklar.', difficulty: 'zor', type: 'onculu',
+    id: `${BI}-q04`, topic: BI, subtopic: 'tytdin-bilgi-ve-inanc-s1', outcome: 'İslam düşüncesinde bilginin kaynaklarını açıklar.', difficulty: 'zor', type: 'onculu',
     question: 'İslam düşüncesinde bilgi kaynaklarıyla ilgili aşağıdaki yargılardan hangileri doğrudur?',
     premises: ['Duyular, dış dünyadaki nesneleri algılamamızı sağlayan bilgi kaynağıdır.', 'Akıl, duyularla elde edilen verileri işleyerek yeni bilgiler üretebilir.', 'Doğru haber, yalnızca dini metinlerden gelen bilgiyi kapsar, günlük hayattaki güvenilir aktarımları kapsamaz.'],
     options: ['Yalnız I', 'I ve III', 'II ve III', 'I ve II', 'I, II ve III'],
@@ -50,7 +50,7 @@ export const questions: QuestionSeed[] = [
     teacherNote: 'Bilgi kaynaklarının kapsamını doğru ayırt etmeyi ölçer.',
   },
   {
-    id: `${BI}-q05`, topic: BI, outcome: 'İnanç ve iman kavramlarını açıklar.', difficulty: 'kolay', type: 'bilgi',
+    id: `${BI}-q05`, topic: BI, subtopic: 'tytdin-bilgi-ve-inanc-s2', outcome: 'İnanç ve iman kavramlarını açıklar.', difficulty: 'kolay', type: 'bilgi',
     question: '"İman" kavramı en genel anlamıyla aşağıdakilerden hangisini ifade eder?',
     options: ['Bir konuda hiçbir görüş belirtmemek', 'Bir bilgiyi deneyle kanıtlamak', 'Bir şeyi yalnızca dille söylemek', 'Bir konuda şüphe içinde kalmak', 'Bir şeyi kalben tasdik edip doğrulamak'],
     correctAnswer: 4,
@@ -60,7 +60,7 @@ export const questions: QuestionSeed[] = [
     teacherNote: 'İman kavramının temel tanımını ölçer.',
   },
   {
-    id: `${BI}-q06`, topic: BI, outcome: "İslam’ın inanç esaslarını açıklar.", difficulty: 'yeni-nesil', type: 'yorum',
+    id: `${BI}-q06`, topic: BI, subtopic: 'tytdin-bilgi-ve-inanc-s3', outcome: "İslam’ın inanç esaslarını açıklar.", difficulty: 'yeni-nesil', type: 'yorum',
     question: 'Bir öğrenci, "Allah’a, meleklere, kitaplara, peygamberlere, ahiret gününe ve kadere (hayır ve şerrin Allah’tan olduğuna) inanıyorum" diyor.\n\nBu öğrencinin saydığı inanç unsurları aşağıdaki kavramlardan hangisiyle bütün olarak adlandırılır?',
     options: ['İmanın şartları (amentü)', 'İslam’ın şartları', 'İbadetin şartları', 'Ahlakın temelleri', 'Fıkhın kaynakları'],
     correctAnswer: 0,
@@ -71,7 +71,7 @@ export const questions: QuestionSeed[] = [
   },
 
   {
-    id: `${DI}-q01`, topic: DI, outcome: 'Din kavramının tanımını ve işlevlerini açıklar.', difficulty: 'orta', type: 'yorum',
+    id: `${DI}-q01`, topic: DI, subtopic: 'tytdin-din-ve-islam-s1', outcome: 'Din kavramının tanımını ve işlevlerini açıklar.', difficulty: 'orta', type: 'yorum',
     question: 'Din, bireylere hayatın anlamı, ölüm sonrası ve evrenin kökeni gibi sorularda cevap sunar; ayrıca bireyler arasında ortak değerler ve dayanışma duygusu oluşturur.\n\nBu açıklama dinin öncelikle hangi işlevini vurgulamaktadır?',
     options: ['Ekonomik işlev', 'Bireysel ve toplumsal işlev', 'Hukuki işlev', 'Siyasi işlev', 'Estetik işlev'],
     correctAnswer: 1,
@@ -81,7 +81,7 @@ export const questions: QuestionSeed[] = [
     teacherNote: 'Dinin işlevlerini metinden çıkarsamayı ölçer.',
   },
   {
-    id: `${DI}-q02`, topic: DI, outcome: 'İslam dininin temel özelliklerini açıklar.', difficulty: 'kolay', type: 'bilgi',
+    id: `${DI}-q02`, topic: DI, subtopic: 'tytdin-din-ve-islam-s2', outcome: 'İslam dininin temel özelliklerini açıklar.', difficulty: 'kolay', type: 'bilgi',
     question: 'İslam dininin kutsal kitabı olan Kur’an-ı Kerim, hangi peygambere indirilmiştir?',
     options: ['Hz. Musa', 'Hz. İsa', 'Hz. Muhammed', 'Hz. İbrahim', 'Hz. Davud'],
     correctAnswer: 2,
@@ -91,7 +91,7 @@ export const questions: QuestionSeed[] = [
     teacherNote: 'Temel din bilgisi kavramlarını ölçer.',
   },
   {
-    id: `${DI}-q03`, topic: DI, outcome: 'Din kavramının tanımını ve işlevlerini açıklar.', difficulty: 'orta', type: 'onculu',
+    id: `${DI}-q03`, topic: DI, subtopic: 'tytdin-din-ve-islam-s1', outcome: 'Din kavramının tanımını ve işlevlerini açıklar.', difficulty: 'orta', type: 'onculu',
     question: 'Din kavramıyla ilgili aşağıdaki yargılardan hangileri doğrudur?',
     premises: ['Din, yalnızca ibadetlerden ibaret, ahlak ve hukuku ilgilendirmeyen bir alandır.', 'Dinler, insanlara evrensel ahlaki ilkeler (doğruluk, adalet, yardımlaşma gibi) sunar.', 'Din, bireyin hayata bakışını ve değerler dünyasını şekillendirebilir.'],
     options: ['Yalnız I', 'Yalnız II', 'I ve III', 'II ve III', 'I, II ve III'],
@@ -102,7 +102,7 @@ export const questions: QuestionSeed[] = [
     teacherNote: 'Dinin kapsamını doğru değerlendirmeyi ölçer.',
   },
   {
-    id: `${DI}-q04`, topic: DI, outcome: 'İslam dininin temel özelliklerini açıklar.', difficulty: 'orta', type: 'bilgi',
+    id: `${DI}-q04`, topic: DI, subtopic: 'tytdin-din-ve-islam-s2', outcome: 'İslam dininin temel özelliklerini açıklar.', difficulty: 'orta', type: 'bilgi',
     question: 'İslam’a göre Hz. Muhammed’den önce gönderilen peygamberlere ve onlara indirilen kitaplara (Tevrat, Zebur, İncil vb.) inanmak, İslam inanç esaslarından hangisinin kapsamına girer?',
     options: ['Yalnızca meleklere iman', 'Bu bir iman esası değildir', 'Yalnızca ahirete iman', 'Yalnızca kadere iman', 'Peygamberlere ve kitaplara iman'],
     correctAnswer: 4,
@@ -112,7 +112,7 @@ export const questions: QuestionSeed[] = [
     teacherNote: 'İman esaslarının kapsamını ölçer.',
   },
   {
-    id: `${DI}-q05`, topic: DI, outcome: 'Din kavramının tanımını ve işlevlerini açıklar.', difficulty: 'yeni-nesil', type: 'yorum',
+    id: `${DI}-q05`, topic: DI, subtopic: 'tytdin-din-ve-islam-s1', outcome: 'Din kavramının tanımını ve işlevlerini açıklar.', difficulty: 'yeni-nesil', type: 'yorum',
     question: 'Bir sosyolog, farklı toplumlarda dinin; evlilik törenlerinden cenaze uygulamalarına, bayramlardan yardımlaşma kültürüne kadar pek çok toplumsal alanı etkilediğini gözlemliyor.\n\nBu gözlem, dinin aşağıdaki işlevlerinden en çok hangisini örneklendirir?',
     options: ['Dinin toplumsal hayatı ve kültürü şekillendiren yönünü', 'Dinin yalnızca bireysel ve özel bir mesele olduğunu', 'Dinin ekonomiyle hiçbir ilişkisinin olmadığını', 'Dinin yalnız ahiretle ilgili olduğunu', 'Dinin bilimsel bir disiplin olduğunu'],
     correctAnswer: 0,
@@ -122,7 +122,7 @@ export const questions: QuestionSeed[] = [
     teacherNote: 'Dinin toplumsal işlevini örnekten çıkarsamayı ölçer.',
   },
   {
-    id: `${DI}-q06`, topic: DI, outcome: 'İslam dininin temel özelliklerini açıklar.', difficulty: 'kolay', type: 'bilgi',
+    id: `${DI}-q06`, topic: DI, subtopic: 'tytdin-din-ve-islam-s2', outcome: 'İslam dininin temel özelliklerini açıklar.', difficulty: 'kolay', type: 'bilgi',
     question: 'Müslümanların günde beş vakit yerine getirmekle yükümlü olduğu, İslam’ın şartlarından biri olan temel ibadet aşağıdakilerden hangisidir?',
     options: ['Oruç', 'Namaz', 'Zekât', 'Hac', 'Kelime-i şehadet'],
     correctAnswer: 1,
@@ -133,7 +133,7 @@ export const questions: QuestionSeed[] = [
   },
 
   {
-    id: `${IB}-q01`, topic: IB, outcome: "İslam’ın şartlarını (beş şart) açıklar.", difficulty: 'kolay', type: 'bilgi',
+    id: `${IB}-q01`, topic: IB, subtopic: 'tytdin-islam-ve-ibadet-s1', outcome: "İslam’ın şartlarını (beş şart) açıklar.", difficulty: 'kolay', type: 'bilgi',
     question: 'Aşağıdakilerden hangisi İslam’ın beş şartından biri değildir?',
     options: ['Kelime-i şehadet getirmek', 'Namaz kılmak', 'Kurban kesmek', 'Zekât vermek', 'Hacca gitmek (gücü yetene)'],
     correctAnswer: 2,
@@ -143,7 +143,7 @@ export const questions: QuestionSeed[] = [
     teacherNote: 'İslam’ın beş şartını doğru saymayı ölçer.',
   },
   {
-    id: `${IB}-q02`, topic: IB, outcome: "İbadetin birey ve toplum açısından anlamını yorumlar.", difficulty: 'orta', type: 'yorum',
+    id: `${IB}-q02`, topic: IB, subtopic: 'tytdin-islam-ve-ibadet-s4', outcome: "İbadetin birey ve toplum açısından anlamını yorumlar.", difficulty: 'orta', type: 'yorum',
     question: 'Zekât ibadetinde, belirli bir zenginlik düzeyine ulaşan kişi malının belli bir oranını ihtiyaç sahiplerine vermekle yükümlüdür.\n\nBu ibadet öncelikle aşağıdaki değerlerden hangisini desteklemeyi amaçlar?',
     options: ['Bireysel rekabeti artırmayı', 'Bireysel ibadeti gizli tutmayı', 'Ticari kazancı artırmayı', 'Toplumsal dayanışma ve paylaşmayı', 'Mal biriktirmeyi teşvik etmeyi'],
     correctAnswer: 3,
@@ -153,7 +153,7 @@ export const questions: QuestionSeed[] = [
     teacherNote: 'İbadetin toplumsal işlevini kavramayı ölçer.',
   },
   {
-    id: `${IB}-q03`, topic: IB, outcome: "İslam’ın şartlarını (beş şart) açıklar.", difficulty: 'orta', type: 'onculu',
+    id: `${IB}-q03`, topic: IB, subtopic: 'tytdin-islam-ve-ibadet-s1', outcome: "İslam’ın şartlarını (beş şart) açıklar.", difficulty: 'orta', type: 'onculu',
     question: 'İslam’ın şartlarıyla ilgili aşağıdaki yargılardan hangileri doğrudur?',
     premises: ['Oruç, Ramazan ayında gündüz vakti yeme, içme ve benzeri şeylerden uzak durmayı içerir.', 'Hac, ekonomik ve bedenen gücü yeten her Müslümana yılda birden fazla farzdır.', 'Kelime-i şehadet, Allah’ın varlığını ve birliğini, Hz. Muhammed’in O’nun elçisi olduğunu tasdik etmektir.'],
     options: ['Yalnız I', 'I ve II', 'I, II ve III', 'II ve III', 'I ve III'],
@@ -164,7 +164,7 @@ export const questions: QuestionSeed[] = [
     teacherNote: 'İbadetlerle ilgili temel bilgileri doğru ayırt etmeyi ölçer.',
   },
   {
-    id: `${IB}-q04`, topic: IB, outcome: "İbadetin birey ve toplum açısından anlamını yorumlar.", difficulty: 'yeni-nesil', type: 'yorum',
+    id: `${IB}-q04`, topic: IB, subtopic: 'tytdin-islam-ve-ibadet-s4', outcome: "İbadetin birey ve toplum açısından anlamını yorumlar.", difficulty: 'yeni-nesil', type: 'yorum',
     question: 'Camide topluca kılınan namazlarda müminler yan yana, sıra düzeninde, zengin-fakir ayrımı olmadan aynı safta durur.\n\nBu uygulama ibadetin aşağıdaki işlevlerinden öncelikle hangisini örneklendirir?',
     options: ['Toplumsal eşitlik ve birlik duygusunu güçlendirmeyi', 'Yalnızca bireysel arınmayı', 'Ekonomik kazancı artırmayı', 'Siyasi otoriteyi pekiştirmeyi', 'Bireyin toplumdan uzaklaşmasını'],
     correctAnswer: 0,
@@ -174,7 +174,7 @@ export const questions: QuestionSeed[] = [
     teacherNote: 'İbadetin toplumsal eşitlik boyutunu kavramayı ölçer.',
   },
   {
-    id: `${IB}-q05`, topic: IB, outcome: "İslam’ın şartlarını (beş şart) açıklar.", difficulty: 'kolay', type: 'bilgi',
+    id: `${IB}-q05`, topic: IB, subtopic: 'tytdin-islam-ve-ibadet-s3', outcome: "İslam’ın şartlarını (beş şart) açıklar.", difficulty: 'kolay', type: 'bilgi',
     question: 'İslami takvime göre bir ayın tamamında, imsak vaktinden akşam vaktine kadar yeme, içme ve orucu bozan diğer şeylerden uzak durmayı içeren ibadet hangisidir?',
     options: ['Namaz', 'Oruç', 'Zekât', 'Hac', 'Kelime-i şehadet'],
     correctAnswer: 1,
@@ -184,7 +184,7 @@ export const questions: QuestionSeed[] = [
     teacherNote: 'Temel ibadetlerin tanımını ölçer.',
   },
   {
-    id: `${IB}-q06`, topic: IB, outcome: "İbadetin birey ve toplum açısından anlamını yorumlar.", difficulty: 'orta', type: 'yorum',
+    id: `${IB}-q06`, topic: IB, subtopic: 'tytdin-islam-ve-ibadet-s4', outcome: "İbadetin birey ve toplum açısından anlamını yorumlar.", difficulty: 'orta', type: 'yorum',
     question: 'Namaz, günün belirli vakitlerinde kişiyi günlük işlerinden alıkoyup kendini gözden geçirmesine, huzur bulmasına vesile olur.\n\nBu açıklama namazın öncelikle hangi boyutunu vurgular?',
     options: ['Toplumsal boyutunu', 'Ekonomik boyutunu', 'Bireysel/manevi boyutunu', 'Siyasi boyutunu', 'Hukuki boyutunu'],
     correctAnswer: 2,
@@ -195,7 +195,7 @@ export const questions: QuestionSeed[] = [
   },
 
   {
-    id: `${AH}-q01`, topic: AH, outcome: 'Din ile ahlak arasındaki ilişkiyi açıklar.', difficulty: 'orta', type: 'yorum',
+    id: `${AH}-q01`, topic: AH, subtopic: 'tytdin-ahlak-ve-degerler-s1', outcome: 'Din ile ahlak arasındaki ilişkiyi açıklar.', difficulty: 'orta', type: 'yorum',
     question: 'İslam dini; doğruluk, emanete riayet, adalet ve yardımseverlik gibi değerleri hem ibadetlerle hem de günlük yaşam kurallarıyla teşvik eder.\n\nBu açıklama din ile aşağıdaki kavramlardan hangisi arasındaki ilişkiyi vurgular?',
     options: ['Din ve ekonomi', 'Din ve hukuk sistemi (yalnızca ceza hukuku)', 'Din ve sanat', 'Din ve ahlak', 'Din ve siyaset'],
     correctAnswer: 3,
@@ -205,7 +205,7 @@ export const questions: QuestionSeed[] = [
     teacherNote: 'Din-ahlak ilişkisini metinden çıkarsamayı ölçer.',
   },
   {
-    id: `${AH}-q02`, topic: AH, outcome: 'Temel ahlaki değerleri (doğruluk, emanet, adalet) açıklar.', difficulty: 'kolay', type: 'bilgi',
+    id: `${AH}-q02`, topic: AH, subtopic: 'tytdin-ahlak-ve-degerler-s2', outcome: 'Temel ahlaki değerleri (doğruluk, emanet, adalet) açıklar.', difficulty: 'kolay', type: 'bilgi',
     question: 'Bir kişiye emanet edilen bir şeyi zamanında ve eksiksiz olarak sahibine geri vermek, İslam ahlakında hangi temel değerle ilgilidir?',
     options: ['Adalet', 'Tevazu', 'Cömertlik', 'Sabır', 'Emanete riayet (güvenilirlik)'],
     correctAnswer: 4,
@@ -215,7 +215,7 @@ export const questions: QuestionSeed[] = [
     teacherNote: 'Temel ahlaki değerleri ayırt etmeyi ölçer.',
   },
   {
-    id: `${AH}-q03`, topic: AH, outcome: 'Din ile ahlak arasındaki ilişkiyi açıklar.', difficulty: 'zor', type: 'onculu',
+    id: `${AH}-q03`, topic: AH, subtopic: 'tytdin-ahlak-ve-degerler-s1', outcome: 'Din ile ahlak arasındaki ilişkiyi açıklar.', difficulty: 'zor', type: 'onculu',
     question: 'Din ve ahlak ilişkisiyle ilgili aşağıdaki yargılardan hangileri doğrudur?',
     premises: ['Ahlaki değerler yalnızca dindar kişilerde bulunabilir, dinsiz bir kişi ahlaklı olamaz.', 'Din, ahlaki değerlere kaynaklık eden ve onları destekleyen unsurlardan biridir.', 'İslam ahlakı, yalnızca ibadetlerle sınırlı olmayıp günlük hayattaki insan ilişkilerini de kapsar.'],
     options: ['II ve III', 'Yalnız II', 'Yalnız I', 'I ve III', 'I, II ve III'],
@@ -226,7 +226,7 @@ export const questions: QuestionSeed[] = [
     teacherNote: 'Din-ahlak ilişkisinin sınırlarını doğru değerlendirmeyi ölçer.',
   },
   {
-    id: `${AH}-q04`, topic: AH, outcome: 'Temel ahlaki değerleri (doğruluk, emanet, adalet) açıklar.', difficulty: 'yeni-nesil', type: 'yorum',
+    id: `${AH}-q04`, topic: AH, subtopic: 'tytdin-ahlak-ve-degerler-s2', outcome: 'Temel ahlaki değerleri (doğruluk, emanet, adalet) açıklar.', difficulty: 'yeni-nesil', type: 'yorum',
     question: 'Bir esnaf, malını satarken ürünün gerçek durumunu ve kalitesini müşteriden gizlemeden, olduğu gibi anlatıyor; fiyatını da haksız kazanç sağlamayacak şekilde belirliyor.\n\nBu esnafın davranışı öncelikle hangi ahlaki değerle ilişkilidir?',
     options: ['Cömertlik', 'Doğruluk ve dürüstlük', 'Sabır', 'Tevekkül', 'Tevazu'],
     correctAnswer: 1,
@@ -236,7 +236,7 @@ export const questions: QuestionSeed[] = [
     teacherNote: 'Somut bir örnekten ahlaki değeri çıkarsamayı ölçer.',
   },
   {
-    id: `${AH}-q05`, topic: AH, outcome: 'Temel ahlaki değerleri (doğruluk, emanet, adalet) açıklar.', difficulty: 'orta', type: 'bilgi',
+    id: `${AH}-q05`, topic: AH, subtopic: 'tytdin-ahlak-ve-degerler-s2', outcome: 'Temel ahlaki değerleri (doğruluk, emanet, adalet) açıklar.', difficulty: 'orta', type: 'bilgi',
     question: 'Herkese hakkı olanı vermek, kimseye haksızlık yapmamak anlamına gelen, İslam ahlakının da temel ilkelerinden biri olan kavram aşağıdakilerden hangisidir?',
     options: ['Kanaat', 'Cömertlik', 'Adalet', 'Tevazu', 'Sabır'],
     correctAnswer: 2,
@@ -246,7 +246,7 @@ export const questions: QuestionSeed[] = [
     teacherNote: 'Adalet kavramının tanımını ölçer.',
   },
   {
-    id: `${AH}-q06`, topic: AH, outcome: 'Din ile ahlak arasındaki ilişkiyi açıklar.', difficulty: 'orta', type: 'yorum',
+    id: `${AH}-q06`, topic: AH, subtopic: 'tytdin-ahlak-ve-degerler-s1', outcome: 'Din ile ahlak arasındaki ilişkiyi açıklar.', difficulty: 'orta', type: 'yorum',
     question: 'İslam dininde yalan söylemek, hile yapmak, haksız yere mal edinmek gibi davranışlar açıkça yasaklanmıştır.\n\nBu yasaklar dinin aşağıdaki işlevlerinden hangisini gösterir?',
     options: ['Dinin yalnızca ibadetle ilgilendiğini', 'Dinin yalnızca ahiretle ilgili olduğunu', 'Dinin ekonomiyle hiçbir ilgisinin olmadığını', 'Dinin ahlaki davranışları düzenleme ve yönlendirme işlevini', 'Dinin bireyi toplumdan izole ettiğini'],
     correctAnswer: 3,
@@ -257,7 +257,7 @@ export const questions: QuestionSeed[] = [
   },
 
   {
-    id: `${HM}-q01`, topic: HM, outcome: "Hz. Muhammed’in hayatının temel dönemlerini (Mekke, Medine) açıklar.", difficulty: 'kolay', type: 'bilgi',
+    id: `${HM}-q01`, topic: HM, subtopic: 'tytdin-hz-muhammed-s1', outcome: "Hz. Muhammed’in hayatının temel dönemlerini (Mekke, Medine) açıklar.", difficulty: 'kolay', type: 'bilgi',
     question: 'Hz. Muhammed’in doğduğu ve peygamberlik görevini ilk aldığı şehir aşağıdakilerden hangisidir?',
     options: ['Medine', 'Şam', 'Kudüs', 'Taif', 'Mekke'],
     correctAnswer: 4,
@@ -267,7 +267,7 @@ export const questions: QuestionSeed[] = [
     teacherNote: 'Hz. Muhammed’in hayatındaki temel coğrafi bilgileri ölçer.',
   },
   {
-    id: `${HM}-q02`, topic: HM, outcome: "Hicretin İslam tarihi açısından önemini yorumlar.", difficulty: 'orta', type: 'yorum',
+    id: `${HM}-q02`, topic: HM, subtopic: 'tytdin-hz-muhammed-s2', outcome: "Hicretin İslam tarihi açısından önemini yorumlar.", difficulty: 'orta', type: 'yorum',
     question: 'Hz. Muhammed ve beraberindeki Müslümanların Mekke’den Medine’ye göç etmesi (Hicret), İslam tarihinde bir dönüm noktası kabul edilir ve İslami takvimin başlangıcı sayılır.\n\nHicretin bu denli önemli sayılmasının temel nedeni aşağıdakilerden hangisidir?',
     options: ['Müslümanların özgürce ibadet edebileceği, İslam toplumunun teşkilatlandığı yeni bir dönemin başlaması', 'Sadece coğrafi bir yer değişikliği olması', 'Ticaretin Medine’de daha kârlı olması', 'Mekke’nin nüfusunun azalması', 'Medine’nin daha büyük bir şehir olması'],
     correctAnswer: 0,
@@ -277,7 +277,7 @@ export const questions: QuestionSeed[] = [
     teacherNote: 'Hicretin tarihsel önemini kavramayı ölçer.',
   },
   {
-    id: `${HM}-q03`, topic: HM, outcome: "Hz. Muhammed’in örnek kişiliğini (Kur’an ahlakı) açıklar.", difficulty: 'orta', type: 'bilgi',
+    id: `${HM}-q03`, topic: HM, subtopic: 'tytdin-hz-muhammed-s3', outcome: "Hz. Muhammed’in örnek kişiliğini (Kur’an ahlakı) açıklar.", difficulty: 'orta', type: 'bilgi',
     question: 'Hz. Muhammed, güvenilirliği nedeniyle Mekkeliler arasında hangi lakapla anılırdı?',
     options: ['El-Fatih', 'El-Emin', 'Es-Sadık (yalnızca)', 'El-Kerim', 'El-Alim'],
     correctAnswer: 1,
@@ -287,7 +287,7 @@ export const questions: QuestionSeed[] = [
     teacherNote: 'Hz. Muhammed’in örnek kişilik özelliklerini ölçer.',
   },
   {
-    id: `${HM}-q04`, topic: HM, outcome: "Hz. Muhammed’in hayatının temel dönemlerini (Mekke, Medine) açıklar.", difficulty: 'zor', type: 'onculu',
+    id: `${HM}-q04`, topic: HM, subtopic: 'tytdin-hz-muhammed-s1', outcome: "Hz. Muhammed’in hayatının temel dönemlerini (Mekke, Medine) açıklar.", difficulty: 'zor', type: 'onculu',
     question: 'Hz. Muhammed’in hayatıyla ilgili aşağıdaki yargılardan hangileri doğrudur?',
     premises: ['Peygamberlik görevi Mekke döneminde, Hira mağarasında başlamıştır.', 'Medine döneminde İslam toplumu siyasi ve sosyal olarak teşkilatlanmıştır.', 'Hz. Muhammed hayatı boyunca yalnızca Mekke’de yaşamış, hiç başka şehre gitmemiştir.'],
     options: ['Yalnız I', 'II ve III', 'I ve II', 'I ve III', 'I, II ve III'],
@@ -298,7 +298,7 @@ export const questions: QuestionSeed[] = [
     teacherNote: 'Hz. Muhammed’in hayatındaki temel dönemleri doğru ayırt etmeyi ölçer.',
   },
   {
-    id: `${HM}-q05`, topic: HM, outcome: "Hz. Muhammed’in örnek kişiliğini (Kur’an ahlakı) açıklar.", difficulty: 'yeni-nesil', type: 'yorum',
+    id: `${HM}-q05`, topic: HM, subtopic: 'tytdin-hz-muhammed-s3', outcome: "Hz. Muhammed’in örnek kişiliğini (Kur’an ahlakı) açıklar.", difficulty: 'yeni-nesil', type: 'yorum',
     question: 'Kaynaklara göre Hz. Muhammed, savaş sonrasında bile eski düşmanlarına karşı affedici davranmış, Mekke’nin fethinde kendisine ve ailesine yıllarca eziyet edenleri dahi bağışlamıştır.\n\nBu tutum Hz. Muhammed’in örnek kişiliğinde öncelikle hangi değeri yansıtır?',
     options: ['Kin tutma', 'Kayıtsızlık', 'Ekonomik çıkarcılık', 'Af ve merhamet', 'İntikam alma'],
     correctAnswer: 3,
@@ -308,7 +308,7 @@ export const questions: QuestionSeed[] = [
     teacherNote: 'Hz. Muhammed’in örnek ahlaki tutumunu somut olaydan çıkarsamayı ölçer.',
   },
   {
-    id: `${HM}-q06`, topic: HM, outcome: "Hicretin İslam tarihi açısından önemini yorumlar.", difficulty: 'kolay', type: 'bilgi',
+    id: `${HM}-q06`, topic: HM, subtopic: 'tytdin-hz-muhammed-s2', outcome: "Hicretin İslam tarihi açısından önemini yorumlar.", difficulty: 'kolay', type: 'bilgi',
     question: 'İslami (Hicri) takvimin başlangıcı olarak kabul edilen olay aşağıdakilerden hangisidir?',
     options: ["Hz. Muhammed’in doğumu", 'Kur’an’ın inmeye başlaması', 'Bedir Savaşı', "Mekke’nin fethi", 'Hicret'],
     correctAnswer: 4,
@@ -319,7 +319,7 @@ export const questions: QuestionSeed[] = [
   },
 
   {
-    id: `${ID}-q01`, topic: ID, outcome: "İslam düşüncesindeki yorum farklılıklarının (mezhep) nedenlerini açıklar.", difficulty: 'orta', type: 'yorum',
+    id: `${ID}-q01`, topic: ID, subtopic: 'tytdin-islam-dusuncesinde-yorumlar-s1', outcome: "İslam düşüncesindeki yorum farklılıklarının (mezhep) nedenlerini açıklar.", difficulty: 'orta', type: 'yorum',
     question: 'İslam’ın temel kaynakları (Kur’an ve Sünnet) aynı olmasına rağmen, tarih boyunca farklı fıkıh ve itikat mezheplerinin ortaya çıkmasının temel nedenlerinden biri aşağıdakilerden hangisidir?',
     options: ['Dini metinlerin farklı zaman, coğrafya ve akıl yürütme biçimleriyle farklı yorumlanabilmesi', 'Müslümanların ortak bir kutsal kitabının olmaması', 'İslam’ın hiçbir ortak inanç esasının bulunmaması', 'Mezheplerin birbirinden tamamen bağımsız farklı dinler olması', 'Kur’an’ın farklı dillerde farklı anlamlara gelmesi'],
     correctAnswer: 0,
@@ -329,7 +329,7 @@ export const questions: QuestionSeed[] = [
     teacherNote: 'Mezhep farklılıklarının nedenini kavramayı ölçer.',
   },
   {
-    id: `${ID}-q02`, topic: ID, outcome: "Fıkhi ve itikadi mezhep kavramlarını ayırt eder.", difficulty: 'orta', type: 'bilgi',
+    id: `${ID}-q02`, topic: ID, subtopic: 'tytdin-islam-dusuncesinde-yorumlar-s3', outcome: "Fıkhi ve itikadi mezhep kavramlarını ayırt eder.", difficulty: 'orta', type: 'bilgi',
     question: 'İbadet ve günlük hayattaki uygulamalarla (namazın kılınış şekli, miras hükümleri vb.) ilgili farklı yorumlardan doğan mezhep türü aşağıdakilerden hangisidir?',
     options: ['İtikadi mezhep', 'Fıkhi (ameli) mezhep', 'Tasavvufi ekol', 'Felsefi ekol', 'Siyasi mezhep'],
     correctAnswer: 1,
@@ -339,7 +339,7 @@ export const questions: QuestionSeed[] = [
     teacherNote: 'Fıkhi ve itikadi mezhep ayrımını ölçer.',
   },
   {
-    id: `${ID}-q03`, topic: ID, outcome: "Fıkhi ve itikadi mezhep kavramlarını ayırt eder.", difficulty: 'zor', type: 'onculu',
+    id: `${ID}-q03`, topic: ID, subtopic: 'tytdin-islam-dusuncesinde-yorumlar-s2', outcome: "Fıkhi ve itikadi mezhep kavramlarını ayırt eder.", difficulty: 'zor', type: 'onculu',
     question: 'İslam düşüncesindeki mezheplerle ilgili aşağıdaki yargılardan hangileri doğrudur?',
     premises: ['Fıkhi mezhepler ibadet ve hukuki uygulamalardaki farklı yorumlardan doğmuştur.', 'İtikadi mezhepler iman esaslarına ilişkin farklı yorumlarla ilgilidir.', 'Bir Müslümanın belirli bir mezhebe bağlı olması, İslam’ın inanç esaslarından biridir.'],
     options: ['Yalnız I', 'II ve III', 'I ve II', 'I ve III', 'I, II ve III'],
@@ -350,7 +350,7 @@ export const questions: QuestionSeed[] = [
     teacherNote: 'Mezhep kavramının iman esaslarıyla ilişkisini doğru değerlendirmeyi ölçer.',
   },
   {
-    id: `${ID}-q04`, topic: ID, outcome: "İslam düşüncesindeki yorum farklılıklarının (mezhep) nedenlerini açıklar.", difficulty: 'yeni-nesil', type: 'yorum',
+    id: `${ID}-q04`, topic: ID, subtopic: 'tytdin-islam-dusuncesinde-yorumlar-s1', outcome: "İslam düşüncesindeki yorum farklılıklarının (mezhep) nedenlerini açıklar.", difficulty: 'yeni-nesil', type: 'yorum',
     question: 'İki farklı fıkıh mezhebine mensup iki kişi, aynı ayet ve hadislere dayanarak, bir ibadetin bazı ayrıntılarında (örneğin belirli bir hareketin yapılış şekli) farklı uygulamalara ulaşmıştır. Her iki kişi de birbirinin görüşüne saygı duymakta, kimse diğerini dinden çıkmış saymamaktadır.\n\nBu durum İslam düşüncesindeki yorum farklılıklarıyla ilgili hangi çıkarıma en uygun destektir?',
     options: ['Mezhep farklılıkları, Müslümanlar arasında kesin ve uzlaşmaz bir ayrılık yaratır.', 'Fıkhi farklılıklar, iman esaslarında da mutlaka farklılık doğurur.', 'Bu farklılıklar, taraflardan birinin dinden çıktığı anlamına gelir.', 'Aynı temel kaynaklardan farklı meşru yorumlara ulaşılabilir ve bu, İslam düşüncesinde bir zenginlik olarak görülebilir.', 'Mezhep farklılıkları yalnızca tarihsel bir hatadan kaynaklanır.'],
     correctAnswer: 3,
@@ -360,7 +360,7 @@ export const questions: QuestionSeed[] = [
     teacherNote: 'Mezhep çeşitliliğine hoşgörülü bir bakışı kavramayı ölçer.',
   },
   {
-    id: `${ID}-q05`, topic: ID, outcome: "Fıkhi ve itikadi mezhep kavramlarını ayırt eder.", difficulty: 'orta', type: 'bilgi',
+    id: `${ID}-q05`, topic: ID, subtopic: 'tytdin-islam-dusuncesinde-yorumlar-s3', outcome: "Fıkhi ve itikadi mezhep kavramlarını ayırt eder.", difficulty: 'orta', type: 'bilgi',
     question: 'İnanç esaslarının (Allah’ın sıfatları, kader, peygamberlik gibi konuların) akli ve nakli delillerle temellendirilmesiyle ilgilenen İslam düşüncesi disiplinine ne ad verilir?',
     options: ['Fıkıh', 'Tasavvuf', 'Hadis', 'Tefsir', 'Kelam'],
     correctAnswer: 4,
@@ -370,7 +370,7 @@ export const questions: QuestionSeed[] = [
     teacherNote: 'Kelam disiplininin tanımını ölçer.',
   },
   {
-    id: `${ID}-q06`, topic: ID, outcome: "İslam düşüncesindeki yorum farklılıklarının (mezhep) nedenlerini açıklar.", difficulty: 'kolay', type: 'bilgi',
+    id: `${ID}-q06`, topic: ID, subtopic: 'tytdin-islam-dusuncesinde-yorumlar-s2', outcome: "İslam düşüncesindeki yorum farklılıklarının (mezhep) nedenlerini açıklar.", difficulty: 'kolay', type: 'bilgi',
     question: 'Aşağıdakilerden hangisi bilinen fıkhi (ameli) mezheplerden biridir?',
     options: ['Hanefilik', 'Eş’ariyye', 'Mu’tezile', 'Maturidiyye', 'Selefiyye'],
     correctAnswer: 0,

@@ -326,7 +326,7 @@ export const questions: QuestionSeed[] = [
     outcome: "Yol = hız · zaman bağıntısını kullanarak karşılaşma, yetişme ve ortalama hız problemlerini çözer.",
     difficulty: 'orta',
     type: 'problem',
-    question: "Bir araç A şehrinden B şehrine saatte 60 km hızla gidip aynı yoldan saatte 90 km hızla geri dönüyor.\nAracın gidiş-dönüş boyunca ortalama hızı saatte kaç km’dir?",
+    question: "Bir araç A şehrinden B şehrine saatte 60 km hızla gidip aynı yoldan saatte 90 km hızla geri dönüyor.\nAracın gidiş-dönüş boyunca ortalama sürati saatte kaç km’dir?",
     options: ["70", "72", "75", "78", "80"],
     correctAnswer: 1,
     solution: "Yol x km olsun. Toplam süre x/60 + x/90 = 5x/180 = x/36. Ortalama hız = 2x / (x/36) = 72 km/sa. (Eşit yollar için 2 · 60 · 90 / 150 = 72.)",

@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react';
 import { AskLabel } from '../components/AskName';
-import { getTopicRef, subjectLabel } from '../data/curriculum';
+import { getTopicRef, subjectLabel, subjectTopics } from '../data/curriculum';
 import { loadLesson, loadTopicQuestions } from '../data/content';
 import type { LessonSeed } from '../domain/types';
 import { InlineQuiz } from '../components/InlineQuiz';
@@ -47,7 +47,7 @@ function LessonView({ lesson }: { lesson: LessonSeed }) {
     ['hatalar', 'Sık hatalar'],
     ['puf', 'Püf noktası'],
     ['ozet', '1 dk özet'],
-  ];
+  ].filter(([id]) => id !== 'formuller' || lesson.formulas.length > 0) as [string, string][];
   return (
     <article className="lesson">
       <nav className="toc" aria-label="Konu bölümleri">
@@ -255,6 +255,10 @@ export default function TopicPage({ params }: { params: string[] }) {
     );
   }
 
+  const siblings = subjectTopics(ref.subject.id);
+  const topicIndex = siblings.findIndex((t) => t.id === topicId);
+  const previousTopic = siblings[topicIndex - 1];
+  const nextTopic = siblings[topicIndex + 1];
   const status: TopicStatus = state.topicProgress[topicId]?.status ?? 'baslanmadi';
   const review = state.reviews[topicId];
   const today = dayKey();
@@ -529,6 +533,11 @@ export default function TopicPage({ params }: { params: string[] }) {
         </div>
       )}
 
+      <nav className="card section topic-navigation" aria-label="Konular arasında gezin">
+        {previousTopic && <a className="btn" href={`#/konu/${previousTopic.id}`}>← {previousTopic.name}</a>}
+        <a className="btn ghost" href={`#/ders/${ref.subject.id}`}>Tüm konular</a>
+        {nextTopic && <a className="btn" href={`#/konu/${nextTopic.id}`}>{nextTopic.name} →</a>}
+      </nav>
       {pending && (
         <ConfirmDialog
           title="Devam eden test var"

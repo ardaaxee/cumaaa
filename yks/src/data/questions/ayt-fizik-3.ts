@@ -10,7 +10,7 @@ const TEKNO = "aytfiz-modern-fizik-teknoloji";
 const bhhQuestions: QuestionSeed[] = [
   {
     id: `${BHH}-q01`,
-    topic: BHH,
+    topic: BHH, subtopic: 'aytfiz-basit-harmonik-hareket-s2',
     outcome: "Basit harmonik harekette konum, hız ve ivme arasındaki ilişkiyi açıklar.",
     difficulty: "kolay",
     type: "bilgi",
@@ -30,7 +30,7 @@ const bhhQuestions: QuestionSeed[] = [
   },
   {
     id: `${BHH}-q02`,
-    topic: BHH,
+    topic: BHH, subtopic: 'aytfiz-basit-harmonik-hareket-s3',
     outcome: "Yay sarkacının periyodunu etkileyen değişkenleri belirleyerek periyodu hesaplar.",
     difficulty: "kolay",
     type: "islem",
@@ -44,7 +44,7 @@ const bhhQuestions: QuestionSeed[] = [
   },
   {
     id: `${BHH}-q03`,
-    topic: BHH,
+    topic: BHH, subtopic: 'aytfiz-basit-harmonik-hareket-s4',
     outcome: "Basit sarkacın periyodunu etkileyen değişkenleri açıklar ve periyot bağıntısını kullanır.",
     difficulty: "orta",
     type: "islem",
@@ -58,7 +58,7 @@ const bhhQuestions: QuestionSeed[] = [
   },
   {
     id: `${BHH}-q04`,
-    topic: BHH,
+    topic: BHH, subtopic: 'aytfiz-basit-harmonik-hareket-s1',
     outcome: "Basit harmonik hareketin konum-zaman grafiğinden genlik, periyot, en büyük hız ve ivmeyi hesaplar.",
     difficulty: "orta",
     type: "grafik",
@@ -78,7 +78,7 @@ const bhhQuestions: QuestionSeed[] = [
   },
   {
     id: `${BHH}-q05`,
-    topic: BHH,
+    topic: BHH, subtopic: 'aytfiz-basit-harmonik-hareket-s3',
     outcome: "Yay sarkacı ve basit sarkacın periyotlarının bağlı olduğu değişkenleri karşılaştırır.",
     difficulty: "orta",
     type: "onculu",
@@ -97,7 +97,7 @@ const bhhQuestions: QuestionSeed[] = [
   },
   {
     id: `${BHH}-q06`,
-    topic: BHH,
+    topic: BHH, subtopic: 'aytfiz-basit-harmonik-hareket-s2',
     outcome: "Basit harmonik harekette herhangi bir konumdaki hız ve ivmeyi hesaplar.",
     difficulty: "orta",
     type: "problem",
@@ -117,7 +117,7 @@ const bhhQuestions: QuestionSeed[] = [
   },
   {
     id: `${BHH}-q07`,
-    topic: BHH,
+    topic: BHH, subtopic: 'aytfiz-basit-harmonik-hareket-s3',
     outcome: "Yay sarkacının periyodunu etkileyen değişkenleri belirler.",
     difficulty: "zor",
     type: "tablo",
@@ -147,7 +147,7 @@ const bhhQuestions: QuestionSeed[] = [
   },
   {
     id: `${BHH}-q08`,
-    topic: BHH,
+    topic: BHH, subtopic: 'aytfiz-basit-harmonik-hareket-s1',
     outcome: "Basit harmonik harekette enerji dönüşümlerini açıklar ve hesaplar.",
     difficulty: "zor",
     type: "cok-adimli",
@@ -161,7 +161,7 @@ const bhhQuestions: QuestionSeed[] = [
   },
   {
     id: `${BHH}-q09`,
-    topic: BHH,
+    topic: BHH, subtopic: 'aytfiz-basit-harmonik-hareket-s2',
     outcome: "İvmeli sistemlerde basit sarkacın ve yay sarkacının periyodundaki değişimi yorumlar.",
     difficulty: "yeni-nesil",
     type: "yeni-nesil",
@@ -181,7 +181,7 @@ const bhhQuestions: QuestionSeed[] = [
   },
   {
     id: `${BHH}-q10`,
-    topic: BHH,
+    topic: BHH, subtopic: 'aytfiz-basit-harmonik-hareket-s4',
     outcome: "Basit sarkaç deneyi ile çekim ivmesini hesaplar.",
     difficulty: "orta",
     type: "deney",
@@ -195,7 +195,7 @@ const bhhQuestions: QuestionSeed[] = [
   },
   {
     id: `${BHH}-q11`,
-    topic: BHH,
+    topic: BHH, subtopic: 'aytfiz-basit-harmonik-hareket-s2',
     outcome: "Basit harmonik harekette ivme-konum grafiğini yorumlar.",
     difficulty: "zor",
     type: "grafik",
@@ -215,7 +215,7 @@ const bhhQuestions: QuestionSeed[] = [
   },
   {
     id: `${BHH}-q12`,
-    topic: BHH,
+    topic: BHH, subtopic: 'aytfiz-basit-harmonik-hareket-s2',
     outcome: "Basit harmonik harekette denge noktası ve uç noktalardaki kuvvet ve enerjiyi yorumlar.",
     difficulty: "zor",
     type: "onculu",
@@ -234,7 +234,7 @@ const bhhQuestions: QuestionSeed[] = [
   },
   {
     id: `${BHH}-q13`,
-    topic: BHH,
+    topic: BHH, subtopic: 'aytfiz-basit-harmonik-hareket-s3',
     outcome: "Seri ve paralel bağlı yaylarla oluşturulan yay sarkaçlarının periyotlarını karşılaştırır.",
     difficulty: "orta",
     type: "cok-adimli",
@@ -248,7 +248,7 @@ const bhhQuestions: QuestionSeed[] = [
   },
   {
     id: `${BHH}-q14`,
-    topic: BHH,
+    topic: BHH, subtopic: 'aytfiz-basit-harmonik-hareket-s3',
     outcome: "Düşey yay sarkacında denge uzaması ile periyot arasındaki ilişkiyi kullanır.",
     difficulty: "orta",
     type: "problem",
@@ -265,7 +265,7 @@ const bhhQuestions: QuestionSeed[] = [
 const dalgaQuestions: QuestionSeed[] = [
   {
     id: `${DALGA}-q01`,
-    topic: DALGA,
+    topic: DALGA, subtopic: 'aytfiz-dalga-mekanigi-s1',
     outcome: "Su dalgalarında kırınımın aralık genişliği ve dalga boyuna bağlılığını açıklar.",
     difficulty: "kolay",
     type: "yorum",
@@ -285,7 +285,7 @@ const dalgaQuestions: QuestionSeed[] = [
   },
   {
     id: `${DALGA}-q02`,
-    topic: DALGA,
+    topic: DALGA, subtopic: 'aytfiz-dalga-mekanigi-s1',
     outcome: "İki noktasal kaynakla oluşturulan girişim deseninde katar ve düğüm çizgilerini yol farkıyla belirler.",
     difficulty: "kolay",
     type: "islem",
@@ -305,7 +305,7 @@ const dalgaQuestions: QuestionSeed[] = [
   },
   {
     id: `${DALGA}-q03`,
-    topic: DALGA,
+    topic: DALGA, subtopic: 'aytfiz-dalga-mekanigi-s2',
     outcome: "Young çift yarık deneyinde saçak genişliğini ve saçakların merkeze uzaklıklarını hesaplar.",
     difficulty: "orta",
     type: "islem",
@@ -319,7 +319,7 @@ const dalgaQuestions: QuestionSeed[] = [
   },
   {
     id: `${DALGA}-q04`,
-    topic: DALGA,
+    topic: DALGA, subtopic: 'aytfiz-dalga-mekanigi-s2',
     outcome: "Çift yarık deneyinde saçak genişliğini etkileyen değişkenleri yorumlar.",
     difficulty: "orta",
     type: "onculu",
@@ -338,7 +338,7 @@ const dalgaQuestions: QuestionSeed[] = [
   },
   {
     id: `${DALGA}-q05`,
-    topic: DALGA,
+    topic: DALGA, subtopic: 'aytfiz-dalga-mekanigi-s3',
     outcome: "Tek yarıkta kırınım desenini açıklar ve merkezi aydınlık saçağın genişliğini hesaplar.",
     difficulty: "orta",
     type: "islem",
@@ -352,7 +352,7 @@ const dalgaQuestions: QuestionSeed[] = [
   },
   {
     id: `${DALGA}-q06`,
-    topic: DALGA,
+    topic: DALGA, subtopic: 'aytfiz-dalga-mekanigi-s2',
     outcome: "Çift yarık deneyinde farklı düzeneklerin saçak genişliklerini karşılaştırır.",
     difficulty: "zor",
     type: "tablo",
@@ -381,7 +381,7 @@ const dalgaQuestions: QuestionSeed[] = [
   },
   {
     id: `${DALGA}-q07`,
-    topic: DALGA,
+    topic: DALGA, subtopic: 'aytfiz-dalga-mekanigi-s4',
     outcome: "Doppler olayını açıklar ve algılanan frekansı hesaplar.",
     difficulty: "orta",
     type: "islem",
@@ -395,7 +395,7 @@ const dalgaQuestions: QuestionSeed[] = [
   },
   {
     id: `${DALGA}-q08`,
-    topic: DALGA,
+    topic: DALGA, subtopic: 'aytfiz-dalga-mekanigi-s4',
     outcome: "Doppler olayında algılanan frekans ve dalga hızındaki değişimleri yorumlar.",
     difficulty: "kolay",
     type: "onculu",
@@ -414,7 +414,7 @@ const dalgaQuestions: QuestionSeed[] = [
   },
   {
     id: `${DALGA}-q09`,
-    topic: DALGA,
+    topic: DALGA, subtopic: 'aytfiz-dalga-mekanigi-s1',
     outcome: "Su dalgalarında girişim deseninin frekans değişimine bağlı değişimini yorumlar.",
     difficulty: "orta",
     type: "deney",
@@ -434,7 +434,7 @@ const dalgaQuestions: QuestionSeed[] = [
   },
   {
     id: `${DALGA}-q10`,
-    topic: DALGA,
+    topic: DALGA, subtopic: 'aytfiz-dalga-mekanigi-s2',
     outcome: "Çift yarık deneyinde perdedeki şiddet dağılımından ışığın dalga boyunu hesaplar.",
     difficulty: "zor",
     type: "grafik",
@@ -448,7 +448,7 @@ const dalgaQuestions: QuestionSeed[] = [
   },
   {
     id: `${DALGA}-q11`,
-    topic: DALGA,
+    topic: DALGA, subtopic: 'aytfiz-dalga-mekanigi-s2',
     outcome: "Çift yarık deneyinin farklı ortamlarda yapılmasının girişim desenine etkisini hesaplar.",
     difficulty: "yeni-nesil",
     type: "yeni-nesil",
@@ -462,7 +462,7 @@ const dalgaQuestions: QuestionSeed[] = [
   },
   {
     id: `${DALGA}-q12`,
-    topic: DALGA,
+    topic: DALGA, subtopic: 'aytfiz-dalga-mekanigi-s3',
     outcome: "Tek yarık ve çift yarık girişim desenlerini karşılaştırır.",
     difficulty: "zor",
     type: "onculu",
@@ -481,7 +481,7 @@ const dalgaQuestions: QuestionSeed[] = [
   },
   {
     id: `${DALGA}-q13`,
-    topic: DALGA,
+    topic: DALGA, subtopic: 'aytfiz-dalga-mekanigi-s4',
     outcome: "Işıkta Doppler olayını gök cisimlerinin hareketini yorumlamada kullanır.",
     difficulty: "yeni-nesil",
     type: "yeni-nesil",
@@ -504,7 +504,7 @@ const dalgaQuestions: QuestionSeed[] = [
 const emQuestions: QuestionSeed[] = [
   {
     id: `${EM}-q01`,
-    topic: EM,
+    topic: EM, subtopic: 'aytfiz-em-dalgalar-s2',
     outcome: "Elektromanyetik spektrumu frekans ve dalga boyuna göre sıralar.",
     difficulty: "kolay",
     type: "bilgi",
@@ -524,7 +524,7 @@ const emQuestions: QuestionSeed[] = [
   },
   {
     id: `${EM}-q02`,
-    topic: EM,
+    topic: EM, subtopic: 'aytfiz-em-dalgalar-s1',
     outcome: "Elektromanyetik dalgalarda c = λ·f bağıntısını kullanır.",
     difficulty: "kolay",
     type: "islem",
@@ -538,7 +538,7 @@ const emQuestions: QuestionSeed[] = [
   },
   {
     id: `${EM}-q03`,
-    topic: EM,
+    topic: EM, subtopic: 'aytfiz-em-dalgalar-s1',
     outcome: "Elektromanyetik dalgaların oluşumunu ve temel özelliklerini açıklar.",
     difficulty: "orta",
     type: "onculu",
@@ -557,7 +557,7 @@ const emQuestions: QuestionSeed[] = [
   },
   {
     id: `${EM}-q04`,
-    topic: EM,
+    topic: EM, subtopic: 'aytfiz-em-dalgalar-s2',
     outcome: "Elektromanyetik spektrumdaki bölgeleri frekans ve dalga boyu değerleriyle tanır.",
     difficulty: "orta",
     type: "tablo",
@@ -585,7 +585,7 @@ const emQuestions: QuestionSeed[] = [
   },
   {
     id: `${EM}-q05`,
-    topic: EM,
+    topic: EM, subtopic: 'aytfiz-em-dalgalar-s2',
     outcome: "Elektromanyetik dalgaların teknolojideki kullanımına ilişkin hesaplamalar yapar.",
     difficulty: "orta",
     type: "problem",
@@ -599,7 +599,7 @@ const emQuestions: QuestionSeed[] = [
   },
   {
     id: `${EM}-q06`,
-    topic: EM,
+    topic: EM, subtopic: 'aytfiz-em-dalgalar-s2',
     outcome: "Elektromanyetik dalgaların günlük hayattaki uygulamalarını dalga boyu ile ilişkilendirir.",
     difficulty: "yeni-nesil",
     type: "yeni-nesil",
@@ -613,7 +613,7 @@ const emQuestions: QuestionSeed[] = [
   },
   {
     id: `${EM}-q07`,
-    topic: EM,
+    topic: EM, subtopic: 'aytfiz-em-dalgalar-s2',
     outcome: "Kızılötesi ışımanın özelliklerini ve kullanım alanlarını açıklar.",
     difficulty: "orta",
     type: "onculu",
@@ -635,7 +635,7 @@ const emQuestions: QuestionSeed[] = [
 const atomQuestions: QuestionSeed[] = [
   {
     id: `${ATOM}-q01`,
-    topic: ATOM,
+    topic: ATOM, subtopic: 'aytfiz-atom-fizigi-radyoaktivite-s1',
     outcome: "Atom modellerinin tarihsel gelişimini ve dayandıkları deneyleri açıklar.",
     difficulty: "kolay",
     type: "bilgi",
@@ -655,7 +655,7 @@ const atomQuestions: QuestionSeed[] = [
   },
   {
     id: `${ATOM}-q02`,
-    topic: ATOM,
+    topic: ATOM, subtopic: 'aytfiz-atom-fizigi-radyoaktivite-s2',
     outcome: "Bohr atom modeline göre hidrojen atomunda enerji geçişlerinde yayılan fotonun enerjisini hesaplar.",
     difficulty: "orta",
     type: "islem",
@@ -669,7 +669,7 @@ const atomQuestions: QuestionSeed[] = [
   },
   {
     id: `${ATOM}-q03`,
-    topic: ATOM,
+    topic: ATOM, subtopic: 'aytfiz-atom-fizigi-radyoaktivite-s2',
     outcome: "Atomların elektron ve fotonla uyarılmasını karşılaştırır, yayılabilecek fotonların enerjilerini belirler.",
     difficulty: "zor",
     type: "tablo",
@@ -699,7 +699,7 @@ const atomQuestions: QuestionSeed[] = [
   },
   {
     id: `${ATOM}-q04`,
-    topic: ATOM,
+    topic: ATOM, subtopic: 'aytfiz-atom-fizigi-radyoaktivite-s4',
     outcome: "Yarı ömür kavramını açıklar ve kalan madde miktarını hesaplar.",
     difficulty: "kolay",
     type: "islem",
@@ -713,7 +713,7 @@ const atomQuestions: QuestionSeed[] = [
   },
   {
     id: `${ATOM}-q05`,
-    topic: ATOM,
+    topic: ATOM, subtopic: 'aytfiz-atom-fizigi-radyoaktivite-s4',
     outcome: "Alfa, beta ve gama bozunmalarında çekirdekteki değişimleri açıklar.",
     difficulty: "orta",
     type: "onculu",
@@ -732,7 +732,7 @@ const atomQuestions: QuestionSeed[] = [
   },
   {
     id: `${ATOM}-q06`,
-    topic: ATOM,
+    topic: ATOM, subtopic: 'aytfiz-atom-fizigi-radyoaktivite-s4',
     outcome: "Radyoaktif bozunma serilerinde bozunma sayılarını hesaplar.",
     difficulty: "zor",
     type: "cok-adimli",
@@ -746,7 +746,7 @@ const atomQuestions: QuestionSeed[] = [
   },
   {
     id: `${ATOM}-q07`,
-    topic: ATOM,
+    topic: ATOM, subtopic: 'aytfiz-atom-fizigi-radyoaktivite-s4',
     outcome: "Radyoaktif bozunma grafiğinden yarı ömrü belirler ve ileri zamanlar için kestirim yapar.",
     difficulty: "orta",
     type: "grafik",
@@ -760,7 +760,7 @@ const atomQuestions: QuestionSeed[] = [
   },
   {
     id: `${ATOM}-q08`,
-    topic: ATOM,
+    topic: ATOM, subtopic: 'aytfiz-atom-fizigi-radyoaktivite-s5',
     outcome: "Fisyon ve füzyon tepkimelerini karşılaştırır ve kullanım alanlarını açıklar.",
     difficulty: "orta",
     type: "onculu",
@@ -782,7 +782,7 @@ const atomQuestions: QuestionSeed[] = [
 const modernQuestions: QuestionSeed[] = [
   {
     id: `${MODERN}-q01`,
-    topic: MODERN,
+    topic: MODERN, subtopic: 'aytfiz-modern-fizik-s1',
     outcome: "Özel görelilik kuramının postulatlarını açıklar.",
     difficulty: "kolay",
     type: "bilgi",
@@ -796,7 +796,7 @@ const modernQuestions: QuestionSeed[] = [
   },
   {
     id: `${MODERN}-q02`,
-    topic: MODERN,
+    topic: MODERN, subtopic: 'aytfiz-modern-fizik-s1',
     outcome: "Zaman genişlemesini açıklar ve hesaplar.",
     difficulty: "orta",
     type: "islem",
@@ -810,7 +810,7 @@ const modernQuestions: QuestionSeed[] = [
   },
   {
     id: `${MODERN}-q03`,
-    topic: MODERN,
+    topic: MODERN, subtopic: 'aytfiz-modern-fizik-s1',
     outcome: "Boy kısalmasını açıklar ve hesaplar.",
     difficulty: "orta",
     type: "islem",
@@ -824,7 +824,7 @@ const modernQuestions: QuestionSeed[] = [
   },
   {
     id: `${MODERN}-q04`,
-    topic: MODERN,
+    topic: MODERN, subtopic: 'aytfiz-modern-fizik-s2',
     outcome: "Kara cisim ışımasını ve Planck’ın kuantum hipotezini açıklar.",
     difficulty: "kolay",
     type: "onculu",
@@ -843,7 +843,7 @@ const modernQuestions: QuestionSeed[] = [
   },
   {
     id: `${MODERN}-q05`,
-    topic: MODERN,
+    topic: MODERN, subtopic: 'aytfiz-modern-fizik-s2',
     outcome: "Fotonun enerjisini dalga boyu ve frekansla ilişkilendirerek hesaplar.",
     difficulty: "kolay",
     type: "islem",
@@ -857,7 +857,7 @@ const modernQuestions: QuestionSeed[] = [
   },
   {
     id: `${MODERN}-q06`,
-    topic: MODERN,
+    topic: MODERN, subtopic: 'aytfiz-modern-fizik-s3',
     outcome: "Fotoelektrik olayda maksimum kinetik enerji–frekans grafiğini yorumlar.",
     difficulty: "orta",
     type: "grafik",
@@ -876,7 +876,7 @@ const modernQuestions: QuestionSeed[] = [
   },
   {
     id: `${MODERN}-q07`,
-    topic: MODERN,
+    topic: MODERN, subtopic: 'aytfiz-modern-fizik-s3',
     outcome: "Einstein’ın fotoelektrik denklemini kullanarak fotoelektronların kinetik enerjisini hesaplar.",
     difficulty: "orta",
     type: "islem",
@@ -890,7 +890,7 @@ const modernQuestions: QuestionSeed[] = [
   },
   {
     id: `${MODERN}-q08`,
-    topic: MODERN,
+    topic: MODERN, subtopic: 'aytfiz-modern-fizik-s3',
     outcome: "Fotoelektrik olayda ışığın frekans ve şiddetinin etkilerini deney düzeneği üzerinden yorumlar.",
     difficulty: "orta",
     type: "deney",
@@ -910,7 +910,7 @@ const modernQuestions: QuestionSeed[] = [
   },
   {
     id: `${MODERN}-q09`,
-    topic: MODERN,
+    topic: MODERN, subtopic: 'aytfiz-modern-fizik-s4',
     outcome: "de Broglie dalga boyunu hesaplar.",
     difficulty: "orta",
     type: "islem",
@@ -924,7 +924,7 @@ const modernQuestions: QuestionSeed[] = [
   },
   {
     id: `${MODERN}-q10`,
-    topic: MODERN,
+    topic: MODERN, subtopic: 'aytfiz-modern-fizik-s4',
     outcome: "Farklı parçacıkların de Broglie dalga boylarını karşılaştırır.",
     difficulty: "zor",
     type: "cok-adimli",
@@ -938,7 +938,7 @@ const modernQuestions: QuestionSeed[] = [
   },
   {
     id: `${MODERN}-q11`,
-    topic: MODERN,
+    topic: MODERN, subtopic: 'aytfiz-modern-fizik-s4',
     outcome: "Compton saçılmasını açıklar ve ışığın tanecik modeli ile ilişkilendirir.",
     difficulty: "orta",
     type: "onculu",
@@ -957,7 +957,7 @@ const modernQuestions: QuestionSeed[] = [
   },
   {
     id: `${MODERN}-q12`,
-    topic: MODERN,
+    topic: MODERN, subtopic: 'aytfiz-modern-fizik-s1',
     outcome: "Zaman genişlemesini gerçek yaşam olaylarıyla ilişkilendirir.",
     difficulty: "yeni-nesil",
     type: "yeni-nesil",
@@ -971,7 +971,7 @@ const modernQuestions: QuestionSeed[] = [
   },
   {
     id: `${MODERN}-q13`,
-    topic: MODERN,
+    topic: MODERN, subtopic: 'aytfiz-modern-fizik-s3',
     outcome: "Farklı metallerde fotoelektrik olayın gerçekleşme koşulunu belirler.",
     difficulty: "zor",
     type: "tablo",
@@ -999,7 +999,7 @@ const modernQuestions: QuestionSeed[] = [
   },
   {
     id: `${MODERN}-q14`,
-    topic: MODERN,
+    topic: MODERN, subtopic: 'aytfiz-modern-fizik-s1',
     outcome: "Kütle-enerji eşdeğerliğini ve göreli kinetik enerjiyi açıklar.",
     difficulty: "zor",
     type: "islem",
@@ -1013,7 +1013,7 @@ const modernQuestions: QuestionSeed[] = [
   },
   {
     id: `${MODERN}-q15`,
-    topic: MODERN,
+    topic: MODERN, subtopic: 'aytfiz-modern-fizik-s2',
     outcome: "Kara cisim ışıması ve Wien yasasını yıldızların sıcaklıklarını karşılaştırmada kullanır.",
     difficulty: "yeni-nesil",
     type: "yeni-nesil",
@@ -1036,7 +1036,7 @@ const modernQuestions: QuestionSeed[] = [
 const teknoQuestions: QuestionSeed[] = [
   {
     id: `${TEKNO}-q01`,
-    topic: TEKNO,
+    topic: TEKNO, subtopic: 'aytfiz-modern-fizik-teknoloji-s3',
     outcome: "Lazerin çalışma ilkesini ve lazer ışığının özelliklerini açıklar.",
     difficulty: "kolay",
     type: "bilgi",
@@ -1056,7 +1056,7 @@ const teknoQuestions: QuestionSeed[] = [
   },
   {
     id: `${TEKNO}-q02`,
-    topic: TEKNO,
+    topic: TEKNO, subtopic: 'aytfiz-modern-fizik-teknoloji-s2',
     outcome: "Güneş pillerinin çalışma ilkesini açıklar.",
     difficulty: "orta",
     type: "onculu",
@@ -1075,7 +1075,7 @@ const teknoQuestions: QuestionSeed[] = [
   },
   {
     id: `${TEKNO}-q03`,
-    topic: TEKNO,
+    topic: TEKNO, subtopic: 'aytfiz-modern-fizik-teknoloji-s1',
     outcome: "Tıbbi görüntüleme tekniklerinin dayandığı fiziksel ilkeleri açıklar.",
     difficulty: "orta",
     type: "tablo",
@@ -1099,7 +1099,7 @@ const teknoQuestions: QuestionSeed[] = [
   },
   {
     id: `${TEKNO}-q04`,
-    topic: TEKNO,
+    topic: TEKNO, subtopic: 'aytfiz-modern-fizik-teknoloji-s2',
     outcome: "LED’in yaydığı ışığın rengini yarı iletkenin enerji aralığıyla ilişkilendirir.",
     difficulty: "orta",
     type: "islem",
@@ -1119,7 +1119,7 @@ const teknoQuestions: QuestionSeed[] = [
   },
   {
     id: `${TEKNO}-q05`,
-    topic: TEKNO,
+    topic: TEKNO, subtopic: 'aytfiz-modern-fizik-teknoloji-s3',
     outcome: "Lazer kaynağının gücünden birim zamanda yayılan foton sayısını hesaplar.",
     difficulty: "yeni-nesil",
     type: "yeni-nesil",
@@ -1133,7 +1133,7 @@ const teknoQuestions: QuestionSeed[] = [
   },
   {
     id: `${TEKNO}-q06`,
-    topic: TEKNO,
+    topic: TEKNO, subtopic: 'aytfiz-modern-fizik-teknoloji-s3',
     outcome: "Süper iletkenlerin özelliklerini ve teknolojideki kullanımını açıklar.",
     difficulty: "orta",
     type: "onculu",

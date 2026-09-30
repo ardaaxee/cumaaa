@@ -62,7 +62,7 @@ export const lessons: LessonSeed[] = [
     summary: [
       "SI’da 7 temel büyüklük vardır; diğerleri türetilmiştir.",
       "Yönü olan büyüklük vektöreldir: hız, ivme, kuvvet, yer değiştirme, ağırlık.",
-      "Bilimsel yöntem: problem → hipotez → deney → sonuç; tekrarlanan doğrulamalar teori ve yasaya götürür.",
+      "Bilimsel araştırma gözlem, soru, hipotez ve sınama arasında ilerler. Yasa düzenliliği betimler, teori açıklama sunar; teori kanıtlanınca yasaya dönüşmez.",
       "Her ölçümde hata vardır; hassas aletle azaltılır ama sıfırlanamaz.",
     ],
   },

@@ -11,7 +11,7 @@ const BL = 'tytfel-bilim-felsefesi';
 
 export const questions: QuestionSeed[] = [
   {
-    id: `${T}-q01`, topic: T, outcome: 'Felsefi düşüncenin özelliklerini açıklar.', difficulty: 'orta', type: 'yorum',
+    id: `${T}-q01`, topic: T, subtopic: 'tytfel-felsefeye-giris-s1', outcome: 'Felsefi düşüncenin özelliklerini açıklar.', difficulty: 'orta', type: 'yorum',
     question: 'Bir öğrenci, "Neden var olan bir şey yok olabiliyor da hiç yoktan bir şey var olamıyor?" diye sorup, günlerce bu soru üzerine düşünüyor; kesin bir cevaba varmasa da soruyu farklı açılardan tartışmaya devam ediyor.\n\nBu öğrencinin tutumu felsefi düşüncenin öncelikle hangi özelliğiyle örtüşür?',
     options: ['Sorgulayıcı ve eleştirel bir tutumla akıl yürütme', 'Kesin ve değişmez sonuçlara ulaşma amacı', 'Deney ve gözleme dayanarak kanıtlama', 'Toplumsal geleneklere bağlı kalma', 'Sorunu çözülmüş kabul edip başka konuya geçme'],
     correctAnswer: 0,
@@ -21,7 +21,7 @@ export const questions: QuestionSeed[] = [
     teacherNote: 'Felsefi düşünmenin sorgulayıcı, sistemli ve süreklilik gösteren yapısını ölçer.',
   },
   {
-    id: `${T}-q02`, topic: T, outcome: 'Felsefenin bilim, din ve sanatla ilişkisini karşılaştırır.', difficulty: 'orta', type: 'onculu',
+    id: `${T}-q02`, topic: T, subtopic: 'tytfel-felsefeye-giris-s2', outcome: 'Felsefenin bilim, din ve sanatla ilişkisini karşılaştırır.', difficulty: 'orta', type: 'onculu',
     question: 'Felsefe ile ilgili aşağıdaki yargılardan hangileri doğrudur?',
     premises: ['Felsefe, bilim gibi kanıtlanabilir kesin bilgiler üretmeyi amaçlar.', 'Felsefe, dinden farklı olarak akıl yürütmeye ve sorgulamaya dayanır.', 'Felsefe, sanat gibi öznel bir anlatım biçimi olsa da kavramsal ve mantıksal tutarlılık arar.'],
     options: ['Yalnız I', 'II ve III', 'I ve II', 'Yalnız II', 'I, II ve III'],
@@ -32,7 +32,7 @@ export const questions: QuestionSeed[] = [
     teacherNote: 'Felsefenin komşu disiplinlerle ayrım noktalarını ölçer.',
   },
   {
-    id: `${T}-q03`, topic: T, outcome: 'İlk Çağ filozoflarının arkhe görüşlerini açıklar.', difficulty: 'kolay', type: 'bilgi',
+    id: `${T}-q03`, topic: T, subtopic: 'tytfel-felsefeye-giris-s3', outcome: 'İlk Çağ filozoflarının arkhe görüşlerini açıklar.', difficulty: 'kolay', type: 'bilgi',
     question: 'Thales’in evrenin ilk maddesi (arkhe) olarak kabul ettiği unsur aşağıdakilerden hangisidir?',
     options: ['Ateş', 'Hava', 'Su', 'Sayı', 'Sonsuz (apeiron)'],
     correctAnswer: 2,
@@ -42,7 +42,7 @@ export const questions: QuestionSeed[] = [
     teacherNote: 'İlk Çağ doğa filozoflarının temel görüşlerini ayırt etmeyi ölçer.',
   },
   {
-    id: `${T}-q04`, topic: T, outcome: 'Felsefi soruların özelliklerini örneklerle açıklar.', difficulty: 'zor', type: 'yeni-nesil',
+    id: `${T}-q04`, topic: T, subtopic: 'tytfel-felsefeye-giris-s1', outcome: 'Felsefi soruların özelliklerini örneklerle açıklar.', difficulty: 'zor', type: 'yeni-nesil',
     question: 'Aşağıdaki sorulardan hangisi felsefi bir soru değildir?',
     options: ['Adalet nedir?', 'Bilgi mümkün müdür?', 'Güzel olan her zaman iyi midir?', 'Su kaç santigrat derecede kaynar?', 'İnsan özgür müdür?'],
     correctAnswer: 3,
@@ -52,7 +52,7 @@ export const questions: QuestionSeed[] = [
     teacherNote: 'Felsefi soru ile bilimsel/ampirik soru ayrımını ölçer.',
   },
   {
-    id: `${T}-q05`, topic: T, outcome: 'Felsefenin bilim, din ve sanatla ilişkisini karşılaştırır.', difficulty: 'orta', type: 'tablo',
+    id: `${T}-q05`, topic: T, subtopic: 'tytfel-felsefeye-giris-s2', outcome: 'Felsefenin bilim, din ve sanatla ilişkisini karşılaştırır.', difficulty: 'orta', type: 'tablo',
     table: { headers: ['Alan', 'Temel dayanak'], rows: [['Bilim', 'Deney ve gözlem'], ['Din', 'Vahiy ve inanç'], ['Sanat', 'Duygu ve estetik yaratım'], ['Felsefe', '?']] },
     question: 'Tabloda bazı düşünce alanlarının temel dayanağı verilmiştir. Felsefenin temel dayanağı için "?" yerine aşağıdakilerden hangisi yazılmalıdır?',
     options: ['Deney ve gözlem', 'Vahiy ve inanç', 'Toplumsal uzlaşı', 'Sezgi ve ilham', 'Akıl yürütme ve sorgulama'],
@@ -63,7 +63,7 @@ export const questions: QuestionSeed[] = [
     teacherNote: 'Disiplinler arası temel yöntem farkını ölçer.',
   },
   {
-    id: `${T}-q06`, topic: T, outcome: 'İlk Çağ filozoflarının arkhe görüşlerini açıklar.', difficulty: 'yeni-nesil', type: 'yorum',
+    id: `${T}-q06`, topic: T, subtopic: 'tytfel-felsefeye-giris-s3', outcome: 'İlk Çağ filozoflarının arkhe görüşlerini açıklar.', difficulty: 'yeni-nesil', type: 'yorum',
     question: 'Bir felsefe öğretmeni öğrencilerine şöyle diyor: "Bu filozof, evrendeki sürekli değişimi vurgulamış ve \'Aynı nehirde iki kez yıkanılmaz\' sözüyle bilinir."\n\nBu sözler aşağıdaki filozoflardan hangisine aittir?',
     options: ['Herakleitos', 'Thales', 'Parmenides', 'Pythagoras', 'Demokritos'],
     correctAnswer: 0,
@@ -74,7 +74,7 @@ export const questions: QuestionSeed[] = [
   },
 
   {
-    id: `${B}-q01`, topic: B, outcome: 'Bilginin doğruluğuna ilişkin görüşleri (dogmatizm, septisizm) karşılaştırır.', difficulty: 'orta', type: 'bilgi',
+    id: `${B}-q01`, topic: B, subtopic: 'tytfel-bilgi-felsefesi-s2', outcome: 'Bilginin doğruluğuna ilişkin görüşleri (dogmatizm, septisizm) karşılaştırır.', difficulty: 'orta', type: 'bilgi',
     question: 'Kesin ve genel geçer bilgiye ulaşmanın mümkün olmadığını, her yargının şüpheyle karşılanması gerektiğini savunan bilgi felsefesi akımı aşağıdakilerden hangisidir?',
     options: ['Dogmatizm', 'Septisizm (Kuşkuculuk)', 'Rasyonalizm', 'Empirizm', 'Pozitivizm'],
     correctAnswer: 1,
@@ -84,7 +84,7 @@ export const questions: QuestionSeed[] = [
     teacherNote: 'Bilgi felsefesi akımlarının temel tutumlarını ayırt etmeyi ölçer.',
   },
   {
-    id: `${B}-q02`, topic: B, outcome: 'Bilginin kaynağına ilişkin görüşleri (rasyonalizm, empirizm) karşılaştırır.', difficulty: 'orta', type: 'onculu',
+    id: `${B}-q02`, topic: B, subtopic: 'tytfel-bilgi-felsefesi-s3', outcome: 'Bilginin kaynağına ilişkin görüşleri (rasyonalizm, empirizm) karşılaştırır.', difficulty: 'orta', type: 'onculu',
     question: 'Bilginin kaynağı konusunda aşağıdaki eşleştirmelerden hangileri doğrudur?',
     premises: ['Rasyonalizm — bilginin kaynağı akıldır.', 'Empirizm — bilginin kaynağı deney ve gözlemdir.', 'Kritisizm — bilgi hem akıl hem deneyimin ortak ürünüdür.'],
     options: ['Yalnız I', 'Yalnız II', 'I, II ve III', 'II ve III', 'I ve II'],
@@ -95,7 +95,7 @@ export const questions: QuestionSeed[] = [
     teacherNote: 'Bilginin kaynağına ilişkin üç temel görüşü ölçer.',
   },
   {
-    id: `${B}-q03`, topic: B, outcome: 'Doğruluk ölçütlerine ilişkin görüşleri açıklar.', difficulty: 'zor', type: 'yorum',
+    id: `${B}-q03`, topic: B, subtopic: 'tytfel-bilgi-felsefesi-s4', outcome: 'Doğruluk ölçütlerine ilişkin görüşleri açıklar.', difficulty: 'zor', type: 'yorum',
     question: 'Bir öğrenci "2+2=4 önermesi doğrudur çünkü matematiksel aksiyomlarla çelişmez ve sistemin diğer önermeleriyle tutarlıdır" diyor.\n\nBu öğrenci doğruluğu değerlendirirken hangi ölçütü kullanmaktadır?',
     options: ['Uygunluk (correspondence) kuramı', 'Konsensüs (uzlaşım) kuramı', 'Pragmatist doğruluk kuramı', 'Tutarlılık (coherence) kuramı', 'Sezgici doğruluk kuramı'],
     correctAnswer: 3,
@@ -105,7 +105,7 @@ export const questions: QuestionSeed[] = [
     teacherNote: 'Doğruluk ölçütlerini ayırt etmeyi ölçer.',
   },
   {
-    id: `${B}-q04`, topic: B, outcome: 'Bilgi felsefesinin temel kavramlarını (episteme, doksa) açıklar.', difficulty: 'kolay', type: 'bilgi',
+    id: `${B}-q04`, topic: B, subtopic: 'tytfel-bilgi-felsefesi-s1', outcome: 'Bilgi felsefesinin temel kavramlarını (episteme, doksa) açıklar.', difficulty: 'kolay', type: 'bilgi',
     question: 'Platon’a göre kanıtlanabilir, değişmez ve kesin bilgi anlamına gelen kavram aşağıdakilerden hangisidir?',
     options: ['Doksa', 'Nous', 'Mitos', 'Empeiria', 'Episteme'],
     correctAnswer: 4,
@@ -115,7 +115,7 @@ export const questions: QuestionSeed[] = [
     teacherNote: 'Platon’un bilgi kuramındaki temel ayrımı ölçer.',
   },
   {
-    id: `${B}-q05`, topic: B, outcome: 'Bilginin doğruluğuna ilişkin görüşleri (dogmatizm, septisizm) karşılaştırır.', difficulty: 'yeni-nesil', type: 'yorum',
+    id: `${B}-q05`, topic: B, subtopic: 'tytfel-bilgi-felsefesi-s2', outcome: 'Bilginin doğruluğuna ilişkin görüşleri (dogmatizm, septisizm) karşılaştırır.', difficulty: 'yeni-nesil', type: 'yorum',
     question: 'Bir düşünür, insanın hiçbir konuda kesin yargıya varmaması, her önermeyi askıya alması (epokhe) gerektiğini, çünkü karşıt görüşlerin eşit güçte savunulabileceğini ileri sürüyor.\n\nBu düşünür hangi bilgi felsefesi akımını temsil etmektedir?',
     options: ['Septisizm', 'Rasyonalizm', 'Dogmatizm', 'Pozitivizm', 'Entüisyonizm'],
     correctAnswer: 0,
@@ -125,7 +125,7 @@ export const questions: QuestionSeed[] = [
     teacherNote: 'Septisizmin temel kavramlarını tanımayı ölçer.',
   },
   {
-    id: `${B}-q06`, topic: B, outcome: 'Bilginin kaynağına ilişkin görüşleri (rasyonalizm, empirizm) karşılaştırır.', difficulty: 'orta', type: 'bilgi',
+    id: `${B}-q06`, topic: B, subtopic: 'tytfel-bilgi-felsefesi-s3', outcome: 'Bilginin kaynağına ilişkin görüşleri (rasyonalizm, empirizm) karşılaştırır.', difficulty: 'orta', type: 'bilgi',
     question: '"Zihin doğuştan boş bir levha (tabula rasa) gibidir; tüm bilgilerimiz deneyimle sonradan kazanılır." görüşü aşağıdaki akımlardan hangisine aittir?',
     options: ['Rasyonalizm', 'Empirizm', 'Kritisizm', 'Entüisyonizm', 'Pozitivizm'],
     correctAnswer: 1,
@@ -136,7 +136,7 @@ export const questions: QuestionSeed[] = [
   },
 
   {
-    id: `${V}-q01`, topic: V, outcome: 'Varlığın var oluş biçimlerine ilişkin görüşleri (idealizm, materyalizm) karşılaştırır.', difficulty: 'orta', type: 'bilgi',
+    id: `${V}-q01`, topic: V, subtopic: 'tytfel-varlik-felsefesi-s3', outcome: 'Varlığın var oluş biçimlerine ilişkin görüşleri (idealizm, materyalizm) karşılaştırır.', difficulty: 'orta', type: 'bilgi',
     question: 'Gerçekliğin temelinde madde olduğunu, ruh veya idea gibi maddi olmayan varlıkların bağımsız bir gerçekliği bulunmadığını savunan görüş aşağıdakilerden hangisidir?',
     options: ['İdealizm', 'Düalizm (İkicilik)', 'Materyalizm', 'Nihilizm', 'Fenomenalizm'],
     correctAnswer: 2,
@@ -146,7 +146,7 @@ export const questions: QuestionSeed[] = [
     teacherNote: 'Varlık felsefesindeki temel karşıt görüşleri ayırt etmeyi ölçer.',
   },
   {
-    id: `${V}-q02`, topic: V, outcome: 'Varlığın var oluş biçimlerine ilişkin görüşleri (idealizm, materyalizm) karşılaştırır.', difficulty: 'zor', type: 'onculu',
+    id: `${V}-q02`, topic: V, subtopic: 'tytfel-varlik-felsefesi-s3', outcome: 'Varlığın var oluş biçimlerine ilişkin görüşleri (idealizm, materyalizm) karşılaştırır.', difficulty: 'zor', type: 'onculu',
     question: 'Varlık felsefesindeki görüşlerle ilgili aşağıdaki yargılardan hangileri doğrudur?',
     premises: ['Platon’a göre asıl gerçeklik, duyularla algılanan nesneler dünyasıdır.', 'Materyalizme göre düşünce, maddenin (beynin) bir ürünüdür.', 'Nihilizme göre hiçbir şeyin gerçek bir varlığı yoktur.'],
     options: ['Yalnız II', 'Yalnız III', 'I ve II', 'II ve III', 'I, II ve III'],
@@ -157,7 +157,7 @@ export const questions: QuestionSeed[] = [
     teacherNote: 'Varlık felsefesi görüşlerinin doğru eşleşmesini ölçer.',
   },
   {
-    id: `${V}-q03`, topic: V, outcome: 'Varlığın var oluş biçimlerine ilişkin görüşleri (oluş, varlık) açıklar.', difficulty: 'orta', type: 'yorum',
+    id: `${V}-q03`, topic: V, subtopic: 'tytfel-varlik-felsefesi-s3', outcome: 'Varlığın var oluş biçimlerine ilişkin görüşleri (oluş, varlık) açıklar.', difficulty: 'orta', type: 'yorum',
     question: 'Parmenides’in "Varlık vardır, yokluk yoktur; varlık birdir, değişmez ve süreklidir" görüşü, aşağıdaki filozoflardan hangisinin "her şey akar, hiçbir şey aynı kalmaz" görüşüyle doğrudan çelişir?',
     options: ['Thales', 'Anaksimenes', 'Pythagoras', 'Empedokles', 'Herakleitos'],
     correctAnswer: 4,
@@ -167,7 +167,7 @@ export const questions: QuestionSeed[] = [
     teacherNote: 'Karşıt İlk Çağ görüşlerini ilişkilendirmeyi ölçer.',
   },
   {
-    id: `${V}-q04`, topic: V, outcome: 'Varlık felsefesinin temel sorularını (varlık nedir, gerçeklik nedir) tanır.', difficulty: 'kolay', type: 'bilgi',
+    id: `${V}-q04`, topic: V, subtopic: 'tytfel-varlik-felsefesi-s1', outcome: 'Varlık felsefesinin temel sorularını (varlık nedir, gerçeklik nedir) tanır.', difficulty: 'kolay', type: 'bilgi',
     question: 'Varlığın ne olduğunu, gerçekliğin yapısını konu edinen felsefe disiplinine ne ad verilir?',
     options: ['Ontoloji (Varlık felsefesi)', 'Epistemoloji', 'Etik', 'Estetik', 'Metodoloji'],
     correctAnswer: 0,
@@ -177,7 +177,7 @@ export const questions: QuestionSeed[] = [
     teacherNote: 'Felsefe disiplinlerinin adlarını ve konularını ayırt etmeyi ölçer.',
   },
   {
-    id: `${V}-q05`, topic: V, outcome: 'Varlığın var oluş biçimlerine ilişkin görüşleri (idealizm, materyalizm) karşılaştırır.', difficulty: 'yeni-nesil', type: 'yorum',
+    id: `${V}-q05`, topic: V, subtopic: 'tytfel-varlik-felsefesi-s3', outcome: 'Varlığın var oluş biçimlerine ilişkin görüşleri (idealizm, materyalizm) karşılaştırır.', difficulty: 'yeni-nesil', type: 'yorum',
     question: 'Bir düşünür şöyle diyor: "Dışarıda gördüğümüz her şey aslında zihnimizin bir algısıdır; zihinden bağımsız bir madde dünyasının var olduğunu kanıtlayamayız. Var olmak, algılanmaktır."\n\nBu görüş aşağıdaki akımlardan hangisiyle örtüşür?',
     options: ['Materyalizm', 'Sübjektif idealizm', 'Realizm', 'Pozitivizm', 'Determinizm'],
     correctAnswer: 1,
@@ -187,7 +187,7 @@ export const questions: QuestionSeed[] = [
     teacherNote: 'İdealizmin alt türlerinden birini tanımayı ölçer.',
   },
   {
-    id: `${V}-q06`, topic: V, outcome: 'Varlığın var oluş biçimlerine ilişkin görüşleri (oluş, varlık) açıklar.', difficulty: 'orta', type: 'tablo',
+    id: `${V}-q06`, topic: V, subtopic: 'tytfel-varlik-felsefesi-s3', outcome: 'Varlığın var oluş biçimlerine ilişkin görüşleri (oluş, varlık) açıklar.', difficulty: 'orta', type: 'tablo',
     table: { headers: ['Görüş', 'Temel iddia'], rows: [['Materyalizm', 'Gerçeklik maddedir'], ['İdealizm', 'Gerçeklik düşünce/ideadır'], ['Düalizm', '?']] },
     question: 'Tabloda bazı varlık görüşlerinin temel iddiası verilmiştir. Düalizm (ikicilik) için "?" yerine aşağıdakilerden hangisi yazılmalıdır?',
     options: ['Gerçeklik yalnız maddedir', 'Gerçeklik yalnız düşüncedir', 'Madde ve ruh (zihin) birbirinden bağımsız iki ayrı gerçekliktir', 'Hiçbir şeyin gerçekliği yoktur', 'Gerçeklik yalnız algıdan ibarettir'],
@@ -199,7 +199,7 @@ export const questions: QuestionSeed[] = [
   },
 
   {
-    id: `${A}-q01`, topic: A, outcome: 'Ahlaki yargıların ve eylemlerin temellerine ilişkin görüşleri (özgürlük, sorumluluk) açıklar.', difficulty: 'orta', type: 'yorum',
+    id: `${A}-q01`, topic: A, subtopic: 'tytfel-ahlak-felsefesi-s4', outcome: 'Ahlaki yargıların ve eylemlerin temellerine ilişkin görüşleri (özgürlük, sorumluluk) açıklar.', difficulty: 'orta', type: 'yorum',
     question: 'Bir kişi, kendi istemiyle ve bilinçli bir tercihle yaptığı bir eylemden dolayı toplum tarafından hesaba çekilebilir.\n\nBu durum ahlak felsefesinde öncelikle hangi kavramla ilişkilidir?',
     options: ['Determinizm', 'Rölativizm', 'Fatalizm (Kadercilik)', 'Ahlaki sorumluluk', 'Hedonizm'],
     correctAnswer: 3,
@@ -209,7 +209,7 @@ export const questions: QuestionSeed[] = [
     teacherNote: 'Özgürlük-sorumluluk ilişkisini kavramayı ölçer.',
   },
   {
-    id: `${A}-q02`, topic: A, outcome: 'Ahlaki yargıların evrenselliğine ilişkin görüşleri (mutlakçılık, görecelilik) karşılaştırır.', difficulty: 'orta', type: 'onculu',
+    id: `${A}-q02`, topic: A, subtopic: 'tytfel-ahlak-felsefesi-s2', outcome: 'Ahlaki yargıların evrenselliğine ilişkin görüşleri (mutlakçılık, görecelilik) karşılaştırır.', difficulty: 'orta', type: 'onculu',
     question: 'Ahlak felsefesindeki görüşlerle ilgili aşağıdaki eşleştirmelerden hangileri doğrudur?',
     premises: ['Ahlaki mutlakçılığa göre iyi ve kötü, zamana ve kültüre göre değişmeyen evrensel ilkelerdir.', 'Ahlaki rölativizme göre ahlak kuralları toplumdan topluma değişebilir.', 'Hedonizme göre ahlaki eylemin amacı toplumsal fayda değil bireysel hazdır.'],
     options: ['Yalnız I', 'I ve II', 'II ve III', 'I ve III', 'I, II ve III'],
@@ -220,7 +220,7 @@ export const questions: QuestionSeed[] = [
     teacherNote: 'Ahlak felsefesi akımlarının temel tezlerini ölçer.',
   },
   {
-    id: `${A}-q03`, topic: A, outcome: 'Ahlak felsefesinin temel kavramlarını (vicdan, erdem, ödev) açıklar.', difficulty: 'kolay', type: 'bilgi',
+    id: `${A}-q03`, topic: A, subtopic: 'tytfel-ahlak-felsefesi-s3', outcome: 'Ahlak felsefesinin temel kavramlarını (vicdan, erdem, ödev) açıklar.', difficulty: 'kolay', type: 'bilgi',
     question: 'Kant’a göre bir eylemin ahlaki değer taşıması için, sonucundan bağımsız olarak yalnızca "ödev olduğu için" yapılmış olması gerekir. Bu görüş aşağıdaki kavramlardan hangisiyle ifade edilir?',
     options: ['Ödev ahlakı (deontoloji)', 'Haz ilkesi', 'Fayda ilkesi', 'Erdem ahlakı', 'Sonuççuluk'],
     correctAnswer: 0,
@@ -230,7 +230,7 @@ export const questions: QuestionSeed[] = [
     teacherNote: 'Kant ahlakının temel ilkesini tanımayı ölçer.',
   },
   {
-    id: `${A}-q04`, topic: A, outcome: 'Ahlaki yargıların evrenselliğine ilişkin görüşleri (mutlakçılık, görecelilik) karşılaştırır.', difficulty: 'zor', type: 'yeni-nesil',
+    id: `${A}-q04`, topic: A, subtopic: 'tytfel-ahlak-felsefesi-s2', outcome: 'Ahlaki yargıların evrenselliğine ilişkin görüşleri (mutlakçılık, görecelilik) karşılaştırır.', difficulty: 'zor', type: 'yeni-nesil',
     question: 'Bir antropolog, farklı toplumları incelediğinde her toplumun kendine özgü ahlaki değerleri olduğunu, bir toplumda erdem sayılan bir davranışın başka bir toplumda kınandığını gözlemliyor ve bundan yola çıkarak "evrensel geçerliliği olan tek bir ahlak yasası yoktur" sonucuna varıyor.\n\nBu antropoloğun vardığı sonuç ahlak felsefesindeki hangi görüşe karşılık gelir?',
     options: ['Ahlaki mutlakçılık', 'Ahlaki rölativizm (görecelilik)', 'Sezgici ahlak', 'Faydacı ahlak', 'Ödev ahlakı'],
     correctAnswer: 1,
@@ -240,7 +240,7 @@ export const questions: QuestionSeed[] = [
     teacherNote: 'Somut bir gözlemden ahlaki görüşü çıkarsamayı ölçer.',
   },
   {
-    id: `${A}-q05`, topic: A, outcome: 'Ahlak felsefesinin temel kavramlarını (vicdan, erdem, ödev) açıklar.', difficulty: 'orta', type: 'bilgi',
+    id: `${A}-q05`, topic: A, subtopic: 'tytfel-ahlak-felsefesi-s3', outcome: 'Ahlak felsefesinin temel kavramlarını (vicdan, erdem, ödev) açıklar.', difficulty: 'orta', type: 'bilgi',
     question: 'Aristoteles’e göre erdem, iki aşırı uç arasındaki "altın orta"da bulunur. Buna göre "cesaret" erdemi hangi iki aşırılık arasındadır?',
     options: ['Cömertlik ve cimrilik', 'Kibir ve alçakgönüllülük', 'Korkaklık ve gözü karalık (atılganlık)', 'Aceleci ve ağırkanlı olmak', 'Cimrilik ve savurganlık'],
     correctAnswer: 2,
@@ -250,7 +250,7 @@ export const questions: QuestionSeed[] = [
     teacherNote: 'Aristoteles’in "altın orta" (mesotes) öğretisini ölçer.',
   },
   {
-    id: `${A}-q06`, topic: A, outcome: 'Ahlaki yargıların ve eylemlerin temellerine ilişkin görüşleri (özgürlük, sorumluluk) açıklar.', difficulty: 'orta', type: 'yorum',
+    id: `${A}-q06`, topic: A, subtopic: 'tytfel-ahlak-felsefesi-s4', outcome: 'Ahlaki yargıların ve eylemlerin temellerine ilişkin görüşleri (özgürlük, sorumluluk) açıklar.', difficulty: 'orta', type: 'yorum',
     question: 'Bir kişi "Zaten her şey önceden belirlenmiş, insanın yapacağı hiçbir şeyi değiştiremeyeceği bir kader var; öyleyse kimse yaptığından sorumlu tutulamaz" diyor.\n\nBu görüş ahlaki sorumluluk açısından aşağıdakilerden hangisiyle en doğrudan ilişkilidir?',
     options: ['Özgür iradenin sorumluluğun ön koşulu olduğu görüşünü destekler', 'Erdem ahlakını doğrudan kanıtlar', 'Faydacı ahlakı doğrudan kanıtlar', 'Determinizmin (kaderciliğin) ahlaki sorumluluğu tartışmalı hale getirdiğini gösterir', 'Ahlaki mutlakçılığı destekler'],
     correctAnswer: 3,
@@ -261,7 +261,7 @@ export const questions: QuestionSeed[] = [
   },
 
   {
-    id: `${S}-q01`, topic: S, outcome: 'Estetik yargının ve güzelliğin doğasına ilişkin görüşleri açıklar.', difficulty: 'orta', type: 'bilgi',
+    id: `${S}-q01`, topic: S, subtopic: 'tytfel-sanat-felsefesi-s2', outcome: 'Estetik yargının ve güzelliğin doğasına ilişkin görüşleri açıklar.', difficulty: 'orta', type: 'bilgi',
     question: 'Bir nesnenin güzelliğinin, nesnenin kendisinde değil, izleyenin öznel beğenisinde bulunduğunu savunan estetik görüşe ne ad verilir?',
     options: ['Estetik objektivizm', 'Formalizm', 'Estetik rölativizm', 'Estetik mutlakçılık', 'Estetik sübjektivizm'],
     correctAnswer: 4,
@@ -271,7 +271,7 @@ export const questions: QuestionSeed[] = [
     teacherNote: 'Estetik yargının kaynağına ilişkin temel ayrımı ölçer.',
   },
   {
-    id: `${S}-q02`, topic: S, outcome: 'Sanat felsefesinin temel kavramlarını (mimesis, yaratıcılık) açıklar.', difficulty: 'kolay', type: 'bilgi',
+    id: `${S}-q02`, topic: S, subtopic: 'tytfel-sanat-felsefesi-s3', outcome: 'Sanat felsefesinin temel kavramlarını (mimesis, yaratıcılık) açıklar.', difficulty: 'kolay', type: 'bilgi',
     question: 'Platon ve Aristoteles’in sanat anlayışlarında ortak biçimde kullanılan, sanatı "gerçekliğin taklidi/yansıması" olarak açıklayan kavram aşağıdakilerden hangisidir?',
     options: ['Mimesis', 'Katharsis', 'Estetik haz', 'Form', 'Üslup'],
     correctAnswer: 0,
@@ -281,7 +281,7 @@ export const questions: QuestionSeed[] = [
     teacherNote: 'Sanat felsefesinin temel kavramını tanımayı ölçer.',
   },
   {
-    id: `${S}-q03`, topic: S, outcome: 'Estetik yargının ve güzelliğin doğasına ilişkin görüşleri açıklar.', difficulty: 'zor', type: 'yorum',
+    id: `${S}-q03`, topic: S, subtopic: 'tytfel-sanat-felsefesi-s2', outcome: 'Estetik yargının ve güzelliğin doğasına ilişkin görüşleri açıklar.', difficulty: 'zor', type: 'yorum',
     question: '"Güzellik, her insanda aynı duyguyu uyandıran, zamana ve kültüre göre değişmeyen, nesnenin kendisinde bulunan evrensel bir niteliktir" diyen bir görüş savunucusu aşağıdaki tutumlardan hangisini benimsemiştir?',
     options: ['Estetik sübjektivizm', 'Estetik objektivizm (mutlakçılık)', 'Estetik rölativizm', 'Nihilizm', 'Pragmatizm'],
     correctAnswer: 1,
@@ -291,7 +291,7 @@ export const questions: QuestionSeed[] = [
     teacherNote: 'Estetik objektivizmi tanımayı ölçer.',
   },
   {
-    id: `${S}-q04`, topic: S, outcome: 'Sanat felsefesinin temel kavramlarını (mimesis, yaratıcılık) açıklar.', difficulty: 'orta', type: 'yeni-nesil',
+    id: `${S}-q04`, topic: S, subtopic: 'tytfel-sanat-felsefesi-s3', outcome: 'Sanat felsefesinin temel kavramlarını (mimesis, yaratıcılık) açıklar.', difficulty: 'orta', type: 'yeni-nesil',
     question: 'Bir ressam, doğadaki bir manzarayı birebir kopyalamak yerine, kendi iç dünyasındaki duyguları özgün biçim ve renklerle tuvale aktarıyor; ortaya çıkan eser doğadaki hiçbir manzaraya birebir benzemiyor.\n\nBu ressamın yaklaşımı, sanatı "gerçekliğin taklidi" olarak gören mimesis anlayışından çok, sanat felsefesinde hangi kavramla açıklanır?',
     options: ['Katharsis', 'Determinizm', 'Yaratıcılık (özgün üretim)', 'Rölativizm', 'Ampirizm'],
     correctAnswer: 2,
@@ -301,7 +301,7 @@ export const questions: QuestionSeed[] = [
     teacherNote: 'Mimesis-yaratıcılık ayrımını somut bir örnekle ölçer.',
   },
   {
-    id: `${S}-q05`, topic: S, outcome: 'Estetik yargının ve güzelliğin doğasına ilişkin görüşleri açıklar.', difficulty: 'orta', type: 'onculu',
+    id: `${S}-q05`, topic: S, subtopic: 'tytfel-sanat-felsefesi-s2', outcome: 'Estetik yargının ve güzelliğin doğasına ilişkin görüşleri açıklar.', difficulty: 'orta', type: 'onculu',
     question: 'Sanat felsefesiyle ilgili aşağıdaki yargılardan hangileri doğrudur?',
     premises: ['Estetik, güzelin ve sanatın doğasını inceleyen felsefe disiplinidir.', 'Her sanat eseri mutlaka toplumsal bir mesaj vermek zorundadır.', 'Sanat yargıları, bilimsel yargılar gibi deneyle kesin olarak kanıtlanabilir.'],
     options: ['I ve III', 'Yalnız II', 'I ve II', 'Yalnız I', 'II ve III'],
@@ -312,7 +312,7 @@ export const questions: QuestionSeed[] = [
     teacherNote: 'Estetik disiplininin sınırlarını ölçer.',
   },
   {
-    id: `${S}-q06`, topic: S, outcome: 'Estetik yargının ve güzelliğin doğasına ilişkin görüşleri açıklar.', difficulty: 'kolay', type: 'bilgi',
+    id: `${S}-q06`, topic: S, subtopic: 'tytfel-sanat-felsefesi-s1', outcome: 'Estetik yargının ve güzelliğin doğasına ilişkin görüşleri açıklar.', difficulty: 'kolay', type: 'bilgi',
     question: 'Güzelin ve sanatın ne olduğunu, estetik yargının doğasını inceleyen felsefe disiplinine ne ad verilir?',
     options: ['Etik', 'Epistemoloji', 'Mantık', 'Ontoloji', 'Estetik'],
     correctAnswer: 4,
@@ -323,7 +323,7 @@ export const questions: QuestionSeed[] = [
   },
 
   {
-    id: `${D}-q01`, topic: D, outcome: 'Din felsefesinin temel kavramlarını (Tanrı, inanç, akıl) açıklar.', difficulty: 'orta', type: 'bilgi',
+    id: `${D}-q01`, topic: D, subtopic: 'tytfel-din-felsefesi-s1', outcome: 'Din felsefesinin temel kavramlarını (Tanrı, inanç, akıl) açıklar.', difficulty: 'orta', type: 'bilgi',
     question: 'Dinin akıl ve mantık ölçütleriyle konu edinildiği, Tanrı’nın varlığı, dinin doğası gibi soruları felsefi yöntemle inceleyen alan aşağıdakilerden hangisidir?',
     options: ['Din felsefesi', 'Teoloji', 'Vaaz', 'Fıkıh', 'Kelam'],
     correctAnswer: 0,
@@ -333,7 +333,7 @@ export const questions: QuestionSeed[] = [
     teacherNote: 'Din felsefesi ile teoloji arasındaki yöntem farkını ölçer.',
   },
   {
-    id: `${D}-q02`, topic: D, outcome: 'Tanrı’nın varlığına ilişkin felsefi kanıtlama biçimlerini (kozmolojik, teleolojik) açıklar.', difficulty: 'zor', type: 'yorum',
+    id: `${D}-q02`, topic: D, subtopic: 'tytfel-din-felsefesi-s2', outcome: 'Tanrı’nın varlığına ilişkin felsefi kanıtlama biçimlerini (kozmolojik, teleolojik) açıklar.', difficulty: 'zor', type: 'yorum',
     question: '"Evrende her şey bir düzen ve amaca göre işliyor; canlıların organları belirli işlevler için kusursuzca tasarlanmış görünüyor. Böylesine bir düzen, akıllı bir yaratıcı olmadan tesadüfen ortaya çıkamaz." Bu argüman Tanrı’nın varlığını kanıtlamaya çalışan hangi delile dayanır?',
     options: ['Kozmolojik delil', 'Teleolojik (gaye ve nizam) delil', 'Ontolojik delil', 'Ahlaki delil', 'Dini tecrübe delili'],
     correctAnswer: 1,
@@ -343,7 +343,7 @@ export const questions: QuestionSeed[] = [
     teacherNote: 'Tanrı’nın varlığına ilişkin delilleri ayırt etmeyi ölçer.',
   },
   {
-    id: `${D}-q03`, topic: D, outcome: 'Tanrı’nın varlığına ilişkin felsefi kanıtlama biçimlerini (kozmolojik, teleolojik) açıklar.', difficulty: 'orta', type: 'bilgi',
+    id: `${D}-q03`, topic: D, subtopic: 'tytfel-din-felsefesi-s2', outcome: 'Tanrı’nın varlığına ilişkin felsefi kanıtlama biçimlerini (kozmolojik, teleolojik) açıklar.', difficulty: 'orta', type: 'bilgi',
     question: '"Evrende var olan her şeyin bir nedeni vardır; bu neden-sonuç zinciri sonsuza kadar geriye gidemez, bu yüzden ilk, nedensiz bir neden (Tanrı) olmalıdır" biçimindeki argüman hangi delildir?',
     options: ['Teleolojik delil', 'Ontolojik delil', 'Kozmolojik delil', 'Ahlaki delil', 'Dini tecrübe delili'],
     correctAnswer: 2,
@@ -353,7 +353,7 @@ export const questions: QuestionSeed[] = [
     teacherNote: 'Kozmolojik delilin mantığını kavramayı ölçer.',
   },
   {
-    id: `${D}-q04`, topic: D, outcome: 'Din felsefesinin temel kavramlarını (Tanrı, inanç, akıl) açıklar.', difficulty: 'yeni-nesil', type: 'onculu',
+    id: `${D}-q04`, topic: D, subtopic: 'tytfel-din-felsefesi-s1', outcome: 'Din felsefesinin temel kavramlarını (Tanrı, inanç, akıl) açıklar.', difficulty: 'yeni-nesil', type: 'onculu',
     question: 'Din felsefesiyle ilgili aşağıdaki yargılardan hangileri doğrudur?',
     premises: ['Din felsefesi, belirli bir dinin ilkelerini savunmayı değil, dine ilişkin kavramları akılla incelemeyi amaçlar.', 'Kelam, İslam inanç esaslarını akli ve nakli delillerle savunan bir disiplindir.', 'Din felsefesi ile kelam birebir aynı yöntem ve amaca sahiptir.'],
     options: ['Yalnız I', 'I ve III', 'II ve III', 'I ve II', 'I, II ve III'],
@@ -364,7 +364,7 @@ export const questions: QuestionSeed[] = [
     teacherNote: 'Din felsefesi–kelam ayrımını ölçer.',
   },
   {
-    id: `${D}-q05`, topic: D, outcome: 'Din felsefesinin temel kavramlarını (Tanrı, inanç, akıl) açıklar.', difficulty: 'orta', type: 'yorum',
+    id: `${D}-q05`, topic: D, subtopic: 'tytfel-din-felsefesi-s2', outcome: 'Din felsefesinin temel kavramlarını (Tanrı, inanç, akıl) açıklar.', difficulty: 'orta', type: 'yorum',
     question: 'Dünyada masum insanların çektiği acılar ve doğal afetler gibi kötülüklerin varlığı, "her şeye gücü yeten ve sonsuz iyi bir Tanrı" inancıyla nasıl bağdaştırılabileceği sorusu din felsefesinde hangi problem olarak bilinir?',
     options: ['Determinizm problemi', 'Tümevarım problemi', 'Evrensel önerme problemi', 'Zihin-beden problemi', 'Kötülük problemi'],
     correctAnswer: 4,
@@ -374,7 +374,7 @@ export const questions: QuestionSeed[] = [
     teacherNote: 'Din felsefesinin klasik problemlerinden birini tanımayı ölçer.',
   },
   {
-    id: `${D}-q06`, topic: D, outcome: 'Din felsefesinin temel kavramlarını (Tanrı, inanç, akıl) açıklar.', difficulty: 'kolay', type: 'bilgi',
+    id: `${D}-q06`, topic: D, subtopic: 'tytfel-din-felsefesi-s1', outcome: 'Din felsefesinin temel kavramlarını (Tanrı, inanç, akıl) açıklar.', difficulty: 'kolay', type: 'bilgi',
     question: 'Din felsefesi ile ilgili aşağıdakilerden hangisi yanlıştır?',
     options: ['Amacı, tek bir dinin ilkelerini savunmaktır.', 'Belirli bir dinin doğruluğunu önceden kabul etmez, sorgular.', 'Tanrı’nın varlığı, kötülük problemi gibi konuları ele alır.', 'Dini kavramları akılla, felsefi yöntemle inceler.', 'Akademik ve tarafsız bir yaklaşım benimser.'],
     correctAnswer: 0,
@@ -385,7 +385,7 @@ export const questions: QuestionSeed[] = [
   },
 
   {
-    id: `${P}-q01`, topic: P, outcome: 'Devletin kökenine ve meşruiyetine ilişkin görüşleri (toplum sözleşmesi) açıklar.', difficulty: 'orta', type: 'bilgi',
+    id: `${P}-q01`, topic: P, subtopic: 'tytfel-siyaset-felsefesi-s2', outcome: 'Devletin kökenine ve meşruiyetine ilişkin görüşleri (toplum sözleşmesi) açıklar.', difficulty: 'orta', type: 'bilgi',
     question: 'Bireylerin doğal haklarından bir kısmını güvenlik ve düzen karşılığında devlete devrettiği fikrine dayanan, Hobbes, Locke ve Rousseau gibi düşünürlerce farklı biçimlerde savunulan kuram aşağıdakilerden hangisidir?',
     options: ['Determinizm', 'Toplumsal sözleşme kuramı', 'Ütopyacılık', 'Anarşizm', 'Totalitarizm'],
     correctAnswer: 1,
@@ -395,7 +395,7 @@ export const questions: QuestionSeed[] = [
     teacherNote: 'Siyaset felsefesinin temel kuramını tanımayı ölçer.',
   },
   {
-    id: `${P}-q02`, topic: P, outcome: 'Yönetim biçimlerine ilişkin görüşleri (demokrasi, totalitarizm) karşılaştırır.', difficulty: 'orta', type: 'yorum',
+    id: `${P}-q02`, topic: P, subtopic: 'tytfel-siyaset-felsefesi-s3', outcome: 'Yönetim biçimlerine ilişkin görüşleri (demokrasi, totalitarizm) karşılaştırır.', difficulty: 'orta', type: 'yorum',
     question: 'Bir yönetim biçiminde, tek bir kişi veya küçük bir grup toplumun tüm alanlarını (ekonomi, eğitim, özel yaşam) sıkı biçimde denetler; muhalefete ve farklı düşünceye yer verilmez.\n\nBu tanım aşağıdaki yönetim biçimlerinden hangisine karşılık gelir?',
     options: ['Demokrasi', 'Liberalizm', 'Totalitarizm', 'Federalizm', 'Cumhuriyet'],
     correctAnswer: 2,
@@ -405,7 +405,7 @@ export const questions: QuestionSeed[] = [
     teacherNote: 'Yönetim biçimlerini ayırt etmeyi ölçer.',
   },
   {
-    id: `${P}-q03`, topic: P, outcome: 'Bireysel özgürlük ile devlet otoritesi arasındaki ilişkiye dair görüşleri açıklar.', difficulty: 'zor', type: 'onculu',
+    id: `${P}-q03`, topic: P, subtopic: 'tytfel-siyaset-felsefesi-s1', outcome: 'Bireysel özgürlük ile devlet otoritesi arasındaki ilişkiye dair görüşleri açıklar.', difficulty: 'zor', type: 'onculu',
     question: 'Siyaset felsefesiyle ilgili aşağıdaki yargılardan hangileri doğrudur?',
     premises: ['Liberalizm, bireysel özgürlükleri ve sınırlı devleti ön planda tutar.', 'Anarşizme göre devlet, insan özgürlüğünü kısıtladığı için ortadan kaldırılmalıdır.', 'Totaliter rejimlerde birey hakları devletin çıkarlarının üzerinde tutulur.'],
     options: ['Yalnız I', 'I ve III', 'II ve III', 'I ve II', 'I, II ve III'],
@@ -416,7 +416,7 @@ export const questions: QuestionSeed[] = [
     teacherNote: 'Siyaset felsefesi akımlarının temel tezlerini ölçer.',
   },
   {
-    id: `${P}-q04`, topic: P, outcome: 'Devletin kökenine ve meşruiyetine ilişkin görüşleri (toplum sözleşmesi) açıklar.', difficulty: 'yeni-nesil', type: 'yorum',
+    id: `${P}-q04`, topic: P, subtopic: 'tytfel-siyaset-felsefesi-s2', outcome: 'Devletin kökenine ve meşruiyetine ilişkin görüşleri (toplum sözleşmesi) açıklar.', difficulty: 'yeni-nesil', type: 'yorum',
     question: 'Hobbes’a göre "doğa hâli"nde insanlar arasında sürekli bir çatışma ("herkesin herkesle savaşı") vardır ve bu kaostan kurtulmak için insanlar tüm haklarını mutlak bir egemene (Leviathan) devretmeyi kabul eder.\n\nBuna göre Hobbes’un toplum sözleşmesi anlayışı, aşağıdaki düşünürlerden hangisinin anlayışından, devlete verilen yetkinin sınırsızlığı bakımından en çok ayrılır?\n\n(Not: Locke, bireylerin yalnızca bazı haklarını devrettiğini ve devletin bu hakları ihlal etmesi durumunda halkın direnme hakkı olduğunu savunur.)',
     options: ['Platon', 'Pythagoras', 'Herakleitos', 'Parmenides', 'John Locke'],
     correctAnswer: 4,
@@ -426,7 +426,7 @@ export const questions: QuestionSeed[] = [
     teacherNote: 'Toplum sözleşmesi kuramcıları arasındaki farkı ölçer.',
   },
   {
-    id: `${P}-q05`, topic: P, outcome: 'Yönetim biçimlerine ilişkin görüşleri (demokrasi, totalitarizm) karşılaştırır.', difficulty: 'orta', type: 'bilgi',
+    id: `${P}-q05`, topic: P, subtopic: 'tytfel-siyaset-felsefesi-s3', outcome: 'Yönetim biçimlerine ilişkin görüşleri (demokrasi, totalitarizm) karşılaştırır.', difficulty: 'orta', type: 'bilgi',
     question: 'Halkın, seçimler yoluyla yöneticilerini belirlediği, temel hak ve özgürlüklerin anayasal güvence altında olduğu, muhalefetin serbestçe örgütlenebildiği yönetim biçimi aşağıdakilerden hangisidir?',
     options: ['Demokrasi', 'Oligarşi', 'Totalitarizm', 'Monarşi', 'Teokrasi'],
     correctAnswer: 0,
@@ -436,7 +436,7 @@ export const questions: QuestionSeed[] = [
     teacherNote: 'Temel yönetim biçimlerini tanımayı ölçer.',
   },
   {
-    id: `${P}-q06`, topic: P, outcome: 'Devletin kökenine ve meşruiyetine ilişkin görüşleri (toplum sözleşmesi) açıklar.', difficulty: 'kolay', type: 'bilgi',
+    id: `${P}-q06`, topic: P, subtopic: 'tytfel-siyaset-felsefesi-s1', outcome: 'Devletin kökenine ve meşruiyetine ilişkin görüşleri (toplum sözleşmesi) açıklar.', difficulty: 'kolay', type: 'bilgi',
     question: 'Siyasetin ve devletin doğasını, iktidarın kaynağını, yönetim biçimlerini felsefi açıdan inceleyen felsefe disiplinine ne ad verilir?',
     options: ['Etik', 'Siyaset felsefesi', 'Estetik', 'Bilim felsefesi', 'Ontoloji'],
     correctAnswer: 1,
@@ -447,7 +447,7 @@ export const questions: QuestionSeed[] = [
   },
 
   {
-    id: `${BL}-q01`, topic: BL, outcome: 'Bilimsel bilginin doğasına ilişkin görüşleri (tümevarım, tümdengelim) açıklar.', difficulty: 'orta', type: 'bilgi',
+    id: `${BL}-q01`, topic: BL, subtopic: 'tytfel-bilim-felsefesi-s2', outcome: 'Bilimsel bilginin doğasına ilişkin görüşleri (tümevarım, tümdengelim) açıklar.', difficulty: 'orta', type: 'bilgi',
     question: 'Tekil gözlemlerden yola çıkarak genel bir yasaya ulaşma biçimindeki akıl yürütmeye ne ad verilir?',
     options: ['Tümdengelim', 'Analoji', 'Tümevarım', 'Diyalektik', 'Sezgi'],
     correctAnswer: 2,
@@ -457,7 +457,7 @@ export const questions: QuestionSeed[] = [
     teacherNote: 'Bilim felsefesinin temel akıl yürütme biçimlerini ayırt etmeyi ölçer.',
   },
   {
-    id: `${BL}-q02`, topic: BL, outcome: 'Bilimsel bilginin doğasına ilişkin görüşleri (yanlışlanabilirlik) açıklar.', difficulty: 'zor', type: 'yorum',
+    id: `${BL}-q02`, topic: BL, subtopic: 'tytfel-bilim-felsefesi-s3', outcome: 'Bilimsel bilginin doğasına ilişkin görüşleri (yanlışlanabilirlik) açıklar.', difficulty: 'zor', type: 'yorum',
     question: 'Karl Popper’a göre bir teorinin bilimsel sayılabilmesi için, onu çürütebilecek bir gözlem veya deneyin ilke olarak mümkün olması gerekir; hiçbir gözlemle çürütülemeyen bir iddia bilimsel değildir.\n\nBu görüş, bilim felsefesinde hangi ölçütle bilinir?',
     options: ['Doğrulanabilirlik ilkesi', 'Tümevarım ilkesi', 'Tutarlılık ilkesi', 'Yanlışlanabilirlik (falsifiabilite) ilkesi', 'Determinizm ilkesi'],
     correctAnswer: 3,
@@ -467,7 +467,7 @@ export const questions: QuestionSeed[] = [
     teacherNote: 'Popper’ın bilim felsefesindeki temel katkısını ölçer.',
   },
   {
-    id: `${BL}-q03`, topic: BL, outcome: 'Bilimsel bilginin doğasına ilişkin görüşleri (tümevarım, tümdengelim) açıklar.', difficulty: 'orta', type: 'yorum',
+    id: `${BL}-q03`, topic: BL, subtopic: 'tytfel-bilim-felsefesi-s2', outcome: 'Bilimsel bilginin doğasına ilişkin görüşleri (tümevarım, tümdengelim) açıklar.', difficulty: 'orta', type: 'yorum',
     question: 'Bir bilim insanı önce genel bir yasadan ("Tüm metaller ısıtılınca genleşir") yola çıkıp, belirli bir metal için ("Bu demir çubuk da ısıtılınca genleşecektir") tekil bir sonuç çıkarıyor.\n\nBu akıl yürütme biçimi aşağıdakilerden hangisidir?',
     options: ['Tümevarım', 'Septisizm', 'Analoji', 'Diyalektik', 'Tümdengelim'],
     correctAnswer: 4,
@@ -477,7 +477,7 @@ export const questions: QuestionSeed[] = [
     teacherNote: 'Tümdengelim örneğini tanımayı ölçer.',
   },
   {
-    id: `${BL}-q04`, topic: BL, outcome: 'Bilim felsefesinin temel kavramlarını (hipotez, paradigma) açıklar.', difficulty: 'yeni-nesil', type: 'onculu',
+    id: `${BL}-q04`, topic: BL, subtopic: 'tytfel-bilim-felsefesi-s3', outcome: 'Bilim felsefesinin temel kavramlarını (hipotez, paradigma) açıklar.', difficulty: 'yeni-nesil', type: 'onculu',
     question: 'Bilim felsefesiyle ilgili aşağıdaki yargılardan hangileri doğrudur?',
     premises: ['Bilim felsefesi, bilimsel bilginin doğasını, yöntemini ve sınırlarını inceler.', 'Bir bilimsel teori, tek bir yanlışlayıcı gözlemle bile geçerliliğini yitirebilir.', 'Kuhn’a göre bilim, paradigma değişimleriyle (bilimsel devrimlerle) ilerler.'],
     options: ['I, II ve III', 'I ve II', 'I ve III', 'II ve III', 'Yalnız I'],
@@ -488,7 +488,7 @@ export const questions: QuestionSeed[] = [
     teacherNote: 'Bilim felsefesindeki üç temel kavramı ölçer.',
   },
   {
-    id: `${BL}-q05`, topic: BL, outcome: 'Bilim felsefesinin temel kavramlarını (hipotez, paradigma) açıklar.', difficulty: 'orta', type: 'bilgi',
+    id: `${BL}-q05`, topic: BL, subtopic: 'tytfel-bilim-felsefesi-s3', outcome: 'Bilim felsefesinin temel kavramlarını (hipotez, paradigma) açıklar.', difficulty: 'orta', type: 'bilgi',
     question: 'Thomas Kuhn’a göre bir bilim topluluğunun belirli bir dönemde paylaştığı temel kavramlar, yöntemler ve değerler bütününe ne ad verilir?',
     options: ['Hipotez', 'Paradigma', 'Aksiyom', 'Postulat', 'Determinizm'],
     correctAnswer: 1,
@@ -498,7 +498,7 @@ export const questions: QuestionSeed[] = [
     teacherNote: 'Kuhn’un temel kavramını tanımayı ölçer.',
   },
   {
-    id: `${BL}-q06`, topic: BL, outcome: 'Bilimsel bilginin doğasına ilişkin görüşleri (yanlışlanabilirlik) açıklar.', difficulty: 'kolay', type: 'bilgi',
+    id: `${BL}-q06`, topic: BL, subtopic: 'tytfel-bilim-felsefesi-s1', outcome: 'Bilimsel bilginin doğasına ilişkin görüşleri (yanlışlanabilirlik) açıklar.', difficulty: 'kolay', type: 'bilgi',
     question: 'Bilim felsefesi aşağıdaki sorulardan öncelikle hangisiyle ilgilenir?',
     options: ['Güzel nedir?', 'Devletin meşruiyeti nereden gelir?', 'Bilimsel bilgi nasıl elde edilir ve neyi bilimsel yapar?', 'İyi ve kötü nedir?', 'Tanrı var mıdır?'],
     correctAnswer: 2,

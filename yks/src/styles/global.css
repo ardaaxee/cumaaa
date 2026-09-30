@@ -14180,3 +14180,6 @@ textarea:focus-visible {
   }
   .pet-control-hint::before { display:none; }
 }
+
+.topic-navigation { display:flex; flex-wrap:wrap; justify-content:space-between; gap:12px; }
+.topic-navigation .btn { white-space:normal; text-align:center; }

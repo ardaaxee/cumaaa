@@ -26,7 +26,7 @@ export const questions: QuestionSeed[] = [
   // =====================================================================
   {
     id: `${AB}-q01`,
-    topic: AB,
+    topic: AB, subtopic: 'aytkim-asit-baz-dengesi-s2',
     outcome: "Kuvvetli asit ve bazların sulu çözeltilerinde pH ve pOH değerlerini hesaplar.",
     difficulty: "kolay",
     type: "islem",
@@ -41,7 +41,7 @@ export const questions: QuestionSeed[] = [
   },
   {
     id: `${AB}-q02`,
-    topic: AB,
+    topic: AB, subtopic: 'aytkim-asit-baz-dengesi-s3',
     outcome: "Zayıf asit ve bazların iyonlaşma dengesini Ka ve Kb ile ilişkilendirerek pH hesaplar.",
     difficulty: "orta",
     type: "islem",
@@ -57,7 +57,7 @@ export const questions: QuestionSeed[] = [
   },
   {
     id: `${AB}-q03`,
-    topic: AB,
+    topic: AB, subtopic: 'aytkim-asit-baz-dengesi-s3',
     outcome: "Kuvvetli ve zayıf asitleri iyonlaşma, pH ve nötrleşme kapasitesi bakımından karşılaştırır.",
     difficulty: "orta",
     type: "onculu",
@@ -78,7 +78,7 @@ export const questions: QuestionSeed[] = [
   },
   {
     id: `${AB}-q04`,
-    topic: AB,
+    topic: AB, subtopic: 'aytkim-asit-baz-dengesi-s4',
     outcome: "Tuzların hidrolizini açıklayarak sulu çözeltilerinin asitlik-bazlık durumunu belirler.",
     difficulty: "orta",
     type: "tablo",
@@ -103,7 +103,7 @@ export const questions: QuestionSeed[] = [
   },
   {
     id: `${AB}-q05`,
-    topic: AB,
+    topic: AB, subtopic: 'aytkim-asit-baz-dengesi-s5',
     outcome: "Titrasyon eğrilerini yorumlayarak eşdeğerlik noktası ve tampon bölgesini belirler.",
     difficulty: "zor",
     type: "grafik",
@@ -134,7 +134,7 @@ export const questions: QuestionSeed[] = [
   },
   {
     id: `${AB}-q06`,
-    topic: AB,
+    topic: AB, subtopic: 'aytkim-asit-baz-dengesi-s4',
     outcome: "Tampon çözeltilerin oluşumunu açıklar ve pH değerini hesaplar.",
     difficulty: "orta",
     type: "cok-adimli",
@@ -150,7 +150,7 @@ export const questions: QuestionSeed[] = [
   },
   {
     id: `${AB}-q07`,
-    topic: AB,
+    topic: AB, subtopic: 'aytkim-asit-baz-dengesi-s2',
     outcome: "Asit ve baz çözeltileri karıştırıldığında oluşan çözeltinin pH değerini hesaplar.",
     difficulty: "orta",
     type: "problem",
@@ -166,7 +166,7 @@ export const questions: QuestionSeed[] = [
   },
   {
     id: `${AB}-q08`,
-    topic: AB,
+    topic: AB, subtopic: 'aytkim-asit-baz-dengesi-s1',
     outcome: "Suyun iyonlaşma dengesini ve sıcaklığın bu dengeye etkisini açıklar.",
     difficulty: "zor",
     type: "onculu",
@@ -187,7 +187,7 @@ export const questions: QuestionSeed[] = [
   },
   {
     id: `${AB}-q09`,
-    topic: AB,
+    topic: AB, subtopic: 'aytkim-asit-baz-dengesi-s3',
     outcome: "Zayıf asit ve bazların iyonlaşma dengesini Ka ve Kb ile ilişkilendirerek pH hesaplar.",
     difficulty: "kolay",
     type: "islem",
@@ -202,7 +202,7 @@ export const questions: QuestionSeed[] = [
   },
   {
     id: `${AB}-q10`,
-    topic: AB,
+    topic: AB, subtopic: 'aytkim-asit-baz-dengesi-s3',
     outcome: "Kuvvetli ve zayıf asitleri iyonlaşma, pH ve nötrleşme kapasitesi bakımından karşılaştırır.",
     difficulty: "zor",
     type: "deney",
@@ -223,7 +223,7 @@ export const questions: QuestionSeed[] = [
   },
   {
     id: `${AB}-q11`,
-    topic: AB,
+    topic: AB, subtopic: 'aytkim-asit-baz-dengesi-s4',
     outcome: "Asit ve baz çözeltileri karıştırıldığında oluşan çözeltinin pH değerini hesaplar.",
     difficulty: "yeni-nesil",
     type: "yeni-nesil",
@@ -239,7 +239,7 @@ export const questions: QuestionSeed[] = [
   },
   {
     id: `${AB}-q12`,
-    topic: AB,
+    topic: AB, subtopic: 'aytkim-asit-baz-dengesi-s5',
     outcome: "Titrasyon eğrilerini yorumlayarak eşdeğerlik noktası ve tampon bölgesini belirler.",
     difficulty: "orta",
     type: "grafik",
@@ -266,7 +266,7 @@ export const questions: QuestionSeed[] = [
   },
   {
     id: `${AB}-q13`,
-    topic: AB,
+    topic: AB, subtopic: 'aytkim-asit-baz-dengesi-s3',
     outcome: "Konjuge asit-baz çiftlerinde Ka ve Kb ilişkisini kullanarak tuz çözeltilerini karşılaştırır.",
     difficulty: "zor",
     type: "tablo",
@@ -290,7 +290,7 @@ export const questions: QuestionSeed[] = [
   },
   {
     id: `${AB}-q14`,
-    topic: AB,
+    topic: AB, subtopic: 'aytkim-asit-baz-dengesi-s1',
     outcome: "Brønsted-Lowry tanımına göre konjuge asit-baz çiftlerini belirler.",
     difficulty: "kolay",
     type: "bilgi",
@@ -315,7 +315,7 @@ export const questions: QuestionSeed[] = [
   // =====================================================================
   {
     id: `${CD}-q01`,
-    topic: CD,
+    topic: CD, subtopic: 'aytkim-cozunurluk-dengesi-s1',
     outcome: "Az çözünen tuzlar için çözünürlük çarpımı ile molar çözünürlük arasındaki ilişkiyi kullanarak hesap yapar.",
     difficulty: "kolay",
     type: "islem",
@@ -329,7 +329,7 @@ export const questions: QuestionSeed[] = [
   },
   {
     id: `${CD}-q02`,
-    topic: CD,
+    topic: CD, subtopic: 'aytkim-cozunurluk-dengesi-s2',
     outcome: "Ortak iyonun çözünürlüğe etkisini açıklar ve hesaplar.",
     difficulty: "orta",
     type: "islem",
@@ -345,7 +345,7 @@ export const questions: QuestionSeed[] = [
   },
   {
     id: `${CD}-q03`,
-    topic: CD,
+    topic: CD, subtopic: 'aytkim-cozunurluk-dengesi-s3',
     outcome: "İyon çarpımını çözünürlük çarpımıyla karşılaştırarak çökelme olup olmayacağını belirler.",
     difficulty: "zor",
     type: "tablo",
@@ -370,7 +370,7 @@ export const questions: QuestionSeed[] = [
   },
   {
     id: `${CD}-q04`,
-    topic: CD,
+    topic: CD, subtopic: 'aytkim-cozunurluk-dengesi-s1',
     outcome: "Farklı formül türündeki tuzların çözünürlüklerini karşılaştırır.",
     difficulty: "orta",
     type: "onculu",
@@ -391,7 +391,7 @@ export const questions: QuestionSeed[] = [
   },
   {
     id: `${CD}-q05`,
-    topic: CD,
+    topic: CD, subtopic: 'aytkim-cozunurluk-dengesi-s4',
     outcome: "Sıcaklığın çözünürlük ve çözünürlük çarpımı üzerindeki etkisini yorumlar.",
     difficulty: "orta",
     type: "grafik",
@@ -413,7 +413,7 @@ export const questions: QuestionSeed[] = [
   },
   {
     id: `${CD}-q06`,
-    topic: CD,
+    topic: CD, subtopic: 'aytkim-cozunurluk-dengesi-s1',
     outcome: "Az çözünen tuzlar için çözünürlük çarpımı ile molar çözünürlük arasındaki ilişkiyi kullanarak hesap yapar.",
     difficulty: "yeni-nesil",
     type: "yeni-nesil",
@@ -433,7 +433,7 @@ export const questions: QuestionSeed[] = [
   // =====================================================================
   {
     id: `${EK}-q01`,
-    topic: EK,
+    topic: EK, subtopic: 'aytkim-elektrokimya-s1',
     outcome: "Redoks tepkimelerinde yükseltgenen, indirgenen, yükseltgen ve indirgen türleri belirler.",
     difficulty: "kolay",
     type: "bilgi",
@@ -454,7 +454,7 @@ export const questions: QuestionSeed[] = [
   },
   {
     id: `${EK}-q02`,
-    topic: EK,
+    topic: EK, subtopic: 'aytkim-elektrokimya-s2',
     outcome: "Standart indirgenme potansiyellerini kullanarak galvanik hücrelerin standart potansiyelini hesaplar.",
     difficulty: "orta",
     type: "tablo",
@@ -471,7 +471,7 @@ export const questions: QuestionSeed[] = [
   },
   {
     id: `${EK}-q03`,
-    topic: EK,
+    topic: EK, subtopic: 'aytkim-elektrokimya-s3',
     outcome: "Galvanik hücrenin çalışmasını elektron akışı, iyon göçü ve elektrot değişimleri açısından açıklar.",
     difficulty: "orta",
     type: "onculu",
@@ -492,7 +492,7 @@ export const questions: QuestionSeed[] = [
   },
   {
     id: `${EK}-q04`,
-    topic: EK,
+    topic: EK, subtopic: 'aytkim-elektrokimya-s2',
     outcome: "Standart indirgenme potansiyellerinden yararlanarak tepkimelerin kendiliğinden olup olmayacağını belirler.",
     difficulty: "orta",
     type: "tablo",
@@ -509,7 +509,7 @@ export const questions: QuestionSeed[] = [
   },
   {
     id: `${EK}-q05`,
-    topic: EK,
+    topic: EK, subtopic: 'aytkim-elektrokimya-s3',
     outcome: "Derişim değişiminin pil potansiyeline etkisini Nernst mantığıyla nitel olarak yorumlar.",
     difficulty: "zor",
     type: "onculu",
@@ -530,7 +530,7 @@ export const questions: QuestionSeed[] = [
   },
   {
     id: `${EK}-q06`,
-    topic: EK,
+    topic: EK, subtopic: 'aytkim-elektrokimya-s4',
     outcome: "Faraday yasalarını kullanarak elektrolizde toplanan madde miktarını hesaplar.",
     difficulty: "kolay",
     type: "islem",
@@ -544,7 +544,7 @@ export const questions: QuestionSeed[] = [
   },
   {
     id: `${EK}-q07`,
-    topic: EK,
+    topic: EK, subtopic: 'aytkim-elektrokimya-s4',
     outcome: "Faraday yasalarını kullanarak elektrolizde toplanan madde miktarını hesaplar.",
     difficulty: "orta",
     type: "problem",
@@ -560,7 +560,7 @@ export const questions: QuestionSeed[] = [
   },
   {
     id: `${EK}-q08`,
-    topic: EK,
+    topic: EK, subtopic: 'aytkim-elektrokimya-s4',
     outcome: "Sulu çözeltilerin elektrolizinde elektrotlarda oluşan ürünleri belirler.",
     difficulty: "orta",
     type: "onculu",
@@ -581,7 +581,7 @@ export const questions: QuestionSeed[] = [
   },
   {
     id: `${EK}-q09`,
-    topic: EK,
+    topic: EK, subtopic: 'aytkim-elektrokimya-s3',
     outcome: "Galvanik hücre ile elektroliz hücresini karşılaştırır.",
     difficulty: "kolay",
     type: "bilgi",
@@ -602,7 +602,7 @@ export const questions: QuestionSeed[] = [
   },
   {
     id: `${EK}-q10`,
-    topic: EK,
+    topic: EK, subtopic: 'aytkim-elektrokimya-s5',
     outcome: "Korozyonu açıklar ve metalleri korozyondan koruma yöntemlerini elektrokimyasal olarak yorumlar.",
     difficulty: "orta",
     type: "onculu",
@@ -623,7 +623,7 @@ export const questions: QuestionSeed[] = [
   },
   {
     id: `${EK}-q11`,
-    topic: EK,
+    topic: EK, subtopic: 'aytkim-elektrokimya-s4',
     outcome: "Faraday yasalarını kullanarak elektrolizde toplanan madde miktarını hesaplar.",
     difficulty: "yeni-nesil",
     type: "yeni-nesil",
@@ -639,7 +639,7 @@ export const questions: QuestionSeed[] = [
   },
   {
     id: `${EK}-q12`,
-    topic: EK,
+    topic: EK, subtopic: 'aytkim-elektrokimya-s4',
     outcome: "Faraday yasalarını kullanarak elektrolizde toplanan madde miktarını hesaplar.",
     difficulty: "zor",
     type: "grafik",
@@ -655,7 +655,7 @@ export const questions: QuestionSeed[] = [
   },
   {
     id: `${EK}-q13`,
-    topic: EK,
+    topic: EK, subtopic: 'aytkim-elektrokimya-s2',
     outcome: "Metallerin aktifliklerini deney sonuçlarına göre karşılaştırır ve indirgenme potansiyelleriyle ilişkilendirir.",
     difficulty: "orta",
     type: "deney",
@@ -671,7 +671,7 @@ export const questions: QuestionSeed[] = [
   },
   {
     id: `${EK}-q14`,
-    topic: EK,
+    topic: EK, subtopic: 'aytkim-elektrokimya-s3',
     outcome: "Standart indirgenme potansiyellerini kullanarak galvanik hücrelerin standart potansiyelini hesaplar.",
     difficulty: "orta",
     type: "islem",
@@ -691,7 +691,7 @@ export const questions: QuestionSeed[] = [
   // =====================================================================
   {
     id: `${KG}-q01`,
-    topic: KG,
+    topic: KG, subtopic: 'aytkim-karbon-kimyasina-giris-s1',
     outcome: "Karbonun allotroplarını yapı ve özellikleri bakımından karşılaştırır.",
     difficulty: "kolay",
     type: "onculu",
@@ -711,7 +711,7 @@ export const questions: QuestionSeed[] = [
   },
   {
     id: `${KG}-q02`,
-    topic: KG,
+    topic: KG, subtopic: 'aytkim-karbon-kimyasina-giris-s2',
     outcome: "Yakma analizi verilerinden organik bileşiklerin basit ve molekül formüllerini belirler.",
     difficulty: "orta",
     type: "problem",
@@ -727,7 +727,7 @@ export const questions: QuestionSeed[] = [
   },
   {
     id: `${KG}-q03`,
-    topic: KG,
+    topic: KG, subtopic: 'aytkim-karbon-kimyasina-giris-s3',
     outcome: "Organik moleküllerde σ ve π bağlarını ve karbon atomlarının hibritleşme türlerini belirler.",
     difficulty: "orta",
     type: "islem",
@@ -749,7 +749,7 @@ export const questions: QuestionSeed[] = [
   },
   {
     id: `${KG}-q04`,
-    topic: KG,
+    topic: KG, subtopic: 'aytkim-karbon-kimyasina-giris-s3',
     outcome: "Karbonun hibritleşme türlerini molekül geometrisi ve bağ açılarıyla ilişkilendirir.",
     difficulty: "orta",
     type: "tablo",
@@ -774,7 +774,7 @@ export const questions: QuestionSeed[] = [
   },
   {
     id: `${KG}-q05`,
-    topic: KG,
+    topic: KG, subtopic: 'aytkim-karbon-kimyasina-giris-s2',
     outcome: "Yüzde bileşim ve mol kütlesinden organik bileşiklerin molekül formülünü belirler.",
     difficulty: "zor",
     type: "cok-adimli",
@@ -790,7 +790,7 @@ export const questions: QuestionSeed[] = [
   },
   {
     id: `${KG}-q06`,
-    topic: KG,
+    topic: KG, subtopic: 'aytkim-karbon-kimyasina-giris-s1',
     outcome: "Organik kimyanın gelişimini ve organik bileşiklerin genel özelliklerini açıklar.",
     difficulty: "kolay",
     type: "bilgi",
@@ -815,7 +815,7 @@ export const questions: QuestionSeed[] = [
   // =====================================================================
   {
     id: `${OB}-q01`,
-    topic: OB,
+    topic: OB, subtopic: 'aytkim-organik-bilesikler-s2',
     outcome: "Hidrokarbonlarda yapı izomerlerini belirler.",
     difficulty: "kolay",
     type: "bilgi",
@@ -830,7 +830,7 @@ export const questions: QuestionSeed[] = [
   },
   {
     id: `${OB}-q02`,
-    topic: OB,
+    topic: OB, subtopic: 'aytkim-organik-bilesikler-s1',
     outcome: "Organik bileşikleri IUPAC kurallarına göre adlandırır.",
     difficulty: "orta",
     type: "yorum",
@@ -845,7 +845,7 @@ export const questions: QuestionSeed[] = [
   },
   {
     id: `${OB}-q03`,
-    topic: OB,
+    topic: OB, subtopic: 'aytkim-organik-bilesikler-s6',
     outcome: "Organik bileşiklerdeki fonksiyonel grupları tanır ve sınıflandırır.",
     difficulty: "kolay",
     type: "tablo",
@@ -870,7 +870,7 @@ export const questions: QuestionSeed[] = [
   },
   {
     id: `${OB}-q04`,
-    topic: OB,
+    topic: OB, subtopic: 'aytkim-organik-bilesikler-s3',
     outcome: "Alkollerin sınıflarını ve yükseltgenme ürünlerini belirler.",
     difficulty: "orta",
     type: "onculu",
@@ -890,7 +890,7 @@ export const questions: QuestionSeed[] = [
   },
   {
     id: `${OB}-q05`,
-    topic: OB,
+    topic: OB, subtopic: 'aytkim-organik-bilesikler-s5',
     outcome: "Esterleşme tepkimesini açıklar ve esterleri adlandırır.",
     difficulty: "yeni-nesil",
     type: "yeni-nesil",
@@ -912,7 +912,7 @@ export const questions: QuestionSeed[] = [
   },
   {
     id: `${OB}-q06`,
-    topic: OB,
+    topic: OB, subtopic: 'aytkim-organik-bilesikler-s2',
     outcome: "Fonksiyonel grup izomerlerini fiziksel ve kimyasal özellikleri bakımından karşılaştırır.",
     difficulty: "orta",
     type: "onculu",
@@ -932,7 +932,7 @@ export const questions: QuestionSeed[] = [
   },
   {
     id: `${OB}-q07`,
-    topic: OB,
+    topic: OB, subtopic: 'aytkim-organik-bilesikler-s2',
     outcome: "Alkenlerde geometrik (cis-trans) izomerinin koşullarını açıklar.",
     difficulty: "orta",
     type: "bilgi",
@@ -947,7 +947,7 @@ export const questions: QuestionSeed[] = [
   },
   {
     id: `${OB}-q08`,
-    topic: OB,
+    topic: OB, subtopic: 'aytkim-organik-bilesikler-s1',
     outcome: "Hidrokarbonların verdiği tepkime türlerini açıklar ve ürünlerini belirler.",
     difficulty: "orta",
     type: "yorum",
@@ -968,7 +968,7 @@ export const questions: QuestionSeed[] = [
   },
   {
     id: `${OB}-q09`,
-    topic: OB,
+    topic: OB, subtopic: 'aytkim-organik-bilesikler-s1',
     outcome: "Hidrokarbonların yanma tepkimelerinde mol ilişkilerinden formül ve miktar hesaplar.",
     difficulty: "orta",
     type: "problem",
@@ -984,7 +984,7 @@ export const questions: QuestionSeed[] = [
   },
   {
     id: `${OB}-q10`,
-    topic: OB,
+    topic: OB, subtopic: 'aytkim-organik-bilesikler-s1',
     outcome: "Hidrokarbonların verdiği tepkime türlerini açıklar ve ürünlerini belirler.",
     difficulty: "zor",
     type: "cok-adimli",
@@ -1000,7 +1000,7 @@ export const questions: QuestionSeed[] = [
   },
   {
     id: `${OB}-q11`,
-    topic: OB,
+    topic: OB, subtopic: 'aytkim-organik-bilesikler-s1',
     outcome: "Aromatik bileşiklerin yapısını ve tepkime özelliklerini açıklar.",
     difficulty: "orta",
     type: "onculu",
@@ -1020,7 +1020,7 @@ export const questions: QuestionSeed[] = [
   },
   {
     id: `${OB}-q12`,
-    topic: OB,
+    topic: OB, subtopic: 'aytkim-organik-bilesikler-s6',
     outcome: "Organik bileşiklerin fiziksel özelliklerini molekül arası etkileşimlerle açıklar.",
     difficulty: "zor",
     type: "tablo",
@@ -1050,7 +1050,7 @@ export const questions: QuestionSeed[] = [
   },
   {
     id: `${OB}-q13`,
-    topic: OB,
+    topic: OB, subtopic: 'aytkim-organik-bilesikler-s4',
     outcome: "Aldehit ve ketonları yükseltgenme tepkimeleri yardımıyla ayırt eder.",
     difficulty: "orta",
     type: "deney",
@@ -1072,7 +1072,7 @@ export const questions: QuestionSeed[] = [
   },
   {
     id: `${OB}-q14`,
-    topic: OB,
+    topic: OB, subtopic: 'aytkim-organik-bilesikler-s1',
     outcome: "Hidrokarbonları genel formüllerine ve yapılarına göre sınıflandırır.",
     difficulty: "kolay",
     type: "yorum",
@@ -1093,7 +1093,7 @@ export const questions: QuestionSeed[] = [
   },
   {
     id: `${OB}-q15`,
-    topic: OB,
+    topic: OB, subtopic: 'aytkim-organik-bilesikler-s6',
     outcome: "Aminlerin yapısını ve asit-baz özelliklerini açıklar.",
     difficulty: "kolay",
     type: "bilgi",
@@ -1118,7 +1118,7 @@ export const questions: QuestionSeed[] = [
   // =====================================================================
   {
     id: `${EN}-q01`,
-    topic: EN,
+    topic: EN, subtopic: 'aytkim-enerji-kaynaklari-s2',
     outcome: "Enerji kaynaklarını yenilenebilirlik ve çevresel etkileri bakımından sınıflandırır.",
     difficulty: "kolay",
     type: "onculu",
@@ -1134,7 +1134,7 @@ export const questions: QuestionSeed[] = [
   },
   {
     id: `${EN}-q02`,
-    topic: EN,
+    topic: EN, subtopic: 'aytkim-enerji-kaynaklari-s1',
     outcome: "Yakıtları birim kütle başına açığa çıkardıkları enerji bakımından karşılaştırır.",
     difficulty: "orta",
     type: "tablo",
@@ -1158,7 +1158,7 @@ export const questions: QuestionSeed[] = [
   },
   {
     id: `${EN}-q03`,
-    topic: EN,
+    topic: EN, subtopic: 'aytkim-enerji-kaynaklari-s1',
     outcome: "Ham petrolün fraksiyonlu damıtma ile ayrılmasını açıklar.",
     difficulty: "kolay",
     type: "bilgi",
@@ -1173,7 +1173,7 @@ export const questions: QuestionSeed[] = [
   },
   {
     id: `${EN}-q04`,
-    topic: EN,
+    topic: EN, subtopic: 'aytkim-enerji-kaynaklari-s2',
     outcome: "Hidrojen yakıt pilinin çalışma ilkesini elektrokimyasal olarak açıklar.",
     difficulty: "orta",
     type: "onculu",
@@ -1193,7 +1193,7 @@ export const questions: QuestionSeed[] = [
   },
   {
     id: `${EN}-q05`,
-    topic: EN,
+    topic: EN, subtopic: 'aytkim-enerji-kaynaklari-s1',
     outcome: "Fosil yakıtların oluşumunu ve türlerini açıklar.",
     difficulty: "kolay",
     type: "bilgi",
@@ -1214,7 +1214,7 @@ export const questions: QuestionSeed[] = [
   },
   {
     id: `${EN}-q06`,
-    topic: EN,
+    topic: EN, subtopic: 'aytkim-enerji-kaynaklari-s3',
     outcome: "Yakıtların çevresel etkilerini CO₂ salımı açısından karşılaştırır.",
     difficulty: "yeni-nesil",
     type: "yeni-nesil",

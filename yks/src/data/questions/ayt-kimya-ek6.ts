@@ -91,4 +91,14 @@ export const questions: QuestionSeed[] = [
     commonMistake: 'Elektroliz hücresi işaretleriyle galvanik hücreyi karıştırmak.',
     teacherNote: 'Elektrokimyanın temel yön ve elektrot kavramlarını ölçer.',
   },
+  {
+    id: 'aytkim-modern-atom-q601', topic: 'aytkim-modern-atom', subtopic: 'aytkim-modern-atom-s1',
+    outcome: 'Bohr atom modeli ile kuantum atom modelini karşılaştırır.', difficulty: 'orta', type: 'bilgi',
+    question: 'Modern kuantum atom modelindeki orbital kavramını Bohr modelindeki yörünge kavramından ayıran temel özellik aşağıdakilerden hangisidir?',
+    options: ['Orbital, elektronun izlediği kesin dairesel yoldur.', 'Orbital, elektronun bulunma olasılığıyla ilişkili bir uzay bölgesidir.', 'Orbitalde elektronun konumu ve momentumu aynı anda tam kesinlikle bilinir.', 'Tüm orbitaller aynı enerjiye ve şekle sahiptir.', 'Orbital kavramı yalnız hidrojen atomuna uygulanabilir.'],
+    correctAnswer: 1,
+    solution: 'Bohr modelinde elektron belirli yörüngelerde düşünülür. Kuantum modelinde ise elektronun kesin bir yolu tanımlanmaz; orbital, elektronun bulunma olasılığıyla ilişkilidir. Bu yüzden yörünge ile orbital aynı kavram değildir. Doğru cevap B’dir.',
+    hint: 'Kesin hareket yolu ile bulunma olasılığı arasındaki farkı düşün.',
+    commonMistake: 'Orbitali elektronun çekirdek çevresindeki kesin yörüngesi olarak yorumlamak.',
+  },
 ];

@@ -38,7 +38,7 @@ export const questions: QuestionSeed[] = [
     outcome: 'Yol = hız · zaman bağıntısını kullanarak karşılaşma, yetişme ve ortalama hız problemlerini çözer.',
     difficulty: 'zor',
     type: 'problem',
-    question: 'Bir araç 180 km’lik yolun ilk 60 km’sini saatte 60 km, kalan 120 km’sini saatte 80 km hızla gidiyor. Yolculuk sırasında ayrıca 30 dakika mola veriyor. Aracın mola dâhil tüm yolculuktaki ortalama hızı kaç km/saattir?',
+    question: 'Bir araç 180 km’lik yolun ilk 60 km’sini saatte 60 km, kalan 120 km’sini saatte 80 km hızla gidiyor. Yolculuk sırasında ayrıca 30 dakika mola veriyor. Aracın mola dâhil tüm yolculuktaki ortalama sürati kaç km/saattir?',
     options: ['54', '56', '60', '64', '72'],
     correctAnswer: 2,
     solution: 'İlk 60 km için süre 60/60 = 1 saattir.\nKalan 120 km için süre 120/80 = 1,5 saattir.\nMola 0,5 saat olduğundan toplam süre 1 + 1,5 + 0,5 = 3 saattir.\nOrtalama hız = toplam yol / toplam süre = 180/3 = 60 km/sa.',

@@ -19,7 +19,7 @@ import { launchTest, makeConfig } from '../services/testLauncher';
  * Adım adım ders çalışma: konu özeti → formül ve örnekler → konu soruları → bitiş.
  * Geçen süre çalışma günlüğüne, sorular istatistiğe ve yanlışlar defterine işlenir.
  */
-const STEPS = ['Özet', 'Örnekler', 'Sorular', 'Bitti'] as const;
+const STEPS = ['Özet', 'Mantık ve örnekler', 'Sorular', 'Bitti'] as const;
 const QUIZ_SIZE = 5;
 const MAX_LOGGED_MIN = 90;
 
@@ -99,6 +99,8 @@ function SummaryStep({ lesson }: { lesson: LessonSeed }) {
           {p}
         </p>
       ))}
+      <h2>Ön bilgiler</h2>
+      <ul>{lesson.prerequisites.map((item) => <li key={item}>{item}</li>)}</ul>
       <h2>Temel kavramlar</h2>
       <dl className="concept">
         {lesson.concepts.map((c, i) => (
@@ -121,6 +123,8 @@ function SummaryStep({ lesson }: { lesson: LessonSeed }) {
 function ExamplesStep({ lesson }: { lesson: LessonSeed }) {
   return (
     <article className="lesson">
+      <h2>Mantığı: neden böyle?</h2>
+      {lesson.logic.split(/\n\n+/).map((text, i) => <p key={i} className="pre-line">{text}</p>)}
       {lesson.formulas.length > 0 && (
         <>
           <h2>Formüller</h2>
@@ -150,6 +154,8 @@ function ExamplesStep({ lesson }: { lesson: LessonSeed }) {
           </details>
         </div>
       ))}
+      <h2>Sınavda nasıl düşünmeli?</h2>
+      <p className="pre-line">{lesson.osymThinking}</p>
       <div className="callout ok">
         <b>Püf noktası</b>
         <ul>
@@ -180,6 +186,7 @@ function Session({ topicId }: { topicId: string }) {
     return ids.map((id) => qs.find((q) => q.id === id)!).filter(Boolean);
   }, [qLoad.data]);
   const [step, setStep] = useState(0);
+  const [savedAnswers, setSavedAnswers] = useState<Record<string, number>>({});
   const [score, setScore] = useState({ answered: 0, correct: 0 });
   const startedAt = useRef(Date.now());
   const logged = useRef(false);
@@ -269,7 +276,7 @@ function Session({ topicId }: { topicId: string }) {
           <Spinner label="Konu yükleniyor" />
         ) : current === 'Özet' && lesson ? (
           <SummaryStep lesson={lesson} />
-        ) : current === 'Örnekler' && lesson ? (
+        ) : current === 'Mantık ve örnekler' && lesson ? (
           <ExamplesStep lesson={lesson} />
         ) : current === 'Sorular' ? (
           <>
@@ -284,7 +291,7 @@ function Session({ topicId }: { topicId: string }) {
             ) : quiz.length === 0 ? (
               <Empty title="Bu konu için henüz soru yok." />
             ) : (
-              <InlineQuiz questions={quiz} topicName={ref.topic.name} onProgress={(answered, correct) => setScore({ answered, correct })} />
+              <InlineQuiz questions={quiz} savedAnswers={savedAnswers} onAnswersChange={setSavedAnswers} topicName={ref.topic.name} onProgress={(answered, correct) => setScore({ answered, correct })} />
             )}
           </>
         ) : (
@@ -293,7 +300,7 @@ function Session({ topicId }: { topicId: string }) {
             <h2>Harika çalıştın ♡</h2>
             <p className="muted">
               {score.answered ? `${score.answered} sorudan ${score.correct} doğru. ` : ''}
-              Çalışma süren günlüğüne eklendi; {petName} için yemek ve su kazandın 🎋💧
+              Çalışma süren günlüğüne kaydedildi. Doğru cevaplar bambu; cevaplanan sorular ve odak dakikaları su kazandırır 🎋💧
             </p>
             <div className="study-mastery-check">
               <div>
@@ -344,7 +351,7 @@ function Session({ topicId }: { topicId: string }) {
             Geri
           </button>
           {current === 'Sorular' ? (
-            <button type="button" className="btn primary" onClick={finish} disabled={quiz.length > 0 && score.answered < quiz.length}>
+            <button type="button" className="btn primary" onClick={finish} disabled={qLoad.failed || !qLoad.data || (quiz.length > 0 && score.answered < quiz.length)}>
               {quiz.length > 0 && score.answered < quiz.length ? `${score.answered}/${quiz.length} cevaplandı` : 'Bitir ♡'}
             </button>
           ) : (

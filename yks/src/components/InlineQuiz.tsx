@@ -18,6 +18,8 @@ export function InlineQuiz({
   onMore,
   moreLabel = 'Yeni sorular getir',
   onProgress,
+  savedAnswers,
+  onAnswersChange,
 }: {
   questions: Question[];
   topicName?: string;
@@ -25,14 +27,19 @@ export function InlineQuiz({
   moreLabel?: string;
   /** Her cevaptan sonra: cevaplanan ve doğru sayısı. */
   onProgress?: (answered: number, correct: number) => void;
+  savedAnswers?: Record<string, number>;
+  onAnswersChange?: (answers: Record<string, number>) => void;
 }) {
   const sessionRef = useRef(uid('inline'));
   const shownAt = useRef(Date.now());
-  const [answers, setAnswers] = useState<Record<string, number>>({});
+  const [answers, setAnswers] = useState<Record<string, number>>(() => savedAnswers ?? {});
+  const answersRef = useRef(answers);
 
   const answer = (q: Question, i: number) => {
-    if (answers[q.id] != null) return;
-    const next = { ...answers, [q.id]: i };
+    if (answersRef.current[q.id] != null) return;
+    const next = { ...answersRef.current, [q.id]: i };
+    answersRef.current = next;
+    onAnswersChange?.(next);
     setAnswers(next);
     onProgress?.(Object.keys(next).length, questions.filter((x) => next[x.id] === x.correctAnswer).length);
     update((s) => recordPractice(s, q, i, sessionRef.current, Math.min(Date.now() - shownAt.current, 10 * 60_000)));
