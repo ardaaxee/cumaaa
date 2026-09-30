@@ -14,6 +14,10 @@ services:
     envVars:
       - key: GEMINI_API_KEY
         sync: false
+      - key: GEMINI_MODEL
+        value: gemini-3.5-flash
+      - key: GEMINI_FALLBACK_MODEL
+        value: gemini-3.5-flash-lite
       - key: ALLOWED_ORIGINS
         value: https://ardaaxee.github.io
       - key: NODE_VERSION
