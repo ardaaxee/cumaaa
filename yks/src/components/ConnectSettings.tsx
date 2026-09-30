@@ -1,5 +1,5 @@
 import { useEffect, useState, useSyncExternalStore } from 'react';
-import { checkAiStatus, type AiStatus } from '../services/ai';
+import { checkAiStatus, DEFAULT_AI_SERVER, type AiStatus } from '../services/ai';
 import { FIRESTORE_RULES, getCloudStatus, randomCode, shareLink, subscribeCloud, syncNow } from '../services/cloud';
 import { canInstall, downloadIcs, getReminderTime, isStandalone, promptInstall, setReminderTime } from '../services/reminder';
 import { updateSettings } from '../store/actions';
@@ -37,12 +37,16 @@ function AiSection() {
         🤖 Yapay zekâ bağlantısı
       </h2>
       <p className="small muted">
-        Bağlanınca asistan her soruyu gerçekten anlar, konuları sıfırdan anlatır ve <b>fotoğrafı çekilen soruyu</b> adım adım çözer. API anahtarı yalnız senin sunucunda
-        durur, bu uygulamaya asla yazılmaz. Tamamen ücretsiz kurulabilir.
+        Gerçek AI öğretmen artık varsayılan olarak ortak Render sunucusuna bağlıdır. Zeynep başka telefondan açtığında hiçbir adres girmeden çalışır.
+        API anahtarı yalnız Render'da gizli kalır; uygulamaya yazılmaz.
       </p>
+      <div className="notice">
+        <b>Otomatik sunucu:</b> {DEFAULT_AI_SERVER}
+        <div className="tiny muted">Aşağıdaki alanı yalnız farklı bir sunucu kullanmak istersen doldur.</div>
+      </div>
       <label className="field">
         <span>Sunucu adresi</span>
-        <input className="input" type="url" inputMode="url" value={draft} onChange={(e) => setDraft(e.target.value)} placeholder="https://iyiki-yks.onrender.com" />
+        <input className="input" type="url" inputMode="url" value={draft} onChange={(e) => setDraft(e.target.value)} placeholder={DEFAULT_AI_SERVER + ' (otomatik)'} />
       </label>
       <div className="row mt-8">
         <button type="button" className="btn primary" onClick={() => void save()} disabled={testing}>
@@ -52,7 +56,7 @@ function AiSection() {
           <span className={`badge ${status.configured ? 'ok' : 'warn'}`}>{status.configured ? `Bağlı ✓ (${status.model})` : status.reason}</span>
         )}
       </div>
-      <details className="mt-12" open={!url}>
+      <details className="mt-12">
         <summary className="small">Ücretsiz nasıl kurarım? (5 dakika)</summary>
         <ol className="small muted">
           <li>
