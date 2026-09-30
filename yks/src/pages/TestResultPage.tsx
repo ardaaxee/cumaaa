@@ -194,7 +194,7 @@ export default function TestResultPage({ params }: { params: string[] }) {
           <button type="button" className="btn ghost" onClick={createRecoveryWeek}>
             7 günlük toparlanma planı oluştur
           </button>
-        )
+        )}
         {(result.config.origin === 'adaptif' || result.config.origin === 'seviye') && (
           <button type="button" className="btn ghost" onClick={() => void launchAdaptivePractice(12).then((e) => e && toast(e))}>
             Sonraki adaptif test
