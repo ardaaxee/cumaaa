@@ -9584,3 +9584,34 @@ body {
 @media (prefers-reduced-motion: reduce) {
   .study-flow-step { transition:none !important; }
 }
+
+
+/* ===== TIMED EXAM ALERTS v1 ===== */
+.runner-time-warning {
+  color:var(--warn);
+  font-weight:900;
+}
+.runner-time-critical {
+  color:var(--bad);
+  font-weight:950;
+  animation:runner-critical-pulse 1.15s ease-in-out infinite;
+}
+.runner-review-shortcut {
+  border:1px solid color-mix(in srgb,var(--warn) 32%,var(--line));
+  border-radius:999px;
+  background:var(--warn-soft);
+  color:var(--warn);
+  min-height:28px;
+  padding:4px 9px;
+  font:inherit;
+  font-size:.66rem;
+  font-weight:850;
+  cursor:pointer;
+}
+@keyframes runner-critical-pulse {
+  0%,100% { opacity:.72; }
+  50% { opacity:1; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .runner-time-critical { animation:none !important; }
+}
