@@ -67,6 +67,7 @@ export function generateStarterPlan(
       used.add(topicId);
       tasks.push({
         date,
+        time: profile.preferredStudyTime || undefined,
         type: 'konu',
         title: `${lookup.subjectName(subjectId)}: ${lookup.topicName(topicId)} konu çalışması`,
         subjectId,
