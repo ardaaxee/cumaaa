@@ -13103,3 +13103,82 @@ textarea:focus-visible {
     min-height:39px;
   }
 }
+
+
+/* ===== PANDA ROOM POSES V3 ===== */
+.p3dv3-panda-prop {
+  position:absolute;
+  z-index:12;
+  pointer-events:none;
+  filter:drop-shadow(0 7px 8px rgba(35,24,35,.16));
+}
+.p3dv3-panda-prop.bamboo {
+  left:50%;
+  top:91px;
+  transform:translateX(-50%) rotate(-18deg);
+  font-size:2.45rem;
+}
+.p3dv3-panda-prop.book {
+  left:50%;
+  top:111px;
+  transform:translateX(-50%);
+  font-size:2.55rem;
+}
+.p3dv3-panda-prop.sleep {
+  right:-13px;
+  top:7px;
+  padding:3px 7px;
+  border-radius:999px;
+  background:rgba(255,255,255,.88);
+  color:#6f5a87;
+  font-size:.75rem;
+  font-weight:950;
+  letter-spacing:.06em;
+  animation:p3dv3-sleep 1.8s ease-in-out infinite;
+}
+.p3dv3-panda-prop.mug {
+  right:7px;
+  top:104px;
+  font-size:1.9rem;
+}
+.p3dv2-panda.room-kitchen .p3dv2-panda-arm.left {
+  transform:rotate(38deg) translate(8px,-5px);
+}
+.p3dv2-panda.room-kitchen .p3dv2-panda-arm.right {
+  transform:rotate(-38deg) translate(-8px,-5px);
+}
+.p3dv2-panda.room-study {
+  transform:translateY(14px) scale(.97);
+}
+.p3dv2-panda.room-study .p3dv2-panda-arm.left {
+  transform:rotate(46deg) translate(8px,-1px);
+}
+.p3dv2-panda.room-study .p3dv2-panda-arm.right {
+  transform:rotate(-46deg) translate(-8px,-1px);
+}
+.p3dv2-panda.room-bedroom {
+  transform:translateY(27px) rotate(4deg) scale(.94,.88);
+}
+.p3dv2-panda.room-bedroom .p3dv2-panda-head {
+  transform:rotate(8deg) translate(5px,3px);
+}
+.p3dv2-panda.room-bedroom .p3dv2-panda-patch i {
+  height:3px;
+  border-radius:999px;
+  background:#151517;
+  box-shadow:none;
+  top:60%;
+}
+.p3dv2-panda.room-balcony {
+  transform:translateX(10px) rotate(-3deg);
+}
+.p3dv2-panda.room-balcony .p3dv2-panda-head {
+  transform:rotate(-4deg);
+}
+.p3dv2-panda.room-balcony .p3dv2-panda-arm.right {
+  transform:rotate(-48deg) translate(-6px,-2px);
+}
+@keyframes p3dv3-sleep {
+  0%,100% { transform:translate(0,0) scale(.9); opacity:.45; }
+  50% { transform:translate(8px,-10px) scale(1.04); opacity:1; }
+}
