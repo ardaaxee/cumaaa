@@ -97,6 +97,35 @@ export default function SettingsPage() {
             <input className="input" value={profile.field} maxLength={30} onChange={(e) => update((s) => updateProfile(s, { field: e.target.value }))} />
           </label>
           <label className="field">
+            <span>Hedef üniversite</span>
+            <input
+              className="input"
+              value={profile.targetUniversity}
+              maxLength={80}
+              placeholder="Örn. Hacettepe Üniversitesi"
+              onChange={(e) => update((s) => updateProfile(s, { targetUniversity: e.target.value }))}
+            />
+          </label>
+          <label className="field">
+            <span>Hedef bölüm</span>
+            <input
+              className="input"
+              value={profile.targetDepartment}
+              maxLength={80}
+              placeholder="Örn. Bilgisayar Mühendisliği"
+              onChange={(e) => update((s) => updateProfile(s, { targetDepartment: e.target.value }))}
+            />
+          </label>
+          <label className="field">
+            <span>Tercih ettiğin çalışma başlangıcı</span>
+            <input
+              className="input"
+              type="time"
+              value={profile.preferredStudyTime}
+              onChange={(e) => update((s) => updateProfile(s, { preferredStudyTime: e.target.value }))}
+            />
+          </label>
+          <label className="field">
             <span>En zorlandığın ders</span>
             <select
               className="select"
