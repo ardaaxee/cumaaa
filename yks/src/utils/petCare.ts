@@ -7,6 +7,7 @@ import type { AppState, PetCare } from '../store/schema';
  */
 export const FOOD_PER_HOUR = 100 / 30; // tam tokluk ~30 saatte biter
 export const WATER_PER_HOUR = 100 / 20; // su ~20 saatte biter
+export const SATISFIED_AT = 99.5; // yüzde 100 gösterilen ihtiyaç kaynak harcamaz
 export const FOOD_PER_BAMBOO = 25;
 export const WATER_PER_DROP = 30;
 export const HUNGRY_BELOW = 35;
@@ -75,7 +76,7 @@ function withCare(state: AppState, care: PetCare): AppState {
 /** Bir bambu yedirir. Bambu yoksa ya da panda tokken durum değişmez. */
 export function feedPet(state: AppState, now: Date = new Date()): AppState {
   const n = petNeeds(state, now);
-  if (n.bamboo < 1 || n.food >= 100) return state;
+  if (n.bamboo < 1 || n.food >= SATISFIED_AT) return state;
   const care = state.settings.pet.care ?? freshCare(now);
   return withCare(state, { ...care, food: Math.min(100, n.food + FOOD_PER_BAMBOO), foodAt: now.toISOString(), spentBamboo: care.spentBamboo + 1 });
 }
@@ -83,7 +84,7 @@ export function feedPet(state: AppState, now: Date = new Date()): AppState {
 /** Bir damla su içirir. */
 export function waterPet(state: AppState, now: Date = new Date()): AppState {
   const n = petNeeds(state, now);
-  if (n.drops < 1 || n.water >= 100) return state;
+  if (n.drops < 1 || n.water >= SATISFIED_AT) return state;
   const care = state.settings.pet.care ?? freshCare(now);
   return withCare(state, { ...care, water: Math.min(100, n.water + WATER_PER_DROP), waterAt: now.toISOString(), spentWater: care.spentWater + 1 });
 }

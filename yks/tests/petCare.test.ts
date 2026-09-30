@@ -64,6 +64,14 @@ describe('panda bakımı', () => {
     expect(feedPet(full, T0)).toBe(full);
   });
 
+  it('ekranda yüzde 100 görünen küçük zaman azalması kaynak harcatmaz', () => {
+    const s = withAttempts(base(), 12, 10);
+    const full = { ...s, settings: { ...s.settings, pet: { ...s.settings.pet, care: { ...freshCare(T0), food: 100, water: 100 } } } };
+    const oneMinuteLater = new Date(T0.getTime() + 60_000);
+    expect(feedPet(full, oneMinuteLater)).toBe(full);
+    expect(waterPet(full, oneMinuteLater)).toBe(full);
+  });
+
   it('ihtiyaç mesajı durumu anlatır', () => {
     const s = base();
     expect(needsMessage('Bambu', petNeeds(s, T0))).toBeNull();

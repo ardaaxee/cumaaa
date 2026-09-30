@@ -83,6 +83,35 @@ describe('Panda evindeki etkileşimler', () => {
     expect(JSON.parse(localStorage.getItem(PANDA_LIFE_KEY)!).cleanliness).toBe(100);
   });
 
+  it('bakım çubuğundan iptal edilen banyo sonradan temizlik vermemeli', async () => {
+    await click('.pet-game-needs button:nth-child(3)');
+    expect(host.querySelector('.panda-care-session')).not.toBeNull();
+    await advance(1000);
+    await click('.panda-care-session button');
+    await advance(5000);
+    expect(host.querySelector('.panda-care-session')).toBeNull();
+    expect(JSON.parse(localStorage.getItem(PANDA_LIFE_KEY)!).cleanliness).toBe(82);
+  });
+
+  it('erken uyandırmak tam enerji vermez', async () => {
+    await click('.pet-game-actions button:last-child');
+    await advance(1000);
+    await click('.pet-game-actions button:last-child');
+    await advance(5000);
+    expect(JSON.parse(localStorage.getItem(PANDA_LIFE_KEY)!).energy).toBe(76);
+  });
+
+  it('aynı beslemeye tekrar dokunmak hazırlık süresini yeniden başlatmaz', async () => {
+    state = { ...state, testResults: [{ id: 'earned-test' }] as AppState['testResults'] };
+    await mount();
+    await click('.pet-game-actions .feed');
+    await advance(1000);
+    await click('.pet-game-actions .feed');
+    await advance(1250);
+    expect(state.settings.pet.care!.spentBamboo).toBe(1);
+    expect(host.querySelector('.panda-care-session')?.textContent).toContain('1 bambu kullanıldı');
+  });
+
   it('iptal edilen besleme bambu harcamaz; tamamlanan besleme yalnız bir bambu harcar', async () => {
     state = { ...state, testResults: [{ id: 'earned-test' }] as AppState['testResults'] };
     await mount();

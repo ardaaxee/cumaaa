@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState, type CSSProperties, type PointerEvent as ReactPointerEvent } from 'react';
+import { PandaCareSession, type CareSession } from '../components/PandaCareSession';
 import { RealisticPanda } from '../components/RealisticPanda';
 import { Icon } from '../components/Icon';
 import { ProgressBar, toast } from '../components/ui';
@@ -6,7 +7,7 @@ import { updateSettings } from '../store/actions';
 import { update, useAppState } from '../store/store';
 import { PET_ITEMS, petStatus } from '../utils/pet';
 import { usePetNeeds } from '../hooks/usePetNeeds';
-import { FOOD_PER_BAMBOO, WATER_PER_DROP, feedPet, needsMessage, waterPet } from '../utils/petCare';
+import { SATISFIED_AT, FOOD_PER_BAMBOO, WATER_PER_DROP, feedPet, needsMessage, waterPet } from '../utils/petCare';
 import { PetNotifyToggle } from '../hooks/usePetAlerts';
 import { dashboard } from '../utils/stats';
 import { dayKey } from '../utils/date';
@@ -332,6 +333,10 @@ export default function PetPage() {
   const needs = usePetNeeds();
   const initialLife = useMemo(() => loadPandaLife(), []);
 
+  const [careSession, setCareSession] = useState<CareSession | null>(null);
+  const careRef = useRef<CareSession | null>(null);
+  const setCare = (session: CareSession | null) => { careRef.current = session; setCareSession(session); };
+  const startCare = (kind: CareSession['kind'], durationMs: number) => setCare({ kind, durationMs, startedAt: Date.now(), committed: false });
   const [holding, setHolding] = useState<'bambu' | 'su' | null>(null);
   const [room, setRoom] = useState<HouseRoom>(initialLife.room);
   const [activity, setActivity] = useState<HouseActivity>('idle');
@@ -383,6 +388,7 @@ export default function PetPage() {
     greeted.current = true;
     lastUserActionRef.current = Date.now();
     clearTimers();
+    setCare(null);
     ballGame.stop();
     setHolding(null);
     setEmotion('neutral');
@@ -732,7 +738,8 @@ export default function PetPage() {
 
   const kitchenGive = (kind: 'bambu' | 'su') => {
     lastUserActionRef.current = Date.now();
-    const full = kind === 'bambu' ? needs.food >= 100 : needs.water >= 100;
+    if (careRef.current?.kind === kind) return;
+    const full = kind === 'bambu' ? needs.food >= SATISFIED_AT : needs.water >= SATISFIED_AT;
     const have = kind === 'bambu' ? needs.bamboo : needs.drops;
     if (full) return toast(kind === 'bambu' ? pet.name + ' şu an tok ♡' : pet.name + ' şu an susamadı ♡');
     if (have < 1) {
@@ -740,6 +747,7 @@ export default function PetPage() {
     }
 
     beginAction();
+    startCare(kind, 4700);
     setRoom('kitchen');
     setPetPos({ x: 52, y: 2 });
     setFacing('right');
@@ -752,7 +760,10 @@ export default function PetPage() {
     }, 900);
 
     later(() => {
-      update((s) => (kind === 'bambu' ? feedPet(s) : waterPet(s)));
+      let consumed = false;
+      update((s) => { const next = kind === 'bambu' ? feedPet(s) : waterPet(s); consumed = next !== s; return next; });
+      if (!consumed) { beginAction(); setActivity('idle'); setSceneMessage('Bakım gerekmedi; kaynak kullanılmadı.'); return; }
+      if (careRef.current) setCare({ ...careRef.current, committed: true });
       setHolding(kind);
       setActivity(kind === 'bambu' ? 'eating' : 'drinking');
       const line = kind === 'bambu' ? 'Bambu hazır. Afiyet olsun 🎋' : 'Su hazır. Ohh, ferahladı 💧';
@@ -764,12 +775,15 @@ export default function PetPage() {
       setHolding(null);
       setActivity('idle');
       setSceneMessage(null);
+      setCare(null);
       toast(kind === 'bambu' ? 'Yemeğini bitirdi 🎋' : 'Suyunu içti 💧');
     }, 4700);
   };
 
   const bath = () => {
+    if (careRef.current?.kind === 'bath') return;
     beginAction();
+    startCare('bath', 4300);
     setRoom('bathroom');
     setPetPos({ x: 59, y: 2 });
     setFacing('right');
@@ -780,6 +794,7 @@ export default function PetPage() {
       speak('Köpükler hazır. Banyo zamanı 🫧', 'bath');
     }, 850);
     later(() => {
+      setCare(null);
       setCleanliness(100);
       setHappiness((v) => Math.min(100, v + 4));
       setActivity('idle');
@@ -794,12 +809,13 @@ export default function PetPage() {
       beginAction();
       setActivity('idle');
       setRoomMode('day');
-      setEnergy(100);
       setSceneMessage('Günaydın! ' + pet.name + ' uyandı ☀️');
       later(() => setSceneMessage(null), 1800);
       return;
     }
+    if (careRef.current?.kind === 'sleep') return;
     beginAction();
+    startCare('sleep', 4200);
     setRoom('bedroom');
     setPetPos({ x: 42, y: 2 });
     setFacing('left');
@@ -810,7 +826,7 @@ export default function PetPage() {
       setRoomMode('night');
       speak('Işıkları kapattık. ' + pet.name + ' uyuyor 🌙', 'sleepy');
     }, 900);
-    later(() => setEnergy(100), 4200);
+    later(() => { setEnergy(100); setCare(null); }, 4200);
   };
 
   const studyTogether = () => {
@@ -989,7 +1005,6 @@ export default function PetPage() {
     if (activity === 'sleeping') {
       setActivity('idle');
       setRoomMode('day');
-      setEnergy(100);
       setEmotion('surprised');
       speak('Günaydın! Beni uyandırdın 😮', 'surprised');
       later(() => { setEmotion('neutral'); setSceneMessage(null); }, 2200);
@@ -1034,9 +1049,9 @@ export default function PetPage() {
   const questQuestions = Math.max(10, Math.min(30, Math.round(state.profile.dailyQuestionGoal * 0.35)));
   const questMinutes = Math.max(20, Math.min(60, Math.round(state.profile.dailyStudyMinutes * 0.25)));
   const quests = [
-    { icon: '⚡', label: questQuestions + ' soru çöz', current: Math.min(questQuestions, d.todayQuestions), target: questQuestions, done: d.todayQuestions >= questQuestions },
-    { icon: '⏱️', label: questMinutes + ' dk odaklan', current: Math.min(questMinutes, d.todayMinutes), target: questMinutes, done: d.todayMinutes >= questMinutes },
-    { icon: '✓', label: '1 plan görevi bitir', current: Math.min(1, doneTasks), target: 1, done: doneTasks >= 1 },
+    { href: '#/testler', icon: '⚡', label: questQuestions + ' soru çöz', current: Math.min(questQuestions, d.todayQuestions), target: questQuestions, done: d.todayQuestions >= questQuestions },
+    { href: '#/odak', icon: '⏱️', label: questMinutes + ' dk odaklan', current: Math.min(questMinutes, d.todayMinutes), target: questMinutes, done: d.todayMinutes >= questMinutes },
+    { href: '#/plan', icon: '✓', label: '1 plan görevi bitir', current: Math.min(1, doneTasks), target: 1, done: doneTasks >= 1 },
   ];
   const questDone = quests.filter((q) => q.done).length;
 
@@ -1203,6 +1218,7 @@ export default function PetPage() {
           <span>💧 <b>{needs.drops}</b> damla</span>
           <a href="#/testler">Soru çöz, kazan</a>
         </div>
+        {careSession && <PandaCareSession session={careSession} onCancel={() => { beginAction(); setActivity('idle'); setRoomMode('day'); setSceneMessage('Bakım durduruldu.'); }} />}
         <div
           ref={stageRef}
           className={'pet-stage scene-' + room + ' activity-' + activity + (ballGame.phase !== 'idle' ? ' has-ball-game' : '')}
@@ -1351,6 +1367,7 @@ export default function PetPage() {
           <ProgressBar value={dailyStudyProgress} label="Günlük hedef" />
         </div>
         <div className="panda-study-links"><a href="#/odak">Odaklanmaya geç</a><a href="#/testler">Soru çöz</a></div>
+        <div className="panda-daily-quests">{quests.map((q) => <a key={q.href} href={q.href}><span>{q.done ? '✓' : q.icon} {q.label}</span><b>{Math.round(q.current)}/{q.target}</b></a>)}</div>
       </section>
       <section className="pet-game-quick section">
         <button type="button" onClick={roam}>
