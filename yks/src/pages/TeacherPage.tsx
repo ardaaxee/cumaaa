@@ -211,9 +211,12 @@ export default function TeacherPage() {
                 ⏹ Sustur
               </button>
             )}
-            {status && !status.configured && (
-              <span className="badge warn" title={status.reason}>
-                Yerel konu rehberi
+            {status && (
+              <span
+                className={`badge ${status.configured ? 'ok' : 'warn'}`}
+                title={status.configured ? `Gerçek AI modeli: ${status.model ?? 'bağlı'}` : status.reason}
+              >
+                {status.configured ? `Gerçek AI · ${status.model ?? 'bağlı'}` : 'Yerel konu rehberi'}
               </span>
             )}
           </div>
@@ -259,6 +262,11 @@ export default function TeacherPage() {
             state.chat.map((m) => (
               <div key={m.id} className={`bubble ${m.role}`}>
                 <RichText text={m.text} />
+                {m.role === 'teacher' && (
+                  <small className="teacher-source-label">
+                    {m.source === 'ai' ? '✦ Gerçek AI yanıtı' : m.source === 'sistem' ? 'Sistem' : '📚 Uygulama içeriği'}
+                  </small>
+                )}
               </div>
             ))
           )}
@@ -314,6 +322,16 @@ export default function TeacherPage() {
           </button>
         </form>
         {listener.error && <div className="tiny muted mt-8">{listener.error}</div>}
+        {status && (
+          <div className={`teacher-ai-disclosure ${status.configured ? 'connected' : 'local'}`}>
+            <b>{status.configured ? 'Gerçek AI öğretmen aktif' : 'Yerel öğretmen modu'}</b>
+            <span>
+              {status.configured
+                ? 'Metin ve soru fotoğrafları bağlı AI modeli tarafından işlenir. Cevapların altında kaynak etiketi görünür.'
+                : 'Yanıtlar uygulamadaki konu anlatımları ve kendi çalışma verinden oluşturulur. Fotoğrafı okuyabilen AI şu an bağlı değil.'}
+            </span>
+          </div>
+        )}
         {state.chat.length > 0 && (
           <button
             type="button"
