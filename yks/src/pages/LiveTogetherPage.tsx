@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { PageHeader } from '../components/Layout';
 import { toast } from '../components/ui';
+import { useSelector } from '../store/store';
 
 const SUPABASE_URL = 'https://wvtkcjutgcigxyenwkfs.supabase.co';
 const SUPABASE_PUBLISHABLE_KEY = 'sb_publishable_mDx9F5vv4aUuRjrGbP1vkQ_LzdiYAJi';
@@ -23,6 +24,28 @@ type SecurePacket = {
   from: string;
   iv: string;
   data: string;
+  at: number;
+};
+
+type SharedTask = {
+  id: string;
+  text: string;
+  done: boolean;
+};
+
+type SharedStudyState = {
+  running: boolean;
+  endsAt: number | null;
+  remainingMs: number;
+  durationMin: number;
+  tasks: SharedTask[];
+  updatedAt: number;
+  updatedBy: string;
+};
+
+type LiveReaction = {
+  emoji: string;
+  sender: string;
   at: number;
 };
 
@@ -98,6 +121,25 @@ async function decryptPacket<T>(key: CryptoKey | null, event: string, packet: Se
   }
 }
 
+function formatTimer(ms: number) {
+  const total = Math.max(0, Math.ceil(ms / 1000));
+  const min = Math.floor(total / 60);
+  const sec = total % 60;
+  return `${String(min).padStart(2, '0')}:${String(sec).padStart(2, '0')}`;
+}
+
+function initialStudyState(clientId: string): SharedStudyState {
+  return {
+    running: false,
+    endsAt: null,
+    remainingMs: 25 * 60_000,
+    durationMin: 25,
+    tasks: [],
+    updatedAt: Date.now(),
+    updatedBy: clientId,
+  };
+}
+
 function makeId(len = 12) {
   const alphabet = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
   const bytes = new Uint8Array(len);
@@ -120,6 +162,8 @@ function roomFromHash(): string {
 
 export default function LiveTogetherPage() {
   const clientId = useMemo(() => makeId(16), []);
+  const localName = useSelector((state) => state.profile.name.trim() || 'Ben');
+  const [remoteName, setRemoteName] = useState('Karşı taraf');
   const [roomCode, setRoomCode] = useState(() => roomFromHash() || makeId(24));
   const [joined, setJoined] = useState(false);
   const [onlineCount, setOnlineCount] = useState(0);
@@ -129,6 +173,10 @@ export default function LiveTogetherPage() {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [draft, setDraft] = useState('');
   const [roomFull, setRoomFull] = useState(false);
+  const [taskDraft, setTaskDraft] = useState('');
+  const [studyTick, setStudyTick] = useState(() => Date.now());
+  const [reaction, setReaction] = useState<LiveReaction | null>(null);
+  const [sharedStudy, setSharedStudy] = useState<SharedStudyState>(() => initialStudyState(clientId));
 
   const channelRef = useRef<any>(null);
   const supabaseRef = useRef<any>(null);
@@ -144,9 +192,14 @@ export default function LiveTogetherPage() {
   const reconnectTimer = useRef<number | null>(null);
   const helloTimer = useRef<number | null>(null);
   const cryptoKeyRef = useRef<CryptoKey | null>(null);
+  const sharedStudyRef = useRef<SharedStudyState>(sharedStudy);
+  const reactionTimerRef = useRef<number | null>(null);
 
   const normalizedRoom = roomCode.trim().toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 24);
   const shareSupported = typeof navigator !== 'undefined' && !!navigator.mediaDevices?.getDisplayMedia;
+  const sharedRemaining = sharedStudy.running && sharedStudy.endsAt != null
+    ? Math.max(0, sharedStudy.endsAt - studyTick)
+    : sharedStudy.remainingMs;
 
   const sendBroadcast = async (event: string, payload: unknown) => {
     const ch = channelRef.current;
@@ -158,6 +211,16 @@ export default function LiveTogetherPage() {
     } catch {
       setConnection('reconnecting');
     }
+  };
+
+  const applySharedStudy = (next: SharedStudyState) => {
+    sharedStudyRef.current = next;
+    setSharedStudy(next);
+  };
+
+  const syncStudy = async (next: SharedStudyState) => {
+    applySharedStudy(next);
+    await sendBroadcast('study-sync', next);
   };
 
   const cleanupPeer = () => {
