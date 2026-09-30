@@ -42,6 +42,7 @@ export default function TestRunnerPage() {
   const pendingRef = useRef(0);
   const lastRef = useRef(Date.now());
   const finishingRef = useRef(false);
+  const timeWarningsRef = useRef<Set<number>>(new Set());
 
   // Yalnız bu testteki soruların dersleri yüklenir (tüm bankayı indirmeden, telefonda hızlı).
   const subjectKey = [...new Set((test?.questionIds ?? []).map(subjectOfQuestionId).filter(Boolean))].sort().join(',');
@@ -123,6 +124,25 @@ export default function TestRunnerPage() {
     test?.timeLimitMs != null && remaining != null
       ? Math.max(activeElapsed, Math.min(test.timeLimitMs, test.timeLimitMs - remaining))
       : activeElapsed;
+
+  useEffect(() => {
+    timeWarningsRef.current = new Set();
+  }, [test?.id]);
+
+  useEffect(() => {
+    if (remaining == null || !test || test.config.mode !== 'sinav') return;
+    const thresholds = [30, 15, 5, 1];
+    for (const minute of thresholds) {
+      const thresholdMs = minute * 60_000;
+      if (remaining <= thresholdMs && remaining > thresholdMs - 65_000 && !timeWarningsRef.current.has(minute)) {
+        timeWarningsRef.current.add(minute);
+        toast(minute === 1 ? 'Son 1 dakika. Boş ve işaretli soruları hızlıca kontrol et.' : `Sınavda ${minute} dakika kaldı.`, 4200);
+        if (minute <= 5 && 'vibrate' in navigator) {
+          try { navigator.vibrate?.(minute === 1 ? [80, 60, 80] : 70); } catch { /* titreşim desteklenmiyor */ }
+        }
+      }
+    }
+  }, [remaining, test]);
 
   useEffect(() => {
     if (remaining === 0 && test && byId) {
@@ -225,7 +245,11 @@ export default function TestRunnerPage() {
             {remaining != null && (
               <div className="runner-time">
                 <div className="tiny muted">Kalan süre</div>
-                <div style={{ color: remaining < 5 * 60_000 ? 'var(--bad)' : undefined }}>{formatClock(remaining)}</div>
+                <div
+                  className={remaining <= 5 * 60_000 ? 'runner-time-critical' : remaining <= 15 * 60_000 ? 'runner-time-warning' : undefined}
+                >
+                  {formatClock(remaining)}
+                </div>
               </div>
             )}
             <div className="runner-time">
@@ -249,6 +273,19 @@ export default function TestRunnerPage() {
           <span><b>{counts.answered}</b> çözülen</span>
           <span><b>{counts.blank}</b> boş</span>
           <span><b>{counts.marked}</b> işaretli</span>
+          {remaining != null && remaining <= 15 * 60_000 && (
+            <button
+              type="button"
+              className="runner-review-shortcut"
+              onClick={() => {
+                const target = test.questionIds.findIndex((id) => test.answers[id] == null || test.marked[id]);
+                if (target >= 0) go(target);
+                else toast('Boş veya işaretli soru kalmadı.');
+              }}
+            >
+              Boş/işaretliye git
+            </button>
+          )}
         </div>
       </div>
 
