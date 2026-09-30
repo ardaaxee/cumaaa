@@ -5,7 +5,7 @@ import type { DayKey } from '../utils/date';
  * Kalıcı uygulama durumu. Şema değiştiğinde SCHEMA_VERSION artırılır ve
  * store/migrations.ts içine bir geçiş adımı eklenir.
  */
-export const SCHEMA_VERSION = 3;
+export const SCHEMA_VERSION = 4;
 
 export type ThemePref = 'system' | 'light' | 'dark';
 export type TopicStatus = 'baslanmadi' | 'calisiliyor' | 'tamamlandi';
@@ -19,6 +19,10 @@ export interface Profile {
   tytTarget: number | null;
   aytTarget: number | null;
   hardestSubject: SubjectId | '';
+  targetUniversity: string;
+  targetDepartment: string;
+  /** Öğrencinin genellikle çalışmak istediği başlangıç saati (HH:MM) veya boş. */
+  preferredStudyTime: string;
   examDate: DayKey | '';
   onboarded: boolean;
 }
@@ -309,6 +313,9 @@ export function defaultState(): AppState {
       tytTarget: null,
       aytTarget: null,
       hardestSubject: '',
+      targetUniversity: '',
+      targetDepartment: '',
+      preferredStudyTime: '',
       examDate: '',
       onboarded: false,
     },
