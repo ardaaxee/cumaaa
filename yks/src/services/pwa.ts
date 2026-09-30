@@ -31,7 +31,7 @@ export function applyUpdate(): boolean {
 export function setupPwa(): void {
   if (!('serviceWorker' in navigator) || window.top !== window.self) return;
   navigator.serviceWorker.addEventListener('controllerchange', () => {
-    publish({ offlineReady: true });
+    publish({ offlineReady: true, updateReady: !!registration?.waiting });
     if (updating) location.reload();
   });
   const install = async () => {
@@ -42,7 +42,7 @@ export function setupPwa(): void {
         const worker = registration?.installing;
         worker?.addEventListener('statechange', () => {
           if (worker.state === 'installed') publish({ updateReady: !!registration?.waiting });
-          if (worker.state === 'activated') publish({ offlineReady: true });
+          if (worker.state === 'activated') publish({ offlineReady: true, updateReady: !!registration?.waiting });
         });
       });
       await checkForUpdates();

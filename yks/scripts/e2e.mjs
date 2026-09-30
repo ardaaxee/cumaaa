@@ -42,6 +42,8 @@ try {
   await page.waitForURL(/#\/koc/);
   await page.waitForFunction(() => JSON.parse(localStorage.getItem('iyikiYks.state.v3') || '{}').profile?.onboarded);
   assert.ok((await stateOf(page)).tasks.length > 0, 'Starter plan was not created');
+  await page.evaluate(() => navigator.serviceWorker.ready.then(() => undefined));
+  await page.waitForFunction(() => !document.querySelector('.app-update-notice'));
 
   const routes = ['/', '/dersler', '/plan', '/denemeler', '/gelisim', '/yanlislar', '/tekrar', '/kartlar', '/formuller', '/defterim', '/ogretmen', '/pandam', '/canli', '/ayarlar', '/kaydedilenler', '/karne', '/koc', '/odak', '/kaynaklar', '/cikmis', '/rozetler', '/daha'];
   for (const route of routes) await visit(page, route);
@@ -119,7 +121,7 @@ try {
   await visit(mobilePage, '/ayarlar');
   await mobilePage.screenshot({ path: resolve(output, 'mobile-settings.png'), fullPage: true });
   assert.deepEqual(errors, [], 'Unhandled browser errors');
-  console.log(`E2E passed: onboarding, ${routes.length} routes, test resume/results, notebook backup/cancel/restore, offline use, mobile layout.`);
+  console.log(`E2E passed: onboarding/first install, ${routes.length} routes, test resume/results, notebook backup/cancel/restore, offline use, mobile layout.`);
 } catch (error) {
   if (page && !page.isClosed()) {
     await page.screenshot({ path: resolve(output, 'failure.png'), fullPage: true }).catch(() => undefined);
