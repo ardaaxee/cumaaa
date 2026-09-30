@@ -100,6 +100,7 @@ test('successful imports keep drawings attached to remapped notebook pages', asy
   assert.equal(f.images.get(id), 'new drawing');
   assert.equal(f.images.size, 1);
   assert.equal(f.state.profile.name, 'Yeni');
+  assert.ok(f.state.deleted.original, 'Cloud sync must not revive remapped notebook pages');
   assert.equal(f.photo, 'new photo');
 });
 

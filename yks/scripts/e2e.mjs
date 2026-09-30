@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import { mkdir, readFile } from 'node:fs/promises';
+import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { existsSync } from 'node:fs';
 import { spawn } from 'node:child_process';
 import { resolve } from 'node:path';
@@ -12,6 +12,7 @@ const output = resolve('artifacts');
 await mkdir(output, { recursive: true });
 const server = spawn(process.execPath, ['scripts/serve-dist.mjs'], { stdio: 'inherit' });
 let browser;
+let page;
 const errors = [];
 const stateOf = (page) => page.evaluate(() => JSON.parse(localStorage.getItem('iyikiYks.state.v3')));
 const visit = async (page, route) => {
@@ -31,11 +32,12 @@ try {
   const context = await browser.newContext({ viewport: { width: 1365, height: 950 } });
   // AI health checks use a deterministic fixture; core study functions must work independently of a remote AI server.
   await context.route('https://iyi-ki-yks.onrender.com/**', (route) => route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ ai: false, model: null }) }));
-  const page = await context.newPage();
+  page = await context.newPage();
   page.on('pageerror', (error) => errors.push(error.message));
   await page.goto(base);
   await page.getByLabel('Adın', { exact: true }).fill('Sürüm testi');
-  for (let i = 0; i < 3; i++) await page.getByRole('button', { name: 'Devam et', exact: true }).click();
+  const setupSteps = await page.locator('.onboarding-step').count();
+  for (let i = 0; i < setupSteps - 1; i++) await page.getByRole('button', { name: 'Devam et', exact: true }).click();
   await page.getByRole('button', { name: 'Profilimi oluştur', exact: true }).click();
   await page.waitForURL(/#\/koc/);
   await page.waitForFunction(() => JSON.parse(localStorage.getItem('iyikiYks.state.v3') || '{}').profile?.onboarded);
@@ -118,6 +120,12 @@ try {
   await mobilePage.screenshot({ path: resolve(output, 'mobile-settings.png'), fullPage: true });
   assert.deepEqual(errors, [], 'Unhandled browser errors');
   console.log(`E2E passed: onboarding, ${routes.length} routes, test resume/results, notebook backup/cancel/restore, offline use, mobile layout.`);
+} catch (error) {
+  if (page && !page.isClosed()) {
+    await page.screenshot({ path: resolve(output, 'failure.png'), fullPage: true }).catch(() => undefined);
+    await writeFile(resolve(output, 'failure.json'), JSON.stringify({ error: String(error), url: page.url(), body: await page.locator('body').innerText().catch(() => '') }, null, 2));
+  }
+  throw error;
 } finally {
   await browser?.close();
   server.kill('SIGTERM');

@@ -23,7 +23,9 @@ export async function restoreBackup(
     if (images[page.id]) stagedImages[id] = images[page.id];
     return { ...page, id };
   });
-  const next = { ...incoming, notebookPages };
+  const removedIds = new Set([...previous.notebookPages, ...incoming.notebookPages].map((page) => page.id));
+  const deleted = { ...incoming.deleted, ...Object.fromEntries([...removedIds].map((id) => [id, new Date().toISOString()])) };
+  const next = { ...incoming, notebookPages, deleted };
   const oldPhoto = await ports.readPhoto();
   await ports.stageAssets(stagedImages, photo);
   try {
