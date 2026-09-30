@@ -10,7 +10,7 @@ import { dashboard } from '../utils/stats';
  * sevgilisinin gerçek çalışma verisine göre seçilir. Hiçbir sayı uydurulmaz.
  */
 export function companionLines(path: string, state: AppState, now: Date = new Date()): string[] {
-  const her = state.profile.name || 'canım';
+  const her = state.profile.name || 'Öğrenci';
   const today = dayKey(now);
   const d = dashboard(state, today);
   const hour = now.getHours();
@@ -19,30 +19,30 @@ export function companionLines(path: string, state: AppState, now: Date = new Da
   const page: string[] = [];
 
   // Saat ve genel durum
-  if (hour >= 0 && hour < 5) lines.push(`${her}, saat çok geç oldu… Biraz uyu, yarın daha verimli olursun ♡`);
-  else if (hour < 11) lines.push(`Günaydın ${her} ☀ Kahvaltını yaptın mı? Sonra 10 soruyla güne başlayalım.`);
-  else if (hour >= 22) lines.push(`İyi akşamlar ${her} ♡ Bugünü kısa bir tekrarla kapatalım mı?`);
-  if (d.streak >= 3) lines.push(`${d.streak} gündür aralıksız çalışıyorsun, seninle çok gurur duyuyorum ♡`);
-  if (d.todayQuestions >= state.profile.dailyQuestionGoal && state.profile.dailyQuestionGoal > 0) lines.push(`Bugünkü hedefini tutturdun! ${d.todayQuestions} soru 🎉 Şimdi biraz dinlenmeyi hak ettin.`);
-  else if (d.todayQuestions > 0) lines.push(`Bugün ${d.todayQuestions} soru çözdün, harikasın. Hedefe ${Math.max(0, state.profile.dailyQuestionGoal - d.todayQuestions)} soru kaldı ♡`);
+  if (hour >= 0 && hour < 5) lines.push(`Gece çalışma hatırlatması: çalışma ve dinlenme süreni dengeli planlayabilirsin.`);
+  else if (hour < 11) lines.push(`Günaydın ${her}. Günlük planını kontrol ederek çalışmaya başlayabilirsin.`);
+  else if (hour >= 22) lines.push(`Akşam çalışma özeti: tamamladığın görevleri ve tekrarlarını kontrol edebilirsin.`);
+  if (d.streak >= 3) lines.push(`Çalışma serin ${d.streak} güne ulaştı.`);
+  if (d.todayQuestions >= state.profile.dailyQuestionGoal && state.profile.dailyQuestionGoal > 0) lines.push(`Günlük soru hedefin tamamlandı: ${d.todayQuestions} soru.`);
+  else if (d.todayQuestions > 0) lines.push(`Bugün ${d.todayQuestions} soru çözüldü. Günlük hedefe ${Math.max(0, state.profile.dailyQuestionGoal - d.todayQuestions)} soru kaldı.`);
   if (state.profile.examDate) {
     const left = diffDays(today, state.profile.examDate);
-    if (left >= 0) lines.push(`Sınava ${left} gün var. Birlikte hallederiz, merak etme ♡`);
+    if (left >= 0) lines.push(`Hedef sınav tarihine ${left} gün kaldı. Çalışma planını gözden geçirebilirsin.`);
   }
 
   switch (section) {
     case '':
-      page.push(`Hoş geldin ${her} ♡ Bugün ne çalışmak istersin? Ben hep buradayım.`);
+      page.push(`Hoş geldin ${her}. Günlük hedeflerin ve sıradaki çalışmaların ana sayfada.`);
       break;
     case 'dersler':
     case 'ders':
-      page.push('Hangi konuyu açarsan aç, önce 1 dakikalık özete bak; sonra birlikte soru çözeriz.');
+      page.push('Konunun kısa özetini inceleyip ardından ilgili soruları çözebilirsin.');
       break;
     case 'konu':
-      page.push('Bu konuyu birlikte hallederiz. Anlamadığın yer olursa bana sor ♡', 'Konunun sonundaki soruları çözmeyi unutma, ben de bakıyorum 👀');
+      page.push('Konu açıklaması için öğretmen bölümünü kullanabilirsin.', 'Konu sonu soruları öğrenmeni değerlendirmene yardımcı olur.');
       break;
     case 'testler':
-      page.push('Test zamanı! Sakin ol, önce kolay soruları topla ♡');
+      page.push('Test ayarlarından konu, zorluk ve soru sayısını seçebilirsin.');
       break;
     case 'sonuc': {
       const r = state.testResults[state.testResults.length - 1];
@@ -50,49 +50,49 @@ export function companionLines(path: string, state: AppState, now: Date = new Da
         const ratio = r.questionIds.length ? r.correct / r.questionIds.length : 0;
         page.push(
           ratio >= 0.7
-            ? `${formatNet(r.net)} net! Çok iyisin ${her} 🎉`
-            : `Yanlışlar seni üzmesin; her yanlış, sınavda yapmayacağın bir hata demek. Birlikte bakalım mı?`,
+            ? `Test sonucun: ${formatNet(r.net)} net. Konu bazlı değerlendirmeyi inceleyebilirsin.`
+            : `Yanlış ve boş soruların için konu tekrarı ve pekiştirme önerileri hazır.`,
         );
       }
       break;
     }
     case 'yanlislar':
-      page.push('Yanlışlarına geri dönmen çok akıllıca. Her biri bir ders ♡');
+      page.push('Yanlış sorularını inceleyip ilgili konu anlatımıyla pekiştirebilirsin.');
       break;
     case 'tekrar': {
       const due = dueReviews(state.reviews, today).length;
-      page.push(due ? `Bugün ${due} konunun tekrar günü. Kısa kısa geçelim ♡` : 'Bugün tekrar yok, süpersin!');
+      page.push(due ? `Bugün ${due} konu için tekrar zamanı geldi.` : 'Bugün zamanı gelen tekrar bulunmuyor.');
       break;
     }
     case 'kartlar':
-      page.push('Kartları çevirmeye devam, ezber kendiliğinden gelecek ✨');
+      page.push('Bilgi kartlarıyla kavramları ve formülleri tekrar edebilirsin.');
       break;
     case 'formuller':
-      page.push('Formülü ezberlemek yerine anlamına bak, sınavda o kurtarır ♡');
+      page.push('Formülleri kullanım koşulları ve örnekleriyle birlikte inceleyebilirsin.');
       break;
     case 'defterim':
-      page.push('Yazın çok tatlı 😊 Önemli yerleri renkli kalemle işaretle.');
+      page.push('Notlarını başlıklar ve önemli kavramlarla düzenleyebilirsin.');
       break;
     case 'denemeler':
-      page.push(d.lastMockNet != null ? `Son denemen ${formatNet(d.lastMockNet)} net. Bir sonrakinde daha iyisi gelecek ♡` : 'İlk denemeni birlikte çözelim mi? Ben süreni tutarım ⏱');
+      page.push(d.lastMockNet != null ? `Son denemen: ${formatNet(d.lastMockNet)} net. Ders bazlı sonuçlarını karşılaştırabilirsin.` : 'Deneme sonuçlarını ekleyerek net değişimini takip edebilirsin.');
       break;
     case 'plan':
-      page.push('Plan yapman çok güzel. Küçük görevler, büyük başarı ♡');
+      page.push('Görevlerini süre ve konuya göre planlayabilirsin.');
       break;
     case 'gelisim':
     case 'karne':
-      page.push('Gelişimine bakınca gözlerim doluyor, çok emek veriyorsun ♡');
+      page.push('Çalışma geçmişin ve performans değişimin bu bölümde gösterilir.');
       break;
     case 'pandam':
-      page.push(`${state.settings.pet.name} seni çok seviyor, ben de ♡ Çalıştıkça bambu ve su kazanıyorsun.`);
+      page.push(`${state.settings.pet.name} için bakım durumunu kontrol edebilirsin. Çalışma etkinlikleriyle bakım kaynakları kazanılır.`);
       break;
     case 'rozetler':
-      page.push('Her rozet seninle gurur duyduğum bir an ♡');
+      page.push('Kazandığın rozetler ve tamamlanan çalışma hedefleri burada gösterilir.');
       break;
     default:
       break;
   }
-  lines.push(`Bir şeye takılırsan bana dokun, beraber bakarız ${her} ♡`, 'Su içmeyi unutma 💧', 'Seni seviyorum, çalışmaya devam ♡');
+  lines.push(`Yardım ve açıklama için öğretmen bölümünü açabilirsin.`, 'Düzenli aralarla kısa çalışma molaları planlayabilirsin.', 'Sıradaki görevini çalışma planından seçebilirsin.');
   // Panda aç/susuzsa Cuma önce bunu hatırlatır (panda sayfasında ve ana sayfada en başta).
   const need = needsMessage(state.settings.pet.name, petNeeds(state, now));
   if (need && (section === '' || section === 'pandam')) page.unshift(need);

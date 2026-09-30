@@ -75,7 +75,7 @@ describe('panda bakımı', () => {
   it('ihtiyaç mesajı durumu anlatır', () => {
     const s = base();
     expect(needsMessage('Bambu', petNeeds(s, T0))).toBeNull();
-    expect(needsMessage('Bambu', petNeeds(s, hoursLater(15)))).toContain('hem acıktı hem susadı');
+    expect(needsMessage('Bambu', petNeeds(s, hoursLater(15)))).toContain('beslenme ve su ihtiyacı var');
   });
 
   it('bozuk kayıtlar güvenli değerlere döner', () => {

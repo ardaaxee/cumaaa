@@ -133,13 +133,14 @@ export function Companion() {
         <div className={`companion-bubble${right ? ' right' : ''}`} role="status" aria-live="polite">
           <b className="tiny">{name}</b>
           <div>{bubble}</div>
+          <button type="button" className="btn small ghost" onClick={() => { setBubble(null); setMenu(false); speaker.stop(); }} aria-label="Bildirimi kapat">Kapat</button>
           {menu && (
             <div className="companion-actions">
               <a className="btn small primary" href="#/ogretmen" onClick={() => speaker.stop()}>
-                Konuşalım ♡
+                Öğretmene sor
               </a>
               <button type="button" className="btn small ghost" onClick={mute}>
-                Bugün sessiz ol
+                Bugün bildirimleri sessize al
               </button>
             </div>
           )}

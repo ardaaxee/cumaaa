@@ -49,7 +49,7 @@ export function usePetAlerts(): void {
       if (!s.profile.onboarded) return;
       const msg = needsMessage(s.settings.pet.name, petNeeds(s));
       if (!msg) return;
-      if (document.visibilityState === 'visible' && !read(globalThis.sessionStorage, SESSION_KEY)) {
+      if (document.visibilityState === 'visible' && !s.settings.companion && !read(globalThis.sessionStorage, SESSION_KEY)) {
         write(globalThis.sessionStorage, SESSION_KEY, '1');
         toast(msg, 5000);
       }
@@ -57,7 +57,7 @@ export function usePetAlerts(): void {
       const last = Number(read(globalThis.localStorage, LAST_KEY) || 0);
       if (Date.now() - last < NOTIFY_GAP_MS) return;
       write(globalThis.localStorage, LAST_KEY, String(Date.now()));
-      void showNotification(`${s.settings.pet.name} seni bekliyor 🐼`, msg).catch(() => undefined);
+      void showNotification(`${s.settings.pet.name} · Bakım hatırlatması`, msg).catch(() => undefined);
     };
     const first = window.setTimeout(check, 4000);
     const id = window.setInterval(check, CHECK_MS);
@@ -83,7 +83,7 @@ export function PetNotifyToggle() {
     if (on && supported && Notification.permission === 'default') {
       const p = await Notification.requestPermission();
       setPerm(p);
-      if (p === 'granted') toast('Tamam! Panda acıkınca haber vereceğim 🐼');
+      if (p === 'granted') toast('Panda bakım bildirimleri etkinleştirildi.');
     }
   };
 

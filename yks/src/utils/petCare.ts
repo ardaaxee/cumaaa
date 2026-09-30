@@ -91,12 +91,8 @@ export function waterPet(state: AppState, now: Date = new Date()): AppState {
 
 /** Pandanın o anki ihtiyacını anlatan kısa cümle (bildirim ve Cuma'nın konuşması için). */
 export function needsMessage(name: string, n: PetNeeds): string | null {
-  if (n.hungry && n.thirsty) {
-    return n.bamboo > 0 || n.drops > 0
-      ? `${name} hem acıktı hem susadı 🥺 Sende ${n.bamboo} bambu ve ${n.drops} damla su var, hadi besle!`
-      : `${name} hem acıktı hem susadı 🥺 Birkaç soru çöz, bambu ve su kazan!`;
-  }
-  if (n.hungry) return n.bamboo > 0 ? `${name} acıktı 🎋 Sende ${n.bamboo} bambu var, hadi besle!` : `${name} acıktı 🎋 5 doğru cevap = 1 bambu. Birlikte kazanalım mı?`;
-  if (n.thirsty) return n.drops > 0 ? `${name} susadı 💧 ${n.drops} damla suyun var, bir yudum ver!` : `${name} susadı 💧 4 soru çöz, 1 damla su kazan!`;
+  if (n.hungry && n.thirsty) return `${name}: beslenme ve su ihtiyacı var. Bakım bölümünden kontrol edebilirsin.`;
+  if (n.hungry) return `${name}: beslenme zamanı. ${n.bamboo > 0 ? 'Mevcut bambularını bakım bölümünde kullanabilirsin.' : 'Doğru cevaplarla bambu kazanabilirsin.'}`;
+  if (n.thirsty) return `${name}: su ihtiyacı var. ${n.drops > 0 ? 'Mevcut suyunu bakım bölümünde kullanabilirsin.' : 'Soru çözerek su kazanabilirsin.'}`;
   return null;
 }
