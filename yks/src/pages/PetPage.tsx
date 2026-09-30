@@ -385,6 +385,11 @@ export default function PetPage() {
   const [voiceOn, setVoiceOn] = useState(true);
   const [emotion, setEmotion] = useState<PandaEmotion>('neutral');
   const [playScore, setPlayScore] = useState(0);
+  const [ballGameActive, setBallGameActive] = useState(false);
+  const [playHighScore, setPlayHighScore] = useState(() => {
+    try { return Math.max(0, Number(localStorage.getItem('iyikiPanda.ballHigh') ?? 0) || 0); }
+    catch { return 0; }
+  });
   const [dragging, setDragging] = useState(false);
   const stageRef = useRef<HTMLDivElement>(null);
   const pandaDragRef = useRef<{ pointerId: number; startX: number; startY: number; x: number; y: number; moved: boolean } | null>(null);
@@ -719,6 +724,7 @@ export default function PetPage() {
 
   const moveTo = (nextRoom: HouseRoom, nextActivity: HouseActivity = 'idle', message?: string) => {
     lastUserActionRef.current = Date.now();
+    if (nextRoom !== 'garden') ballGameActive && setBallGameActive(false);
     clearTimers();
     setHolding(null);
     setRoom(nextRoom);
@@ -939,6 +945,32 @@ export default function PetPage() {
     touchPanda(e);
   };
 
+  const ballPosition = (score: number) => ({
+    x: 22 + (score * 31) % 58,
+    y: 3 + (score * 17) % 10,
+  });
+
+  const finishBallGame = (completed = false) => {
+    setBallGameActive(false);
+    if (completed) {
+      setHappiness((v) => clampLife(v + 12));
+      setHearts((v) => v + 1);
+      setEmotion('laugh');
+      setActivity('laughing');
+      speak('On numara! Top oyununu bitirdik! ⚽🏆', 'happy');
+      try { navigator.vibrate?.([45, 55, 45, 55, 90]); } catch { /* noop */ }
+      later(() => {
+        setEmotion('neutral');
+        setActivity('idle');
+        setSceneMessage(null);
+      }, 2600);
+    } else {
+      setActivity('idle');
+      setSceneMessage(playScore > 0 ? `Top oyunu bitti · skor ${playScore} ⚽` : null);
+      later(() => setSceneMessage(null), 1600);
+    }
+  };
+
   const playGame = () => {
     lastUserActionRef.current = Date.now();
     clearTimers();
@@ -946,21 +978,35 @@ export default function PetPage() {
     setPetPos({ x: 38, y: 2 });
     setFacing('right');
     setPlayScore(0);
+    setBallGameActive(true);
     setActivity('playing');
-    setSceneMessage('Topa dokun! Panda topun peşinden koşsun ⚽');
+    setSceneMessage('10 kez topa dokun. Ben peşinden koşayım! ⚽');
     setHappiness((v) => clampLife(v + 4));
   };
 
   const kickBall = () => {
+    if (!ballGameActive) return;
     lastUserActionRef.current = Date.now();
-    setPlayScore((v) => v + 1);
-    setHappiness((v) => clampLife(v + 2));
-    const nextX = playScore % 2 === 0 ? 68 : 34;
-    setFacing(nextX < petPos.x ? 'left' : 'right');
-    setPetPos({ x: nextX, y: 3 + (playScore % 3) * 2 });
+    const currentBall = ballPosition(playScore);
+    const nextScore = playScore + 1;
+    setFacing(currentBall.x < petPos.x ? 'left' : 'right');
+    setPetPos({ x: currentBall.x, y: currentBall.y });
     setActivity('playing');
-    setSceneMessage(`Harika! ${playScore + 1}. vuruş ⚽`);
-    try { navigator.vibrate?.(28); } catch { /* noop */ }
+    setPlayScore(nextScore);
+    setHappiness((v) => clampLife(v + 2));
+
+    if (nextScore > playHighScore) {
+      setPlayHighScore(nextScore);
+      try { localStorage.setItem('iyikiPanda.ballHigh', String(nextScore)); } catch { /* noop */ }
+    }
+
+    if (nextScore >= 10) {
+      setSceneMessage('10/10! Şampiyonuz! 🏆🐼');
+      window.setTimeout(() => finishBallGame(true), 650);
+    } else {
+      setSceneMessage(`${nextScore}/10 · devam! ⚽`);
+      try { navigator.vibrate?.(28); } catch { /* noop */ }
+    }
   };
 
   const petPanda = () => {
@@ -1252,20 +1298,33 @@ export default function PetPage() {
             )}
           </button>
 
-          {room === 'garden' && activity === 'playing' && (
-            <button
-              key={playScore}
-              type="button"
-              className="pet-tom-ball"
-              style={{
-                left: (22 + (playScore * 31) % 58) + '%',
-                bottom: (13 + (playScore * 17) % 20) + '%',
-              }}
-              onClick={(e) => { e.stopPropagation(); kickBall(); }}
-              aria-label={'Top · skor ' + playScore}
-            >
-              ⚽<small>{playScore}</small>
-            </button>
+          {room === 'garden' && ballGameActive && (
+            <>
+              <div className="pet-ball-game-hud">
+                <div>
+                  <b>⚽ Top Oyunu</b>
+                  <small>Rekor {playHighScore}</small>
+                </div>
+                <div className="pet-ball-game-progress" aria-label={'Top oyunu ' + playScore + ' / 10'}>
+                  <span style={{ width: Math.min(100, playScore * 10) + '%' }} />
+                </div>
+                <strong>{playScore}/10</strong>
+                <button type="button" onClick={(e) => { e.stopPropagation(); finishBallGame(false); }}>Bitir</button>
+              </div>
+              <button
+                key={playScore}
+                type="button"
+                className="pet-tom-ball"
+                style={{
+                  left: ballPosition(playScore).x + '%',
+                  bottom: (13 + ballPosition(playScore).y) + '%',
+                }}
+                onClick={(e) => { e.stopPropagation(); kickBall(); }}
+                aria-label={'Top · skor ' + playScore}
+              >
+                ⚽<small>{playScore}</small>
+              </button>
+            </>
           )}
 
           <div className="pet-control-hint">
