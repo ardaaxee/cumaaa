@@ -1,1 +1,0 @@
-import{ct as e}from"./actions-CRuIsyNn.js";import{k as t,y as n}from"./index-3d_H6cHc.js";var r=e();function i(){return(0,r.jsxs)(r.Fragment,{children:[(0,r.jsx)(t,{title:`Sayfa bulunamadı`}),(0,r.jsx)(n,{title:`Aradığın sayfa yok.`,action:(0,r.jsx)(`a`,{className:`btn primary`,href:`#/`,children:`Ana sayfaya dön`})})]})}export{i as default};
