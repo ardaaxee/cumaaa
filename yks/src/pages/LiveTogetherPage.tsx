@@ -622,6 +622,32 @@ export default function LiveTogetherPage() {
   };
 
   useEffect(() => {
+    if (!sharedStudy.running) return;
+    const tick = () => {
+      const now = Date.now();
+      setStudyTick(now);
+      const current = sharedStudyRef.current;
+      if (current.running && current.endsAt != null && now >= current.endsAt) {
+        const done: SharedStudyState = {
+          ...current,
+          running: false,
+          endsAt: null,
+          remainingMs: 0,
+          updatedAt: now,
+          updatedBy: clientId,
+        };
+        applySharedStudy(done);
+        void sendBroadcast('study-sync', done);
+        toast('Ortak odak süresi tamamlandı ♡');
+        try { navigator.vibrate?.([90, 70, 90]); } catch { /* noop */ }
+      }
+    };
+    tick();
+    const timer = window.setInterval(tick, 500);
+    return () => window.clearInterval(timer);
+  }, [sharedStudy.running, clientId]);
+
+  useEffect(() => {
     const ch = channelRef.current;
     if (!ch) return;
     ch.on('broadcast', { event: 'screen-started' }, ({ payload }: any) => {
@@ -641,6 +667,7 @@ export default function LiveTogetherPage() {
   }, [joined, clientId]);
 
   useEffect(() => () => {
+    if (reactionTimerRef.current) window.clearTimeout(reactionTimerRef.current);
     void leaveRoom();
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -658,7 +685,7 @@ export default function LiveTogetherPage() {
 
   return (
     <>
-      <PageHeader title="Cuma ♡ Zeynep Canlı" sub="İzinli ekran paylaşımı, çevrimiçi durum ve özel mesaj alanı" />
+      <PageHeader title="Birlikte Canlı ♡" sub="Ekran paylaşımı, ortak odak, görevler ve uçtan uca şifreli mesajlar" />
 
       <section className="card live-room-card">
         <div className="live-room-head">
@@ -720,22 +747,22 @@ export default function LiveTogetherPage() {
         <div className="card live-video-card">
           <div className="live-video-head">
             <div>
-              <b>Zeynep'in ekranı</b>
-              <span className="tiny muted">{remoteSharing ? 'Canlı yayın alınıyor' : onlineCount >= 2 ? 'Paylaşım bekleniyor' : 'Zeynep çevrimdışı'}</span>
+              <b>{remoteName}'ın ekranı</b>
+              <span className="tiny muted">{remoteSharing ? 'Canlı yayın alınıyor' : onlineCount >= 2 ? 'Paylaşım bekleniyor' : remoteName + ' çevrimdışı'}</span>
             </div>
             {remoteSharing && <span className="live-pill">CANLI</span>}
           </div>
           <div className="live-video-frame remote">
             <video ref={remoteVideoRef} playsInline autoPlay muted />
-            {!remoteSharing && <div className="live-empty"><span>📱</span><b>Ekran bekleniyor</b><small>Zeynep paylaşımı başlattığında burada görünecek.</small></div>}
+            {!remoteSharing && <div className="live-empty"><span>📱</span><b>Ekran bekleniyor</b><small>{remoteName} paylaşımı başlattığında burada görünecek.</small></div>}
           </div>
         </div>
 
         <div className="card live-video-card">
           <div className="live-video-head">
             <div>
-              <b>Benim ekranım</b>
-              <span className="tiny muted">{sharing ? 'Zeynep seni canlı görüyor' : 'Paylaşım kapalı'}</span>
+              <b>{localName}'in ekranı</b>
+              <span className="tiny muted">{sharing ? remoteName + ' seni canlı görüyor' : 'Paylaşım kapalı'}</span>
             </div>
             {sharing && <span className="live-pill mine">PAYLAŞILIYOR</span>}
           </div>
@@ -760,11 +787,113 @@ export default function LiveTogetherPage() {
         </div>
       </section>
 
+      <section className="card section live-study-card" aria-labelledby="shared-study-title">
+        <div className="live-study-head">
+          <div>
+            <div className="eyebrow">Beraber ders çalış</div>
+            <h2 id="shared-study-title">Ortak odak odası</h2>
+            <p className="small muted">Pomodoro, görevler ve tepkiler ikinizde aynı anda güncellenir. Bu veriler de oda anahtarıyla şifrelidir.</p>
+          </div>
+          <span className={`live-study-state${sharedStudy.running ? ' running' : ''}`}>
+            {sharedStudy.running ? 'ODAK AÇIK' : 'HAZIR'}
+          </span>
+        </div>
+
+        {reaction && (
+          <div className="live-reaction-pop" aria-live="polite">
+            <span>{reaction.emoji}</span>
+            <b>{reaction.sender}</b>
+          </div>
+        )}
+
+        <div className="live-study-grid">
+          <div className="live-focus-panel">
+            <div className="live-focus-timer">{formatTimer(sharedRemaining)}</div>
+            <div className="live-focus-sub">
+              {sharedStudy.running ? `${localName} + ${remoteName} birlikte odakta` : 'Bir süre seçip beraber başlatın'}
+            </div>
+            <div className="live-duration-picks" role="group" aria-label="Ortak odak süresi">
+              {[25, 50, 75].map((minutes) => (
+                <button
+                  key={minutes}
+                  type="button"
+                  className={`chip${sharedStudy.durationMin === minutes ? ' on' : ''}`}
+                  disabled={sharedStudy.running}
+                  onClick={() => setStudyDuration(minutes)}
+                >
+                  {minutes} dk
+                </button>
+              ))}
+            </div>
+            <div className="row live-focus-actions">
+              {!sharedStudy.running ? (
+                <button className="btn primary" type="button" disabled={!joined} onClick={startSharedStudy}>
+                  ▶ Birlikte başlat
+                </button>
+              ) : (
+                <button className="btn" type="button" onClick={pauseSharedStudy}>⏸ Duraklat</button>
+              )}
+              <button className="btn ghost" type="button" disabled={!joined} onClick={resetSharedStudy}>↺ Sıfırla</button>
+            </div>
+            <div className="live-reactions" aria-label="Hızlı tepkiler">
+              {['♡', '🔥', '👏', '💪', '☕'].map((emoji) => (
+                <button key={emoji} type="button" disabled={!joined} onClick={() => sendReaction(emoji)}>{emoji}</button>
+              ))}
+            </div>
+          </div>
+
+          <div className="live-shared-tasks">
+            <div className="row between nowrap">
+              <div>
+                <b>Ortak görev listesi</b>
+                <div className="tiny muted">{sharedStudy.tasks.filter((task) => task.done).length}/{sharedStudy.tasks.length} tamamlandı</div>
+              </div>
+              {sharedStudy.tasks.some((task) => task.done) && <span className="badge ok">İlerliyor ✓</span>}
+            </div>
+            <form
+              className="live-task-form"
+              onSubmit={(event) => {
+                event.preventDefault();
+                addSharedTask();
+              }}
+            >
+              <input
+                className="input"
+                value={taskDraft}
+                onChange={(event) => setTaskDraft(event.target.value)}
+                maxLength={120}
+                placeholder={joined ? 'Örn. 20 fizik sorusu' : 'Önce odaya bağlan'}
+                disabled={!joined}
+              />
+              <button className="btn" type="submit" disabled={!joined || !taskDraft.trim()}>Ekle</button>
+            </form>
+            <div className="live-task-list">
+              {sharedStudy.tasks.length === 0 ? (
+                <div className="live-empty-chat">Bugünkü ortak hedefinizi ekleyin.</div>
+              ) : sharedStudy.tasks.map((task) => (
+                <div className={`live-task-item${task.done ? ' done' : ''}`} key={task.id}>
+                  <button
+                    type="button"
+                    className="live-task-check"
+                    onClick={() => toggleSharedTask(task.id)}
+                    aria-label={task.done ? task.text + ' görevini geri aç' : task.text + ' görevini tamamla'}
+                  >
+                    {task.done ? '✓' : ''}
+                  </button>
+                  <span>{task.text}</span>
+                  <button type="button" className="live-task-remove" onClick={() => removeSharedTask(task.id)} aria-label="Görevi sil">×</button>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </section>
+
       <section className="card section live-chat-card">
         <div className="live-chat-head">
           <div>
             <div className="eyebrow">Mesajlar</div>
-            <h2 style={{ margin: '3px 0 0' }}>Cuma ♡ Zeynep</h2>
+            <h2 style={{ margin: '3px 0 0' }}>{localName} ♡ {remoteName}</h2>
           </div>
           <span className="tiny muted">{onlineCount >= 2 ? 'İkiniz de çevrimiçi' : 'Diğer kişi bekleniyor'}</span>
         </div>
