@@ -131,6 +131,7 @@ export default function HomePage() {
     },
   ];
   const flowDone = studyFlow.filter((step) => step.done).length;
+  const targetLabel = [profile.targetUniversity, profile.targetDepartment].filter(Boolean).join(' · ');
 
   return (
     <>
@@ -147,6 +148,12 @@ export default function HomePage() {
               ? `YKS'ye ${daysLeft} gün kaldı. Bugünün hedefini bitir, kalanını yarına bırak.`
               : 'Bugün küçük ama tamamlanmış bir çalışma, yarım kalan büyük plandan daha değerlidir.'}
           </p>
+          {(targetLabel || profile.preferredStudyTime) && (
+            <div className="hero-personal-target">
+              {targetLabel && <span>🎓 Hedef: <b>{targetLabel}</b></span>}
+              {profile.preferredStudyTime && <span>🕒 Rahat çalışma saatin: <b>{profile.preferredStudyTime}</b></span>}
+            </div>
+          )}
           <div className="hero-actions">
             <a className="btn primary study-cta" href="#/dersler">
               <Icon name="play" /> Konu çalışmaya başla
