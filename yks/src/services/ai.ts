@@ -40,21 +40,18 @@ export interface AiStatus {
   reason: string;
 }
 
-/** Ayarlardaki sunucu adresi > derleme sırasında verilen VITE_AI_URL > aynı alan adındaki /api. */
+export const DEFAULT_AI_SERVER = 'https://iyi-ki-yks.onrender.com';
+
+/** Kullanıcı özel adres verdiyse onu; yoksa build ayarını; o da yoksa kalıcı Render sunucusunu kullanır. */
 export function apiBase(): string {
-  const configured = getState().settings.aiServerUrl || (import.meta.env.VITE_AI_URL as string | undefined) || '';
-  return configured ? `${configured.replace(/\/+$/, '')}/api` : './api';
+  const configured =
+    getState().settings.aiServerUrl ||
+    (import.meta.env.VITE_AI_URL as string | undefined) ||
+    DEFAULT_AI_SERVER;
+  return `${configured.replace(/\/+$/, '')}/api`;
 }
 
-/** GitHub Pages gibi statik sunucularda /api yoktur; adres girilmemişse boşuna istek atılmaz. */
-function isStaticHost(): boolean {
-  return /\.github\.io$/.test(location.hostname);
-}
-
-export async function checkAiStatus(timeoutMs = 4000): Promise<AiStatus> {
-  if (apiBase() === './api' && isStaticHost()) {
-    return { configured: false, model: null, reason: 'AI sunucusu adresi girilmedi (Ayarlar → Bağlantılar).' };
-  }
+export async function checkAiStatus(timeoutMs = 8000): Promise<AiStatus> {
   const ctrl = new AbortController();
   const timer = setTimeout(() => ctrl.abort(), timeoutMs);
   try {
