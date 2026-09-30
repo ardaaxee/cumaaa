@@ -46,7 +46,7 @@ export const questions: QuestionSeed[] = [
     outcome: 'Net kuvvet ile hareket durumu arasındaki ilişkiyi yorumlar.',
     difficulty: 'yeni-nesil',
     type: 'onculu',
-    question: 'Yatay doğrultuda hareket eden bir cisme etki eden net kuvvet bir süre boyunca sıfırdır. Bu süreç için;\nI. Cisim duruyor olabilir.\nII. Cisim sabit süratle hareket ediyor olabilir.\nIII. Cismin hızının yönü kesinlikle değişir.\nifadelerinden hangileri doğrudur?',
+    question: 'Başlangıçtaki hareket durumu belirtilmeyen bir cisme etki eden net kuvvet bir süre boyunca sıfırdır. Bu süreç için;\nI. Cisim duruyor olabilir.\nII. Cisim sabit süratle hareket ediyor olabilir.\nIII. Cismin hızının yönü kesinlikle değişir.\nifadelerinden hangileri doğrudur?',
     options: ['Yalnız I', 'Yalnız II', 'I ve II', 'II ve III', 'I, II ve III'],
     correctAnswer: 2,
     solution: 'Net kuvvet sıfırsa ivme sıfırdır. Cisim başlangıçta duruyorsa durmaya, hareket ediyorsa sabit hızla hareket etmeye devam edebilir. Hız yönünün değişmesi için ivme gerekir. Bu yüzden I ve II doğrudur.',

@@ -83,6 +83,7 @@ export function InlineQuiz({
                     <SolutionBlock q={q} />
                   </div>
                 </details>
+                {!ok && <a className="btn small primary mt-8" href={href(`/pekistir/${q.id}`)}>Eksik bilgiyi tamamla · Pekiştir</a>}
                 <a className="btn small ghost mt-8" href={href('/ogretmen', { soru: q.id, cevap: String(chosen), eylem: ok ? 'coz' : 'hatam' })}>
                   <Icon name="teacher" /> <AskLabel />
                 </a>

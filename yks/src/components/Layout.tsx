@@ -49,6 +49,7 @@ export function sectionOf(path: string): string {
   if (first === '/') return '/';
   if (['/dersler', '/ders', '/konu'].includes(first)) return '/dersler';
   if (['/testler', '/test', '/sonuc'].includes(first)) return '/testler';
+  if (first === '/pekistir') return '/yanlislar';
   return first;
 }
 

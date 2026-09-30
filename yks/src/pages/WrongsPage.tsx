@@ -203,6 +203,7 @@ export default function WrongsPage() {
                     </div>
                   )}
                   <div className="row mt-8">
+                    {!w.learned && <a className="btn small primary" href={href(`/pekistir/${q.id}`)}>Anlatım ve pekiştirme</a>}
                     {w.learned ? (
                       <button
                         type="button"

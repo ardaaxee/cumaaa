@@ -370,6 +370,7 @@ export default function TestRunnerPage() {
               </div>
             </details>
             <div className="row mt-12">
+              {!isCorrect && <a className="btn small primary" href={href(`/pekistir/${q.id}`)}>Eksik bilgiyi tamamla · Pekiştir</a>}
               <a className="btn small" href={href('/ogretmen', { soru: q.id, cevap: chosen != null ? String(chosen) : undefined, eylem: isCorrect ? 'coz' : 'hatam' })}>
                 <Icon name="teacher" /> <AskLabel />
               </a>
