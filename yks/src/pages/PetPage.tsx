@@ -723,7 +723,7 @@ export default function PetPage() {
     }
 
     if (!key || !target) return;
-    const stamp = today + ':' + key;
+    const stamp = dayKey() + ':' + key;
     if (dailyRoutineRef.current === stamp) return;
     dailyRoutineRef.current = stamp;
 
@@ -757,7 +757,6 @@ export default function PetPage() {
     needs.hungry,
     needs.thirsty,
     state.profile.preferredStudyTime,
-    today,
     pet.name,
   ]);
 
