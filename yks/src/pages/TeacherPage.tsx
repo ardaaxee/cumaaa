@@ -104,7 +104,8 @@ export default function TeacherPage() {
     const weak = weakTopics(state);
     if (weak.length) ctx.wrongsSummary = weak.slice(0, 5).map((w) => `${getTopicRef(w.topicId)?.topic.name ?? w.topicId}: ${w.reasons.join(', ')}`).join(' | ');
     const d = dashboard(state);
-    ctx.statsSummary = `Bugün ${d.todayQuestions} soru, ${formatMinutes(d.todayMinutes)} çalışma. Bu hafta ${d.weekQuestions} soru. Doğruluk: ${d.accuracy != null ? `%${d.accuracy}` : 'veri yok'}. Seri: ${d.streak} gün. Adaptif çalışma özeti: ${studyBrief(state)}`;
+    const personalGoal = [state.profile.targetUniversity, state.profile.targetDepartment].filter(Boolean).join(' / ');
+    ctx.statsSummary = `Bugün ${d.todayQuestions} soru, ${formatMinutes(d.todayMinutes)} çalışma. Bu hafta ${d.weekQuestions} soru. Doğruluk: ${d.accuracy != null ? `%${d.accuracy}` : 'veri yok'}. Seri: ${d.streak} gün.${personalGoal ? ` Hedef: ${personalGoal}.` : ''}${state.profile.preferredStudyTime ? ` Tercih edilen çalışma başlangıcı: ${state.profile.preferredStudyTime}.` : ''} Adaptif çalışma özeti: ${studyBrief(state)}`;
     return ctx;
   }, [ref, topicId, question, answerIdx, state, lesson]);
 
