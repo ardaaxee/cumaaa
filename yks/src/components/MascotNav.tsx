@@ -1,6 +1,9 @@
-import { Icon } from './Icon';
+import { useEffect, useId, useRef, useState } from 'react';
+import { Icon, type IconName } from './Icon';
 import { sectionOf } from './Layout';
-import { useRoute } from '../hooks/useRoute';
+import { href, useRoute } from '../hooks/useRoute';
+import { usePetNeeds } from '../hooks/usePetNeeds';
+import { useSelector } from '../store/store';
 
 /** Oturan, tam gövdeli yavru panda. */
 /** Panda aksesuarları (seviye ile açılır). Baş/gövde koordinatları PandaBody'ye göredir. */
@@ -192,15 +195,267 @@ export function CatFace({ size = 34 }: { size?: number }) {
   );
 }
 
-/** Çalışma araçlarına beklemeden ulaşan mobil gezinme. */
+export function FoxFace({ size = 34 }: { size?: number }) {
+  return (
+    <svg viewBox="0 0 64 64" width={size} height={size} aria-hidden="true">
+      <path d="M12 10 L26 26 L9 28 Z" fill="#e8783a" />
+      <path d="M52 10 L38 26 L55 28 Z" fill="#e8783a" />
+      <path d="M15 14 L23 23 L12 24 Z" fill="#fff4ea" />
+      <path d="M49 14 L41 23 L52 24 Z" fill="#fff4ea" />
+      <circle cx="32" cy="38" r="21" fill="#ef8a45" />
+      <path d="M13 40 Q32 60 51 40 Q46 56 32 58 Q18 56 13 40 Z" fill="#fff8f1" />
+      <circle cx="24" cy="36" r="2.4" fill="#3a3238" />
+      <circle cx="40" cy="36" r="2.4" fill="#3a3238" />
+      <path d="M32 42 l-3 3 h6 z" fill="#3a3238" />
+    </svg>
+  );
+}
+
+export function BearFace({ size = 34 }: { size?: number }) {
+  return (
+    <svg viewBox="0 0 64 64" width={size} height={size} aria-hidden="true">
+      <circle cx="15" cy="18" r="9" fill="#b98760" />
+      <circle cx="49" cy="18" r="9" fill="#b98760" />
+      <circle cx="15" cy="18" r="4.5" fill="#f1cda9" />
+      <circle cx="49" cy="18" r="4.5" fill="#f1cda9" />
+      <circle cx="32" cy="37" r="21" fill="#c99670" />
+      <ellipse cx="32" cy="44" rx="10" ry="8" fill="#f3dcc2" />
+      <circle cx="24" cy="34" r="2.4" fill="#3a3238" />
+      <circle cx="40" cy="34" r="2.4" fill="#3a3238" />
+      <ellipse cx="32" cy="41" rx="3.2" ry="2.3" fill="#3a3238" />
+      <path d="M29 46 Q32 49 35 46" stroke="#3a3238" strokeWidth="1.6" fill="none" strokeLinecap="round" />
+    </svg>
+  );
+}
+
+
+interface MenuItem {
+  path: string;
+  label: string;
+  icon: IconName;
+  emoji: string;
+}
+
+/** Panda menüsünün ilk seviyesi: yalnız en sık kullanılanlar. */
+export const MENU_MAIN: MenuItem[] = [
+  { path: '/', label: 'Ana Sayfa', icon: 'home', emoji: '🏠' },
+  { path: '/dersler', label: 'Dersler', icon: 'book', emoji: '📚' },
+  { path: '/calis', label: 'Ders Çalış', icon: 'pen', emoji: '✏️' },
+  { path: '/testler', label: 'Testler', icon: 'check', emoji: '✅' },
+  { path: '/plan', label: 'Planım', icon: 'calendar', emoji: '📅' },
+  { path: '/tekrar', label: 'Genel Tekrar', icon: 'repeat', emoji: '🔁' },
+  { path: '/ogretmen', label: 'Cuma Öğretmen', icon: 'teacher', emoji: '🧠' },
+];
+
+/** "Diğer" altındakiler. */
+export const MENU_MORE: MenuItem[] = [
+  { path: '/yanlislar', label: 'Yanlışlarım', icon: 'alert', emoji: '❗' },
+  { path: '/defterim', label: 'Defterim', icon: 'pen', emoji: '📓' },
+  { path: '/denemeler', label: 'Denemeler', icon: 'trophy', emoji: '🏁' },
+  { path: '/kartlar', label: 'Bilgi Kartları', icon: 'cards', emoji: '🃏' },
+  { path: '/formuller', label: 'Formüller', icon: 'formula', emoji: '📐' },
+  { path: '/gelisim', label: 'Gelişimim', icon: 'chart', emoji: '📈' },
+  { path: '/karne', label: 'Haftalık Karne', icon: 'chart', emoji: '🗓️' },
+  { path: '/rozetler', label: 'Rozetler', icon: 'trophy', emoji: '🏅' },
+  { path: '/kaynaklar', label: 'Kaynaklar', icon: 'link', emoji: '🔗' },
+  { path: '/cikmis', label: 'ÖSYM', icon: 'archive', emoji: '🗂️' },
+  { path: '/kaydedilenler', label: 'Kaydedilenler', icon: 'star', emoji: '⭐' },
+  { path: '/pandam', label: 'Panda', icon: 'sparkle', emoji: '🐼' },
+  { path: '/ayarlar', label: 'Ayarlar', icon: 'settings', emoji: '⚙️' },
+];
+
+type PandaPhase = 'sit' | 'standing' | 'walking' | 'pulling' | 'stood' | 'releasing' | 'returning' | 'sitting';
+
+/** Animasyon süreleri (ms): kalk → yürü → ipi çek → menü; kapanınca ipi bırak → geri yürü → otur. */
+export const PANDA_TIMING = { stand: 220, walk: 900, pull: 380, release: 220, back: 820, sit: 220 };
+
+function prefersReducedMotion(): boolean {
+  return typeof window !== 'undefined' && !!window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+}
+
+/**
+ * Alt gezinme: tam genişlikte bar yok; her hayvan kendi küçük platformunda yüzer.
+ * 🐰 TYT test merkezi · 🦊 AYT test merkezi · 🐼 menü · 🐱 denemeler · 🐻 defter.
+ * Pandaya basınca: ayağa kalkar, küçük adımlarla sağ üste yürür, ipi çeker ve menü açılır;
+ * kapanınca ipi bırakır, geri yürür ve yerine oturur.
+ */
 export function MascotNav() {
-  const section = sectionOf(useRoute().path);
-  const items = [
-    { path: '/', label: 'Ana sayfa', icon: 'home' as const },
-    { path: '/dersler', label: 'Konular', icon: 'book' as const },
-    { path: '/testler', label: 'Sorular', icon: 'check' as const },
-    { path: '/yanlislar', label: 'Yanlışlar', icon: 'alert' as const },
-    { path: '/daha', label: 'Araçlar', icon: 'more' as const },
-  ];
-  return <nav className="study-dock" aria-label="Hızlı gezinme">{items.map((item) => <a key={item.path} href={`#${item.path}`} aria-current={section === item.path ? 'page' : undefined}><Icon name={item.icon} /><span>{item.label}</span></a>)}</nav>;
+  const route = useRoute();
+  const [phase, setPhase] = useState<PandaPhase>('sit');
+  const [more, setMore] = useState(false);
+  const panelId = useId();
+  const closeBtnRef = useRef<HTMLButtonElement>(null);
+  const pandaBtnRef = useRef<HTMLButtonElement>(null);
+  const timers = useRef<number[]>([]);
+  const section = sectionOf(route.path);
+  const petItems = useSelector((s) => s.settings.pet.items);
+  const teacherName = useSelector((s) => s.settings.teacherName);
+  const needs = usePetNeeds();
+  const menuOpen = phase === 'stood';
+  const exam = route.query.get('sinav');
+  const onTests = section === '/testler';
+
+  const later = (fn: () => void, ms: number) => {
+    timers.current.push(window.setTimeout(fn, ms));
+  };
+  useEffect(() => () => timers.current.forEach((t) => clearTimeout(t)), []);
+  useEffect(() => {
+    if (menuOpen) closeBtnRef.current?.focus();
+  }, [menuOpen]);
+
+  const openMenu = () => {
+    if (phase !== 'sit') return;
+    setMore(false);
+    if (prefersReducedMotion()) return setPhase('stood');
+    const t = PANDA_TIMING;
+    setPhase('standing');
+    later(() => setPhase('walking'), t.stand);
+    later(() => setPhase('pulling'), t.stand + t.walk);
+    later(() => setPhase('stood'), t.stand + t.walk + t.pull);
+  };
+  const closeMenu = () => {
+    if (phase !== 'stood') return;
+    const done = () => {
+      setPhase('sit');
+      pandaBtnRef.current?.focus({ preventScroll: true });
+    };
+    if (prefersReducedMotion()) return done();
+    const t = PANDA_TIMING;
+    setPhase('releasing');
+    later(() => setPhase('returning'), t.release);
+    later(() => setPhase('sitting'), t.release + t.back);
+    later(done, t.release + t.back + t.sit);
+  };
+
+  // Sayfa değişince menü kapansın.
+  useEffect(() => {
+    if (phase === 'stood') closeMenu();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [route.path]);
+
+  useEffect(() => {
+    if (!menuOpen) return;
+    const onKey = (e: KeyboardEvent) => e.key === 'Escape' && closeMenu();
+    document.addEventListener('keydown', onKey);
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    return () => {
+      document.removeEventListener('keydown', onKey);
+      document.body.style.overflow = prev;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [menuOpen]);
+
+  const travelling = phase !== 'sit' && phase !== 'stood';
+  const away = phase !== 'sit';
+  const cord = phase === 'walking' || phase === 'pulling' || phase === 'stood' || phase === 'releasing';
+  const items = more ? MENU_MORE : MENU_MAIN;
+
+  return (
+    <>
+      {menuOpen && <div className="mascot-backdrop" onClick={closeMenu} aria-hidden="true" />}
+
+      {travelling && (
+        <div className={`walker walker-${phase}`} aria-hidden="true">
+          <div className="walker-body">
+            <PandaBody size={62} waving={phase === 'pulling'} />
+          </div>
+        </div>
+      )}
+      {cord && (
+        <span className={`blind-cord${phase === 'pulling' || phase === 'stood' ? ' pulled' : ''}`} aria-hidden="true">
+          <span className="blind-knob" />
+        </span>
+      )}
+
+      <div className={`mascot-menu-panel${menuOpen ? ' open' : ''}`} id={panelId} role="dialog" aria-modal="true" aria-label="Ana menü" hidden={!menuOpen}>
+        <div className="menu-head">
+          <div className="menu-panda">
+            <PandaBody size={54} waving />
+          </div>
+          <div className="grow">
+            <b>{more ? 'Diğer' : 'Nereye gidelim?'}</b>
+            <div className="tiny muted">{more ? 'Tüm araçlar' : 'Panda seni götürsün ♡'}</div>
+          </div>
+          {more && (
+            <button type="button" className="icon-btn" aria-label="Ana menüye dön" onClick={() => setMore(false)}>
+              <Icon name="left" />
+            </button>
+          )}
+          <button ref={closeBtnRef} type="button" className="icon-btn" aria-label="Menüyü kapat" onClick={closeMenu}>
+            <Icon name="close" />
+          </button>
+        </div>
+        <nav className="mascot-menu-list" aria-label={more ? 'Diğer sayfalar' : 'Ana sayfalar'}>
+          {items.map((m) => (
+            <a key={m.path} href={`#${m.path}`} aria-current={section === m.path ? 'page' : undefined} onClick={closeMenu}>
+              <span className="menu-emoji" aria-hidden="true">
+                {m.emoji}
+              </span>
+              <span className="grow">{m.path === '/ogretmen' ? `${teacherName} Öğretmen` : m.label}</span>
+              <Icon name="right" size={16} />
+            </a>
+          ))}
+          {!more && (
+            <button type="button" className="menu-more" onClick={() => setMore(true)} aria-expanded={more}>
+              <span className="menu-emoji" aria-hidden="true">
+                ✨
+              </span>
+              <span className="grow">Diğer</span>
+              <Icon name="right" size={16} />
+            </button>
+          )}
+        </nav>
+      </div>
+
+      <nav className="mascot-dock" aria-label="Hızlı gezinme">
+        <a href={href('/testler', { sinav: 'TYT' })} className="dock-item" data-testid="dock-tyt" aria-label="TYT test merkezi" data-active={onTests && exam !== 'AYT'}>
+          <span className="dock-animal hop">
+            <RabbitFace />
+          </span>
+          <span className="dock-label">TYT</span>
+        </a>
+        <a href={href('/testler', { sinav: 'AYT' })} className="dock-item" data-testid="dock-ayt" aria-label="AYT test merkezi" data-active={onTests && exam === 'AYT'}>
+          <span className="dock-animal hop">
+            <FoxFace />
+          </span>
+          <span className="dock-label">AYT</span>
+        </a>
+        <button
+          ref={pandaBtnRef}
+          type="button"
+          data-testid="dock-panda"
+          className={`dock-item dock-panda${away ? ' away' : ''}`}
+          aria-haspopup="dialog"
+          aria-expanded={menuOpen}
+          aria-controls={panelId}
+          aria-label={menuOpen ? 'Ana menüyü kapat' : `Ana menüyü aç${needs.hungry ? ', panda acıktı' : ''}${needs.thirsty ? ', panda susadı' : ''}`}
+          onClick={() => (phase === 'sit' ? openMenu() : phase === 'stood' ? closeMenu() : undefined)}
+        >
+          <span className="dock-panda-seat">
+            <PandaBody size={64} items={petItems} sad={needs.hungry || needs.thirsty} />
+          </span>
+          {(needs.hungry || needs.thirsty) && (
+            <span className="dock-need" aria-hidden="true">
+              {needs.hungry ? '🎋' : ''}
+              {needs.thirsty ? '💧' : ''}
+            </span>
+          )}
+          <span className="dock-label">Menü</span>
+        </button>
+        <a href="#/denemeler" className="dock-item" data-testid="dock-deneme" aria-label="Denemeler" data-active={section === '/denemeler'}>
+          <span className="dock-animal hop">
+            <CatFace />
+          </span>
+          <span className="dock-label">Deneme</span>
+        </a>
+        <a href="#/defterim" className="dock-item" data-testid="dock-defter" aria-label="Defterim" data-active={section === '/defterim'}>
+          <span className="dock-animal hop">
+            <BearFace />
+          </span>
+          <span className="dock-label">Defter</span>
+        </a>
+      </nav>
+    </>
+  );
 }

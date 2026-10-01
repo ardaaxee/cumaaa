@@ -2,7 +2,7 @@ import { useEffect, useState, type ReactNode } from 'react';
 import { useRoute } from '../hooks/useRoute';
 import { update, useSelector } from '../store/store';
 import { Icon, type IconName } from './Icon';
-import { MascotNav } from './MascotNav';
+import { CatFace, MascotNav, RabbitFace } from './MascotNav';
 import { Companion } from './Companion';
 
 interface NavItem {
@@ -172,7 +172,22 @@ export function Layout({ children }: { children: ReactNode }) {
       </main>
       {!focusMode && <AppStatusBar />}
       {!focusMode && <MascotNav />}
+      {!focusMode && <EdgeFriends />}
       {!petMode && <Companion />}
+    </div>
+  );
+}
+
+/** Ekran kenarından bakan küçük kedi/tavşan: yalnız süs, tıklanamaz, metnin üstüne taşmaz. */
+function EdgeFriends() {
+  return (
+    <div aria-hidden="true">
+      <span className="edge-friend edge-rabbit">
+        <RabbitFace size={34} />
+      </span>
+      <span className="edge-friend edge-cat">
+        <CatFace size={34} />
+      </span>
     </div>
   );
 }

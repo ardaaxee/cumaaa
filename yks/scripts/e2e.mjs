@@ -319,6 +319,27 @@ await step('H) Yeni sürüm → eski paket hatası → tek yenileme → yeni sü
   }
 });
 
+await step('Alt gezinme: kedi → denemeler, ayı → defter, tilki → AYT; panda menüyü açar ve kapatır', async () => {
+  await page.goto(APP + '#/', { waitUntil: 'networkidle' });
+  const bar = await page.locator('.mascot-dock').evaluate((el) => getComputedStyle(el).backgroundColor);
+  assert(/rgba\(0, 0, 0, 0\)|transparent/.test(bar), `Alt gezinmenin arkasında bar var: ${bar}`);
+  await tap(page.getByTestId('dock-deneme'));
+  await page.waitForURL(/#\/denemeler/);
+  await tap(page.getByTestId('dock-defter'));
+  await page.waitForURL(/#\/defterim/);
+  await tap(page.getByTestId('dock-ayt'));
+  await page.waitForURL(/#\/testler\?sinav=AYT/);
+  await tap(page.getByTestId('dock-panda'));
+  await page.locator('.walker').waitFor({ timeout: 2000 });
+  const dialog = page.getByRole('dialog', { name: 'Ana menü' });
+  await dialog.waitFor({ timeout: 4000 });
+  await tap(dialog.getByRole('button', { name: 'Diğer' }));
+  await dialog.getByRole('link', { name: /Ayarlar/ }).waitFor();
+  await tap(dialog.getByRole('button', { name: 'Menüyü kapat', exact: true }));
+  await page.locator('.walker').waitFor({ state: 'detached', timeout: 4000 });
+  assert(await page.locator('.dock-panda-seat').isVisible(), 'Panda yerine oturmadı');
+});
+
 await step('Sayfa hatası (pageerror) yok', async () => {
   const relevant = pageErrors.filter((m) => !/ResizeObserver/.test(m));
   assert(!relevant.length, relevant.slice(0, 3).join(' | '));

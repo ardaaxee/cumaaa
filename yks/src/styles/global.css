@@ -14210,3 +14210,147 @@ textarea:focus-visible {
   font-weight: 700;
   box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
 }
+
+/* =====================================================================
+   Hayvanlı alt gezinme (bar YOK): her hayvan kendi yumuşak platformunda yüzer.
+   🐰 TYT · 🦊 AYT · 🐼 Menü (ortada, büyük) · 🐱 Deneme · 🐻 Defter
+   ===================================================================== */
+.mascot-dock,
+.mascot-dock.mascot-dock {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: calc(6px + var(--safe-b, env(safe-area-inset-bottom, 0px)));
+  z-index: 40;
+  height: auto;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  gap: clamp(4px, 2.4vw, 14px);
+  padding: 0 8px;
+  background: none !important;
+  border: 0 !important;
+  border-radius: 0;
+  box-shadow: none !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  pointer-events: none; /* boşluklar alttaki içeriğe tıklamayı engellemesin */
+}
+.mascot-dock::before { display: none !important; }
+.mascot-dock .dock-item {
+  pointer-events: auto;
+  flex: 0 0 auto;
+  width: clamp(54px, 16vw, 66px);
+  padding: 0;
+  gap: 2px;
+  justify-content: flex-end;
+}
+.mascot-dock .dock-animal {
+  width: 48px;
+  height: 48px;
+  border-radius: 18px;
+  border: 1.5px solid color-mix(in srgb, var(--line) 80%, transparent);
+  background: color-mix(in srgb, var(--surface) 94%, transparent);
+  box-shadow: 0 6px 16px rgba(60, 40, 90, 0.16);
+}
+.mascot-dock .dock-animal svg { width: 34px; height: 34px; }
+.mascot-dock .dock-label {
+  max-width: none;
+  padding: 1px 7px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--surface) 92%, transparent);
+  box-shadow: 0 2px 6px rgba(60, 40, 90, 0.1);
+  font-size: 0.66rem;
+  font-weight: 800;
+  color: var(--text-2);
+}
+.mascot-dock .dock-item[data-active='true'] .dock-animal {
+  transform: translateY(-3px);
+  background: var(--brand-soft);
+  border-color: var(--brand);
+}
+.mascot-dock .dock-item[data-active='true'] .dock-label { color: var(--brand); }
+.mascot-dock .dock-panda { width: clamp(70px, 21vw, 84px); }
+.mascot-dock .dock-panda-seat {
+  margin-top: 0;
+  padding: 4px 6px 0;
+  border-radius: 26px 26px 20px 20px;
+  background: color-mix(in srgb, var(--surface) 94%, transparent);
+  border: 1.5px solid color-mix(in srgb, var(--line) 80%, transparent);
+  box-shadow: 0 8px 20px rgba(60, 40, 90, 0.18);
+}
+.mascot-dock .dock-panda-seat svg { width: 60px; height: 60px; }
+.mascot-dock .dock-panda .dock-label { margin-top: 0; color: var(--brand); }
+.study-dock { display: none !important; }
+@media (min-width: 900px) {
+  .mascot-dock { display: none !important; }
+}
+
+/* Yürüyen panda: ayağa kalkar → küçük adımlarla sağ üste yürür → ipi çeker; dönüşte tersi. */
+.walker { will-change: transform; }
+.walker-body { line-height: 0; transform-origin: 50% 100%; }
+.walker-standing { animation: none; }
+.walker-standing .walker-body { animation: panda-stand 0.22s ease-out forwards; }
+.walker-walking .walker-body,
+.walker-returning .walker-body { animation: panda-step 0.18s ease-in-out infinite alternate; }
+.walker-releasing { transform: translate(calc(50vw - 100px), calc(-1 * (100dvh - 140px))); }
+.walker-releasing .walker-body { animation: panda-release 0.22s ease-out forwards; }
+.walker-returning { animation: panda-walk-back 0.82s cubic-bezier(0.4, 0, 0.6, 1) forwards; }
+.walker-sitting .walker-body { animation: panda-sit 0.22s ease-in forwards; }
+@keyframes panda-stand {
+  0% { transform: scale(1.08, 0.86); }
+  60% { transform: scale(0.94, 1.08) translateY(-3px); }
+  100% { transform: scale(1, 1); }
+}
+/* adım: gövde zıplar, kafa hafif sallanır (yalnız transform) */
+@keyframes panda-step {
+  0% { transform: translateY(0) rotate(-4deg) scale(1.02, 0.98); }
+  100% { transform: translateY(-4px) rotate(4deg) scale(0.98, 1.03); }
+}
+@keyframes panda-release {
+  0% { transform: translateY(6px) scale(1.04, 0.94); }
+  100% { transform: translateY(0) scale(1, 1); }
+}
+@keyframes panda-sit {
+  0% { transform: scale(1, 1); }
+  60% { transform: scale(1.1, 0.86) translateY(2px); }
+  100% { transform: scale(1, 1); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .walker, .walker-body, .blind-cord { animation: none !important; }
+}
+
+/* Sade panda menüsü: tek sütun liste + "Diğer" */
+.mascot-menu-list { display: grid; gap: 6px; margin-top: 10px; }
+.mascot-menu-list a,
+.mascot-menu-list .menu-more {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 48px;
+  padding: 8px 12px;
+  border-radius: 14px;
+  border: 1.5px solid var(--line);
+  background: var(--surface);
+  color: var(--text);
+  font: inherit;
+  font-weight: 700;
+  text-decoration: none;
+  text-align: left;
+  cursor: pointer;
+}
+.mascot-menu-list a[aria-current='page'] { border-color: var(--brand); background: var(--brand-soft); }
+.mascot-menu-list a:active, .mascot-menu-list .menu-more:active { transform: scale(0.98); }
+.menu-emoji { font-size: 1.25rem; width: 28px; text-align: center; }
+.mascot-menu-panel { max-height: calc(100dvh - 24px); overflow-y: auto; }
+
+/* Kenar hayvanları: negatif z-index YOK; içeriğin üstünde ama tıklanamaz ve metni kapatmayacak kadar dışarıda. */
+.edge-friend {
+  z-index: 2 !important;
+  pointer-events: none !important;
+}
+/* Kenar hayvanları ekranın dışında durur; yalnız ~10px'lik kulak/yanak görünür (16px kenar boşluğuna taşmaz). */
+.edge-friend.edge-rabbit { left: -24px; top: 42%; }
+.edge-friend.edge-cat { right: -24px; top: 66%; }
+.edge-friend { opacity: 0.9; }
+@media (min-width: 900px) { .edge-friend.edge-rabbit { left: 228px; } }
