@@ -67,5 +67,6 @@ export function subjectTopics(subjectId: string): Topic[] {
 }
 
 export function subjectLabel(subject: Subject): string {
-  return `${subject.exam} ${subject.name}`;
+  // Ad zaten sınavla başlıyorsa ("TYT Temel Matematik") tekrar eklenmez.
+  return subject.name.startsWith(subject.exam) ? subject.name : `${subject.exam} ${subject.name}`;
 }

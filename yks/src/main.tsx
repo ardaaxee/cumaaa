@@ -3,6 +3,7 @@ import { createRoot } from 'react-dom/client';
 import { App } from './App';
 import './styles/global.css';
 import { installChunkRecovery } from './utils/chunkRecovery';
+import { isStaleBuild } from './utils/loadErrors';
 
 installChunkRecovery();
 
@@ -31,8 +32,10 @@ if ('serviceWorker' in navigator) {
   const embedded = window.top !== window.self;
   if (import.meta.env.PROD && !embedded) {
     let refreshing = false;
-    navigator.serviceWorker.addEventListener('controllerchange', () => {
+    navigator.serviceWorker.addEventListener('controllerchange', async () => {
       if (refreshing) return;
+      // Sayfa zaten en yeni sürümle açıldıysa (ör. az önce yenilendiyse) ikinci kez yenileme.
+      if (!(await isStaleBuild())) return;
       refreshing = true;
       window.location.reload();
     });

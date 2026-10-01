@@ -45,7 +45,7 @@ function currentEntry(): string | null {
 }
 
 /** Sunucudaki index.html bu sayfanın ana betiğini hâlâ kullanıyor mu? Değilse yeni sürüm yayınlanmış demektir. */
-async function isStaleBuild(): Promise<boolean> {
+export async function isStaleBuild(): Promise<boolean> {
   const entry = currentEntry();
   if (!entry) return false;
   try {
