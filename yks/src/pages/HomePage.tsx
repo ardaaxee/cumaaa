@@ -2,18 +2,15 @@ import { useMemo } from 'react';
 import { Icon } from '../components/Icon';
 import { PageHeader } from '../components/Layout';
 import { PandaBody } from '../components/MascotNav';
-import { DailyQuestion } from '../components/DailyQuestion';
-import { StudyQueue } from '../components/StudyQueue';
-import { Empty, ProgressBar, toast } from '../components/ui';
+import { ProgressBar, toast } from '../components/ui';
 import { navigate } from '../hooks/useRoute';
 import { lookup } from '../services/lookup';
 import { buildRecommendations, hasAnyData, type Recommendation } from '../services/recommendations';
 import { launchAdaptivePractice, launchTest, makeConfig } from '../services/testLauncher';
 import { usePetNeeds } from '../hooks/usePetNeeds';
 import { needsMessage } from '../utils/petCare';
-import { toggleTask } from '../store/actions';
 import type { PlanTask } from '../store/schema';
-import { update, useAppState } from '../store/store';
+import { useAppState } from '../store/store';
 import { dayKey, diffDays, formatDay, formatMinutes } from '../utils/date';
 import { dueReviews } from '../utils/srs';
 import { dashboard } from '../utils/stats';
@@ -98,31 +95,6 @@ export default function HomePage() {
   const nextTask = todayTasks.find((t) => !t.done) ?? overdue[0] ?? null;
   const focusRunning = state.pomodoro.running && state.pomodoro.phase === 'odak';
   const todayWrongOpen = Object.values(state.wrongs).filter((w) => !w.learned).length;
-  const targetLabel = [profile.targetUniversity, profile.targetDepartment].filter(Boolean).join(' · ');
-
-  const smartStartLabel = activeTest
-    ? 'Devam eden teste dön'
-    : focusRunning
-      ? 'Odak oturumuna dön'
-      : nextTask
-        ? nextTask.title
-        : todayWrongOpen > 0
-          ? `${todayWrongOpen} yanlışı düzelt`
-          : due.length > 0
-            ? `${due.length} tekrarı tamamla`
-            : recs[0]?.title ?? 'Adaptif çalışma başlat';
-
-  const smartStartDetail = activeTest
-    ? `Soru ${activeTest.current + 1}/${activeTest.questionIds.length} · kaldığın yerden`
-    : focusRunning
-      ? 'Sayaç çalışıyor · kaldığın yerden devam et'
-      : nextTask
-        ? [nextTask.time, nextTask.estMinutes ? `${nextTask.estMinutes} dk` : '', nextTask.targetQuestions ? `${nextTask.targetQuestions} soru` : ''].filter(Boolean).join(' · ') || 'Bugünün sıradaki plan görevi'
-        : todayWrongOpen > 0
-          ? 'Önce açık yanlışlarını düzelt'
-          : due.length > 0
-            ? 'Unutmadan zamanı gelen konuları tekrar et'
-            : recs[0]?.detail ?? 'Verine göre 12 soruluk adaptif pratik';
 
   const smartStart = async () => {
     if (activeTest) return navigate('/test');
@@ -135,188 +107,163 @@ export default function HomePage() {
     if (err) toast(err);
   };
 
+  // B) Bugünün rotası: en fazla 3 net görev (gerçek veriden; uydurma yok).
+  const route: { key: string; title: string; detail: string; run: () => void }[] = [];
+  if (activeTest) route.push({ key: 'test', title: 'Devam eden testi bitir', detail: `Soru ${activeTest.current + 1}/${activeTest.questionIds.length}`, run: () => navigate('/test') });
+  for (const t of [...overdue, ...todayTasks.filter((x) => !x.done)].slice(0, 3)) {
+    route.push({
+      key: t.id,
+      title: t.title,
+      detail: [t.time, t.estMinutes ? `${t.estMinutes} dk` : '', t.targetQuestions ? `${t.targetQuestions} soru` : '', t.date < today ? 'gecikmiş' : 'bugünkü planda'].filter(Boolean).join(' · '),
+      run: () => void runPlanTask(t),
+    });
+  }
+  if (due.length) route.push({ key: 'tekrar', title: `${due.length} konunun tekrar günü`, detail: 'Aralıklı tekrar · 5 dakikalık tekrar', run: () => navigate('/tekrar') });
+  if (todayWrongOpen) route.push({ key: 'yanlis', title: `${Math.min(todayWrongOpen, 10)} yanlışı yeniden çöz`, detail: `${todayWrongOpen} açık yanlış`, run: () => navigate('/yanlislar') });
+  for (const r of recs) route.push({ key: r.id, title: r.title, detail: r.basis, run: () => void runRecommendation(r) });
+  const todayRoute = route.filter((r, i, all) => all.findIndex((x) => x.key === r.key) === i).slice(0, 3);
+
+  // C) Devam et: son çalışılan konu, son test, son defter sayfası.
+  const lastTopic = Object.entries(state.topicProgress)
+    .filter(([, p]) => p.startedAt)
+    .sort(([, a], [, b]) => (b.completedAt ?? b.startedAt ?? '').localeCompare(a.completedAt ?? a.startedAt ?? ''))[0];
+  const lastTopicName = lastTopic ? lookup.topicName(lastTopic[0]) : null;
+  const lastResult = state.testResults[state.testResults.length - 1];
+  const lastPage = [...state.notebookPages].sort((a, b) => (b.updatedAt ?? '').localeCompare(a.updatedAt ?? ''))[0];
+  const goalPct = Math.round(Math.min(100, Math.max(qPct, mPct)));
+  const tip = recs[0];
+
   return (
     <>
-      <PageHeader title="Çalışma merkezim" sub={formatDay(today, { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })} />
+      <PageHeader title="Odam" sub={formatDay(today, { weekday: 'long', day: 'numeric', month: 'long' })} />
 
-      <section className="card hero hero-panda" aria-labelledby="hello">
-        <div className="hero-text">
-          <div className="eyebrow">Bugünün çalışma alanı</div>
+      <section className="card home-hello" aria-labelledby="hello">
+        <div className="grow">
           <h2 id="hello">
             İyi ki buradasın{profile.name ? `, ${profile.name}` : ''} <span className="heart">♡</span>
           </h2>
-          <p className="muted hero-copy">
-            {daysLeft != null && daysLeft >= 0
-              ? `YKS'ye ${daysLeft} gün kaldı. Bugünün hedefini bitir, kalanını yarına bırak.`
-              : 'Bugün küçük ama tamamlanmış bir çalışma, yarım kalan büyük plandan daha değerlidir.'}
+          <p className="muted" style={{ margin: 0 }}>
+            {daysLeft != null && daysLeft >= 0 ? `Sınava ${daysLeft} gün kaldı.` : cheerOfDay(today)}
           </p>
-          {(targetLabel || profile.preferredStudyTime) && (
-            <div className="hero-personal-target">
-              {targetLabel && <span>🎓 Hedef: <b>{targetLabel}</b></span>}
-              {profile.preferredStudyTime && <span>🕒 Rahat çalışma saatin: <b>{profile.preferredStudyTime}</b></span>}
-            </div>
-          )}
-          <div className="home-smart-start">
-            <div className="home-smart-start-copy">
-              <span className="eyebrow">Şimdi sıradaki</span>
-              <b>{smartStartLabel}</b>
-              <small>{smartStartDetail}</small>
-            </div>
-            <button type="button" className="btn primary study-cta" onClick={() => void smartStart()}>
-              <Icon name="play" /> Şimdi başla
+        </div>
+        <a className="home-hello-panda" href="#/pandam" aria-label={`${state.settings.pet.name}: seviye ${pet.level}${petNeed ? `. ${petNeed}` : ''}`}>
+          <PandaBody size={64} waving={!petNeed && pet.mood !== 'uykulu'} sleepy={!petNeed && pet.mood === 'uykulu'} sad={!!petNeed} items={state.settings.pet.items} />
+          {petNeed && <span className="home-hello-need">{needs.hungry ? '🎋' : '💧'}</span>}
+        </a>
+      </section>
+
+      <section className="card section home-route" aria-labelledby="route-h">
+        <div className="eyebrow" id="route-h">
+          Bugünün rotası
+        </div>
+        {todayRoute.length === 0 ? (
+          <div className="home-route-empty">
+            <p className="small muted" style={{ marginTop: 0 }}>
+              Bugün için bekleyen görev yok. Kısa bir çalışma ile başla:
+            </p>
+            <button type="button" className="btn primary" onClick={() => void smartStart()}>
+              <Icon name="play" /> Ders çalışmaya başla
             </button>
           </div>
-          <div className="hero-actions">
-            <a className="btn hero-secondary" href="#/dersler">
-              <Icon name="book" /> Dersleri aç
-            </a>
-            <a className="btn hero-secondary" href="#/testler">
-              <Icon name="target" /> Soru bankası
-            </a>
-          </div>
-          <div className="hero-kpis" aria-label="Bugünün özeti">
-            <div><b>{d.todayQuestions}</b><span>soru</span></div>
-            <div><b>{formatMinutes(d.todayMinutes)}</b><span>çalışma</span></div>
-            <div><b>{d.streak}</b><span>gün seri</span></div>
-          </div>
-        </div>
-        <div className="hero-mascot-wrap">
-          <div className="speech">{petNeed ? (needs.hungry ? 'Acıktım 🎋' : 'Susadım 💧') : cheerOfDay(today)}</div>
-          <a className="hero-mascot" href="#/pandam" aria-label={`${state.settings.pet.name}: seviye ${pet.level}${petNeed ? `. ${petNeed}` : ''}`}>
-            <PandaBody
-              size={104}
-              waving={!petNeed && pet.mood !== 'uykulu'}
-              sleepy={!petNeed && pet.mood === 'uykulu'}
-              sad={!!petNeed}
-              items={state.settings.pet.items}
-            />
-            <span className="pet-level">Sv. {pet.level}</span>
-          </a>
-        </div>
-      </section>
-
-      <StudyQueue />
-
-      <section className="home-today-grid section" aria-label="Bugünün çalışma merkezi">
-        <div className="card home-focus-card">
-          <div className="card-head">
-            <div>
-              <div className="eyebrow">Bugünün hedefi</div>
-              <h2>İki hedef, tek ekran</h2>
-            </div>
-            <a className="text-link" href="#/plan">Planı aç <Icon name="right" /></a>
-          </div>
-
-          <div className="home-goals">
-            <div className="home-goal">
-              <div className="row between nowrap">
-                <span>Soru hedefi</span>
-                <b>{d.todayQuestions} / {profile.dailyQuestionGoal}</b>
-              </div>
-              <ProgressBar value={qPct} label="Günlük soru hedefi" />
-            </div>
-            <div className="home-goal">
-              <div className="row between nowrap">
-                <span>Çalışma süresi</span>
-                <b>{formatMinutes(d.todayMinutes)} / {formatMinutes(profile.dailyStudyMinutes)}</b>
-              </div>
-              <ProgressBar value={mPct} label="Günlük süre hedefi" />
-            </div>
-          </div>
-
-          <div className="home-plan-preview">
-            <div className="row between nowrap">
-              <b>Bugünün planı</b>
-              <span className="tiny muted">{todayTasks.filter((t) => t.done).length}/{todayTasks.length} tamamlandı</span>
-            </div>
-            {overdue.length > 0 && (
-              <div className="home-overdue">
-                <Icon name="alert" />
-                <span>{overdue.length} eski görev bekliyor.</span>
-                <a href="#/plan">Düzenle</a>
-              </div>
-            )}
-            {todayTasks.length === 0 ? (
-              <Empty title="Bugün için görev yok." action={<a className="btn small" href="#/plan">Görev ekle</a>}>
-                Kısa ve gerçekçi bir plan ekleyip doğrudan başlayabilirsin.
-              </Empty>
-            ) : (
-              <ul className="list home-task-list">
-                {todayTasks.slice(0, 4).map((t) => (
-                  <li key={t.id} className={`task${t.done ? ' done' : ''}`}>
-                    <input
-                      type="checkbox"
-                      className="task-check"
-                      checked={t.done}
-                      onChange={() => update((s) => toggleTask(s, t.id))}
-                      aria-label={`${t.title} tamamlandı`}
-                    />
-                    <div className="grow">
-                      <div className="task-title">{t.title}</div>
-                      <div className="task-meta">
-                        {[t.time, t.estMinutes ? `${t.estMinutes} dk` : '', t.targetQuestions ? `${t.targetQuestions} soru` : ''].filter(Boolean).join(' · ')}
-                      </div>
-                    </div>
-                  </li>
-                ))}
-              </ul>
-            )}
-            {todayTasks.length > 4 && <a className="home-more-link" href="#/plan">+{todayTasks.length - 4} görevi daha göster</a>}
-          </div>
-        </div>
-
-        <div className="card home-coach-card">
-          <div className="card-head">
-            <div>
-              <div className="eyebrow">Akıllı yönlendirme</div>
-              <h2>Sıradaki en mantıklı adım</h2>
-            </div>
-            <span className="badge brand">Verine göre</span>
-          </div>
-
-          {!hasAnyData(state) ? (
-            <Empty
-              title="Seni tanımaya başlayalım."
-              action={
-                <button type="button" className="btn primary small" onClick={() => navigate('/koc')}>
-                  Seviye tespitini başlat
+        ) : (
+          <ol className="home-route-list">
+            {todayRoute.map((r, i) => (
+              <li key={r.key}>
+                <span className="home-route-num" aria-hidden="true">
+                  {i + 1}
+                </span>
+                <div className="grow">
+                  <b>{r.title}</b>
+                  <span className="tiny muted">{r.detail}</span>
+                </div>
+                <button type="button" className={`btn small${i === 0 ? ' primary' : ''}`} onClick={r.run}>
+                  {i === 0 ? 'Başla' : 'Aç'}
                 </button>
-              }
-            >
-              Birkaç test ve konu çalışmasından sonra öneriler burada kişiselleşir.
-              {profile.hardestSubject && <> En zorlandığın ders: {lookup.subjectName(profile.hardestSubject)}.</>}
-            </Empty>
-          ) : recs.length === 0 ? (
-            <div className="home-clear-state">
-              <span aria-hidden="true">✓</span>
-              <div>
-                <b>Bugün için acil öneri yok.</b>
-                <p>Planındaki görevlere devam edebilirsin.</p>
-              </div>
-            </div>
-          ) : (
-            <div className="home-recommendation">
-              <div className="home-rec-icon" aria-hidden="true">✦</div>
-              <div className="grow">
-                <b>{recs[0].title}</b>
-                <p>{recs[0].detail}</p>
-                <span>Dayanak: {recs[0].basis}</span>
-              </div>
-              <button type="button" className="btn small primary" onClick={() => void runRecommendation(recs[0])}>
-                {recs[0].actionLabel}
-              </button>
-              <button type="button" className="btn small ghost" onClick={() => void launchAdaptivePractice(12).then((e) => e && toast(e))}>
-                Adaptif 12 soru
-              </button>
-            </div>
-          )}
+              </li>
+            ))}
+          </ol>
+        )}
+      </section>
 
+      {(lastTopic || lastResult || lastPage) && (
+        <section className="card section home-continue" aria-labelledby="cont-h">
+          <div className="eyebrow" id="cont-h">
+            Devam et
+          </div>
+          <div className="home-continue-row">
+            {lastTopic && lastTopicName && (
+              <a href={`#/konu/${lastTopic[0]}`}>
+                <span aria-hidden="true">📚</span>
+                <span className="grow">
+                  <b>{lastTopicName}</b>
+                  <span className="tiny muted">son konu</span>
+                </span>
+              </a>
+            )}
+            {lastResult && (
+              <a href={`#/sonuc/${lastResult.id}`}>
+                <span aria-hidden="true">✅</span>
+                <span className="grow">
+                  <b>{lastResult.config.title ?? 'Son test'}</b>
+                  <span className="tiny muted">{formatDay(lastResult.day)}</span>
+                </span>
+              </a>
+            )}
+            {lastPage && (
+              <a href={`#/defterim/${lastPage.id}`}>
+                <span aria-hidden="true">📓</span>
+                <span className="grow">
+                  <b>{lastPage.title}</b>
+                  <span className="tiny muted">defter</span>
+                </span>
+              </a>
+            )}
+          </div>
+        </section>
+      )}
 
+      <section className="home-stats section" aria-label="Bugünün özeti">
+        <div>
+          <b>{d.todayQuestions}</b>
+          <span>bugünkü soru</span>
+        </div>
+        <div>
+          <b>{formatMinutes(d.todayMinutes)}</b>
+          <span>çalışma süresi</span>
+        </div>
+        <div>
+          <b>%{goalPct}</b>
+          <span>günlük hedef</span>
+          <ProgressBar value={goalPct} label="Günlük hedef" />
         </div>
       </section>
 
-      <details className="card section home-daily-practice"><summary>Bir soruyla ısın</summary><DailyQuestion /></details>
-
+      {hasAnyData(state) && tip && (
+        <section className="card section home-tip" aria-labelledby="tip-h">
+          <div className="eyebrow" id="tip-h">
+            Akıllı öneri
+          </div>
+          <b>{tip.title}</b>
+          <p className="small muted" style={{ margin: '4px 0 8px' }}>
+            Neden: {tip.basis}
+          </p>
+          <button type="button" className="btn small" onClick={() => void runRecommendation(tip)}>
+            {tip.actionLabel}
+          </button>
+        </section>
+      )}
+      {!hasAnyData(state) && (
+        <section className="card section home-tip">
+          <div className="eyebrow">Akıllı öneri</div>
+          <b>Seni tanımaya başlayalım</b>
+          <p className="small muted" style={{ margin: '4px 0 8px' }}>
+            Henüz yeterli veri yok. Kısa seviye tespitinden sonra öneriler kişiselleşir.
+          </p>
+          <button type="button" className="btn small" onClick={() => navigate('/koc')}>
+            Seviye tespiti
+          </button>
+        </section>
+      )}
     </>
   );
 }
