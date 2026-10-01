@@ -3,6 +3,7 @@ import { getTopicRef, subjectLabel } from '../data/curriculum';
 import { loadLesson, loadQuestionsByIds } from '../data/content';
 import type { LessonSeed, Question } from '../domain/types';
 import { AssistantCharacter, type AssistantMood } from '../components/AssistantCharacter';
+import { TeacherPhotoImage, useTeacherPhoto } from '../components/TeacherPhoto';
 import { Icon } from '../components/Icon';
 import { PageHeader } from '../components/Layout';
 import { toast } from '../components/ui';
@@ -55,6 +56,7 @@ export default function TeacherPage() {
   const route = useRoute();
   const state = useAppState();
   const [status, setStatus] = useState<AiStatus | null>(null);
+  const teacherPhoto = useTeacherPhoto();
   const [input, setInput] = useState('');
   const [busy, setBusy] = useState(false);
   const [question, setQuestion] = useState<Question | null>(null);
@@ -215,7 +217,7 @@ export default function TeacherPage() {
           onClick={() => speaker.speak(lastTeacher ?? greeting, voiceOn)}
           aria-label="Asistanın son söylediğini tekrar dinle"
         >
-          <AssistantCharacter mood={mood} size={170} />
+          {teacherPhoto ? <TeacherPhotoImage src={teacherPhoto} size={170} alt={`${teacherName} öğretmen`} /> : <AssistantCharacter mood={mood} size={170} />}
         </button>
         <div className="asst-say" aria-live="polite">
           <div className="asst-name">{teacherName}</div>

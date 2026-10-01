@@ -8,6 +8,7 @@ import { PageHeader } from '../components/Layout';
 import { ConfirmDialog, toast } from '../components/ui';
 import { deletePageImage, getPageImage, setPageImage } from '../services/notebookStore';
 import { getTeacherPhoto, setTeacherPhoto } from '../services/photoStore';
+import { TeacherPhotoSettings } from '../components/TeacherPhoto';
 import { updateProfile, updateSettings } from '../store/actions';
 import { clearAppData, createBackup, migrationContext, parseBackup } from '../store/storage';
 import { replaceState, update, useAppState } from '../store/store';
@@ -167,6 +168,8 @@ export default function SettingsPage() {
           </label>
         </div>
       </section>
+
+      <TeacherPhotoSettings />
 
       <section className="card section" aria-labelledby="t-h">
         <h2 id="t-h" className="mb-8">

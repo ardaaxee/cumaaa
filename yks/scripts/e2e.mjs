@@ -74,6 +74,7 @@ function assert(cond, msg) {
 
 const browser = await chromium.launch({ executablePath: CHROMIUM, args: ['--no-sandbox'] });
 const context = await browser.newContext({
+  acceptDownloads: true,
   viewport: { width: 393, height: 851 },
   deviceScaleFactor: 2,
   isMobile: true,
@@ -338,6 +339,66 @@ await step('Alt gezinme: kedi → denemeler, ayı → defter, tilki → AYT; pan
   await tap(dialog.getByRole('button', { name: 'Menüyü kapat', exact: true }));
   await page.locator('.walker').waitFor({ state: 'detached', timeout: 4000 });
   assert(await page.locator('.dock-panda-seat').isVisible(), 'Panda yerine oturmadı');
+});
+
+await step('Defter: sayfa aç → çiz → fizik şablonu → PDF gerçekten indirilir', async () => {
+  await page.goto(APP + '#/defterim', { waitUntil: 'networkidle' });
+  await tap(page.getByRole('button', { name: /Yeni sayfa|İlk sayfanı aç/ }));
+  await tap(page.locator('.modal').getByRole('button', { name: 'Oluştur' }));
+  await page.waitForURL(/#\/defterim\/.+/);
+  const canvas = page.locator('canvas.notebook-canvas').first();
+  await canvas.waitFor();
+  const box = await canvas.boundingBox();
+  await page.mouse.move(box.x + 40, box.y + 60);
+  await page.mouse.down();
+  for (let i = 1; i <= 12; i++) await page.mouse.move(box.x + 40 + i * 15, box.y + 60 + (i % 2) * 8);
+  await page.mouse.up();
+  const ink = await canvas.evaluate((c) => {
+    const d = c.getContext('2d').getImageData(0, 0, c.width, c.height).data;
+    let n = 0;
+    for (let i = 3; i < d.length; i += 4) if (d[i] > 0) n++;
+    return n;
+  });
+  assert(ink > 50, 'Çizim tuvale işlenmedi');
+  await tap(page.getByRole('button', { name: /Daha/ }));
+  await tap(page.getByRole('button', { name: 'Hız–zaman' }));
+  await page.getByText('Şablon eklendi').first().waitFor({ timeout: 3000 });
+  await tap(page.getByRole('button', { name: /Daha/ }));
+  const [download] = await Promise.all([page.waitForEvent('download', { timeout: 10_000 }), tap(page.getByRole('button', { name: /PDF indir/ }))]);
+  const path = await download.path();
+  const head = readFileSync(path).subarray(0, 8).toString('latin1');
+  assert(head.startsWith('%PDF-1.4'), `PDF değil: ${head}`);
+  assert(/\.pdf$/.test(download.suggestedFilename()), 'Dosya adı .pdf değil');
+  // Gömülü sayfa görüntüsü geçerli bir JPEG olmalı ve tarayıcıda çizilebilmeli (kareli zemin + çizim).
+  const pdf = readFileSync(path);
+  const at = pdf.indexOf(Buffer.from('/DCTDecode'));
+  const start = pdf.indexOf(Buffer.from('stream\n'), at) + 7;
+  const end = pdf.indexOf(Buffer.from('\nendstream'), start);
+  const jpeg = pdf.subarray(start, end);
+  assert(jpeg[0] === 0xff && jpeg[1] === 0xd8 && jpeg[jpeg.length - 2] === 0xff && jpeg[jpeg.length - 1] === 0xd9, 'PDF içindeki görüntü geçerli JPEG değil');
+  const dims = await page.evaluate(async (b64) => {
+    const img = new Image();
+    img.src = 'data:image/jpeg;base64,' + b64;
+    await img.decode();
+    return [img.naturalWidth, img.naturalHeight];
+  }, jpeg.toString('base64'));
+  assert(dims[0] === 900 && dims[1] > 500, `Beklenmeyen PDF sayfa görüntüsü: ${dims}`);
+});
+
+await step('Öğretmen fotoğrafı: seç → öğretmen ekranında görünür → kaldır', async () => {
+  // 1×1 piksel PNG
+  const png = Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==', 'base64');
+  await page.goto(APP + '#/ayarlar', { waitUntil: 'networkidle' });
+  const section = page.locator('section', { has: page.locator('#tphoto-h') });
+  await section.locator('input[type=file]').setInputFiles({ name: 'cuma.png', mimeType: 'image/png', buffer: png });
+  await section.locator('img.teacher-photo').waitFor({ timeout: 5000 });
+  await page.goto(APP + '#/ogretmen', { waitUntil: 'networkidle' });
+  await page.locator('.teacher-hero img.teacher-photo').waitFor({ timeout: 5000 });
+  await page.goto(APP + '#/ayarlar', { waitUntil: 'networkidle' });
+  await tap(section.getByRole('button', { name: 'Kaldır' }));
+  await section.locator('img.teacher-photo').waitFor({ state: 'detached', timeout: 5000 });
+  await page.goto(APP + '#/ogretmen', { waitUntil: 'networkidle' });
+  assert((await page.locator('.teacher-hero img.teacher-photo').count()) === 0, 'Fotoğraf kaldırılmadı');
 });
 
 await step('Sayfa hatası (pageerror) yok', async () => {

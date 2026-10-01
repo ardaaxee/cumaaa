@@ -9,6 +9,8 @@ import { useIsDark } from '../hooks/useIsDark';
 import { getPageImage, setPageImage } from '../services/notebookStore';
 import { deleteNotebookPage, renameNotebookPage, setNotebookPaper, touchNotebookPage } from '../store/actions';
 import type { NotebookPaper } from '../store/schema';
+import { canvasToPdf } from '../utils/pdf';
+import { TEMPLATE_GROUPS, drawArrowHead, drawSmoothCurve, drawTemplate, snapAngle, type Template } from '../utils/notebookTemplates';
 import { update, useSelector } from '../store/store';
 
 /**
@@ -18,7 +20,7 @@ import { update, useSelector } from '../store/store';
  * (destination-out) ve dışa aktarımda ayrıca birleştirilir.
  */
 
-type Tool = 'kalem' | 'silgi' | 'cizgi' | 'ok' | 'kutu' | 'daire' | 'eksen' | 'metin' | 'cikartma';
+type Tool = 'kalem' | 'silgi' | 'cizgi' | 'kesikli' | 'cetvel' | 'egri' | 'ok' | 'kutu' | 'daire' | 'eksen' | 'metin' | 'cikartma';
 
 const PENS = [
   { key: 'siyah', label: 'Siyah kalem', color: '#2a2430', alpha: 1 },
@@ -33,6 +35,9 @@ const TOOLS: { key: Tool; label: string; icon: string }[] = [
   { key: 'kalem', label: 'Kalem', icon: 'pen' },
   { key: 'silgi', label: 'Silgi', icon: 'eraser' },
   { key: 'cizgi', label: 'Çizgi', icon: 'line' },
+  { key: 'kesikli', label: 'Noktalı çizgi', icon: 'line' },
+  { key: 'cetvel', label: 'Cetvel (15° kilitli)', icon: 'line' },
+  { key: 'egri', label: 'Grafik çizgisi (yumuşak eğri)', icon: 'axis' },
   { key: 'ok', label: 'Ok', icon: 'arrow' },
   { key: 'kutu', label: 'Kutu', icon: 'square' },
   { key: 'daire', label: 'Daire', icon: 'circle' },
@@ -41,116 +46,9 @@ const TOOLS: { key: Tool; label: string; icon: string }[] = [
   { key: 'cikartma', label: 'Çıkartma', icon: 'sparkle' },
 ];
 
+const TOOL_SHORT: Partial<Record<Tool, string>> = { eksen: 'Eksen', kesikli: 'Noktalı', cetvel: 'Cetvel', egri: 'Grafik' };
+
 const STICKERS = ['⭐', '✅', '❌', '❤️', '⚠️', '❓', '💡', '📌', '🐰', '🐱', '🐼', '🦊', '🐻', '🌸', '🎯', '🔥'];
-
-type Template = 'sayi-dogrusu' | 'koordinat' | 'tablo' | 'formul-kutusu' | 'cetvel';
-
-const TEMPLATES: { key: Template; label: string }[] = [
-  { key: 'sayi-dogrusu', label: 'Sayı doğrusu' },
-  { key: 'koordinat', label: 'Koordinat düzlemi' },
-  { key: 'tablo', label: 'Tablo (3×4)' },
-  { key: 'formul-kutusu', label: 'Formül kutusu' },
-  { key: 'cetvel', label: 'Başlık + çizgi' },
-];
-
-/** Şablonu sayfanın görünen üst bölgesine (y0) çizer. */
-function drawTemplate(ctx: CanvasRenderingContext2D, t: Template, y0: number, color: string) {
-  ctx.save();
-  ctx.globalCompositeOperation = 'source-over';
-  ctx.globalAlpha = 1;
-  ctx.strokeStyle = color;
-  ctx.fillStyle = color;
-  ctx.lineWidth = 3;
-  ctx.lineCap = 'round';
-  ctx.font = '600 22px system-ui, sans-serif';
-  ctx.textAlign = 'center';
-  if (t === 'sayi-dogrusu') {
-    const y = y0 + 90;
-    ctx.beginPath();
-    ctx.moveTo(90, y);
-    ctx.lineTo(810, y);
-    ctx.stroke();
-    drawArrowHead(ctx, { x: 790, y }, { x: 810, y });
-    drawArrowHead(ctx, { x: 110, y }, { x: 90, y });
-    for (let i = -5; i <= 5; i++) {
-      const x = 450 + i * 60;
-      ctx.beginPath();
-      ctx.moveTo(x, y - 12);
-      ctx.lineTo(x, y + 12);
-      ctx.stroke();
-      ctx.fillText(String(i), x, y + 42);
-    }
-  } else if (t === 'koordinat') {
-    const cx = 450;
-    const cy = y0 + 240;
-    const step = 40;
-    ctx.save();
-    ctx.globalAlpha = 0.25;
-    ctx.lineWidth = 1.5;
-    for (let i = -8; i <= 8; i++) {
-      ctx.beginPath();
-      ctx.moveTo(cx + i * step, cy - 200);
-      ctx.lineTo(cx + i * step, cy + 200);
-      ctx.stroke();
-    }
-    for (let j = -5; j <= 5; j++) {
-      ctx.beginPath();
-      ctx.moveTo(cx - 330, cy + j * step);
-      ctx.lineTo(cx + 330, cy + j * step);
-      ctx.stroke();
-    }
-    ctx.restore();
-    ctx.beginPath();
-    ctx.moveTo(cx - 340, cy);
-    ctx.lineTo(cx + 340, cy);
-    ctx.moveTo(cx, cy + 210);
-    ctx.lineTo(cx, cy - 210);
-    ctx.stroke();
-    drawArrowHead(ctx, { x: cx + 320, y: cy }, { x: cx + 340, y: cy });
-    drawArrowHead(ctx, { x: cx, y: cy - 190 }, { x: cx, y: cy - 210 });
-    ctx.fillText('x', cx + 330, cy + 30);
-    ctx.fillText('y', cx - 22, cy - 196);
-    ctx.fillText('O', cx - 16, cy + 26);
-    ctx.font = '500 16px system-ui, sans-serif';
-    for (let i = -7; i <= 7; i++) if (i) ctx.fillText(String(i), cx + i * step, cy + 22);
-    for (let j = -4; j <= 4; j++) if (j) ctx.fillText(String(-j), cx - 18, cy + j * step + 6);
-  } else if (t === 'tablo') {
-    const x = 90;
-    const w = 720;
-    const rows = 4;
-    const cols = 3;
-    const rh = 60;
-    for (let r = 0; r <= rows; r++) {
-      ctx.lineWidth = r === 1 ? 3 : 2;
-      ctx.beginPath();
-      ctx.moveTo(x, y0 + 40 + r * rh);
-      ctx.lineTo(x + w, y0 + 40 + r * rh);
-      ctx.stroke();
-    }
-    for (let c = 0; c <= cols; c++) {
-      ctx.beginPath();
-      ctx.moveTo(x + (c * w) / cols, y0 + 40);
-      ctx.lineTo(x + (c * w) / cols, y0 + 40 + rows * rh);
-      ctx.stroke();
-    }
-  } else if (t === 'formul-kutusu') {
-    ctx.setLineDash([12, 8]);
-    ctx.strokeRect(120, y0 + 40, 660, 150);
-    ctx.setLineDash([]);
-    ctx.textAlign = 'left';
-    ctx.fillText('★ Formül:', 140, y0 + 76);
-  } else {
-    ctx.textAlign = 'left';
-    ctx.font = '700 30px system-ui, sans-serif';
-    ctx.fillText('Başlık:', 90, y0 + 70);
-    ctx.lineWidth = 2;
-    ctx.beginPath();
-    ctx.moveTo(90, y0 + 86);
-    ctx.lineTo(810, y0 + 86);
-    ctx.stroke();
-  }
-  ctx.restore();
-}
 
 const PAPERS: { key: NotebookPaper; label: string }[] = [
   { key: 'kareli', label: 'Kareli' },
@@ -159,7 +57,7 @@ const PAPERS: { key: NotebookPaper; label: string }[] = [
   { key: 'duz', label: 'Düz' },
 ];
 
-const DEFAULT_WIDTH = 3;
+const DEFAULT_WIDTH = 4;
 const HIGHLIGHTER_WIDTH = 16;
 
 const W = 900;
@@ -171,20 +69,17 @@ function point(canvas: HTMLCanvasElement, e: PointerEvent | React.PointerEvent):
   return { x: ((e.clientX - r.left) / r.width) * W, y: ((e.clientY - r.top) / r.height) * H };
 }
 
-function drawArrowHead(ctx: CanvasRenderingContext2D, from: { x: number; y: number }, to: { x: number; y: number }) {
-  const angle = Math.atan2(to.y - from.y, to.x - from.x);
-  const len = 18;
-  ctx.beginPath();
-  ctx.moveTo(to.x, to.y);
-  ctx.lineTo(to.x - len * Math.cos(angle - Math.PI / 7), to.y - len * Math.sin(angle - Math.PI / 7));
-  ctx.moveTo(to.x, to.y);
-  ctx.lineTo(to.x - len * Math.cos(angle + Math.PI / 7), to.y - len * Math.sin(angle + Math.PI / 7));
-  ctx.stroke();
-}
-
 function drawShape(ctx: CanvasRenderingContext2D, tool: Tool, start: { x: number; y: number }, end: { x: number; y: number }) {
   ctx.beginPath();
-  if (tool === 'cizgi' || tool === 'ok') {
+  if (tool === 'kesikli' || tool === 'cetvel') {
+    const to = tool === 'cetvel' ? snapAngle(start, end) : end;
+    ctx.save();
+    if (tool === 'kesikli') ctx.setLineDash([ctx.lineWidth * 3 + 6, ctx.lineWidth * 2 + 6]);
+    ctx.moveTo(start.x, start.y);
+    ctx.lineTo(to.x, to.y);
+    ctx.stroke();
+    ctx.restore();
+  } else if (tool === 'cizgi' || tool === 'ok') {
     ctx.moveTo(start.x, start.y);
     ctx.lineTo(end.x, end.y);
     ctx.stroke();
@@ -231,6 +126,10 @@ export default function NotebookEditorPage({ params }: { params: string[] }) {
   const [tool, setTool] = useState<Tool>('kalem');
   const [pen, setPen] = useState<(typeof PENS)[number]>(PENS[0]);
   const [width, setWidth] = useState(DEFAULT_WIDTH);
+  /** Titrek el çizgisini yumuşatır (kalemde). */
+  const [smooth, setSmooth] = useState(true);
+  const curveRef = useRef<{ x: number; y: number }[]>([]);
+  const smoothRef = useRef({ x: 0, y: 0 });
   const [confirmClear, setConfirmClear] = useState(false);
   const [canUndo, setCanUndo] = useState(false);
   const [canRedo, setCanRedo] = useState(false);
@@ -428,6 +327,8 @@ export default function NotebookEditorPage({ params }: { params: string[] }) {
     drawingRef.current = true;
     startRef.current = point(c, e);
     lastRef.current = startRef.current;
+    smoothRef.current = startRef.current;
+    curveRef.current = [startRef.current];
 
     if (tool === 'kalem' || tool === 'silgi') {
       cx.beginPath();
@@ -452,10 +353,27 @@ export default function NotebookEditorPage({ params }: { params: string[] }) {
     if (!c || !oc || !cx || !ocx) return;
     const p = point(c, e);
 
-    if (tool === 'kalem' || tool === 'silgi') {
+    if (tool === 'kalem' && smooth) {
+      // Sabitleyici: kalem ucu parmağı biraz geriden izler, titreme yumuşar; ara noktalar eğriyle birleşir.
+      const prev = smoothRef.current;
+      const next = { x: prev.x + (p.x - prev.x) * 0.45, y: prev.y + (p.y - prev.y) * 0.45 };
+      const mid = { x: (prev.x + next.x) / 2, y: (prev.y + next.y) / 2 };
+      cx.quadraticCurveTo(prev.x, prev.y, mid.x, mid.y);
+      cx.stroke();
+      cx.beginPath();
+      cx.moveTo(mid.x, mid.y);
+      smoothRef.current = next;
+      lastRef.current = p;
+    } else if (tool === 'kalem' || tool === 'silgi') {
       cx.lineTo(p.x, p.y);
       cx.stroke();
       lastRef.current = p;
+    } else if (tool === 'egri') {
+      curveRef.current.push(p);
+      ocx.clearRect(0, 0, W, H);
+      applyPenStyle(ocx);
+      ocx.globalAlpha = 1;
+      drawSmoothCurve(ocx, curveRef.current);
     } else {
       ocx.clearRect(0, 0, W, H);
       applyPenStyle(ocx);
@@ -471,7 +389,16 @@ export default function NotebookEditorPage({ params }: { params: string[] }) {
     const cx = ctx();
     const ocx = octx();
     if (!c || !cx || !ocx) return;
-    if (tool !== 'kalem' && tool !== 'silgi') {
+    if (tool === 'kalem' && smooth) {
+      const p = point(c, e);
+      cx.lineTo(p.x, p.y);
+      cx.stroke();
+    } else if (tool === 'egri') {
+      curveRef.current.push(point(c, e));
+      applyPenStyle(cx);
+      drawSmoothCurve(cx, curveRef.current);
+      ocx.clearRect(0, 0, W, H);
+    } else if (tool !== 'kalem' && tool !== 'silgi') {
       const p = point(c, e);
       applyPenStyle(cx);
       drawShape(cx, tool, startRef.current, p);
@@ -485,17 +412,17 @@ export default function NotebookEditorPage({ params }: { params: string[] }) {
   const fileBase = () => (meta?.title ?? 'defter-sayfasi').replace(/[^\p{L}\p{N} ]/gu, '').trim() || 'defter-sayfasi';
 
   /** Çizimi kareli zeminle birleştirip düz bir PNG'ye dönüştürür (dışa aktarım için). */
-  const renderFlattened = (): HTMLCanvasElement | null => {
+  const renderFlattened = (dark = isDark): HTMLCanvasElement | null => {
     const c = canvasRef.current;
     if (!c) return null;
     const out = document.createElement('canvas');
     out.width = W;
     out.height = H;
     const o = out.getContext('2d')!;
-    o.fillStyle = isDark ? '#1b1622' : '#ffffff';
+    o.fillStyle = dark ? '#1b1622' : '#ffffff';
     o.fillRect(0, 0, W, H);
-    o.strokeStyle = isDark ? '#332a40' : '#e4dcef';
-    o.fillStyle = isDark ? '#3a3048' : '#d9cfe8';
+    o.strokeStyle = dark ? '#332a40' : '#e4dcef';
+    o.fillStyle = dark ? '#3a3048' : '#d9cfe8';
     o.lineWidth = 1;
     if (paper === 'kareli') {
       for (let x = 0; x <= W; x += 30) {
@@ -529,17 +456,21 @@ export default function NotebookEditorPage({ params }: { params: string[] }) {
     a.click();
   };
 
-  /** Tarayıcının "PDF olarak kaydet" yazdırma seçeneğini kullanarak tek sayfalık PDF üretir. */
+  /** Gerçek PDF: kareli zemin, çizim, yazı ve çıkartmalar ekrandaki gibi; uzun sayfa A4 sayfalara bölünür. */
   const exportPdf = async () => {
-    const out = renderFlattened();
+    const out = renderFlattened(false);
     if (!out) return;
-    const dataUrl = out.toDataURL('image/png');
-    const win = window.open('', '_blank');
-    if (!win) return toast('Açılır pencereye izin verilmedi. Tarayıcı ayarlarından izin ver.');
-    win.document.write(
-      `<!doctype html><html><head><title>${fileBase()}</title><style>@page{size:auto;margin:0}html,body{margin:0}img{width:100%;display:block}</style></head><body><img src="${dataUrl}" onload="window.focus();window.print();"></body></html>`,
-    );
-    win.document.close();
+    try {
+      const blob = canvasToPdf(out, fileBase());
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = `${fileBase()}.pdf`;
+      a.click();
+      setTimeout(() => URL.revokeObjectURL(a.href), 4000);
+      toast('PDF indirildi.');
+    } catch {
+      toast('PDF hazırlanamadı. PNG olarak indirmeyi deneyebilirsin.');
+    }
   };
 
   const accent = meta?.subjectId ? subjectColorFor(meta.subjectId, isDark) : null;
@@ -576,7 +507,7 @@ export default function NotebookEditorPage({ params }: { params: string[] }) {
               onClick={() => setTool(t.key)}
             >
               <Icon name={t.icon} size={20} />
-              <span>{t.key === 'eksen' ? 'Eksen' : t.label}</span>
+              <span>{TOOL_SHORT[t.key] ?? t.label}</span>
             </button>
           ))}
         </div>
@@ -597,6 +528,20 @@ export default function NotebookEditorPage({ params }: { params: string[] }) {
               }}
             />
           ))}
+          <div className="segmented nb-sizes" role="group" aria-label="Kalem kalınlığı">
+            {([
+              ['İnce', 2],
+              ['Normal', 4],
+              ['Başlık', 9],
+            ] as const).map(([label, w]) => (
+              <button key={label} type="button" aria-pressed={width === w} onClick={() => setWidth(w)}>
+                {label}
+              </button>
+            ))}
+          </div>
+          <button type="button" className={`chip${smooth ? ' on' : ''}`} aria-pressed={smooth} onClick={() => setSmooth((v) => !v)} title="Titrek çizgiyi yumuşatır">
+            Düzgün çizgi
+          </button>
           <label className="nb-width">
             <span className="sr-only">Kalem kalınlığı</span>
             <input type="range" min={1} max={24} value={width} onChange={(e) => setWidth(Number(e.target.value))} aria-label="Kalem kalınlığı" />
@@ -649,14 +594,16 @@ export default function NotebookEditorPage({ params }: { params: string[] }) {
                 </button>
               ))}
             </div>
-            <div className="nb-row" role="group" aria-label="Şablonlar">
-              <span className="tiny muted">Şablon ekle:</span>
-              {TEMPLATES.map((t) => (
-                <button key={t.key} type="button" className="chip" onClick={() => insertTemplate(t.key)}>
-                  {t.label}
-                </button>
-              ))}
-            </div>
+            {TEMPLATE_GROUPS.map((g) => (
+              <div key={g.group} className="nb-row" role="group" aria-label={`${g.group} şablonları`}>
+                <span className="tiny muted nb-group">{g.group}:</span>
+                {g.items.map((t) => (
+                  <button key={t.key} type="button" className="chip" onClick={() => insertTemplate(t.key)}>
+                    {t.label}
+                  </button>
+                ))}
+              </div>
+            ))}
             <div className="nb-row">
               <button type="button" className="btn small ghost" onClick={() => void exportPng()}>
                 <Icon name="download" /> PNG indir
