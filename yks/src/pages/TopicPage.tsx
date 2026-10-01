@@ -434,7 +434,7 @@ export default function TopicPage({ params }: { params: string[] }) {
             <span><b>{lesson.commonMistakes.length}</b> sık hata</span>
           </div>
         )}
-        {lessonLoad.failed ? <LoadFailed what="Konu anlatımı" onRetry={lessonLoad.retry} /> : lesson === undefined ? <Spinner label="Konu anlatımı yükleniyor" /> : lesson === null ? <Empty title="Bu konunun anlatımı henüz eklenmedi." /> : <LessonView lesson={lesson} />}
+        {lessonLoad.failed ? <LoadFailed what="Konu anlatımı" kind={lessonLoad.errorKind} onRetry={lessonLoad.retry} /> : lesson === undefined ? <Spinner label="Konu anlatımı yükleniyor" /> : lesson === null ? <Empty title="Bu konunun anlatımı henüz eklenmedi." /> : <LessonView lesson={lesson} />}
       </div>
 
       <div className="card section topic-quiz-card" id="konu-sonu">
@@ -458,7 +458,7 @@ export default function TopicPage({ params }: { params: string[] }) {
           </div>
         )}
         {qLoad.failed ? (
-          <LoadFailed what="Sorular" onRetry={qLoad.retry} />
+          <LoadFailed what="Sorular" kind={qLoad.errorKind} onRetry={qLoad.retry} />
         ) : qCount == null ? (
           <Spinner label="Sorular yükleniyor" />
         ) : topicQs.length === 0 ? (

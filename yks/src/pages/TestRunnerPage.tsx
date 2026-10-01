@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { AskLabel } from '../components/AskName';
 import { getTopicRef } from '../data/curriculum';
-import { loadSubjectQuestions, subjectOfQuestionId } from '../data/content';
+import { loadQuestionsForTopics, topicOfQuestionId } from '../data/content';
 import type { Question } from '../domain/types';
 import { Icon } from '../components/Icon';
 import { PageHeader } from '../components/Layout';
@@ -44,12 +44,9 @@ export default function TestRunnerPage() {
   const finishingRef = useRef(false);
   const timeWarningsRef = useRef<Set<number>>(new Set());
 
-  // Yalnız bu testteki soruların dersleri yüklenir (tüm bankayı indirmeden, telefonda hızlı).
-  const subjectKey = [...new Set((test?.questionIds ?? []).map(subjectOfQuestionId).filter(Boolean))].sort().join(',');
-  const loaded = useLoad<Question[]>(
-    () => Promise.all(subjectKey.split(',').filter(Boolean).map((s) => loadSubjectQuestions(s))).then((l) => l.flat()),
-    [subjectKey],
-  );
+  // Yalnız bu testteki soruların bulunduğu dosyalar yüklenir (dersin tamamı değil, telefonda hızlı).
+  const topicKey = [...new Set((test?.questionIds ?? []).map(topicOfQuestionId))].sort().join(',');
+  const loaded = useLoad<Question[]>(() => loadQuestionsForTopics(topicKey.split(',').filter(Boolean)), [topicKey]);
   const all = useMemo(() => loaded.data ?? [], [loaded.data]);
   const byId = useMemo(() => (loaded.data ? new Map(loaded.data.map((q) => [q.id, q])) : null), [loaded.data]);
 
@@ -209,7 +206,7 @@ export default function TestRunnerPage() {
       </>
     );
   }
-  if (!byId) return loaded.failed ? <LoadFailed what="Sorular" onRetry={loaded.retry} /> : <Spinner label="Sorular yükleniyor" />;
+  if (!byId) return loaded.failed ? <LoadFailed what="Sorular" kind={loaded.errorKind} onRetry={loaded.retry} /> : <Spinner label="Sorular yükleniyor" />;
   if (!q) {
     return (
       <>

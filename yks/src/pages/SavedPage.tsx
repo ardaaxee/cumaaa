@@ -45,7 +45,7 @@ export default function SavedPage() {
     <>
       <PageHeader title="Kaydettiğim sorular" sub="Sorulardaki ☆ Kaydet ile eklenir" />
       {!byId ? (
-        loaded.failed ? <LoadFailed what="Kaydedilen sorular" onRetry={loaded.retry} /> : <Spinner />
+        loaded.failed ? <LoadFailed what="Kaydedilen sorular" kind={loaded.errorKind} onRetry={loaded.retry} /> : <Spinner />
       ) : Object.keys(favorites).length === 0 ? (
         <div className="card">
           <Empty title="Henüz kaydettiğin soru yok." action={<a className="btn primary" href="#/testler">Test çöz</a>}>

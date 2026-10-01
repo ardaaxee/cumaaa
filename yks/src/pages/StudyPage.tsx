@@ -271,7 +271,7 @@ function Session({ topicId }: { topicId: string }) {
 
       <div className="card section">
         {lessonLoad.failed ? (
-          <LoadFailed what="Konu anlatımı" onRetry={lessonLoad.retry} />
+          <LoadFailed what="Konu anlatımı" kind={lessonLoad.errorKind} onRetry={lessonLoad.retry} />
         ) : loading ? (
           <Spinner label="Konu yükleniyor" />
         ) : current === 'Özet' && lesson ? (
@@ -285,7 +285,7 @@ function Session({ topicId }: { topicId: string }) {
               <SourceBadge type="ozgun-pratik" />
             </div>
             {qLoad.failed ? (
-              <LoadFailed what="Sorular" onRetry={qLoad.retry} />
+              <LoadFailed what="Sorular" kind={qLoad.errorKind} onRetry={qLoad.retry} />
             ) : !qLoad.data ? (
               <Spinner label="Sorular yükleniyor" />
             ) : quiz.length === 0 ? (

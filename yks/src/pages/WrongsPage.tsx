@@ -131,7 +131,7 @@ export default function WrongsPage() {
 
       <section className="section">
         {!byId ? (
-          loaded.failed ? <LoadFailed what="Yanlışların" onRetry={loaded.retry} /> : <Spinner />
+          loaded.failed ? <LoadFailed what="Yanlışların" kind={loaded.errorKind} onRetry={loaded.retry} /> : <Spinner />
         ) : entries.length === 0 ? (
           <div className="card">
             <Empty title={show === 'acik' ? 'Açık yanlışın yok.' : 'Henüz “öğrendim” işaretlediğin soru yok.'}>

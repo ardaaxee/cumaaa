@@ -14195,3 +14195,18 @@ textarea:focus-visible {
 .home-daily-practice > summary { cursor:pointer; min-height:44px; font-weight:600; }
 @media(min-width:900px) { .study-dock { display:none; } }
 @media(max-width:700px) { .study-queue-grid { grid-template-columns:1fr; } }
+
+/* Yeni sürüm yenileme bildirimi */
+.update-banner {
+  position: fixed;
+  left: 50%;
+  top: calc(env(safe-area-inset-top, 0px) + 12px);
+  transform: translateX(-50%);
+  z-index: 9999;
+  padding: 10px 16px;
+  border-radius: 999px;
+  background: var(--brand, #5b3fa8);
+  color: #fff;
+  font-weight: 700;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
+}

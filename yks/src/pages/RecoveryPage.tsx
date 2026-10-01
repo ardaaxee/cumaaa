@@ -11,7 +11,7 @@ import { recoveryQuestions } from '../utils/recoveryPractice';
 
 export default function RecoveryPage({ params }: { params: string[] }) {
   const id = params[0] ?? '';
-  const { data, failed, retry } = useLoad(async () => {
+  const { data, failed, errorKind, retry } = useLoad(async () => {
     const source = (await loadQuestionsByIds([id])).get(id);
     if (!source) return null;
     const [lesson, pool] = await Promise.all([loadLesson(source.topic), loadTopicQuestions(source.topic)]);
@@ -20,7 +20,7 @@ export default function RecoveryPage({ params }: { params: string[] }) {
   const [step, setStep] = useState(1);
   const [answers, setAnswers] = useState<Record<string, number>>({});
   const [verification, setVerification] = useState<Record<string, number>>({});
-  if (failed) return <LoadFailed onRetry={retry} />;
+  if (failed) return <LoadFailed kind={errorKind} onRetry={retry} />;
   if (data === undefined) return <Spinner />;
   if (!data) return <Empty title="Soru bulunamadı">Yanlışlarım bölümünden başka bir soru seçebilirsin.</Empty>;
   const { source, lesson, practice } = data;

@@ -1,11 +1,13 @@
 import { SUBJECTS } from '../data/curriculum';
 import { loadQuestionsByIds, loadQuestionsFor, loadSubjectQuestions } from '../data/content';
 import { recoverFromChunkError } from '../utils/chunkRecovery';
+import { classifyLoadError, loadErrorText } from '../utils/loadErrors';
 import { navigate } from '../hooks/useRoute';
 import { startTest } from '../store/actions';
 import type { TestConfig } from '../store/schema';
 import { getState, update } from '../store/store';
 import { filterPool, pickQuestions } from '../utils/testEngine';
+import type { Question } from '../domain/types';
 import { nextBestTopics } from './adaptiveStudy';
 
 export const DEFAULT_CONFIG: TestConfig = {
@@ -28,22 +30,52 @@ export function makeConfig(patch: Partial<TestConfig>): TestConfig {
  * Filtreye göre test oluşturup başlatır. Havuz boşsa hata mesajı döner.
  * Devam eden test varsa üzerine yazılır (çağıran taraf onay almalıdır).
  */
-const LOAD_ERROR = 'Sorular yüklenemedi. İnternet bağlantını kontrol edip tekrar dene.';
+/** Yükleme hatasını türüne göre açıklar; eski sürümse sayfayı bir kez yeniler. */
+async function loadFailure(e: unknown): Promise<string> {
+  const err = await classifyLoadError(e);
+  recoverFromChunkError(err);
+  return loadErrorText(err.kind);
+}
+
+/** Aynı anda iki test başlatılmasın (çift dokunma). */
+let launching = false;
+export function isLaunching(): boolean {
+  return launching;
+}
+async function once(run: () => Promise<string | null>): Promise<string | null> {
+  if (launching) return null;
+  launching = true;
+  try {
+    return await run();
+  } finally {
+    launching = false;
+  }
+}
 export const ACTIVE_TEST_ERROR = 'Devam eden testin var. Önce teste dönüp bitir veya yeni test başlatırken mevcut testi kapatmayı onayla.';
 
 function activeTestBlocked(replaceActive = false): string | null {
   return getState().activeTest && !replaceActive ? ACTIVE_TEST_ERROR : null;
 }
 
-export async function launchTest(config: TestConfig, replaceActive = false): Promise<string | null> {
+export function launchTest(config: TestConfig, replaceActive = false, preloaded?: Question[]): Promise<string | null> {
+  return once(() => launchTestNow(config, replaceActive, preloaded));
+}
+
+/** Hazır havuz verildiyse yeniden indirmeden onu kullanır. */
+export function launchTestFromPool(config: TestConfig, pool: Question[], replaceActive = false): Promise<string | null> {
+  return launchTest(config, replaceActive, pool);
+}
+
+async function launchTestNow(config: TestConfig, replaceActive: boolean, preloaded?: Question[]): Promise<string | null> {
   const blocked = activeTestBlocked(replaceActive);
   if (blocked) return blocked;
-  let all;
-  try {
-    all = await loadQuestionsFor(config);
-  } catch (e) {
-    recoverFromChunkError(e);
-    return LOAD_ERROR;
+  let all = preloaded;
+  if (!all) {
+    try {
+      all = await loadQuestionsFor(config);
+    } catch (e) {
+      return loadFailure(e);
+    }
   }
   const pool = filterPool(all, config);
   if (!pool.length) return 'Bu filtrelere uyan soru bulunamadı. Filtreleri genişletmeyi dene.';
@@ -54,21 +86,22 @@ export async function launchTest(config: TestConfig, replaceActive = false): Pro
 }
 
 /** Belirli soru kimlikleriyle test başlatır (yanlışlar, tek soru). */
-export async function launchWithIds(ids: string[], config: TestConfig, replaceActive = false): Promise<string | null> {
+export function launchWithIds(ids: string[], config: TestConfig, replaceActive = false): Promise<string | null> {
+  return once(async () => {
   const blocked = activeTestBlocked(replaceActive);
   if (blocked) return blocked;
   let known;
   try {
     known = await loadQuestionsByIds(ids);
   } catch (e) {
-    recoverFromChunkError(e);
-    return LOAD_ERROR;
+    return loadFailure(e);
   }
   const valid = ids.filter((id) => known.has(id));
   if (!valid.length) return 'Soru bulunamadı.';
   update((s) => startTest(s, { ...config, count: valid.length }, valid));
   navigate('/test');
   return null;
+  });
 }
 
 const QUICK_SUBJECTS = 3;
@@ -85,8 +118,7 @@ export async function launchQuickMix(count: number, title: string): Promise<stri
   try {
     pool = (await Promise.all(subjects.map((s) => loadSubjectQuestions(s.id)))).flat();
   } catch (e) {
-    recoverFromChunkError(e);
-    return LOAD_ERROR;
+    return loadFailure(e);
   }
   if (!pool.length) return 'Soru bulunamadı.';
   const config = makeConfig({ count, title });
@@ -125,8 +157,7 @@ export async function launchDiagnostic(): Promise<string | null> {
   try {
     groups = await Promise.all(DIAGNOSTIC_SUBJECTS.map(async (id) => ({ id, qs: await loadSubjectQuestions(id) })));
   } catch (e) {
-    recoverFromChunkError(e);
-    return LOAD_ERROR;
+    return loadFailure(e);
   }
 
   const ids: string[] = [];

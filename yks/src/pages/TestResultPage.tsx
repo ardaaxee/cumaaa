@@ -62,7 +62,7 @@ export default function TestResultPage({ params }: { params: string[] }) {
       </>
     );
   }
-  if (loaded.failed) return <LoadFailed what="Sonuç" onRetry={loaded.retry} />;
+  if (loaded.failed) return <LoadFailed what="Sonuç" kind={loaded.errorKind} onRetry={loaded.retry} />;
   if (!score || !byId) return <Spinner />;
 
   const items = score.items.filter((i) => (filter === 'all' ? true : filter === 'isaretli' ? i.marked : i.state === filter));

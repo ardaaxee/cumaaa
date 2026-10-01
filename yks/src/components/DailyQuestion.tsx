@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { SUBJECTS, getTopicRef, subjectLabel } from '../data/curriculum';
-import { loadSubjectQuestions } from '../data/content';
+import { loadTopicQuestions } from '../data/content';
 import type { Question } from '../domain/types';
 import { dayKey } from '../utils/date';
 import { recoverFromChunkError } from '../utils/chunkRecovery';
@@ -22,7 +22,9 @@ export function DailyQuestion() {
     let alive = true;
     const h = hash(today);
     const subject = SUBJECTS[h % SUBJECTS.length];
-    loadSubjectQuestions(subject.id)
+    const topics = subject.units.flatMap((u) => u.topics);
+    // Yalnız seçilen konunun soru dosyası indirilir.
+    loadTopicQuestions(topics[(h >>> 4) % topics.length].id)
       .then((qs) => {
         if (!alive) return;
         setQ(qs.length ? qs[(h >>> 8) % qs.length] : null);

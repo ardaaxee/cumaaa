@@ -6,14 +6,17 @@
   "description": "İyi ki • YKS Çalışma Odası — TYT + AYT sayısal hazırlık uygulaması",
   "scripts": {
     "dev": "vite",
-    "build": "tsc -b && vite build",
+    "build": "npm run gen:content && tsc -b && vite build && node scripts/check-build.mjs",
     "preview": "vite preview",
     "start": "node server/index.mjs",
     "typecheck": "tsc -b --noEmit",
     "test": "vitest run",
     "test:watch": "vitest",
     "coverage": "vitest run --coverage",
-    "release:check": "npm test && npm run build && node scripts/check-release.mjs"
+    "release:check": "npm test && npm run build && node scripts/check-release.mjs",
+    "gen:content": "node --experimental-strip-types --no-warnings scripts/gen-content-index.mjs",
+    "pretest": "npm run gen:content",
+    "e2e": "node scripts/e2e.mjs"
   },
   "engines": {
     "node": ">=20"

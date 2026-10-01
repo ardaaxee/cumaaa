@@ -1,8 +1,7 @@
 import { useMemo, useState } from 'react';
 import { SUBJECTS, getSubject, getTopicRef, subjectLabel } from '../data/curriculum';
-import { loadQuestionsFor } from '../data/content';
-import { useLoad } from '../hooks/useLoad';
-import type { Difficulty, Question, QuestionType } from '../domain/types';
+import { summarizePool } from '../data/questionCounts';
+import type { Difficulty, QuestionType } from '../domain/types';
 import { DIFFICULTY_LABEL, TYPE_LABEL } from '../components/QuestionView';
 import { PageHeader } from '../components/Layout';
 import { ConfirmDialog, Empty, SourceBadge, toast } from '../components/ui';
@@ -13,7 +12,7 @@ import { useAppState } from '../store/store';
 import { useRoute } from '../hooks/useRoute';
 import { formatDay, formatDuration } from '../utils/date';
 import { formatNet } from '../utils/net';
-import { QUESTION_COUNTS, filterPool } from '../utils/testEngine';
+import { QUESTION_COUNTS } from '../utils/testEngine';
 
 export default function TestSetupPage() {
   const state = useAppState();
@@ -42,37 +41,40 @@ export default function TestSetupPage() {
   });
   const [confirm, setConfirm] = useState<null | (() => Promise<string | null>)>(null);
 
-  // Yalnız seçili sınav/ders için soru sayılır; tüm banka gereksiz yere indirilmez.
-  const loaded = useLoad<Question[]>(() => loadQuestionsFor(cfg), [cfg.exam, cfg.subjectId, cfg.topicId]);
-  const questions = loaded.data ?? null;
+  // Sayım, derleme sırasında üretilen küçük dizinden yapılır: bu ekran açılırken hiçbir soru paketi indirilmez.
+  // Sorular yalnız "Testi başlat"a basınca ve yalnız seçilen konu/dersin dosyalarından yüklenir.
+  const [phase, setPhase] = useState<'ready' | 'preparing' | 'error'>('ready');
+  const [lastError, setLastError] = useState<string | null>(null);
 
   const set = (patch: Partial<TestConfig>) => setCfg((c) => ({ ...c, ...patch }));
-  const pool = useMemo(() => (questions ? filterPool(questions, cfg) : []), [questions, cfg]);
+  const summary = useMemo(() => summarizePool(cfg), [cfg]);
+  const poolSize = summary.total;
   const subjects = SUBJECTS.filter((s) => cfg.exam === 'all' || s.exam === cfg.exam);
   const subject = cfg.subjectId !== 'all' ? getSubject(cfg.subjectId) : undefined;
   const topics = subject ? subject.units.flatMap((u) => u.topics) : [];
   const topic = cfg.topicId !== 'all' ? getTopicRef(cfg.topicId)?.topic : undefined;
   const openWrongIds = Object.values(state.wrongs).filter((w) => !w.learned).map((w) => w.questionId);
-  const difficultyPool = useMemo(() => questions ? filterPool(questions, { ...cfg, difficulty: 'all' }) : [], [questions, cfg]);
-  const poolDifficulty = useMemo(
-    () => Object.entries(DIFFICULTY_LABEL).map(([key, label]) => ({ key, label, count: difficultyPool.filter((q) => q.difficulty === key).length })),
-    [difficultyPool],
-  );
-  const poolTypes = useMemo(
-    () =>
-      Object.entries(TYPE_LABEL)
-        .map(([key, label]) => ({ key, label, count: pool.filter((q) => q.type === key).length }))
-        .filter((x) => x.count > 0)
-        .sort((a, b) => b.count - a.count),
-    [pool],
-  );
+  const poolDifficulty = Object.entries(DIFFICULTY_LABEL).map(([key, label]) => ({ key, label, count: summary.byDifficulty[key] ?? 0 }));
+  const poolTypes = Object.entries(TYPE_LABEL)
+    .map(([key, label]) => ({ key, label, count: summary.byType[key] ?? 0 }))
+    .filter((x) => x.count > 0)
+    .sort((a, b) => b.count - a.count);
+  const mixed = cfg.subjectId === 'all';
 
   const run = (
     start: (replaceActive: boolean) => Promise<string | null>,
   ) => {
     const go = async (replaceActive: boolean) => {
+      if (phase === 'preparing') return;
+      setPhase('preparing');
+      setLastError(null);
       const err = await start(replaceActive);
-      if (err) toast(err);
+      // Başarılıysa test ekranına geçildi; bu sayfa kapanır.
+      setPhase(err ? 'error' : 'ready');
+      if (err) {
+        setLastError(err);
+        toast(err);
+      }
     };
     if (state.activeTest) setConfirm(() => () => start(true));
     else void go(false);
@@ -186,11 +188,11 @@ export default function TestSetupPage() {
             </div>
           </div>
         </div>
-        {questions && pool.length > 0 && (
+        {poolSize > 0 && (
           <div className="test-pool-map" aria-label="Soru havuzu dağılımı">
             <div className="test-pool-head">
               <span>Soru havuzu</span>
-              <b>{pool.length} soru</b>
+              <b>{poolSize} soru</b>
             </div>
             <div className="test-pool-chips">
               {poolDifficulty.filter((x) => x.count > 0).map((x) => (
@@ -210,31 +212,35 @@ export default function TestSetupPage() {
           </div>
         )}
 
-        {questions && pool.length === 0 && <div className="notice warn"><div className="grow">Bu seçimde soru bulunamadı. Konuyu koruyarak zorluk, soru tipi ve alt konu filtrelerini genişletebilirsin.</div><button className="btn small" type="button" onClick={() => set({ subtopicId: 'all', difficulty: 'all', type: 'all' })}>Filtreleri genişlet</button></div>}
+        {poolSize === 0 && <div className="notice warn"><div className="grow">Bu seçimde soru bulunamadı. Konuyu koruyarak zorluk, soru tipi ve alt konu filtrelerini genişletebilirsin.</div><button className="btn small" type="button" onClick={() => set({ subtopicId: 'all', difficulty: 'all', type: 'all' })}>Filtreleri genişlet</button></div>}
         <p className="small muted mt-12" style={{ marginBottom: 0 }}>
           {cfg.mode === 'ogrenme'
             ? 'Öğrenme modu: her cevaptan sonra doğru/yanlış, çözüm, öğretmene sor ve benzer soru seçenekleri görünür.'
-            : `Sınav modu: süre ${Math.round((Math.min(cfg.count, pool.length || cfg.count) * 90) / 60)} dk (soru başına 1,5 dk). Test bitene kadar cevaplar açıklanmaz.`}
+            : `Sınav modu: süre ${Math.round((Math.min(cfg.count, poolSize || cfg.count) * 90) / 60)} dk (soru başına 1,5 dk). Test bitene kadar cevaplar açıklanmaz.`}
         </p>
         <div className="row mt-12">
           <button
             type="button"
             className="btn primary"
-            disabled={!!questions && pool.length === 0}
+            data-testid="start-test"
+            disabled={poolSize === 0 || phase === 'preparing'}
+            aria-busy={phase === 'preparing'}
             onClick={() => run((replace) => launchTest(cfg, replace))}
           >
-            Testi başlat
+            {phase === 'preparing' ? 'Sorular hazırlanıyor…' : 'Testi başlat'}
           </button>
           <span className="small muted" aria-live="polite">
-            {questions ? `Bu filtrede ${pool.length} soru var${pool.length && pool.length < cfg.count ? ` (test ${pool.length} soruyla başlar)` : ''}.` : loaded.failed ? (
+            {phase === 'error' && lastError ? (
               <>
-                Soru sayısı alınamadı.{' '}
-                <button type="button" className="btn small ghost" onClick={loaded.retry}>
+                {lastError}{' '}
+                <button type="button" className="btn small ghost" onClick={() => run((replace) => launchTest(cfg, replace))}>
                   Tekrar dene
                 </button>
               </>
+            ) : mixed ? (
+              `Karışık seçimde ${poolSize} soruluk havuzdan rastgele 3 dersin soruları kullanılır.`
             ) : (
-              'Sorular sayılıyor…'
+              `Bu filtrede ${poolSize} soru var${poolSize && poolSize < cfg.count ? ` (test ${poolSize} soruyla başlar)` : ''}.`
             )}
           </span>
         </div>

@@ -1,9 +1,12 @@
 import { useCallback, useEffect, useState } from 'react';
 import { recoverFromChunkError } from '../utils/chunkRecovery';
+import { classifyLoadError, type LoadErrorKind } from '../utils/loadErrors';
 
 export interface Loaded<T> {
   data: T | undefined;
   failed: boolean;
+  /** Hatanın türü (çevrimdışı, zaman aşımı, eksik paket…); ekranda doğru mesaj için. */
+  errorKind: LoadErrorKind | null;
   retry: () => void;
 }
 
@@ -15,16 +18,21 @@ export interface Loaded<T> {
 export function useLoad<T>(load: () => Promise<T>, deps: unknown[]): Loaded<T> {
   const [data, setData] = useState<T | undefined>(undefined);
   const [failed, setFailed] = useState(false);
+  const [errorKind, setErrorKind] = useState<LoadErrorKind | null>(null);
   const [round, setRound] = useState(0);
 
   useEffect(() => {
     let alive = true;
     setFailed(false);
+    setErrorKind(null);
     setData(undefined);
     load()
       .then((d) => alive && setData(d))
-      .catch((e) => {
-        if (!alive || recoverFromChunkError(e)) return;
+      .catch(async (e) => {
+        const err = await classifyLoadError(e);
+        if (!alive) return;
+        setErrorKind(err.kind);
+        if (recoverFromChunkError(err)) return;
         setFailed(true);
       });
     return () => {
@@ -34,5 +42,5 @@ export function useLoad<T>(load: () => Promise<T>, deps: unknown[]): Loaded<T> {
   }, [...deps, round]);
 
   const retry = useCallback(() => setRound((r) => r + 1), []);
-  return { data, failed, retry };
+  return { data, failed, errorKind, retry };
 }

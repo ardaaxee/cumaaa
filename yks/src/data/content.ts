@@ -1,4 +1,6 @@
 import type { LessonSeed, Question, QuestionSeed, SubjectId } from '../domain/types';
+import { loadWithPolicy } from '../utils/loadErrors';
+import { LESSON_FILES, QUESTION_INDEX } from './contentIndex.generated';
 import { SUBJECTS, getTopicRef } from './curriculum';
 
 type LessonModule = { lessons: LessonSeed[] };
@@ -11,22 +13,14 @@ const questionModules = import.meta.glob<QuestionModule>('./questions/*.ts');
 /** İçerik dosyalarının oluşturulma tarihi (soru bankası sürümü). */
 export const CONTENT_CREATED_AT = '2026-09-27';
 
-/** Ağ hatasında bir kez yeniden dener (mobil bağlantı kopmaları için). */
-async function withRetry<T>(load: Loader<T>): Promise<T> {
-  try {
-    return await load();
-  } catch {
-    await new Promise((r) => setTimeout(r, 600));
-    return load();
-  }
-}
+const fileName = (path: string) => path.replace(/^.*\//, '').replace(/\.ts$/, '');
+const questionLoaderByFile = new Map(Object.entries(questionModules).map(([p, l]) => [fileName(p), l]));
+const lessonLoaderByFile = new Map(Object.entries(lessonModules).map(([p, l]) => [fileName(p), l]));
 
-/** Dosya adı dersin kimliğiyle başlar: "./lessons/ayt-fizik-1.ts" → ayt-fizik. */
-function loadersFor<T>(modules: Record<string, Loader<T>>, subjectId: string): Loader<T>[] {
-  const re = new RegExp(`/${subjectId}(-[^/]*)?\\.ts$`);
-  return Object.entries(modules)
-    .filter(([path]) => re.test(path))
-    .map(([, load]) => load);
+/** Dosya adı dersin kimliğiyle başlar: "ayt-fizik-1" → ayt-fizik. */
+function filesForSubject(files: Iterable<string>, subjectId: string): string[] {
+  const re = new RegExp(`^${subjectId}(-.*)?$`);
+  return [...files].filter((f) => re.test(f)).sort();
 }
 
 export function normalizeQuestion(seed: QuestionSeed): Question | null {
@@ -42,89 +36,137 @@ export function normalizeQuestion(seed: QuestionSeed): Question | null {
   };
 }
 
-const subjectLessonCache = new Map<string, Promise<Map<string, LessonSeed>>>();
-const subjectQuestionCache = new Map<string, Promise<Question[]>>();
-let allQuestionCache: Promise<Question[]> | null = null;
+// ---------- Dosya bazlı önbellek: her soru/konu paketi en fazla bir kez indirilir ----------
 
-/** Yalnız bir dersin konu anlatımlarını yükler (telefonda hızlı açılış için). */
-export function loadSubjectLessons(subjectId: SubjectId | string): Promise<Map<string, LessonSeed>> {
-  let p = subjectLessonCache.get(subjectId);
+const questionFileCache = new Map<string, Promise<Question[]>>();
+const lessonFileCache = new Map<string, Promise<LessonSeed[]>>();
+
+function cached<T>(cache: Map<string, Promise<T>>, key: string, load: Loader<T>): Promise<T> {
+  let p = cache.get(key);
   if (!p) {
-    p = Promise.all(loadersFor(lessonModules, subjectId).map((load) => withRetry(load))).then((mods) => {
-      const map = new Map<string, LessonSeed>();
-      for (const mod of mods) for (const lesson of mod.lessons) map.set(lesson.topicId, lesson);
-      return map;
-    });
+    p = loadWithPolicy(load);
     // Başarısız yükleme önbellekte kalmasın; bir sonraki denemede yeniden istensin.
-    p.catch(() => subjectLessonCache.delete(subjectId));
-    subjectLessonCache.set(subjectId, p);
+    p.catch(() => cache.delete(key));
+    cache.set(key, p);
   }
   return p;
 }
 
+function loadQuestionFile(file: string): Promise<Question[]> {
+  const loader = questionLoaderByFile.get(file);
+  if (!loader) return Promise.resolve([]);
+  return cached(questionFileCache, file, () =>
+    loader().then((m) => m.questions.map(normalizeQuestion).filter((q): q is Question => q !== null)),
+  );
+}
+
+function loadLessonFile(file: string): Promise<LessonSeed[]> {
+  const loader = lessonLoaderByFile.get(file);
+  if (!loader) return Promise.resolve([]);
+  return cached(lessonFileCache, file, () => loader().then((m) => m.lessons));
+}
+
+async function loadQuestionFiles(files: string[]): Promise<Question[]> {
+  return (await Promise.all([...new Set(files)].map(loadQuestionFile))).flat();
+}
+
+// ---------- Konu anlatımları ----------
+
+/** Yalnız bir dersin konu anlatımlarını yükler (formül defteri, kartlar). */
+export async function loadSubjectLessons(subjectId: SubjectId | string): Promise<Map<string, LessonSeed>> {
+  const lists = await Promise.all(filesForSubject(lessonLoaderByFile.keys(), subjectId).map(loadLessonFile));
+  const map = new Map<string, LessonSeed>();
+  for (const list of lists) for (const lesson of list) map.set(lesson.topicId, lesson);
+  return map;
+}
+
+/** Yalnız konunun anlatımının bulunduğu dosyayı yükler. */
 export async function loadLesson(topicId: string): Promise<LessonSeed | undefined> {
-  const ref = getTopicRef(topicId);
-  if (!ref) return undefined;
-  return (await loadSubjectLessons(ref.subject.id)).get(topicId);
+  const file = LESSON_FILES[topicId];
+  if (!file) return undefined;
+  return (await loadLessonFile(file)).find((l) => l.topicId === topicId);
+}
+
+// ---------- Sorular ----------
+
+/** Konunun sorularının bulunduğu dosyalar (derleme sırasında üretilen dizinden). */
+export function topicQuestionFiles(topicId: string): string[] {
+  return QUESTION_INDEX[topicId]?.f ?? [];
 }
 
 /** Yalnız bir dersin soru bankasını yükler. */
 export function loadSubjectQuestions(subjectId: SubjectId | string): Promise<Question[]> {
-  let p = subjectQuestionCache.get(subjectId);
-  if (!p) {
-    p = Promise.all(loadersFor(questionModules, subjectId).map((load) => withRetry(load))).then((mods) =>
-      mods
-        .flatMap((m) => m.questions)
-        .map(normalizeQuestion)
-        .filter((q): q is Question => q !== null),
-    );
-    p.catch(() => subjectQuestionCache.delete(subjectId));
-    subjectQuestionCache.set(subjectId, p);
-  }
-  return p;
+  return loadQuestionFiles(filesForSubject(questionLoaderByFile.keys(), subjectId));
 }
 
+/** Yalnız konunun sorularının bulunduğu dosyaları yükler (dersin tamamını değil). */
 export async function loadTopicQuestions(topicId: string): Promise<Question[]> {
-  const ref = getTopicRef(topicId);
-  if (!ref) return [];
-  return (await loadSubjectQuestions(ref.subject.id)).filter((q) => q.topic === topicId);
+  return (await loadQuestionFiles(topicQuestionFiles(topicId))).filter((q) => q.topic === topicId);
 }
 
-/** Soru kimliği "<konuId>-qNN" biçimindedir; konu → ders. */
+/** Verilen konuların bulunduğu dosyalardaki tüm sorular (test ekranı ve "benzer soru" için). */
+export function loadQuestionsForTopics(topicIds: string[]): Promise<Question[]> {
+  return loadQuestionFiles([...new Set(topicIds)].flatMap(topicQuestionFiles));
+}
+
+/** Soru kimliği "<konuId>-qNN" biçimindedir. */
+export function topicOfQuestionId(id: string): string {
+  return id.replace(/-q\d+$/, '');
+}
+
 export function subjectOfQuestionId(id: string): string | undefined {
-  return getTopicRef(id.replace(/-q\d+$/, ''))?.subject.id;
+  return getTopicRef(topicOfQuestionId(id))?.subject.id;
 }
 
-/** Yalnız verilen soruların derslerini yükler (tüm bankayı indirmeden). */
+/** Yalnız verilen soruların bulunduğu dosyaları yükler. */
 export async function loadQuestionsByIds(ids: string[]): Promise<Map<string, Question>> {
-  const subjects = [...new Set(ids.map(subjectOfQuestionId).filter((s): s is string => !!s))];
-  const lists = await Promise.all(subjects.map((s) => loadSubjectQuestions(s)));
+  const topics = [...new Set(ids.map(topicOfQuestionId))];
+  const list = await loadQuestionFiles(topics.flatMap(topicQuestionFiles));
   const want = new Set(ids);
-  const map = new Map<string, Question>();
-  for (const list of lists) for (const q of list) if (want.has(q.id)) map.set(q.id, q);
-  return map;
+  return new Map(list.filter((q) => want.has(q.id)).map((q) => [q.id, q]));
 }
 
-/** Filtreye göre gereken en küçük soru kümesini yükler: konu/ders seçiliyse yalnız o ders, sınav seçiliyse o sınavın dersleri. */
-export async function loadQuestionsFor(filter: { exam: string; subjectId: string; topicId: string }): Promise<Question[]> {
-  const subjectId = filter.topicId !== 'all' ? getTopicRef(filter.topicId)?.subject.id : filter.subjectId !== 'all' ? filter.subjectId : undefined;
-  if (subjectId) return loadSubjectQuestions(subjectId);
-  if (filter.exam === 'TYT' || filter.exam === 'AYT') {
-    const subjects = SUBJECTS.filter((s) => s.exam === filter.exam).map((s) => s.id);
-    return (await Promise.all(subjects.map((s) => loadSubjectQuestions(s)))).flat();
-  }
-  return loadQuestions();
+export interface QuestionScope {
+  exam: string;
+  subjectId: string;
+  topicId: string;
 }
 
-/** Tüm soru bankası (karışık testler için). */
+/** Karışık testlerde rastgele seçilen ders sayısı (tüm bankayı indirmemek için). */
+export const MIXED_SUBJECTS = 3;
+
+/**
+ * Filtre için gereken en küçük dosya kümesi:
+ * konu seçiliyse o konunun dosyaları, ders seçiliyse o dersin dosyaları,
+ * yalnız sınav ya da "karışık" seçiliyse rastgele birkaç dersin dosyaları.
+ */
+export function filesForScope(scope: QuestionScope, random: () => number = Math.random): string[] {
+  if (scope.topicId !== 'all') return topicQuestionFiles(scope.topicId);
+  if (scope.subjectId !== 'all') return filesForSubject(questionLoaderByFile.keys(), scope.subjectId);
+  const pool = SUBJECTS.filter((s) => scope.exam === 'all' || s.exam === scope.exam).map((s) => s.id);
+  const picked = [...pool].sort(() => random() - 0.5).slice(0, MIXED_SUBJECTS);
+  return picked.flatMap((s) => filesForSubject(questionLoaderByFile.keys(), s));
+}
+
+export function loadQuestionsFor(scope: QuestionScope, random?: () => number): Promise<Question[]> {
+  return loadQuestionFiles(filesForScope(scope, random));
+}
+
+/** Tüm soru bankası. Yalnız gerçekten gereken yerde (ör. tam deneme) kullanılır. */
 export function loadQuestions(): Promise<Question[]> {
-  if (!allQuestionCache) {
-    // Ders önbellekleri paylaşılır; bir ders zaten yüklendiyse yeniden indirilmez.
-    const p = Promise.all(SUBJECTS.map((s) => loadSubjectQuestions(s.id))).then((lists) => lists.flat());
-    p.catch(() => {
-      allQuestionCache = null;
-    });
-    allQuestionCache = p;
-  }
-  return allQuestionCache;
+  return loadQuestionFiles([...questionLoaderByFile.keys()]);
+}
+
+/** Bir sınavın tüm soruları (tam deneme oluşturmak için). */
+export function loadExamQuestions(exam: 'TYT' | 'AYT'): Promise<Question[]> {
+  return loadQuestionFiles(SUBJECTS.filter((s) => s.exam === exam).flatMap((s) => filesForSubject(questionLoaderByFile.keys(), s.id)));
+}
+
+/** Test için hangi dosyaların indirileceğini gösterir (testler/teşhis). */
+export function questionFileNames(): string[] {
+  return [...questionLoaderByFile.keys()].sort();
+}
+
+export function lessonFileNames(): string[] {
+  return [...lessonLoaderByFile.keys()].sort();
 }

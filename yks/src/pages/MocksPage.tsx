@@ -5,7 +5,9 @@ import { Icon } from '../components/Icon';
 import { PageHeader } from '../components/Layout';
 import { ConfirmDialog, Empty, Modal, Segmented, Stat, toast } from '../components/ui';
 import { addMock, deleteMock } from '../store/actions';
-import { loadQuestionsFor, loadSubjectQuestions } from '../data/content';
+import { classifyLoadError, loadErrorText } from '../utils/loadErrors';
+import { recoverFromChunkError } from '../utils/chunkRecovery';
+import { loadExamQuestions, loadSubjectQuestions } from '../data/content';
 import { launchWithIds, makeConfig, hasActiveTest } from '../services/testLauncher';
 import { getState } from '../store/store';
 import { FULL_MOCKS, buildFullMock, totalQuestions } from '../utils/fullMock';
@@ -190,9 +192,10 @@ export default function MocksPage() {
     const plan = FULL_MOCKS[e];
     let pool;
     try {
-      pool = await loadQuestionsFor({ exam: e, subjectId: 'all', topicId: 'all' });
-    } catch {
-      toast('Sorular yüklenemedi. İnternet bağlantını kontrol edip tekrar dene.');
+      pool = await loadExamQuestions(e);
+    } catch (err) {
+      const c = await classifyLoadError(err);
+      if (!recoverFromChunkError(c)) toast(loadErrorText(c.kind), 5000);
       return;
     }
     const ids = buildFullMock(plan, pool, getState().attempts);

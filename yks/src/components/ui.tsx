@@ -1,3 +1,5 @@
+import { loadErrorText, type LoadErrorKind } from '../utils/loadErrors';
+import { safeReload } from '../utils/chunkRecovery';
 import { useEffect, useRef, useState, type ReactNode } from 'react';
 import type { SourceType } from '../domain/types';
 import { Icon } from './Icon';
@@ -188,10 +190,25 @@ export function Empty({ title, children, action }: { title: string; children?: R
 }
 
 /** İçerik yüklenemediğinde sonsuz beklemek yerine gösterilir. */
-export function LoadFailed({ onRetry, what = 'İçerik' }: { onRetry: () => void; what?: string }) {
+export function LoadFailed({ onRetry, what = 'İçerik', kind = null }: { onRetry: () => void; what?: string; kind?: LoadErrorKind | null }) {
+  const needsReload = kind === 'stale' || kind === 'missing' || kind === 'module';
   return (
-    <Empty title={`${what} yüklenemedi.`} action={<button type="button" className="btn primary" onClick={onRetry}>Tekrar dene</button>}>
-      İnternet bağlantını kontrol et; bağlantı gelince tekrar dene.
+    <Empty
+      title={`${what} yüklenemedi.`}
+      action={
+        <div className="row" style={{ justifyContent: 'center' }}>
+          <button type="button" className="btn primary" onClick={onRetry}>
+            Tekrar dene
+          </button>
+          {needsReload && (
+            <button type="button" className="btn" onClick={() => safeReload()}>
+              Uygulamayı yenile
+            </button>
+          )}
+        </div>
+      }
+    >
+      {kind ? loadErrorText(kind) : 'İnternet bağlantını kontrol et; bağlantı gelince tekrar dene.'}
     </Empty>
   );
 }
