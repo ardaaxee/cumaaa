@@ -42,3 +42,9 @@ jobs:
 
       - name: Verify release files
         run: node scripts/check-release.mjs
+
+      - name: Install Chromium for E2E
+        run: npx playwright-core install --with-deps chromium
+
+      - name: E2E (real browser, phone size)
+        run: npm run e2e

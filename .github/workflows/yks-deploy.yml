@@ -44,12 +44,16 @@ jobs:
           ref: gh-pages
           path: gh-pages
 
-      - name: Replace YKS build
+      # Eski /assets dosyaları SİLİNMEZ (açık kalmış eski sekmeler güncellemede kırılmasın);
+      # index.html ile yeni paketler aynı commit'te yayına girer, birleşik klasör yeniden doğrulanır.
+      - name: Add YKS build (keep old assets)
         run: |
-          rm -rf gh-pages/yks
-          mkdir -p gh-pages/yks
-          cp -R yks/dist/. gh-pages/yks/
+          mkdir -p gh-pages/yks/assets
+          cp -R yks/dist/assets/. gh-pages/yks/assets/
+          find yks/dist -maxdepth 1 -type f -exec cp {} gh-pages/yks/ \;
+          for d in yks/dist/*/; do [ "$(basename "$d")" = "assets" ] || cp -R "$d" gh-pages/yks/; done
           touch gh-pages/.nojekyll
+          node yks/scripts/check-build.mjs gh-pages/yks
 
       - name: Publish
         working-directory: gh-pages
@@ -61,9 +65,10 @@ jobs:
             echo "No deployment changes."
             exit 0
           fi
-          git commit -m "deploy: latest YKS site"
-          if ! git push origin gh-pages; then
-            echo "gh-pages changed during deploy; publishing newest YKS build."
-            git fetch origin gh-pages
-            git push --force-with-lease origin HEAD:gh-pages
-          fi
+          git commit -m "deploy: latest YKS site (${GITHUB_SHA::7})"
+          for i in 1 2 3 4; do
+            if git push origin HEAD:gh-pages; then exit 0; fi
+            git pull --rebase origin gh-pages
+            sleep $((2 ** i))
+          done
+          exit 1
