@@ -401,6 +401,36 @@ await step('Öğretmen fotoğrafı: seç → öğretmen ekranında görünür �
   assert((await page.locator('.teacher-hero img.teacher-photo').count()) === 0, 'Fotoğraf kaldırılmadı');
 });
 
+await step('Genel tekrar: 5 dakikalık tekrar (özet → formül → 3 kart → 5 soru) bitince sonraki tarih planlanır', async () => {
+  // Uygulama sayfadan çıkarken durumu kaydettiği için veri, yeni belge yüklenmeden hemen önce (bir kez) yazılır.
+  await context.addInitScript((topic) => {
+    if (sessionStorage.getItem('e2eReview')) return;
+    sessionStorage.setItem('e2eReview', '1');
+    const k = 'iyikiYks.state.v3';
+    const st = JSON.parse(localStorage.getItem(k));
+    st.reviews = { ...(st.reviews || {}), [topic]: { topicId: topic, stage: 1, dueDay: '2020-01-01', history: [] } };
+    localStorage.setItem(k, JSON.stringify(st));
+  }, visitedTopic);
+  await page.reload({ waitUntil: 'networkidle' });
+  await page.goto(APP + '#/tekrar', { waitUntil: 'networkidle' });
+  await tap(page.getByRole('link', { name: '5 dk tekrar' }));
+  await page.waitForURL(/#\/tekrar\/.+/);
+  await page.locator('.review-summary li').first().waitFor({ timeout: 15_000 });
+  for (let i = 0; i < 3; i++) await tap(page.getByRole('button', { name: 'Devam' }));
+  const qs = page.locator('.inline-q');
+  await qs.first().waitFor({ timeout: 15_000 });
+  const n = await qs.count();
+  for (let i = 0; i < n; i++) await tap(qs.nth(i).locator('.option'));
+  await tap(page.getByRole('button', { name: /Tekrarı bitir/ }));
+  await page.waitForURL(/#\/tekrar$/);
+  // Durum kısa bir gecikmeyle kaydedilir.
+  await page.waitForFunction((topic) => (JSON.parse(localStorage.getItem('iyikiYks.state.v3')).reviews[topic]?.history ?? []).length > 0, visitedTopic, { timeout: 5000 }).catch(() => undefined);
+  const r = await page.evaluate((topic) => JSON.parse(localStorage.getItem('iyikiYks.state.v3')).reviews[topic], visitedTopic);
+  const today = await page.evaluate(() => { const d = new Date(); return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`; });
+  assert(r.lastReviewedDay === today && r.history.includes(today), `Tekrar kaydedilmedi: ${JSON.stringify(r)}`);
+  assert(r.dueDay > today, `Sonraki tekrar ileri tarihe planlanmadı: ${r.dueDay}`);
+});
+
 await step('Sayfa hatası (pageerror) yok', async () => {
   const relevant = pageErrors.filter((m) => !/ResizeObserver/.test(m));
   assert(!relevant.length, relevant.slice(0, 3).join(' | '));

@@ -14479,3 +14479,23 @@ textarea:focus-visible {
 }
 .teacher-photo { display: block; border-radius: 50%; object-fit: cover; border: 3px solid var(--surface); box-shadow: 0 6px 18px rgba(60, 40, 90, 0.18); }
 .teacher-photo.empty { display: grid; place-items: center; width: 84px; height: 84px; background: var(--surface-2); font-size: 2rem; }
+
+/* ---------- 5 dakikalık tekrar ---------- */
+.review-facts { display: flex; flex-wrap: wrap; gap: 4px 10px; margin-top: 4px; color: var(--text-2); }
+.review-summary { margin: 0; padding-left: 1.2em; line-height: 1.7; font-size: 1.02rem; }
+.review-cards { display: grid; gap: 10px; }
+.review-card {
+  display: grid;
+  gap: 6px;
+  min-height: 96px;
+  padding: 14px;
+  border-radius: 16px;
+  border: 1.5px solid var(--line);
+  background: var(--surface);
+  color: var(--text);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.review-card.flipped { background: var(--brand-soft); border-color: var(--brand); }
+.review-card small { color: var(--muted); }

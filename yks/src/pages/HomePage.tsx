@@ -5,7 +5,7 @@ import { PandaBody } from '../components/MascotNav';
 import { ProgressBar, toast } from '../components/ui';
 import { navigate } from '../hooks/useRoute';
 import { lookup } from '../services/lookup';
-import { buildRecommendations, hasAnyData, type Recommendation } from '../services/recommendations';
+import { hasAnyData, whatToStudyToday, type Recommendation } from '../services/recommendations';
 import { launchAdaptivePractice, launchTest, makeConfig } from '../services/testLauncher';
 import { usePetNeeds } from '../hooks/usePetNeeds';
 import { needsMessage } from '../utils/petCare';
@@ -80,7 +80,7 @@ export default function HomePage() {
   const state = useAppState();
   const today = dayKey();
   const d = useMemo(() => dashboard(state, today), [state, today]);
-  const recs = useMemo(() => buildRecommendations(state, lookup, today), [state, today]);
+  const recs = useMemo(() => whatToStudyToday(state, lookup, today), [state, today]);
   const due = dueReviews(state.reviews, today);
   const todayTasks = state.tasks.filter((t) => t.date === today);
   const overdue = state.tasks.filter((t) => t.date < today && !t.done);

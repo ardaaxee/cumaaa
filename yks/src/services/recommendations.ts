@@ -1,7 +1,7 @@
 import type { Exam, SubjectId } from '../domain/types';
 import type { AppState } from '../store/schema';
 import { recentTopicPerformance, weakTopics } from '../utils/analysis';
-import { dayKey, type DayKey } from '../utils/date';
+import { dayKey, diffDays, type DayKey } from '../utils/date';
 import { analyzeMocks } from '../utils/mock';
 import { formatNet } from '../utils/net';
 import { dueReviews } from '../utils/srs';
@@ -67,9 +67,41 @@ export function buildRecommendations(state: AppState, lookup: CurriculumLookup, 
       id: `weak-${weak.topicId}`,
       title: `${name}: zayıf konu`,
       detail: `${basis} Bugün 20 dakika konu tekrarı + 10 orta seviye ${name} sorusu öneriliyor.`,
-      basis: weak.reasons.join(', '),
+      basis: perf.total > 0 ? `Son ${perf.total} soruda %${perf.accuracy}` : weak.reasons.join(', '),
       action: { kind: 'topic-test', topicId: weak.topicId, difficulty: 'orta' },
       actionLabel: '10 soru çöz',
+    });
+  }
+
+  // Uzun süredir dokunulmayan (başlanmış/tamamlanmış) konular: unutma eğrisi.
+  const lastTouch = new Map<string, DayKey>();
+  for (const a of state.attempts) if ((lastTouch.get(a.topicId) ?? '') < a.day) lastTouch.set(a.topicId, a.day);
+  const stale = Object.entries(state.topicProgress)
+    .filter(([id, p]) => p.status !== 'baslanmadi' && !state.reviews[id])
+    .map(([id, p]) => ({ id, last: lastTouch.get(id) ?? (p.completedAt ?? p.startedAt ?? '').slice(0, 10) }))
+    .filter((t) => t.last && diffDays(t.last as DayKey, today) >= STALE_DAYS)
+    .sort((a, b) => a.last.localeCompare(b.last))[0];
+  if (stale) {
+    const days = diffDays(stale.last as DayKey, today);
+    recs.push({
+      id: `stale-${stale.id}`,
+      title: `${lookup.topicName(stale.id)}: unutmadan tekrar et`,
+      detail: `Bu konuya ${days} gündür dokunmadın. 5 soruluk kısa bir tekrar hafızanı tazeler.`,
+      basis: `${days} gündür tekrar edilmedi`,
+      action: { kind: 'topic-test', topicId: stale.id },
+      actionLabel: '5 dk tekrar',
+    });
+  }
+
+  const planToday = state.tasks.filter((t) => t.date === today && !t.done && t.topicId)[0];
+  if (planToday?.topicId) {
+    recs.push({
+      id: `plan-${planToday.id}`,
+      title: planToday.title,
+      detail: 'Bugünkü planında bu konu var.',
+      basis: 'Bugünkü planda',
+      action: { kind: 'topic', topicId: planToday.topicId },
+      actionLabel: 'Konuyu aç',
     });
   }
 
@@ -127,5 +159,24 @@ export function buildRecommendations(state: AppState, lookup: CurriculumLookup, 
     }
   }
 
+  // Sınava az kaldıysa gerekçeye eklenir.
+  const left = state.profile.examDate ? diffDays(today, state.profile.examDate) : null;
+  if (left != null && left >= 0 && left <= 60) for (const r of recs) r.basis = `${r.basis} · sınava ${left} gün`;
   return recs;
+}
+
+const STALE_DAYS = 7;
+const PRIORITY = ['reviews', 'weak-', 'stale-', 'plan-', 'wrongs', 'hardest', 'questions', 'mock-'];
+
+/** "Bugün ne çalışayım?": en fazla 3 öneri, en acil olandan; her birinin gerekçesi `basis`te. */
+export function whatToStudyToday(state: AppState, lookup: CurriculumLookup, today: DayKey = dayKey(), max = 3): Recommendation[] {
+  const rank = (r: Recommendation) => {
+    const i = PRIORITY.findIndex((p) => r.id === p || r.id.startsWith(p));
+    return i < 0 ? PRIORITY.length : i;
+  };
+  return buildRecommendations(state, lookup, today)
+    .map((r, i) => ({ r, i }))
+    .sort((a, b) => rank(a.r) - rank(b.r) || a.i - b.i)
+    .slice(0, max)
+    .map((x) => x.r);
 }

@@ -22,6 +22,15 @@ function AiSection() {
   const [status, setStatus] = useState<AiStatus | null>(null);
   const [testing, setTesting] = useState(false);
 
+  // Bağlantı durumu gerçekten denenir; "bağlı" yalnız sunucu cevap verirse yazılır.
+  useEffect(() => {
+    let alive = true;
+    void checkAiStatus(8000).then((st) => alive && setStatus(st));
+    return () => {
+      alive = false;
+    };
+  }, []);
+
   const save = async () => {
     const clean = draft.trim().replace(/\/+$/, '');
     if (clean && !/^https:\/\/\S+$/.test(clean)) return toast('Adres https:// ile başlamalı.');
@@ -37,8 +46,12 @@ function AiSection() {
         🤖 Yapay zekâ bağlantısı
       </h2>
       <p className="small muted">
-        Gerçek AI öğretmen artık varsayılan olarak ortak Render sunucusuna bağlıdır. Zeynep başka telefondan açtığında hiçbir adres girmeden çalışır.
-        API anahtarı yalnız Render'da gizli kalır; uygulamaya yazılmaz.
+        {status == null
+          ? 'Yapay zekâ sunucusu kontrol ediliyor…'
+          : status.configured
+            ? `Gerçek AI öğretmen bağlı (${status.model ?? 'model'}). Zeynep başka telefondan açtığında da adres girmeden çalışır.`
+            : `Şu an gerçek AI bağlı değil (${status.reason}). Cuma, uygulamadaki konu anlatımlarıyla "yerel konu rehberi" olarak cevap verir.`}{' '}
+        API anahtarı yalnız sunucuda gizli kalır; uygulamaya yazılmaz.
       </p>
       <div className="notice">
         <b>Otomatik sunucu:</b> {DEFAULT_AI_SERVER}

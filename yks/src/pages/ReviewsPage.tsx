@@ -1,5 +1,7 @@
 import { getTopicRef, subjectLabel } from '../data/curriculum';
 import { PageHeader } from '../components/Layout';
+import { QuickReview } from '../components/QuickReview';
+import { recentTopicPerformance } from '../utils/analysis';
 import { Empty, toast } from '../components/ui';
 import { launchTest, makeConfig } from '../services/testLauncher';
 import { markReviewDone } from '../store/actions';
@@ -7,8 +9,15 @@ import { update, useSelector } from '../store/store';
 import { dayKey, formatDay } from '../utils/date';
 import { REVIEW_DONE_STAGE, dueReviews, stageLabel, upcomingReviews } from '../utils/srs';
 
-export default function ReviewsPage() {
+export default function ReviewsPage({ params = [] }: { params?: string[] }) {
+  if (params[0]) return <QuickReview topicId={params[0]} />;
+  return <ReviewList />;
+}
+
+function ReviewList() {
   const reviews = useSelector((s) => s.reviews);
+  const attempts = useSelector((s) => s.attempts);
+  const wrongs = useSelector((s) => s.wrongs);
   const today = dayKey();
   const due = dueReviews(reviews, today);
   const upcoming = upcomingReviews(reviews, today, 30);
@@ -46,8 +55,24 @@ export default function ReviewsPage() {
                     <div className="tiny muted">
                       {l.sub} · {stageLabel(r.stage)} · {r.dueDay < today ? `gecikti (${formatDay(r.dueDay)})` : 'bugün'}
                     </div>
+                    <div className="review-facts tiny">
+                      {(() => {
+                        const perf = recentTopicPerformance(attempts, r.topicId, 3);
+                        const open = Object.values(wrongs).filter((w) => w.topicId === r.topicId && !w.learned).length;
+                        return (
+                          <>
+                            <span>Son başarı: {perf.accuracy != null ? `%${perf.accuracy}` : '—'}</span>
+                            <span>Açık yanlış: {open}</span>
+                            <span>Tahmini süre: ~5 dk</span>
+                          </>
+                        );
+                      })()}
+                    </div>
                   </div>
                   <div className="row">
+                    <a className="btn small primary" href={`#/tekrar/${r.topicId}`}>
+                      5 dk tekrar
+                    </a>
                     <button
                       type="button"
                       className="btn small"
@@ -60,7 +85,7 @@ export default function ReviewsPage() {
                     </button>
                     <button
                       type="button"
-                      className="btn small primary"
+                      className="btn small ghost"
                       onClick={() => {
                         update((s) => markReviewDone(s, r.topicId));
                         toast('Tekrar kaydedildi; bir sonraki tarih planlandı.');
