@@ -20,13 +20,14 @@ const C: Record<string, SubjectColor> = {
   yesil: { light: '#20915a', dark: '#7fd9a8', softLight: '#e4f8ec', softDark: '#123825' },
   zeytin: { light: '#6d7a2c', dark: '#b7c46a', softLight: '#eef2dc', softDark: '#2b3110' },
   kirmizi: { light: '#d13d54', dark: '#ff97a8', softLight: '#ffe9ec', softDark: '#3d1420' },
+  mercan: { light: '#e0604a', dark: '#ff9e8a', softLight: '#ffece7', softDark: '#3f1a12' },
   kahve: { light: '#8a5a34', dark: '#d8a874', softLight: '#f6ebdf', softDark: '#33220f' },
   turkuaz: { light: '#118a8a', dark: '#6bd6d6', softLight: '#e2f7f7', softDark: '#0e2f2f' },
   koyumor: { light: '#6a3fa0', dark: '#c3a3ec', softLight: '#efe7fb', softDark: '#241636' },
 };
 
 export const SUBJECT_COLOR_KEY: Record<SubjectId, keyof typeof C> = {
-  'tyt-turkce': 'kirmizi',
+  'tyt-turkce': 'mercan',
   'tyt-matematik': 'mavi',
   'tyt-geometri': 'lacivert',
   'tyt-fizik': 'turuncu',

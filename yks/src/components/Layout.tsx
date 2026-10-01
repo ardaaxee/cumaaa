@@ -1,4 +1,8 @@
-import { useEffect, useState, type ReactNode } from 'react';
+import { useEffect, useState, type CSSProperties, type ReactNode } from 'react';
+import { getSubject, getTopicRef } from '../data/curriculum';
+import { subjectColorFor } from '../data/subjectColors';
+import type { SubjectId } from '../domain/types';
+import { useIsDark } from '../hooks/useIsDark';
 import { useRoute } from '../hooks/useRoute';
 import { update, useSelector } from '../store/store';
 import { Icon, type IconName } from './Icon';
@@ -125,8 +129,26 @@ function AppStatusBar() {
   );
 }
 
+/** Açık sayfanın dersi (konu, ders, ders çalış, test, defter sayfası); ders rengi için. */
+function useRouteSubject(): SubjectId | null {
+  const route = useRoute();
+  const [section, id] = route.segments;
+  const activeSubject = useSelector((s) => s.activeTest?.config.subjectId);
+  const pageSubject = useSelector((s) => (section === 'defterim' && id ? s.notebookPages.find((p) => p.id === id)?.subjectId : undefined));
+  if ((section === 'konu' || section === 'calis' || section === 'pekistir') && id) return (getTopicRef(id)?.subject.id as SubjectId) ?? null;
+  if (section === 'ders' && id && getSubject(id)) return id as SubjectId;
+  if (section === 'test' && activeSubject && activeSubject !== 'all') return activeSubject as SubjectId;
+  if (section === 'defterim' && pageSubject) return pageSubject;
+  return null;
+}
+
 export function Layout({ children }: { children: ReactNode }) {
   const route = useRoute();
+  const subject = useRouteSubject();
+  const isDark = useIsDark();
+  const subjectStyle = subject
+    ? ({ '--subject': subjectColorFor(subject, isDark).fg, '--subject-soft': subjectColorFor(subject, isDark).soft } as CSSProperties)
+    : undefined;
   const section = sectionOf(route.path);
   const teacherName = useSelector((s) => s.settings.teacherName);
   // Test ve Panda Evi tam ekran deneyimdir; global alt şerit gizlenir.
@@ -167,7 +189,7 @@ export function Layout({ children }: { children: ReactNode }) {
           Kişisel çalışma verilerin cihazında saklanır.
         </div>
       </aside>
-      <main id="main" className="main" tabIndex={-1}>
+      <main id="main" className={`main${subject ? ' subject-themed' : ''}`} data-subject={subject ?? undefined} style={subjectStyle} tabIndex={-1}>
         {children}
       </main>
       {!focusMode && <AppStatusBar />}

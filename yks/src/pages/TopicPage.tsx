@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useMemo, useState, type ReactNode } from 'react';
 import { AskLabel } from '../components/AskName';
 import { getTopicRef, subjectLabel, subjectTopics } from '../data/curriculum';
 import { loadLesson, loadTopicQuestions } from '../data/content';
@@ -35,69 +35,70 @@ function Paragraphs({ text }: { text: string }) {
   );
 }
 
-function LessonView({ lesson }: { lesson: LessonSeed }) {
-  const sections: [string, string][] = [
-    ['giris', 'Giriş'],
-    ['onbilgi', 'Ön bilgiler'],
-    ['kavramlar', 'Kavramlar'],
-    ['formuller', 'Formüller'],
-    ['mantik', 'Mantığı'],
-    ['ornekler', 'Örnekler'],
-    ['osym', 'Sınav mantığı'],
-    ['hatalar', 'Sık hatalar'],
-    ['puf', 'Püf noktası'],
-    ['ozet', '1 dk özet'],
-  ].filter(([id]) => id !== 'formuller' || lesson.formulas.length > 0) as [string, string][];
+interface LessonActions {
+  toNotebook: () => void;
+  askHref: string;
+  solve: (count: number) => void;
+  canSolve: boolean;
+}
+
+/** Mobilde metin duvarı olmasın: her bölüm açılır-kapanır; ilk iki bölüm açık gelir. */
+function LessonSection({ id, emoji, title, open = false, children }: { id: string; emoji: string; title: string; open?: boolean; children: ReactNode }) {
+  return (
+    <details className="lesson-acc" id={`sec-${id}`} open={open}>
+      <summary>
+        <span className="lesson-acc-emoji" aria-hidden="true">
+          {emoji}
+        </span>
+        <span className="grow">{title}</span>
+        <Icon name="right" size={16} />
+      </summary>
+      <div className="lesson-acc-body">{children}</div>
+    </details>
+  );
+}
+
+function LessonView({ lesson, actions }: { lesson: LessonSeed; actions: LessonActions }) {
   return (
     <article className="lesson">
-      <nav className="toc" aria-label="Konu bölümleri">
-        {sections.map(([id, label]) => (
-          <a
-            key={id}
-            href={`#sec-${id}`}
-            onClick={(e) => {
-              e.preventDefault();
-              document.getElementById(`sec-${id}`)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-            }}
-          >
-            {label}
-          </a>
-        ))}
-        <a
-          href="#konu-sonu"
-          onClick={(e) => {
-            e.preventDefault();
-            document.getElementById('konu-sonu')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-          }}
-        >
-          Konu sonu soruları ✎
+      <div className="lesson-quick" role="group" aria-label="Hızlı aksiyonlar">
+        <button type="button" className="btn small" onClick={actions.toNotebook}>
+          📓 Deftere aktar
+        </button>
+        <a className="btn small" href={actions.askHref}>
+          🧠 <AskLabel />
         </a>
-      </nav>
-
-      <div className="lesson-route" aria-label="Öğrenme rotası">
-        <div><span>1</span><b>Temel fikir</b><small>Kavramları anla</small></div>
-        <div><span>2</span><b>Formül + mantık</b><small>Nedenini öğren</small></div>
-        <div><span>3</span><b>Çözümlü örnek</b><small>{lesson.examples.length} örnekle uygula</small></div>
-        <div><span>4</span><b>Sınav mantığı</b><small>Nasıl sorulur?</small></div>
-        <div><span>5</span><b>Mini test</b><small>Bilgiyi doğrula</small></div>
+        <button type="button" className="btn small primary" onClick={() => actions.solve(5)} disabled={!actions.canSolve}>
+          5 soru çöz
+        </button>
+        <button type="button" className="btn small" onClick={() => actions.solve(20)} disabled={!actions.canSolve}>
+          20 soru çöz
+        </button>
       </div>
 
-      <section id="sec-giris">
-        <h2>Konuya giriş</h2>
+      <LessonSection id="giris" emoji="🌱" title="Konuya giriş" open>
         <Paragraphs text={lesson.intro} />
-      </section>
+        {lesson.prerequisites.length > 0 && (
+          <>
+            <h3>Bilmen gereken ön bilgiler</h3>
+            <ul>
+              {lesson.prerequisites.map((p, i) => (
+                <li key={i}>{p}</li>
+              ))}
+            </ul>
+          </>
+        )}
+      </LessonSection>
 
-      <section id="sec-onbilgi">
-        <h2>Bilmen gereken ön bilgiler</h2>
-        <ul>
-          {lesson.prerequisites.map((p, i) => (
-            <li key={i}>{p}</li>
-          ))}
-        </ul>
-      </section>
+      <LessonSection id="mantik" emoji="🧠" title="Mantığını anla" open>
+        <Paragraphs text={lesson.logic} />
+        <div className="callout">
+          <b>Sınavda nasıl sorulur?</b>
+          <Paragraphs text={lesson.osymThinking} />
+        </div>
+      </LessonSection>
 
-      <section id="sec-kavramlar">
-        <h2>Temel kavramlar</h2>
+      <LessonSection id="kavramlar" emoji="📌" title={`Temel kavramlar (${lesson.concepts.length})`}>
         <dl className="concept">
           {lesson.concepts.map((c, i) => (
             <div key={i}>
@@ -106,27 +107,20 @@ function LessonView({ lesson }: { lesson: LessonSeed }) {
             </div>
           ))}
         </dl>
-      </section>
+      </LessonSection>
 
       {lesson.formulas.length > 0 && (
-        <section id="sec-formuller">
-          <h2>Formüller / bağıntılar</h2>
+        <LessonSection id="formuller" emoji="📐" title={`Formüller (${lesson.formulas.length})`}>
           {lesson.formulas.map((f, i) => (
             <div key={i} className="formula">
               <code>{f.expr}</code>
               <div className="meaning">{f.meaning}</div>
             </div>
           ))}
-        </section>
+        </LessonSection>
       )}
 
-      <section id="sec-mantik">
-        <h2>Mantığı: neden böyle?</h2>
-        <Paragraphs text={lesson.logic} />
-      </section>
-
-      <section id="sec-ornekler">
-        <h2>Adım adım çözümlü örnekler</h2>
+      <LessonSection id="ornekler" emoji="✏️" title={`Çözümlü örnek (${lesson.examples.length})`}>
         {lesson.examples.map((ex, i) => (
           <div key={i} className="example">
             <div className="row between">
@@ -135,11 +129,11 @@ function LessonView({ lesson }: { lesson: LessonSeed }) {
             </div>
             <p className="pre-line mt-8">{ex.problem}</p>
             <details>
-              <summary className="btn small">Çözümü göster</summary>
+              <summary className="btn small">Önce dene, sonra çözümü aç</summary>
               <ol>
-                {ex.steps.map((s, j) => (
+                {ex.steps.map((st, j) => (
                   <li key={j} className="pre-line">
-                    {s}
+                    {st}
                   </li>
                 ))}
               </ol>
@@ -147,21 +141,9 @@ function LessonView({ lesson }: { lesson: LessonSeed }) {
             </details>
           </div>
         ))}
-      </section>
+      </LessonSection>
 
-      <section id="sec-osym">
-        <h2>ÖSYM tarzında düşünme</h2>
-        <div className="callout">
-          <Paragraphs text={lesson.osymThinking} />
-        </div>
-        <div className="lesson-osym-note">
-          <b>Çıkmış soruyla kontrol et</b>
-          <span>Bu bölüm konuya ait sınav düşünme biçimini özetler. Resmî soru metni uygulamaya kopyalanmaz; aşağıdaki ÖSYM kitapçıklarından aynı kazanımı ayrıca çalışabilirsin.</span>
-        </div>
-      </section>
-
-      <section id="sec-hatalar">
-        <h2>Sık yapılan hatalar</h2>
+      <LessonSection id="hatalar" emoji="⚠️" title="Sık hata">
         <div className="callout bad">
           <ul>
             {lesson.commonMistakes.map((m, i) => (
@@ -169,10 +151,9 @@ function LessonView({ lesson }: { lesson: LessonSeed }) {
             ))}
           </ul>
         </div>
-      </section>
+      </LessonSection>
 
-      <section id="sec-puf">
-        <h2>Püf noktası</h2>
+      <LessonSection id="puf" emoji="✨" title="Püf noktası">
         <div className="callout ok">
           <ul>
             {lesson.tips.map((t, i) => (
@@ -180,16 +161,30 @@ function LessonView({ lesson }: { lesson: LessonSeed }) {
             ))}
           </ul>
         </div>
-      </section>
+      </LessonSection>
 
-      <section id="sec-ozet">
-        <h2>1 dakikalık özet</h2>
+      <LessonSection id="ozet" emoji="📝" title="1 dakikalık özet">
         <ul>
-          {lesson.summary.map((s, i) => (
-            <li key={i}>{s}</li>
+          {lesson.summary.map((sm, i) => (
+            <li key={i}>{sm}</li>
           ))}
         </ul>
-      </section>
+      </LessonSection>
+
+      <a
+        className="lesson-acc lesson-acc-link"
+        href="#konu-sonu"
+        onClick={(e) => {
+          e.preventDefault();
+          document.getElementById('konu-sonu')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }}
+      >
+        <span className="lesson-acc-emoji" aria-hidden="true">
+          🎯
+        </span>
+        <span className="grow">Konu sonu testi</span>
+        <Icon name="right" size={16} />
+      </a>
     </article>
   );
 }
@@ -434,7 +429,10 @@ export default function TopicPage({ params }: { params: string[] }) {
             <span><b>{lesson.commonMistakes.length}</b> sık hata</span>
           </div>
         )}
-        {lessonLoad.failed ? <LoadFailed what="Konu anlatımı" kind={lessonLoad.errorKind} onRetry={lessonLoad.retry} /> : lesson === undefined ? <Spinner label="Konu anlatımı yükleniyor" /> : lesson === null ? <Empty title="Bu konunun anlatımı henüz eklenmedi." /> : <LessonView lesson={lesson} />}
+        {lessonLoad.failed ? <LoadFailed what="Konu anlatımı" kind={lessonLoad.errorKind} onRetry={lessonLoad.retry} /> : lesson === undefined ? <Spinner label="Konu anlatımı yükleniyor" /> : lesson === null ? <Empty title="Bu konunun anlatımı henüz eklenmedi." /> : <LessonView
+              lesson={lesson}
+              actions={{ toNotebook: writeToNotebook, askHref: href('/ogretmen', { konu: topicId, eylem: 'anlat' }), solve: (n) => start(Math.min(n, qCount ?? n), n <= 5 ? 'konu-mini' : 'konu-normal'), canSolve: !!qCount }}
+            />}
       </div>
 
       <div className="card section topic-quiz-card" id="konu-sonu">
