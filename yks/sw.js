@@ -1,34 +1,74 @@
 /* İyi ki • YKS — service worker (derleme sırasında üretilir) */
-const CACHE = 'iyiki-yks-de78864e2812';
-const PRECACHE = ["./","./index.html","./assets/index-iuDpp7uV.js","./assets/AskName-DHoCpbbk.js","./assets/BadgesPage-MfRI9PVi.js","./assets/CardsPage-DUaRaFE4.js","./assets/Charts-4XPi6Uxr.js","./assets/CoachPage-BToP4UDR.js","./assets/FocusPage-C7h5TTKR.js","./assets/FormulasPage-DNQAhsGm.js","./assets/GuidePage-CjmIjcwb.js","./assets/HomePage-NaFALC-y.js","./assets/InlineQuiz-wSk2fzco.js","./assets/LiveTogetherPage-kK-XxLBX.js","./assets/MocksPage-D3PGoHY2.js","./assets/MorePage-B7zGQRQl.js","./assets/NotFoundPage-DK63CwXQ.js","./assets/NotebookRouter-C5W01oyD.js","./assets/OnboardingPage-DDeRySyX.js","./assets/OsymPage-DPKSgdvL.js","./assets/PartnerPage-meP6znvW.js","./assets/PetPage-CljqNgTI.js","./assets/PlanPage-BEdFu6id.js","./assets/ProgressPage-CF3W37rt.js","./assets/QuestionView-C-_kozer.js","./assets/RecoveryPage-GWcrhxC2.js","./assets/ReportPage-C4flypKl.js","./assets/ResourcesPage-C9AQ0VAo.js","./assets/ReviewsPage-DdTttR8F.js","./assets/SavedPage--_ukt-CP.js","./assets/SettingsPage-ksoYpGk1.js","./assets/StudyPage-0L_C3Sjl.js","./assets/SubjectPage-ZoRfQbHv.js","./assets/SubjectsPage-DE5p55zb.js","./assets/TeacherPage-BtlG6-xf.js","./assets/TestResultPage-BqdqgpOp.js","./assets/TestRunnerPage-CZf65KYu.js","./assets/TestSetupPage-CSsgafDy.js","./assets/TopicPage-Df8D2c4B.js","./assets/WrongsPage-DBEKi6Wg.js","./assets/actions-DEbD0-8e.js","./assets/adaptiveStudy-BuIonl2f.js","./assets/analysis-8lr-mn9h.js","./assets/ayt-biyoloji-1-DAOM1u2c.js","./assets/ayt-biyoloji-1-DRjdejHJ.js","./assets/ayt-biyoloji-2-2wZ923Yq.js","./assets/ayt-biyoloji-2-OUzAFoeE.js","./assets/ayt-biyoloji-3-C-nk6it7.js","./assets/ayt-biyoloji-3-D73ymuNt.js","./assets/ayt-biyoloji-ek-D-gUA9yc.js","./assets/ayt-biyoloji-ek4-BdRKHMWD.js","./assets/ayt-fizik-1-CNFU0aft.js","./assets/ayt-fizik-1-DdiTB10i.js","./assets/ayt-fizik-2-BU5ypgmH.js","./assets/ayt-fizik-2-C0L16QTj.js","./assets/ayt-fizik-3-B2sVhgKh.js","./assets/ayt-fizik-3-_bPbfRbT.js","./assets/ayt-fizik-ek-Cap_ZWl4.js","./assets/ayt-fizik-ek3-DCeoHvW4.js","./assets/ayt-fizik-ek4-9nhldys4.js","./assets/ayt-fizik-ek6-CeAZEXj7.js","./assets/ayt-geometri-DUJ7EYhA.js","./assets/ayt-geometri-DxHBMUSU.js","./assets/ayt-geometri-ek-DYnHGMWj.js","./assets/ayt-geometri-ek3-DsQ6IcWH.js","./assets/ayt-kimya-1-BZgBI3nn.js","./assets/ayt-kimya-1-C9vSmmIY.js","./assets/ayt-kimya-2-CUoyoxHy.js","./assets/ayt-kimya-2-ukCD2TVT.js","./assets/ayt-kimya-ek-F-VuSwNq.js","./assets/ayt-kimya-ek3-CAACcm0i.js","./assets/ayt-kimya-ek6-DrVUSGGE.js","./assets/ayt-matematik-1-B-YOJAmr.js","./assets/ayt-matematik-1-C0mXXoIX.js","./assets/ayt-matematik-1b-VQWLNwqS.js","./assets/ayt-matematik-2-XKcxfDKx.js","./assets/ayt-matematik-2-nkqG5kY5.js","./assets/ayt-matematik-3-SHnaSmg8.js","./assets/ayt-matematik-3-TD8XBkAW.js","./assets/ayt-matematik-ek-BVa56jU1.js","./assets/ayt-matematik-ek3-4XDOjC_P.js","./assets/ayt-matematik-ek4-BFBGZSiz.js","./assets/ayt-matematik-ek7-f0s4Gg2Z.js","./assets/content-Df6XlaUl.js","./assets/localAssistant-CS7z3H8i.js","./assets/lookup-DSEpP4dg.js","./assets/notebookStore-Bz1Cuxdl.js","./assets/officialResources-C4pYIVk_.js","./assets/pet-DiEVNT02.js","./assets/photoStore-DbCaRPwU.js","./assets/recommendations-KkjQdBQQ.js","./assets/testLauncher-cuxK9ase.js","./assets/tyt-biyoloji-A7cJdxgi.js","./assets/tyt-biyoloji-B8W32KjE.js","./assets/tyt-biyoloji-ek-U_et8uM4.js","./assets/tyt-biyoloji-ek3-BAU2R-O6.js","./assets/tyt-cografya-CGIKep2O.js","./assets/tyt-cografya-COpkP2QN.js","./assets/tyt-cografya-ek-u40yRQiD.js","./assets/tyt-cografya-ek3-HFGVOmQf.js","./assets/tyt-din-BLZN5rp3.js","./assets/tyt-din-CNfWeYPG.js","./assets/tyt-din-ek-D5ZChKCt.js","./assets/tyt-din-ek4-D8POvi_R.js","./assets/tyt-felsefe-3AJmOagM.js","./assets/tyt-felsefe-CLTYQ0VM.js","./assets/tyt-felsefe-ek-BfQCn076.js","./assets/tyt-felsefe-ek4-DqjI4MFw.js","./assets/tyt-fizik-CvNFjayY.js","./assets/tyt-fizik-ek-Co7-gA8M.js","./assets/tyt-fizik-ek3-BIU5g6Xn.js","./assets/tyt-fizik-ek4-BsomiPbc.js","./assets/tyt-fizik-ek6-Rfszrx-r.js","./assets/tyt-fizik-j9JLs8BE.js","./assets/tyt-geometri-CKFyu-YI.js","./assets/tyt-geometri-DtWZnS2i.js","./assets/tyt-geometri-ek-fqH3ih3a.js","./assets/tyt-geometri-ek3-XlonEgkw.js","./assets/tyt-kimya-DJoYN93C.js","./assets/tyt-kimya-Yomk-AYy.js","./assets/tyt-kimya-ek-CDKQAW2_.js","./assets/tyt-kimya-ek3-De1m9Ehj.js","./assets/tyt-kimya-ek4-ClFBIgMw.js","./assets/tyt-kimya-ek6-DfrN2bDR.js","./assets/tyt-matematik-1-DiIx0cH-.js","./assets/tyt-matematik-1-gkXSnHbR.js","./assets/tyt-matematik-2-B8yaSydn.js","./assets/tyt-matematik-2-BfsnQNst.js","./assets/tyt-matematik-ek-B6ciMFJq.js","./assets/tyt-matematik-ek3-CF3j_8DV.js","./assets/tyt-matematik-ek4-BjQ9qCwT.js","./assets/tyt-matematik-ek7-BVlKr5ph.js","./assets/tyt-tarih-BaTjHs5E.js","./assets/tyt-tarih-ek-C-xMBI2t.js","./assets/tyt-tarih-ek2-Cg3hsLIY.js","./assets/tyt-tarih-ek3-CiapcSTg.js","./assets/tyt-tarih-ek4-CEuVRhKD.js","./assets/tyt-tarih-gjAWlzM0.js","./assets/tyt-turkce-DAal0Zcv.js","./assets/tyt-turkce-ek-C8PPd6yw.js","./assets/tyt-turkce-ek3-DsCEG_kC.js","./assets/tyt-turkce-ek4-Dshepod_.js","./assets/tyt-turkce-ek7-CN6L7pOL.js","./assets/tyt-turkce-oiSrtaZp.js","./assets/useIsDark-CGbxXAFA.js","./assets/useLoad-hipnsDmI.js","./assets/PetPage-DBMyMI1S.css","./assets/index-BXGANt_d.css","./theme-init.js","./manifest.webmanifest","./icon.svg","./icon-192.png","./icon-512.png","./icon-maskable-512.png","./apple-touch-icon.png"];
+const VERSION = '366959b3bf59';
+const SHELL_CACHE = `iyiki-yks-shell-${VERSION}`;
+const RUNTIME_CACHE = `iyiki-yks-runtime-${VERSION}`;
+const CONTENT_CACHE = `iyiki-yks-content-${VERSION}`;
+/** Olmazsa olmaz kabuk: index + ana JS + ana CSS. Biri inmezse kurulum başarısız sayılır. */
+const REQUIRED = ["./index.html","./assets/index-ODyOdUng.js","./assets/actions-DEbD0-8e.js","./assets/index-DrifDMAq.css"];
+/** İsteğe bağlı kabuk dosyaları (simgeler, manifest…). İnmeyen olursa kurulum yine tamamlanır. */
+const OPTIONAL = ["./","./theme-init.js","./manifest.webmanifest","./icon.svg","./icon-192.png","./icon-512.png","./icon-maskable-512.png","./apple-touch-icon.png","./assets/PetPage-DBMyMI1S.css"];
+/** Soru ve konu anlatımı paketleri: kurulumda İNDİRİLMEZ, ilk açıldıklarında önbelleğe alınır. */
+const CONTENT = new Set(["ayt-biyoloji-1-DAOM1u2c.js","ayt-biyoloji-1-DRjdejHJ.js","ayt-biyoloji-2-2wZ923Yq.js","ayt-biyoloji-2-OUzAFoeE.js","ayt-biyoloji-3-C-nk6it7.js","ayt-biyoloji-3-D73ymuNt.js","ayt-biyoloji-ek-D-gUA9yc.js","ayt-biyoloji-ek4-BdRKHMWD.js","ayt-fizik-1-CNFU0aft.js","ayt-fizik-1-DdiTB10i.js","ayt-fizik-2-BU5ypgmH.js","ayt-fizik-2-C0L16QTj.js","ayt-fizik-3-B2sVhgKh.js","ayt-fizik-3-_bPbfRbT.js","ayt-fizik-ek-Cap_ZWl4.js","ayt-fizik-ek3-DCeoHvW4.js","ayt-fizik-ek4-9nhldys4.js","ayt-fizik-ek6-CeAZEXj7.js","ayt-geometri-DUJ7EYhA.js","ayt-geometri-DxHBMUSU.js","ayt-geometri-ek-DYnHGMWj.js","ayt-geometri-ek3-DsQ6IcWH.js","ayt-kimya-1-BZgBI3nn.js","ayt-kimya-1-C9vSmmIY.js","ayt-kimya-2-CUoyoxHy.js","ayt-kimya-2-ukCD2TVT.js","ayt-kimya-ek-F-VuSwNq.js","ayt-kimya-ek3-CAACcm0i.js","ayt-kimya-ek6-DrVUSGGE.js","ayt-matematik-1-B-YOJAmr.js","ayt-matematik-1-C0mXXoIX.js","ayt-matematik-1b-VQWLNwqS.js","ayt-matematik-2-XKcxfDKx.js","ayt-matematik-2-nkqG5kY5.js","ayt-matematik-3-SHnaSmg8.js","ayt-matematik-3-TD8XBkAW.js","ayt-matematik-ek-BVa56jU1.js","ayt-matematik-ek3-4XDOjC_P.js","ayt-matematik-ek4-BFBGZSiz.js","ayt-matematik-ek7-f0s4Gg2Z.js","tyt-biyoloji-A7cJdxgi.js","tyt-biyoloji-B8W32KjE.js","tyt-biyoloji-ek-U_et8uM4.js","tyt-biyoloji-ek3-BAU2R-O6.js","tyt-cografya-CGIKep2O.js","tyt-cografya-COpkP2QN.js","tyt-cografya-ek-u40yRQiD.js","tyt-cografya-ek3-HFGVOmQf.js","tyt-din-BLZN5rp3.js","tyt-din-CNfWeYPG.js","tyt-din-ek-D5ZChKCt.js","tyt-din-ek4-D8POvi_R.js","tyt-felsefe-3AJmOagM.js","tyt-felsefe-CLTYQ0VM.js","tyt-felsefe-ek-BfQCn076.js","tyt-felsefe-ek4-DqjI4MFw.js","tyt-fizik-CvNFjayY.js","tyt-fizik-ek-Co7-gA8M.js","tyt-fizik-ek3-BIU5g6Xn.js","tyt-fizik-ek4-BsomiPbc.js","tyt-fizik-ek6-Rfszrx-r.js","tyt-fizik-j9JLs8BE.js","tyt-geometri-CKFyu-YI.js","tyt-geometri-DtWZnS2i.js","tyt-geometri-ek-fqH3ih3a.js","tyt-geometri-ek3-XlonEgkw.js","tyt-kimya-DJoYN93C.js","tyt-kimya-Yomk-AYy.js","tyt-kimya-ek-CDKQAW2_.js","tyt-kimya-ek3-De1m9Ehj.js","tyt-kimya-ek4-ClFBIgMw.js","tyt-kimya-ek6-DfrN2bDR.js","tyt-matematik-1-DiIx0cH-.js","tyt-matematik-1-gkXSnHbR.js","tyt-matematik-2-B8yaSydn.js","tyt-matematik-2-BfsnQNst.js","tyt-matematik-ek-B6ciMFJq.js","tyt-matematik-ek3-CF3j_8DV.js","tyt-matematik-ek4-BjQ9qCwT.js","tyt-matematik-ek7-BVlKr5ph.js","tyt-tarih-BaTjHs5E.js","tyt-tarih-ek-C-xMBI2t.js","tyt-tarih-ek2-Cg3hsLIY.js","tyt-tarih-ek3-CiapcSTg.js","tyt-tarih-ek4-CEuVRhKD.js","tyt-tarih-gjAWlzM0.js","tyt-turkce-DAal0Zcv.js","tyt-turkce-ek-C8PPd6yw.js","tyt-turkce-ek3-DsCEG_kC.js","tyt-turkce-ek4-Dshepod_.js","tyt-turkce-ek7-CN6L7pOL.js","tyt-turkce-oiSrtaZp.js"]);
 
 self.addEventListener('install', (event) => {
   event.waitUntil(
-    caches.open(CACHE).then((cache) => cache.addAll(PRECACHE)).then(() => self.skipWaiting()),
+    (async () => {
+      const cache = await caches.open(SHELL_CACHE);
+      await cache.addAll(REQUIRED);
+      await Promise.all(OPTIONAL.map((url) => cache.add(url).catch(() => undefined)));
+      await self.skipWaiting();
+    })(),
   );
 });
 
 self.addEventListener('activate', (event) => {
   event.waitUntil(
-    caches.keys()
-      .then((keys) => Promise.all(keys.filter((k) => k.startsWith('iyiki-yks-') && k !== CACHE).map((k) => caches.delete(k))))
-      .then(() => self.clients.claim()),
+    (async () => {
+      const keep = new Set([SHELL_CACHE, RUNTIME_CACHE, CONTENT_CACHE]);
+      const keys = await caches.keys();
+      // Değişmemiş soru paketleri (aynı dosya adı) yeni sürüme taşınır: çevrimdışı açılan konular kaybolmaz.
+      const content = await caches.open(CONTENT_CACHE);
+      for (const key of keys) {
+        if (!key.startsWith('iyiki-yks-content-') || key === CONTENT_CACHE) continue;
+        const old = await caches.open(key);
+        for (const req of await old.keys()) {
+          if (CONTENT.has(new URL(req.url).pathname.split('/').pop())) {
+            const res = await old.match(req);
+            if (res) await content.put(req, res);
+          }
+        }
+      }
+      // Yalnız Cache Storage temizlenir; localStorage/IndexedDB'deki kullanıcı verisine dokunulmaz.
+      await Promise.all(keys.filter((k) => k.startsWith('iyiki-yks-') && !keep.has(k)).map((k) => caches.delete(k)));
+      await self.clients.claim();
+    })(),
   );
 });
 
-// Önbellek stratejisi (eski sürümde takılı kalmamak için):
-// - Sayfa (HTML) ve sabit adlı dosyalar: önce ağ, ağ yoksa önbellek.
-// - /assets/ altındaki dosyalar içerik özetiyle adlandırıldığı için değişmez: önce önbellek.
+function cacheFor(url) {
+  return CONTENT.has(url.pathname.split('/').pop()) ? CONTENT_CACHE : RUNTIME_CACHE;
+}
+
+function putIfOk(cacheName, request, response) {
+  if (response && response.ok && response.type === 'basic') {
+    const copy = response.clone();
+    caches.open(cacheName).then((cache) => cache.put(request, copy)).catch(() => undefined);
+  }
+  return response;
+}
+
+// Sayfa ve sabit adlı dosyalar: önce ağ (yeni sürüm gecikmeden gelsin), ağ yoksa önbellek.
 function networkFirst(request, fallbackUrl) {
   return fetch(request)
-    .then((response) => {
-      if (response.ok && response.type === 'basic') {
-        const copy = response.clone();
-        caches.open(CACHE).then((cache) => cache.put(fallbackUrl || request, copy));
-      }
-      return response;
-    })
-    .catch(() => caches.match(fallbackUrl || request, { ignoreSearch: true }));
+    .then((response) => putIfOk(SHELL_CACHE, fallbackUrl || request, response))
+    .catch(() =>
+      caches.match(fallbackUrl || request, { ignoreSearch: true }).then((hit) => hit || Response.error()),
+    );
+}
+
+// İçerik özetiyle adlandırılmış /assets/ dosyaları değişmez: önce önbellek, yoksa ağ.
+function cacheFirst(request, url) {
+  return caches.match(request).then((hit) => hit || fetch(request).then((response) => putIfOk(cacheFor(url), request, response)));
 }
 
 self.addEventListener('fetch', (event) => {
@@ -42,24 +82,10 @@ self.addEventListener('fetch', (event) => {
     event.respondWith(networkFirst(request, './index.html'));
     return;
   }
-
   if (url.pathname.includes('/assets/')) {
-    event.respondWith(
-      caches.match(request).then(
-        (cached) =>
-          cached ||
-          fetch(request).then((response) => {
-            if (response.ok && response.type === 'basic') {
-              const copy = response.clone();
-              caches.open(CACHE).then((cache) => cache.put(request, copy));
-            }
-            return response;
-          }),
-      ),
-    );
+    event.respondWith(cacheFirst(request, url));
     return;
   }
-
   event.respondWith(networkFirst(request));
 });
 
