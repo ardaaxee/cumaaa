@@ -14499,3 +14499,15 @@ textarea:focus-visible {
 }
 .review-card.flipped { background: var(--brand-soft); border-color: var(--brand); }
 .review-card small { color: var(--muted); }
+
+.learning-area { overflow:hidden; }
+.learning-area header { border-bottom:3px solid var(--brand); padding-bottom:12px; }
+.learning-tabs { display:grid; grid-template-columns:repeat(4,1fr); gap:8px; margin:18px 0; }
+.learning-tabs button { min-height:48px; border:1px solid var(--line); border-radius:10px; background:var(--surface-2); color:var(--text); font:inherit; cursor:pointer; }
+.learning-tabs button[aria-pressed="true"] { background:var(--brand); color:white; }
+.learning-board { padding:clamp(16px,4vw,30px); border:1px solid var(--line); border-radius:14px; background:var(--surface); line-height:1.8; }
+.learning-board h3 { margin-top:20px; }
+.learning-problem { padding:18px; border-left:4px solid var(--brand); background:var(--surface-2); font-size:1.1rem; }
+.learning-area footer { margin-top:16px; }
+.learning-board li { margin-block:8px; }
+@media(max-width:560px) { .learning-tabs { grid-template-columns:repeat(2,1fr); } .learning-area footer .btn { padding:10px; font-size:13px; } }
