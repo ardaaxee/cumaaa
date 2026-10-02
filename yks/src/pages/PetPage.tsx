@@ -1246,7 +1246,7 @@ export default function PetPage() {
             onRelax={relax}
           />
 
-          <PandaFurniture room={room} onWater={() => kitchenGive('su')} onStudy={studyTogether} bamboo={needs.bamboo} drops={needs.drops} />
+          <PandaFurniture room={room} onWater={() => kitchenGive('su')} onFeed={() => kitchenGive('bambu')} onBath={bath} onStudy={studyTogether} bamboo={needs.bamboo} drops={needs.drops} />
 
           <button className="pet-scene-arrow prev" type="button" onClick={() => changeRoom(-1)} aria-label="Önceki oda">‹</button>
           <button className="pet-scene-arrow next" type="button" onClick={() => changeRoom(1)} aria-label="Sonraki oda">›</button>

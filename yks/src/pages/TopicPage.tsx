@@ -1,3 +1,4 @@
+import { LearningArea } from '../components/LearningArea';
 import { useMemo, useState, type ReactNode } from 'react';
 import { AskLabel } from '../components/AskName';
 import { getTopicRef, subjectLabel, subjectTopics } from '../data/curriculum';
@@ -340,6 +341,8 @@ export default function TopicPage({ params }: { params: string[] }) {
         <Stat label="Son testlerde" value={perf.accuracy != null ? `%${perf.accuracy}` : '—'} sub={perf.total ? `${perf.total} sorudan ${perf.correct} doğru` : 'Henüz çözülmedi'} />
         <Stat label="Açık yanlış" value={openWrongs} sub={openWrongs ? <a href="#/yanlislar">Yanlışlarıma git</a> : 'yok'} />
       </div>
+
+      {lesson && <LearningArea key={topicId} lesson={lesson} topic={ref.topic} questions={topicQs} />}
 
       <div className="card section topic-actions-card">
         <div className="card-head">

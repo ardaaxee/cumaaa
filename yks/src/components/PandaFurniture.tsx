@@ -2,7 +2,7 @@ import { useState } from 'react';
 import type { HouseRoom } from '../utils/pandaLife';
 
 /** Hafif vektör eşyalar; tüm etkileşimler kullanıcının dokunuşuyla başlar. */
-export function PandaFurniture({room,onWater,onStudy,bamboo,drops}:{room:HouseRoom;onWater:()=>void;onStudy:()=>void;bamboo:number;drops:number}) {
+export function PandaFurniture({room,onWater,onStudy,onBath,onFeed,bamboo,drops}:{room:HouseRoom;onWater:()=>void;onStudy:()=>void;onBath?:()=>void;onFeed?:()=>void;bamboo:number;drops:number}) {
  const [light,setLight]=useState(false);const [open,setOpen]=useState(false);const [reading,setReading]=useState(false);const [plant,setPlant]=useState(0);
  const garden=room==='garden'||room==='balcony';
  return <>
@@ -18,6 +18,12 @@ export function PandaFurniture({room,onWater,onStudy,bamboo,drops}:{room:HouseRo
   </button>}
   {room==='kitchen'&&<button type="button" className="furniture-object furniture-glass" onClick={onWater} aria-label="Su bardağıyla Panda’ya su ver">
    <svg viewBox="0 0 80 105" aria-hidden="true"><ellipse cx="40" cy="94" rx="24" ry="5" fill="#0003"/><path d="M15 13h50l-6 74q-19 12-38 0z" fill="#d8edf044" stroke="#b8d9e4" strokeWidth="3"/><path d="M19 45h42l-4 40q-17 10-34 0z" fill="#6dabceaa"/><ellipse cx="40" cy="45" rx="21" ry="4" fill="#b8e6fa"/><path d="M24 19l3 62" stroke="#fff9" strokeWidth="3"/></svg><span>Su bardağı</span>
+  </button>}
+  {room==='bathroom'&&onBath&&<button type="button" className="furniture-object furniture-soap" aria-label="Sabunla Panda’nın banyosunu başlat" onClick={onBath}>
+   <svg viewBox="0 0 120 100" aria-hidden="true"><ellipse cx="60" cy="85" rx="48" ry="8" fill="#0003"/><path d="M12 69q48-20 96 0l-8 15H20z" fill="#d3d9df" stroke="#899ba8" strokeWidth="2"/><rect x="25" y="40" width="70" height="30" rx="13" fill="#e4bdcc" stroke="#b98b9f" strokeWidth="2"/><ellipse cx="60" cy="46" rx="26" ry="7" fill="#f3dbe5"/><circle cx="32" cy="28" r="9" fill="#e2f4ff88" stroke="#a7cede"/><circle cx="79" cy="23" r="12" fill="#e2f4ff88" stroke="#a7cede"/></svg><span>Sabun · banyo yap</span>
+  </button>}
+  {room==='kitchen'&&onFeed&&<button type="button" className="furniture-object furniture-bowl" aria-label="Bambu kasesinden Panda’yı besle" onClick={onFeed}>
+   <svg viewBox="0 0 120 100" aria-hidden="true"><ellipse cx="60" cy="88" rx="43" ry="7" fill="#0003"/><path d="M21 45h78l-12 34q-27 15-54 0z" fill="#e4dbce" stroke="#a69780" strokeWidth="2"/><ellipse cx="60" cy="45" rx="39" ry="10" fill="#b9aa91"/><path d="M41 45l8-34m7 34 7-37m8 38 9-30" stroke="#799b57" strokeWidth="9"/><path d="M45 27h8m6-1h8m9 7h8" stroke="#b7cc8c" strokeWidth="3"/></svg><span>Bambu kasesi · {bamboo}</span>
   </button>}
   {garden&&<button type="button" className="furniture-object furniture-watering" aria-label="Çiçeği sula" disabled={plant>=3} onClick={()=>setPlant(Math.min(3,plant+1))}>
    <svg viewBox="0 0 150 130" aria-hidden="true"><path d="M23 48h57v51q-29 19-57 0z" fill="#6e9696" stroke="#416966" strokeWidth="3"/><path d="M25 51q-40 11-14 44l13-2" fill="none" stroke="#416966" strokeWidth="8"/><path d="M79 59l42-30 11 10-51 45z" fill="#8aafaa" stroke="#416966" strokeWidth="3"/><path d="M35 39h34v11H35z" fill="#aac8bf"/><path d="M121 49l12 15m-8-17 16 12" stroke="#93cce8" strokeWidth="3"/><path d="M116 96h27l-4 26h-19z" fill="#bf8460"/><path d="M129 98V71m0 15-13-9m13 4 12-11" stroke="#628557" strokeWidth="4"/>{plant>=3&&<><circle cx="129" cy="65" r="12" fill="#e4b8cc"/><circle cx="129" cy="65" r="4" fill="#ffe3a0"/></>}</svg><span>{plant>=3?'Çiçek açtı ✓':`Çiçeği sula · ${plant}/3`}</span>
