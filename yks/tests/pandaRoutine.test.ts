@@ -5,6 +5,7 @@ import {expect,it} from 'vitest';
 import {pandaPose} from '../src/utils/pandaPose';
 import {PandaFurniture} from '../src/components/PandaFurniture';
 it('room and activity decide a physical pose without snapping walking onto furniture',()=>{
+ expect(pandaPose('living','relaxing')).toBe('sofa');expect(pandaPose('study','studying')).toBe('desk');expect(pandaPose('bathroom','bathing')).toBe('bath');expect(pandaPose('balcony','relaxing')).toBe('terrace');expect(pandaPose('garden','relaxing')).toBe('watering');
  expect(pandaPose('bedroom','sleeping')).toBe('lying');expect(pandaPose('living','sleeping')).toBe('standing');
  expect(pandaPose('kitchen','eating')).toBe('seated');expect(pandaPose('kitchen','drinking')).toBe('seated');expect(pandaPose('kitchen','walking')).toBe('standing');
 });

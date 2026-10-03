@@ -454,6 +454,17 @@ await step('Panda yatağa uzanır, lambayı kapatır ve mutfak masasında yemek 
   await page.locator('.panda-dining-pose').waitFor({state:'detached',timeout:12000});
 });
 
+await step('Her oda kendi eşyasıyla günlük yaşam rutini gösterir',async()=>{
+  for(const [room,label,pose] of [['Salon','Koltukta dinlen','sofa'],['Çalışma','Defterde çalış','desk'],['Banyo','Küvette yıkan','bath'],['Bahçe','Bitkilerle ilgilen','watering'],['Balkon','Balkonda mola ver','terrace']]){
+    await tap(page.getByRole('navigation',{name:'Ev odaları'}).getByRole('button').filter({hasText:room}));
+    await tap(page.getByRole('group',{name:'Bu odanın günlük rutini'}).getByRole('button',{name:label,exact:true}));
+    const model=page.locator('.room-pose-'+pose);await model.waitFor({state:'visible',timeout:6000});
+    assert(await model.locator('.routine-front').isVisible(),room+' eşya katmanı görünmüyor');
+    const fits=await model.evaluate(el=>{const r=el.getBoundingClientRect(),s=el.closest('.pet-stage').getBoundingClientRect();return r.left>=s.left-1&&r.right<=s.right+1;});
+    assert(fits,room+' rutini telefon ekranından taşıyor');
+  }
+});
+
 await step('Öğretmen fotoğrafı: seç → öğretmen ekranında görünür → kaldır', async () => {
   // 1×1 piksel PNG
   const png = Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==', 'base64');

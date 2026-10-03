@@ -1,7 +1,10 @@
 import {useId} from 'react';
+import {PandaRoomPose} from './PandaRoomPose';
+import type {PandaPose} from '../utils/pandaPose';
 import {RealisticPanda} from './RealisticPanda';
-export function PandaRoutinePose({pose,eating,drinking,items}:{pose:'lying'|'seated';eating:boolean;drinking:boolean;items:string[]}){
+export function PandaRoutinePose({pose,eating,drinking,items}:{pose:Exclude<PandaPose,'standing'>;eating:boolean;drinking:boolean;items:string[]}){
  const id=useId().replace(/:/g,'');
+ if(pose!=='lying'&&pose!=='seated')return <PandaRoomPose pose={pose} items={items}/>;
  if(pose==='lying')return <svg className="panda-bed-pose" viewBox="0 0 440 230" aria-hidden="true">
   <defs><linearGradient id={id+'wood'}><stop stopColor="#755340"/><stop offset=".5" stopColor="#b18a65"/><stop offset="1" stopColor="#805c44"/></linearGradient><linearGradient id={id+'duvet'} x2="0" y2="1"><stop stopColor="#b6a8d0"/><stop offset="1" stopColor="#7c6b98"/></linearGradient><radialGradient id={id+'fur'}><stop stopColor="#fffdf5"/><stop offset="1" stopColor="#d9d4ca"/></radialGradient></defs>
   <ellipse cx="224" cy="210" rx="201" ry="13" fill="#12101b26"/>

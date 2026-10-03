@@ -1232,6 +1232,17 @@ export default function PetPage() {
           </button>
         </header>
 
+        <div className="pet-room-routine" role="group" aria-label="Bu odanın günlük rutini">
+          <button type="button" onClick={() => {
+            if(room==='kitchen')kitchenGive('bambu');
+            else if(room==='bedroom')sleep();
+            else if(room==='bathroom')bath();
+            else if(room==='study')studyTogether();
+            else if(room==='garden'){moveTo('garden','relaxing','Çiçeklerle ilgileniyoruz.');later(()=>{setActivity('idle');setSceneMessage(null);},7200);}
+            else relax();
+          }}>{({living:'Koltukta dinlen',kitchen:'Masada yemek ye',bedroom:activity==='sleeping'?'Uyan':'Yatağa uzan',bathroom:'Küvette yıkan',study:'Defterde çalış',garden:'Bitkilerle ilgilen',balcony:'Balkonda mola ver'})[room]}</button>
+          <span>Odadaki eşyalara dokunarak da başlatabilirsin.</span>
+        </div>
         <div className="pet-game-needs" aria-label="Panda ihtiyaçları">
           <NeedBubble icon="🎋" label="Tokluk" value={needs.food} onClick={() => kitchenGive('bambu')} />
           <NeedBubble icon="💧" label="Su" value={needs.water} onClick={() => kitchenGive('su')} />
@@ -1291,7 +1302,7 @@ export default function PetPage() {
             onPointerCancel={() => { pandaDragRef.current = null; setDragging(false); setActivity('idle'); }}
             onClick={(e) => { if (e.detail === 0) petPanda(); }}
             disabled={ballGame.phase !== 'idle'}
-            aria-label={activity==='sleeping'?pet.name+' yatakta uyuyor · uyandır':pose==='seated'?pet.name+' mutfak masasında oturuyor':pet.name + ' pandayı sev'}
+            aria-label={activity==='sleeping'?pet.name+' yatakta uyuyor · uyandır':pose!=='standing'?pet.name+' '+activityText(activity,room,pet.name):pet.name + ' pandayı sev'}
           >
             {pose!=='standing'?<PandaRoutinePose pose={pose} eating={activity==='eating'} drinking={activity==='drinking'} items={pet.items}/>:<RealisticPanda
               size={292}
