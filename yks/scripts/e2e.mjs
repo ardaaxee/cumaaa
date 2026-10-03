@@ -289,7 +289,11 @@ await step('Telefon genişliklerinde yatay taşma yok', async () => {
     await page.setViewportSize({ width: w, height: h });
     for (const r of routes) {
       await page.goto(APP + r, { waitUntil: 'networkidle' });
-      await page.waitForTimeout(250);
+      await page.locator('#main h1').waitFor({ state: 'visible' });
+      await page.evaluate(async () => {
+        await document.fonts.ready;
+        await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+      });
       const sw = await page.evaluate(() => document.documentElement.scrollWidth);
       if (sw > w + 1) {
         const overflow = await page.evaluate(() => [...document.querySelectorAll('body *')].filter(el => !el.closest('.edge-friend')).map(el => {
