@@ -1,3 +1,4 @@
+import {sanitizePandaPlants,waterPandaPlant} from '../utils/pandaPlants';
 import {PandaRoutinePose} from '../components/PandaRoutinePose';
 import {pandaPose} from '../utils/pandaPose';
 import { PandaFurniture } from '../components/PandaFurniture';
@@ -335,6 +336,7 @@ function activityText(activity: HouseActivity, room: HouseRoom, name: string): s
 export default function PetPage() {
   const state = useAppState();
   const pet = state.settings.pet;
+  const plants = sanitizePandaPlants(pet.plants);
   const p = useMemo(() => petStatus(state), [state]);
   const needs = usePetNeeds();
   const initialLife = useMemo(() => loadPandaLife(), []);
@@ -861,6 +863,10 @@ export default function PetPage() {
   };
 
   const tendPlant = () => {
+    const plantRoom=room==='balcony'?'balcony':'garden';
+    const plantDay=dayKey();
+    if(plants[plantRoom].wateredDay>=plantDay)return toast('Bu çiçek bugün sulandı. Yarın yeniden ilgilenebiliriz.');
+    update(s=>updateSettings(s,{pet:{...s.settings.pet,plants:waterPandaPlant(s.settings.pet.plants,plantRoom,plantDay)}}));
     moveTo(room==='balcony'?'balcony':'garden','watering','Sulama kabı hazır; bitkilerle ilgileniyoruz.');
     later(()=>{setActivity('idle');setSceneMessage(null);},7200);
   };
@@ -1291,7 +1297,7 @@ export default function PetPage() {
             onRelax={relax}
           />
 
-          <PandaFurniture room={room} onWater={() => kitchenGive('su')} onFeed={() => kitchenGive('bambu')} onBath={bath} onStudy={studyTogether} bamboo={needs.bamboo} drops={needs.drops} sleeping={activity==='sleeping'} onPlant={tendPlant} />
+          <PandaFurniture room={room} onWater={() => kitchenGive('su')} onFeed={() => kitchenGive('bambu')} onBath={bath} onStudy={studyTogether} bamboo={needs.bamboo} drops={needs.drops} sleeping={activity==='sleeping'} onPlant={tendPlant} plant={plants[room==='balcony'?'balcony':'garden'].growth} plantWatered={plants[room==='balcony'?'balcony':'garden'].wateredDay>=dayKey()} />
 
           <button className="pet-scene-arrow prev" type="button" onClick={() => changeRoom(-1)} aria-label="Önceki oda">‹</button>
           <button className="pet-scene-arrow next" type="button" onClick={() => changeRoom(1)} aria-label="Sonraki oda">›</button>

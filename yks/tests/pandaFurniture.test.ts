@@ -17,10 +17,14 @@ it('lamba, kitap, erzak dolabı ve su bardağı gerçek etkileşim verir',async(
  await act(()=>host.querySelector<HTMLButtonElement>('.furniture-glass')!.click());expect(onWater).toHaveBeenCalledTimes(1);
  await act(()=>root.unmount());host.remove();
 });
-it('çiçek sulama üç aşamada tamamlanır ve tekrar sulama kapanır',async()=>{
+it('günlük sulama kapanır; çiçek olgunlaşsa da ertesi gün bakım açılır',async()=>{
  Object.assign(globalThis,{IS_REACT_ACT_ENVIRONMENT:true});const host=document.createElement('div');const root=createRoot(host);
- await act(()=>root.render(createElement(PandaFurniture,{room:'garden',onWater:vi.fn(),onStudy:vi.fn(),bamboo:0,drops:0})));
- for(let i=0;i<3;i++) await act(()=>host.querySelector<HTMLButtonElement>('.furniture-watering')!.click());
- expect(host.textContent).toContain('Çiçek açtı');expect(host.querySelector<HTMLButtonElement>('.furniture-watering')!.disabled).toBe(true);
+ const onPlant=vi.fn();const props={room:'garden' as const,onWater:vi.fn(),onStudy:vi.fn(),onPlant,bamboo:0,drops:0,plant:3};
+ await act(()=>root.render(createElement(PandaFurniture,props)));
+ await act(()=>host.querySelector<HTMLButtonElement>('.furniture-watering')!.click());expect(onPlant).toHaveBeenCalledTimes(1);
+ await act(()=>root.render(createElement(PandaFurniture,{...props,plantWatered:true})));
+ expect(host.textContent).toContain('Bugün sulandı');expect(host.querySelector<HTMLButtonElement>('.furniture-watering')!.disabled).toBe(true);
+ await act(()=>root.render(createElement(PandaFurniture,{...props,plantWatered:false})));
+ expect(host.querySelector<HTMLButtonElement>('.furniture-watering')!.disabled).toBe(false);
  await act(()=>root.unmount());
 });

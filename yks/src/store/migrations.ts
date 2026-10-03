@@ -1,3 +1,4 @@
+import {sanitizePandaPlants} from '../utils/pandaPlants';
 import {sanitizeRecoveryProgress} from '../utils/recoveryProgress';
 import { sanitizeLearningProgress } from '../utils/learningProgress';
 import { sanitizePandaMemories } from '../utils/pandaMoments';
@@ -284,6 +285,7 @@ export function sanitize(raw: Json): AppState {
         name: str(petRaw.name).trim().slice(0, 20) || 'Bambu',
         items: arr(petRaw.items).filter((x): x is string => typeof x === 'string').slice(0, 12),
         care: sanitizeCare(petRaw.care),
+        plants: sanitizePandaPlants(petRaw.plants),
         memories: sanitizePandaMemories(petRaw.memories),
       },
       companion: settings.companion !== false,
