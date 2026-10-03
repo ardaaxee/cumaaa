@@ -364,6 +364,14 @@ export default function PetPage() {
   const [facing, setFacing] = useState<'left' | 'right'>('right');
   const [voiceOn, setVoiceOn] = useState(initialLife.voiceOn);
   const [emotion, setEmotion] = useState<PandaEmotion>('neutral');
+  const [gaze, setGaze] = useState({ x: 0, y: 0 });
+  const gazeTime = useRef(0);
+  const followTouch = (e: ReactPointerEvent<HTMLDivElement>) => {
+    if (Date.now() - gazeTime.current < 70 || activity === 'sleeping') return;
+    gazeTime.current = Date.now();
+    const rect = e.currentTarget.getBoundingClientRect();
+    setGaze({ x: ((e.clientX - rect.left) / rect.width - .5) * 6, y: ((e.clientY - rect.top) / rect.height - .5) * 4 });
+  };
   const ballGame = usePandaBallGame();
   const playScore = ballGame.score;
   const ballGameActive = ballGame.phase === 'playing';
@@ -1023,7 +1031,13 @@ export default function PetPage() {
       return;
     }
 
-    if (y < 0.38) {
+    const x = (e.clientX - rect.left) / Math.max(1, rect.width);
+    try { navigator.vibrate?.(18); } catch { /* Optional tactile feedback. */ }
+    if (y > .32 && y < .52 && x > .36 && x < .64) {
+      setEmotion('sneeze');
+      setActivity('sneezing');
+      speak('Hapşuu! Burnum gıdıklandı!', 'sneeze');
+    } else if (y < 0.38) {
       setEmotion('shy');
       setActivity('shy');
       setHappiness((v) => clampLife(v + 5));
@@ -1234,7 +1248,9 @@ export default function PetPage() {
         <div
           ref={stageRef}
           className={'pet-stage scene-' + room + ' pose-' + pose + ' activity-' + activity + (ballGame.phase !== 'idle' ? ' has-ball-game' : '')}
-          onPointerDown={(e) => { stageTouch.current = { x: e.clientX, y: e.clientY }; }}
+          onPointerMove={followTouch}
+          onPointerLeave={() => setGaze({ x: 0, y: 0 })}
+          onPointerDown={(e) => { followTouch(e); stageTouch.current = { x: e.clientX, y: e.clientY }; }}
           onPointerCancel={() => { stageTouch.current = null; }}
           onPointerUp={stagePointerUp}
         >
@@ -1279,6 +1295,7 @@ export default function PetPage() {
           >
             {pose!=='standing'?<PandaRoutinePose pose={pose} eating={activity==='eating'} drinking={activity==='drinking'} items={pet.items}/>:<RealisticPanda
               size={292}
+              gaze={gaze}
               items={pet.items.filter((id) => PET_ITEMS.some((item) => item.id === id && item.level <= p.level))}
               sleepy={activity === 'sleeping'}
               sad={!holding && sad}
