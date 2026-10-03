@@ -418,7 +418,8 @@ await step('Öğretmen öğrenme alanı ve defter aynı anda kullanılabilir', a
 
 await step('Konu seviye kontrolü ve aynı sorunun defterini tekrar açma',async()=>{
   await page.goto(APP+'#/ogretmen?konu=aytkim-elektrokimya',{waitUntil:'networkidle'});
-  await tap(page.getByRole('button',{name:'Adım adım öğrenmeye başla',exact:true}));
+  const startLearning=page.getByRole('button',{name:'Adım adım öğrenmeye başla',exact:true});
+  if(await startLearning.isVisible())await tap(startLearning);
   await tap(page.getByRole('button',{name:'Seviyemi kontrol et',exact:true}));
   const diagnostic=page.getByRole('region',{name:'Konu seviye kontrolü',exact:true});
   for(const article of await diagnostic.locator('.inline-q').all())await tap(article.locator('.option').first());
