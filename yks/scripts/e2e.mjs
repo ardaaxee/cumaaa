@@ -250,6 +250,9 @@ await step('G) Çevrimdışıyken daha önce açılan konunun soruları açılı
 await step('Deneme raporu: hedef kaydı, sınav ve sonuç bağlantısı yenilemede korunur', async () => {
   await page.goto(APP + '#/denemeler?sinav=AYT', { waitUntil: 'networkidle' });
   await tap(page.getByRole('button', { name: 'Deneme', exact: true }));
+  await tap(page.getByRole('dialog', { name: 'AYT denemesi ekle' }).getByRole('button', { name: 'Kapat', exact: true }));
+  assert(page.url().endsWith('#/denemeler?sinav=AYT'), 'Formu kapatmak rapor bağlantısını değiştirdi');
+  await tap(page.getByRole('button', { name: 'Deneme', exact: true }));
   const dialog = page.getByRole('dialog', { name: 'AYT denemesi ekle' });
   await dialog.getByRole('textbox', { name: 'Deneme adı', exact: true }).fill('Mobil AYT kontrolü');
   for (const [label, value] of [['Matematik doğru', '24'], ['Matematik yanlış', '12'], ['Fizik doğru', '7'], ['Fizik yanlış', '5'], ['Kimya doğru', '10'], ['Kimya yanlış', '3'], ['Biyoloji doğru', '10'], ['Biyoloji yanlış', '3']]) {

@@ -90,7 +90,7 @@ function MockForm({ exam, onClose }: { exam: Exam; onClose: (savedId?: string) =
   return (
     <Modal
       title={`${exam} denemesi ekle`}
-      onClose={onClose}
+      onClose={() => onClose()}
       actions={
         <>
           <button type="button" className="btn" onClick={() => onClose()}>
