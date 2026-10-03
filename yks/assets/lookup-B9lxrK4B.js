@@ -1,0 +1,1 @@
+import{fn as e,hn as t,mn as n,pn as r}from"./actions-DrBSWSIY.js";var i={topicName:e=>r(e)?.topic.name??e,subjectName:t=>{let r=e(t);return r?n(r):t},subjectTopicIds:e=>t(e).map(e=>e.id)};export{i as t};
