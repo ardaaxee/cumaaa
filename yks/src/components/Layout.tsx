@@ -206,7 +206,7 @@ export function Layout({ children }: { children: ReactNode }) {
 /** Ekran kenarından bakan küçük kedi/tavşan: yalnız süs, tıklanamaz, metnin üstüne taşmaz. */
 function EdgeFriends() {
   return (
-    <div aria-hidden="true">
+    <div className="edge-friends-layer" aria-hidden="true">
       <span className="edge-friend edge-rabbit">
         <RabbitFace size={34} />
       </span>

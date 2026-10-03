@@ -14598,3 +14598,7 @@ textarea:focus-visible {
   .test-builder-card .form-grid.two{grid-template-columns:minmax(0,1fr)}
   .test-builder-card .card-head{flex-wrap:wrap}
 }
+
+/* Edge decorations peek through a viewport-sized layer without widening pages. */
+.edge-friends-layer{position:fixed;inset:0;overflow:clip;contain:paint;pointer-events:none;z-index:2}
+.edge-friends-layer .edge-friend{position:absolute}
