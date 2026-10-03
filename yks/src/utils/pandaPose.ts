@@ -4,6 +4,7 @@ export type PandaPose='standing'|'lying'|'seated'|'sofa'|'desk'|'bath'|'terrace'
 export function pandaPose(room:HouseRoom,activity:string):PandaPose{
  if(room==='bedroom'&&activity==='sleeping')return 'lying';
  if(room==='kitchen'&&['waiting','eating','drinking'].includes(activity))return 'seated';
+ if((room==='garden'||room==='balcony')&&activity==='watering')return 'watering';
  if(room==='living'&&activity==='relaxing')return 'sofa';
  if(room==='study'&&activity==='studying')return 'desk';
  if(room==='bathroom'&&activity==='bathing')return 'bath';

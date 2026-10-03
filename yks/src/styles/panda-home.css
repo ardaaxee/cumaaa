@@ -244,3 +244,10 @@
 
 /* Keep furniture poses centered even when the walking direction flips. */
 .panda-home-v7 .pet-stage-panda .panda-room-pose>.real-panda,.panda-home-v7 .pet-stage-panda .panda-dining-pose>.real-panda{translate:-50% 0;transform:none!important}
+
+/* Characters stay alive while sitting, writing or tending plants. */
+.panda-home-v7 .panda-room-pose .rp-body{transform-origin:110px 240px;animation:panda-calm-breath 4.6s ease-in-out infinite}
+.panda-home-v7 .panda-room-pose .rp-eye{transform-box:fill-box;transform-origin:center;animation:panda-natural-blink 5.8s infinite}
+.panda-home-v7 .room-pose-desk .rp-arm-right{transform-origin:145px 142px;animation:panda-writing-arm 1.2s ease-in-out infinite}
+@keyframes panda-writing-arm{0%,100%{transform:rotate(20deg)}50%{transform:rotate(27deg)}}
+@media(prefers-reduced-motion:reduce){.panda-home-v7 .panda-room-pose .rp-body,.panda-home-v7 .panda-room-pose .rp-eye,.panda-home-v7 .room-pose-desk .rp-arm-right{animation:none}}

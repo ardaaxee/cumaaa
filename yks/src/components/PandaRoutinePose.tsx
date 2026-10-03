@@ -2,9 +2,9 @@ import {useId} from 'react';
 import {PandaRoomPose} from './PandaRoomPose';
 import type {PandaPose} from '../utils/pandaPose';
 import {RealisticPanda} from './RealisticPanda';
-export function PandaRoutinePose({pose,eating,drinking,items}:{pose:Exclude<PandaPose,'standing'>;eating:boolean;drinking:boolean;items:string[]}){
+export function PandaRoutinePose({pose,eating,drinking,items,gaze}:{pose:Exclude<PandaPose,'standing'>;eating:boolean;drinking:boolean;items:string[];gaze?:{x:number;y:number}}){
  const id=useId().replace(/:/g,'');
- if(pose!=='lying'&&pose!=='seated')return <PandaRoomPose pose={pose} items={items}/>;
+ if(pose!=='lying'&&pose!=='seated')return <PandaRoomPose pose={pose} items={items} gaze={gaze}/>;
  if(pose==='lying')return <svg className="panda-bed-pose" viewBox="0 0 440 230" aria-hidden="true">
   <defs><linearGradient id={id+'wood'}><stop stopColor="#755340"/><stop offset=".5" stopColor="#b18a65"/><stop offset="1" stopColor="#805c44"/></linearGradient><linearGradient id={id+'duvet'} x2="0" y2="1"><stop stopColor="#b6a8d0"/><stop offset="1" stopColor="#7c6b98"/></linearGradient><radialGradient id={id+'fur'}><stop stopColor="#fffdf5"/><stop offset="1" stopColor="#d9d4ca"/></radialGradient></defs>
   <ellipse cx="224" cy="210" rx="201" ry="13" fill="#12101b26"/>
@@ -25,7 +25,7 @@ export function PandaRoutinePose({pose,eating,drinking,items}:{pose:Exclude<Pand
   </g><path d="M44 165H396" stroke="#f7f0e6" strokeWidth="3" opacity=".7"/>
  </svg>;
  return <div className="panda-dining-pose" aria-hidden="true"><svg className="panda-dining-chair" viewBox="0 0 300 320"><rect x="75" y="83" width="150" height="159" rx="22" fill="#936d52" stroke="#6d4d39" strokeWidth="5"/><path d="M91 106H209M91 123H209M91 140H209" stroke="#bf9470" strokeWidth="8"/><path d="M83 230L75 306M217 230L225 306" stroke="#6f503b" strokeWidth="12"/><rect x="64" y="216" width="172" height="22" rx="8" fill="#bf9772"/></svg>
- <RealisticPanda size={230} eating={eating} drinking={drinking} items={items}/>
+ <RealisticPanda gaze={gaze} size={230} eating={eating} drinking={drinking} items={items}/>
  <svg className="panda-dining-table" viewBox="0 0 340 165"><ellipse cx="170" cy="153" rx="144" ry="9" fill="#37251c25"/><path d="M60 59L52 150M280 59L288 150" stroke="#795638" strokeWidth="15"/><path d="M15 34Q170-2 325 34L318 66Q170 101 22 66Z" fill="#b2875f" stroke="#765235" strokeWidth="3"/><ellipse cx="170" cy="33" rx="153" ry="29" fill="#d7b28b" stroke="#a57b54" strokeWidth="3"/><path d="M39 32Q174 10 301 32M48 43Q175 22 287 43" stroke="#bb9167" strokeWidth="1" opacity=".6"/>
  <ellipse cx="162" cy="34" rx="52" ry="16" fill="#fcf6e7" stroke="#cdc6b8" strokeWidth="2"/><path d="M119 32Q124 66 162 67Q200 66 205 32Z" fill="#839b87" stroke="#526e56" strokeWidth="2"/><ellipse cx="162" cy="32" rx="43" ry="12" fill="#d7e4ca"/>
  {!drinking&&<g className={eating?'panda-plate-bamboo':''}><path d="M139 27L173 36M148 23L182 32M135 34L167 42" stroke="#73a155" strokeWidth="6" strokeLinecap="round"/><path d="M148 29L150 33M163 31L165 35" stroke="#446c39" strokeWidth="2"/></g>}

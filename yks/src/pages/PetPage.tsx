@@ -52,6 +52,7 @@ type HouseActivity =
   | 'playing'
   | 'studying'
   | 'relaxing'
+  | 'watering'
   | 'greeting'
   | 'talking'
   | 'laughing'
@@ -318,6 +319,7 @@ function activityText(activity: HouseActivity, room: HouseRoom, name: string): s
   if (activity === 'bathing') return name + ' köpüklü banyo yapıyor 🫧';
   if (activity === 'playing') return name + ' bahçede oyun oynuyor.';
   if (activity === 'studying') return name + ' çalışma masasında seninle ders çalışıyor.';
+  if (activity === 'watering') return name + ' bitkilerini suluyor.';
   if (activity === 'relaxing') return name + ' koltukta dinleniyor.';
   if (activity === 'greeting') return name + ' sana selam veriyor 👋';
   if (activity === 'talking') return name + ' seninle konuşuyor.';
@@ -678,7 +680,7 @@ export default function PetPage() {
     } else if (hour >= 7 && hour < 9) {
       key = 'breakfast';
       target = 'kitchen';
-      pandaNext = 'relaxing';
+      pandaNext = 'waiting';
       message = 'Günaydın! Evde kahvaltı rutini başladı ☀️🍳';
     } else if (hour >= 9 && hour < 12) {
       key = 'morning-study';
@@ -688,7 +690,7 @@ export default function PetPage() {
     } else if (hour >= 18 && hour < 20) {
       key = 'dinner';
       target = 'kitchen';
-      pandaNext = 'relaxing';
+      pandaNext = 'waiting';
       message = 'Akşam oldu; evde yemek hazırlığı başladı 🍽️';
     } else if (hour >= 20 && hour < 23) {
       key = 'evening';
@@ -856,6 +858,11 @@ export default function PetPage() {
       setActivity('idle');
       setSceneMessage(null);
     }, 5400);
+  };
+
+  const tendPlant = () => {
+    moveTo(room==='balcony'?'balcony':'garden','watering','Sulama kabı hazır; bitkilerle ilgileniyoruz.');
+    later(()=>{setActivity('idle');setSceneMessage(null);},7200);
   };
 
   const relax = () => {
@@ -1238,9 +1245,10 @@ export default function PetPage() {
             else if(room==='bedroom')sleep();
             else if(room==='bathroom')bath();
             else if(room==='study')studyTogether();
-            else if(room==='garden'){moveTo('garden','relaxing','Çiçeklerle ilgileniyoruz.');later(()=>{setActivity('idle');setSceneMessage(null);},7200);}
+            else if(room==='garden')tendPlant();
             else relax();
           }}>{({living:'Koltukta dinlen',kitchen:'Masada yemek ye',bedroom:activity==='sleeping'?'Uyan':'Yatağa uzan',bathroom:'Küvette yıkan',study:'Defterde çalış',garden:'Bitkilerle ilgilen',balcony:'Balkonda mola ver'})[room]}</button>
+          {pose!=='standing'&&activity!=='sleeping'&&!careSession&&<button type="button" onClick={()=>{beginAction();setActivity('idle');setSceneMessage('Mola bitti. Yeni bir şey yapabiliriz.');}}>Rutini bitir</button>}
           <span>Odadaki eşyalara dokunarak da başlatabilirsin.</span>
         </div>
         <div className="pet-game-needs" aria-label="Panda ihtiyaçları">
@@ -1283,7 +1291,7 @@ export default function PetPage() {
             onRelax={relax}
           />
 
-          <PandaFurniture room={room} onWater={() => kitchenGive('su')} onFeed={() => kitchenGive('bambu')} onBath={bath} onStudy={studyTogether} bamboo={needs.bamboo} drops={needs.drops} sleeping={activity==='sleeping'} />
+          <PandaFurniture room={room} onWater={() => kitchenGive('su')} onFeed={() => kitchenGive('bambu')} onBath={bath} onStudy={studyTogether} bamboo={needs.bamboo} drops={needs.drops} sleeping={activity==='sleeping'} onPlant={tendPlant} />
 
           <button className="pet-scene-arrow prev" type="button" onClick={() => changeRoom(-1)} aria-label="Önceki oda">‹</button>
           <button className="pet-scene-arrow next" type="button" onClick={() => changeRoom(1)} aria-label="Sonraki oda">›</button>
@@ -1304,7 +1312,7 @@ export default function PetPage() {
             disabled={ballGame.phase !== 'idle'}
             aria-label={activity==='sleeping'?pet.name+' yatakta uyuyor · uyandır':pose!=='standing'?pet.name+' '+activityText(activity,room,pet.name):pet.name + ' pandayı sev'}
           >
-            {pose!=='standing'?<PandaRoutinePose pose={pose} eating={activity==='eating'} drinking={activity==='drinking'} items={pet.items}/>:<RealisticPanda
+            {pose!=='standing'?<PandaRoutinePose pose={pose} eating={activity==='eating'} drinking={activity==='drinking'} items={pet.items} gaze={gaze}/>:<RealisticPanda
               size={292}
               gaze={gaze}
               items={pet.items.filter((id) => PET_ITEMS.some((item) => item.id === id && item.level <= p.level))}

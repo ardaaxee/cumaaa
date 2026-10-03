@@ -462,6 +462,7 @@ await step('Her oda kendi eşyasıyla günlük yaşam rutini gösterir',async()=
     assert(await model.locator('.routine-front').isVisible(),room+' eşya katmanı görünmüyor');
     const fits=await model.evaluate(el=>{const r=el.getBoundingClientRect(),s=el.closest('.pet-stage').getBoundingClientRect();return r.left>=s.left-1&&r.right<=s.right+1;});
     assert(fits,room+' rutini telefon ekranından taşıyor');
+    if(pose!=='bath'){await tap(page.getByRole('button',{name:'Rutini bitir',exact:true}));await model.waitFor({state:'detached'});}
   }
 });
 
