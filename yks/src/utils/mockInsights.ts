@@ -28,3 +28,10 @@ export function mockSubjectLinks(exam: MockExam['exam'], key: string) {
     : { matematik: ['matematik', 'geometri'], fizik: ['fizik'], kimya: ['kimya'], biyoloji: ['biyoloji'] };
   return (groups[key] ?? []).map(id => `${exam.toLowerCase()}-${id}`);
 }
+
+export function mockTargetStatus(net: number, target: number | null, exam: MockExam['exam']) {
+  const maximum = exam === 'TYT' ? 120 : 80;
+  if (target === null || !Number.isFinite(target) || target < 0 || target > maximum) return null;
+  return { target, gap: round2(Math.max(0, target - net)), reached: net >= target,
+    progress: target === 0 ? (net >= 0 ? 100 : 0) : Math.round(Math.max(0, Math.min(100, net / target * 100))) };
+}

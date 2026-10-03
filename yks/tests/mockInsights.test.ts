@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import type { MockExam } from '../src/store/schema';
 import { buildSections } from '../src/utils/mock';
-import { mockInsights, mockSubjectLinks } from '../src/utils/mockInsights';
+import { mockInsights, mockSubjectLinks, mockTargetStatus } from '../src/utils/mockInsights';
 
 function result(id: string, date: string, math: number, physics: number): MockExam {
   return { id, date, exam: 'AYT', name: id, createdAt: `${date}T12:00:00Z`, sections: buildSections('AYT', [
@@ -37,5 +37,20 @@ describe('result-based mock report', () => {
       expect(buildSections('AYT', [{ key: 'matematik', correct, wrong: 0 }]).errors.length).toBeGreaterThan(0);
     }
     expect(buildSections('AYT', [{ key: 'fizik', correct: 10, wrong: 5 }]).errors.length).toBeGreaterThan(0);
+  });
+});
+
+
+describe('mock net targets', () => {
+  it('handles negative nets, zero targets and exceeded targets without invalid progress', () => {
+    expect(mockTargetStatus(-2, 40, 'AYT')).toEqual({ target: 40, gap: 42, reached: false, progress: 0 });
+    expect(mockTargetStatus(-2, 0, 'AYT')?.reached).toBe(false);
+    expect(mockTargetStatus(0, 0, 'AYT')?.progress).toBe(100);
+    expect(mockTargetStatus(60, 50, 'AYT')).toEqual({ target: 50, gap: 0, reached: true, progress: 100 });
+  });
+  it('validates each exam limit and permits quarter-net goals', () => {
+    for (const target of [null, Infinity, NaN, -1, 81]) expect(mockTargetStatus(30, target, 'AYT')).toBeNull();
+    expect(mockTargetStatus(30, 100, 'TYT')?.gap).toBe(70);
+    expect(mockTargetStatus(31, 40.25, 'AYT')?.gap).toBe(9.25);
   });
 });

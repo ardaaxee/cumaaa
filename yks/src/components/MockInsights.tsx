@@ -1,13 +1,27 @@
 import { useState } from 'react';
 import type { MockExam } from '../store/schema';
 import { mockNet, mockTotals } from '../utils/mock';
-import { mockInsights, mockSubjectLinks } from '../utils/mockInsights';
+import { mockInsights, mockSubjectLinks, mockTargetStatus } from '../utils/mockInsights';
 import { formatNet } from '../utils/net';
 import { formatDay } from '../utils/date';
 import { getSubject, subjectLabel } from '../data/curriculum';
+import { Modal, toast } from './ui';
+import { update } from '../store/store';
+import { updateProfile } from '../store/actions';
 import './mock-insights.css';
 
-export function MockInsights({ mock, mocks }: { mock: MockExam; mocks: MockExam[] }) {
+export function MockInsights({ mock, mocks, target }: { mock: MockExam; mocks: MockExam[]; target: number | null }) {
+  const [editingTarget, setEditingTarget] = useState(false);
+  const [draftTarget, setDraftTarget] = useState('');
+  const [targetError, setTargetError] = useState('');
+  const goal = mockTargetStatus(mockNet(mock), target, mock.exam);
+  const editTarget = () => { setDraftTarget(target === null ? '' : String(target)); setTargetError(''); setEditingTarget(true); };
+  const saveTarget = () => {
+    const value = draftTarget.trim() === '' ? null : Number(draftTarget);
+    if (value !== null && !mockTargetStatus(0, value, mock.exam)) { setTargetError(`0 ile ${mock.exam === 'TYT' ? 120 : 80} arasında geçerli bir net gir.`); return; }
+    update(s => updateProfile(s, mock.exam === 'TYT' ? { tytTarget: value } : { aytTarget: value }));
+    setEditingTarget(false); toast(value === null ? 'Net hedefi temizlendi.' : 'Net hedefi kaydedildi.');
+  };
   const [view, setView] = useState<'results' | 'coach'>('results');
   const report = mockInsights(mock, mocks);
   const totals = mockTotals(mock);
@@ -22,6 +36,10 @@ export function MockInsights({ mock, mocks }: { mock: MockExam; mocks: MockExam[
       <button className="btn" aria-pressed={view === 'results'} onClick={() => setView('results')}>Detaylı analiz</button>
       <button className="btn" aria-pressed={view === 'coach'} onClick={() => setView('coach')}>Çalışma önerileri</button>
     </div>
+    <section className="mock-target-card" aria-label="Net hedefim">
+      <div className="row between"><div><div className="eyebrow">{mock.exam} net hedefim</div><b>{goal ? `${formatNet(goal.target)} net` : 'Henüz hedef belirlenmedi'}</b></div><button className="btn small" onClick={editTarget}>{goal ? 'Hedefi düzenle' : 'Hedef belirle'}</button></div>
+      {goal ? <><div className="mock-performance-track" role="progressbar" aria-label="Net hedefi ilerlemesi" aria-valuemin={0} aria-valuemax={100} aria-valuenow={goal.progress}><span style={{ width: `${goal.progress}%` }} /></div><p className="small">{goal.reached ? 'Bu denemede net hedefine ulaştın.' : `Bu denemeye göre hedefe ${formatNet(goal.gap)} net kaldı.`}</p></> : <p className="small muted">Hedefini belirleyerek her denemenin hedefe kalan farkını izle.</p>}
+    </section>
     {view === 'results' ? <>
       <div className="mock-result-totals" aria-label="Genel özet">
         <div><b>{totals.correct}</b><span>Doğru</span></div><div><b>{totals.wrong}</b><span>Yanlış</span></div><div><b>{totals.blank}</b><span>Boş</span></div><div><b>{formatNet(mockNet(mock))}</b><span>Toplam net</span></div>
@@ -44,5 +62,10 @@ export function MockInsights({ mock, mocks }: { mock: MockExam; mocks: MockExam[
         <li><b>Öğren, uygula, tekrar ölç</b><p>Bir oturumda bir eksik konuya odaklan. Anlatımdan sonra çözümlü örnekleri çalış, ardından soruları kendin çöz. Yeni deneme sonucunu ekleyerek değişimi takip et.</p><a className="btn small primary" href="#/koc">Kişisel çalışma planım</a></li>
       </ol><p className="tiny muted">Bu rehber kayıtlı sonuçlarından hesaplanır. Başarı veya sıralama tahmini değildir.</p>
     </div>}
+    {editingTarget && <Modal title={`${mock.exam} net hedefim`} onClose={() => setEditingTarget(false)} actions={<><button className="btn" onClick={() => setEditingTarget(false)}>Vazgeç</button><button className="btn primary" onClick={saveTarget}>Hedefi kaydet</button></>}>
+      <label className="field"><span>Hedef net</span><input className="input" type="number" inputMode="decimal" min={0} max={mock.exam === 'TYT' ? 120 : 80} step="0.25" value={draftTarget} onChange={e => setDraftTarget(e.target.value)} aria-describedby="mock-target-help" /></label>
+      <p id="mock-target-help" className="small muted">{mock.exam === 'TYT' ? '120' : '80'} nete kadar hedef belirleyebilirsin. Hedefi temizlemek için alanı boş bırak. Profilindeki hedef de güncellenir.</p>
+      {targetError && <p className="field-error" role="alert">{targetError}</p>}
+    </Modal>}
   </section>;
 }

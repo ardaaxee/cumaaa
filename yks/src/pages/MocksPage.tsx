@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react';
+import { href, navigate, useRoute } from '../hooks/useRoute';
 import { MockInsights } from '../components/MockInsights';
 import type { Exam, SubjectId } from '../domain/types';
 import { LineChart } from '../components/Charts';
@@ -62,7 +63,7 @@ const BRANCH_MOCKS: Record<Exam, BranchMockDef[]> = {
   ],
 };
 
-function MockForm({ exam, onClose }: { exam: Exam; onClose: () => void }) {
+function MockForm({ exam, onClose }: { exam: Exam; onClose: (savedId?: string) => void }) {
   const defs = MOCK_SECTIONS[exam];
   const [name, setName] = useState('');
   const [date, setDate] = useState(dayKey());
@@ -83,7 +84,7 @@ function MockForm({ exam, onClose }: { exam: Exam; onClose: () => void }) {
     if (all.length) return;
     update((s) => addMock(s, { exam, name: name.trim().slice(0, 80) || `${exam} Denemesi`, date, sections }));
     toast('Deneme kaydedildi.');
-    onClose();
+    onClose(getState().mocks.at(-1)?.id);
   };
 
   return (
@@ -92,7 +93,7 @@ function MockForm({ exam, onClose }: { exam: Exam; onClose: () => void }) {
       onClose={onClose}
       actions={
         <>
-          <button type="button" className="btn" onClick={onClose}>
+          <button type="button" className="btn" onClick={() => onClose()}>
             Vazgeç
           </button>
           <button type="button" className="btn primary" onClick={save}>
@@ -142,10 +143,13 @@ function MockForm({ exam, onClose }: { exam: Exam; onClose: () => void }) {
 
 export default function MocksPage() {
   const mocks = useSelector((s) => s.mocks);
-  const [exam, setExam] = useState<Exam>('TYT');
+  const route = useRoute();
+  const exam: Exam = route.query.get('sinav') === 'AYT' ? 'AYT' : 'TYT';
+  const setExam = (value: Exam) => navigate(href('/denemeler', { sinav: value }));
   const [range, setRange] = useState<'5' | '10'>('5');
   const [adding, setAdding] = useState(false);
-  const [selectedId, setSelectedId] = useState<string | null>(null);
+  const selectedId = route.query.get('deneme');
+  const profile = useSelector(s => s.profile);
   const [del, setDel] = useState<MockExam | null>(null);
   const [startExam, setStartExam] = useState<Exam | null>(null);
 
@@ -258,10 +262,10 @@ export default function MocksPage() {
       </div>
 
       {selected ? <>
-        <label className="field mock-result-picker"><span>İncelenecek deneme</span><select className="input" value={selected.id} onChange={e => setSelectedId(e.target.value)}>
+        <label className="field mock-result-picker"><span>İncelenecek deneme</span><select className="input" value={selected.id} onChange={e => navigate(href('/denemeler', { sinav: exam, deneme: e.target.value }))}>
           {list.slice().reverse().map(m => <option key={m.id} value={m.id}>{m.name} · {formatDay(m.date)} · {formatNet(mockNet(m))} net</option>)}
         </select></label>
-        <MockInsights key={selected.id} mock={selected} mocks={list} />
+        <MockInsights key={selected.id} mock={selected} mocks={list} target={exam === 'TYT' ? profile.tytTarget : profile.aytTarget} />
       </> : <section className="card section"><div className="eyebrow">Deneme analiz merkezi</div><h2>Sonucunu ekle, sonraki adımını gör</h2><p className="small muted">Doğru ve yanlışlarını gir. Netin, ders performansın ve sonuçlarına dayalı çalışma önerilerin birlikte hazırlansın.</p><button className="btn primary" onClick={() => setAdding(true)}>Yeni deneme ekle</button></section>}
 
       <section className={`mock-exam-hero ${exam.toLowerCase()}`} aria-labelledby="fm-h">
@@ -422,7 +426,7 @@ export default function MocksPage() {
         </>
       )}
 
-      {adding && <MockForm exam={exam} onClose={() => { setAdding(false); setSelectedId(null); }} />}
+      {adding && <MockForm exam={exam} onClose={savedId => { setAdding(false); if (savedId) navigate(href('/denemeler', { sinav: exam, deneme: savedId })); }} />}
       {del && (
         <ConfirmDialog
           title="Deneme silinsin mi?"

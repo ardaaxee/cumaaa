@@ -247,9 +247,40 @@ await step('G) Çevrimdışıyken daha önce açılan konunun soruları açılı
   }
 });
 
+await step('Deneme raporu: hedef kaydı, sınav ve sonuç bağlantısı yenilemede korunur', async () => {
+  await page.goto(APP + '#/denemeler?sinav=AYT', { waitUntil: 'networkidle' });
+  await tap(page.getByRole('button', { name: 'Deneme', exact: true }));
+  const dialog = page.getByRole('dialog', { name: 'AYT denemesi ekle' });
+  await dialog.getByRole('textbox', { name: 'Deneme adı', exact: true }).fill('Mobil AYT kontrolü');
+  for (const [label, value] of [['Matematik doğru', '24'], ['Matematik yanlış', '12'], ['Fizik doğru', '7'], ['Fizik yanlış', '5'], ['Kimya doğru', '10'], ['Kimya yanlış', '3'], ['Biyoloji doğru', '10'], ['Biyoloji yanlış', '3']]) {
+    await dialog.getByRole('spinbutton', { name: label, exact: true }).fill(value);
+  }
+  await tap(dialog.getByRole('button', { name: 'Kaydet', exact: true }));
+  await page.waitForURL(/sinav=AYT&deneme=/);
+  const reportUrl = page.url();
+  await page.locator('.mock-net-pill').waitFor();
+  assert((await page.locator('.mock-net-pill').innerText()).includes('45,25'), 'Deneme neti yanlış');
+  await tap(page.getByRole('button', { name: 'Hedef belirle', exact: true }));
+  const targetDialog = page.getByRole('dialog', { name: 'AYT net hedefim' });
+  await targetDialog.getByRole('spinbutton', { name: 'Hedef net', exact: true }).fill('81');
+  await tap(targetDialog.getByRole('button', { name: 'Hedefi kaydet', exact: true }));
+  await targetDialog.getByRole('alert').waitFor();
+  await targetDialog.getByRole('spinbutton', { name: 'Hedef net', exact: true }).fill('60');
+  await tap(targetDialog.getByRole('button', { name: 'Hedefi kaydet', exact: true }));
+  await page.getByText('Bu denemeye göre hedefe 14,75 net kaldı.', { exact: true }).waitFor();
+  await page.reload({ waitUntil: 'networkidle' });
+  assert(page.url() === reportUrl, 'Seçili sonuç bağlantısı kayboldu');
+  await page.getByText('Bu denemeye göre hedefe 14,75 net kaldı.', { exact: true }).waitFor();
+  await tap(page.getByRole('button', { name: 'Çalışma önerileri', exact: true }));
+  await tap(page.getByRole('link', { name: 'AYT Fizik', exact: true }));
+  await page.waitForURL(/#\/ders\/ayt-fizik/);
+  await page.goBack({ waitUntil: 'networkidle' });
+  await page.getByRole('heading', { name: 'Mobil AYT kontrolü', exact: true }).waitFor();
+});
+
 await step('Telefon genişliklerinde yatay taşma yok', async () => {
   const sizes = [[320, 700], [360, 800], [375, 812], [393, 873], [412, 915], [430, 932]];
-  const routes = ['#/', '#/testler?sinav=TYT', '#/dersler', `#/konu/${visitedTopic}`, '#/denemeler', '#/defterim', '#/pandam'];
+  const routes = ['#/', '#/testler?sinav=TYT', '#/dersler', `#/konu/${visitedTopic}`, '#/denemeler', '#/denemeler?sinav=AYT', '#/defterim', '#/pandam'];
   const bad = [];
   for (const [w, h] of sizes) {
     await page.setViewportSize({ width: w, height: h });
