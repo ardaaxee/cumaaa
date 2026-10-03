@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react';
+import { MockInsights } from '../components/MockInsights';
 import type { Exam, SubjectId } from '../domain/types';
 import { LineChart } from '../components/Charts';
 import { Icon } from '../components/Icon';
@@ -110,63 +111,23 @@ function MockForm({ exam, onClose }: { exam: Exam; onClose: () => void }) {
           <input className="input" type="date" value={date} onChange={(e) => setDate(e.target.value)} />
         </label>
       </div>
-      <div className="table-scroll mt-12">
-        <table className="data-table">
-          <thead>
-            <tr>
-              <th scope="col">Ders</th>
-              <th scope="col">Doğru</th>
-              <th scope="col">Yanlış</th>
-              <th scope="col">Boş</th>
-              <th scope="col">Net</th>
-            </tr>
-          </thead>
-          <tbody>
-            {defs.map((d, i) => {
-              const p = parsed[i];
-              const blank = d.questions - p.correct - p.wrong;
-              return (
-                <tr key={d.key}>
-                  <th scope="row" style={{ textAlign: 'left' }}>
-                    {d.label}
-                    <div className="tiny muted">{d.questions} soru</div>
-                  </th>
-                  {(['correct', 'wrong'] as const).map((k) => (
-                    <td key={k}>
-                      <input
-                        className="input"
-                        style={{ width: 64, minHeight: 40, padding: '6px 8px', textAlign: 'right' }}
-                        type="number"
-                        inputMode="numeric"
-                        min={0}
-                        max={d.questions}
-                        aria-label={`${d.label} ${k === 'correct' ? 'doğru' : 'yanlış'}`}
-                        value={inputs[d.key][k]}
-                        onChange={(e) => setInputs((x) => ({ ...x, [d.key]: { ...x[d.key], [k]: e.target.value } }))}
-                      />
-                    </td>
-                  ))}
-                  <td style={{ color: blank < 0 ? 'var(--bad)' : undefined }}>{blank}</td>
-                  <td>
-                    <b>{formatNet(calcNet(p.correct, p.wrong))}</b>
-                  </td>
-                </tr>
-              );
-            })}
-          </tbody>
-          <tfoot>
-            <tr>
-              <th scope="row" style={{ textAlign: 'left' }}>
-                Toplam
-              </th>
-              <td colSpan={3} />
-              <td>
-                <b>{formatNet(total)}</b>
-              </td>
-            </tr>
-          </tfoot>
-        </table>
+      <div className="mock-entry-sections">
+        {defs.map((d, i) => {
+          const p = parsed[i];
+          const blank = d.questions - p.correct - p.wrong;
+          return <section className="mock-entry-row" key={d.key} aria-label={`${d.label} sonucu`}>
+            <header><b>{d.label}</b><span className="tiny muted">{d.questions} soru</span></header>
+            <div className="mock-entry-fields">{(['correct', 'wrong'] as const).map(k => <label className="field" key={k}>
+              <span>{k === 'correct' ? 'Doğru' : 'Yanlış'}</span>
+              <input className="input" type="number" inputMode="numeric" min={0} max={d.questions} step={1}
+                aria-label={`${d.label} ${k === 'correct' ? 'doğru' : 'yanlış'}`} value={inputs[d.key][k]}
+                onChange={e => setInputs(x => ({ ...x, [d.key]: { ...x[d.key], [k]: e.target.value } }))} />
+            </label>)}</div>
+            <div className="mock-entry-summary"><span style={{ color: blank < 0 ? 'var(--bad)' : undefined }}>{blank < 0 ? 'Soru sayısı aşıldı' : `${blank} boş`}</span><b>{formatNet(calcNet(p.correct, p.wrong))} net</b></div>
+          </section>;
+        })}
       </div>
+      <div className="mock-entry-total" aria-live="polite"><span>Toplam net</span><b>{formatNet(total)}</b></div>
       <div className="tiny muted mt-8">Boş sayısı otomatik hesaplanır. Net = Doğru − Yanlış / 4.</div>
       {errors.length > 0 && (
         <ul className="field-error mt-8" role="alert">
@@ -184,6 +145,7 @@ export default function MocksPage() {
   const [exam, setExam] = useState<Exam>('TYT');
   const [range, setRange] = useState<'5' | '10'>('5');
   const [adding, setAdding] = useState(false);
+  const [selectedId, setSelectedId] = useState<string | null>(null);
   const [del, setDel] = useState<MockExam | null>(null);
   const [startExam, setStartExam] = useState<Exam | null>(null);
 
@@ -264,6 +226,7 @@ export default function MocksPage() {
   };
 
   const list = useMemo(() => sortMocks(mocks.filter((m) => m.exam === exam)), [mocks, exam]);
+  const selected = list.find(m => m.id === selectedId) ?? list.at(-1);
   const shown = list.slice(-Number(range));
   const analysis = useMemo(() => analyzeMocks(exam, shown).filter((a) => a.key !== 'genel'), [exam, shown]);
   const avg = list.length ? round2(list.reduce((s, m) => s + mockNet(m), 0) / list.length) : null;
@@ -293,6 +256,13 @@ export default function MocksPage() {
           ]}
         />
       </div>
+
+      {selected ? <>
+        <label className="field mock-result-picker"><span>İncelenecek deneme</span><select className="input" value={selected.id} onChange={e => setSelectedId(e.target.value)}>
+          {list.slice().reverse().map(m => <option key={m.id} value={m.id}>{m.name} · {formatDay(m.date)} · {formatNet(mockNet(m))} net</option>)}
+        </select></label>
+        <MockInsights key={selected.id} mock={selected} mocks={list} />
+      </> : <section className="card section"><div className="eyebrow">Deneme analiz merkezi</div><h2>Sonucunu ekle, sonraki adımını gör</h2><p className="small muted">Doğru ve yanlışlarını gir. Netin, ders performansın ve sonuçlarına dayalı çalışma önerilerin birlikte hazırlansın.</p><button className="btn primary" onClick={() => setAdding(true)}>Yeni deneme ekle</button></section>}
 
       <section className={`mock-exam-hero ${exam.toLowerCase()}`} aria-labelledby="fm-h">
         <div className="mock-exam-copy">
@@ -452,7 +422,7 @@ export default function MocksPage() {
         </>
       )}
 
-      {adding && <MockForm exam={exam} onClose={() => setAdding(false)} />}
+      {adding && <MockForm exam={exam} onClose={() => { setAdding(false); setSelectedId(null); }} />}
       {del && (
         <ConfirmDialog
           title="Deneme silinsin mi?"

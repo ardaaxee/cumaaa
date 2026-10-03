@@ -56,8 +56,10 @@ export function buildSections(exam: Exam, inputs: SectionInput[]): { sections: M
   const errors: string[] = [];
   const sections: MockSection[] = MOCK_SECTIONS[exam].map((def) => {
     const input = inputs.find((i) => i.key === def.key) ?? { key: def.key, correct: 0, wrong: 0 };
-    const correct = Math.floor(Number(input.correct) || 0);
-    const wrong = Math.floor(Number(input.wrong) || 0);
+    const valid = (v: number) => Number.isFinite(v) && Number.isInteger(v);
+    if (!valid(input.correct) || !valid(input.wrong)) errors.push(`${def.label}: doğru ve yanlış tam sayı olmalı.`);
+    const correct = valid(input.correct) ? input.correct : 0;
+    const wrong = valid(input.wrong) ? input.wrong : 0;
     if (correct < 0 || wrong < 0) errors.push(`${def.label}: negatif değer girilemez.`);
     if (correct + wrong > def.questions) errors.push(`${def.label}: doğru + yanlış ${def.questions} soruyu geçemez.`);
     return { key: def.key, correct: Math.max(0, correct), wrong: Math.max(0, wrong), blank: Math.max(0, def.questions - correct - wrong) };
