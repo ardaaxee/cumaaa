@@ -10,7 +10,7 @@ const routeDetails=vi.hoisted(()=>({query:new URLSearchParams()}));
 vi.mock('../src/hooks/useRoute',()=>({useRoute:()=>routeDetails,navigate:vi.fn()}));
 vi.mock('../src/services/ai',()=>({checkAiStatus:()=>new Promise(()=>{}),askTeacher:vi.fn()}));
 vi.mock('../src/services/localAssistant',()=>({assistantReply:vi.fn()}));
-vi.mock('../src/data/content',()=>({loadLesson:vi.fn(),loadQuestionsByIds:vi.fn()}));
+vi.mock('../src/data/content',()=>({loadLesson:vi.fn(),loadQuestionsByIds:vi.fn(),loadTopicQuestions:vi.fn().mockResolvedValue([])}));
 let host:HTMLDivElement;let root:ReturnType<typeof createRoot>;
 beforeEach(()=>{routeDetails.query=new URLSearchParams();vi.useFakeTimers();Object.assign(globalThis,{IS_REACT_ACT_ENVIRONMENT:true});HTMLElement.prototype.scrollTo=vi.fn();update(s=>({...s,chat:[]}));host=document.createElement('div');document.body.append(host);root=createRoot(host);vi.mocked(loadLesson).mockResolvedValue({summary:['Konu özeti']} as never);});
 afterEach(async()=>{await act(()=>root.unmount());host.remove();vi.useRealTimers();vi.clearAllMocks();});

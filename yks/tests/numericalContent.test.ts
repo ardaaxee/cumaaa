@@ -59,3 +59,21 @@ it('elektrokimyanın üç öğretim örneği bağımsız hesapla tutarlı',async
  expect(lesson.examples[2].answer).toContain((electrons/2*64).toFixed(1).replace('.',','));
  expect(lesson.examples[2].answer).toContain(String(electrons*96500/.5));
 });
+
+function gametes(genotype:string):string[]{return [...genotype.slice(0,2)].flatMap(a=>genotype.length===4?[...genotype.slice(2,4)].map(b=>a+b):[a]);}
+function offspringPhenotypes(first:string,second:string):Record<string,number>{
+ const totals:Record<string,number>={};const aa=gametes(first),bb=gametes(second);
+ for(const a of aa)for(const b of bb){let key='';for(let i=0;i<a.length;i++){const dominant=[a[i],b[i]].find(c=>c===c.toUpperCase());key+=dominant?dominant+'_':a[i]+a[i];}totals[key]=(totals[key]??0)+1/(aa.length*bb.length);}return totals;
+}
+it('dihibrit tablodaki 3:3:1:1 oranının tek bir ata genotipiyle eşleştiğini hesaplar',()=>{
+ const q=questions.find(q=>q.id==='tytbio-kalitim-q04')!;
+ const expected={'A_B_':.375,'A_bb':.375,'aaB_':.125,'aabb':.125};
+ const matching=q.options.filter(option=>{const actual=offspringPhenotypes('AaBb',option);return Object.entries(expected).every(([key,value])=>actual[key]===value);});
+ expect(matching).toEqual([q.options[q.correctAnswer]]);expect(matching).toEqual(['Aabb']);
+});
+it('kontrol çaprazlamasında beyaz yavru olasılığını bağımsız hesaplar',()=>{
+ const q=questions.find(q=>q.id==='tytbio-kalitim-q05')!;
+ expect(offspringPhenotypes('MM','mm').mm??0).toBe(0);
+ expect(offspringPhenotypes('Mm','mm').mm).toBe(.5);
+ expect(q.options[q.correctAnswer]).toContain('Mm');
+});

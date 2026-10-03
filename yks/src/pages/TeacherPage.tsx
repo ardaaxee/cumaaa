@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { allTopics, SUBJECTS, getTopicRef, subjectLabel } from '../data/curriculum';
-import { loadLesson, loadQuestionsByIds } from '../data/content';
+import { loadLesson, loadQuestionsByIds, loadTopicQuestions } from '../data/content';
 import type { LessonSeed, Question } from '../domain/types';
 import { AssistantCharacter, type AssistantMood } from '../components/AssistantCharacter';
 import { TeacherPhotoImage, useTeacherPhoto } from '../components/TeacherPhoto';
@@ -30,6 +30,7 @@ function readVoicePref(): boolean {
   }
 }
 
+import { LearningArea } from '../components/LearningArea';
 import { TeacherText as RichText } from '../components/TeacherText';
 
 const QUICK: { action: TeacherAction; label: string }[] = [
@@ -65,6 +66,8 @@ export default function TeacherPage() {
   const [input, setInput] = useState('');
   const [busy, setBusy] = useState(false);
   const [question, setQuestion] = useState<Question | null>(null);
+  const [guided,setGuided]=useState(false);
+  const [topicQuestions,setTopicQuestions]=useState<Question[]>([]);
   const [lesson, setLesson] = useState<LessonSeed | null>(null);
   const listRef = useRef<HTMLDivElement>(null);
   const [voiceOn, setVoiceOn] = useState(readVoicePref);
@@ -90,7 +93,8 @@ export default function TeacherPage() {
         if(questionId&&!loadedQuestion)throw new Error('Seçili soru bulunamadı.');
         const loadedLesson=(topicId||loadedQuestion?.topic)?await loadLesson(topicId||loadedQuestion!.topic):null;
         if((topicId||loadedQuestion?.topic)&&!loadedLesson)throw new Error('Konu anlatımı yüklenemedi.');
-        if(active){setQuestion(loadedQuestion);setLesson(loadedLesson??null);}
+        const questions=(topicId||loadedQuestion?.topic)?await loadTopicQuestions(topicId||loadedQuestion!.topic):[];
+        if(active){setQuestion(loadedQuestion);setLesson(loadedLesson??null);setTopicQuestions(questions);}
       }catch(e){if(active)setContextError(e instanceof Error?e.message:'Çalışma içeriği yüklenemedi.');}
       finally{if(active)setContextLoading(false);}
     })();
@@ -286,6 +290,8 @@ export default function TeacherPage() {
         </div>
       )}
 
+      {ref && lesson && !contextLoading && !contextError && <section className="card section teacher-guided-entry"><div><h2>Öğretmenle adım adım öğren</h2><p>Konuyu öğren → örneği birlikte çöz → kendi cevabını sınayarak eksiklerini bul.</p></div><button className="btn primary" type="button" aria-expanded={guided} onClick={()=>setGuided(v=>!v)}>{guided?'Öğrenme alanını kapat':'Adım adım öğrenmeye başla'}</button></section>}
+      {guided && ref && lesson && <LearningArea key={ref.topic.id} lesson={lesson} topic={ref.topic} questions={topicQuestions}/>}
       <div className="card section teacher-chat-card">
         <div className="teacher-chat-head">
           <div>

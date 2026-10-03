@@ -136,6 +136,7 @@ function useRouteSubject(): SubjectId | null {
   const [section, id] = route.segments;
   const activeSubject = useSelector((s) => s.activeTest?.config.subjectId);
   const pageSubject = useSelector((s) => (section === 'defterim' && id ? s.notebookPages.find((p) => p.id === id)?.subjectId : undefined));
+  if(section==='ogretmen') return (getTopicRef(route.query.get('konu')??'')?.subject.id as SubjectId)??null;
   if ((section === 'konu' || section === 'calis' || section === 'pekistir') && id) return (getTopicRef(id)?.subject.id as SubjectId) ?? null;
   if (section === 'ders' && id && getSubject(id)) return id as SubjectId;
   if (section === 'test' && activeSubject && activeSubject !== 'all') return activeSubject as SubjectId;

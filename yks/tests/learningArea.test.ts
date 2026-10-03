@@ -62,3 +62,18 @@ it('öğrenme konumu yedek durumundan geri gelir',async()=>{
  expect(host.querySelector('[aria-pressed="true"]')?.textContent).toBe('2. Birlikte çöz');
  await act(()=>again.unmount());
 });
+it('externally saved follow-up answers stay revealed without a second attempt',async()=>{
+ Object.assign(globalThis,{IS_REACT_ACT_ENVIRONMENT:true});
+ const {InlineQuiz}=await import('../src/components/InlineQuiz');
+ const {loadTopicQuestions}=await import('../src/data/content');
+ const q=(await loadTopicQuestions(SUBJECTS[0].units[0].topics[0].id))[0];
+ const host=document.createElement('div');document.body.append(host);const root=createRoot(host);
+ await act(()=>root.render(createElement(InlineQuiz,{questions:[q],savedAnswers:{}})));
+ const before=getState().attempts.length;
+ await act(()=>root.render(createElement(InlineQuiz,{questions:[q],savedAnswers:{[q.id]:q.correctAnswer}})));
+ expect(host.textContent).toContain('Doğru ✓');
+ expect(getState().attempts.length).toBe(before);
+ const options=host.querySelectorAll('.option');
+ for(const option of options)expect((option as HTMLButtonElement).disabled).toBe(true);
+ await act(()=>root.unmount());host.remove();
+});

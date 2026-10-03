@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { AskLabel } from './AskName';
 import type { Question } from '../domain/types';
 import { href } from '../hooks/useRoute';
@@ -34,6 +34,12 @@ export function InlineQuiz({
   const shownAt = useRef(Date.now());
   const [answers, setAnswers] = useState<Record<string, number>>(() => savedAnswers ?? {});
   const answersRef = useRef(answers);
+  useEffect(()=>{
+    if(!savedAnswers)return;
+    if(Object.entries(savedAnswers).some(([id,value])=>answersRef.current[id]!==value)){
+      const next={...answersRef.current,...savedAnswers};answersRef.current=next;setAnswers(next);
+    }
+  },[savedAnswers]);
 
   const answer = (q: Question, i: number) => {
     if (answersRef.current[q.id] != null) return;
