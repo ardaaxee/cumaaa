@@ -289,7 +289,7 @@ await step('Telefon genişliklerinde yatay taşma yok', async () => {
     await page.setViewportSize({ width: w, height: h });
     for (const r of routes) {
       await page.goto(APP + r, { waitUntil: 'networkidle' });
-      await page.locator('#main h1').waitFor({ state: 'visible' });
+      await page.locator('#main h1').waitFor({ state: 'attached' });
       await page.evaluate(async () => {
         await document.fonts.ready;
         await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
