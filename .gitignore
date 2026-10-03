@@ -29,3 +29,9 @@ __pycache__/
 build/
 dist/
 cikti-ag/
+# yks uygulaması
+yks/node_modules/
+yks/dist/
+yks/coverage/
+yks/*.tsbuildinfo
+yks/tests/_count*.test.ts

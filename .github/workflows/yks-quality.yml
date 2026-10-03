@@ -1,0 +1,50 @@
+name: YKS Quality
+
+on:
+  push:
+    branches:
+      - "claude/yks-study-platform-p15aod"
+    paths:
+      - "yks/**"
+      - ".github/workflows/yks-quality.yml"
+  pull_request:
+    paths:
+      - "yks/**"
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: yks
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: yks/package-lock.json
+
+      - name: Install
+        run: npm ci
+
+      - name: Typecheck
+        run: npm run typecheck
+
+      - name: Test
+        run: npm test
+
+      - name: Build
+        run: npm run build
+
+      - name: Verify release files
+        run: node scripts/check-release.mjs
+
+      - name: Install Chromium for E2E
+        run: npx playwright-core install --with-deps chromium
+
+      - name: E2E (real browser, phone size)
+        run: npm run e2e

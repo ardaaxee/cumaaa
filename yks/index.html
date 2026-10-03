@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="tr">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="theme-color" content="#fbfaff" />
+    <meta name="description" content="İyi ki • YKS — TYT + AYT Sayısal için kişisel çalışma odası: konu anlatımı, testler, plan, tekrar, deneme takibi ve akıllı çalışma önerileri." />
+    <meta name="color-scheme" content="light dark" />
+    <link rel="icon" href="./icon.svg" type="image/svg+xml" />
+    <link rel="apple-touch-icon" href="./apple-touch-icon.png" />
+    <link rel="manifest" href="./manifest.webmanifest" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-title" content="İyi ki YKS" />
+    <title>İyi ki • YKS Çalışma Odası</title>
+    <script src="./theme-init.js"></script>
+    <style>
+      #boot-splash{position:fixed;inset:0;z-index:9999;display:grid;place-items:center;background:#fbfaff;color:#2e2736;font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;transition:opacity .28s ease,visibility .28s ease}
+      #boot-splash .boot-inner{display:grid;justify-items:center;gap:10px;text-align:center}
+      #boot-splash .boot-logo{width:82px;height:82px;display:grid;place-items:center;border-radius:26px;background:linear-gradient(145deg,#fff,#eee6f7);box-shadow:0 18px 50px rgba(61,45,75,.13);font-size:42px}
+      #boot-splash b{font-size:1.08rem}
+      #boot-splash span{font-size:.76rem;opacity:.62}
+      #boot-splash.hide{opacity:0;visibility:hidden;pointer-events:none}
+      @media (prefers-color-scheme:dark){html:not([data-theme="light"]) #boot-splash{background:#17151c;color:#f4eef9}html:not([data-theme="light"]) #boot-splash .boot-logo{background:linear-gradient(145deg,#27222f,#1b1820)}}
+      @media (prefers-reduced-motion:reduce){#boot-splash{transition:none}}
+    </style>
+  </head>
+  <body>
+    <div id="boot-splash" aria-hidden="true">
+      <div class="boot-inner">
+        <div class="boot-logo">🐼</div>
+        <b>İyi ki • YKS</b>
+        <span>Çalışma odan hazırlanıyor…</span>
+      </div>
+    </div>
+    <div id="root"></div>
+    <noscript>Bu uygulama için JavaScript gereklidir.</noscript>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>
