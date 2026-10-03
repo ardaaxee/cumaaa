@@ -241,3 +241,6 @@
 @keyframes panda-pencil{50%{transform:translateX(8px) rotate(8deg)}}@keyframes panda-foam{50%{transform:translateY(-5px);opacity:.65}}@keyframes panda-pour{50%{transform:rotate(12deg)}}
 @media(max-width:420px){.panda-home-v7 .pet-stage-panda:is(.routine-sofa,.routine-desk,.routine-bath,.routine-terrace,.routine-watering){height:280px}.panda-room-pose>.real-panda{width:200px}}
 @media(prefers-reduced-motion:reduce){.routine-pencil,.routine-foam,.routine-pour,.routine-steam{animation:none}}
+
+/* Keep furniture poses centered even when the walking direction flips. */
+.panda-home-v7 .pet-stage-panda .panda-room-pose>.real-panda,.panda-home-v7 .pet-stage-panda .panda-dining-pose>.real-panda{transform:translateX(-50%)}
