@@ -1,10 +1,10 @@
 /* İyi ki • YKS — service worker (derleme sırasında üretilir) */
-const VERSION = '86c8c38757db';
+const VERSION = 'd9cb4908acb2';
 const SHELL_CACHE = `iyiki-yks-shell-${VERSION}`;
 const RUNTIME_CACHE = `iyiki-yks-runtime-${VERSION}`;
 const CONTENT_CACHE = `iyiki-yks-content-${VERSION}`;
 /** Olmazsa olmaz kabuk: index + ana JS + ana CSS. Biri inmezse kurulum başarısız sayılır. */
-const REQUIRED = ["./index.html","./assets/index-C_8VNZ6R.js","./assets/actions-BOcx4D88.js","./assets/index-BTQCpilx.css"];
+const REQUIRED = ["./index.html","./assets/index-Owe0TGys.js","./assets/actions-8Yu-5_Oo.js","./assets/index-BTQCpilx.css"];
 /** İsteğe bağlı kabuk dosyaları (simgeler, manifest…). İnmeyen olursa kurulum yine tamamlanır. */
 const OPTIONAL = ["./","./theme-init.js","./manifest.webmanifest","./icon.svg","./icon-192.png","./icon-512.png","./icon-maskable-512.png","./apple-touch-icon.png","./assets/PetPage-DRGYvz_3.css"];
 /** Soru ve konu anlatımı paketleri: kurulumda İNDİRİLMEZ, ilk açıldıklarında önbelleğe alınır. */
