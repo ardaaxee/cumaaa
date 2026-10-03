@@ -291,7 +291,13 @@ await step('Telefon genişliklerinde yatay taşma yok', async () => {
       await page.goto(APP + r, { waitUntil: 'networkidle' });
       await page.waitForTimeout(250);
       const sw = await page.evaluate(() => document.documentElement.scrollWidth);
-      if (sw > w + 1) bad.push(`${w}px ${r}: ${sw}`);
+      if (sw > w + 1) {
+        const overflow = await page.evaluate(() => [...document.querySelectorAll('body *')].map(el => {
+          const rect = el.getBoundingClientRect();
+          return { tag: el.tagName, cls: el.className, text: el.textContent?.slice(0, 90), right: Math.round(rect.right), width: Math.round(rect.width) };
+        }).filter(el => el.right > innerWidth + 1).slice(-12));
+        bad.push(`${w}px ${r}: ${sw} ${JSON.stringify(overflow)}`);
+      }
     }
   }
   await page.setViewportSize({ width: 393, height: 851 });
