@@ -1,3 +1,4 @@
+import {defaultState} from '../src/store/schema';
 // @vitest-environment jsdom
 import { act, createElement } from 'react';
 import { createRoot } from 'react-dom/client';
@@ -23,7 +24,7 @@ it('pekiştirmeyi tamamlamadan doğrulamaya geçmez; ilk soruyu ayrı kaydeder',
  expect(host.querySelectorAll('.inline-q')).toHaveLength(1);
  expect(host.querySelector<HTMLButtonElement>('.option')!.disabled).toBe(false);
  await act(()=>host.querySelectorAll<HTMLButtonElement>('.option')[2].click());
- expect(fixture.update).toHaveBeenCalledTimes(4);
+ expect(fixture.update.mock.calls.filter(([fn])=>fn(defaultState()).attempts.length===1)).toHaveLength(4);
  expect(host.textContent).toContain('Yanlışlarımdaki durumunu gör');
  await act(()=>root.unmount());host.remove();
 });

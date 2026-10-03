@@ -1,3 +1,4 @@
+import {openContextNotebook} from '../utils/notebookContext';
 import type { Question } from '../domain/types';
 import { getTopicRef } from '../data/curriculum';
 import { OPTION_LETTERS } from '../utils/ids';
@@ -39,6 +40,7 @@ export function QuestionMeta({ q, topicName }: { q: Question; topicName?: string
         <span className="badge outline">{DIFFICULTY_LABEL[q.difficulty]}</span>
         <span className="badge outline">{TYPE_LABEL[q.type]}</span>
         <FavoriteButton id={q.id} />
+        <button type="button" className="btn small question-note" onClick={()=>openContextNotebook({questionId:q.id,topicId:q.topic,subjectId:q.subject,title:`${ref?.topic.name??'Soru'} · çözüm notum`})}>✎ Defterde çöz</button>
       </div>
       {subtopic && <div className="question-subtopic">{subtopic.name}</div>}
     </div>

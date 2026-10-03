@@ -6,7 +6,7 @@ import { ConnectSettings } from '../components/ConnectSettings';
 import { CompanionToggle } from '../components/Companion';
 import { PageHeader } from '../components/Layout';
 import { ConfirmDialog, toast } from '../components/ui';
-import { deletePageImage, getPageImage, setPageImage } from '../services/notebookStore';
+import { getPageImage, setPageImages } from '../services/notebookStore';
 import { getTeacherPhoto, setTeacherPhoto } from '../services/photoStore';
 import { TeacherPhotoSettings } from '../components/TeacherPhoto';
 import { updateProfile, updateSettings } from '../store/actions';
@@ -21,7 +21,7 @@ export default function SettingsPage() {
   const [busy, setBusy] = useState(false);
   const [resetConfirm, setResetConfirm] = useState(false);
 
-  const exportData = async () => {
+  const exportData = async (share=false) => {
     setBusy(true);
     try {
       const photo = await getTeacherPhoto();
@@ -33,13 +33,20 @@ export default function SettingsPage() {
       );
       const backup = createBackup(state, photo, notebookImages);
       const blob = new Blob([JSON.stringify(backup, null, 2)], { type: 'application/json' });
+      const file=new File([blob],`iyi-ki-yks-yedek-${new Date().toISOString().slice(0,10)}.json`,{type:'application/json'});
+      if(share&&navigator.canShare?.({files:[file]})){
+        await navigator.share({files:[file],title:'Çalışma odamı diğer cihaza aktar'});
+        toast('Yedek paylaşımı tamamlandı. Diğer cihazda Ayarlar → Yedek yükle ile aç.');
+        return;
+      }
       const a = document.createElement('a');
       a.href = URL.createObjectURL(blob);
       a.download = `iyi-ki-yks-yedek-${new Date().toISOString().slice(0, 10)}.json`;
       a.click();
       URL.revokeObjectURL(a.href);
       toast(`Yedek indirildi · ${Object.keys(notebookImages).length} defter çizimi dahil.`);
-    } catch {
+    } catch(error) {
+      if(error instanceof Error&&error.name==='AbortError')return;
       toast('Yedek hazırlanamadı. Cihaz depolamasını kontrol edip tekrar dene.');
     } finally {
       setBusy(false);
@@ -51,14 +58,11 @@ export default function SettingsPage() {
     try {
       const text = await file.text();
       const { state: next, teacherPhoto, notebookImages, report } = parseBackup(text, migrationContext());
-      await Promise.all(state.notebookPages.map((page) => deletePageImage(page.id)));
-      replaceState(next);
+      const drawings=Object.fromEntries(Object.entries(notebookImages).filter(([id])=>next.notebookPages.some(page=>page.id===id)));
+      const previousPhoto=await getTeacherPhoto();
       await setTeacherPhoto(teacherPhoto);
-      await Promise.all(
-        Object.entries(notebookImages)
-          .filter(([id]) => next.notebookPages.some((page) => page.id === id))
-          .map(([id, image]) => setPageImage(id, image)),
-      );
+      try{await setPageImages(drawings);}catch(error){await setTeacherPhoto(previousPhoto);throw error;}
+      replaceState(next);
       const restoredDrawings = Object.keys(notebookImages).length;
       toast(
         report.notes.length
@@ -197,6 +201,7 @@ export default function SettingsPage() {
           Profil, test geçmişi, plan, Panda durumu, öğretmen fotoğrafı ve dijital defter çizimleri dahil YKS verilerini tek yedek dosyasına alabilirsin.
         </p>
         <div className="row">
+          <button type="button" className="btn" onClick={()=>void exportData(true)} disabled={busy}>Diğer cihaza aktar</button>
           <button type="button" className="btn primary" onClick={() => void exportData()} disabled={busy}>
             Veriyi dışa aktar
           </button>

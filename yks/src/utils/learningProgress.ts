@@ -1,4 +1,4 @@
-export interface LearningProgress { phase:number;example:number;step:number;subtopic:string;answers:Record<string,number>;updatedAt:string }
+export interface LearningProgress { phase:number;example:number;step:number;subtopic:string;answers:Record<string,number>;updatedAt:string;diagnosticAnswers?:Record<string,number> }
 export function sanitizeLearningProgress(raw:unknown): Record<string,LearningProgress> {
  if(!raw||typeof raw!=='object'||Array.isArray(raw))return {};
  const result:Record<string,LearningProgress>={};
@@ -7,7 +7,8 @@ export function sanitizeLearningProgress(raw:unknown): Record<string,LearningPro
   const v=value as Record<string,unknown>;
   const integer=(x:unknown,max:number)=>typeof x==='number'&&Number.isInteger(x)&&x>=0&&x<=max?x:0;
   const answers=Object.fromEntries(Object.entries(v.answers&&typeof v.answers==='object'?v.answers:{}).slice(0,100).filter(([,a])=>typeof a==='number'&&Number.isInteger(a)&&a>=0&&a<=4));
-  result[id]={phase:integer(v.phase,3),example:integer(v.example,100),step:integer(v.step,100),subtopic:typeof v.subtopic==='string'?v.subtopic.slice(0,100):'',answers:answers as Record<string,number>,updatedAt:typeof v.updatedAt==='string'&&Number.isFinite(Date.parse(v.updatedAt))?v.updatedAt:''};
+  const diagnosticAnswers=Object.fromEntries(Object.entries(v.diagnosticAnswers&&typeof v.diagnosticAnswers==='object'?v.diagnosticAnswers:{}).slice(0,100).filter(([,a])=>typeof a==='number'&&Number.isInteger(a)&&a>=0&&a<=4)) as Record<string,number>;
+  result[id]={diagnosticAnswers,phase:integer(v.phase,3),example:integer(v.example,100),step:integer(v.step,100),subtopic:typeof v.subtopic==='string'?v.subtopic.slice(0,100):'',answers:answers as Record<string,number>,updatedAt:typeof v.updatedAt==='string'&&Number.isFinite(Date.parse(v.updatedAt))?v.updatedAt:''};
  }
  return result;
 }

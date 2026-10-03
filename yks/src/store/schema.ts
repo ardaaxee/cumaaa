@@ -1,3 +1,4 @@
+import type {RecoveryProgress} from '../utils/recoveryProgress';
 import type { LearningProgress } from '../utils/learningProgress';
 import type { Difficulty, Exam, QuestionType, SubjectId } from '../domain/types';
 import type { DayKey } from '../utils/date';
@@ -257,6 +258,8 @@ export interface ChatMessage {
 }
 
 export interface NotebookPageMeta {
+  topicId?: string;
+  questionId?: string;
   id: string;
   title: string;
   subjectId?: SubjectId;
@@ -279,6 +282,7 @@ export interface AppState {
   profile: Profile;
   settings: Settings;
   topicProgress: Record<string, TopicProgress>;
+  recoveryProgress?: Record<string,RecoveryProgress>;
   learningProgress?: Record<string, LearningProgress>;
   attempts: QuestionAttempt[];
   testResults: TestResult[];

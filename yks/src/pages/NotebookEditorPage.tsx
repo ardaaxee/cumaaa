@@ -106,7 +106,7 @@ function drawShape(ctx: CanvasRenderingContext2D, tool: Tool, start: { x: number
   }
 }
 
-export default function NotebookEditorPage({ params, embedded = false, onPageChange }: { params: string[]; embedded?: boolean; onPageChange?: (id: string) => void }) {
+export default function NotebookEditorPage({ params, embedded = false, onPageChange, onSaveReady }: { params: string[]; embedded?: boolean; onPageChange?: (id: string) => void; onSaveReady?: (save:(()=>Promise<boolean>)|null)=>void }) {
   const id = params[0] ?? '';
   const pages = useSelector(s=>s.notebookPages);
   const orderedPages=pages.slice().sort((a,b)=>a.createdAt.localeCompare(b.createdAt)||a.id.localeCompare(b.id));
@@ -242,11 +242,11 @@ export default function NotebookEditorPage({ params, embedded = false, onPageCha
   const save = async (silent = false, target = canvasRef.current) => {
     if (!target || !readyRef.current) return false;
     const revision=revisionRef.current;
-    const data=target.toDataURL('image/png');
-    setSaveStatus('Kaydediliyor…');
-    const operation=saveQueueRef.current.catch(()=>{}).then(()=>setPageImage(id,data));
-    saveQueueRef.current=operation;
     try {
+      const data=target.toDataURL('image/png');
+      setSaveStatus('Kaydediliyor…');
+      const operation=saveQueueRef.current.catch(()=>{}).then(()=>setPageImage(id,data));
+      saveQueueRef.current=operation;
       await operation;
       update(s=>touchNotebookPage(s,id));
       if(revision===revisionRef.current){dirtyRef.current=false;setSaveStatus('Kaydedildi');}
@@ -260,6 +260,11 @@ export default function NotebookEditorPage({ params, embedded = false, onPageCha
     }
   };
 
+  useEffect(()=>{
+    onSaveReady?.(()=>dirtyRef.current?save(true):Promise.resolve(true));
+    return()=>onSaveReady?.(null);
+  },[id,onSaveReady]);
+
   const turnPage = async (targetId?: string) => {
     if (turning || drawingRef.current) return;
     setTurning(true);
@@ -270,7 +275,8 @@ export default function NotebookEditorPage({ params, embedded = false, onPageCha
         update(state => {
           const result = addNotebookPage(state, `${meta.title.replace(/ · Sayfa \d+$/, '')} · Sayfa ${orderedPages.length+1}`, meta.subjectId);
           nextId = result.id;
-          return setNotebookPaper(result.state, result.id, paper);
+          const linked={...result.state,notebookPages:result.state.notebookPages.map(p=>p.id===result.id?{...p,topicId:meta.topicId,questionId:meta.questionId}:p)};
+          return setNotebookPaper(linked, result.id, paper);
         });
       }
       if (nextId) {

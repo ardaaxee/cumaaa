@@ -51,3 +51,16 @@ export async function deletePageImage(id: string): Promise<void> {
     /* sayfa zaten yoksa sorun değil */
   }
 }
+
+/** Restore drawings together: a failed transaction leaves all old drawings intact. */
+export async function setPageImages(entries:Record<string,string>):Promise<void>{
+ const db=await openDb();
+ return new Promise((resolve,reject)=>{
+  const transaction=db.transaction(STORE,'readwrite');
+  const store=transaction.objectStore(STORE);
+  for(const [id,image] of Object.entries(entries))store.put(image,id);
+  transaction.oncomplete=()=>{db.close();resolve();};
+  transaction.onabort=()=>{db.close();reject(transaction.error??new Error('Defter çizimleri geri yüklenemedi.'));};
+  transaction.onerror=()=>{db.close();reject(transaction.error);};
+ });
+}

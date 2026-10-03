@@ -1,3 +1,4 @@
+import {dailyLearningTasks} from '../utils/dailyLearning';
 import { useMemo } from 'react';
 import { Icon } from '../components/Icon';
 import { PageHeader } from '../components/Layout';
@@ -110,6 +111,7 @@ export default function HomePage() {
   // B) Bugünün rotası: en fazla 3 net görev (gerçek veriden; uydurma yok).
   const route: { key: string; title: string; detail: string; run: () => void }[] = [];
   if (activeTest) route.push({ key: 'test', title: 'Devam eden testi bitir', detail: `Soru ${activeTest.current + 1}/${activeTest.questionIds.length}`, run: () => navigate('/test') });
+  for(const task of dailyLearningTasks(state,today,id=>lookup.topicName(id)??null))route.push({...task,run:()=>navigate(task.path)});
   for (const t of [...overdue, ...todayTasks.filter((x) => !x.done)].slice(0, 3)) {
     route.push({
       key: t.id,

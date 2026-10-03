@@ -1,3 +1,4 @@
+import {getPageImage,setPageImages} from './notebookStore';
 import { mergeStates } from '../store/merge';
 import type { AppState } from '../store/schema';
 import { sanitize } from '../store/migrations';
@@ -52,7 +53,7 @@ export interface ShareMessage {
 const CHANGED_KEY = 'iyikiYks.changedAt';
 const SYNCED_KEY = 'iyikiYks.syncedAt';
 const MESSAGES_KEY = 'iyikiYks.partnerMessages';
-const CHUNK = 700_000;
+const CHUNK = 180_000;
 const SYNC_COL = 'yksSync';
 const SHARE_COL = 'yksShare';
 
@@ -138,42 +139,49 @@ export function subscribeCloud(l: () => void): () => void {
 
 let applyingRemote = false;
 let dirty = false;
+let changeRevision=0;
 
 /** Yerel değişiklik zamanını tutar (eşitlemeden gelen değişiklikler hariç). */
 export function startChangeTracking(): () => void {
   return subscribe(() => {
     if (applyingRemote) return;
     dirty = true;
+    changeRevision++;
     lsSet(CHANGED_KEY, new Date().toISOString());
   });
 }
 
-function serialize(state: AppState): string {
-  // Devam eden test ve sayaç cihaza özeldir; buluta yazılmaz.
-  return JSON.stringify({ ...state, activeTest: null });
+async function serialize(state:AppState):Promise<string>{
+ const notebookImages:Record<string,string>={};
+ for(const page of state.notebookPages){const image=await getPageImage(page.id);if(image)notebookImages[page.id]=image;}
+ return JSON.stringify({state:{...state,activeTest:null},notebookImages});
 }
 
-async function pullRemote(cfg: CloudConfig, code: string): Promise<{ state: AppState; updatedAt: string } | null> {
-  const main = await readDoc(cfg, SYNC_COL, code);
-  if (!main) return null;
-  const parts = Math.max(1, Number(main.parts) || 1);
-  let json = main.part0 ?? '';
-  for (let i = 1; i < parts; i++) {
-    const p = await readDoc(cfg, SYNC_COL, `${code}-p${i}`);
-    if (!p) throw new Error('Bulut verisi eksik (parça bulunamadı).');
-    json += p.data ?? '';
-  }
-  const parsed = sanitize(JSON.parse(json));
-  return { state: parsed, updatedAt: main.updatedAt || '1970-01-01T00:00:00Z' };
+async function pullRemote(cfg:CloudConfig,code:string):Promise<{state:AppState;updatedAt:string;notebookImages:Record<string,string>}|null>{
+ const main=await readDoc(cfg,SYNC_COL,code);if(!main)return null;
+ const parts=Number(main.parts)||1;
+ if(!Number.isInteger(parts)||parts<1||parts>1000)throw new Error('Bulut verisinin parça sayısı geçersiz.');
+ let json=main.part0??'';
+ for(let i=1;i<parts;i++){
+  const part=await readDoc(cfg,SYNC_COL,`${code}${main.generation?'-'+main.generation:''}-p${i}`);
+  if(!part)throw new Error('Bulut verisi eksik. Yerel verilerin korunuyor; tekrar dene.');
+  json+=part.data??'';
+ }
+ const raw=JSON.parse(json);const wrapped=raw&&typeof raw==='object'&&raw.state;
+ const state=sanitize(wrapped?raw.state:raw);
+ const images=wrapped&&raw.notebookImages&&typeof raw.notebookImages==='object'?raw.notebookImages:{};
+ const notebookImages:Record<string,string>={};
+ for(const page of state.notebookPages){const image=images[page.id];if(typeof image==='string'&&/^data:image\/png;base64,[A-Za-z0-9+/=]+$/.test(image))notebookImages[page.id]=image;}
+ return {state,notebookImages,updatedAt:main.updatedAt||'1970-01-01T00:00:00Z'};
 }
 
-async function pushRemote(cfg: CloudConfig, code: string, state: AppState, updatedAt: string, keepalive = false): Promise<void> {
-  const json = serialize(state);
-  const chunks: string[] = [];
-  for (let i = 0; i < json.length; i += CHUNK) chunks.push(json.slice(i, i + CHUNK));
-  // Önce ek parçalar, en son ana belge yazılır (yarım kalan yazım okunmaz).
-  for (let i = 1; i < chunks.length; i++) await writeDoc(cfg, SYNC_COL, `${code}-p${i}`, { data: chunks[i] });
-  await writeDoc(cfg, SYNC_COL, code, { part0: chunks[0] ?? '{}', parts: String(chunks.length || 1), updatedAt }, undefined, keepalive);
+async function pushRemote(cfg:CloudConfig,code:string,state:AppState,updatedAt:string):Promise<void>{
+ const json=await serialize(state);const chunks:string[]=[];
+ for(let i=0;i<json.length;i+=CHUNK)chunks.push(json.slice(i,i+CHUNK));
+ const generation=randomCode(12);
+ // Versioned chunks keep the old snapshot readable until the manifest commits.
+ for(let i=1;i<chunks.length;i++)await writeDoc(cfg,SYNC_COL,`${code}-${generation}-p${i}`,{data:chunks[i]});
+ await writeDoc(cfg,SYNC_COL,code,{part0:chunks[0]??'{}',parts:String(chunks.length||1),generation,updatedAt});
 }
 
 let inFlight: Promise<void> | null = null;
@@ -191,11 +199,21 @@ export function syncNow(): Promise<void> {
     }
     setStatus({ enabled: true, syncing: true, error: null });
     try {
+      const revision=changeRevision;
       const remote = await pullRemote(cfg, code);
       const localChangedAt = ls(CHANGED_KEY) ?? '1970-01-01T00:00:00Z';
       let merged = getState();
       if (remote) {
         merged = mergeStates({ local: getState(), localChangedAt, remote: remote.state, remoteChangedAt: remote.updatedAt });
+        const restoreImages:Record<string,string>={};
+        for(const page of remote.state.notebookPages){
+          const current=getState().notebookPages.find(p=>p.id===page.id);
+          const image=remote.notebookImages[page.id];
+          if(image&&!getState().deleted[page.id]&&(!current||page.updatedAt>current.updatedAt))restoreImages[page.id]=image;
+          else if(image&&current&&page.updatedAt===current.updatedAt&&!(await getPageImage(page.id)))restoreImages[page.id]=image;
+        }
+        if(Object.keys(restoreImages).length)await setPageImages(restoreImages);
+        merged=mergeStates({local:getState(),localChangedAt:ls(CHANGED_KEY)??localChangedAt,remote:remote.state,remoteChangedAt:remote.updatedAt});
         applyingRemote = true;
         replaceState(merged);
         applyingRemote = false;
@@ -204,8 +222,8 @@ export function syncNow(): Promise<void> {
       await pushRemote(cfg, code, merged, now);
       await publishShare(merged).catch(() => undefined);
       await refreshPartnerMessages(merged).catch(() => undefined);
-      dirty = false;
-      lsSet(CHANGED_KEY, now);
+      dirty = changeRevision!==revision;
+      if(!dirty)lsSet(CHANGED_KEY, now);
       lsSet(SYNCED_KEY, now);
       setStatus({ syncing: false, lastSyncAt: now });
     } catch (e) {
@@ -225,19 +243,8 @@ export function startAutoSync(): () => void {
   const first = window.setTimeout(() => void syncNow(), 1500);
   const iv = window.setInterval(() => {
     if (dirty) void syncNow();
-  }, 90_000);
-  const onHide = () => {
-    if (document.visibilityState !== 'hidden' || !dirty) return;
-    const state = getState();
-    const cfg = cloudConfig(state);
-    if (cfg && state.settings.cloud.syncCode) {
-      const now = new Date().toISOString();
-      void pushRemote(cfg, state.settings.cloud.syncCode, state, now, true).then(() => {
-        dirty = false;
-        lsSet(CHANGED_KEY, now);
-      }).catch(() => undefined);
-    }
-  };
+  }, 30_000);
+  const onHide=()=>{if(document.visibilityState==='hidden'&&dirty)void syncNow();};
   const onVisible = () => document.visibilityState === 'visible' && void syncNow();
   document.addEventListener('visibilitychange', onHide);
   document.addEventListener('visibilitychange', onVisible);

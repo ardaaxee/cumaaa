@@ -105,7 +105,7 @@ function CloudSection() {
     const a = route.query.get('a');
     if (code && p && a && code !== cloud.syncCode) {
       update((s) => updateSettings(s, { cloud: { ...s.settings.cloud, projectId: p, apiKey: a, syncCode: code, shareCode: s.settings.cloud.shareCode || randomCode() } }));
-      toast('Bu cihaz buluta bağlandı. Veriler eşitleniyor…');
+      toast('Bağlantı ayarları alındı. Eşitlemenin sonucu aşağıda gösterilecek.');
       setTimeout(() => void syncNow(), 300);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -129,11 +129,11 @@ function CloudSection() {
       <h2 id="cloud-h" className="mb-8">
         ☁️ Bulut kaydı (cihazlar arası)
       </h2>
-      <p className="small muted">Verilerin bu telefonda kaybolmasın, başka cihazda da aynısını gör. Ücretsiz bir Firebase projesi yeter.</p>
+      <p className="small muted">Verilerin bu telefonda kaybolmasın, başka cihazda da aynısını gör. Bulut kaydı defterin el yazısı çizimlerini, soru bağlantılarını ve öğrenme adımlarını da taşır. Ücretsiz bir Firebase projesi yeter.</p>
       {cloud.syncCode ? (
         <>
           <div className="notice">
-            {st.syncing ? 'Eşitleniyor…' : st.error ? `⚠ ${st.error}` : st.lastSyncAt ? `✓ Son eşitleme: ${new Date(st.lastSyncAt).toLocaleString('tr-TR')}` : 'Henüz eşitlenmedi.'}
+            {st.syncing ? 'Eşitleniyor…' : st.error ? `⚠ ${st.error}` : st.lastSyncAt ? `✓ Defter ve ilerleme · son eşitleme: ${new Date(st.lastSyncAt).toLocaleString('tr-TR')}` : 'Henüz eşitlenmedi. Bağlantı kurulana kadar verilerin bu cihazda saklanır.'}
           </div>
           <div className="row mt-8">
             <button type="button" className="btn primary" onClick={() => void syncNow()} disabled={st.syncing}>

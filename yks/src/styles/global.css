@@ -14566,3 +14566,10 @@ textarea:focus-visible {
  .notebook-toolbar-compact .nb-row[aria-label="Kalem renkleri"] .chip{display:none}
  .notebook-canvas-wrap{margin-top:10px}
 }
+
+.diagnostic-check{margin:16px 0;padding:16px;border:1px solid var(--line);border-radius:16px;background:var(--surface)}
+.diagnostic-check h3{margin-top:0}.diagnostic-check .btn{margin:4px 6px 4px 0}
+.guided-recovery-example{margin:16px 0;padding:16px;border:1px solid var(--line);border-radius:14px}
+.guided-recovery-example li{margin-bottom:10px;white-space:pre-line}
+.question-note{white-space:normal;min-height:40px}
+@media(max-width:599px){.diagnostic-check{padding:12px}.question-note{min-height:44px}.learning-tabs{flex-wrap:wrap}}

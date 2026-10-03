@@ -1,4 +1,4 @@
-import type { AppState, CardState, ReviewItem, TopicProgress, WrongEntry } from './schema';
+import type { AppState, CardState, NotebookPageMeta, ReviewItem, TopicProgress, WrongEntry } from './schema';
 
 /**
  * İki cihazın durumunu birleştirir (bulut eşitlemesi).
@@ -23,6 +23,16 @@ function mergeList<T extends WithId>(local: T[], remote: T[], deleted: Record<st
   for (const x of second) map.set(x.id, x);
   const out = [...map.values()].filter((x) => !deleted[x.id]);
   return sortKey ? out.sort((a, b) => sortKey(a).localeCompare(sortKey(b))) : out;
+}
+
+function mergeNotebookPages(local:NotebookPageMeta[],remote:NotebookPageMeta[],deleted:Record<string,string>):NotebookPageMeta[]{
+ const pages=new Map<string,NotebookPageMeta>();
+ for(const page of [...remote,...local]){
+  if(deleted[page.id])continue;
+  const previous=pages.get(page.id);
+  if(!previous||page.updatedAt>=previous.updatedAt)pages.set(page.id,page);
+ }
+ return [...pages.values()];
 }
 
 function mergeRecord<T>(local: Record<string, T>, remote: Record<string, T>, newer: (a: T, b: T) => T, deleted: Record<string, string>, prefix = ''): Record<string, T> {
@@ -69,6 +79,7 @@ export function mergeStates({ local, localChangedAt, remote, remoteChangedAt }: 
     settings: { ...base.settings, cloud: local.settings.cloud, aiServerUrl: local.settings.aiServerUrl || remote.settings.aiServerUrl },
     activeTest: local.activeTest,
     pomodoro: local.pomodoro,
+    recoveryProgress: mergeRecord(local.recoveryProgress??{},remote.recoveryProgress??{},(a,b)=>a.updatedAt>=b.updatedAt?a:b,deleted),
     learningProgress: mergeRecord(local.learningProgress ?? {}, remote.learningProgress ?? {}, (a,b)=>a.updatedAt>=b.updatedAt?a:b, deleted),
     topicProgress: mergeRecord(local.topicProgress, remote.topicProgress, newerTopic, deleted),
     attempts: mergeList(local.attempts, remote.attempts, deleted, remoteNewer, (a) => a.at),
@@ -80,7 +91,7 @@ export function mergeStates({ local, localChangedAt, remote, remoteChangedAt }: 
     studyLog: mergeList(local.studyLog, remote.studyLog, deleted, remoteNewer, (x) => x.at),
     videos: mergeList(local.videos, remote.videos, deleted, remoteNewer),
     chat: mergeList(local.chat, remote.chat, deleted, remoteNewer, (m) => m.at).slice(-200),
-    notebookPages: mergeList(local.notebookPages, remote.notebookPages, deleted, remoteNewer),
+    notebookPages: mergeNotebookPages(local.notebookPages,remote.notebookPages,deleted),
     cards: mergeRecord(local.cards, remote.cards, newerCard, deleted),
     favorites: mergeRecord(local.favorites, remote.favorites, (a, b) => (a >= b ? a : b), deleted, 'fav:'),
     deleted,

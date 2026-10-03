@@ -1,3 +1,4 @@
+import {sanitizeRecoveryProgress} from '../utils/recoveryProgress';
 import { sanitizeLearningProgress } from '../utils/learningProgress';
 import { sanitizePandaMemories } from '../utils/pandaMoments';
 import type { SubjectId } from '../domain/types';
@@ -288,6 +289,7 @@ export function sanitize(raw: Json): AppState {
       companion: settings.companion !== false,
       aiServerUrl: /^https:\/\/[^\s]+$/.test(str(settings.aiServerUrl)) ? str(settings.aiServerUrl).slice(0, 200) : '',
     } as AppState['settings'],
+    recoveryProgress: sanitizeRecoveryProgress(raw.recoveryProgress),
     learningProgress: sanitizeLearningProgress(raw.learningProgress),
     topicProgress: isObj(raw.topicProgress) ? (raw.topicProgress as AppState['topicProgress']) : {},
     attempts: arr(raw.attempts).filter(isObj).filter((a) => typeof a.questionId === 'string' && isValidDayKey(a.day)) as unknown as AppState['attempts'],

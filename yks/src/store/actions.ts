@@ -1,3 +1,4 @@
+import {reviewFromPractice} from '../utils/reviewEvidence';
 import type { Question, SubjectId } from '../domain/types';
 import { dayKey, addDays, type DayKey } from '../utils/date';
 import { uid } from '../utils/ids';
@@ -291,7 +292,10 @@ export function recordPractice(
     !state.topicProgress[q.topic] || state.topicProgress[q.topic].status === 'baslanmadi'
       ? { ...state.topicProgress, [q.topic]: { status: 'calisiliyor' as const, startedAt: iso } }
       : state.topicProgress;
-  return { ...state, attempts: [...state.attempts, attempt], wrongs, reviews, topicProgress };
+  const attempts=[...state.attempts,attempt];
+  const reviewed=correct?reviewFromPractice(q.topic,today,attempts,reviews[q.topic]):reviews[q.topic];
+  if(reviewed)reviews[q.topic]=reviewed;
+  return { ...state, attempts, wrongs, reviews, topicProgress };
 }
 
 // ---------- Yanlışlar ----------

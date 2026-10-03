@@ -416,6 +416,25 @@ await step('Öğretmen öğrenme alanı ve defter aynı anda kullanılabilir', a
   await panel.waitFor({state:'detached'});
 });
 
+await step('Konu seviye kontrolü ve aynı sorunun defterini tekrar açma',async()=>{
+  await page.goto(APP+'#/ogretmen?konu=aytkim-elektrokimya',{waitUntil:'networkidle'});
+  await tap(page.getByRole('button',{name:'Adım adım öğrenmeye başla',exact:true}));
+  await tap(page.getByRole('button',{name:'Seviyemi kontrol et',exact:true}));
+  const diagnostic=page.getByRole('region',{name:'Konu seviye kontrolü',exact:true});
+  for(const article of await diagnostic.locator('.inline-q').all())await tap(article.locator('.option').first());
+  assert(await diagnostic.getByText(/3\/3 doğru|2\/3 doğru|1\/3 doğru|0\/3 doğru/).count()>0,'Seviye sonucu gösterilmedi');
+  const note=diagnostic.getByRole('button',{name:'✎ Defterde çöz',exact:true}).first();
+  await tap(note);
+  const panel=page.getByRole('region',{name:'El yazısı defterim',exact:true});await panel.waitFor();
+  const selected=await panel.getByLabel('Açılacak defter sayfası').inputValue();
+  const before=await panel.locator('select option').count();
+  await tap(page.getByRole('button',{name:'Defteri kapat',exact:true}));await panel.waitFor({state:'detached'});
+  await tap(note);await panel.waitFor();
+  assert(await panel.getByLabel('Açılacak defter sayfası').inputValue()===selected,'Aynı sorunun defteri yeniden açılmadı');
+  assert(await panel.locator('select option').count()===before,'Aynı soru için gereksiz yeni sayfa oluştu');
+  await tap(page.getByRole('button',{name:'Defteri kapat',exact:true}));await panel.waitFor({state:'detached'});
+});
+
 await step('Öğretmen fotoğrafı: seç → öğretmen ekranında görünür → kaldır', async () => {
   // 1×1 piksel PNG
   const png = Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==', 'base64');
