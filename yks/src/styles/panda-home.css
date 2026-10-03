@@ -262,3 +262,7 @@
 @media(max-width:420px){.panda-home-v7 .pet-stage{min-height:480px}.panda-room-door{width:46px;height:108px;border-width:4px;bottom:17%}.panda-wardrobe-object,.panda-makeup-object{width:76px;top:28%;left:5%}.panda-wardrobe-object svg,.panda-makeup-object svg{height:105px}.panda-dressing-preview{height:180px}.panda-dressing-panel{padding:12px}}
 
 .panda-dressing-preview{position:relative}.panda-makeup-brush{position:absolute;top:45px;left:calc(50% + 14px);width:75px;height:75px;animation:panda-makeup-stroke .6s ease-in-out infinite}.panda-dressing-status{min-height:24px;text-align:center;font-size:12px;color:#795d85;margin:4px 0}@keyframes panda-makeup-stroke{50%{transform:translate(-10px,5px) rotate(-12deg)}}@media(prefers-reduced-motion:reduce){.panda-makeup-brush{animation:none}}
+/* Furniture must stay touchable when a large panda stands in front of it. */
+.panda-home-v7 .scene-object,.panda-home-v7 .furniture-object,.panda-home-v7 .panda-wardrobe-object,.panda-home-v7 .panda-makeup-object{z-index:30}
+.panda-home-v7 .panda-room-door{z-index:32}
+.panda-home-v7 .panda-house-map-toggle{z-index:34}

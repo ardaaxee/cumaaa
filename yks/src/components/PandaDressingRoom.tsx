@@ -5,7 +5,7 @@ export function PandaDressingRoom({kind,items,onChoose,onClose}:{kind:'outfit'|'
  const [applying,setApplying]=useState(false);
  useEffect(()=>{if(!applying)return;const timer=window.setTimeout(()=>setApplying(false),1800);return()=>window.clearTimeout(timer);},[applying]);
  const panel=useRef<HTMLDivElement>(null);
- useEffect(()=>{const previous=document.activeElement as HTMLElement|null;panel.current?.focus();return()=>previous?.focus();},[]);
+ useEffect(()=>{const previous=document.activeElement as HTMLElement|null;panel.current?.focus({preventScroll:true});return()=>previous?.focus({preventScroll:true});},[]);
  const choices=kind==='outfit'?PANDA_OUTFITS:PANDA_MAKEUP;
  return <div className="panda-dressing-overlay" onPointerDown={e=>e.stopPropagation()}>
  <div ref={panel} tabIndex={-1} className="panda-dressing-panel" role="dialog" aria-modal="true" aria-label={kind==='outfit'?"Zeynep’in gardırobu":"Zeynep’in makyaj masası"} onKeyDown={e=>{if(e.key==='Escape'){onClose();}if(e.key==='Tab'){const buttons=[...e.currentTarget.querySelectorAll<HTMLButtonElement>('button')];const first=buttons[0],last=buttons[buttons.length-1];if(e.shiftKey&&(document.activeElement===first||document.activeElement===e.currentTarget)){e.preventDefault();last.focus();}else if(!e.shiftKey&&document.activeElement===last){e.preventDefault();first.focus();}}}}>
