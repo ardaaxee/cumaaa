@@ -1,0 +1,1 @@
+import{Jt as e,Xt as t,Yt as n,Zt as r}from"./actions-BZujgFG9.js";var i={topicName:e=>n(e)?.topic.name??e,subjectName:n=>{let r=e(n);return r?t(r):n},subjectTopicIds:e=>r(e).map(e=>e.id)};export{i as t};
