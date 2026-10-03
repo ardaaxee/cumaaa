@@ -19,3 +19,26 @@ it('örneğin adımlarını ve cevabını sıralı açar; konu değişince öğr
  expect(host.textContent).not.toContain('Sonuç:');
  await act(()=>root.unmount());host.remove();
 });
+it('öğrenme adımları ve alt konu arasında geçiş cevabı kaybettirmez',async()=>{
+ Object.assign(globalThis,{IS_REACT_ACT_ENVIRONMENT:true});
+ const {loadTopicQuestions}=await import('../src/data/content');
+ const {getState}=await import('../src/store/store');
+ const topic=SUBJECTS[0].units[0].topics[0];const lesson=(await loadLesson(topic.id))!;
+ const questions=await loadTopicQuestions(topic.id);
+ const host=document.createElement('div');document.body.append(host);const root=createRoot(host);
+ await act(()=>root.render(createElement(LearningArea,{lesson,topic,questions})));
+ const click=async(text:string)=>act(()=>[...host.querySelectorAll('button')].find(b=>b.textContent===text)!.click());
+ await click('3. Sen uygula');
+ const before=getState().attempts.length;
+ await act(()=>host.querySelector<HTMLButtonElement>('.option')!.click());
+ expect(getState().attempts.length).toBe(before+1);
+ await click('4. Özetle');await click('3. Sen uygula');
+ expect(host.querySelector<HTMLButtonElement>('.option')!.disabled).toBe(true);
+ expect(host.textContent).toContain('1 cevap');
+ const select=host.querySelector('select')!;
+ await act(()=>{select.value=topic.subtopics[0].id;select.dispatchEvent(new Event('change',{bubbles:true}));});
+ await act(()=>{select.value='';select.dispatchEvent(new Event('change',{bubbles:true}));});
+ expect(host.querySelector<HTMLButtonElement>('.option')!.disabled).toBe(true);
+ expect(getState().attempts.length).toBe(before+1);
+ await act(()=>root.unmount());host.remove();
+});
