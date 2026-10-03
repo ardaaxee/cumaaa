@@ -389,6 +389,19 @@ await step('Defter: sayfa aç → çiz → fizik şablonu → PDF gerçekten ind
   assert(dims[0] === 900 && dims[1] > 500, `Beklenmeyen PDF sayfa görüntüsü: ${dims}`);
 });
 
+await step('Öğretmen öğrenme alanı ve defter aynı anda kullanılabilir', async () => {
+  await page.goto(APP + '#/ogretmen?konu=aytkim-elektrokimya', {waitUntil:'networkidle'});
+  await tap(page.getByRole('button',{name:'Adım adım öğrenmeye başla',exact:true}));
+  await tap(page.getByRole('button',{name:'El yazısı defterini aç',exact:true}));
+  const panel=page.getByRole('region',{name:'El yazısı defterim',exact:true});await panel.waitFor();
+  await page.getByRole('button',{name:'2. Birlikte çöz',exact:true}).evaluate(el=>el.scrollIntoView({block:'start'}));
+  await tap(page.getByRole('button',{name:'2. Birlikte çöz',exact:true}));
+  const geometry=await panel.evaluate(el=>({height:el.getBoundingClientRect().height,top:el.getBoundingClientRect().top,viewport:innerHeight}));
+  assert(geometry.height<geometry.viewport*.6 && geometry.top>geometry.viewport*.3,'Defter telefon ekranının tamamını kaplıyor');
+  await tap(page.getByRole('button',{name:'Defteri kapat',exact:true}));
+  await panel.waitFor({state:'detached'});
+});
+
 await step('Öğretmen fotoğrafı: seç → öğretmen ekranında görünür → kaldır', async () => {
   // 1×1 piksel PNG
   const png = Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==', 'base64');
