@@ -436,34 +436,42 @@ await step('Konu seviye kontrolü ve aynı sorunun defterini tekrar açma',async
   await tap(page.getByRole('button',{name:'Defteri kapat',exact:true}));await panel.waitFor({state:'detached'});
 });
 
-await step('Panda yatağa uzanır, lambayı kapatır ve mutfak masasında yemek yer',async()=>{
-  await page.goto(APP+'#/pandam',{waitUntil:'networkidle'});
-  await tap(page.locator('.pet-game-actions button').filter({hasText:'Uyku'}));
-  const bed=page.locator('.panda-bed-pose');await bed.waitFor({state:'visible',timeout:6000});
-  const lamp=page.getByRole('button',{name:'Panda uyuyor · lamba kapalı',exact:true});
-  assert(await lamp.isDisabled(),'Uyku sırasında lamba açık kalabiliyor');
-  assert(await lamp.getAttribute('aria-pressed')==='false','Uyku lambası kapanmadı');
-  const bedGeometry=await bed.evaluate(el=>{const r=el.getBoundingClientRect();const stage=el.closest('.pet-stage').getBoundingClientRect();return {fits:r.left>=stage.left&&r.right<=stage.right&&r.bottom<=stage.bottom};});
-  assert(bedGeometry.fits,'Uyku pozu oda sınırlarının dışına taşıyor');
-  await tap(page.locator('.pet-game-actions button').filter({hasText:'Uyandır'}));
-  await bed.waitFor({state:'detached'});
-  await tap(page.locator('.pet-game-actions button').filter({hasText:'Besle'}));
-  await page.locator('.activity-eating .panda-dining-pose').waitFor({state:'visible',timeout:6000});
-  assert(await page.locator('.panda-dining-chair').isVisible(),'Yemekte sandalye yok');
-  assert(await page.locator('.panda-dining-table').isVisible(),'Yemekte masa yok');
-  await page.locator('.panda-dining-pose').waitFor({state:'detached',timeout:12000});
+async function pandaRoom(label){
+ await tap(page.getByRole('button',{name:'Ev planını aç',exact:true}));
+ await tap(page.getByRole('dialog',{name:'Ev planı',exact:true}).getByRole('button').filter({hasText:label}));
+}
+await step('Panda eşyalarla uyur, yemek yer ve odalara yürür',async()=>{
+ await page.goto(APP+'#/pandam',{waitUntil:'networkidle'});
+ assert(await page.locator('.pet-room-strip,.pet-game-actions,.pet-game-quick').count()===0,'Alt kontrol çubukları hâlâ var');
+ await pandaRoom('Yatak');await tap(page.getByRole('button',{name:'Panda uyusun',exact:true}));
+ await page.locator('.panda-bed-pose').waitFor({state:'visible',timeout:6000});
+ assert(await page.getByRole('button',{name:'Panda uyuyor · lamba kapalı',exact:true}).isDisabled(),'Uyku lambası kapanmadı');
+ await tap(page.getByRole('button',{name:'Bambu yatakta uyuyor · uyandır',exact:true}));
+ await page.locator('.panda-bed-pose').waitFor({state:'detached'});
+ await pandaRoom('Mutfak');await tap(page.getByRole('button',{name:'Bambu kasesinden Panda’yı besle',exact:true}));
+ await page.locator('.activity-eating .panda-dining-pose').waitFor({state:'visible',timeout:6000});
+ await page.locator('.panda-dining-pose').waitFor({state:'detached',timeout:12000});
 });
-
-await step('Her oda kendi eşyasıyla günlük yaşam rutini gösterir',async()=>{
-  for(const [room,label,pose] of [['Salon','Koltukta dinlen','sofa'],['Çalışma','Defterde çalış','desk'],['Banyo','Küvette yıkan','bath'],['Bahçe','Bitkilerle ilgilen','watering'],['Balkon','Balkonda mola ver','terrace']]){
-    await tap(page.getByRole('navigation',{name:'Ev odaları'}).getByRole('button').filter({hasText:room}));
-    await tap(page.getByRole('group',{name:'Bu odanın günlük rutini'}).getByRole('button',{name:label,exact:true}));
-    const model=page.locator('.room-pose-'+pose);await model.waitFor({state:'visible',timeout:6000});
-    assert(await model.locator('.routine-front').isVisible(),room+' eşya katmanı görünmüyor');
-    const fits=await model.evaluate(el=>{const r=el.getBoundingClientRect(),s=el.closest('.pet-stage').getBoundingClientRect();return r.left>=s.left-1&&r.right<=s.right+1;});
-    assert(fits,room+' rutini telefon ekranından taşıyor');
-    if(pose!=='bath'){await tap(page.getByRole('button',{name:'Rutini bitir',exact:true}));await model.waitFor({state:'detached'});}
-  }
+await step('Her odanın eşyası gerçek rutini başlatır',async()=>{
+ for(const [room,object,pose] of [['Salon','Koltukta dinlen','sofa'],['Çalışma','Panda ders çalışsın','desk'],['Banyo','Panda banyo yapsın','bath'],['Bahçe','Çiçeği sula','watering'],['Balkon','Balkonda dinlen','terrace']]){
+  await pandaRoom(room);await tap(page.getByRole('button',{name:object,exact:true}));
+  const model=page.locator('.room-pose-'+pose);await model.waitFor({state:'visible',timeout:6000});
+  const fits=await model.evaluate(el=>{const r=el.getBoundingClientRect(),s=el.closest('.pet-stage').getBoundingClientRect();return r.left>=s.left-1&&r.right<=s.right+1;});assert(fits,room+' pozu ekranı aşıyor');
+  if(pose!=='bath'){await tap(page.getByRole('button',{name:'Ayağa kalk',exact:true}));await model.waitFor({state:'detached'});}
+ }
+});
+await step('Gardırop ve makyaj seçimi panda üzerinde görünür ve kaydedilir',async()=>{
+ await pandaRoom('Yatak');await tap(page.getByRole('button',{name:'Gardırobu aç',exact:true}));
+ await tap(page.getByRole('button',{name:'Pembe tulum',exact:true}));
+ assert(await page.locator('.panda-dressing-preview [data-outfit="kiyafet-pembe"]').count()===1,'Kıyafet giyilmedi');
+ await tap(page.getByRole('button',{name:'Hazırım · odaya dön',exact:true}));
+ await pandaRoom('Banyo');await tap(page.getByRole('button',{name:'Makyaj aynasına otur',exact:true}));
+ await tap(page.getByRole('button',{name:'Pembe yanaklar',exact:true}));
+ assert(await page.locator('.panda-dressing-preview [data-makeup="makyaj-pembe"]').count()===1,'Makyaj görünmüyor');
+ await tap(page.getByRole('button',{name:'Hazırım · odaya dön',exact:true}));
+ await page.reload({waitUntil:'networkidle'});
+ assert(await page.locator('.pet-stage-panda [data-outfit="kiyafet-pembe"]').count()===1,'Kıyafet kayboldu');
+ assert(await page.locator('.pet-stage-panda [data-makeup="makyaj-pembe"]').count()===1,'Makyaj kayboldu');
 });
 
 await step('Öğretmen fotoğrafı: seç → öğretmen ekranında görünür → kaldır', async () => {

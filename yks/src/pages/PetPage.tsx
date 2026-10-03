@@ -1,3 +1,5 @@
+import {PandaDressingRoom} from '../components/PandaDressingRoom';
+import {equipPandaStyle} from '../utils/pandaStyle';
 import {sanitizePandaPlants,waterPandaPlant} from '../utils/pandaPlants';
 import {PandaRoutinePose} from '../components/PandaRoutinePose';
 import {pandaPose} from '../utils/pandaPose';
@@ -336,6 +338,8 @@ function activityText(activity: HouseActivity, room: HouseRoom, name: string): s
 export default function PetPage() {
   const state = useAppState();
   const pet = state.settings.pet;
+  const [dressing,setDressing]=useState<'outfit'|'makeup'|null>(null);
+  const [houseMap,setHouseMap]=useState(false);
   const plants = sanitizePandaPlants(pet.plants);
   const p = useMemo(() => petStatus(state), [state]);
   const needs = usePetNeeds();
@@ -742,6 +746,7 @@ export default function PetPage() {
   const moveTo = (nextRoom: HouseRoom, nextActivity: HouseActivity = 'idle', message?: string) => {
     lastUserActionRef.current = Date.now();
     beginAction();
+    setHouseMap(false);setDressing(null);
     setHolding(null);
     setRoom(nextRoom);
     setPetPos(ROOM_TARGET[nextRoom]);
@@ -880,25 +885,6 @@ export default function PetPage() {
       setSceneMessage(null);
     }, 7800);
   };
-
-  const roam = () => {
-    beginAction();
-    let nextX = petPos.x < 50 ? 78 : 22;
-    setFacing(nextX < petPos.x ? 'left' : 'right');
-    setActivity('walking');
-    setSceneMessage(pet.name + ' odada dolaşıyor…');
-    setPetPos({ x: nextX, y: 8 });
-    later(() => {
-      nextX = nextX < 50 ? 66 : 34;
-      setFacing(nextX < petPos.x ? 'left' : 'right');
-      setPetPos({ x: nextX, y: 2 });
-    }, 1400);
-    later(() => {
-      setActivity('idle');
-      setSceneMessage(null);
-    }, 2800);
-  };
-
 
   const clampPos = (value: number, min: number, max: number) => Math.max(min, Math.min(max, value));
 
@@ -1208,6 +1194,7 @@ export default function PetPage() {
   const toggle = (id: string) =>
     update((s) => {
       if (!PET_ITEMS.some((item) => item.id === id && item.level <= petStatus(s).level)) return s;
+      if(id.startsWith('kiyafet-')||id.startsWith('makyaj-'))return updateSettings(s,{pet:{...s.settings.pet,items:equipPandaStyle(s.settings.pet.items,s.settings.pet.items.includes(id)?'':id,id.startsWith('kiyafet-')?'outfit':'makeup')}});
       const items = s.settings.pet.items.includes(id) ? s.settings.pet.items.filter((x) => x !== id) : [...s.settings.pet.items, id];
       return updateSettings(s, { pet: { ...s.settings.pet, items } });
     });
@@ -1245,18 +1232,6 @@ export default function PetPage() {
           </button>
         </header>
 
-        <div className="pet-room-routine" role="group" aria-label="Bu odanın günlük rutini">
-          <button type="button" onClick={() => {
-            if(room==='kitchen')kitchenGive('bambu');
-            else if(room==='bedroom')sleep();
-            else if(room==='bathroom')bath();
-            else if(room==='study')studyTogether();
-            else if(room==='garden')tendPlant();
-            else relax();
-          }}>{({living:'Koltukta dinlen',kitchen:'Masada yemek ye',bedroom:activity==='sleeping'?'Uyan':'Yatağa uzan',bathroom:'Küvette yıkan',study:'Defterde çalış',garden:'Bitkilerle ilgilen',balcony:'Balkonda mola ver'})[room]}</button>
-          {pose!=='standing'&&activity!=='sleeping'&&!careSession&&<button type="button" onClick={()=>{beginAction();setActivity('idle');setSceneMessage('Mola bitti. Yeni bir şey yapabiliriz.');}}>Rutini bitir</button>}
-          <span>Odadaki eşyalara dokunarak da başlatabilirsin.</span>
-        </div>
         <div className="pet-game-needs" aria-label="Panda ihtiyaçları">
           <NeedBubble icon="🎋" label="Tokluk" value={needs.food} onClick={() => kitchenGive('bambu')} />
           <NeedBubble icon="💧" label="Su" value={needs.water} onClick={() => kitchenGive('su')} />
@@ -1277,7 +1252,7 @@ export default function PetPage() {
           onPointerLeave={() => setGaze({ x: 0, y: 0 })}
           onPointerDown={(e) => { followTouch(e); stageTouch.current = { x: e.clientX, y: e.clientY }; }}
           onPointerCancel={() => { stageTouch.current = null; }}
-          onPointerUp={stagePointerUp}
+          onPointerUp={(e)=>{const start=stageTouch.current;if(start&&!((e.target as HTMLElement).closest('button,a'))&&Math.abs(e.clientX-start.x)>65&&Math.abs(e.clientY-start.y)<55){stageTouch.current=null;changeRoom(e.clientX<start.x?1:-1);return;}stagePointerUp(e);}}
         >
           <div className="pet-stage-room-badge">
             <span>{ROOM_INFO[room].icon}</span>
@@ -1299,8 +1274,14 @@ export default function PetPage() {
 
           <PandaFurniture room={room} onWater={() => kitchenGive('su')} onFeed={() => kitchenGive('bambu')} onBath={bath} onStudy={studyTogether} bamboo={needs.bamboo} drops={needs.drops} sleeping={activity==='sleeping'} onPlant={tendPlant} plant={plants[room==='balcony'?'balcony':'garden'].growth} plantWatered={plants[room==='balcony'?'balcony':'garden'].wateredDay>=dayKey()} />
 
-          <button className="pet-scene-arrow prev" type="button" onClick={() => changeRoom(-1)} aria-label="Önceki oda">‹</button>
-          <button className="pet-scene-arrow next" type="button" onClick={() => changeRoom(1)} aria-label="Sonraki oda">›</button>
+          <button className="panda-house-map-toggle" type="button" onClick={()=>{beginAction();setActivity('waiting');setHouseMap(true);}} aria-label="Ev planını aç">⌂ Ev planı</button>
+          <button className="panda-room-door door-left" type="button" onClick={()=>changeRoom(-1)} aria-label="Önceki odaya yürü"><span>‹</span><small>{ROOM_INFO[ROOM_ORDER[(ROOM_ORDER.indexOf(room)+6)%7]].label}</small></button>
+          <button className="panda-room-door door-right" type="button" onClick={()=>changeRoom(1)} aria-label="Sonraki odaya yürü"><span>›</span><small>{ROOM_INFO[ROOM_ORDER[(ROOM_ORDER.indexOf(room)+1)%7]].label}</small></button>
+          {houseMap&&<div className="panda-map-overlay" role="dialog" aria-label="Ev planı"><h2>Hangi odaya yürüyelim?</h2><div>{ROOM_ORDER.map(id=><button className="panda-map-room" data-room={id} key={id} type="button" onClick={()=>moveTo(id)}>{ROOM_INFO[id].icon} {ROOM_INFO[id].label}</button>)}</div><button type="button" onClick={()=>{setHouseMap(false);setActivity('idle');}}>Planı kapat</button></div>}
+          {room==='bedroom'&&<button className="panda-wardrobe-object" type="button" onClick={()=>{beginAction();setActivity('waiting');setDressing('outfit');}} aria-label="Gardırobu aç"><svg viewBox="0 0 100 150" aria-hidden="true"><rect x="8" y="8" width="84" height="132" rx="7" fill="#b89370" stroke="#725b47" strokeWidth="4"/><path d="M50 10v128M39 73v12M61 73v12" stroke="#6d5748" strokeWidth="4"/><path d="M15 22h28v104H15m42-104h28v104H57" fill="#d7b795"/><path d="M16 140v7M84 140v7" stroke="#725b47" strokeWidth="6"/></svg><small>Gardırop</small></button>}
+          {room==='bathroom'&&<button className="panda-makeup-object" type="button" onClick={()=>{beginAction();setActivity('waiting');setDressing('makeup');}} aria-label="Makyaj aynasına otur"><svg viewBox="0 0 120 140" aria-hidden="true"><ellipse cx="60" cy="48" rx="41" ry="43" fill="#cee3e7" stroke="#d4b99a" strokeWidth="7"/><path d="M38 24l35 40" stroke="#fff9" strokeWidth="5"/><path d="M60 94v22M20 117h80v12H20" stroke="#9b7a5a" strokeWidth="8"/><rect x="25" y="96" width="12" height="22" rx="3" fill="#cf7e99"/><rect x="83" y="102" width="17" height="14" rx="4" fill="#b6a3cb"/></svg><small>Makyaj masası</small></button>}
+          {dressing&&<PandaDressingRoom kind={dressing} items={pet.items} onClose={()=>{setDressing(null);setActivity('idle');setSceneMessage('Hazırız! Evde dolaşabiliriz.');}} onChoose={id=>{update(st=>updateSettings(st,{pet:{...st.settings.pet,items:equipPandaStyle(st.settings.pet.items,id,dressing)}}));setEmotion('shy');}}/>}
+          {pose!=='standing'&&activity!=='sleeping'&&!careSession&&!dressing&&<button className="panda-finish-routine" type="button" onClick={()=>{beginAction();setActivity('idle');setSceneMessage(null);}}>Ayağa kalk</button>}
 
           <button
             type="button"
@@ -1314,7 +1295,7 @@ export default function PetPage() {
             onPointerMove={pandaPointerMove}
             onPointerUp={pandaPointerUp}
             onPointerCancel={() => { pandaDragRef.current = null; setDragging(false); setActivity('idle'); }}
-            onClick={(e) => { if (e.detail === 0) petPanda(); }}
+            onClick={(e) => { if (e.detail === 0) {if(activity==='sleeping')sleep();else petPanda();} }}
             disabled={ballGame.phase !== 'idle'}
             aria-label={activity==='sleeping'?pet.name+' yatakta uyuyor · uyandır':pose!=='standing'?pet.name+' '+activityText(activity,room,pet.name):pet.name + ' pandayı sev'}
           >
@@ -1384,36 +1365,10 @@ export default function PetPage() {
           )}
           <div className="pet-control-hint">
             <span>☝️ Zemine dokun: yürü</span>
-            <span>↔️ Panda’yı sürükle</span>
+            <span>↔️ Oda için zeminde kaydır · kapıya dokun</span>
           </div>
         </div>
 
-        <nav className="pet-room-strip" aria-label="Ev odaları">
-          {ROOM_ORDER.map((id) => (
-            <button key={id} type="button" className={room === id ? 'active' : ''} aria-pressed={room === id} onClick={() => moveTo(id)}>
-              <span>{ROOM_INFO[id].icon}</span>
-              <b>{ROOM_INFO[id].label.replace(' Odası', '')}</b>
-            </button>
-          ))}
-        </nav>
-
-        <div className="pet-game-actions" aria-label="Panda eylemleri">
-          <button type="button" onClick={petPanda} className="love">
-            <span>♡</span><b>Sev</b>
-          </button>
-          <button type="button" onClick={() => kitchenGive('bambu')} className="feed">
-            <span>🎋</span><b>Besle</b>
-          </button>
-          <button type="button" onClick={() => kitchenGive('su')} className="water">
-            <span>💧</span><b>Su</b>
-          </button>
-          <button type="button" onClick={playGame} className="play">
-            <span>⚽</span><b>Oyna</b>
-          </button>
-          <button type="button" onClick={sleep}>
-            <span>🌙</span><b>{activity === 'sleeping' ? 'Uyandır' : 'Uyku'}</b>
-          </button>
-        </div>
       </section>
 
       <PandaMoments onMoment={(kind, message) => {
@@ -1433,27 +1388,6 @@ export default function PetPage() {
         <div className="panda-study-links"><a href="#/odak">Odaklanmaya geç</a><a href="#/testler">Soru çöz</a></div>
         <div className="panda-daily-quests">{quests.map((q) => <a key={q.href} href={q.href}><span>{q.done ? '✓' : q.icon} {q.label}</span><b>{Math.round(q.current)}/{q.target}</b></a>)}</div>
       </section>
-      <section className="pet-game-quick section">
-        <button type="button" onClick={roam}>
-          <span>🐾</span><b>Evde gez</b><small>Kendi kendine dolaşsın</small>
-        </button>
-        <button type="button" onClick={() => greet()}>
-          <span>👋</span><b>Selam ver</b><small>Sana dönüp tepki versin</small>
-        </button>
-        <button type="button" onClick={bath}>
-          <span>🫧</span><b>Banyo</b><small>Temizliği yenile</small>
-        </button>
-        <button type="button" onClick={studyTogether}>
-          <span>📚</span><b>Çalışma odası</b><small>Masaya birlikte geç</small>
-        </button>
-        <button type="button" onClick={playGame}>
-          <span>⚽</span><b>Top oyunu</b><small>Topa dokun, Panda peşinden koşsun</small>
-        </button>
-        <button type="button" onClick={() => triggerReaction()}>
-          <span>🎭</span><b>Sürpriz tepki</b><small>Kahkaha · utanma · hapşırma…</small>
-        </button>
-      </section>
-
       <details className="card section pet-game-drawer">
         <summary>
           <span>

@@ -11,9 +11,10 @@ describe('panda arkadaş', () => {
     expect(levelForXp(xpForLevel(7))).toBe(7);
   });
 
-  it('a fresh state sleeps at level 1 with nothing unlocked', () => {
+  it('a fresh state keeps earned accessories locked and allows dressing', () => {
     const p = petStatus(defaultState(), '2026-09-28');
     expect(p).toMatchObject({ xp: 0, level: 1, mood: 'uykulu' });
-    expect(unlockedItems(p.level)).toEqual([]);
+    expect(unlockedItems(p.level)).toEqual(['kiyafet-pembe','kiyafet-mavi','kiyafet-pijama','makyaj-pembe','makyaj-isilti']);
+    expect(unlockedItems(p.level)).not.toContain('gozluk');
   });
 });

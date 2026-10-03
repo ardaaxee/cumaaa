@@ -6,9 +6,14 @@ import { dashboard } from './stats';
  * Panda arkadaş: XP yalnız gerçek çalışmadan hesaplanır (ayrı bir sayaç tutulmaz, hile yapılamaz).
  * Seviye atladıkça aksesuarlar açılır.
  */
-export type PetItem = 'kalem' | 'gozluk' | 'papyon' | 'atki' | 'cicek' | 'kulaklik' | 'kep' | 'tac';
+export type PetItem = 'kalem' | 'gozluk' | 'papyon' | 'atki' | 'cicek' | 'kulaklik' | 'kep' | 'tac' | 'kiyafet-pembe' | 'kiyafet-mavi' | 'kiyafet-pijama' | 'makyaj-pembe' | 'makyaj-isilti';
 
 export const PET_ITEMS: { id: PetItem; label: string; level: number; icon: string }[] = [
+  {id:'kiyafet-pembe',label:'Pembe tulum',level:1,icon:'👚'},
+  {id:'kiyafet-mavi',label:'Mavi sweatshirt',level:1,icon:'👕'},
+  {id:'kiyafet-pijama',label:'Yıldızlı pijama',level:1,icon:'🌙'},
+  {id:'makyaj-pembe',label:'Pembe yanaklar',level:1,icon:'🌸'},
+  {id:'makyaj-isilti',label:'Hafif ışıltı',level:1,icon:'✨'},
   { id: 'kalem', label: 'Kalem', level: 2, icon: '✏️' },
   { id: 'gozluk', label: 'Gözlük', level: 3, icon: '👓' },
   { id: 'papyon', label: 'Papyon', level: 4, icon: '🎀' },

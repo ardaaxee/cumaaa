@@ -1,3 +1,4 @@
+import {PANDA_OUTFITS} from '../utils/pandaStyle';
 import { useId, type CSSProperties } from 'react';
 
 export function RealisticPanda({
@@ -27,6 +28,7 @@ export function RealisticPanda({
   talking?: boolean;
   emotion?: 'neutral' | 'laugh' | 'angry' | 'shy' | 'yawn' | 'sneeze' | 'surprised';
 }) {
+  const outfit=PANDA_OUTFITS.find(c=>items.includes(c.id));
   const uid = useId().replace(/:/g, '');
   const style = { '--real-panda-size': size + 'px', '--gaze-x': Math.max(-3, Math.min(3, gaze.x)) + 'px', '--gaze-y': Math.max(-2, Math.min(2, gaze.y)) + 'px' } as CSSProperties;
 
@@ -98,6 +100,12 @@ export function RealisticPanda({
           d="M156 138 C176 150 184 174 179 196 C176 210 166 218 154 215 C143 212 143 194 146 178 C148 165 146 151 139 140Z"
           fill={`url(#${uid}-black-fur)`}
         />
+        {outfit&&!bathing&&<g data-outfit={outfit.id}>
+          <path d="M72 139Q110 157 148 139L158 211Q110 234 62 211Z" fill={outfit.color} stroke="#635b7433" strokeWidth="2"/>
+          <path d="M77 142Q110 162 143 142" fill="none" stroke="#fff7" strokeWidth="4"/>
+          <path d="M110 158v63" stroke="#fff4" strokeWidth="2"/>
+          {outfit.id==='kiyafet-pijama'?<g fill="#fff1d5"><path d="m85 177 3-7 3 7 7 2-6 4 1 7-5-4-6 4 2-7-6-4z"/><path d="m133 198 2-5 2 5 5 1-4 3 1 5-4-3-4 3 1-5-4-3z"/></g>:<path d="M94 179Q110 169 126 179v21H94Z" fill="#fff3" stroke="#fff5"/>}
+        </g>}
         <path
           className="rp-leg rp-leg-left"
           d="M72 219 C60 228 55 241 62 249 C68 257 86 258 95 250 C101 245 99 236 93 226Z"
@@ -173,6 +181,8 @@ export function RealisticPanda({
           <path className="rp-tongue" d="M103 126 Q110 137 117 126 Q111 131 103 126Z" fill="#d88091" opacity="0" />
         </g>
 
+        {items.includes('makyaj-pembe')&&<g data-makeup="makyaj-pembe" fill="#e996ad" opacity=".65"><ellipse cx="69" cy="113" rx="12" ry="6"/><ellipse cx="151" cy="113" rx="12" ry="6"/></g>}
+        {items.includes('makyaj-isilti')&&<g data-makeup="makyaj-isilti" fill="#ffe3a0"><path d="m63 106 2-5 2 5 5 2-5 2-2 5-2-5-5-2zM149 106l2-5 2 5 5 2-5 2-2 5-2-5-5-2z"/></g>}
         <g className="rp-expression-layer">
           <ellipse className="rp-blush rp-blush-left" cx="67" cy="111" rx="13" ry="7" fill="#e9a0ad" opacity="0" />
           <ellipse className="rp-blush rp-blush-right" cx="153" cy="111" rx="13" ry="7" fill="#e9a0ad" opacity="0" />

@@ -17,6 +17,7 @@ export function PandaRoutinePose({pose,eating,drinking,items,gaze}:{pose:Exclude
    <ellipse cx="93" cy="100" rx="55" ry="43" fill={'url(#'+id+'fur)'} transform="rotate(-9 93 100)"/>
    <ellipse cx="69" cy="98" rx="14" ry="19" fill="#27252b" transform="rotate(23 69 98)"/><ellipse cx="113" cy="90" rx="14" ry="19" fill="#27252b" transform="rotate(-21 113 90)"/>
    <path d="M61 97q9 7 17-2M104 90q9 7 17-2" fill="none" stroke="#e4ddd3" strokeWidth="3" strokeLinecap="round"/>
+   {items.includes('makyaj-pembe')&&<g fill="#e996ad" opacity=".65"><ellipse cx="61" cy="114" rx="8" ry="4"/><ellipse cx="122" cy="108" rx="8" ry="4"/></g>}
    <ellipse cx="95" cy="117" rx="24" ry="17" fill="#f8f2e8"/><path d="M87 111q9-7 16 0l-7 8z" fill="#242129"/><path d="M96 119q-2 6-9 5m9-5q4 5 10 1" stroke="#4d4145" fill="none" strokeWidth="2"/>
    <path d="M138 87Q210 77 270 98L323 153H142Z" fill={'url(#'+id+'duvet)'} stroke="#7a6b91" strokeWidth="2"/>
    <path d="M147 96Q229 109 275 130M169 119L157 155M221 118L215 160M274 132L295 156" stroke="#dacfea" strokeWidth="2" opacity=".48" fill="none"/>

@@ -25,6 +25,9 @@ async function click(selector: string) {
   expect(button, selector).not.toBeNull();
   await act(() => button!.click());
 }
+async function room(id:string){await click('.panda-house-map-toggle');await click('[data-room="'+id+'"]');await advance(900);}
+async function play(){await room('garden');await click('.scene-garden-ball');}
+async function feed(){await room('kitchen');await click('.furniture-bowl');}
 async function advance(ms: number) { await act(() => vi.advanceTimersByTime(ms)); }
 async function mount() { await act(() => root.render(createElement(PetPage))); }
 
@@ -52,14 +55,14 @@ describe('Panda evindeki etkileşimler', () => {
     await act(() => root.unmount());
     root = createRoot(host);
     await mount();
-    await click('.pet-game-actions .play');
+    await play();
     await advance(900);
     expect(host.querySelector('.pet-ball-game-hud')).not.toBeNull();
     expect(host.querySelector('.pet-stage')?.classList.contains('scene-garden')).toBe(true);
   });
 
   it('hızlı dokunmalarda 10 puanı aşmaz, tek ödül verir, tekrar oynanabilir', async () => {
-    await click('.pet-game-actions .play');
+    await play();
     const ball = host.querySelector<HTMLButtonElement>('.pet-tom-ball')!;
     await act(() => { for (let i = 0; i < 15; i++) ball.click(); });
     expect(host.querySelector('.panda-game-result')?.textContent).toContain('10’da 10');
@@ -68,14 +71,14 @@ describe('Panda evindeki etkileşimler', () => {
     expect(JSON.parse(localStorage.getItem(PANDA_LIFE_KEY)!).happiness).toBe(96);
     await click('.panda-game-result button');
     expect(host.querySelector('.pet-ball-game-hud strong')?.textContent).toBe('0/10');
-    await click('.pet-room-strip button');
+    await room('living');
     await advance(6000);
     expect(host.querySelector('.pet-stage')?.classList.contains('scene-living')).toBe(true);
     expect(host.querySelector('.panda-game-result')).toBeNull();
   });
 
   it('oyundan bakım eylemine geçince oyun tamamen kapanır', async () => {
-    await click('.pet-game-actions .play');
+    await play();
     await click('.pet-game-needs button:nth-child(3)');
     await advance(4400);
     expect(host.querySelector('.pet-stage')?.classList.contains('scene-bathroom')).toBe(true);
@@ -94,9 +97,9 @@ describe('Panda evindeki etkileşimler', () => {
   });
 
   it('erken uyandırmak tam enerji vermez', async () => {
-    await click('.pet-game-actions button:last-child');
+    await room('bedroom');await click('.scene-bed');
     await advance(1000);
-    await click('.pet-game-actions button:last-child');
+    await click('.pet-stage-panda');
     await advance(5000);
     expect(JSON.parse(localStorage.getItem(PANDA_LIFE_KEY)!).energy).toBe(76);
   });
@@ -104,9 +107,9 @@ describe('Panda evindeki etkileşimler', () => {
   it('aynı beslemeye tekrar dokunmak hazırlık süresini yeniden başlatmaz', async () => {
     state = { ...state, testResults: [{ id: 'earned-test' }] as AppState['testResults'] };
     await mount();
-    await click('.pet-game-actions .feed');
+    await feed();
     await advance(1000);
-    await click('.pet-game-actions .feed');
+    await click('.furniture-bowl');
     await advance(1250);
     expect(state.settings.pet.care!.spentBamboo).toBe(1);
     expect(host.querySelector('.panda-care-session')?.textContent).toContain('1 bambu kullanıldı');
@@ -115,12 +118,12 @@ describe('Panda evindeki etkileşimler', () => {
   it('iptal edilen besleme bambu harcamaz; tamamlanan besleme yalnız bir bambu harcar', async () => {
     state = { ...state, testResults: [{ id: 'earned-test' }] as AppState['testResults'] };
     await mount();
-    await click('.pet-game-actions .feed');
+    await feed();
     await advance(1000);
-    await click('.pet-room-strip button');
+    await room('living');
     await advance(4000);
     expect(state.settings.pet.care!.spentBamboo).toBe(0);
-    await click('.pet-game-actions .feed');
+    await feed();
     await advance(2300);
     expect(state.settings.pet.care!.spentBamboo).toBe(1);
   });
@@ -134,7 +137,7 @@ describe('Panda evindeki etkileşimler', () => {
   });
 
   it('balkon koltuğu salon yerine balkonda dinlendirir ve çalışma bağlantıları doğrudur', async () => {
-    await click('.pet-room-strip button:last-child');
+    await room('balcony');
     await advance(900);
     await click('[aria-label="Balkonda dinlen"]');
     await advance(1000);
