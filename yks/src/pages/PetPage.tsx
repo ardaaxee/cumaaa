@@ -1,3 +1,5 @@
+import {PandaRoutinePose} from '../components/PandaRoutinePose';
+import {pandaPose} from '../utils/pandaPose';
 import { PandaFurniture } from '../components/PandaFurniture';
 import { PandaMoments } from '../components/PandaMoments';
 import { useEffect, useMemo, useRef, useState, type CSSProperties, type PointerEvent as ReactPointerEvent } from 'react';
@@ -346,6 +348,12 @@ export default function PetPage() {
     const h = new Date().getHours();
     return h >= 19 || h < 7 ? 'night' : 'day';
   });
+  const sleepingPreviously=useRef(false);
+  useEffect(()=>{
+    if(activity==='sleeping')setRoomMode('night');
+    else if(sleepingPreviously.current)setRoomMode('day');
+    sleepingPreviously.current=activity==='sleeping';
+  },[activity]);
   const [hearts, setHearts] = useState(0);
   const [cleanliness, setCleanliness] = useState(initialLife.cleanliness);
   const [energy, setEnergy] = useState(initialLife.energy);
@@ -370,6 +378,7 @@ export default function PetPage() {
   const greeted = useRef(false);
   const dailyRoutineRef = useRef('');
 
+  const pose=pandaPose(room,activity);
   const sad = needs.hungry || needs.thirsty;
   const need = needsMessage(pet.name, needs);
 
@@ -749,7 +758,8 @@ export default function PetPage() {
     }
 
     beginAction();
-    startCare(kind, 4700);
+    startCare(kind, 7800);
+    setRoomMode('day');
     setRoom('kitchen');
     setPetPos({ x: 52, y: 2 });
     setFacing('right');
@@ -779,7 +789,7 @@ export default function PetPage() {
       setSceneMessage(null);
       setCare(null);
       toast(kind === 'bambu' ? 'Yemeğini bitirdi 🎋' : 'Suyunu içti 💧');
-    }, 4700);
+    }, 7800);
   };
 
   const bath = () => {
@@ -847,7 +857,7 @@ export default function PetPage() {
     later(() => {
       setActivity('idle');
       setSceneMessage(null);
-    }, 4700);
+    }, 7800);
   };
 
   const roam = () => {
@@ -873,7 +883,7 @@ export default function PetPage() {
 
   const userWalkTo = (clientX: number, clientY: number) => {
     const stage = stageRef.current;
-    if (!stage || activity === 'sleeping' || activity === 'bathing') return;
+    if (!stage || pose!=='standing' || activity === 'bathing') return;
     const rect = stage.getBoundingClientRect();
     const nextX = clampPos(((clientX - rect.left) / Math.max(1, rect.width)) * 100, 14, 86);
     const rawBottom = ((rect.bottom - clientY) / Math.max(1, rect.height)) * 100 - 13;
@@ -898,7 +908,7 @@ export default function PetPage() {
   };
 
   const pandaPointerDown = (e: ReactPointerEvent<HTMLButtonElement>) => {
-    if (activity === 'sleeping' || ballGame.phase !== 'idle') return;
+    if (pose!=='standing' || ballGame.phase !== 'idle') return;
     lastUserActionRef.current = Date.now();
     beginAction();
     pandaDragRef.current = {
@@ -1223,7 +1233,7 @@ export default function PetPage() {
         {careSession && <PandaCareSession session={careSession} onCancel={() => { beginAction(); setActivity('idle'); setRoomMode('day'); setSceneMessage('Bakım durduruldu.'); }} />}
         <div
           ref={stageRef}
-          className={'pet-stage scene-' + room + ' activity-' + activity + (ballGame.phase !== 'idle' ? ' has-ball-game' : '')}
+          className={'pet-stage scene-' + room + ' pose-' + pose + ' activity-' + activity + (ballGame.phase !== 'idle' ? ' has-ball-game' : '')}
           onPointerDown={(e) => { stageTouch.current = { x: e.clientX, y: e.clientY }; }}
           onPointerCancel={() => { stageTouch.current = null; }}
           onPointerUp={stagePointerUp}
@@ -1246,14 +1256,14 @@ export default function PetPage() {
             onRelax={relax}
           />
 
-          <PandaFurniture room={room} onWater={() => kitchenGive('su')} onFeed={() => kitchenGive('bambu')} onBath={bath} onStudy={studyTogether} bamboo={needs.bamboo} drops={needs.drops} />
+          <PandaFurniture room={room} onWater={() => kitchenGive('su')} onFeed={() => kitchenGive('bambu')} onBath={bath} onStudy={studyTogether} bamboo={needs.bamboo} drops={needs.drops} sleeping={activity==='sleeping'} />
 
           <button className="pet-scene-arrow prev" type="button" onClick={() => changeRoom(-1)} aria-label="Önceki oda">‹</button>
           <button className="pet-scene-arrow next" type="button" onClick={() => changeRoom(1)} aria-label="Sonraki oda">›</button>
 
           <button
             type="button"
-            className={'pet-stage-panda act-' + activity + ' facing-' + facing + (dragging ? ' is-dragging' : '')}
+            className={'pet-stage-panda routine-' + pose + ' act-' + activity + ' facing-' + facing + (dragging ? ' is-dragging' : '')}
             style={{
               '--pet-x': petPos.x + '%',
               '--pet-y': petPos.y + '%',
@@ -1265,9 +1275,9 @@ export default function PetPage() {
             onPointerCancel={() => { pandaDragRef.current = null; setDragging(false); setActivity('idle'); }}
             onClick={(e) => { if (e.detail === 0) petPanda(); }}
             disabled={ballGame.phase !== 'idle'}
-            aria-label={pet.name + ' pandayı sev'}
+            aria-label={activity==='sleeping'?pet.name+' yatakta uyuyor · uyandır':pose==='seated'?pet.name+' mutfak masasında oturuyor':pet.name + ' pandayı sev'}
           >
-            <RealisticPanda
+            {pose!=='standing'?<PandaRoutinePose pose={pose} eating={activity==='eating'} drinking={activity==='drinking'} items={pet.items}/>:<RealisticPanda
               size={292}
               items={pet.items.filter((id) => PET_ITEMS.some((item) => item.id === id && item.level <= p.level))}
               sleepy={activity === 'sleeping'}
@@ -1279,7 +1289,7 @@ export default function PetPage() {
               waving={activity === 'greeting'}
               talking={activity === 'talking' || activity === 'greeting'}
               emotion={emotion}
-            />
+            />}
             <span className="pet-floor-shadow" />
             {hearts > 0 && <span key={hearts} className="pet-game-heart" aria-hidden="true">♡</span>}
             {activity === 'sleeping' && <span className="pet-game-sleep">Z z z</span>}

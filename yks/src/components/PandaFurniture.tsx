@@ -1,14 +1,16 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import type { HouseRoom } from '../utils/pandaLife';
 
 /** Hafif vektör eşyalar; tüm etkileşimler kullanıcının dokunuşuyla başlar. */
-export function PandaFurniture({room,onWater,onStudy,onBath,onFeed,bamboo,drops}:{room:HouseRoom;onWater:()=>void;onStudy:()=>void;onBath?:()=>void;onFeed?:()=>void;bamboo:number;drops:number}) {
+export function PandaFurniture({room,onWater,onStudy,onBath,onFeed,bamboo,drops,sleeping=false}:{room:HouseRoom;onWater:()=>void;onStudy:()=>void;onBath?:()=>void;onFeed?:()=>void;bamboo:number;drops:number;sleeping?:boolean}) {
  const [light,setLight]=useState(false);const [open,setOpen]=useState(false);const [reading,setReading]=useState(false);const [plant,setPlant]=useState(0);
+ useEffect(()=>{if(sleeping)setLight(false);},[sleeping]);
+ const lampOn=light&&!sleeping;
  const garden=room==='garden'||room==='balcony';
  return <>
-  {(room==='living'||room==='bedroom'||room==='study')&&<button type="button" className={`furniture-object furniture-light ${light?'lit':''}`} aria-label={light?'Okuma lambasını kapat':'Okuma lambasını aç'} aria-pressed={light} onClick={()=>setLight(!light)}>
-   <svg viewBox="0 0 90 160" aria-hidden="true"><ellipse cx="45" cy="150" rx="31" ry="6" fill="#0003"/><path d="M42 52h6v91h-6z" fill="#9b8273"/><path d="M22 142h46l8 7H14z" fill="#715b50"/><path d="M27 9h36l17 47H10z" fill={light?'#ffe9aa':'#b4a18c'} stroke="#8a7661" strokeWidth="2"/><path d="M27 9h7L25 56H11z" fill="#fff3"/><ellipse cx="45" cy="56" rx="35" ry="5" fill={light?'#fff1c0':'#84715d'}/></svg>
-   <span>{light?'Lamba açık':'Okuma lambası'}</span>
+  {(room==='living'||room==='bedroom'||room==='study')&&<button type="button" className={`furniture-object furniture-light ${lampOn?'lit':''}`} aria-label={sleeping?'Panda uyuyor · lamba kapalı':lampOn?'Okuma lambasını kapat':'Okuma lambasını aç'} aria-pressed={lampOn} disabled={sleeping} onClick={()=>setLight(!light)}>
+   <svg viewBox="0 0 90 160" aria-hidden="true"><ellipse cx="45" cy="150" rx="31" ry="6" fill="#0003"/><path d="M42 52h6v91h-6z" fill="#9b8273"/><path d="M22 142h46l8 7H14z" fill="#715b50"/><path d="M27 9h36l17 47H10z" fill={lampOn?'#ffe9aa':'#b4a18c'} stroke="#8a7661" strokeWidth="2"/><path d="M27 9h7L25 56H11z" fill="#fff3"/><ellipse cx="45" cy="56" rx="35" ry="5" fill={lampOn?'#fff1c0':'#84715d'}/></svg>
+   <span>{sleeping?'Lamba kapalı':lampOn?'Lamba açık':'Okuma lambası'}</span>
   </button>}
   {room==='study'&&<button type="button" className="furniture-object furniture-book" aria-label="Çalışma kitabını aç" aria-expanded={reading} onClick={()=>setReading(!reading)}>
    <svg viewBox="0 0 130 90" aria-hidden="true"><ellipse cx="65" cy="79" rx="58" ry="8" fill="#0003"/><path d="M8 25l51-14 63 19-6 43-52 10L9 64z" fill="#69538c"/><path d="M13 22l47-10 55 18-1 38-51 11-50-17z" fill="#e9dfc7"/><path d="M61 13l2 65M18 35l35-8M19 44l34-8M20 53l34-8M74 31l28 9M74 40l28 9M74 49l28 9" stroke="#b5a88e" strokeWidth="2"/></svg><span>Çalışma kitabı</span>

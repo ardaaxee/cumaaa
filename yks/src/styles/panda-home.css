@@ -200,3 +200,24 @@
 .furniture-bowl { left:6%; bottom:24%; width:86px; height:80px; }
 .furniture-object:focus-visible { outline:3px solid #785aa5; outline-offset:5px; border-radius:10px; }
 .furniture-object:active svg { transform:translateY(2px); }
+
+/* Furniture routines: poses share a stable floor plane, without layout animation. */
+.panda-home-v7 .pet-stage-panda.routine-lying{left:50%;bottom:8%;width:min(90%,460px);height:auto;max-width:90%;transform:translateX(-50%);animation:none;cursor:pointer}
+.panda-bed-pose{display:block;width:100%;height:auto;overflow:visible}
+.panda-sleep-breath{transform-origin:210px 130px;animation:panda-breathe-bed 4s ease-in-out infinite}
+@keyframes panda-breathe-bed{50%{transform:translateY(-2px) scaleY(1.015)}}
+.panda-home-v7 .pose-lying .scene-bed,.panda-home-v7 .pose-lying .scene-blanket,.panda-home-v7 .pose-lying .pet-floor-shadow{visibility:hidden}
+.panda-home-v7 .pose-lying .pet-game-sleep{left:28%;top:-10%;font-size:22px;opacity:.75}
+.panda-home-v7 .pet-stage-panda.routine-seated{left:50%;bottom:5%;width:min(80%,340px);height:330px;max-width:80%;transform:translateX(-50%);animation:none;cursor:default}
+.panda-dining-pose{position:relative;width:100%;height:100%}
+.panda-dining-chair{position:absolute;inset:0;width:100%;height:100%;z-index:0}
+.panda-dining-pose>.real-panda{position:absolute;z-index:1;left:50%;top:-6px;transform:translateX(-50%);width:230px;height:auto;max-width:80%}
+.panda-dining-pose .rp-leg,.panda-dining-pose .rp-foot{transform:translateY(-23px)}
+.panda-dining-table{position:absolute;z-index:2;bottom:0;left:0;width:100%;height:auto;pointer-events:none}
+.panda-home-v7 .pose-seated .scene-table,.panda-home-v7 .pose-seated .scene-kitchen-chair,.panda-home-v7 .pose-seated .pet-floor-shadow{visibility:hidden}
+.panda-home-v7 .routine-seated .pet-panda-mini-talk{top:-34px}
+.panda-home-v7 .routine-lying .pet-panda-mini-talk{top:-54px;max-width:230px}
+.panda-home-v7 .pet-stage{transition:filter .8s ease,background-color .8s ease}
+.panda-home-v7 .night .scene-bedroom-window{filter:brightness(.55)}
+@media(max-width:420px){.panda-home-v7 .pet-stage-panda.routine-seated{height:290px}.panda-dining-pose>.real-panda{width:208px;top:0}.panda-home-v7 .pet-stage-panda.routine-lying{bottom:12%}}
+@media(prefers-reduced-motion:reduce){.panda-sleep-breath{animation:none}.panda-home-v7 .pet-stage{transition:none}}

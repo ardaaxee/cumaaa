@@ -436,6 +436,24 @@ await step('Konu seviye kontrolü ve aynı sorunun defterini tekrar açma',async
   await tap(page.getByRole('button',{name:'Defteri kapat',exact:true}));await panel.waitFor({state:'detached'});
 });
 
+await step('Panda yatağa uzanır, lambayı kapatır ve mutfak masasında yemek yer',async()=>{
+  await page.goto(APP+'#/pandam',{waitUntil:'networkidle'});
+  await tap(page.locator('.pet-game-actions button').filter({hasText:'Uyku'}));
+  const bed=page.locator('.panda-bed-pose');await bed.waitFor({state:'visible',timeout:6000});
+  const lamp=page.getByRole('button',{name:'Panda uyuyor · lamba kapalı',exact:true});
+  assert(await lamp.isDisabled(),'Uyku sırasında lamba açık kalabiliyor');
+  assert(await lamp.getAttribute('aria-pressed')==='false','Uyku lambası kapanmadı');
+  const bedGeometry=await bed.evaluate(el=>{const r=el.getBoundingClientRect();const stage=el.closest('.pet-stage').getBoundingClientRect();return {fits:r.left>=stage.left&&r.right<=stage.right&&r.bottom<=stage.bottom};});
+  assert(bedGeometry.fits,'Uyku pozu oda sınırlarının dışına taşıyor');
+  await tap(page.locator('.pet-game-actions button').filter({hasText:'Uyandır'}));
+  await bed.waitFor({state:'detached'});
+  await tap(page.locator('.pet-game-actions button').filter({hasText:'Besle'}));
+  await page.locator('.activity-eating .panda-dining-pose').waitFor({state:'visible',timeout:6000});
+  assert(await page.locator('.panda-dining-chair').isVisible(),'Yemekte sandalye yok');
+  assert(await page.locator('.panda-dining-table').isVisible(),'Yemekte masa yok');
+  await page.locator('.panda-dining-pose').waitFor({state:'detached',timeout:12000});
+});
+
 await step('Öğretmen fotoğrafı: seç → öğretmen ekranında görünür → kaldır', async () => {
   // 1×1 piksel PNG
   const png = Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==', 'base64');
