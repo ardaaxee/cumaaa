@@ -69,6 +69,7 @@ export function mergeStates({ local, localChangedAt, remote, remoteChangedAt }: 
     settings: { ...base.settings, cloud: local.settings.cloud, aiServerUrl: local.settings.aiServerUrl || remote.settings.aiServerUrl },
     activeTest: local.activeTest,
     pomodoro: local.pomodoro,
+    learningProgress: mergeRecord(local.learningProgress ?? {}, remote.learningProgress ?? {}, (a,b)=>a.updatedAt>=b.updatedAt?a:b, deleted),
     topicProgress: mergeRecord(local.topicProgress, remote.topicProgress, newerTopic, deleted),
     attempts: mergeList(local.attempts, remote.attempts, deleted, remoteNewer, (a) => a.at),
     testResults: mergeList(local.testResults, remote.testResults, deleted, remoteNewer, (r) => r.finishedAt),

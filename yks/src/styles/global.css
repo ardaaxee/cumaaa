@@ -14511,3 +14511,12 @@ textarea:focus-visible {
 .learning-area footer { margin-top:16px; }
 .learning-board li { margin-block:8px; }
 @media(max-width:560px) { .learning-tabs { grid-template-columns:repeat(2,1fr); } .learning-area footer .btn { padding:10px; font-size:13px; } }
+
+/* Defter: fiziksel kâğıt, kenar boşluğu ve sayfa çevirme. */
+.notebook-page-turn { display:flex; align-items:center; justify-content:space-between; gap:8px; margin-block:16px; }
+.notebook-save-status { font-size:.875rem; color:var(--muted); }
+.notebook-canvas-wrap { --chart-grid:#d9d5c8; --line-strong:#c9c2b1; border-radius:4px 14px 14px 4px; border-color:#d6cbb9; background-color:#fffdf5; box-shadow:-8px 0 0 #c9b998,0 4px 0 #e8dfcc,0 8px 0 #d7cdbb,0 12px 24px #392d2920; }
+.notebook-canvas-wrap::before { content:''; position:absolute; left:8%; top:0; bottom:0; width:1px; background:#d8959566; pointer-events:none; z-index:2; }
+.notebook-canvas-wrap::after { content:''; position:absolute; top:0; bottom:0; left:0; width:14px; background:linear-gradient(90deg,#78685025,transparent); pointer-events:none; }
+[data-theme="dark"] .notebook-canvas-wrap { background-color:#fffdf5; }
+@media(max-width:560px){ .notebook-page-turn .btn { font-size:12px; padding:10px 8px; } .notebook-toolbar { position:relative; top:auto; } .notebook-canvas-wrap { margin-inline:8px; } }

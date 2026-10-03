@@ -3,7 +3,7 @@ import { SUBJECTS, subjectLabel } from '../data/curriculum';
 import { subjectColorFor } from '../data/subjectColors';
 import { Icon } from '../components/Icon';
 import { PageHeader } from '../components/Layout';
-import { ConfirmDialog, Modal, Spinner, toast } from '../components/ui';
+import { ConfirmDialog, Empty, Modal, Spinner, toast } from '../components/ui';
 import { navigate } from '../hooks/useRoute';
 import { useIsDark } from '../hooks/useIsDark';
 import { getPageImage, setPageImage } from '../services/notebookStore';
@@ -108,6 +108,9 @@ function drawShape(ctx: CanvasRenderingContext2D, tool: Tool, start: { x: number
 
 export default function NotebookEditorPage({ params }: { params: string[] }) {
   const id = params[0] ?? '';
+  const pages = useSelector(s=>s.notebookPages);
+  const orderedPages=pages.slice().sort((a,b)=>a.createdAt.localeCompare(b.createdAt)||a.id.localeCompare(b.id));
+  const pageNumber=orderedPages.findIndex(p=>p.id===id);
   const meta = useSelector((s) => s.notebookPages.find((p) => p.id === id));
   const isDark = useIsDark();
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -121,6 +124,10 @@ export default function NotebookEditorPage({ params }: { params: string[] }) {
   const startRef = useRef({ x: 0, y: 0 });
   const lastRef = useRef({ x: 0, y: 0 });
   const dirtyRef = useRef(false);
+  const revisionRef = useRef(0);
+  const readyRef = useRef(false);
+  const saveQueueRef = useRef<Promise<void>>(Promise.resolve());
+  const [saveStatus,setSaveStatus]=useState('Yükleniyor…');
 
   const [loading, setLoading] = useState(true);
   const [tool, setTool] = useState<Tool>('kalem');
@@ -150,7 +157,9 @@ export default function NotebookEditorPage({ params }: { params: string[] }) {
 
   useEffect(() => {
     let alive = true;
-    getPageImage(id).then((data) => {
+    readyRef.current=false;
+    setLoading(true);
+    getPageImage(id).then(async (data) => {
       if (!alive) return;
       const c = canvasRef.current;
       const cx = ctx();
@@ -158,17 +167,19 @@ export default function NotebookEditorPage({ params }: { params: string[] }) {
         cx.clearRect(0, 0, W, H);
         if (data) {
           const img = new Image();
-          img.onload = () => cx.drawImage(img, 0, 0, W, H);
-          img.src = data;
+          await new Promise<void>((resolve,reject)=>{img.onload=()=>{if(alive)cx.drawImage(img,0,0,W,H);resolve();};img.onerror=()=>reject(new Error('Çizim açılamadı'));img.src=data;});
         }
       }
+      if(!alive)return;
+      readyRef.current=true;
+      setSaveStatus('Kaydedildi');
       baseRef.current = data ?? null;
       historyRef.current = [];
       redoRef.current = [];
       setCanUndo(false);
       setCanRedo(false);
       setLoading(false);
-    });
+    }).catch(()=>{if(alive){setSaveStatus('Sayfa açılamadı; yeniden açmayı dene');setLoading(false);toast('Kayıtlı çizim açılamadı. Verini korumak için çizim kapatıldı.');}});
     return () => {
       alive = false;
     };
@@ -181,34 +192,39 @@ export default function NotebookEditorPage({ params }: { params: string[] }) {
     if (historyRef.current.length > HISTORY_LIMIT) historyRef.current.shift();
     redoRef.current = [];
     dirtyRef.current = true;
+    revisionRef.current++;
+    setSaveStatus('Kaydedilmedi');
     setCanUndo(historyRef.current.length > 0);
     setCanRedo(false);
   };
 
   const restoreFrom = (data: string | null) => {
-    const c = canvasRef.current;
-    const cx = ctx();
-    if (!c || !cx) return;
-    cx.clearRect(0, 0, W, H);
-    if (data) {
-      const img = new Image();
-      img.onload = () => cx.drawImage(img, 0, 0);
-      img.src = data;
-    }
+    const c=canvasRef.current;const cx=ctx();
+    if(!c||!cx)return;
+    readyRef.current=false;
+    cx.clearRect(0,0,W,H);
+    if(!data){readyRef.current=true;return;}
+    const img=new Image();
+    img.onload=()=>{cx.drawImage(img,0,0);readyRef.current=true;};
+    img.onerror=()=>{setSaveStatus('Çizim geri yüklenemedi');toast('Çizim geri yüklenemedi. Sayfayı yeniden açmayı dene.');};
+    img.src=data;
   };
 
   const undo = () => {
     const c = canvasRef.current;
-    if (!c || !historyRef.current.length) return;
+    if (!readyRef.current || !c || !historyRef.current.length) return;
     redoRef.current.push(c.toDataURL());
     historyRef.current.pop();
     restoreFrom(historyRef.current[historyRef.current.length - 1] ?? baseRef.current);
     setCanUndo(historyRef.current.length > 0);
     setCanRedo(true);
     dirtyRef.current = true;
+    revisionRef.current++;
+    setSaveStatus('Kaydedilmedi');
   };
 
   const redo = () => {
+    if(!readyRef.current)return;
     const next = redoRef.current.pop();
     if (!next) return;
     historyRef.current.push(next);
@@ -216,30 +232,43 @@ export default function NotebookEditorPage({ params }: { params: string[] }) {
     setCanUndo(true);
     setCanRedo(redoRef.current.length > 0);
     dirtyRef.current = true;
+    revisionRef.current++;
+    setSaveStatus('Kaydedilmedi');
   };
 
-  const save = async (silent = false) => {
-    const c = canvasRef.current;
-    if (!c) return;
-    await setPageImage(id, c.toDataURL('image/png'));
-    update((s) => touchNotebookPage(s, id));
-    dirtyRef.current = false;
-    if (!silent) toast('Sayfa kaydedildi.');
+  const save = async (silent = false, target = canvasRef.current) => {
+    if (!target || !readyRef.current) return;
+    const revision=revisionRef.current;
+    const data=target.toDataURL('image/png');
+    setSaveStatus('Kaydediliyor…');
+    const operation=saveQueueRef.current.catch(()=>{}).then(()=>setPageImage(id,data));
+    saveQueueRef.current=operation;
+    try {
+      await operation;
+      update(s=>touchNotebookPage(s,id));
+      if(revision===revisionRef.current){dirtyRef.current=false;setSaveStatus('Kaydedildi');}
+      if(!silent)toast('Sayfa kaydedildi.');
+    } catch {
+      dirtyRef.current=true;
+      setSaveStatus('Kayıt başarısız · tekrar dene');
+      toast('Defter kaydedilemedi. Sayfayı kapatmadan Kaydet düğmesiyle tekrar dene.');
+    }
   };
 
   useEffect(() => {
-    const iv = setInterval(() => {
-      if (dirtyRef.current) void save(true);
-    }, 8000);
-    const onHide = () => dirtyRef.current && void save(true);
-    document.addEventListener('visibilitychange', onHide);
-    return () => {
+    const activeCanvas=canvasRef.current;
+    const iv=setInterval(()=>{if(dirtyRef.current)void save(true,activeCanvas);},2000);
+    const onHide=()=>{if(dirtyRef.current)void save(true,activeCanvas);};
+    document.addEventListener('visibilitychange',onHide);
+    window.addEventListener('pagehide',onHide);
+    return ()=>{
       clearInterval(iv);
-      document.removeEventListener('visibilitychange', onHide);
-      if (dirtyRef.current) void save(true);
+      document.removeEventListener('visibilitychange',onHide);
+      window.removeEventListener('pagehide',onHide);
+      if(dirtyRef.current)void save(true,activeCanvas);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [id]);
+  },[id]);
 
   const applyPenStyle = (c: CanvasRenderingContext2D, overrideWidth?: number) => {
     c.lineCap = 'round';
@@ -276,6 +305,7 @@ export default function NotebookEditorPage({ params }: { params: string[] }) {
   }, [full]);
 
   const insertTemplate = (t: Template) => {
+    if(!readyRef.current)return;
     const cx = ctx();
     const wrap = wrapRef.current;
     if (!cx || !wrap) return;
@@ -302,7 +332,7 @@ export default function NotebookEditorPage({ params }: { params: string[] }) {
     const oc = overlayRef.current;
     const cx = ctx();
     const ocx = octx();
-    if (!c || !oc || !cx || !ocx) return;
+    if (!readyRef.current || !c || !oc || !cx || !ocx) return;
     (e.target as HTMLCanvasElement).setPointerCapture(e.pointerId);
 
     if (tool === 'cikartma') {
@@ -412,17 +442,17 @@ export default function NotebookEditorPage({ params }: { params: string[] }) {
   const fileBase = () => (meta?.title ?? 'defter-sayfasi').replace(/[^\p{L}\p{N} ]/gu, '').trim() || 'defter-sayfasi';
 
   /** Çizimi kareli zeminle birleştirip düz bir PNG'ye dönüştürür (dışa aktarım için). */
-  const renderFlattened = (dark = isDark): HTMLCanvasElement | null => {
+  const renderFlattened = (): HTMLCanvasElement | null => {
     const c = canvasRef.current;
     if (!c) return null;
     const out = document.createElement('canvas');
     out.width = W;
     out.height = H;
     const o = out.getContext('2d')!;
-    o.fillStyle = dark ? '#1b1622' : '#ffffff';
+    o.fillStyle = '#fffdf5';
     o.fillRect(0, 0, W, H);
-    o.strokeStyle = dark ? '#332a40' : '#e4dcef';
-    o.fillStyle = dark ? '#3a3048' : '#d9cfe8';
+    o.strokeStyle = '#ded9cf';
+    o.fillStyle = '#cfc8ba';
     o.lineWidth = 1;
     if (paper === 'kareli') {
       for (let x = 0; x <= W; x += 30) {
@@ -443,6 +473,7 @@ export default function NotebookEditorPage({ params }: { params: string[] }) {
     if (paper === 'noktali') {
       for (let x = 15; x < W; x += 30) for (let y = 15; y < H; y += 30) o.fillRect(x - 1.5, y - 1.5, 3, 3);
     }
+    o.strokeStyle='#d8959588';o.beginPath();o.moveTo(W*.08,0);o.lineTo(W*.08,H);o.stroke();
     o.drawImage(c, 0, 0);
     return out;
   };
@@ -458,7 +489,7 @@ export default function NotebookEditorPage({ params }: { params: string[] }) {
 
   /** Gerçek PDF: kareli zemin, çizim, yazı ve çıkartmalar ekrandaki gibi; uzun sayfa A4 sayfalara bölünür. */
   const exportPdf = async () => {
-    const out = renderFlattened(false);
+    const out = renderFlattened();
     if (!out) return;
     try {
       const blob = canvasToPdf(out, fileBase());
@@ -472,6 +503,8 @@ export default function NotebookEditorPage({ params }: { params: string[] }) {
       toast('PDF hazırlanamadı. PNG olarak indirmeyi deneyebilirsin.');
     }
   };
+
+  if(!meta)return <><PageHeader title="Sayfa bulunamadı" back="#/defterim"/><Empty title="Bu defter sayfası bulunamadı." action={<a className="btn" href="#/defterim">Defterime dön</a>}/></>;
 
   const accent = meta?.subjectId ? subjectColorFor(meta.subjectId, isDark) : null;
 
@@ -493,6 +526,12 @@ export default function NotebookEditorPage({ params }: { params: string[] }) {
         }
       />
 
+      <nav className="notebook-page-turn" aria-label="Defter sayfaları">
+        {pageNumber>0?<a className="btn" href={`#/defterim/${orderedPages[pageNumber-1].id}`}>← Önceki sayfa</a>:<span/>}
+        <span>Sayfa {pageNumber+1} / {orderedPages.length}</span>
+        {pageNumber<orderedPages.length-1?<a className="btn" href={`#/defterim/${orderedPages[pageNumber+1].id}`}>Sonraki sayfa →</a>:<a className="btn" href="#/defterim">Sayfalarım</a>}
+      </nav>
+      <p role="status" className="notebook-save-status">{saveStatus}</p>
       <div className={`nb-stage${full ? ' full' : ''}`}>
       <div className="card notebook-toolbar">
         <div className="nb-tools" role="group" aria-label="Araçlar">
@@ -634,6 +673,7 @@ export default function NotebookEditorPage({ params }: { params: string[] }) {
           onPointerDown={onDown}
           onPointerMove={onMove}
           onPointerUp={onUp}
+          onPointerCancel={onUp}
           onPointerLeave={(e) => drawingRef.current && onUp(e)}
         />
         <canvas ref={overlayRef} width={W} height={H} className="notebook-canvas overlay" aria-hidden="true" />
@@ -656,7 +696,7 @@ export default function NotebookEditorPage({ params }: { params: string[] }) {
             </>
           }
         >
-          <textarea className="input" rows={3} value={textValue} onChange={(e) => setTextValue(e.target.value)} placeholder="Örn. F = m · a" style={{ color: pen.color, fontWeight: 600 }} />
+          <textarea aria-label="Deftere eklenecek yazı" className="input" rows={3} value={textValue} onChange={(e) => setTextValue(e.target.value)} placeholder="Örn. F = m · a" style={{ color: pen.color, fontWeight: 600 }} />
           <label className="row nowrap mt-8" style={{ gap: 8 }}>
             <span className="tiny muted">Boyut</span>
             <input type="range" min={16} max={60} value={textSize} onChange={(e) => setTextSize(Number(e.target.value))} style={{ flex: 1 }} aria-label="Yazı boyutu" />

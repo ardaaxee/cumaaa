@@ -1,3 +1,4 @@
+import type { LearningProgress } from '../utils/learningProgress';
 import type { Difficulty, Exam, QuestionType, SubjectId } from '../domain/types';
 import type { DayKey } from '../utils/date';
 
@@ -278,6 +279,7 @@ export interface AppState {
   profile: Profile;
   settings: Settings;
   topicProgress: Record<string, TopicProgress>;
+  learningProgress?: Record<string, LearningProgress>;
   attempts: QuestionAttempt[];
   testResults: TestResult[];
   activeTest: ActiveTest | null;

@@ -50,3 +50,12 @@ it('eylemsizlik sorusunda başlangıçta durma olasılığı kökle çelişmez',
  expect(q.question).toContain('Başlangıçtaki hareket durumu belirtilmeyen');
  expect(q.options[q.correctAnswer]).toBe('I ve II');
 });
+it('elektrokimyanın üç öğretim örneği bağımsız hesapla tutarlı',async()=>{
+ const {loadLesson}=await import('../src/data/content');
+ const lesson=(await loadLesson('aytkim-elektrokimya'))!;
+ expect(lesson.examples[0].answer).toContain((.34-(-.76)).toFixed(2).replace('.',','));
+ expect(lesson.examples[1].answer).toContain((2*9650/96500/2*64).toFixed(1).replace('.',','));
+ const electrons=10.8/108;
+ expect(lesson.examples[2].answer).toContain((electrons/2*64).toFixed(1).replace('.',','));
+ expect(lesson.examples[2].answer).toContain(String(electrons*96500/.5));
+});

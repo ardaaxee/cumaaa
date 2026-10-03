@@ -25,20 +25,19 @@ function tx<T>(mode: IDBTransactionMode, run: (s: IDBObjectStore) => IDBRequest<
       new Promise<T>((resolve, reject) => {
         const t = db.transaction(STORE, mode);
         const req = run(t.objectStore(STORE));
-        req.onsuccess = () => resolve(req.result);
+        let result: T;
+        req.onsuccess = () => { result = req.result; };
         req.onerror = () => reject(req.error);
-        t.oncomplete = () => db.close();
+        t.oncomplete = () => { db.close(); resolve(result); };
+        t.onabort = () => { db.close(); reject(t.error ?? new Error('Defter kaydı tamamlanamadı')); };
+        t.onerror = () => { db.close(); reject(t.error); };
       }),
   );
 }
 
 export async function getPageImage(id: string): Promise<string | null> {
-  try {
-    const v = await tx<string | undefined>('readonly', (s) => s.get(id) as IDBRequest<string | undefined>);
-    return typeof v === 'string' ? v : null;
-  } catch {
-    return null;
-  }
+  const v = await tx<string | undefined>('readonly', (s) => s.get(id) as IDBRequest<string | undefined>);
+  return typeof v === 'string' ? v : null;
 }
 
 export async function setPageImage(id: string, dataUrl: string): Promise<void> {

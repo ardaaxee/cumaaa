@@ -1,10 +1,13 @@
+import { getState, update } from '../src/store/store';
+import { sanitize } from '../src/store/migrations';
 // @vitest-environment jsdom
 import { act, createElement } from 'react';
 import { createRoot } from 'react-dom/client';
-import { expect, it } from 'vitest';
+import { beforeEach, expect, it } from 'vitest';
 import { LearningArea } from '../src/components/LearningArea';
 import { loadLesson } from '../src/data/content';
 import { SUBJECTS } from '../src/data/curriculum';
+beforeEach(()=>update(s=>({...s,learningProgress:{}})));
 it('örneğin adımlarını ve cevabını sıralı açar; konu değişince öğretim alanı yeniden başlar', async()=>{
  Object.assign(globalThis,{IS_REACT_ACT_ENVIRONMENT:true});
  const topic=SUBJECTS[0].units[0].topics[0];const lesson=(await loadLesson(topic.id))!;
@@ -41,4 +44,21 @@ it('öğrenme adımları ve alt konu arasında geçiş cevabı kaybettirmez',asy
  expect(host.querySelector<HTMLButtonElement>('.option')!.disabled).toBe(true);
  expect(getState().attempts.length).toBe(before+1);
  await act(()=>root.unmount());host.remove();
+});
+
+it('öğrenme konumu yedek durumundan geri gelir',async()=>{
+ Object.assign(globalThis,{IS_REACT_ACT_ENVIRONMENT:true});
+ const topic=SUBJECTS[0].units[0].topics[0];const lesson=(await loadLesson(topic.id))!;
+ const host=document.createElement('div');const root=createRoot(host);
+ await act(()=>root.render(createElement(LearningArea,{lesson,topic,questions:[]})));
+ await act(()=>[...host.querySelectorAll('button')].find(b=>b.textContent==='2. Birlikte çöz')!.click());
+ await act(()=>[...host.querySelectorAll('button')].find(b=>b.textContent?.includes('İlk çözüm adımını'))!.click());
+ const restored=sanitize(JSON.parse(JSON.stringify(getState())));
+ expect(restored.learningProgress?.[topic.id]).toMatchObject({phase:1,step:1});
+ await act(()=>root.unmount());
+ const again=createRoot(host);
+ await act(()=>again.render(createElement(LearningArea,{lesson,topic,questions:[]})));
+ expect(host.textContent).toContain(lesson.examples[0].steps[0]);
+ expect(host.querySelector('[aria-pressed="true"]')?.textContent).toBe('2. Birlikte çöz');
+ await act(()=>again.unmount());
 });

@@ -1,14 +1,18 @@
-import { useState } from 'react';
+import { getState, update } from '../store/store';
+import { sanitizeLearningProgress } from '../utils/learningProgress';
+import { useEffect, useState } from 'react';
 import type { LessonSeed, Question, Topic } from '../domain/types';
 import { InlineQuiz } from './InlineQuiz';
 
 /** Her konunun kendi içeriğiyle çalışan öğretim tahtası. */
 export function LearningArea({ lesson, topic, questions }: {lesson:LessonSeed;topic:Topic;questions:Question[]}) {
- const [phase,setPhase]=useState(0);
- const [example,setExample]=useState(0);
- const [step,setStep]=useState(0);
- const [subtopic,setSubtopic]=useState('');
- const [answers,setAnswers]=useState<Record<string,number>>({});
+ const saved=sanitizeLearningProgress(getState().learningProgress)[topic.id];
+ const [phase,setPhase]=useState(saved?.phase??0);
+ const [example,setExample]=useState(Math.min(saved?.example??0,Math.max(0,lesson.examples.length-1)));
+ const [step,setStep]=useState(Math.min(saved?.step??0,lesson.examples[Math.min(saved?.example??0,lesson.examples.length-1)]?.steps.length??0));
+ const [subtopic,setSubtopic]=useState(topic.subtopics.some(s=>s.id===saved?.subtopic)?saved!.subtopic:'');
+ const [answers,setAnswers]=useState<Record<string,number>>(saved?.answers??{});
+ useEffect(()=>{update(s=>({...s,learningProgress:{...s.learningProgress,[topic.id]:{phase,example,step,subtopic,answers,updatedAt:new Date().toISOString()}}}));},[topic.id,phase,example,step,subtopic,answers]);
  const ex=lesson.examples[example];
  const practice=questions.filter(q=>!subtopic||q.subtopic===subtopic).slice(0,3);
  const visibleAnswers=Object.fromEntries(practice.filter(q=>answers[q.id]!=null).map(q=>[q.id,answers[q.id]]));
