@@ -14573,3 +14573,20 @@ textarea:focus-visible {
 .guided-recovery-example li{margin-bottom:10px;white-space:pre-line}
 .question-note{white-space:normal;min-height:40px}
 @media(max-width:599px){.diagnostic-check{padding:12px}.question-note{min-height:44px}.learning-tabs{flex-wrap:wrap}}
+
+/* Keep the travelling assistant's notification inside narrow phone screens. */
+@media (max-width:640px){
+  .companion .companion-bubble,
+  .companion .companion-bubble.right{
+    position:fixed;
+    left:12px;
+    right:12px;
+    bottom:calc(var(--nav-h) + var(--safe-b) + 55px);
+    width:auto;
+    max-width:none;
+    max-height:35dvh;
+    overflow:auto;
+    overflow-wrap:anywhere;
+    border-radius:16px;
+  }
+}
