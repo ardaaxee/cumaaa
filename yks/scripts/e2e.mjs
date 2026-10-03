@@ -364,6 +364,20 @@ await step('Defter: sayfa aç → çiz → fizik şablonu → PDF gerçekten ind
     return n;
   });
   assert(ink > 50, 'Çizim tuvale işlenmedi');
+  const originalPageUrl = page.url();
+  await tap(page.getByRole('button', { name: '＋ Sayfa ekle', exact: true }));
+  await page.waitForURL(url => url.toString() !== originalPageUrl);
+  await page.getByRole('status').filter({hasText:'Kaydedildi'}).first().waitFor();
+  await tap(page.getByRole('button', { name: '← Önceki', exact: true }));
+  await page.waitForURL(originalPageUrl);
+  await page.getByRole('status').filter({hasText:'Kaydedildi'}).first().waitFor();
+  const restoredInk = await page.locator('canvas.notebook-canvas').first().evaluate(c => {
+    const pixels=c.getContext('2d').getImageData(0,0,c.width,c.height).data;
+    let count=0;for(let i=3;i<pixels.length;i+=4)if(pixels[i]>0)count++;
+    return count;
+  });
+  assert(restoredInk===ink, 'Sayfa ekleyip geri dönünce el yazısı değişti');
+
   await tap(page.getByRole('button', { name: /Daha/ }));
   await tap(page.getByRole('button', { name: 'Hız–zaman' }));
   await page.getByText('Şablon eklendi').first().waitFor({ timeout: 3000 });

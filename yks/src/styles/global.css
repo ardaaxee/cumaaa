@@ -14551,3 +14551,18 @@ textarea:focus-visible {
 @media(min-width:900px){.notebook-split-open .sidebar{display:none}.notebook-split-open .main{width:calc(100vw - min(48vw,704px));max-width:none;margin-left:0;margin-right:min(48vw,704px)}}
 
 @media(max-width:899px){html:has(body.notebook-split-open){scroll-padding-bottom:calc(50dvh + 104px)}}
+
+/* Everyday notebook: keep writing space visible, retain all advanced tools. */
+.notebook-page-turn{display:flex;align-items:center;flex-wrap:wrap;gap:8px;justify-content:space-between}
+.notebook-tools-toggle{margin-bottom:8px}
+.notebook-toolbar-compact .nb-tools .nb-tool:nth-child(n+3){display:none}
+.notebook-toolbar-compact > .nb-row:nth-of-type(2){display:none}
+.notebook-toolbar-compact .nb-width{display:none}
+.notebook-toolbar-compact .nb-row{gap:6px}
+@media(max-width:599px){
+ .notebook-page-turn .btn{min-height:44px;padding:8px 10px}
+ .notebook-toolbar-compact .nb-tools{display:inline-flex;margin-right:8px}
+ .notebook-toolbar-compact{padding:10px}
+ .notebook-toolbar-compact .nb-row[aria-label="Kalem renkleri"] .chip{display:none}
+ .notebook-canvas-wrap{margin-top:10px}
+}

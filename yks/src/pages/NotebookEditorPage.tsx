@@ -7,7 +7,7 @@ import { ConfirmDialog, Empty, Modal, Spinner, toast } from '../components/ui';
 import { navigate } from '../hooks/useRoute';
 import { useIsDark } from '../hooks/useIsDark';
 import { getPageImage, setPageImage } from '../services/notebookStore';
-import { deleteNotebookPage, renameNotebookPage, setNotebookPaper, touchNotebookPage } from '../store/actions';
+import { addNotebookPage, deleteNotebookPage, renameNotebookPage, setNotebookPaper, touchNotebookPage } from '../store/actions';
 import type { NotebookPaper } from '../store/schema';
 import { canvasToPdf } from '../utils/pdf';
 import { TEMPLATE_GROUPS, drawArrowHead, drawSmoothCurve, drawTemplate, snapAngle, type Template } from '../utils/notebookTemplates';
@@ -106,7 +106,7 @@ function drawShape(ctx: CanvasRenderingContext2D, tool: Tool, start: { x: number
   }
 }
 
-export default function NotebookEditorPage({ params, embedded = false }: { params: string[]; embedded?: boolean }) {
+export default function NotebookEditorPage({ params, embedded = false, onPageChange }: { params: string[]; embedded?: boolean; onPageChange?: (id: string) => void }) {
   const id = params[0] ?? '';
   const pages = useSelector(s=>s.notebookPages);
   const orderedPages=pages.slice().sort((a,b)=>a.createdAt.localeCompare(b.createdAt)||a.id.localeCompare(b.id));
@@ -148,6 +148,8 @@ export default function NotebookEditorPage({ params, embedded = false }: { param
   const [textValue, setTextValue] = useState('');
   const [textSize, setTextSize] = useState(28);
   const [showMore, setShowMore] = useState(false);
+  const [compact, setCompact] = useState(true);
+  const [turning, setTurning] = useState(false);
   const [sticker, setSticker] = useState(STICKERS[0]);
   const [stickerSize, setStickerSize] = useState(56);
   const [full, setFull] = useState(false);
@@ -238,7 +240,7 @@ export default function NotebookEditorPage({ params, embedded = false }: { param
   };
 
   const save = async (silent = false, target = canvasRef.current) => {
-    if (!target || !readyRef.current) return;
+    if (!target || !readyRef.current) return false;
     const revision=revisionRef.current;
     const data=target.toDataURL('image/png');
     setSaveStatus('Kaydediliyor…');
@@ -249,12 +251,35 @@ export default function NotebookEditorPage({ params, embedded = false }: { param
       update(s=>touchNotebookPage(s,id));
       if(revision===revisionRef.current){dirtyRef.current=false;setSaveStatus('Kaydedildi');}
       if(!silent)toast('Sayfa kaydedildi.');
+      return true;
     } catch {
       dirtyRef.current=true;
       setSaveStatus('Kayıt başarısız · tekrar dene');
       toast('Defter kaydedilemedi. Sayfayı kapatmadan Kaydet düğmesiyle tekrar dene.');
+      return false;
     }
   };
+
+  const turnPage = async (targetId?: string) => {
+    if (turning || drawingRef.current) return;
+    setTurning(true);
+    try {
+      if (!(await save(true))) return;
+      let nextId = targetId;
+      if (!nextId && meta) {
+        update(state => {
+          const result = addNotebookPage(state, `${meta.title.replace(/ · Sayfa \d+$/, '')} · Sayfa ${orderedPages.length+1}`, meta.subjectId);
+          nextId = result.id;
+          return setNotebookPaper(result.state, result.id, paper);
+        });
+      }
+      if (nextId) {
+        if (onPageChange) onPageChange(nextId);
+        else navigate(`#/defterim/${nextId}`);
+      }
+    } finally { setTurning(false); }
+  };
+
 
   useEffect(() => {
     const activeCanvas=canvasRef.current;
@@ -530,14 +555,16 @@ export default function NotebookEditorPage({ params, embedded = false }: { param
         }
       />
 
-      {!embedded && <nav className="notebook-page-turn" aria-label="Defter sayfaları">
-        {pageNumber>0?<a className="btn" href={`#/defterim/${orderedPages[pageNumber-1].id}`}>← Önceki sayfa</a>:<span/>}
+      <nav className="notebook-page-turn" aria-label="Defter sayfaları">
+        <button className="btn small" disabled={turning || loading || pageNumber <= 0} onClick={() => void turnPage(orderedPages[pageNumber-1]?.id)}>← Önceki</button>
         <span>Sayfa {pageNumber+1} / {orderedPages.length}</span>
-        {pageNumber<orderedPages.length-1?<a className="btn" href={`#/defterim/${orderedPages[pageNumber+1].id}`}>Sonraki sayfa →</a>:<a className="btn" href="#/defterim">Sayfalarım</a>}
-      </nav>}
+        <button className="btn small" disabled={turning || loading || pageNumber >= orderedPages.length-1} onClick={() => void turnPage(orderedPages[pageNumber+1]?.id)}>Sonraki →</button>
+        <button className="btn small primary" disabled={turning || loading} onClick={() => void turnPage()}>＋ Sayfa ekle</button>
+      </nav>
       <p role="status" className="notebook-save-status">{saveStatus}</p>
       <div className={`nb-stage${full ? ' full' : ''}`}>
-      <div className="card notebook-toolbar">
+      <div className={`card notebook-toolbar${compact ? ' notebook-toolbar-compact' : ''}`}>
+        <button type="button" className="btn small notebook-tools-toggle" aria-expanded={!compact} onClick={() => setCompact(v=>!v)}>{compact ? 'Tüm kalemler ve araçlar' : 'Araçları küçült'}</button>
         <div className="nb-tools" role="group" aria-label="Araçlar">
           {TOOLS.map((t) => (
             <button

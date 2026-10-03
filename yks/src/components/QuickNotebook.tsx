@@ -19,7 +19,7 @@ export function QuickNotebook({subject}:{subject?:SubjectId}) {
       <div className="quick-notebook">
         <p className="tiny muted">Çalışma ekranın açık kalır. Aynı defter sayfalarını her yerde kullanabilirsin.</p>
         <div className="nb-row"><label>Sayfa <select aria-label="Açılacak defter sayfası" value={active?.id ?? ''} onChange={e=>setSelected(e.target.value)}>{pages.map(p=><option key={p.id} value={p.id}>{p.title}</option>)}</select></label><button type="button" className="btn" onClick={create}>Yeni sayfa</button></div>
-        {active ? <Suspense fallback={<Spinner/>}><Editor key={active.id} params={[active.id]} embedded/></Suspense> : <p>El yazısıyla not tutmak için yeni bir sayfa oluştur.</p>}
+        {active ? <Suspense fallback={<Spinner/>}><Editor key={active.id} params={[active.id]} embedded onPageChange={setSelected}/></Suspense> : <p>El yazısıyla not tutmak için yeni bir sayfa oluştur.</p>}
       </div>
     </section>}
   </>;
