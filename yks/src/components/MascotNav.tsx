@@ -1,8 +1,9 @@
 import { useEffect, useId, useRef, useState } from 'react';
 import { Icon, type IconName } from './Icon';
-import { sectionOf } from './Layout';
+import { NAV_ALL, sectionOf } from './Layout';
 import { href, useRoute } from '../hooks/useRoute';
 import { usePetNeeds } from '../hooks/usePetNeeds';
+import { filterMenu, menuGroup } from '../utils/menuSearch';
 import { useSelector } from '../store/store';
 
 /** Oturan, tam gövdeli yavru panda. */
@@ -262,6 +263,9 @@ export const MENU_MORE: MenuItem[] = [
   { path: '/kaydedilenler', label: 'Kaydedilenler', icon: 'star', emoji: '⭐' },
   { path: '/pandam', label: 'Panda', icon: 'sparkle', emoji: '🐼' },
   { path: '/ayarlar', label: 'Ayarlar', icon: 'settings', emoji: '⚙️' },
+  { path: '/koc', label: 'Akıllı Koç', icon: 'target', emoji: '🎯' },
+  { path: '/odak', label: 'Odak Modu', icon: 'timer', emoji: '⏱️' },
+  { path: '/canli', label: 'Cuma ♡ Zeynep Canlı', icon: 'link', emoji: '💬' },
 ];
 
 type PandaPhase = 'sit' | 'standing' | 'walking' | 'pulling' | 'stood' | 'releasing' | 'returning' | 'sitting';
@@ -283,6 +287,9 @@ export function MascotNav() {
   const route = useRoute();
   const [phase, setPhase] = useState<PandaPhase>('sit');
   const [more, setMore] = useState(false);
+  const [search, setSearch] = useState('');
+  const panelRef = useRef<HTMLDivElement>(null);
+  const activeTest = useSelector(s=>s.activeTest);
   const panelId = useId();
   const closeBtnRef = useRef<HTMLButtonElement>(null);
   const pandaBtnRef = useRef<HTMLButtonElement>(null);
@@ -306,6 +313,7 @@ export function MascotNav() {
   const openMenu = () => {
     if (phase !== 'sit') return;
     setMore(false);
+    setSearch('');
     if (prefersReducedMotion()) return setPhase('stood');
     const t = PANDA_TIMING;
     setPhase('standing');
@@ -331,11 +339,20 @@ export function MascotNav() {
   useEffect(() => {
     if (phase === 'stood') closeMenu();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [route.path]);
+  }, [route.path, route.query.toString()]);
 
   useEffect(() => {
     if (!menuOpen) return;
-    const onKey = (e: KeyboardEvent) => e.key === 'Escape' && closeMenu();
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') closeMenu();
+      if (e.key === 'Tab') {
+        const nodes = panelRef.current?.querySelectorAll<HTMLElement>('a[href],button:not(:disabled),input');
+        if (!nodes?.length) return;
+        const first = nodes[0], last = nodes[nodes.length-1];
+        if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+        else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+      }
+    };
     document.addEventListener('keydown', onKey);
     const prev = document.body.style.overflow;
     document.body.style.overflow = 'hidden';
@@ -349,7 +366,9 @@ export function MascotNav() {
   const travelling = phase !== 'sit' && phase !== 'stood';
   const away = phase !== 'sit';
   const cord = phase === 'walking' || phase === 'pulling' || phase === 'stood' || phase === 'releasing';
-  const items = more ? MENU_MORE : MENU_MAIN;
+  const allItems = NAV_ALL.filter(m=>m.path !== '/daha').map(m=>({...m,label:m.path==='/ogretmen'?`${teacherName} Öğretmen`:m.label}));
+  const items = filterMenu(search ? allItems : more ? allItems : MENU_MAIN.map(m=>({...m,label:m.path==='/ogretmen'?`${teacherName} Öğretmen`:m.label})), search);
+  const groups = ['Çalışma','Takip','Araçlar'];
 
   return (
     <>
@@ -368,14 +387,14 @@ export function MascotNav() {
         </span>
       )}
 
-      <div className={`mascot-menu-panel${menuOpen ? ' open' : ''}`} id={panelId} role="dialog" aria-modal="true" aria-label="Ana menü" hidden={!menuOpen}>
+      <div ref={panelRef} className={`mascot-menu-panel${menuOpen ? ' open' : ''}`} id={panelId} role="dialog" aria-modal="true" aria-label="Ana menü" hidden={!menuOpen}>
         <div className="menu-head">
           <div className="menu-panda">
             <PandaBody size={54} waving />
           </div>
           <div className="grow">
-            <b>{more ? 'Diğer' : 'Nereye gidelim?'}</b>
-            <div className="tiny muted">{more ? 'Tüm araçlar' : 'Panda seni götürsün ♡'}</div>
+            <b>{more ? 'Tüm sayfalar' : 'Çalışma menüsü'}</b>
+            <div className="tiny muted">{more ? 'Dersler, takip ve kişisel araçlar' : 'Bugünkü çalışmana buradan devam et'}</div>
           </div>
           {more && (
             <button type="button" className="icon-btn" aria-label="Ana menüye dön" onClick={() => setMore(false)}>
@@ -386,36 +405,33 @@ export function MascotNav() {
             <Icon name="close" />
           </button>
         </div>
-        <nav className="mascot-menu-list" aria-label={more ? 'Diğer sayfalar' : 'Ana sayfalar'}>
-          {items.map((m) => (
-            <a key={m.path} href={`#${m.path}`} aria-current={section === m.path ? 'page' : undefined} onClick={closeMenu}>
-              <span className="menu-emoji" aria-hidden="true">
-                {m.emoji}
-              </span>
-              <span className="grow">{m.path === '/ogretmen' ? `${teacherName} Öğretmen` : m.label}</span>
-              <Icon name="right" size={16} />
-            </a>
-          ))}
-          {!more && (
-            <button type="button" className="menu-more" onClick={() => setMore(true)} aria-expanded={more}>
-              <span className="menu-emoji" aria-hidden="true">
-                ✨
-              </span>
-              <span className="grow">Diğer</span>
-              <Icon name="right" size={16} />
-            </button>
-          )}
+        <div className="menu-search"><Icon name="search"/><input type="search" aria-label="Menüde ara" placeholder="Ders, defter veya araç ara…" value={search} onChange={e=>setSearch(e.target.value)}/>{search && <button type="button" className="icon-btn" aria-label="Aramayı temizle" onClick={()=>setSearch('')}><Icon name="close"/></button>}</div>
+        {!search && <div className="menu-shortcuts">
+          <a href="#/" onClick={closeMenu}><Icon name="home"/>Ana sayfa</a>
+          <a href={activeTest ? '#/test' : '#/dersler'} onClick={closeMenu}><Icon name={activeTest?'play':'book'}/>{activeTest?'Teste devam':'Konu anlatımı'}</a>
+        </div>}
+        <nav className="mascot-menu-list" aria-label={more || search ? 'Tüm sayfalar' : 'Ana sayfalar'}>
+          {groups.map(group=>{
+            const entries=items.filter(m=>menuGroup(m.path)===group);
+            return entries.length ? <section className="menu-section" key={group}><h3>{group}</h3>{entries.map(m=><a key={m.path} href={`#${m.path}`} aria-current={section===m.path?'page':undefined} onClick={closeMenu}>
+              <span className="menu-item-icon"><Icon name={m.icon}/></span><span className="grow">{m.label}</span>{section===m.path?<span className="menu-current">Açık</span>:<Icon name="right" size={16}/>}
+            </a>)}</section>:null;
+          })}
+          {!items.length && <p role="status" className="menu-empty">Eşleşen sayfa bulunamadı. Başka bir kelime dene.</p>}
+          {!more && !search && <button type="button" className="menu-more" onClick={()=>setMore(true)} aria-expanded={more}><Icon name="more"/><span className="grow">Diğer</span><span className="tiny">Tüm sayfalar</span><Icon name="right" size={16}/></button>}
         </nav>
+        <p className="menu-footer">İyi ki • YKS · çalışma alanın</p>
       </div>
 
+      <button type="button" className="desktop-menu-trigger" aria-label="Tüm sayfalar menüsünü aç" aria-haspopup="dialog" aria-expanded={menuOpen} aria-controls={panelId} onClick={openMenu}><Icon name="more"/> Tüm sayfalar</button>
       <nav className="mascot-dock" aria-label="Hızlı gezinme">
-        <a href={href('/testler', { sinav: 'TYT' })} className="dock-item" data-testid="dock-tyt" aria-label="TYT test merkezi" data-active={onTests && exam !== 'AYT'}>
+        <a href={href('/testler', { sinav: 'TYT' })} className="dock-item" data-testid="dock-tyt" aria-label="TYT test merkezi" aria-current={onTests && exam !== 'AYT' ? 'page' : undefined} data-active={onTests && exam !== 'AYT'}>
           <span className="dock-animal hop">
             <RabbitFace />
           </span>
           <span className="dock-label">TYT</span>
         </a>
-        <a href={href('/testler', { sinav: 'AYT' })} className="dock-item" data-testid="dock-ayt" aria-label="AYT test merkezi" data-active={onTests && exam === 'AYT'}>
+        <a href={href('/testler', { sinav: 'AYT' })} className="dock-item" data-testid="dock-ayt" aria-label="AYT test merkezi" aria-current={onTests && exam === 'AYT' ? 'page' : undefined} data-active={onTests && exam === 'AYT'}>
           <span className="dock-animal hop">
             <FoxFace />
           </span>
@@ -443,13 +459,13 @@ export function MascotNav() {
           )}
           <span className="dock-label">Menü</span>
         </button>
-        <a href="#/denemeler" className="dock-item" data-testid="dock-deneme" aria-label="Denemeler" data-active={section === '/denemeler'}>
+        <a href="#/denemeler" className="dock-item" data-testid="dock-deneme" aria-label="Denemeler" aria-current={section==='/denemeler'?'page':undefined} data-active={section === '/denemeler'}>
           <span className="dock-animal hop">
             <CatFace />
           </span>
           <span className="dock-label">Deneme</span>
         </a>
-        <a href="#/defterim" className="dock-item" data-testid="dock-defter" aria-label="Defterim" data-active={section === '/defterim'}>
+        <a href="#/defterim" className="dock-item" data-testid="dock-defter" aria-label="Defterim" aria-current={section==='/defterim'?'page':undefined} data-active={section === '/defterim'}>
           <span className="dock-animal hop">
             <BearFace />
           </span>
