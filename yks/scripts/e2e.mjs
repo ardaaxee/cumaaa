@@ -292,10 +292,10 @@ await step('Telefon genişliklerinde yatay taşma yok', async () => {
       await page.waitForTimeout(250);
       const sw = await page.evaluate(() => document.documentElement.scrollWidth);
       if (sw > w + 1) {
-        const overflow = await page.evaluate(() => [...document.querySelectorAll('body *')].map(el => {
+        const overflow = await page.evaluate(() => [...document.querySelectorAll('body *')].filter(el => !el.closest('.edge-friend')).map(el => {
           const rect = el.getBoundingClientRect();
           return { tag: el.tagName, cls: el.className, text: el.textContent?.slice(0, 90), right: Math.round(rect.right), width: Math.round(rect.width) };
-        }).filter(el => el.right > innerWidth + 1).slice(-12));
+        }).filter(el => el.right > innerWidth + 1).slice(0,20));
         bad.push(`${w}px ${r}: ${sw} ${JSON.stringify(overflow)}`);
       }
     }

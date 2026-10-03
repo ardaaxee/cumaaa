@@ -14590,3 +14590,11 @@ textarea:focus-visible {
     border-radius:16px;
   }
 }
+
+/* Native select options must not impose their text width on the test form. */
+.test-builder-card .select,
+.test-builder-card .input{min-width:0;max-width:100%}
+@media(max-width:640px){
+  .test-builder-card .form-grid.two{grid-template-columns:minmax(0,1fr)}
+  .test-builder-card .card-head{flex-wrap:wrap}
+}
