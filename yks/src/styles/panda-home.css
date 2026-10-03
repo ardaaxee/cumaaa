@@ -243,4 +243,4 @@
 @media(prefers-reduced-motion:reduce){.routine-pencil,.routine-foam,.routine-pour,.routine-steam{animation:none}}
 
 /* Keep furniture poses centered even when the walking direction flips. */
-.panda-home-v7 .pet-stage-panda .panda-room-pose>.real-panda,.panda-home-v7 .pet-stage-panda .panda-dining-pose>.real-panda{transform:translateX(-50%)}
+.panda-home-v7 .pet-stage-panda .panda-room-pose>.real-panda,.panda-home-v7 .pet-stage-panda .panda-dining-pose>.real-panda{translate:-50% 0;transform:none!important}
