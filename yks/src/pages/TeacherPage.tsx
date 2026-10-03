@@ -1,13 +1,13 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { getTopicRef, subjectLabel } from '../data/curriculum';
+import { allTopics, SUBJECTS, getTopicRef, subjectLabel } from '../data/curriculum';
 import { loadLesson, loadQuestionsByIds } from '../data/content';
 import type { LessonSeed, Question } from '../domain/types';
 import { AssistantCharacter, type AssistantMood } from '../components/AssistantCharacter';
 import { TeacherPhotoImage, useTeacherPhoto } from '../components/TeacherPhoto';
 import { Icon } from '../components/Icon';
 import { PageHeader } from '../components/Layout';
-import { toast } from '../components/ui';
-import { useRoute } from '../hooks/useRoute';
+import { ConfirmDialog, toast } from '../components/ui';
+import { navigate, useRoute } from '../hooks/useRoute';
 import { askTeacher, checkAiStatus, type AiStatus, type TeacherAction, type TeacherContext } from '../services/ai';
 import { assistantReply } from '../services/localAssistant';
 import { useListener, useSpeaker } from '../hooks/useVoice';
@@ -55,7 +55,20 @@ const QUICK: { action: TeacherAction; label: string }[] = [
 export default function TeacherPage() {
   const route = useRoute();
   const state = useAppState();
-  const [status, setStatus] = useState<AiStatus | null>(null);
+  const [status, setStatus] = useState<AiStatus>({configured:false,model:null,reason:'Bağlantı kontrol ediliyor.'});
+  const [checking,setChecking]=useState(true);
+  const [contextLoading,setContextLoading]=useState(true);
+  const [contextError,setContextError]=useState('');
+  const [reloadContext,setReloadContext]=useState(0);
+  const [requestError,setRequestError]=useState('');
+  const [showAll,setShowAll]=useState(false);
+  const [confirmClear,setConfirmClear]=useState(false);
+  const [selectedSubject,setSelectedSubject]=useState('');
+  const inFlight=useRef(false);
+  const alive=useRef(true);
+  const abortRef=useRef<AbortController|null>(null);
+  const retryRef=useRef<{action:TeacherAction;message:string;image?:{mediaType:string;data:string}}|null>(null);
+  useEffect(()=>{alive.current=true;return ()=>{alive.current=false;abortRef.current?.abort();};},[]);
   const teacherPhoto = useTeacherPhoto();
   const [input, setInput] = useState('');
   const [busy, setBusy] = useState(false);
@@ -73,16 +86,24 @@ export default function TeacherPage() {
   const initialAction = (route.query.get('eylem') as TeacherAction | null) ?? undefined;
 
   useEffect(() => {
-    checkAiStatus().then(setStatus);
+    let active=true;
+    checkAiStatus().then(value=>{if(active)setStatus(value);}).catch(()=>{if(active)setStatus({configured:false,model:null,reason:'Bağlantı kurulamadı.'});}).finally(()=>{if(active)setChecking(false);});
+    return ()=>{active=false;};
   }, []);
-  useEffect(() => {
-    if (questionId) loadQuestionsByIds([questionId]).then((m) => setQuestion(m.get(questionId) ?? null)).catch(() => setQuestion(null));
-    else setQuestion(null);
-  }, [questionId]);
-  useEffect(() => {
-    if (topicId) loadLesson(topicId).then((l) => setLesson(l ?? null)).catch(() => setLesson(null));
-    else setLesson(null);
-  }, [topicId]);
+  useEffect(()=>{
+    let active=true;setContextLoading(true);setContextError('');setQuestion(null);setLesson(null);
+    (async()=>{
+      try {
+        const loadedQuestion=questionId?(await loadQuestionsByIds([questionId])).get(questionId)??null:null;
+        if(questionId&&!loadedQuestion)throw new Error('Seçili soru bulunamadı.');
+        const loadedLesson=(topicId||loadedQuestion?.topic)?await loadLesson(topicId||loadedQuestion!.topic):null;
+        if((topicId||loadedQuestion?.topic)&&!loadedLesson)throw new Error('Konu anlatımı yüklenemedi.');
+        if(active){setQuestion(loadedQuestion);setLesson(loadedLesson??null);}
+      }catch(e){if(active)setContextError(e instanceof Error?e.message:'Çalışma içeriği yüklenemedi.');}
+      finally{if(active)setContextLoading(false);}
+    })();
+    return ()=>{active=false;};
+  },[topicId,questionId,reloadContext]);
 
   useEffect(() => {
     if (!question || answerIdx == null || Number(answerIdx) === question.correctAnswer) return;
@@ -104,7 +125,9 @@ export default function TeacherPage() {
     listRef.current?.scrollTo({ top: listRef.current.scrollHeight, behavior: 'smooth' });
   }, [state.chat.length]);
 
-  const ref = topicId ? getTopicRef(topicId) : undefined;
+  const ref = getTopicRef(topicId ?? question?.topic ?? '');
+  const subjectId=selectedSubject || ref?.subject.id || SUBJECTS[0].id;
+  const availableTopics=allTopics().filter(t=>t.subject.id===subjectId);
   const teacherName = state.settings.teacherName;
 
   const context = useMemo(async (): Promise<TeacherContext> => {
@@ -128,15 +151,20 @@ export default function TeacherPage() {
     return ctx;
   }, [ref, topicId, question, answerIdx, state, lesson]);
 
-  const send = async (action: TeacherAction, message: string, image?: { mediaType: string; data: string }) => {
+  const send = async (action: TeacherAction, message: string, image?: { mediaType: string; data: string }, retry=false) => {
     const text = message.trim();
-    if (action === 'serbest' && !text) return;
+    if (inFlight.current || contextLoading || contextError || (action === 'serbest' && !text)) return;
+    inFlight.current=true;
+    setRequestError('');
+    retryRef.current={action,message,image};
     setBusy(true);
+    try {
     const userText = action === 'foto' ? `📷 Fotoğraflı soru${text ? `: ${text}` : ''}` : text || QUICK.find((q) => q.action === action)?.label || action;
-    update((s) => addChatMessage(s, { role: 'user', text: userText }));
+    if (!retry) update((s) => addChatMessage(s, { role: 'user', text: userText }));
     setInput('');
 
     const say = (reply: string, source: 'icerik' | 'ai') => {
+      if (!alive.current) return;
       update((s) => addChatMessage(s, { role: 'teacher', text: reply, source }));
       setLastSaid(reply);
       speaker.speak(reply, voiceOn);
@@ -147,7 +175,6 @@ export default function TeacherPage() {
         'Fotoğraftaki soruyu okuyabilmem için yapay zekâ bağlantısı gerekiyor. Ayarlar → “Yapay zekâ bağlantısı” bölümünden sunucu adresini girince fotoğraflı soruları adım adım çözerim. O zamana kadar soruyu yazarak sorabilirsin ♡',
         'icerik',
       );
-      setBusy(false);
       return;
     }
 
@@ -165,32 +192,33 @@ export default function TeacherPage() {
       });
       await new Promise((r) => setTimeout(r, 450));
       say(reply, 'icerik');
-      setBusy(false);
       return;
     }
 
-    try {
       const ctx = await context;
+      const controller=new AbortController();abortRef.current=controller;
+      const timer=window.setTimeout(()=>controller.abort(),90000);
+      try {
       const history = state.chat.slice(-10).map((m) => ({ role: m.role, text: m.text }));
-      const reply = await askTeacher({ action, message: text, context: ctx, history, teacherName, image });
+      const reply = await askTeacher({ action, message: text, context: ctx, history, teacherName, image },controller.signal);
       say(reply, 'ai');
+      } finally {window.clearTimeout(timer);abortRef.current=null;}
     } catch (e) {
-      toast(e instanceof Error ? e.message : 'Yanıt alınamadı.');
+      if(alive.current)setRequestError(e instanceof Error ? e.message : 'Yanıt alınamadı.');
     } finally {
-      setBusy(false);
+      inFlight.current=false;
+      if(alive.current)setBusy(false);
     }
   };
 
   const autoFiredRef = useRef<string | null>(null);
   useEffect(() => {
     const key = `${initialAction ?? ''}|${topicId ?? ''}|${questionId ?? ''}`;
-    if (!initialAction || initialAction === 'serbest' || !status || autoFiredRef.current === key) return;
-    autoFiredRef.current = key;
-    // Konu anlatımının yüklenmesi için kısa bir gecikme (yerel rehber yanıtı tam olsun).
-    const t = setTimeout(() => void send(initialAction, ''), topicId ? 250 : 0);
+    if (!initialAction || initialAction === 'serbest' || contextLoading || contextError || autoFiredRef.current === key) return;
+    const t = setTimeout(() => {autoFiredRef.current = key;void send(initialAction, '');}, 0);
     return () => clearTimeout(t);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [initialAction, topicId, questionId, status]);
+  }, [initialAction, topicId, questionId, contextLoading, contextError]);
 
   const mood: AssistantMood = listener.listening ? 'listening' : busy ? 'thinking' : speaker.speaking ? 'talking' : state.chat.length === 0 ? 'happy' : 'idle';
   const lastTeacher = lastSaid ?? [...state.chat].reverse().find((m) => m.role === 'teacher')?.text;
@@ -210,6 +238,13 @@ export default function TeacherPage() {
     <>
       <PageHeader title={`${teacherName} ♡`} sub={ref ? `${subjectLabel(ref.subject)} · ${ref.topic.name}` : question ? 'Soru bağlamı seçili' : 'Sevgilin ve çalışma arkadaşın'} />
 
+      <section className="card teacher-topic-picker" aria-label="Öğretmen çalışma konusu">
+        <div><h2>Bugün ne öğrenelim?</h2><p className="small muted">Bir konu seç; anlatımı, örnekleri ve ipuçlarını aynı konu üzerinden çalışalım.</p></div>
+        <div className="teacher-topic-fields"><label>Ders<select aria-label="Öğretmen dersi" value={subjectId} disabled={busy} onChange={e=>setSelectedSubject(e.target.value)}>{SUBJECTS.map(s=><option key={s.id} value={s.id}>{subjectLabel(s)}</option>)}</select></label>
+        <label>Konu<select aria-label="Öğretmen konusu" value={ref?.subject.id===subjectId?ref.topic.id:''} disabled={busy} onChange={e=>{if(e.target.value)navigate(`/ogretmen?konu=${encodeURIComponent(e.target.value)}`);}}><option value="">Konu seç</option>{availableTopics.map(t=><option key={t.topic.id} value={t.topic.id}>{t.topic.name}</option>)}</select></label></div>
+        {contextLoading && <p role="status" className="small">Çalışma içeriği hazırlanıyor…</p>}
+        {contextError && <div role="alert"><p>{contextError}</p><button className="btn" type="button" onClick={()=>setReloadContext(v=>v+1)}>İçeriği yeniden yükle</button></div>}
+      </section>
       <section className="card asst-stage teacher-hero" aria-label="Asistan">
         <button
           type="button"
@@ -236,7 +271,7 @@ export default function TeacherPage() {
                 className={`badge ${status.configured ? 'ok' : 'warn'}`}
                 title={status.configured ? `Gerçek AI modeli: ${status.model ?? 'bağlı'}` : status.reason}
               >
-                {status.configured ? `Gerçek AI · ${status.model ?? 'bağlı'}` : 'Yerel konu rehberi'}
+                {status.configured ? 'AI öğretmen bağlı' : checking ? 'Konu rehberi · bağlantı kontrol ediliyor' : 'Yerel konu rehberi'}
               </span>
             )}
           </div>
@@ -268,11 +303,12 @@ export default function TeacherPage() {
           <span className="badge brand">Kişisel çalışma asistanı</span>
         </div>
         <div className="chips teacher-quick" role="group" aria-label="Hızlı istekler">
-          {QUICK.map((q) => (
-            <button key={q.action} type="button" className="chip" disabled={busy || !status} onClick={() => void send(q.action, '')}>
+          {(showAll?QUICK:QUICK.filter(q=>['anlat','basit','ornek','ipucu'].includes(q.action))).map((q) => (
+            <button key={q.action} type="button" className="chip" disabled={busy || contextLoading || !!contextError} onClick={() => void send(q.action, '')}>
               {q.label}
             </button>
           ))}
+          <button type="button" className="chip" aria-expanded={showAll} onClick={()=>setShowAll(v=>!v)}>{showAll?'Daha az seçenek':'Tüm çalışma seçenekleri'}</button>
         </div>
 
         <div className="chat mt-12 teacher-chat" ref={listRef} aria-live="polite">
@@ -282,6 +318,7 @@ export default function TeacherPage() {
             state.chat.map((m) => (
               <div key={m.id} className={`bubble ${m.role}`}>
                 <RichText text={m.text} />
+                {m.role === 'teacher' && <div className="teacher-message-tools"><button type="button" className="chip" onClick={()=>speaker.speak(m.text,true)}>Dinle</button><button type="button" className="chip" onClick={()=>{if(!navigator.clipboard){toast('Kopyalama kullanılamıyor. Metni seçip kopyalayabilirsin.');return;}navigator.clipboard.writeText(m.text).then(()=>toast('Yanıt kopyalandı.')).catch(()=>toast('Kopyalama kullanılamıyor.'));}}>Kopyala</button></div>}
                 {m.role === 'teacher' && (
                   <small className="teacher-source-label">
                     {m.source === 'ai' ? '✦ Gerçek AI yanıtı' : m.source === 'sistem' ? 'Sistem' : '📚 Uygulama içeriği'}
@@ -290,9 +327,10 @@ export default function TeacherPage() {
               </div>
             ))
           )}
-          {busy && <div className="bubble teacher">Düşünüyor…</div>}
+          {busy && <div className="bubble teacher" role="status">Yanıt hazırlanıyor…</div>}
         </div>
 
+        {requestError && <div className="notice teacher-request-error" role="alert"><b>Yanıt alınamadı</b><p>{requestError}</p><button type="button" className="btn" disabled={busy} onClick={()=>{const r=retryRef.current;if(r)void send(r.action,r.message,r.image,true);}}>Tekrar dene</button><a className="btn" href="#/dersler">Konu anlatımlarını aç</a></div>}
         <form
           className="chat-form teacher-composer"
           onSubmit={(e) => {
@@ -315,14 +353,14 @@ export default function TeacherPage() {
               <Icon name="mic" />
             </button>
           )}
-          <label className={`icon-btn photo-btn${busy ? ' disabled' : ''}`} aria-label="Soru fotoğrafı gönder" title="Soru fotoğrafı gönder">
+          <label className={`icon-btn photo-btn${busy ? ' disabled' : ''}`} aria-label="Soru fotoğrafı gönder" title={status.configured?'Soru fotoğrafı gönder':'Fotoğraflı soru için AI bağlantısı gerekiyor'} onClick={e=>{if(!status.configured){e.preventDefault();toast('Fotoğraflı sorular için AI bağlantısı gerekiyor. Şimdilik soruyu mesaj alanına yazabilirsin.');}}}>
             <Icon name="camera" />
             <input
               type="file"
               accept="image/*"
               capture="environment"
               hidden
-              disabled={busy}
+              disabled={busy || !status.configured || contextLoading || !!contextError}
               onChange={(e) => {
                 const f = e.target.files?.[0];
                 e.target.value = '';
@@ -336,8 +374,8 @@ export default function TeacherPage() {
               }}
             />
           </label>
-          <input id="chat-input" className="input" value={input} onChange={(e) => setInput(e.target.value)} placeholder="Örn. Logaritmayı basitçe anlat" disabled={busy} />
-          <button type="submit" className="btn primary" disabled={busy || !input.trim()} aria-label="Gönder">
+          <textarea id="chat-input" rows={3} maxLength={6000} className="input" value={input} onChange={(e) => setInput(e.target.value)} placeholder="Sorunu, verilenleri ve takıldığın adımı yaz…" disabled={busy || contextLoading || !!contextError} />
+          <button type="submit" className="btn primary" disabled={busy || contextLoading || !!contextError || !input.trim()} aria-label="Gönder">
             <Icon name="send" />
           </button>
         </form>
@@ -356,16 +394,14 @@ export default function TeacherPage() {
           <button
             type="button"
             className="btn small ghost mt-8"
-            onClick={() => {
-              update(clearChat);
-              setLastSaid(null);
-              speaker.stop();
-            }}
+            disabled={busy}
+            onClick={() => setConfirmClear(true)}
           >
             Sohbeti temizle
           </button>
         )}
       </div>
+      {confirmClear && <ConfirmDialog title="Sohbet temizlensin mi?" message="Bu ekrandaki mesajlar silinir. Ders ilerlemen ve defterin korunur." confirmLabel="Sohbeti temizle" danger onCancel={()=>setConfirmClear(false)} onConfirm={()=>{update(clearChat);setLastSaid(null);speaker.stop();setConfirmClear(false);}}/>}
     </>
   );
 }
