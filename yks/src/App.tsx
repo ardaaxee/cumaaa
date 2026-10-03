@@ -3,7 +3,7 @@ import { Layout } from './components/Layout';
 import { PageErrorBoundary } from './components/ErrorBoundary';
 import { Spinner, toast, ToastHost } from './components/ui';
 import { useRoute } from './hooks/useRoute';
-import { getState, startupError, startupReport, useSelector } from './store/store';
+import { getState, startupError, startupRecovered, startupReport, useSelector } from './store/store';
 import { cloudConfig, startAutoSync } from './services/cloud';
 import { useReminder } from './hooks/useReminder';
 import { usePetAlerts } from './hooks/usePetAlerts';
@@ -106,6 +106,7 @@ export function App() {
 
   useEffect(() => {
     if (startupError) toast(`Kayıtlı veri okunamadı: ${startupError}`, 6000);
+    else if (startupRecovered) toast('Ana kayıt açılamadı. Son sağlam kayıt geri yüklendi; en son değişiklikleri kontrol et.', 7000);
     else if (startupReport) toast('Eski sürüm verilerin yeni sürüme aktarıldı.', 5000);
     const onStorage = () => toast('Cihaz depolama alanı dolu: son değişiklikler kaydedilemedi. Ayarlar’dan yedek al.', 6000);
     window.addEventListener('iyiki:storage-error', onStorage);

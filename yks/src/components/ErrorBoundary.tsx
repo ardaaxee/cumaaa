@@ -5,7 +5,8 @@ async function clearAppCache() {
   try {
     if ('serviceWorker' in navigator) {
       const regs = await navigator.serviceWorker.getRegistrations();
-      await Promise.all(regs.map((r) => r.unregister()));
+      const scope = new URL('./', window.location.href).href;
+      await Promise.all(regs.filter(r=>r.scope===scope).map((r) => r.unregister()));
     }
     if ('caches' in window) {
       const keys = await caches.keys();
@@ -50,9 +51,10 @@ export class PageErrorBoundary extends Component<{ children: ReactNode; resetKey
           Uygulama güncellenmiş olabilir. Önce yenilemeyi dene; düzelmezse “Önbelleği düzelt” cihazındaki çalışma verilerini silmeden yalnız uygulama dosyalarını tazeler.
         </div>
         <div className="row mt-12" style={{ justifyContent: 'center' }}>
-          <button type="button" className="btn primary" onClick={() => window.location.reload()}>
-            Yenile
+          <button type="button" className="btn primary" onClick={() => this.setState({error:null})}>
+            Tekrar dene
           </button>
+          <button type="button" className="btn" onClick={() => window.location.reload()}>Yenile</button>
           <button type="button" className="btn" onClick={() => void clearAppCache()}>
             Önbelleği düzelt
           </button>

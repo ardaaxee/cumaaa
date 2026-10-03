@@ -15,6 +15,7 @@ let storageFailed = false;
 
 export const startupReport = initial.report;
 export const startupError = initial.error;
+export const startupRecovered = initial.recovered;
 
 function flush() {
   saveTimer = null;

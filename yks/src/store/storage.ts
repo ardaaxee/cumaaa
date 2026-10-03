@@ -3,6 +3,12 @@ import { migrate, type MigrationContext, type MigrationReport } from './migratio
 import { SCHEMA_VERSION, defaultState, type AppState } from './schema';
 
 export const STORAGE_KEY = 'iyikiYks.state.v3';
+export const RECOVERY_KEY = 'iyikiYks.state.recovery';
+
+function browserStorage(): Storage | undefined {
+  try { return globalThis.localStorage; } catch { return undefined; }
+}
+
 export const LEGACY_KEY = 'iyikiYksV2';
 export const BACKUP_APP_ID = 'iyi-ki-yks';
 
@@ -22,30 +28,42 @@ export interface LoadResult {
   state: AppState;
   report: MigrationReport | null;
   error: string | null;
+  recovered?: boolean;
 }
 
 /** Kayıtlı durumu yükler; yoksa eski sürüm verisini taşır; o da yoksa yeni profil açar. */
-export function loadState(storage: Storage | undefined = globalThis.localStorage, ctx: MigrationContext = migrationContext()): LoadResult {
+export function loadState(storage: Storage | undefined = browserStorage(), ctx: MigrationContext = migrationContext()): LoadResult {
   const current = safeGet(storage, STORAGE_KEY);
   const legacy = current ? null : safeGet(storage, LEGACY_KEY);
-  const text = current ?? legacy;
-  if (!text) return { state: defaultState(), report: null, error: null };
-  try {
-    const { state, report } = migrate(JSON.parse(text), ctx);
-    return { state, report: report.from !== SCHEMA_VERSION ? report : null, error: null };
-  } catch (e) {
-    return { state: defaultState(), report: null, error: e instanceof Error ? e.message : 'Kayıtlı veri okunamadı.' };
+  const recovery = safeGet(storage, RECOVERY_KEY);
+  let error:string|null=null;
+  for (const [index,text] of [current ?? legacy,recovery].entries()) {
+    if (!text) continue;
+    try {
+      const {state,report}=migrate(JSON.parse(text),ctx);
+      if (report.from===0) throw new Error('Kayıt biçimi tanınmadı.');
+      return {state,report:report.from!==SCHEMA_VERSION?report:null,error:null,recovered:index===1};
+    } catch(e) { error=e instanceof Error?e.message:'Kayıtlı veri okunamadı.'; }
   }
+  return {state:defaultState(),report:null,error};
 }
 
-/** Durumu kaydeder. Depolama doluysa false döner (veri bellekte kalır). */
-export function saveState(state: AppState, storage: Storage | undefined = globalThis.localStorage): boolean {
+/** Önce ana kaydı atomik yazar; kurtarma kopyasının dolu olması ana kaydı engellemez. */
+export function saveState(state: AppState, storage: Storage | undefined = browserStorage()): boolean {
+  if (!storage) return false;
   try {
-    storage?.setItem(STORAGE_KEY, JSON.stringify(state));
+    const previous=safeGet(storage,STORAGE_KEY);
+    const next=JSON.stringify(state);
+    storage.setItem(STORAGE_KEY,next);
+    // Bir önceki sağlam kayıt tutulur; bozuk kayıt kurtarma kopyasını ezmez.
+    if (previous && previous!==next) {
+      try {
+        const raw=JSON.parse(previous);
+        if (raw && typeof raw==='object' && Number.isInteger(raw.schemaVersion) && raw.schemaVersion>0 && raw.profile) storage.setItem(RECOVERY_KEY,previous);
+      } catch { /* Ana kayıt başarıyla yazıldı. */ }
+    }
     return true;
-  } catch {
-    return false;
-  }
+  } catch { return false; }
 }
 
 export interface BackupFile {
@@ -110,7 +128,7 @@ export function parseBackup(
  * Yalnız İyi ki • YKS verilerini temizler.
  * Aynı GitHub Pages alan adındaki diğer projelerin localStorage verilerine dokunmaz.
  */
-export async function clearAppData(storage: Storage | undefined = globalThis.localStorage): Promise<void> {
+export async function clearAppData(storage: Storage | undefined = browserStorage()): Promise<void> {
   try {
     if (storage) {
       const keys: string[] = [];
