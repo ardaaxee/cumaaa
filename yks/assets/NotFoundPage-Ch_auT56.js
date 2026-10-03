@@ -1,0 +1,1 @@
+import{ct as e,ln as t}from"./actions-zt6cBYlX.js";import{_ as n}from"./index-D_BZHMOD.js";var r=t();function i(){return(0,r.jsxs)(r.Fragment,{children:[(0,r.jsx)(n,{title:`Sayfa bulunamadı`}),(0,r.jsx)(e,{title:`Aradığın sayfa yok.`,action:(0,r.jsx)(`a`,{className:`btn primary`,href:`#/`,children:`Ana sayfaya dön`})})]})}export{i as default};

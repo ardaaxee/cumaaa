@@ -1,0 +1,1 @@
+import{an as e,cn as t,on as n,sn as r}from"./actions-zt6cBYlX.js";var i={topicName:e=>n(e)?.topic.name??e,subjectName:t=>{let n=e(t);return n?r(n):t},subjectTopicIds:e=>t(e).map(e=>e.id)};export{i as t};
