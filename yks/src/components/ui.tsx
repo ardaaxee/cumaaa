@@ -62,7 +62,8 @@ export function Modal({
     const focusable = el?.querySelector<HTMLElement>('input, select, textarea, button:not([data-close])');
     (focusable ?? el)?.focus();
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onClose();
+      if ((e.target as HTMLElement | null)?.closest('[role="dialog"]') !== el) return;
+      if (e.key === 'Escape') { e.stopPropagation(); onClose(); }
       if (e.key === 'Tab' && el) {
         const nodes = el.querySelectorAll<HTMLElement>('a[href], button:not(:disabled), input, select, textarea, [tabindex]:not([tabindex="-1"])');
         if (!nodes.length) return;
@@ -78,10 +79,11 @@ export function Modal({
       }
     };
     document.addEventListener('keydown', onKey);
+    const previousOverflow = document.body.style.overflow;
     document.body.style.overflow = 'hidden';
     return () => {
       document.removeEventListener('keydown', onKey);
-      document.body.style.overflow = '';
+      document.body.style.overflow = previousOverflow;
       prev?.focus?.();
     };
   }, [onClose]);

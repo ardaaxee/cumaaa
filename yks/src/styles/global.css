@@ -14520,3 +14520,6 @@ textarea:focus-visible {
 .notebook-canvas-wrap::after { content:''; position:absolute; top:0; bottom:0; left:0; width:14px; background:linear-gradient(90deg,#78685025,transparent); pointer-events:none; }
 [data-theme="dark"] .notebook-canvas-wrap { background-color:#fffdf5; }
 @media(max-width:560px){ .notebook-page-turn .btn { font-size:12px; padding:10px 8px; } .notebook-toolbar { position:relative; top:auto; } .notebook-canvas-wrap { margin-inline:8px; } }
+
+.quick-notebook-button{position:fixed;right:12px;top:calc(env(safe-area-inset-top,0px) + 62px);z-index:35;border:1px solid var(--border);border-radius:20px;padding:9px 14px;background:var(--surface,#fff);color:var(--text,#292336);box-shadow:0 3px 14px #0002;font-weight:700;cursor:pointer}
+.modal:has(.quick-notebook){width:min(960px,96vw);max-width:960px}.quick-notebook .notebook-toolbar{position:relative;top:auto}.quick-notebook .nb-stage.full{position:relative;inset:auto}.quick-notebook select{max-width:70vw}.quick-notebook .notebook-canvas-wrap{width:100%}

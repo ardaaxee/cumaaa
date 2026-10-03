@@ -106,7 +106,7 @@ function drawShape(ctx: CanvasRenderingContext2D, tool: Tool, start: { x: number
   }
 }
 
-export default function NotebookEditorPage({ params }: { params: string[] }) {
+export default function NotebookEditorPage({ params, embedded = false }: { params: string[]; embedded?: boolean }) {
   const id = params[0] ?? '';
   const pages = useSelector(s=>s.notebookPages);
   const orderedPages=pages.slice().sort((a,b)=>a.createdAt.localeCompare(b.createdAt)||a.id.localeCompare(b.id));
@@ -131,7 +131,8 @@ export default function NotebookEditorPage({ params }: { params: string[] }) {
 
   const [loading, setLoading] = useState(true);
   const [tool, setTool] = useState<Tool>('kalem');
-  const [pen, setPen] = useState<(typeof PENS)[number]>(PENS[0]);
+  const [pen, setPen] = useState<{key:string;label:string;color:string;alpha:number}>(PENS[0]);
+  const [nib, setNib] = useState('tukenmez');
   const [width, setWidth] = useState(DEFAULT_WIDTH);
   /** Titrek el çizgisini yumuşatır (kalemde). */
   const [smooth, setSmooth] = useState(true);
@@ -271,11 +272,11 @@ export default function NotebookEditorPage({ params }: { params: string[] }) {
   },[id]);
 
   const applyPenStyle = (c: CanvasRenderingContext2D, overrideWidth?: number) => {
-    c.lineCap = 'round';
+    c.lineCap = nib === 'fosfor' || nib === 'kaligrafi' ? 'butt' : 'round';
     c.lineJoin = 'round';
     c.globalCompositeOperation = 'source-over';
     c.strokeStyle = pen.color;
-    c.globalAlpha = pen.alpha;
+    c.globalAlpha = pen.alpha * (nib === 'kursun' ? .65 : nib === 'fosfor' ? .28 : 1);
     c.lineWidth = overrideWidth ?? width;
   };
 
@@ -382,6 +383,7 @@ export default function NotebookEditorPage({ params }: { params: string[] }) {
     const ocx = octx();
     if (!c || !oc || !cx || !ocx) return;
     const p = point(c, e);
+    if (tool === 'kalem') applyPenStyle(cx, width * (nib === 'dolma' || nib === 'firca' ? (e.pointerType === 'pen' ? .35 + Math.max(.05,e.pressure) * 1.3 : 1) : 1));
 
     if (tool === 'kalem' && smooth) {
       // Sabitleyici: kalem ucu parmağı biraz geriden izler, titreme yumuşar; ara noktalar eğriyle birleşir.
@@ -397,6 +399,8 @@ export default function NotebookEditorPage({ params }: { params: string[] }) {
     } else if (tool === 'kalem' || tool === 'silgi') {
       cx.lineTo(p.x, p.y);
       cx.stroke();
+      cx.beginPath();
+      cx.moveTo(p.x,p.y);
       lastRef.current = p;
     } else if (tool === 'egri') {
       curveRef.current.push(p);
@@ -513,8 +517,8 @@ export default function NotebookEditorPage({ params }: { params: string[] }) {
       <PageHeader
         title={meta?.title ?? 'Defter sayfası'}
         sub={meta?.subjectId ? subjectLabel(SUBJECTS.find((s) => s.id === meta.subjectId)!) : 'Genel'}
-        back="#/defterim"
-        actions={
+        back={embedded ? undefined : '#/defterim'}
+        actions={embedded ? undefined :
           <>
             <button type="button" className="icon-btn" aria-label="Sayfayı yeniden adlandır" onClick={() => setRenaming(true)}>
               <Icon name="settings" />
@@ -526,11 +530,11 @@ export default function NotebookEditorPage({ params }: { params: string[] }) {
         }
       />
 
-      <nav className="notebook-page-turn" aria-label="Defter sayfaları">
+      {!embedded && <nav className="notebook-page-turn" aria-label="Defter sayfaları">
         {pageNumber>0?<a className="btn" href={`#/defterim/${orderedPages[pageNumber-1].id}`}>← Önceki sayfa</a>:<span/>}
         <span>Sayfa {pageNumber+1} / {orderedPages.length}</span>
         {pageNumber<orderedPages.length-1?<a className="btn" href={`#/defterim/${orderedPages[pageNumber+1].id}`}>Sonraki sayfa →</a>:<a className="btn" href="#/defterim">Sayfalarım</a>}
-      </nav>
+      </nav>}
       <p role="status" className="notebook-save-status">{saveStatus}</p>
       <div className={`nb-stage${full ? ' full' : ''}`}>
       <div className="card notebook-toolbar">
@@ -549,6 +553,13 @@ export default function NotebookEditorPage({ params }: { params: string[] }) {
               <span>{TOOL_SHORT[t.key] ?? t.label}</span>
             </button>
           ))}
+        </div>
+        <div className="nb-row">
+          <label>Kalem türü <select aria-label="Kalem türü" value={nib} onChange={e=>{setNib(e.target.value);setTool('kalem');setWidth(({tukenmez:3,kursun:2,dolma:4,jel:4,kece:7,firca:10,kaligrafi:9,fosfor:18} as Record<string,number>)[e.target.value]);}}>
+            {Object.entries({tukenmez:'Tükenmez kalem',kursun:'Kurşun kalem',dolma:'Dolma kalem',jel:'Jel kalem',kece:'Keçeli kalem',firca:'Fırça kalem',kaligrafi:'Kaligrafi kalemi',fosfor:'Fosforlu kalem'}).map(([key,label])=><option key={key} value={key}>{label}</option>)}
+          </select></label>
+          <label>Özel renk <input type="color" aria-label="Özel kalem rengi" value={pen.color} onChange={e=>setPen({key:'ozel',label:'Özel renk',color:e.target.value,alpha:1})}/></label>
+          <span className="tiny muted">Parmağınla veya dokunmatik kalemle yaz. Dolma ve fırça kalemi basınca duyarlıdır.</span>
         </div>
         <div className="nb-row" role="group" aria-label="Kalem renkleri">
           {PENS.map((p) => (

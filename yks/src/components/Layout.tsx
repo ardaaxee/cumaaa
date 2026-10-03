@@ -7,6 +7,7 @@ import { useRoute } from '../hooks/useRoute';
 import { update, useSelector } from '../store/store';
 import { Icon, type IconName } from './Icon';
 import { CatFace, MascotNav, RabbitFace } from './MascotNav';
+import { QuickNotebook } from './QuickNotebook';
 import { Companion } from './Companion';
 
 interface NavItem {
@@ -196,6 +197,7 @@ export function Layout({ children }: { children: ReactNode }) {
       {!focusMode && <MascotNav />}
       {!focusMode && <EdgeFriends />}
       {!petMode && <Companion />}
+      {!route.path.startsWith('/defterim') && <QuickNotebook subject={subject ?? undefined} />}
     </div>
   );
 }
