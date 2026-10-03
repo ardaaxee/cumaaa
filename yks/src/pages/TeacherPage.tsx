@@ -30,15 +30,7 @@ function readVoicePref(): boolean {
   }
 }
 
-/** **kalın** yazımı gerçek kalın metne çevirir (başka HTML üretmez). */
-function RichText({ text }: { text: string }) {
-  const parts = text.split(/(\*\*[^*]+\*\*)/g);
-  return (
-    <>
-      {parts.map((p, i) => (p.startsWith('**') && p.endsWith('**') ? <b key={i}>{p.slice(2, -2)}</b> : <span key={i}>{p}</span>))}
-    </>
-  );
-}
+import { TeacherText as RichText } from '../components/TeacherText';
 
 const QUICK: { action: TeacherAction; label: string }[] = [
   { action: 'anlat', label: 'Sıfırdan anlat' },
