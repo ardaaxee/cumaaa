@@ -1,8 +1,8 @@
 {
- "version": "3bf255fd2fd4",
+ "version": "893b48376c51",
  "required": [
   "./index.html",
-  "./assets/index-c4NounGS.js",
+  "./assets/index-6xr_M574.js",
   "./assets/ui-CkA9hu8N.js",
   "./assets/index-SOEo7ZUv.css"
  ],
@@ -16,7 +16,8 @@
   "./icon-maskable-512.png",
   "./apple-touch-icon.png",
   "./assets/MocksPage-DZLL5SFS.css",
-  "./assets/PetPage-D_EEWdnm.css"
+  "./assets/PetPage-D_EEWdnm.css",
+  "./assets/PlanPage-CbACnbi3.css"
  ],
  "content": [
   "ayt-biyoloji-1-DAOM1u2c.js",
