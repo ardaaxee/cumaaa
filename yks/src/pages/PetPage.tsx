@@ -1299,7 +1299,7 @@ export default function PetPage() {
             disabled={ballGame.phase !== 'idle'}
             aria-label={activity==='sleeping'?pet.name+' yatakta uyuyor · uyandır':pose!=='standing'?pet.name+' '+activityText(activity,room,pet.name):pet.name + ' pandayı sev'}
           >
-            {pose!=='standing'?<PandaRoutinePose pose={pose} eating={activity==='eating'} drinking={activity==='drinking'} items={pet.items} gaze={gaze}/>:<RealisticPanda
+            {pose!=='standing'?<PandaRoutinePose pose={pose} eating={activity==='eating'} drinking={activity==='drinking'} items={pet.items.filter((id) => PET_ITEMS.some((item) => item.id === id && item.level <= p.level))} gaze={gaze}/>:<RealisticPanda
               size={292}
               gaze={gaze}
               items={pet.items.filter((id) => PET_ITEMS.some((item) => item.id === id && item.level <= p.level))}
