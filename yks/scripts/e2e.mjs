@@ -65,7 +65,7 @@ async function step(name, fn) {
     results.push(`✓ ${name} (${Date.now() - t0} ms)`);
   } catch (e) {
     failures += 1;
-    results.push(`✗ ${name}\n    ${String(e?.message ?? e).split('\n').slice(0, 4).join('\n    ')}`);
+    results.push(`✗ ${name}\n    ${String(e?.message ?? e).split('\n').slice(0, 24).join('\n    ')}`);
   }
 }
 function assert(cond, msg) {

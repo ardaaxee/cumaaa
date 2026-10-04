@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import './plan-page.css';
 import { SUBJECTS, subjectLabel, subjectTopics, getTopicRef } from '../data/curriculum';
 import type { SubjectId } from '../domain/types';
 import { Icon } from '../components/Icon';
@@ -239,7 +240,7 @@ export default function PlanPage() {
   };
 
   return (
-    <>
+    <div className="plan-page">
       <PageHeader
         title="Planım"
         sub="Günlük ve haftalık çalışma planı"
@@ -414,6 +415,6 @@ export default function PlanPage() {
           }}
         />
       )}
-    </>
+    </div>
   );
 }
