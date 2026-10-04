@@ -1,9 +1,9 @@
 {
- "version": "ba2229a6f129",
+ "version": "282bffbffa64",
  "required": [
   "./index.html",
-  "./assets/index-DK_mTvdA.js",
-  "./assets/actions-8Yu-5_Oo.js",
+  "./assets/index-Bems6CtT.js",
+  "./assets/ui-CkA9hu8N.js",
   "./assets/index-SOEo7ZUv.css"
  ],
  "optional": [
@@ -15,7 +15,7 @@
   "./icon-512.png",
   "./icon-maskable-512.png",
   "./apple-touch-icon.png",
-  "./assets/MocksPage-BeG00MB8.css",
+  "./assets/MocksPage-DZLL5SFS.css",
   "./assets/PetPage-D_EEWdnm.css"
  ],
  "content": [
