@@ -181,6 +181,7 @@ export interface ReviewItem {
 export type TaskType = 'konu' | 'test' | 'yanlis' | 'deneme' | 'video' | 'tekrar' | 'ozel';
 
 export interface PlanTask {
+  sourceMockId?: string;
   id: string;
   date: DayKey;
   time?: string;
@@ -203,12 +204,28 @@ export interface MockSection {
   blank: number;
 }
 
+export type MockIssueReason = 'konu' | 'islem' | 'dikkat' | 'sure';
+export interface MockIssue {
+  id: string;
+  sectionKey: string;
+  question: number;
+  kind: 'yanlis' | 'bos';
+  reason: MockIssueReason;
+  topicId: string;
+  note: string;
+  reviewed: boolean;
+}
+export interface MockLearning {
+  issues: MockIssue[];
+  sectionMinutes: Record<string, number>;
+}
 export interface MockExam {
   id: string;
   exam: Exam;
   name: string;
   date: DayKey;
   sections: MockSection[];
+  learning?: MockLearning;
   note?: string;
   createdAt: string;
 }

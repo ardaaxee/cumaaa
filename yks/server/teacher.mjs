@@ -16,7 +16,7 @@ export const TEACHER_ACTIONS = {
   yanlislar: 'Öğrencinin yanlışlar listesine bakarak ortak hata kalıplarını bul ve somut bir çalışma önerisi ver.',
   bugun: 'Öğrencinin verilerine bakarak bugün ne çalışması gerektiğini somut bir plan halinde öner. Veri yoksa bunu açıkça söyle.',
   serbest: 'Öğrencinin sorusunu cevapla.',
-  foto: 'Fotoğraftaki soruyu oku; önce soruyu kısaca yaz, sonra adım adım çöz ve doğru seçeneği belirt. Fotoğraf okunaksızsa bunu söyle ve tahmin yürütme.',
+  foto: 'Fotoğraftaki soruyu oku; önce soruyu kısaca yaz, çözümden önce kısa bir ipucu ver, sonra kullanılan konu ve kuralları açıklayarak adım adım çöz ve doğru seçeneği belirt. Sonunda aynı kazanımı ölçen özgün bir benzer soru oluştur; benzer sorunun cevabını kullanıcı istemeden verme. Fotoğraf okunaksızsa bunu söyle ve tahmin yürütme.',
 };
 
 const IMAGE_TYPES = new Set(['image/jpeg', 'image/png', 'image/webp', 'image/gif']);

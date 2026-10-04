@@ -279,6 +279,31 @@ await step('Deneme raporu: hedef kaydı, sınav ve sonuç bağlantısı yenileme
   await page.waitForURL(/#\/ders\/ayt-fizik/);
   await page.goBack({ waitUntil: 'networkidle' });
   await page.getByRole('heading', { name: 'Mobil AYT kontrolü', exact: true }).waitFor();
+  await tap(page.getByRole('button', { name: 'Soru ekle', exact: true }));
+  const issue = page.getByRole('dialog', { name: 'Yanlış / boş soru ekle' });
+  await issue.getByLabel('Ders', { exact: true }).selectOption('fizik');
+  await issue.getByLabel('Ders içindeki soru numarası', { exact: true }).fill('1');
+  await issue.getByLabel('Eksik konu (isteğe bağlı)', { exact: true }).selectOption('aytfiz-vektorler');
+  await issue.getByLabel('Kendime not', { exact: true }).fill('Vektörleri ayırırken zorlandım.');
+  await tap(issue.getByRole('button', { name: 'Soruyu kaydet', exact: true }));
+  await page.locator('.mock-issue-list').getByText('Vektörler', { exact: false }).waitFor();
+  await tap(page.getByRole('button', { name: 'Çalışma rotasını planıma ekle', exact: true }));
+  await page.getByText('Bu denemeden 3 görev · 0 tamamlandı.', { exact: true }).waitFor();
+  await tap(page.getByRole('button', { name: 'Çalışma rotasını planıma ekle', exact: true }));
+  await page.getByText('Bu denemeden 3 görev · 0 tamamlandı.', { exact: true }).waitFor();
+  await tap(page.getByRole('button', { name: 'Ders sürelerini gir', exact: true }));
+  const timing = page.getByRole('dialog', { name: 'Ders sürelerini kaydet' });
+  await timing.getByLabel('Fizik süresi (dk)', { exact: true }).fill('25');
+  await tap(timing.getByRole('button', { name: 'Süreleri kaydet', exact: true }));
+  await page.getByText('Fizik · 25 dk', { exact: true }).waitFor();
+  await page.reload({ waitUntil: 'networkidle' });
+  await page.getByText('Fizik · 25 dk', { exact: true }).waitFor();
+  await page.getByText('Bu denemeden 3 görev · 0 tamamlandı.', { exact: true }).waitFor();
+  await tap(page.getByRole('link', { name: 'Haftalık gelişim ve 3 önceliğim', exact: true }));
+  await page.getByRole('heading', { name: 'Deneme gelişimi ve çalışma öncelikleri', exact: true }).waitFor();
+  await page.getByRole('link', { name: 'Vektörler', exact: true }).waitFor();
+  await page.goto(reportUrl, { waitUntil: 'networkidle' });
+
 });
 
 await step('Telefon genişliklerinde yatay taşma yok', async () => {

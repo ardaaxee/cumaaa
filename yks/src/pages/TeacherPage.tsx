@@ -301,7 +301,7 @@ export default function TeacherPage() {
           <span className="badge brand">Kişisel çalışma asistanı</span>
         </div>
         <div className="chips teacher-quick" role="group" aria-label="Hızlı istekler">
-          {(showAll?QUICK:QUICK.filter(q=>['anlat','basit','ornek','ipucu'].includes(q.action))).map((q) => (
+          {(showAll?QUICK:QUICK.filter(q=>['anlat','basit','ornek','ipucu','benzer'].includes(q.action))).map((q) => (
             <button key={q.action} type="button" className="chip" disabled={busy || contextLoading || !!contextError} onClick={() => void send(q.action, '')}>
               {q.label}
             </button>

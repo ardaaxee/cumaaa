@@ -1,3 +1,4 @@
+import { sanitizeMockLearning } from '../utils/mockLearning';
 import {sanitizePandaPlants} from '../utils/pandaPlants';
 import {sanitizeRecoveryProgress} from '../utils/recoveryProgress';
 import { sanitizeLearningProgress } from '../utils/learningProgress';
@@ -300,7 +301,7 @@ export function sanitize(raw: Json): AppState {
     wrongs: isObj(raw.wrongs) ? (raw.wrongs as AppState['wrongs']) : {},
     reviews: isObj(raw.reviews) ? (raw.reviews as AppState['reviews']) : {},
     tasks: arr(raw.tasks).filter(isObj).filter((t) => isValidDayKey(t.date)) as unknown as AppState['tasks'],
-    mocks: arr(raw.mocks).filter(isObj).filter((m) => Array.isArray(m.sections)) as unknown as AppState['mocks'],
+    mocks: (arr(raw.mocks).filter(isObj).filter(m => (m.exam === 'TYT' || m.exam === 'AYT') && Array.isArray(m.sections)) as unknown as AppState['mocks']).map(m => ({ ...m, learning: sanitizeMockLearning(m.learning, m) })),
     studyLog: arr(raw.studyLog).filter(isObj).filter((s) => isValidDayKey(s.day) && typeof s.minutes === 'number') as unknown as AppState['studyLog'],
     videos: arr(raw.videos).filter(isObj).filter((v) => /^https?:\/\//.test(str(v.url))) as unknown as AppState['videos'],
     pomodoro: {

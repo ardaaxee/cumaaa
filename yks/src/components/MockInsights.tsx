@@ -5,6 +5,7 @@ import { mockInsights, mockSubjectLinks, mockTargetStatus } from '../utils/mockI
 import { formatNet } from '../utils/net';
 import { formatDay } from '../utils/date';
 import { getSubject, subjectLabel } from '../data/curriculum';
+import { MockLearningPanel } from './MockLearningPanel';
 import { Modal, toast } from './ui';
 import { update } from '../store/store';
 import { updateProfile } from '../store/actions';
@@ -62,6 +63,7 @@ export function MockInsights({ mock, mocks, target }: { mock: MockExam; mocks: M
         <li><b>Öğren, uygula, tekrar ölç</b><p>Bir oturumda bir eksik konuya odaklan. Anlatımdan sonra çözümlü örnekleri çalış, ardından soruları kendin çöz. Yeni deneme sonucunu ekleyerek değişimi takip et.</p><a className="btn small primary" href="#/koc">Kişisel çalışma planım</a></li>
       </ol><p className="tiny muted">Bu rehber kayıtlı sonuçlarından hesaplanır. Başarı veya sıralama tahmini değildir.</p>
     </div>}
+    <MockLearningPanel mock={mock} />
     {editingTarget && <Modal title={`${mock.exam} net hedefim`} onClose={() => setEditingTarget(false)} actions={<><button className="btn" onClick={() => setEditingTarget(false)}>Vazgeç</button><button className="btn primary" onClick={saveTarget}>Hedefi kaydet</button></>}>
       <label className="field"><span>Hedef net</span><input className="input" type="number" inputMode="decimal" min={0} max={mock.exam === 'TYT' ? 120 : 80} step="0.25" value={draftTarget} onChange={e => setDraftTarget(e.target.value)} aria-describedby="mock-target-help" /></label>
       <p id="mock-target-help" className="small muted">{mock.exam === 'TYT' ? '120' : '80'} nete kadar hedef belirleyebilirsin. Hedefi temizlemek için alanı boş bırak. Profilindeki hedef de güncellenir.</p>

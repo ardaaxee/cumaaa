@@ -136,10 +136,12 @@ function TaskForm({ initial, onClose }: { initial: Partial<PlanTask> & { date: s
 }
 
 async function runTask(t: PlanTask) {
+  if (t.type === 'tekrar' && t.sourceMockId && t.topicId) return navigate(`/tekrar/${t.topicId}`);
   if (t.type === 'konu' || t.type === 'tekrar') return navigate(t.topicId ? `/konu/${t.topicId}` : '/tekrar');
   if (t.type === 'test') {
+    const timed = t.sourceMockId ? getState().mocks.find(m => m.id === t.sourceMockId)?.learning?.issues.some(i => !i.reviewed && i.topicId === t.topicId && i.reason === 'sure') : false;
     const err = await launchTest(
-      makeConfig({ subjectId: t.subjectId ?? 'all', topicId: t.topicId ?? 'all', count: [5, 10, 20, 40].find((n) => n >= (t.targetQuestions ?? 10)) ?? 40, origin: 'plan', title: t.title }),
+      makeConfig({ subjectId: t.subjectId ?? 'all', topicId: t.topicId ?? 'all', count: [5, 10, 20, 40].find((n) => n >= (t.targetQuestions ?? 10)) ?? 40, origin: 'plan', mode: timed ? 'sinav' : 'ogrenme', durationMin: timed ? 15 : undefined, title: t.title }),
     );
     if (err) toast(err);
     return;

@@ -39,7 +39,7 @@ export function weekReport(state: AppState, weekStart: DayKey): WeekReport {
   const best = [...bySubject.entries()].filter(([, v]) => v.n >= 5).sort((a, b) => b[1].c / b[1].n - a[1].c / a[1].n)[0];
   const weak = [...byTopic.entries()].filter(([, v]) => v.w >= 2).sort((a, b) => b[1].w / b[1].n - a[1].w / a[1].n)[0];
   const mocks = state.mocks.filter((m) => m.date >= from && m.date <= to);
-  const mockAvg = mocks.length ? round2(mocks.reduce((n, m) => n + m.sections.reduce((k, s) => k + calcNet(s.correct, s.wrong), 0), 0) / mocks.length) : null;
+  const mockAvg = mocks.length && new Set(mocks.map(m => m.exam)).size === 1 ? round2(mocks.reduce((n, m) => n + m.sections.reduce((k, s) => k + calcNet(s.correct, s.wrong), 0), 0) / mocks.length) : null;
   const bestSubject = best ? getSubject(best[0]) : undefined;
 
   return {

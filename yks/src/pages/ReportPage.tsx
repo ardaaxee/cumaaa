@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react';
+import { MockWeeklySummary } from '../components/MockWeeklySummary';
 import { PageHeader } from '../components/Layout';
 import { Segmented, Stat, toast } from '../components/ui';
 import { useAppState } from '../store/store';
@@ -155,6 +156,7 @@ export default function ReportPage() {
         <Stat tint="peach" label="En iyi ders" value={r.bestSubject ?? '—'} sub={r.bestSubject ? 'en yüksek doğruluk' : 'en az 5 soru gerekir'} />
       </section>
 
+      <MockWeeklySummary state={state} from={start} />
       {r.weakTopic && (
         <div className="notice section">
           Bu hafta en çok zorlandığın konu: <b>{r.weakTopic}</b>. Gelecek hafta ona 20 dakika ayırmak iyi olur.
