@@ -299,6 +299,13 @@ await step('Deneme raporu: hedef kaydı, sınav ve sonuç bağlantısı yenileme
   await page.reload({ waitUntil: 'networkidle' });
   await page.getByText('Fizik · 25 dk', { exact: true }).waitFor();
   await page.getByText('Bu denemeden 3 görev · 0 tamamlandı.', { exact: true }).waitFor();
+  await tap(page.getByRole('link', { name: 'Planımı aç', exact: true }));
+  const sourceLinks = page.getByRole('link', { name: 'Mobil AYT kontrolü deneme analizini aç', exact: true });
+  await sourceLinks.first().waitFor();
+  assert(await sourceLinks.count() === 2, 'Bugünkü anlatım ve test görevleri deneme kaynağını göstermeli');
+  await page.getByText('1. Anlatım ve çözümlü örnekler · Çalışma nedeni: Konu eksiği', { exact: true }).waitFor();
+  await tap(sourceLinks.first());
+  assert(page.url() === reportUrl, 'Plan kaynağı aynı deneme analizine dönmeli');
   await tap(page.getByRole('link', { name: 'Haftalık gelişim ve 3 önceliğim', exact: true }));
   await page.getByRole('heading', { name: 'Deneme gelişimi ve çalışma öncelikleri', exact: true }).waitFor();
   await page.getByRole('link', { name: 'Vektörler', exact: true }).waitFor();
@@ -308,7 +315,7 @@ await step('Deneme raporu: hedef kaydı, sınav ve sonuç bağlantısı yenileme
 
 await step('Telefon genişliklerinde yatay taşma yok', async () => {
   const sizes = [[320, 700], [360, 800], [375, 812], [393, 873], [412, 915], [430, 932]];
-  const routes = ['#/', '#/testler?sinav=TYT', '#/dersler', `#/konu/${visitedTopic}`, '#/denemeler', '#/denemeler?sinav=AYT', '#/defterim', '#/pandam'];
+  const routes = ['#/', '#/testler?sinav=TYT', '#/dersler', `#/konu/${visitedTopic}`, '#/denemeler', '#/denemeler?sinav=AYT', '#/defterim', '#/plan', '#/pandam'];
   const bad = [];
   for (const [w, h] of sizes) {
     await page.setViewportSize({ width: w, height: h });

@@ -10,6 +10,7 @@ import { launchTest, makeConfig } from '../services/testLauncher';
 import { addTask, carryAllUnfinished, carryTask, deleteTask, toggleTask, updateTask, type NewTask } from '../store/actions';
 import type { PlanTask, TaskType } from '../store/schema';
 import { getState, update, useSelector } from '../store/store';
+import { MOCK_REASONS } from '../utils/mockLearning';
 import { addDays, dayKey, formatDay, isValidDayKey, weekDays } from '../utils/date';
 
 export const TASK_TYPES: { value: TaskType; label: string }[] = [
@@ -153,6 +154,10 @@ async function runTask(t: PlanTask) {
 }
 
 function TaskRow({ t, onEdit, onDelete }: { t: PlanTask; onEdit: () => void; onDelete: () => void }) {
+  const mocks = useSelector((s) => s.mocks);
+  const source = mocks.find((m) => m.id === t.sourceMockId);
+  const reasons = [...new Set(source?.learning?.issues.filter((i) => i.topicId === t.topicId).map((i) => i.reason) ?? [])];
+  const stage = t.type === 'konu' ? '1. Anlatım ve çözümlü örnekler' : t.type === 'test' ? '2. Pekiştirme soruları' : t.type === 'tekrar' ? '3. Tekrarla öğrenmeni ölç' : '';
   const meta = [
     typeLabel(t.type),
     t.time,
@@ -167,6 +172,10 @@ function TaskRow({ t, onEdit, onDelete }: { t: PlanTask; onEdit: () => void; onD
       <div className="grow">
         <div className="task-title">{t.title}</div>
         <div className="task-meta">{meta.join(' · ')}</div>
+        {source && <div className="mt-8">
+          <a className="btn small ghost" href={`#/denemeler?sinav=${source.exam}&deneme=${encodeURIComponent(source.id)}`} aria-label={`${source.name} deneme analizini aç`}>Kaynak: {source.name}</a>
+          <p className="task-meta">{[stage, reasons.length ? `Çalışma nedeni: ${reasons.map((r) => MOCK_REASONS[r].label).join(', ')}` : ''].filter(Boolean).join(' · ')}</p>
+        </div>}
         <div className="row mt-8">
           {t.type !== 'ozel' && !t.done && (
             <button type="button" className="btn small" onClick={() => void runTask(t)}>
