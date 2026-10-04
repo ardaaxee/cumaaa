@@ -10,3 +10,6 @@ html:has(.plan-page) { scroll-behavior: auto; scroll-padding-block: 24px 180px; 
 .plan-page { overflow-x: clip; }
 .plan-page .task { scroll-margin-block: 24px 180px; }
 .plan-page .task a.btn { display: flex; width: fit-content; text-align: left; position: relative; }
+
+.plan-workload { flex-wrap: wrap; }
+.plan-workload p { margin-block: 6px 0; }

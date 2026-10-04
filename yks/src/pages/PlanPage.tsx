@@ -202,6 +202,7 @@ function TaskRow({ t, onEdit, onDelete }: { t: PlanTask; onEdit: () => void; onD
 
 export default function PlanPage() {
   const tasks = useSelector((s) => s.tasks);
+  const dailyMinutes = useSelector((s) => s.profile.dailyStudyMinutes);
   const today = dayKey();
   const [view, setView] = useState<'gun' | 'hafta'>('gun');
   const [day, setDay] = useState(today);
@@ -216,6 +217,10 @@ export default function PlanPage() {
   const days = weekDays(weekAnchor);
   const doneCount = dayTasks.filter((t) => t.done).length;
   const minutes = dayTasks.reduce((s, t) => s + (t.estMinutes ?? 0), 0);
+  const remainingTasks = dayTasks.filter((t) => !t.done);
+  const remainingMinutes = remainingTasks.reduce((sum, t) => sum + (t.estMinutes ?? 0), 0);
+  const remainingQuestions = remainingTasks.reduce((sum, t) => sum + (t.targetQuestions ?? 0), 0);
+  const unmeasuredTasks = remainingTasks.filter((t) => !t.estMinutes).length;
 
   const refreshSmartWeek = () => {
     if (smartBusy) return;
@@ -290,6 +295,16 @@ export default function PlanPage() {
           <div><b>{minutes || 0}</b><span>planlanan dk</span></div>
         </div>
       )}
+
+      {view === 'gun' && dayTasks.length > 0 && <section className="notice section plan-workload" aria-label="Kalan çalışma yükü">
+        <div className="grow">
+          <b>{unfinished ? `Kalan plan: ${remainingMinutes} dk · ${remainingQuestions} hedef soru` : 'Bu günün görevleri tamamlandı.'}</b>
+          <p className="small muted">Süreler tahmindir; soru sayısı henüz bitmemiş görevlerin hedefidir.</p>
+          {unmeasuredTasks > 0 && <p className="small muted">{unmeasuredTasks} görevin süresi belirtilmedi; toplam süreye dahil değil.</p>}
+          {minutes > dailyMinutes && dailyMinutes > 0 && <p className="small muted">Bu günün planı, günlük {dailyMinutes} dk çalışma hedefinden {minutes - dailyMinutes} dk fazla. Görevleri düzenleyebilir veya uygun olanları yarına taşıyabilirsin.</p>}
+        </div>
+        <a className="btn small ghost" href="#/ayarlar">Günlük hedeflerim</a>
+      </section>}
 
       {overdue.length > 0 && (
         <div className="notice warn section">
