@@ -286,7 +286,7 @@ await step('Deneme raporu: hedef kaydı, sınav ve sonuç bağlantısı yenileme
   await issue.getByLabel('Eksik konu (isteğe bağlı)', { exact: true }).selectOption('aytfiz-vektorler');
   await issue.getByLabel('Kendime not', { exact: true }).fill('Vektörleri ayırırken zorlandım.');
   await tap(issue.getByRole('button', { name: 'Soruyu kaydet', exact: true }));
-  await page.locator('.mock-issue-list').getByText('Vektörler', { exact: false }).waitFor();
+  assert((await page.locator('.mock-issue-list article').first().innerText()).includes('Vektörler'), 'Kaydedilen yanlışın konusu görünmeli');
   await tap(page.getByRole('button', { name: 'Çalışma rotasını planıma ekle', exact: true }));
   await page.getByText('Bu denemeden 3 görev · 0 tamamlandı.', { exact: true }).waitFor();
   await tap(page.getByRole('button', { name: 'Çalışma rotasını planıma ekle', exact: true }));
