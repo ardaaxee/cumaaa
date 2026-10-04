@@ -330,8 +330,8 @@ await step('Telefon genişliklerinde yatay taşma yok', async () => {
       if (sw > w + 1) {
         const overflow = await page.evaluate(() => [...document.querySelectorAll('body *')].filter(el => !el.closest('.edge-friend')).map(el => {
           const rect = el.getBoundingClientRect();
-          return { tag: el.tagName, cls: el.className, text: el.textContent?.slice(0, 90), right: Math.round(rect.right), width: Math.round(rect.width) };
-        }).filter(el => el.right > innerWidth + 1).slice(0,20));
+          return { tag: el.tagName, cls: el.className, text: el.textContent?.slice(0, 90), scroll: el.scrollWidth, client: el.clientWidth, left: Math.round(rect.left), right: Math.round(rect.right), width: Math.round(rect.width) };
+        }).filter(el => el.right > innerWidth + 1 || el.scroll > el.client + 1).slice(0,20));
         bad.push(`${w}px ${r}: ${sw} ${JSON.stringify(overflow)}`);
       }
     }

@@ -6,3 +6,7 @@
   .plan-page .plan-smart-notice { flex-wrap: wrap; }
   .plan-page .plan-smart-notice > .grow { flex-basis: 100%; }
 }
+html:has(.plan-page) { scroll-behavior: auto; scroll-padding-block: 24px 180px; }
+.plan-page { overflow-x: clip; }
+.plan-page .task { scroll-margin-block: 24px 180px; }
+.plan-page .task a.btn { display: flex; width: fit-content; text-align: left; position: relative; }
