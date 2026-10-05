@@ -7,10 +7,13 @@ export function quizSummary(questions: Pick<Question, 'id' | 'correctAnswer'>[],
 }
 
 /** Görevler mevcut çalışma kayıtlarından türetilir; ayrıca ödül veya sayaç yazılmaz. */
-export function dailyMissions(state: Pick<AppState, 'attempts' | 'studyLog' | 'cards'>, today: string) {
+export function dailyMissions(state: Pick<AppState, 'attempts' | 'studyLog' | 'cards'> & Partial<Pick<AppState, 'profile' | 'tasks'>>, today: string) {
+  const questionGoal = state.profile ? Math.max(10, Math.min(30, Math.round(state.profile.dailyQuestionGoal * 0.35))) : 5;
+  const minuteGoal = state.profile ? Math.max(20, Math.min(60, Math.round(state.profile.dailyStudyMinutes * 0.25))) : 15;
   const missions = [
-    { id: 'questions', title: '5 soru çöz', detail: 'Her cevap bir adım. Yanlışlarını da incele.', target: 5, current: state.attempts.filter(a => a.day === today && a.answer != null).length, href: '#/testler', action: 'Sorulara git', unit: 'soru', icon: '✏️' },
-    { id: 'focus', title: '15 dakika çalış', detail: 'Kısa bir odak oturumuyla ritmini bul.', target: 15, current: state.studyLog.filter(s => s.day === today).reduce((sum, s) => sum + Math.max(0, s.minutes), 0), href: '#/odak', action: 'Odaklan', unit: 'dk', icon: '🌿' },
+    { id: 'questions', title: `${questionGoal} soru çöz`, detail: 'Her cevap bir adım. Yanlışlarını da incele.', target: questionGoal, current: state.attempts.filter(a => a.day === today && a.answer != null).length, href: '#/testler', action: 'Sorulara git', unit: 'soru', icon: '✏️' },
+    { id: 'focus', title: `${minuteGoal} dakika çalış`, detail: 'Kısa bir odak oturumuyla ritmini bul.', target: minuteGoal, current: state.studyLog.filter(s => s.day === today).reduce((sum, s) => sum + Math.max(0, s.minutes), 0), href: '#/odak', action: 'Odaklan', unit: 'dk', icon: '🌿' },
+    { id: 'plan', title: '1 plan görevini bitir', detail: 'Bugünkü planından küçük bir adımı tamamla.', target: 1, current: (state.tasks ?? []).filter(t => t.date === today && t.done).length, href: '#/plan', action: 'Planı aç', unit: 'görev', icon: '✓' },
     { id: 'cards', title: '3 bilgi kartını tekrarla', detail: 'Cevabı açmadan önce kendin hatırla.', target: 3, current: Object.values(state.cards).filter(c => c.lastDay === today).length, href: '#/kartlar', action: 'Kartları aç', unit: 'kart', icon: '🧠' },
   ];
   return missions.map(m => ({ ...m, done: m.current >= m.target, current: Math.min(m.current, m.target) }));
