@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import { quizSummary } from '../utils/studyTools';
 import { AskLabel } from './AskName';
 import type { Question } from '../domain/types';
 import { href } from '../hooks/useRoute';
@@ -47,7 +48,8 @@ export function InlineQuiz({
     answersRef.current = next;
     onAnswersChange?.(next);
     setAnswers(next);
-    onProgress?.(Object.keys(next).length, questions.filter((x) => next[x.id] === x.correctAnswer).length);
+    const progress = quizSummary(questions, next);
+    onProgress?.(progress.answered, progress.correct);
     update((s) => recordPractice(s, q, i, sessionRef.current, Math.min(Date.now() - shownAt.current, 10 * 60_000)));
     shownAt.current = Date.now();
   };
