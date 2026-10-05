@@ -1,4 +1,5 @@
 import { LearningArea } from '../components/LearningArea';
+import { LessonNavigator } from '../components/LessonNavigator';
 import { useMemo, useState, type ReactNode } from 'react';
 import { AskLabel } from '../components/AskName';
 import { getTopicRef, subjectLabel, subjectTopics } from '../data/curriculum';
@@ -62,6 +63,7 @@ function LessonSection({ id, emoji, title, open = false, children }: { id: strin
 function LessonView({ lesson, actions }: { lesson: LessonSeed; actions: LessonActions }) {
   return (
     <article className="lesson">
+      <LessonNavigator key={lesson.topicId} lesson={lesson} />
       <div className="lesson-quick" role="group" aria-label="Hızlı aksiyonlar">
         <button type="button" className="btn small" onClick={actions.toNotebook}>
           📓 Deftere aktar
