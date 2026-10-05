@@ -20,6 +20,7 @@ export function PandaStudyMissions() {
       <ProgressBar value={m.current / m.target * 100} label={m.title} />
       <div className="row between"><span className="small">{m.current}/{m.target} {m.unit}</span>{m.done ? <span className="badge ok">Tamamlandı</span> : <a className="btn small" href={m.href}>{m.action} →</a>}</div>
     </article>)}</div>
+    <div className="panda-study-links"><a href="#/odak">Odaklanmaya geç</a><a href="#/testler">Soru çöz</a></div>
     <p className="small muted">Bu görevler günlük çalışma kayıtlarını gösterir. Bambu, su ve XP mevcut kazanım kurallarına göre hesaplanır.</p>
   </section>;
 }
