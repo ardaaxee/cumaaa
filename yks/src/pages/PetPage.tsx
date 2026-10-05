@@ -1072,6 +1072,7 @@ export default function PetPage() {
 
   const today = dayKey();
   const d = useMemo(() => dashboard(state, today), [state, today]);
+  const doneTasks = state.tasks.filter(t => t.date === today && t.done).length;
   const quests = dailyMissions(state, today).map(mission => ({ ...mission, label: mission.title }));
   const questDone = quests.filter((q) => q.done).length;
 
