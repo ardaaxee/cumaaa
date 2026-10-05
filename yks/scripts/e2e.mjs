@@ -596,6 +596,35 @@ await step('Genel tekrar: 5 dakikalık tekrar (özet → formül → 3 kart → 
   assert(r.dueDay > today, `Sonraki tekrar ileri tarihe planlanmadı: ${r.dueDay}`);
 });
 
+await step('Konu rehberi: bölüme git, hepsini aç ve daralt', async () => {
+  await page.goto(APP + '#/konu/' + visitedTopic, { waitUntil: 'networkidle' });
+  const guide = page.getByRole('complementary', { name: 'Konu anlatımı rehberi' });
+  await guide.waitFor();
+  await tap(guide.getByRole('button', { name: 'Özet', exact: true }));
+  assert(await page.locator('#sec-ozet').evaluate(el => el.open), 'Özet bölümü açılmadı');
+  assert(await page.locator('#sec-ozet > summary').evaluate(el => el === document.activeElement), 'Klavye odağı bölüme taşınmadı');
+  await tap(guide.getByRole('button', { name: 'Tüm bölümleri aç', exact: true }));
+  assert(await page.locator('.lesson details.lesson-acc').evaluateAll(items => items.every(el => el.open)), 'Bölümlerin tamamı açılmadı');
+  await tap(guide.getByRole('button', { name: 'Bölümleri daralt', exact: true }));
+  assert(await page.locator('.lesson details.lesson-acc').evaluateAll(items => items.every(el => !el.open)), 'Bölümler daralmadı');
+});
+
+await step('Panda görev kartları: dört görev, gerçek ilerleme ve mobil yerleşim', async () => {
+  await page.goto(APP + '#/pandam', { waitUntil: 'networkidle' });
+  const missions = page.locator('.panda-study-missions');
+  await missions.waitFor();
+  assert(await missions.locator('.study-mission').count() === 4, 'Dört görev görünmüyor');
+  assert(await missions.getByRole('progressbar').count() === 4, 'İlerleme göstergeleri eksik');
+  const stored = await page.evaluate(() => JSON.parse(localStorage.getItem('iyikiYks.state.v3')));
+  const questionTarget = Math.max(10, Math.min(30, Math.round(stored.profile.dailyQuestionGoal * .35)));
+  assert((await missions.textContent()).includes(questionTarget + ' soru çöz'), 'Kişisel soru hedefi korunmadı');
+  for (const width of [360, 390, 768]) {
+    await page.setViewportSize({ width, height: 844 });
+    assert(await missions.evaluate(el => el.scrollWidth <= el.clientWidth + 1), 'Görev kartlarında yatay taşma: ' + width);
+  }
+  await page.setViewportSize({ width: 390, height: 844 });
+});
+
 await step('Sayfa hatası (pageerror) yok', async () => {
   const relevant = pageErrors.filter((m) => !/ResizeObserver/.test(m));
   assert(!relevant.length, relevant.slice(0, 3).join(' | '));
@@ -606,3 +635,4 @@ server.close();
 console.log(results.join('\n'));
 console.log(failures ? `\nE2E: ${failures} senaryo BAŞARISIZ` : `\nE2E: ${results.length} senaryonun hepsi geçti`);
 process.exit(failures ? 1 : 0);
+

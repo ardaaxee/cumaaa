@@ -1,4 +1,7 @@
 import {openContextNotebook} from '../utils/notebookContext';
+import { useState } from 'react';
+import { href } from '../hooks/useRoute';
+import '../styles/study-tools.css';
 import type { Question } from '../domain/types';
 import { getTopicRef } from '../data/curriculum';
 import { OPTION_LETTERS } from '../utils/ids';
@@ -155,18 +158,31 @@ export function Options({
 }
 
 export function SolutionBlock({ q }: { q: Question }) {
+  return <GuidedSolution key={q.id} q={q} />;
+}
+
+function GuidedSolution({ q }: { q: Question }) {
   const steps = q.solution.split(/\n+/).map((s) => s.trim()).filter(Boolean);
+  const [guided, setGuided] = useState(false);
+  const [visible, setVisible] = useState(1);
+  const topic = getTopicRef(q.topic);
   return (
     <div className="stack solution-block">
+      <div className="solution-answer"><b>Doğru cevap: {OPTION_LETTERS[q.correctAnswer]}</b> · {q.options[q.correctAnswer]}</div>
       <div className="solution-main">
         <div className="eyebrow">Çözüm yolu</div>
+        {steps.length > 1 && <div className="solution-step-controls">
+          <button type="button" className="btn small" aria-pressed={guided} onClick={() => { setGuided(!guided); setVisible(1); }}>{guided ? 'Tüm çözümü göster' : 'Adım adım incele'}</button>
+          {guided && <span className="small" role="status">{Math.min(visible, steps.length)} / {steps.length} adım</span>}
+        </div>}
         {steps.length > 1 ? (
           <ol className="solution-steps">
-            {steps.map((step, i) => <li key={i} className="pre-line">{step.replace(/^\d+[.)]\s*/, '')}</li>)}
+            {steps.slice(0, guided ? visible : steps.length).map((step, i) => <li key={i} className="pre-line">{step.replace(/^\d+[.)]\s*/, '')}</li>)}
           </ol>
         ) : (
           <div className="pre-line">{q.solution}</div>
         )}
+        {guided && visible < steps.length && <button type="button" className="btn small primary" onClick={() => setVisible(n => n + 1)}>Sonraki çözüm adımı →</button>}
       </div>
       <div className="solution-learning-grid">
         <div className="callout solution-hint">
@@ -188,6 +204,7 @@ export function SolutionBlock({ q }: { q: Question }) {
         <span>Ölçülen kazanım</span>
         <b>{q.outcome}</b>
       </div>
+      {topic && <a className="btn small" href={href(`/konu/${q.topic}`)}>📖 {topic.topic.name} · Konuyu tekrar et</a>}
     </div>
   );
 }

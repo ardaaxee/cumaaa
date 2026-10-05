@@ -1,4 +1,6 @@
 import {PandaDressingRoom} from '../components/PandaDressingRoom';
+import { PandaStudyMissions } from '../components/PandaStudyMissions';
+import { dailyMissions } from '../utils/studyTools';
 import {equipPandaStyle} from '../utils/pandaStyle';
 import {sanitizePandaPlants,waterPandaPlant} from '../utils/pandaPlants';
 import {PandaRoutinePose} from '../components/PandaRoutinePose';
@@ -1070,14 +1072,8 @@ export default function PetPage() {
 
   const today = dayKey();
   const d = useMemo(() => dashboard(state, today), [state, today]);
-  const doneTasks = state.tasks.filter((t) => t.date === today && t.done).length;
-  const questQuestions = Math.max(10, Math.min(30, Math.round(state.profile.dailyQuestionGoal * 0.35)));
-  const questMinutes = Math.max(20, Math.min(60, Math.round(state.profile.dailyStudyMinutes * 0.25)));
-  const quests = [
-    { href: '#/testler', icon: '⚡', label: questQuestions + ' soru çöz', current: Math.min(questQuestions, d.todayQuestions), target: questQuestions, done: d.todayQuestions >= questQuestions },
-    { href: '#/odak', icon: '⏱️', label: questMinutes + ' dk odaklan', current: Math.min(questMinutes, d.todayMinutes), target: questMinutes, done: d.todayMinutes >= questMinutes },
-    { href: '#/plan', icon: '✓', label: '1 plan görevi bitir', current: Math.min(1, doneTasks), target: 1, done: doneTasks >= 1 },
-  ];
+  const doneTasks = state.tasks.filter(t => t.date === today && t.done).length;
+  const quests = dailyMissions(state, today).map(mission => ({ ...mission, label: mission.title }));
   const questDone = quests.filter((q) => q.done).length;
 
   const dailyStudyProgress = Math.min(
@@ -1379,15 +1375,7 @@ export default function PetPage() {
         setSceneMessage(message);
         later(() => { setActivity('idle'); setEmotion('neutral'); setSceneMessage(null); }, 6500);
       }} />
-      <section className="panda-study-card" aria-label="Bugünkü çalışma">
-        <div><span className="panda-study-label">BİRLİKTE İLERLEYELİM</span>
-          <h2>Bir mola, sonra küçük bir adım.</h2>
-          <p>Bugün {d.todayQuestions} soru · {Math.round(d.todayMinutes)} dk çalışma</p>
-          <ProgressBar value={dailyStudyProgress} label="Günlük hedef" />
-        </div>
-        <div className="panda-study-links"><a href="#/odak">Odaklanmaya geç</a><a href="#/testler">Soru çöz</a></div>
-        <div className="panda-daily-quests">{quests.map((q) => <a key={q.href} href={q.href}><span>{q.done ? '✓' : q.icon} {q.label}</span><b>{Math.round(q.current)}/{q.target}</b></a>)}</div>
-      </section>
+      <PandaStudyMissions />
       <details className="card section pet-game-drawer">
         <summary>
           <span>
