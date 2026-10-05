@@ -15,9 +15,10 @@
     "coverage": "vitest run --coverage",
     "release:check": "npm test && npm run build && node scripts/check-release.mjs && npm run audit:content",
     "gen:content": "node --experimental-strip-types --no-warnings scripts/gen-content-index.mjs",
-    "pretest": "npm run gen:content",
+    "pretest": "npm run gen:content && npm run test:study",
     "e2e": "node scripts/e2e.mjs",
-    "audit:content": "node --experimental-strip-types --no-warnings scripts/audit-content.mjs"
+    "audit:content": "node --experimental-strip-types --no-warnings scripts/audit-content.mjs",
+    "test:study": "node --experimental-strip-types tests/studyTools.test.mjs"
   },
   "engines": {
     "node": ">=20"
