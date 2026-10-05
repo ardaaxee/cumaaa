@@ -48,3 +48,12 @@ jobs:
 
       - name: E2E (real browser, phone size)
         run: npm run e2e
+
+      - name: Upload panda visual review
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: panda-visual-review
+          path: yks/test-results/panda-*.png
+          if-no-files-found: ignore
+          retention-days: 5
