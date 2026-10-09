@@ -13,7 +13,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
 
 concurrency:
   group: yks-play-${{ github.ref }}
@@ -75,3 +75,15 @@ jobs:
           name: iyiki-yks-apk
           path: yks-play/app/build/outputs/apk/release/app-release.apk
           if-no-files-found: error
+      # İmza anahtarı Actions'ta yoksa: imzasız paket ayrı bir dala yazılır, imzalama yerelde (jarsigner) yapılır.
+      - name: Publish unsigned bundle to yks-play-dist branch
+        if: env.YKS_KEYSTORE_FILE == ''
+        run: |
+          mkdir -p "$RUNNER_TEMP/dist" && cp yks-play/app/build/outputs/bundle/release/app-release.aab "$RUNNER_TEMP/dist/iyiki-yks-unsigned.aab"
+          cd "$RUNNER_TEMP/dist"
+          git init -q -b yks-play-dist
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          echo "Kaynak: ${GITHUB_SHA} · sürüm 1.0.${GITHUB_RUN_NUMBER} (versionCode ${GITHUB_RUN_NUMBER})" > README.txt
+          git add . && git commit -qm "İmzasız Play paketi ${GITHUB_SHA::7} (#${GITHUB_RUN_NUMBER})"
+          git push -f "https://x-access-token:${{ github.token }}@github.com/${GITHUB_REPOSITORY}.git" HEAD:yks-play-dist
