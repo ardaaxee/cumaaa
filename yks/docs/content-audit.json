@@ -1,0 +1,118 @@
+{
+  "scope": "Tüm derslerde yapısal tutarlılık, konu/alt konu kapsaması, seçenek ve cevap indisi bütünlüğü, çözümlü örneklerin doluluğu.",
+  "limitation": "Bu denetim tüm cevapların bilimsel doğruluğunu kanıtlamaz. Bağımsız sayısal kontroller tests/numericalContent.test.ts içinde ayrı yürütülür; kalan içerik uzman incelemesi gerektirir.",
+  "totals": {
+    "subjects": 15,
+    "topics": 188,
+    "lessons": 188,
+    "questions": 2929
+  },
+  "subjects": [
+    {
+      "subject": "ayt-biyoloji",
+      "topics": 15,
+      "subtopics": 64,
+      "lessons": 15,
+      "questions": 226
+    },
+    {
+      "subject": "ayt-fizik",
+      "topics": 22,
+      "subtopics": 78,
+      "lessons": 22,
+      "questions": 358
+    },
+    {
+      "subject": "ayt-geometri",
+      "topics": 8,
+      "subtopics": 32,
+      "lessons": 8,
+      "questions": 120
+    },
+    {
+      "subject": "ayt-kimya",
+      "topics": 12,
+      "subtopics": 57,
+      "lessons": 12,
+      "questions": 187
+    },
+    {
+      "subject": "ayt-matematik",
+      "topics": 18,
+      "subtopics": 70,
+      "lessons": 18,
+      "questions": 282
+    },
+    {
+      "subject": "tyt-biyoloji",
+      "topics": 8,
+      "subtopics": 31,
+      "lessons": 8,
+      "questions": 121
+    },
+    {
+      "subject": "tyt-cografya",
+      "topics": 13,
+      "subtopics": 38,
+      "lessons": 13,
+      "questions": 195
+    },
+    {
+      "subject": "tyt-din",
+      "topics": 6,
+      "subtopics": 22,
+      "lessons": 6,
+      "questions": 90
+    },
+    {
+      "subject": "tyt-felsefe",
+      "topics": 8,
+      "subtopics": 28,
+      "lessons": 8,
+      "questions": 120
+    },
+    {
+      "subject": "tyt-fizik",
+      "topics": 11,
+      "subtopics": 46,
+      "lessons": 11,
+      "questions": 188
+    },
+    {
+      "subject": "tyt-geometri",
+      "topics": 11,
+      "subtopics": 38,
+      "lessons": 11,
+      "questions": 169
+    },
+    {
+      "subject": "tyt-kimya",
+      "topics": 11,
+      "subtopics": 43,
+      "lessons": 11,
+      "questions": 171
+    },
+    {
+      "subject": "tyt-matematik",
+      "topics": 20,
+      "subtopics": 68,
+      "lessons": 20,
+      "questions": 312
+    },
+    {
+      "subject": "tyt-tarih",
+      "topics": 13,
+      "subtopics": 45,
+      "lessons": 13,
+      "questions": 195
+    },
+    {
+      "subject": "tyt-turkce",
+      "topics": 12,
+      "subtopics": 39,
+      "lessons": 12,
+      "questions": 195
+    }
+  ],
+  "issues": []
+}
