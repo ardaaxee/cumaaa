@@ -1,0 +1,890 @@
+import type { LessonSeed } from '../../domain/types';
+
+export const lessons: LessonSeed[] = [
+  // ================================================================ Doğa ve İnsan
+  {
+    topicId: 'tytcog-doga-ve-insan',
+    intro:
+      "Coğrafya, insan ile doğal ortam arasındaki karşılıklı etkileşimi inceleyen bilimdir. Bir yerin iklimi, yer şekilleri, suları, toprağı ve bitki örtüsü o yerde yaşayan insanların ne ürettiğini, nasıl ev yaptığını ve nereye yerleştiğini etkiler; insan da barajlar, yollar, şehirler kurarak doğayı değiştirir.\n\nBu konuda coğrafyanın bölümlerini, coğrafi ilkeleri (dağılış, bağlantı, nedensellik) ve dört doğal sistemi (atmosfer, hidrosfer, litosfer, biyosfer) öğreneceksin. TYT’de bu konu çoğu zaman bir paragrafı “hangi ilkeyle açıklanır?” ya da “doğanın insana mı, insanın doğaya mı etkisi?” sorusuyla okumanı ister.",
+    prerequisites: [
+      "Yeryüzündeki temel doğal unsurları (dağ, ova, akarsu, orman) tanımak",
+      "Neden-sonuç ilişkisi kurabilmek",
+      "Harita üzerinde bir yeri bulabilmek",
+    ],
+    concepts: [
+      { term: "Fiziki coğrafya", definition: "İklim, yer şekilleri, su, toprak ve bitki örtüsü gibi doğal unsurları inceleyen coğrafya bölümü." },
+      { term: "Beşerî ve ekonomik coğrafya", definition: "Nüfus, yerleşme, göç ve ekonomik faaliyetler gibi insan kaynaklı unsurları inceleyen bölüm." },
+      { term: "Dağılış ilkesi", definition: "Bir olayın ya da unsurun yeryüzünde nerelerde ve nasıl yayıldığını belirleme ilkesi (“Nerede?”)." },
+      { term: "Bağlantı (ilişki) ilkesi", definition: "Bir unsurun başka unsurlarla ilişkisini ve karşılıklı etkisini inceleme ilkesi." },
+      { term: "Nedensellik ilkesi", definition: "Bir olayın oluş nedenlerini araştırma ilkesi (“Neden?”)." },
+      { term: "Doğal sistemler", definition: "Atmosfer (hava küre), hidrosfer (su küre), litosfer (taş küre) ve biyosfer (canlı küre); birbirini sürekli etkiler." },
+    ],
+    formulas: [
+      { expr: "“Nerede, hangi alanda görülür?” → dağılış ilkesi", meaning: "Metin bir unsurun yayılış alanını anlatıyorsa dağılış ilkesi kullanılmıştır." },
+      { expr: "“Neden oluştu?” → nedensellik ilkesi", meaning: "Metin bir olayın sebebini açıklıyorsa nedensellik ilkesi kullanılmıştır." },
+      { expr: "“A, B’yi nasıl etkiler?” → bağlantı ilkesi", meaning: "İki unsur arasındaki ilişki kuruluyorsa bağlantı ilkesi kullanılmıştır." },
+      { expr: "Doğa → insan / insan → doğa", meaning: "Özne insan faaliyetiyse insanın doğaya, özne doğal koşulsa doğanın insana etkisidir." },
+    ],
+    logic:
+      "Coğrafya tek bir unsuru ayrı ayrı değil, sistem olarak ele alır. Örneğin yağışın azalması (atmosfer) akarsu debisini düşürür (hidrosfer), bitki örtüsünü seyrekleştirir (biyosfer), toprağın rüzgârla aşınmasını artırır (litosfer) ve sonunda tarım yapan insanı göçe zorlayabilir. Bu zincir, bir unsurdaki değişimin diğerlerini de değiştirdiğini gösterir.\n\nİlkeler de aynı mantığa dayanır: bir olayı önce yerinde tanımlarız (dağılış), sonra nedenini ararız (nedensellik), en sonunda diğer unsurlarla bağını kurarız (bağlantı).",
+    examples: [
+      {
+        level: 'kolay',
+        problem: "“Doğu Karadeniz’de evlerin çatıları, bol yağış nedeniyle dik yapılır.” cümlesi hangi etkileşime örnektir?",
+        steps: [
+          "Cümlede belirleyici olan doğal koşul yağıştır.",
+          "İnsan bu doğal koşula uyum sağlayarak mimarisini şekillendirmiştir.",
+        ],
+        answer: "Doğanın (iklimin) insan yaşamına etkisi.",
+      },
+      {
+        level: 'orta',
+        problem: "“Çay tarımı Türkiye’de en çok Doğu Karadeniz kıyılarında yapılır; çünkü çay her mevsim yağış ve ılıman sıcaklık ister.” cümlesinde hangi ilkeler kullanılmıştır?",
+        steps: [
+          "“En çok Doğu Karadeniz kıyılarında” ifadesi yayılış alanını belirtir → dağılış.",
+          "“Çünkü … yağış ister” ifadesi nedeni açıklar → nedensellik.",
+        ],
+        answer: "Dağılış ve nedensellik ilkeleri.",
+      },
+    ],
+    osymThinking:
+      "Sorular genellikle kısa bir metin verip hangi coğrafi ilkenin ya da hangi doğal sistemin öne çıktığını sorar. İpucu soru kökündeki fiillerdedir: “yayılmıştır, görülür” dağılışı; “çünkü, nedeniyle” nedenselliği; “etkilemektedir” bağlantıyı işaret eder. Ayrıca “insanın doğaya etkisi” istenen sorularda, doğanın insana etkisini anlatan cümle çeldirici olarak konur.",
+    commonMistakes: [
+      "“Nedeniyle” kelimesini gördüğü her cümlede yalnızca nedensellik ilkesini seçip dağılış ifadesini gözden kaçırmak.",
+      "Baraj kurulmasını doğanın insana etkisi saymak; baraj insanın doğaya müdahalesidir.",
+      "Hidrosfer ile biyosferi karıştırmak; göldeki balık biyosfer, gölün suyu hidrosferdir.",
+    ],
+    tips: [
+      "Cümlenin öznesini bul: insan faaliyeti mi, doğal koşul mu? Etkileşimin yönü buradan anlaşılır.",
+      "Bir cümlede birden fazla ilke olabilir; her yan cümleyi ayrı değerlendir.",
+    ],
+    summary: [
+      "Coğrafya insan–doğa etkileşimini inceler; fiziki ve beşerî-ekonomik bölümleri vardır.",
+      "Dağılış “nerede?”, nedensellik “neden?”, bağlantı “nasıl ilişkili?” sorusunu yanıtlar.",
+      "Atmosfer, hidrosfer, litosfer ve biyosfer birbirine bağlı sistemlerdir.",
+      "Etkileşim iki yönlüdür: doğa insanı, insan doğayı etkiler.",
+    ],
+  },
+
+  // ================================================================ Dünya’nın Şekli ve Hareketleri
+  {
+    topicId: 'tytcog-dunyanin-sekli-hareketleri',
+    intro:
+      "Dünya kutuplardan basık, ekvatordan şişkin bir şekle (geoit) sahiptir ve bu şekil yeryüzündeki pek çok farkın temel nedenidir. Küresellik yüzünden Güneş ışınları ekvatordan kutuplara doğru giderek daha eğik gelir; bu da sıcaklığın ekvatordan kutuplara doğru azalmasına yol açar.\n\nDünya kendi ekseni etrafında batıdan doğuya döner (günlük hareket) ve Güneş etrafında dolanır (yıllık hareket). Günlük hareket gece-gündüzü ve yerel saat farklarını; eksen eğikliğiyle birlikte yıllık hareket ise mevsimleri oluşturur. Bu konuda en çok işlem sorusu, boylam farkından yerel saat hesabıdır: 1° boylam = 4 dakika.",
+    prerequisites: [
+      "Açı ve derece kavramı",
+      "Saat–dakika dönüşümü (1 saat = 60 dakika)",
+      "Kuzey, güney, doğu, batı yönleri",
+    ],
+    concepts: [
+      { term: "Paralel (enlem dairesi)", definition: "Ekvatora paralel çizilen hayali daireler; ekvatordan kutuplara doğru çevreleri küçülür. İki paralel arası her yerde yaklaşık 111 km’dir." },
+      { term: "Meridyen (boylam yarım dairesi)", definition: "Kutuplardan geçen yarım daireler; hepsinin boyu eşittir. Başlangıç meridyeni Greenwich’ten geçer." },
+      { term: "Yerel saat", definition: "Güneş’in bir meridyen üzerinde en yüksek konuma geldiği an (öğle, 12.00) esas alınarak belirlenen saat." },
+      { term: "Mutlak konum", definition: "Bir yerin enlem ve boylamla belirlenen kesin (matematik) konumu." },
+      { term: "Göreceli konum", definition: "Bir yerin çevresindeki denizlere, ülkelere, geçitlere göre konumu (özel konum)." },
+      { term: "Dönenceler ve kutup daireleri", definition: "Yengeç (≈23°27′ K) ve Oğlak (≈23°27′ G) dönenceleri Güneş ışınlarının dik gelebildiği sınırlar; kutup daireleri (≈66°33′) 24 saat gece/gündüz görülebilen alanların sınırıdır." },
+    ],
+    formulas: [
+      { expr: "1° boylam farkı = 4 dakika yerel saat farkı", meaning: "Dünya 360°’yi 24 saatte döner: 24·60/360 = 4 dk." },
+      { expr: "15° boylam = 1 saat", meaning: "60 dk / 4 dk = 15°; saat dilimleri bu yüzden 15°’lik aralıklara dayanır." },
+      { expr: "Doğudaki yerin saati ileridir", meaning: "Dünya batıdan doğuya döndüğü için Güneş doğudaki yerde daha önce doğar." },
+      { expr: "Ekinokslarda öğle geliş açısı = 90° − enlem", meaning: "21 Mart ve 23 Eylül’de ışınlar ekvatora dik gelir." },
+      { expr: "21 Haziran, Kuzey Yarım Küre (enlem > 23°27′): açı = 90° − enlem + 23°27′", meaning: "Işınlar Yengeç Dönencesi’ne dik geldiği için kuzeydeki yerlerde açı büyür." },
+      { expr: "21 Aralık, Kuzey Yarım Küre: açı = 90° − enlem − 23°27′", meaning: "Işınlar Oğlak Dönencesi’ne dik geldiği için kuzeydeki yerlerde açı küçülür." },
+    ],
+    logic:
+      "Dünya 24 saatte 360° döndüğü için her saat 15°, her 4 dakikada 1° döner. Batıdan doğuya dönüş, Güneş’in önce doğudaki meridyenlerde doğmasına yol açar; bu yüzden doğudaki yerin yerel saati her zaman ileridedir.\n\nMevsimlerin nedeni Dünya’nın Güneş’e olan uzaklığı değil, eksen eğikliğidir. Eksen 23°27′ eğik olduğu için yıl boyunca ışınların dik geldiği yer iki dönence arasında yer değiştirir; bir yarım küre Güneş’e dönükken orada gündüzler uzar, ışınlar daha dik gelir ve yaz yaşanır. Dünya’nın küreselliği ise aynı anda farklı enlemlerde farklı geliş açısı oluşturarak sıcaklığın enleme göre değişmesini sağlar.",
+    examples: [
+      {
+        level: 'kolay',
+        problem: "A merkezi 30° D, B merkezi 45° D boylamındadır. A’da yerel saat 10.00 iken B’de yerel saat kaçtır?",
+        steps: [
+          "Boylam farkı: 45 − 30 = 15°.",
+          "Saat farkı: 15 · 4 = 60 dk = 1 saat.",
+          "B daha doğuda olduğu için saati ileridir: 10.00 + 1 saat.",
+        ],
+        answer: "11.00",
+      },
+      {
+        level: 'orta',
+        problem: "Türkiye yaklaşık 26° D ile 45° D boylamları arasındadır. En doğu ile en batı uçları arasındaki yerel saat farkı kaç dakikadır?",
+        steps: [
+          "Boylam farkı: 45 − 26 = 19°.",
+          "19 · 4 = 76 dk.",
+        ],
+        answer: "76 dakika (1 saat 16 dakika).",
+      },
+      {
+        level: 'zor',
+        problem: "40° K enleminde bulunan bir şehirde 21 Haziran ve 21 Aralık günlerinde öğle vakti Güneş ışınlarının geliş açıları arasındaki fark kaç derecedir?",
+        steps: [
+          "21 Haziran: 90° − 40° + 23°27′ = 73°27′.",
+          "21 Aralık: 90° − 40° − 23°27′ = 26°33′.",
+          "Fark: 73°27′ − 26°33′ = 46°54′ (eksen eğikliğinin iki katı).",
+        ],
+        answer: "46°54′",
+      },
+    ],
+    osymThinking:
+      "Saat sorularında ÖSYM tarzı tuzak, yönü karıştırmaktır: doğudaki yerin saati ileridir. Bazen iki farklı yarım küredeki (doğu–batı) boylamlar verilir; o zaman boylam farkı toplanarak bulunur. Mevsim sorularında ise bir tarih ve iki şehir verilip “gündüz süresi, geliş açısı, gölge boyu” karşılaştırılır; ışınların dik geldiği paralele yakın olan yerin açısı büyük, gölgesi kısa olur.",
+    commonMistakes: [
+      "Doğu ve batı boylamları arasındaki farkı çıkararak bulmak; farklı yarım kürelerde boylamlar toplanır.",
+      "Batıdaki yerin saatini ileri sanmak.",
+      "Mevsimlerin nedenini Dünya–Güneş uzaklığı olarak düşünmek; asıl neden eksen eğikliğidir.",
+      "Meridyenler arası uzaklığın her yerde eşit olduğunu sanmak; kutuplara doğru azalır (paraleller arası sabittir).",
+    ],
+    tips: [
+      "Saat sorusunda önce “hangisi daha doğuda?” diye sor, sonra 4 ile çarp.",
+      "21 Mart ve 23 Eylül’de tüm dünyada gece ile gündüz eşittir (kutuplar hariç özel durum).",
+      "Gölge boyu, geliş açısı ile ters orantılıdır: açı büyüdükçe gölge kısalır.",
+    ],
+    summary: [
+      "Dünya batıdan doğuya döner: 1° = 4 dk, 15° = 1 saat; doğunun saati ileridir.",
+      "Küresellik → ekvatordan kutuplara geliş açısı ve sıcaklık azalır.",
+      "Eksen eğikliği + yıllık hareket → mevsimler ve gece-gündüz süresi farkı.",
+      "21 Haziran’da ışınlar Yengeç, 21 Aralık’ta Oğlak dönencesine, ekinokslarda ekvatora dik gelir.",
+      "Paraleller arası ≈111 km sabit; meridyenler arası kutuplara doğru azalır.",
+    ],
+  },
+
+  // ================================================================ Harita Bilgisi
+  {
+    topicId: 'tytcog-harita-bilgisi',
+    intro:
+      "Harita, yeryüzünün tamamının ya da bir parçasının kuşbakışı görünümünün belirli bir oranda küçültülerek düzleme aktarılmış hâlidir. Küre şeklindeki Dünya düzleme aktarılırken bozulma kaçınılmazdır; projeksiyon yöntemleri bu bozulmayı istenen bölgede en aza indirmeye çalışır.\n\nHaritanın en çok soru çıkan unsuru ölçektir: haritadaki uzunluğun gerçek uzunluğa oranı. Ölçek paydası küçüldükçe ölçek büyür, harita ayrıntılı hâle gelir. İzohips (eş yükselti eğrisi) haritalarında ise yükselti, eğim ve yer şekilleri okunur.",
+    prerequisites: [
+      "Oran-orantı ve kesir işlemleri",
+      "Uzunluk birimleri dönüşümü (1 km = 100.000 cm)",
+      "Alan kavramı (km², cm²)",
+    ],
+    concepts: [
+      { term: "Ölçek", definition: "Haritadaki uzunluğun gerçek uzunluğa oranı; kesir ölçek (1/500.000) veya çizgi ölçek olarak gösterilir." },
+      { term: "Büyük ölçekli harita", definition: "Paydası küçük olan harita; ayrıntı fazla, bozulma az, gösterilen alan dardır (ör. 1/25.000)." },
+      { term: "Küçük ölçekli harita", definition: "Paydası büyük olan harita; ayrıntı az, gösterilen alan geniştir (ör. 1/20.000.000 dünya haritası)." },
+      { term: "İzohips", definition: "Deniz seviyesinden aynı yükseklikteki noktaları birleştiren eğri; eğriler sıklaştıkça eğim artar." },
+      { term: "Eküidistans", definition: "Ardışık iki izohips arasındaki yükselti farkı; bir haritada sabittir." },
+      { term: "Projeksiyon", definition: "Küre yüzeyini düzleme aktarma yöntemi; silindirik (ekvator çevresi), konik (orta enlemler), düzlem (kutuplar) türleri vardır." },
+    ],
+    formulas: [
+      { expr: "Ölçek = Harita uzunluğu / Gerçek uzunluk", meaning: "Temel bağıntı; birimler aynı olmalıdır (genellikle cm)." },
+      { expr: "Gerçek uzunluk = Harita uzunluğu × Ölçek paydası", meaning: "1/200.000 ölçekte 3 cm = 600.000 cm = 6 km." },
+      { expr: "Gerçek alan = Harita alanı × (Ölçek paydası)²", meaning: "Alan iki boyutlu olduğu için payda karesiyle çarpılır." },
+      { expr: "1 km = 100.000 cm; 1 km² = 10¹⁰ cm²", meaning: "Birim dönüşümünde en sık kullanılan eşitlikler." },
+      { expr: "Payda k kat büyürse harita uzunluğu k kat, harita alanı k² kat küçülür", meaning: "Aynı alan farklı ölçekli haritalarda karşılaştırılırken kullanılır." },
+      { expr: "Eğim (%) = Yükselti farkı / Yatay uzaklık × 100", meaning: "İzohips haritalarında iki nokta arasındaki ortalama eğim." },
+    ],
+    logic:
+      "Ölçek bir küçültme oranıdır. 1/100.000 ölçek, haritadaki 1 cm’nin gerçekte 100.000 cm yani 1 km olduğunu söyler. Payda büyüdükçe aynı kâğıda daha büyük bir alan sığdırılır; bu yüzden ayrıntılar kaybolur ve harita “küçük ölçekli” olur.\n\nAlan hesabında payda karesi alınır, çünkü küçültme hem enine hem boyuna uygulanır. İzohips haritalarında eğriler arası yükselti farkı sabit olduğundan, eğrilerin birbirine yakın olduğu yerde kısa yatay mesafede aynı yükselti farkı aşılır; yani eğim fazladır.",
+    examples: [
+      {
+        level: 'kolay',
+        problem: "1/250.000 ölçekli bir haritada iki şehir arası 8 cm’dir. Gerçek uzaklık kaç km’dir?",
+        steps: [
+          "8 · 250.000 = 2.000.000 cm.",
+          "2.000.000 / 100.000 = 20 km.",
+        ],
+        answer: "20 km",
+      },
+      {
+        level: 'orta',
+        problem: "Gerçekte 45 km olan bir yol, bir haritada 9 cm gösterilmiştir. Haritanın ölçeği nedir?",
+        steps: [
+          "45 km = 4.500.000 cm.",
+          "Ölçek = 9 / 4.500.000 = 1/500.000.",
+        ],
+        answer: "1/500.000",
+      },
+      {
+        level: 'zor',
+        problem: "1/200.000 ölçekli haritada 5 cm² olarak gösterilen bir göl, 1/400.000 ölçekli haritada kaç cm² olur ve gerçek alanı kaç km²’dir?",
+        steps: [
+          "Payda 2 katına çıktığı için alan 2² = 4 kat küçülür: 5 / 4 = 1,25 cm².",
+          "Gerçek alan = 5 · (200.000)² = 2 · 10¹¹ cm².",
+          "2 · 10¹¹ / 10¹⁰ = 20 km².",
+        ],
+        answer: "1,25 cm²; 20 km²",
+      },
+    ],
+    osymThinking:
+      "Ölçek soruları çoğunlukla birim dönüşümü üzerinden tuzak kurar (km → cm). Ayrıca “aynı alan daha büyük ölçekli haritada gösterilirse ne değişir?” biçiminde yorum soruları gelir: ayrıntı artar, harita alanı büyür, gerçek alan değişmez. İzohips sorularında ise eğim, akarsuyun akış yönü ve görüş (bir noktadan diğerinin görünüp görünmediği) sorgulanır.",
+    commonMistakes: [
+      "Alan hesabında paydanın karesini almayı unutmak.",
+      "Büyük ölçeği “paydası büyük” sanmak; tam tersi, paydası küçük olan büyük ölçeklidir.",
+      "Ölçek değişince gerçek uzunluğun da değiştiğini düşünmek; yalnızca haritadaki uzunluk değişir.",
+      "km–cm dönüşümünde sıfır sayısını karıştırmak (1 km = 10⁵ cm).",
+    ],
+    tips: [
+      "Önce her şeyi cm’ye çevir, sonra oran kur; en sonda km’ye dön.",
+      "İzohipste kapalı eğrilerin merkezine doğru yükselti artıyorsa tepe, azalıyorsa çukurdur.",
+      "Akarsular izohipsleri V şeklinde keser ve V’nin sivri ucu yükseltinin arttığı yöne (kaynağa) bakar.",
+    ],
+    summary: [
+      "Ölçek = harita uzunluğu / gerçek uzunluk; gerçek uzunluk = harita uzunluğu × payda.",
+      "Alan için payda karesi kullanılır.",
+      "Payda küçük → büyük ölçek → ayrıntı fazla, alan dar.",
+      "İzohipsler sıklaşınca eğim artar; eküidistans sabittir.",
+      "Silindirik ekvator, konik orta enlem, düzlem projeksiyon kutup çevresini en az bozar.",
+    ],
+  },
+
+  // ================================================================ İklim Bilgisi
+  {
+    topicId: 'tytcog-iklim-bilgisi',
+    intro:
+      "Hava durumu kısa süreli ve dar alandaki atmosfer koşullarıdır; iklim ise geniş bir alanda uzun yıllar boyunca görülen ortalama atmosfer koşullarıdır. İklimi oluşturan elemanlar sıcaklık, basınç, rüzgâr, nem ve yağıştır.\n\nSıcaklık; enlem, yükselti, denize uzaklık, bakı ve okyanus akıntıları gibi faktörlerle değişir. Yükseldikçe sıcaklık azalır (ders kitaplarında genellikle her 200 m’de yaklaşık 1 °C). Basınç farkları rüzgârları, sıcaklık-nem ilişkisi yağışları doğurur. En sonunda bu elemanların birleşimi iklim tiplerini oluşturur ve TYT’de sık sık bir sıcaklık-yağış tablosundan iklim tipi bulman istenir.",
+    prerequisites: [
+      "Dünya’nın şekli ve eksen eğikliğinin sıcaklığa etkisi",
+      "Yüzde ve oran hesapları",
+      "Tablo ve grafik okuma",
+    ],
+    concepts: [
+      { term: "Troposfer", definition: "Atmosferin yere en yakın katmanı; hava olaylarının hemen tamamı burada gerçekleşir. Ekvatorda kalın, kutuplarda incedir." },
+      { term: "Stratosfer", definition: "Troposferin üstündeki katman; ozon tabakası buradadır ve zararlı morötesi ışınları tutar." },
+      { term: "Bağıl nem", definition: "Havadaki mutlak nemin, o sıcaklıkta taşıyabileceği maksimum neme oranının yüzdesi." },
+      { term: "Termik basınç", definition: "Sıcaklık farkından kaynaklanan basınç: ısınan hava yükselir (alçak basınç), soğuyan hava çöker (yüksek basınç)." },
+      { term: "Orografik yağış", definition: "Nemli hava dağ yamacı boyunca yükselip soğuyarak yağış bırakır; Doğu Karadeniz kıyıları tipik örnektir." },
+      { term: "Konveksiyonel yağış", definition: "Yerden ısınan nemli havanın dikey yükselmesiyle oluşan sağanak yağış; ekvatorda her gün, İç Anadolu’da ilkbahar sonunda (kırkikindi) görülür." },
+      { term: "Cephesel yağış", definition: "Sıcak ve soğuk hava kütlelerinin karşılaşmasıyla oluşan yağış; Akdeniz ikliminin kış yağışları bu türdendir." },
+    ],
+    formulas: [
+      { expr: "Sıcaklık azalışı ≈ 0,5 °C / 100 m (1 °C / 200 m)", meaning: "Yükseldikçe sıcaklık azalır; yükselti farkı × 0,5/100 ile hesaplanır." },
+      { expr: "Bağıl nem (%) = Mutlak nem / Maksimum nem × 100", meaning: "Sıcaklık artınca maksimum nem artar; mutlak nem sabitse bağıl nem düşer." },
+      { expr: "Yıllık sıcaklık farkı = En sıcak ay ort. − En soğuk ay ort.", meaning: "Denizellik azaldıkça (karasallık arttıkça) bu fark büyür." },
+      { expr: "Rüzgâr: yüksek basınç → alçak basınç", meaning: "Basınç farkı arttıkça rüzgâr hızı artar." },
+      { expr: "Coriolis: Kuzey Yarım Küre’de sağa, Güney Yarım Küre’de sola sapma", meaning: "Dünya’nın dönüşü nedeniyle hareket eden hava kütleleri saparak eser." },
+    ],
+    logic:
+      "Yükseldikçe sıcaklığın azalmasının nedeni, atmosferin asıl olarak yerden yansıyan ısıyla ısınmasıdır; yerden uzaklaştıkça hava seyrekleşir ve ısıyı daha az tutar. Bu yüzden aynı enlemde yüksek bir yayla, alçak bir kıyıdan daha soğuktur.\n\nYağışın oluşması için nemli havanın yükselip soğuması gerekir; yükselme ısınma (konveksiyon), dağ yamacı (orografik) ya da hava kütlelerinin karşılaşması (cephe) ile sağlanır. Denizler geç ısınıp geç soğuduğu için kıyılarda yıllık sıcaklık farkı azdır; iç kesimlerde ise karalar hızla ısınıp soğuduğundan fark büyüktür. İklim tipi bulunurken önce sıcaklık (en soğuk ay, yıllık fark), sonra yağışın mevsimlere dağılışı incelenir.",
+    examples: [
+      {
+        level: 'kolay',
+        problem: "Deniz kıyısında (0 m) sıcaklık 22 °C iken 1800 m yükseltideki bir yaylada sıcaklık kaç °C olur? (Her 200 m’de 1 °C azalış)",
+        steps: [
+          "1800 / 200 = 9 °C azalış.",
+          "22 − 9 = 13 °C.",
+        ],
+        answer: "13 °C",
+      },
+      {
+        level: 'orta',
+        problem: "Bir hava kütlesinde mutlak nem 12 g/m³, o sıcaklıktaki maksimum nem 16 g/m³’tür. Bağıl nem yüzde kaçtır?",
+        steps: [
+          "Bağıl nem = 12 / 16 × 100.",
+          "= %75.",
+        ],
+        answer: "%75",
+      },
+      {
+        level: 'zor',
+        problem: "Bir istasyonda en soğuk ay 9 °C, en sıcak ay 26 °C; yağışın büyük bölümü kışın düşüyor, yaz ayları neredeyse kurak. İklim tipi nedir?",
+        steps: [
+          "En soğuk ay 0 °C’nin üzerinde → kışlar ılık.",
+          "Yazlar sıcak ve kurak, yağış kışın → cephesel kış yağışları.",
+          "Bu özellikler Akdeniz iklimini gösterir.",
+        ],
+        answer: "Akdeniz iklimi",
+      },
+    ],
+    osymThinking:
+      "ÖSYM tarzı iklim soruları genellikle 12 aylık sıcaklık-yağış tablosu ya da grafiği verir ve iklim tipini veya o iklimin doğal bitki örtüsünü sorar. Tuzak, yalnızca toplam yağışa bakmaktır; asıl belirleyici yağışın mevsimlere dağılışı ve kış sıcaklığıdır. Güney Yarım Küre istasyonlarında mevsimlerin ters olduğu da (en sıcak ay Ocak) sık kullanılan bir çeldiricidir.",
+    commonMistakes: [
+      "Toplam yağış fazla diye her istasyonu Karadeniz iklimi sanmak; yazın kurak geçen yer Akdeniz iklimidir.",
+      "Sıcaklık artınca bağıl nemin de arttığını düşünmek; mutlak nem sabitse bağıl nem azalır.",
+      "Güney Yarım Küre verisinde Temmuz’u yaz ayı saymak.",
+      "Ozon tabakasını troposferde sanmak; stratosferdedir.",
+    ],
+    tips: [
+      "İklim tablosunda önce yaz yağışına bak: yaz kurak → Akdeniz; her mevsim yağışlı → Karadeniz/okyanusal; yaz yağışlı → muson/ekvatoral olabilir.",
+      "Yıllık sıcaklık farkı çok küçük ve her ay 25 °C civarı → ekvatoral iklim.",
+      "Yükselti sorularında 200’e böl, çıkan sayı azalan derecedir.",
+    ],
+    summary: [
+      "Hava durumu kısa süreli, iklim uzun süreli ortalamadır.",
+      "Sıcaklık yükseldikçe ≈0,5 °C/100 m azalır; enlem, yükselti, denizellik belirleyicidir.",
+      "Rüzgâr yüksek basınçtan alçak basınca eser; Coriolis kuzeyde sağa saptırır.",
+      "Bağıl nem = mutlak / maksimum × 100.",
+      "Yağış türleri: konveksiyonel, orografik, cephesel.",
+      "Akdeniz: yaz kurak; Karadeniz: her mevsim yağışlı; karasal: kış soğuk, yıllık fark büyük.",
+    ],
+  },
+
+  // ================================================================ Yer Şekilleri
+  {
+    topicId: 'tytcog-yer-sekilleri',
+    intro:
+      "Yeryüzündeki dağlar, ovalar, vadiler ve kıyı şekilleri iki büyük kuvvetin eseridir. İç kuvvetler (orojenez, epirojenez, volkanizma, deprem) enerjisini yerin içinden alır ve yeryüzünü yükseltip alçaltarak ana şekilleri oluşturur. Dış kuvvetler (akarsu, rüzgâr, buzul, dalga, yer altı suyu) ise enerjisini Güneş’ten ve yer çekiminden alır; yüksek yerleri aşındırır, çukurları doldurur.\n\nBu konu ayrıca kayaç türlerini ve jeolojik zamanları kapsar. Örneğin Zonguldak taş kömürü I. jeolojik zamanda, Türkiye’deki kıvrım dağlarının büyük kısmı III. zamanda (Alp orojenezi) oluşmuştur. TYT’de çoğunlukla bir şeklin hangi dış kuvvetle oluştuğu sorulur.",
+    prerequisites: [
+      "İklim tipleri ve yağış-sıcaklık ilişkisi",
+      "Harita okuma ve yükselti kavramı",
+    ],
+    concepts: [
+      { term: "Orojenez", definition: "Dağ oluşumu: kıvrılma ve kırılma hareketleriyle dağların meydana gelmesi." },
+      { term: "Epirojenez", definition: "Kıta oluşumu: geniş alanların yavaşça yükselmesi veya alçalması; kıyı çizgisinin yer değiştirmesine yol açar." },
+      { term: "Püskürük (magmatik) kayaç", definition: "Magmanın soğumasıyla oluşan kayaç; derinde soğursa granit, yüzeyde soğursa bazalt, andezit." },
+      { term: "Tortul kayaç", definition: "Parçalanan maddelerin ya da çözünmüş minerallerin birikmesiyle oluşan kayaç; kalker, kumtaşı, kil, kömür gibi." },
+      { term: "Başkalaşım kayacı", definition: "Yüksek sıcaklık ve basınç altında değişime uğrayan kayaç; kalkerden mermer, granitten gnays oluşur." },
+      { term: "Karstik şekil", definition: "Kalker, jips gibi kolay çözünen kayaçlarda suyun eritme ve biriktirmesiyle oluşan şekiller: lapya, dolin, uvala, polye; sarkıt, dikit, traverten." },
+      { term: "Delta", definition: "Akarsuyun taşıdığı malzemeyi, gelgit genliği az ve kıyısı sığ denizlere döküldüğü yerde biriktirmesiyle oluşan üçgen şekilli ova." },
+    ],
+    formulas: [
+      { expr: "Nemli-sıcak iklim → kimyasal çözünme; kurak/soğuk iklim → mekanik parçalanma", meaning: "Ayrışma türü iklimle belirlenir." },
+      { expr: "Akarsu: çentik vadi, kanyon, dev kazanı (aşındırma) — menderes, delta, birikinti yelpazesi (biriktirme)", meaning: "Akarsu şekilleri eğim ve akış hızına göre değişir." },
+      { expr: "Rüzgâr: mantarkaya, şahit tepe (aşındırma) — kumul, barkan, lös (biriktirme)", meaning: "Kurak ve bitki örtüsü seyrek alanlarda etkilidir." },
+      { expr: "Buzul: sirk, U vadi, hörgüç kaya (aşındırma) — moren (biriktirme)", meaning: "Yüksek dağlarda ve yüksek enlemlerde etkilidir." },
+      { expr: "Dalga: falez, abrazyon düzlüğü (aşındırma) — kıyı oku, kıyı kordonu, tombolo, lagün (biriktirme)", meaning: "Kıyılarda etkilidir." },
+      { expr: "Karst: lapya, dolin, uvala, polye (erime) — sarkıt, dikit, sütun, traverten (birikme)", meaning: "Kalker gibi çözünebilen kayaçlarda görülür." },
+    ],
+    logic:
+      "İç kuvvetler yeryüzünü engebelendirir, dış kuvvetler düzleştirmeye çalışır; bugünkü görünüm bu iki zıt etkinin toplamıdır. Dış kuvvetlerden hangisinin etkili olacağını iklim belirler: kurak alanlarda bitki örtüsü seyrek olduğu için rüzgâr, soğuk ve yüksek yerlerde buzul, nemli yerlerde akarsu ve kalker alanlarda yer altı suyu öne çıkar.\n\nAkarsu, eğimin fazla olduğu yukarı çığırında derine aşındırır (çentik vadi), eğimin azaldığı aşağı çığırında hızı düştüğü için yük bırakır (menderes, delta). Delta oluşması için akarsuyun bol malzeme getirmesi, kıyının sığ olması ve gelgit ile akıntıların zayıf olması gerekir; bu yüzden gelgit genliği az olan Akdeniz ve Karadeniz kıyılarımızda deltalar gelişmiştir.",
+    examples: [
+      {
+        level: 'kolay',
+        problem: "Pamukkale’deki beyaz basamaklar hangi dış kuvvetin hangi etkisiyle oluşmuştur?",
+        steps: [
+          "Kalsiyum karbonatlı sıcak su kaynağından çıkan su yüzeye akar.",
+          "Suyun içindeki kireç çökelerek basamaklar oluşturur → biriktirme.",
+        ],
+        answer: "Yer altı suyunun (karstik) biriktirmesi: traverten.",
+      },
+      {
+        level: 'orta',
+        problem: "Bir alanda mantarkaya, barkan ve lös birikintileri görülüyor. Bu alanın iklimi hakkında ne söylenebilir?",
+        steps: [
+          "Bu şekillerin tamamı rüzgârın aşındırma ve biriktirmesiyle oluşur.",
+          "Rüzgâr, bitki örtüsünün seyrek olduğu kurak alanlarda etkilidir.",
+        ],
+        answer: "Kurak ya da yarı kurak bir iklim görülür, bitki örtüsü seyrektir.",
+      },
+    ],
+    osymThinking:
+      "Sorular genellikle bir şekil listesi verip ortak dış kuvveti ya da “hangisi farklı süreçle oluşmuştur?” diye sorar. Ayrıca şekillerden iklim çıkarımı istenir: rüzgâr şekilleri kuraklığı, buzul şekilleri soğuk ve yüksekliği, karstik şekiller kalker ve nemi gösterir. Kayaç sorularında mermer–kalker, gnays–granit dönüşümleri kullanılır.",
+    commonMistakes: [
+      "Traverteni akarsu biriktirmesi sanmak; karstik (yer altı suyu) biriktirmedir.",
+      "Kıyı set gölünü (lagün) akarsuyun oluşturduğunu düşünmek; dalga ve akıntıların biriktirmesiyle oluşur.",
+      "Mermeri tortul kayaç saymak; kalkerin başkalaşımıyla oluşur.",
+      "Epirojenezi dağ oluşumu sanmak; geniş alanların yavaş yükselip alçalmasıdır.",
+    ],
+    tips: [
+      "Önce şeklin aşındırma mı biriktirme mi olduğunu, sonra hangi kuvvete ait olduğunu belirle.",
+      "“Sarkıt yukarıdan sarkar, dikit aşağıdan dikilir”; ikisi birleşince sütun olur.",
+      "Taş kömürü I. zaman (Zonguldak), linyit ve petrol ağırlıkla III. zaman, Boğazlar IV. zaman.",
+    ],
+    summary: [
+      "İç kuvvetler: orojenez, epirojenez, volkanizma, deprem — yeryüzünü engebelendirir.",
+      "Dış kuvvetler: akarsu, rüzgâr, buzul, dalga, karst — aşındırır ve biriktirir.",
+      "Kayaçlar: püskürük, tortul, başkalaşım.",
+      "Dış kuvvet türünü iklim belirler: kurak → rüzgâr, soğuk → buzul, kalker + nem → karst.",
+      "Delta için bol alüvyon, sığ kıyı, zayıf gelgit gerekir.",
+    ],
+  },
+
+  // ================================================================ Su, Toprak, Bitki
+  {
+    topicId: 'tytcog-su-toprak-bitki',
+    intro:
+      "Su, toprak ve bitki örtüsü iklim ile yer şekillerinin ortak ürünüdür. Bir akarsuyun yıl içinde akım değişimi (rejimi) beslendiği yağış ve kar erimesine bağlıdır; göllerin oluşumu ise çanağın nasıl meydana geldiğine göre sınıflandırılır: tektonik, volkanik, karstik, buzul, set gölleri gibi.\n\nToprak, kayaçların ayrışması ve organik maddelerle karışmasıyla oluşur. Oluştuğu yerde kalan topraklar (zonal) iklimin damgasını taşır: bozkırda kara toprak (çernozyom), Akdeniz’de kırmızı toprak (terra rossa) gibi. Taşınmış topraklar (azonal) ise alüvyal, kolüvyal, moren ve lös topraklarıdır. Bitki örtüsü de iklimin aynasıdır: yağış ve sıcaklık azaldıkça orman → çalı → ot topluluklarına geçilir.",
+    prerequisites: [
+      "İklim tipleri ve yağış rejimleri",
+      "Dış kuvvetlerin aşındırma ve biriktirme şekilleri",
+    ],
+    concepts: [
+      { term: "Akarsu rejimi", definition: "Akarsuyun akımının yıl içindeki değişimi; yağışın yıl içine dağılışı düzenliyse rejim de düzenlidir." },
+      { term: "Tektonik göl", definition: "Yer kabuğu hareketleriyle oluşan çukurlukta biriken göl; Tuz Gölü, Beyşehir ve Eğirdir gölleri örnektir." },
+      { term: "Volkanik set gölü", definition: "Lavların bir vadinin önünü kapatmasıyla oluşan göl; Van Gölü (Nemrut lavları) örnektir." },
+      { term: "Heyelan set gölü", definition: "Heyelan malzemesinin vadiyi kapatmasıyla oluşan göl; Tortum Gölü örnektir." },
+      { term: "Zonal (yerli) toprak", definition: "Ana kayanın üzerinde oluşup yerinde kalan, iklimin etkisini taşıyan toprak: laterit, terra rossa, çernozyom, podzol." },
+      { term: "Azonal (taşınmış) toprak", definition: "Dış kuvvetlerle taşınıp biriken toprak: alüvyal (akarsu), kolüvyal (yamaç), moren (buzul), lös (rüzgâr)." },
+      { term: "Maki", definition: "Akdeniz ikliminin tahrip edilmiş ormanlarının yerinde gelişen, yaz kuraklığına dayanıklı, her mevsim yeşil kalan çalı topluluğu." },
+    ],
+    formulas: [
+      { expr: "Yağış düzenli + kaynak/göl beslemesi → düzenli rejim", meaning: "Türkiye akarsularının çoğu düzensiz rejimlidir; en yüksek akım genellikle ilkbahardadır." },
+      { expr: "Ekvatoral → laterit; Akdeniz → terra rossa; bozkır → çernozyom; tayga → podzol", meaning: "Başlıca zonal topraklar ve iklim eşleşmesi." },
+      { expr: "Nemli → orman; yarı kurak → bozkır (step); kurak → çöl bitkileri", meaning: "Yağış azaldıkça bitki örtüsü seyrekleşir ve kısalır." },
+      { expr: "Türkiye: Karadeniz kıyısı → geniş yapraklı ve karışık orman; Akdeniz kıyısı → maki ve kızılçam; İç Anadolu → bozkır", meaning: "Türkiye’de bitki örtüsünün ana dağılışı." },
+    ],
+    logic:
+      "Akarsuyun akımını yağış ve kar erimesi belirler. Türkiye’de yağışın büyük bölümü kış ve ilkbaharda düşer, ilkbaharda karlar da erir; bu yüzden akarsularımızın çoğu ilkbaharda en yüksek, yaz sonunda en düşük akıma ulaşır.\n\nToprak oluşumunda iklim en belirleyici etkendir: yağış çok ve sıcaklık yüksekse kimyasal ayrışma hızlı olur, topraklar derin ve yıkanmıştır (laterit); bozkırda ise yağış az olduğundan ot kökleri çürüyerek humusça zengin kara toprak oluşturur ve yıkanma azdır. Bitki örtüsü de aynı mantıkla iklime uyum sağlar: Akdeniz’de yaz kuraklığına dayanıklı maki, Karadeniz’de her mevsim yağış sayesinde gür orman gelişir.",
+    examples: [
+      {
+        level: 'kolay',
+        problem: "İç Anadolu’da doğal bitki örtüsünün bozkır olmasının temel nedeni nedir?",
+        steps: [
+          "İç Anadolu dağlarla çevrili olduğu için nemli hava kütleleri içeri az ulaşır.",
+          "Yağış az, yazlar kurak → ağaç yetişmesi için nem yetersiz, otlar gelişir.",
+        ],
+        answer: "Yağışın az olması (yarı kurak karasal iklim).",
+      },
+      {
+        level: 'orta',
+        problem: "Bir akarsuyun en yüksek akımı Nisan–Mayıs’ta, en düşük akımı Ağustos–Eylül’de görülüyor. Bu akarsu hakkında ne söylenebilir?",
+        steps: [
+          "İlkbahar sonunda yükselme, kar erimesi ve ilkbahar yağışlarını gösterir.",
+          "Yaz sonunda düşüş, yaz kuraklığını ve yüksek buharlaşmayı gösterir.",
+        ],
+        answer: "Kar ve yağmur sularıyla beslenen, düzensiz rejimli bir akarsudur.",
+      },
+    ],
+    osymThinking:
+      "Sorular göl adlarını oluşum türleriyle eşleştirmeni ya da bir toprak/bitki türünden iklim çıkarmanı ister. Grafik biçiminde verilen akım değerlerinden akarsuyun beslenme kaynağı yorumlanır. Çeldiriciler genellikle benzer adlı göllerin oluşum türlerini karıştırır veya zonal ile azonal toprakları yer değiştirir.",
+    commonMistakes: [
+      "Van Gölü’nü tektonik göl sanmak; volkanik set gölüdür.",
+      "Alüvyal toprağı zonal saymak; akarsuyun taşıdığı azonal topraktır.",
+      "Makinin doğal orman olduğunu düşünmek; tahrip edilen ormanların yerine gelişen çalılıktır.",
+    ],
+    tips: [
+      "Göl sorularında “çanak nasıl oluştu?” diye sor: fay → tektonik, lav → volkanik set, heyelan → heyelan set.",
+      "Toprak rengi ipucu verir: kara → çernozyom (bozkır), kırmızı → terra rossa (Akdeniz) veya laterit (ekvator).",
+    ],
+    summary: [
+      "Türkiye akarsularının çoğu düzensiz rejimlidir; en yüksek akım ilkbaharda görülür.",
+      "Göller çanağın oluşumuna göre sınıflanır: tektonik, volkanik, karstik, buzul, set.",
+      "Zonal topraklar iklimi yansıtır; azonal topraklar taşınmıştır.",
+      "Bitki örtüsü yağış ve sıcaklığa göre orman → çalı → ot şeklinde değişir.",
+    ],
+  },
+
+  // ================================================================ Nüfus
+  {
+    topicId: 'tytcog-nufus',
+    intro:
+      "Nüfus coğrafyası, insanların yeryüzünde nasıl dağıldığını, nasıl arttığını ve hangi yapısal özelliklere sahip olduğunu inceler. Nüfus ılıman iklimli, düz, su ve verimli toprağa sahip alanlarda yoğunlaşır; çöller, kutup çevreleri ve yüksek dağlar ise seyrek nüfusludur.\n\nBu konuda nüfus yoğunluğu türlerini hesaplamayı, doğal nüfus artışını ve nüfus piramitlerini yorumlamayı öğreneceksin. Türkiye’de ilk nüfus sayımı 1927’de yapılmış, 2007’den itibaren Adrese Dayalı Nüfus Kayıt Sistemi ile nüfus her yıl belirlenmektedir. TYT’de çoğunlukla bir tablo verilip yoğunluk ya da gelişmişlik yorumu istenir.",
+    prerequisites: [
+      "Bölme, oran ve yüzde hesapları",
+      "Grafik ve tablo okuma",
+    ],
+    concepts: [
+      { term: "Aritmetik nüfus yoğunluğu", definition: "Toplam nüfusun toplam yüzölçümüne bölümü (kişi/km²)." },
+      { term: "Fizyolojik nüfus yoğunluğu", definition: "Toplam nüfusun tarım alanına bölümü; tarım topraklarına düşen nüfus baskısını gösterir." },
+      { term: "Tarımsal nüfus yoğunluğu", definition: "Tarımla uğraşan nüfusun tarım alanına bölümü; yüksekse tarımda makineleşme düşüktür." },
+      { term: "Doğal nüfus artışı", definition: "Doğum oranı ile ölüm oranı arasındaki fark; genellikle binde (‰) ifade edilir." },
+      { term: "Nüfus piramidi", definition: "Nüfusun yaş gruplarına ve cinsiyete göre dağılımını gösteren grafik." },
+      { term: "Bağımlı nüfus", definition: "Çalışma çağı dışındaki nüfus: genellikle 0–14 yaş ile 65 ve üzeri yaş grupları." },
+    ],
+    formulas: [
+      { expr: "Aritmetik yoğunluk = Toplam nüfus / Toplam alan", meaning: "Ülkenin genel nüfus yoğunluğu." },
+      { expr: "Fizyolojik yoğunluk = Toplam nüfus / Tarım alanı", meaning: "Tarım alanı azaldıkça artar." },
+      { expr: "Tarımsal yoğunluk = Tarımla uğraşan nüfus / Tarım alanı", meaning: "Yüksekse tarım emek yoğundur, makineleşme azdır." },
+      { expr: "Doğal artış (‰) = Doğum oranı (‰) − Ölüm oranı (‰)", meaning: "Göçler hesaba katılmaz." },
+      { expr: "Geniş tabanlı piramit → genç nüfus; dar tabanlı piramit → yaşlanan nüfus", meaning: "Piramit tabanı doğum oranını, tepesi ortalama yaşam süresini yansıtır." },
+    ],
+    logic:
+      "Aynı ülke için üç yoğunluk birlikte verildiğinde ülke hakkında zengin çıkarımlar yapılabilir. Tarım alanı toplam alandan küçük olduğu için fizyolojik yoğunluk her zaman aritmetik yoğunluktan büyük ya da ona eşittir. Tarımsal yoğunluğun yüksek olması, küçük tarım alanlarında çok kişinin çalıştığını, yani tarımın makineleşmediğini gösterir.\n\nNüfus piramidinde tabanın genişliği doğum oranının yüksekliğini, tepenin genişliği ise yaşlı nüfusun fazlalığını gösterir. Gelişmiş ülkelerde eğitim düzeyi ve kentleşme arttıkça doğum oranı düşer, sağlık hizmetleri iyileştikçe ortalama yaşam süresi uzar; bu yüzden piramitleri dar tabanlı ve geniş tepelidir.",
+    examples: [
+      {
+        level: 'kolay',
+        problem: "Nüfusu 12 milyon, yüzölçümü 150.000 km², tarım alanı 40.000 km² olan bir ülkenin aritmetik ve fizyolojik yoğunluğu nedir?",
+        steps: [
+          "Aritmetik: 12.000.000 / 150.000 = 80 kişi/km².",
+          "Fizyolojik: 12.000.000 / 40.000 = 300 kişi/km².",
+        ],
+        answer: "80 kişi/km² ve 300 kişi/km²",
+      },
+      {
+        level: 'orta',
+        problem: "Doğum oranı ‰ 24, ölüm oranı ‰ 7 olan 5 milyon nüfuslu bir ülkenin bir yıllık doğal nüfus artışı kaç kişidir?",
+        steps: [
+          "Doğal artış hızı: 24 − 7 = ‰ 17.",
+          "5.000.000 · 17 / 1000 = 85.000 kişi.",
+        ],
+        answer: "85.000 kişi",
+      },
+    ],
+    osymThinking:
+      "Nüfus soruları sıklıkla ülkelere ait yoğunluk tablolarıyla gelir ve “tarımda makineleşme en az hangisinde?” veya “tarım alanı oranı en düşük hangisi?” gibi çıkarımlar istenir. Piramit sorularında ise bağımlı nüfus oranı, doğum oranı ve gelişmişlik yorumlanır. Tuzak, aritmetik yoğunluğu yüksek olan ülkeyi otomatik olarak “gelişmemiş” saymaktır.",
+    commonMistakes: [
+      "Fizyolojik ve tarımsal yoğunluğu karıştırmak; tarımsal yoğunlukta pay yalnızca tarımla uğraşan nüfustur.",
+      "Doğal artışa göçleri de eklemek.",
+      "Nüfusu fazla olan ülkenin nüfus yoğunluğunun da fazla olduğunu varsaymak.",
+    ],
+    tips: [
+      "Fizyolojik / aritmetik oranı, toplam alanın tarım alanına oranını verir: oran büyükse tarım alanı payı küçüktür.",
+      "Piramitte tabana bak: geniş taban → yüksek doğum oranı, genç nüfus.",
+    ],
+    summary: [
+      "Nüfus düz, ılıman, sulu ve verimli alanlarda yoğunlaşır.",
+      "Aritmetik = nüfus/alan, fizyolojik = nüfus/tarım alanı, tarımsal = tarımcı nüfus/tarım alanı.",
+      "Doğal artış = doğum − ölüm oranı.",
+      "Geniş tabanlı piramit genç ve az gelişmiş, dar tabanlı piramit yaşlanan ve gelişmiş nüfusu gösterir.",
+    ],
+  },
+
+  // ================================================================ Göç
+  {
+    topicId: 'tytcog-goc',
+    intro:
+      "Göç, insanların ekonomik, sosyal, siyasi ya da doğal nedenlerle geçici veya kalıcı olarak yer değiştirmesidir. Göçü açıklamak için iki grup etken kullanılır: insanı yaşadığı yerden uzaklaştıran itici faktörler (işsizlik, kuraklık, savaş, afet) ve onu yeni yere çeken çekici faktörler (iş olanağı, eğitim, sağlık, güvenlik).\n\nGöçler ülke içinde (iç göç) ya da ülkeler arasında (dış göç) olabilir; isteğe bağlı veya zorunlu, mevsimlik veya sürekli olabilir. Türkiye’de 1950’lerden sonra kırdan kente göç hızlanmış, 1961’de Almanya ile imzalanan işgücü anlaşmasıyla yurt dışına işçi göçü başlamıştır.",
+    prerequisites: [
+      "Nüfus yapısı ve nüfus piramitleri",
+      "Ekonomik faaliyetlerin temel türleri",
+    ],
+    concepts: [
+      { term: "İtici faktör", definition: "İnsanı yaşadığı yerden ayrılmaya zorlayan koşullar: işsizlik, toprak yetersizliği, afet, savaş." },
+      { term: "Çekici faktör", definition: "Göç edilen yeri cazip kılan koşullar: iş olanakları, eğitim, sağlık hizmetleri, yüksek ücret." },
+      { term: "Mevsimlik göç", definition: "Belirli dönemlerde yapılan geçici göç; fındık toplama, pamuk hasadı, turizm işçiliği gibi." },
+      { term: "Beyin göçü", definition: "Nitelikli ve yüksek eğitimli iş gücünün başka ülkelere göçü." },
+      { term: "Zorunlu göç", definition: "Savaş, afet, baskı gibi nedenlerle kişinin isteği dışında yaptığı göç; mübadele ve mülteci hareketleri gibi." },
+    ],
+    formulas: [
+      { expr: "Göç = İtici faktörler (çıkış yeri) + Çekici faktörler (varış yeri)", meaning: "Göç kararı iki yerin koşullarının karşılaştırılmasıyla verilir." },
+      { expr: "Göç veren yer: genç ve erkek nüfus azalır, yaşlı nüfus oranı artar", meaning: "Göç edenler çoğunlukla çalışma çağındaki gençlerdir." },
+      { expr: "Göç alan yer: hızlı ve plansız kentleşme, konut-altyapı sorunları", meaning: "Hızlı nüfus artışına hizmetler yetişemez." },
+    ],
+    logic:
+      "Göç eden kişiler çoğunlukla çalışma çağındaki genç bireylerdir; çünkü iş arama ve yeni bir hayat kurma motivasyonu bu yaş grubunda en yüksektir. Bu yüzden göç veren yerlerde nüfus yaşlanır, üretim gücü düşer; göç alan yerlerde ise genç nüfus ve iş gücü artar ama konut, ulaşım, altyapı gibi hizmetlere talep bir anda yükselir.\n\nBu nedenle aynı göç olayının iki yere etkisi zıttır. Soru çözerken “bu sonuç göç veren yerde mi, göç alan yerde mi görülür?” sorusunu kendine sormak doğru cevabı bulmayı kolaylaştırır.",
+    examples: [
+      {
+        level: 'kolay',
+        problem: "Her yıl Ağustos ayında Doğu Karadeniz’e fındık toplamak için gelen işçilerin hareketi hangi göç türüne örnektir?",
+        steps: [
+          "Hareket belirli bir mevsimde ve geçicidir.",
+          "Amaç tarımsal iş gücü ihtiyacını karşılamaktır.",
+        ],
+        answer: "Mevsimlik (geçici) iç göç.",
+      },
+      {
+        level: 'orta',
+        problem: "Uzun yıllar dışarıya göç veren bir kırsal ilçede hangi nüfus değişimleri beklenir?",
+        steps: [
+          "Göç edenler çoğunlukla genç ve çalışma çağındadır.",
+          "Geride kalan nüfusta yaşlıların oranı artar, doğum sayısı azalır.",
+        ],
+        answer: "Nüfus azalır ve yaşlanır, çalışma çağındaki nüfus oranı düşer.",
+      },
+    ],
+    osymThinking:
+      "Göç soruları genellikle bir durumu anlatıp bunun itici mi çekici mi faktör olduğunu, ya da bir sonucun göç veren mi göç alan yerde mi görüleceğini sorar. Çeldiriciler, göç alan yerin sorunlarını (gecekondulaşma) göç veren yere yakıştırır. Mevsimlik göç ile sürekli göçün ayrımı da sıkça test edilir.",
+    commonMistakes: [
+      "Gecekondulaşmayı göç veren yerin sorunu sanmak.",
+      "Mevsimlik tarım işçiliğini sürekli göç olarak nitelendirmek.",
+      "Doğal afet nedeniyle yapılan göçü isteğe bağlı göç saymak.",
+    ],
+    tips: [
+      "Çıkış yerindeki olumsuzluk → itici; varış yerindeki olumluluk → çekici.",
+      "Göç veren yeri “yaşlanan köy”, göç alan yeri “büyüyen kent” olarak hayal et.",
+    ],
+    summary: [
+      "Göç itici ve çekici faktörlerle açıklanır.",
+      "Türleri: iç/dış, geçici/sürekli, isteğe bağlı/zorunlu.",
+      "Göç veren yer yaşlanır; göç alan yerde hızlı ve plansız kentleşme görülür.",
+      "Türkiye’de kırdan kente göç 1950’lerden sonra hızlanmıştır.",
+    ],
+  },
+
+  // ================================================================ Yerleşme
+  {
+    topicId: 'tytcog-yerlesme',
+    intro:
+      "Yerleşme, insanların barınmak, üretmek ve güvenlikte olmak amacıyla sürekli ya da geçici olarak yaşadığı yerlerdir. Bir yerleşmenin kurulacağı yeri su kaynakları, iklim, yer şekilleri, toprak verimliliği, savunma kolaylığı ve ulaşım olanakları belirler.\n\nYerleşmeler kır ve şehir olarak ikiye ayrılır. Kırda ekonomi ağırlıklı olarak tarım ve hayvancılığa dayanır; köylerin yanında mezra, oba, yayla, ağıl, dalyan gibi geçici ya da küçük yerleşmeler görülür. Şehirler ise sanayi, ticaret, turizm, liman, yönetim gibi işlevleriyle öne çıkar. Ev dokusu da iklim ve arazi yapısına göre toplu ya da dağınık olabilir.",
+    prerequisites: [
+      "İklim ve yer şekillerinin insan yaşamına etkisi",
+      "Ekonomik faaliyet türleri",
+    ],
+    concepts: [
+      { term: "Toplu yerleşme", definition: "Evlerin birbirine yakın kurulduğu yerleşme dokusu; düz alanlarda ve su kaynağının sınırlı olduğu yerlerde görülür." },
+      { term: "Dağınık yerleşme", definition: "Evlerin birbirinden uzak kurulduğu doku; engebeli, su kaynağı bol ve tarım alanı parçalı yerlerde (Doğu Karadeniz) görülür." },
+      { term: "Yayla", definition: "Yaz aylarında hayvancılık amacıyla yükseklerde kullanılan geçici yerleşme." },
+      { term: "Mezra", definition: "Köye bağlı, tarım ve hayvancılık için kurulmuş birkaç evlik küçük yerleşme." },
+      { term: "Dalyan", definition: "Kıyılarda ve göl-deniz bağlantı yerlerinde balıkçılık amacıyla kurulan yerleşme." },
+    ],
+    formulas: [
+      { expr: "Su kıt + düz arazi → toplu yerleşme", meaning: "İnsanlar sınırlı su kaynağının çevresinde toplanır." },
+      { expr: "Su bol + engebeli arazi → dağınık yerleşme", meaning: "Her aile kendi küçük tarım alanının yanına ev yapar." },
+      { expr: "Şehir fonksiyonu = şehirde öne çıkan ekonomik/idari etkinlik", meaning: "Zonguldak maden, Mersin liman, Antalya turizm, Ankara yönetim şehri örnekleridir." },
+    ],
+    logic:
+      "Yerleşme dokusu, insanın doğal koşullara uyumunun açık bir göstergesidir. İç Anadolu gibi yağışın az olduğu yerlerde su kaynakları sınırlıdır; insanlar kaynağın çevresinde toplanır ve toplu köyler oluşur. Doğu Karadeniz’de ise her yerde su bulunur, ama arazi dik ve tarım alanları küçük parçalar hâlindedir; bu yüzden herkes kendi tarlasının yanına yerleşir ve dağınık doku oluşur.\n\nŞehirlerin işlevleri ise konumlarından doğar: maden yataklarının yakınında maden şehirleri, doğal liman koşullarına sahip kıyılarda liman şehirleri, doğal ve tarihî güzellikleri olan yerlerde turizm şehirleri gelişir.",
+    examples: [
+      {
+        level: 'kolay',
+        problem: "Rize ve Trabzon kırsalında evlerin birbirinden uzak olmasının temel nedenleri nelerdir?",
+        steps: [
+          "Bölgede yağış boldur, su kaynağı sorunu yoktur.",
+          "Arazi engebeli, tarım alanları küçük ve parçalıdır.",
+        ],
+        answer: "Su kaynaklarının bolluğu ve engebeli arazi → dağınık yerleşme.",
+      },
+      {
+        level: 'orta',
+        problem: "Bir şehrin gelişiminde kömür yataklarının belirleyici olduğu biliniyor. Bu şehrin fonksiyonu nedir? Türkiye’den örnek veriniz.",
+        steps: [
+          "Şehrin ortaya çıkışı ve büyümesi madene bağlıdır.",
+          "Türkiye’de taş kömürü çıkarımıyla gelişen şehir Zonguldak’tır.",
+        ],
+        answer: "Maden şehri; Zonguldak.",
+      },
+    ],
+    osymThinking:
+      "Yerleşme soruları genellikle bir yerleşme tipini tarif edip adını veya o yerleşmenin hangi ekonomik faaliyetle ilgili olduğunu sorar. Ayrıca toplu–dağınık doku ile doğal koşullar arasındaki ilişki yorumlatılır. Tuzak, dağınık yerleşmeyi “su azlığı” ile ilişkilendirmektir; aslında su bolluğu ve engebe belirleyicidir.",
+    commonMistakes: [
+      "Dağınık yerleşmeyi su kaynaklarının az olmasına bağlamak.",
+      "Yaylayı sürekli yerleşme saymak; yayla yazın kullanılan geçici yerleşmedir.",
+      "Şehir fonksiyonunu yalnız nüfus büyüklüğüyle belirlemeye çalışmak.",
+    ],
+    tips: [
+      "Toplu doku → su kıt; dağınık doku → su bol ve arazi engebeli.",
+      "Kır yerleşmelerinin adı genelde işlevini söyler: dalyan balıkçılık, ağıl hayvan barınağı, yayla yaz otlağı.",
+    ],
+    summary: [
+      "Yerleşme yerini su, iklim, arazi, toprak, savunma ve ulaşım belirler.",
+      "Toplu yerleşme düz ve su kıt yerlerde, dağınık yerleşme engebeli ve sulu yerlerde görülür.",
+      "Köy altı yerleşmeler: mezra, oba, yayla, ağıl, dalyan, çiftlik.",
+      "Şehirler fonksiyonlarına göre maden, liman, sanayi, turizm, yönetim şehri olarak sınıflanır.",
+    ],
+  },
+
+  // ================================================================ Ekonomik Faaliyetler
+  {
+    topicId: 'tytcog-ekonomik-faaliyetler',
+    intro:
+      "Ekonomik faaliyetler, insanların ihtiyaçlarını karşılamak için yaptıkları üretim, dağıtım ve hizmet etkinlikleridir. Doğadan doğrudan yararlanılan tarım, hayvancılık, balıkçılık, ormancılık ve madencilik birincil (temel) faaliyetlerdir. Hammaddelerin işlenmesiyle yapılan sanayi ve inşaat ikincil faaliyetlerdir. Ticaret, ulaşım, eğitim, sağlık, turizm gibi hizmetler ise üçüncül faaliyetlerdir; bilgi ve araştırma-geliştirme temelli işler bazen dördüncül olarak ayrılır.\n\nBir ülkenin çalışan nüfusunun sektörlere dağılımı gelişmişlik hakkında önemli ipuçları verir: gelişmiş ülkelerde hizmet sektörünün payı yüksek, tarımın payı düşüktür.",
+    prerequisites: [
+      "İklim, toprak ve yer şekillerinin tarıma etkisi",
+      "Yüzde ve oran okuma",
+    ],
+    concepts: [
+      { term: "Birincil faaliyetler", definition: "Doğal kaynakların doğrudan elde edildiği faaliyetler: tarım, hayvancılık, balıkçılık, ormancılık, madencilik." },
+      { term: "İkincil faaliyetler", definition: "Hammaddelerin işlenerek ürüne dönüştürüldüğü faaliyetler: sanayi, enerji üretimi, inşaat." },
+      { term: "Üçüncül faaliyetler", definition: "Hizmet sektörü: ticaret, ulaşım, turizm, eğitim, sağlık, bankacılık." },
+      { term: "Dördüncül faaliyetler", definition: "Bilgi üretimi, araştırma-geliştirme ve teknoloji temelli nitelikli hizmetler." },
+      { term: "Ekstansif (geniş alanlı) tarım", definition: "Makine, gübre ve sulama gibi girdilerin az kullanıldığı, verimi doğal koşullara bağlı tarım." },
+      { term: "Entansif (yoğun) tarım", definition: "Makine, gübre, ilaç, sulama ve seçilmiş tohum kullanılarak birim alandan yüksek verim alınan tarım." },
+    ],
+    formulas: [
+      { expr: "Gelişmiş ülke: hizmet ↑, tarım ↓", meaning: "Çalışan nüfusun çoğu hizmet sektöründe; tarımda makineleşme yüksek olduğu için az kişi çalışır." },
+      { expr: "Gelişmekte olan ülke: tarımda çalışan payı yüksek", meaning: "Tarım emek yoğundur, sanayi ve hizmet sınırlıdır." },
+      { expr: "Hammaddeyi işleme → ikincil; doğadan alma → birincil; hizmet sunma → üçüncül", meaning: "Bir faaliyeti sınıflarken sorulacak soru: ne yapılıyor?" },
+    ],
+    logic:
+      "Ekonomik gelişme ilerledikçe iş gücü tarımdan sanayiye, sanayiden hizmetlere kayar. Bunun nedeni, tarımda makineleşme ile aynı üretimin çok daha az kişiyle yapılabilmesi ve gelirin artmasıyla eğitim, sağlık, turizm, finans gibi hizmetlere talebin yükselmesidir.\n\nBirincil faaliyetlerin dağılışı doğal koşullara sıkı sıkıya bağlıdır: çay nemli-ılıman Doğu Karadeniz’de, pamuk sıcak ve sulanabilir ovalarda (Çukurova, Harran), buğday bozkır iklimli İç Anadolu’da yoğunlaşır. İkincil ve üçüncül faaliyetler ise daha çok sermaye, ulaşım, pazar ve iş gücü gibi beşerî etkenlere göre yer seçer.",
+    examples: [
+      {
+        level: 'kolay',
+        problem: "Madencilik, dokumacılık ve bankacılık faaliyetlerini sektörlerine göre sınıflandırınız.",
+        steps: [
+          "Madencilik doğadan doğrudan kaynak elde eder → birincil.",
+          "Dokumacılık ham maddeyi (pamuk, yün) işler → ikincil.",
+          "Bankacılık hizmet sunar → üçüncül.",
+        ],
+        answer: "Madencilik birincil, dokumacılık ikincil, bankacılık üçüncül.",
+      },
+      {
+        level: 'orta',
+        problem: "Bir ülkede çalışanların %3’ü tarımda, %22’si sanayide, %75’i hizmette çalışmaktadır. Bu ülke hakkında ne söylenebilir?",
+        steps: [
+          "Tarımda çalışan oranı çok düşük → tarımda makineleşme yüksek.",
+          "Hizmet sektörü baskın → gelir ve gelişmişlik düzeyi yüksek.",
+        ],
+        answer: "Gelişmiş bir ülkedir; tarım makineleşmiş, hizmet sektörü baskındır.",
+      },
+    ],
+    osymThinking:
+      "Sorular genellikle ülkelerin sektörel dağılım tablosunu verip gelişmişlik sıralaması ister ya da bir faaliyet listesinden birincil-ikincil-üçüncül ayrımı yaptırır. Çeldirici olarak madencilik (birincil) sanayi gibi, turizm (üçüncül) ikincil gibi sunulur. Tarımda çalışan oranı yüksek ülkenin toplam tarım üretiminin de yüksek olduğu varsayımı sık kullanılan bir tuzaktır.",
+    commonMistakes: [
+      "Madenciliği sanayi (ikincil) faaliyeti saymak; madenin çıkarılması birincil, işlenmesi ikincildir.",
+      "Tarımda çalışan payı düşük ülkenin tarım üretiminin de düşük olduğunu sanmak.",
+      "Turizmi ikincil faaliyet saymak.",
+    ],
+    tips: [
+      "Doğadan al → birincil, işle → ikincil, sat/taşı/hizmet et → üçüncül.",
+      "Sektör tablolarında hizmet payı en yüksek, tarım payı en düşük ülke en gelişmiş olandır.",
+    ],
+    summary: [
+      "Birincil: tarım, hayvancılık, madencilik, balıkçılık, ormancılık.",
+      "İkincil: sanayi, inşaat, enerji üretimi.",
+      "Üçüncül: ticaret, ulaşım, turizm, eğitim, sağlık; dördüncül: bilgi ve AR-GE.",
+      "Gelişmişlik arttıkça hizmet sektörünün payı artar, tarımın payı azalır.",
+    ],
+  },
+
+  // ================================================================ Bölgeler ve Ulaşım
+  {
+    topicId: 'tytcog-bolgeler-ulasim',
+    intro:
+      "Bölge, belirli özellikler bakımından benzerlik gösteren ve bu özellikleriyle çevresinden ayrılan alandır. Bölgeler iklim, bitki örtüsü, yer şekilleri gibi doğal ölçütlere (doğal/şekli bölge) ya da bir merkezin etki alanı, ekonomik ilişkiler gibi beşerî ölçütlere (işlevsel/fonksiyonel bölge) göre belirlenebilir.\n\nUlaşım ise bölgeler arasındaki bağlantıyı kurar. Deniz yolu en ucuz yük taşımacılığıdır; hava yolu en hızlı ama en pahalıdır. Küresel ticaretin kilit noktaları olan boğaz ve kanallar (İstanbul ve Çanakkale boğazları, Süveyş ve Panama kanalları, Hürmüz ve Malakka boğazları) jeopolitik öneme sahiptir.",
+    prerequisites: [
+      "Dünya haritasında kıta ve okyanusların yerleri",
+      "Yer şekilleri ve iklim bilgisi",
+    ],
+    concepts: [
+      { term: "Formal (şekli) bölge", definition: "Bir ya da birkaç ortak özelliğin benzerliğiyle belirlenen bölge; Akdeniz iklim bölgesi gibi." },
+      { term: "Fonksiyonel (işlevsel) bölge", definition: "Bir merkez ile çevresi arasındaki ilişkilerle (ticaret, ulaşım, hizmet) belirlenen bölge; bir şehrin etki alanı gibi." },
+      { term: "Süveyş Kanalı", definition: "Akdeniz’i Kızıldeniz’e bağlayan kanal; Avrupa–Asya deniz yolunu Afrika’yı dolaşmaya gerek bırakmadan kısaltır." },
+      { term: "Panama Kanalı", definition: "Atlas Okyanusu ile Büyük Okyanus’u Orta Amerika’dan bağlayan kanal." },
+      { term: "Hürmüz Boğazı", definition: "Basra Körfezi’ni Umman Denizi’ne bağlayan, dünya petrol taşımacılığı açısından kritik boğaz." },
+    ],
+    formulas: [
+      { expr: "Deniz yolu: en ucuz, yavaş, büyük hacimli yük", meaning: "Uluslararası ticaretin büyük kısmı deniz yoluyla yapılır." },
+      { expr: "Hava yolu: en hızlı, en pahalı", meaning: "Yolcu, acil ve değerli yükler için tercih edilir." },
+      { expr: "Demir yolu: uzun mesafede ucuz ve güvenli kara taşımacılığı", meaning: "Engebeli arazide yapım maliyeti yüksektir." },
+      { expr: "Engebe ↑ → kara ve demir yolu yapım maliyeti ↑", meaning: "Yollar vadiler ve geçitleri izler; tünel ve viyadük gerekir." },
+    ],
+    logic:
+      "Bölge kavramı, dünyayı anlamlı parçalara ayırarak incelemeyi kolaylaştırır. Hangi ölçütün seçildiği bölgenin sınırlarını belirler: aynı alan iklim açısından bir bölgeye, ekonomik ilişkiler açısından başka bir bölgeye dahil olabilir.\n\nUlaşım yollarının yerini doğal koşullar ve beşerî ihtiyaçlar birlikte belirler. Engebeli arazide yollar vadileri ve geçitleri izler; ovalarda ise düz ve kısa hatlar kurulur. Kanal ve boğazlar, deniz yolunu büyük ölçüde kısalttığı için buralarda yaşanacak bir kapanma dünya ticaretini ve enerji fiyatlarını doğrudan etkiler.",
+    examples: [
+      {
+        level: 'kolay',
+        problem: "İstanbul’dan Hindistan’a giden bir yük gemisi Süveyş Kanalı’nı kullanmasaydı hangi yolu izlemek zorunda kalırdı?",
+        steps: [
+          "Süveyş Kanalı Akdeniz ile Kızıldeniz’i bağlar.",
+          "Kanal olmadan Cebelitarık’tan Atlas Okyanusu’na çıkıp Afrika’nın güney ucunu (Ümit Burnu) dolaşmak gerekir.",
+        ],
+        answer: "Afrika’yı dolaşarak Ümit Burnu üzerinden Hint Okyanusu’na ulaşmak.",
+      },
+      {
+        level: 'orta',
+        problem: "“Bir şehrin gazetesinin dağıtıldığı, hastanesine hasta gelen ve alışveriş için gelinen çevre” hangi tür bölgeye örnektir?",
+        steps: [
+          "Bölge, bir merkezin çevresiyle kurduğu ilişkilerle tanımlanmıştır.",
+          "Ortak doğal özellik değil, işlevsel bağlantı esastır.",
+        ],
+        answer: "Fonksiyonel (işlevsel) bölge.",
+      },
+    ],
+    osymThinking:
+      "Bu konudaki sorular bölgenin hangi ölçüte göre belirlendiğini ya da bir ulaşım türünün hangi koşulda tercih edileceğini sorar. Harita tanımıyla verilen bir boğaz veya kanalın hangi denizleri bağladığı da sık sorulur. Tuzak, fonksiyonel bölge ile formal bölgeyi karıştırmak ya da en ucuz ulaşımı karayolu sanmaktır.",
+    commonMistakes: [
+      "Panama Kanalı’nın Akdeniz’le ilgili olduğunu düşünmek.",
+      "Karayolunu yük taşımacılığında en ucuz yol sanmak; en ucuz deniz yoludur.",
+      "İklim bölgelerini fonksiyonel bölge saymak; ortak özelliğe dayandıkları için formal bölgedir.",
+    ],
+    tips: [
+      "Formal = benzerlik; fonksiyonel = bağlantı/ilişki.",
+      "Kanal/boğaz sorularında iki ucundaki denizleri eşleştirerek ezberle.",
+    ],
+    summary: [
+      "Bölge ortak özelliklerle belirlenir; formal (benzerlik) ve fonksiyonel (ilişki) bölgeler vardır.",
+      "Deniz yolu en ucuz, hava yolu en hızlı ulaşımdır.",
+      "Süveyş: Akdeniz–Kızıldeniz; Panama: Atlas–Büyük Okyanus; Hürmüz: Basra Körfezi–Umman Denizi.",
+      "Engebe, yol yapım maliyetini artırır; yollar vadi ve geçitleri izler.",
+    ],
+  },
+
+  // ================================================================ Doğal Afetler
+  {
+    topicId: 'tytcog-dogal-afetler',
+    intro:
+      "Doğal afet, doğal süreçlerin insan yaşamına ve faaliyetlerine zarar verecek biçimde gerçekleşmesidir. Deprem, volkanizma ve tsunami yerin iç kuvvetleriyle ilgilidir; sel, kuraklık, fırtına, çığ ve dolu atmosferik (iklim kaynaklı) olaylardır; heyelan ise eğimli yamaçlarda yer çekimiyle gelişen kütle hareketidir.\n\nTürkiye, Alp-Himalaya kuşağında bulunduğu için deprem riski yüksek bir ülkedir; Kuzey Anadolu ve Doğu Anadolu fay hatları başlıca deprem kuşaklarıdır. Karadeniz Bölgesi’nde eğim ve yağış nedeniyle heyelan, Doğu Anadolu’da çığ, İç ve Güneydoğu Anadolu’da kuraklık riski öne çıkar. Bir doğal olayın afete dönüşmesinde insanın hazırlıksızlığı ve yanlış yer seçimi büyük rol oynar.",
+    prerequisites: [
+      "İç kuvvetler ve fay hatları",
+      "İklim ve yağış özellikleri",
+    ],
+    concepts: [
+      { term: "Deprem", definition: "Yer kabuğundaki kırılmalar sonucu biriken enerjinin açığa çıkmasıyla oluşan sarsıntı; Türkiye’de en çok can kaybına yol açan afettir." },
+      { term: "Heyelan", definition: "Eğimli yamaçlardaki toprak ve kaya kütlesinin, suya doyarak ya da dengesi bozularak yer çekimiyle aşağı kayması." },
+      { term: "Çığ", definition: "Eğimli yamaçlarda biriken kar kütlesinin aniden aşağı kayması; kar yağışının bol olduğu dağlık alanlarda görülür." },
+      { term: "Sel", definition: "Kısa sürede düşen şiddetli yağış veya ani kar erimesiyle akarsu yatağından taşan suyun çevreye zarar vermesi." },
+      { term: "Kuraklık", definition: "Uzun süre yağışın normalin altında kalmasıyla su kaynaklarının ve tarımın zarar görmesi." },
+      { term: "Magnitüd", definition: "Depremde açığa çıkan enerjinin büyüklüğü; şiddet ise depremin belirli bir yerdeki etkisi ve hasarıdır." },
+    ],
+    formulas: [
+      { expr: "Jeolojik: deprem, volkanizma, tsunami", meaning: "Yerin iç kuvvetlerinden kaynaklanan afetler." },
+      { expr: "Klimatik: sel, kuraklık, fırtına, dolu, çığ", meaning: "Atmosfer olaylarından kaynaklanan afetler." },
+      { expr: "Heyelan riski: eğim + bol yağış + killi zemin + bitki örtüsünün tahribi", meaning: "Karadeniz Bölgesi bu koşulları bir arada taşır." },
+      { expr: "Çığ riski: eğim + kalın kar örtüsü + ağaçsız yamaç", meaning: "Doğu Anadolu ve Doğu Karadeniz’in yüksek kesimlerinde yaygındır." },
+    ],
+    logic:
+      "Bir doğal olayın afete dönüşmesi, olayın büyüklüğü kadar insanın o olaya karşı ne kadar hazırlıklı olduğuna bağlıdır. Aynı büyüklükte bir deprem, yapıların depreme dayanıklı olduğu bir yerde az hasar verirken zemin etüdü yapılmadan kurulmuş bir şehirde büyük yıkıma yol açabilir.\n\nAfetlerin dağılışı doğal koşullara göre değişir: heyelan eğim ve suya, çığ eğim ve kara, kuraklık düşük yağışa bağlıdır. Bu yüzden afet riskini azaltmak için yerleşim yeri seçimi, ağaçlandırma, dere yataklarına yapılaşmanın engellenmesi ve depreme dayanıklı yapılaşma gibi önlemler alınır.",
+    examples: [
+      {
+        level: 'kolay',
+        problem: "Karadeniz Bölgesi’nde heyelanların sık görülmesinin nedenleri nelerdir?",
+        steps: [
+          "Arazi dağlık ve eğim fazladır.",
+          "Yağış bol olduğu için toprak suya doyar; killi zeminler kayar.",
+        ],
+        answer: "Eğimin fazla olması ve bol yağış (suya doygun killi zemin).",
+      },
+      {
+        level: 'orta',
+        problem: "Sel afetinin zararlarını azaltmak için alınabilecek üç önlem yazınız.",
+        steps: [
+          "Dere yataklarına ve taşkın alanlarına yapılaşmaya izin verilmemesi.",
+          "Akarsu havzalarının ağaçlandırılarak yüzey akışının yavaşlatılması.",
+          "Taşkın kontrol barajları ve ıslah çalışmaları yapılması.",
+        ],
+        answer: "Dere yataklarına yapılaşmayı engellemek, ağaçlandırma, taşkın kontrol yapıları.",
+      },
+    ],
+    osymThinking:
+      "Afet soruları genellikle bir bölgenin doğal özelliklerini verip orada hangi afet riskinin yüksek olduğunu ya da bir önlemin hangi afete yönelik olduğunu sorar. Afetlerin sınıflandırılması (jeolojik–klimatik) ve magnitüd–şiddet ayrımı da sık sorgulanır. Tuzak, heyelanı yalnızca depremle ilişkilendirmek ve yağışın rolünü atlamaktır.",
+    commonMistakes: [
+      "Magnitüd ile şiddeti aynı şey sanmak.",
+      "Çığı yalnızca kar yağışıyla açıklayıp eğim koşulunu unutmak.",
+      "Ağaçlandırmanın yalnızca erozyona karşı etkili olduğunu düşünmek; sel ve heyelan riskini de azaltır.",
+    ],
+    tips: [
+      "Afeti eşleştirirken iki koşul ara: heyelan (eğim + su), çığ (eğim + kar), sel (şiddetli yağış + dar vadi).",
+      "Deprem riski fay hattına yakınlıkla, zarar ise yapı kalitesi ve zeminle ilgilidir.",
+    ],
+    summary: [
+      "Afetler jeolojik (deprem, volkan), klimatik (sel, kuraklık, çığ) ve kütle hareketleri (heyelan) olarak gruplanır.",
+      "Türkiye’de deprem riski KAF ve DAF hatlarında yüksektir.",
+      "Heyelan Karadeniz’de, çığ Doğu Anadolu’da, kuraklık İç ve Güneydoğu Anadolu’da öne çıkar.",
+      "Doğru yer seçimi, dayanıklı yapı ve ağaçlandırma zararları azaltır.",
+    ],
+  },
+
+  // ================================================================ Çevre ve Toplum
+  {
+    topicId: 'tytcog-cevre-ve-toplum',
+    intro:
+      "İnsan, tarım alanı açmak, şehir kurmak, sanayi tesisleri yapmak ve enerji üretmek için doğal ortamı sürekli değiştirir. Bu değişimler kontrolsüz olduğunda hava, su ve toprak kirliliği, ormansızlaşma, erozyon, çölleşme, küresel iklim değişikliği gibi sorunlar ortaya çıkar.\n\nFosil yakıtların yakılması atmosferdeki karbondioksiti artırarak sera etkisini güçlendirir ve küresel ısınmaya yol açar. Kükürt ve azot oksitler asit yağmurlarına neden olur. Bu sorunlara karşı yenilenebilir enerji kaynakları (güneş, rüzgâr, jeotermal, hidroelektrik), geri dönüşüm ve sürdürülebilir kalkınma anlayışı öne çıkar; uluslararası düzeyde Kyoto Protokolü ve Paris Anlaşması gibi düzenlemeler yapılmıştır.",
+    prerequisites: [
+      "Atmosferin katmanları ve sera etkisi kavramı",
+      "Ekonomik faaliyetler ve enerji kaynakları",
+    ],
+    concepts: [
+      { term: "Sera etkisi", definition: "Atmosferdeki karbondioksit, metan, su buharı gibi gazların yeryüzünden yayılan ısıyı tutması; aşırı artışı küresel ısınmaya yol açar." },
+      { term: "Asit yağmuru", definition: "Kükürt dioksit ve azot oksitlerin su buharıyla birleşip asit olarak yeryüzüne inmesi; orman, göl ve yapılara zarar verir." },
+      { term: "Erozyon", definition: "Toprağın akarsu, rüzgâr gibi etkenlerle taşınması; bitki örtüsünün tahribi ve eğim erozyonu hızlandırır." },
+      { term: "Yenilenebilir enerji", definition: "Tükenmeyen ya da kısa sürede yenilenen kaynaklardan elde edilen enerji: güneş, rüzgâr, jeotermal, hidroelektrik, biyokütle." },
+      { term: "Sürdürülebilir kalkınma", definition: "Bugünün ihtiyaçlarını, gelecek kuşakların kendi ihtiyaçlarını karşılama olanağını tehlikeye atmadan karşılayan kalkınma anlayışı." },
+    ],
+    formulas: [
+      { expr: "Fosil yakıt ↑ → CO₂ ↑ → sera etkisi ↑ → küresel ısınma", meaning: "İklim değişikliğinin temel zinciri." },
+      { expr: "SO₂ + NOₓ + su buharı → asit yağmuru", meaning: "Sanayi ve kömürlü termik santrallerin başlıca çevre etkisi." },
+      { expr: "Bitki örtüsü tahribi + eğim + sağanak → erozyon", meaning: "Ağaçlandırma ve teraslama erozyonu azaltır." },
+      { expr: "Kloroflorokarbon (CFC) → ozon tabakasının incelmesi", meaning: "1987 Montreal Protokolü ile CFC kullanımı sınırlandırılmıştır." },
+    ],
+    logic:
+      "Çevre sorunlarının çoğu, doğal sistemler arasındaki dengenin bozulmasından kaynaklanır. Ormanlar kesildiğinde toprağı tutan kökler ortadan kalkar, yağış suyu daha hızlı akar ve toprak taşınır; aynı zamanda karbondioksiti tutan bitki kütlesi azalır. Tek bir müdahale böylece hem erozyonu hem de iklim değişikliğini besler.\n\nÇevre sorunları sınır tanımaz: bir ülkenin bacasından çıkan kükürt dioksit komşu ülkenin ormanlarına asit yağmuru olarak düşebilir. Bu yüzden çözümler hem yerel (arıtma tesisi, ağaçlandırma) hem de küresel (uluslararası anlaşmalar, yenilenebilir enerjiye geçiş) ölçekte ele alınmalıdır.",
+    examples: [
+      {
+        level: 'kolay',
+        problem: "Güneş, rüzgâr, kömür, jeotermal ve doğal gaz kaynaklarından hangileri yenilenebilirdir?",
+        steps: [
+          "Kömür ve doğal gaz fosil yakıttır; oluşumları milyonlarca yıl sürer.",
+          "Güneş, rüzgâr ve jeotermal sürekli yenilenir.",
+        ],
+        answer: "Güneş, rüzgâr ve jeotermal.",
+      },
+      {
+        level: 'orta',
+        problem: "Bir gölde tarım alanlarından gelen gübre kalıntıları nedeniyle aşırı yosunlanma ve balık ölümleri görülüyor. Bu süreci açıklayınız.",
+        steps: [
+          "Gübrelerdeki azot ve fosfor göl suyuna karışır.",
+          "Besin fazlalığı algleri aşırı çoğaltır; ölen alglerin ayrışması suyun oksijenini tüketir.",
+          "Oksijen azalınca balıklar ölür.",
+        ],
+        answer: "Su kirliliğine bağlı aşırı besin zenginleşmesi (ötrofikasyon) ve oksijen azalması.",
+      },
+    ],
+    osymThinking:
+      "Çevre soruları genellikle bir insan faaliyetini ve sonucunu verip hangi çevre sorununa örnek olduğunu, ya da bir önlemin hangi sorunu azaltacağını sorar. Yenilenebilir–yenilenemez kaynak ayrımı ve küresel ısınma–ozon incelmesi karıştırması sık kullanılan çeldiricilerdir. Metinde geçen gaz adı (CO₂, SO₂, CFC) doğru sorunu bulmanın anahtarıdır.",
+    commonMistakes: [
+      "Ozon tabakasının incelmesini küresel ısınmanın temel nedeni sanmak; ikisi farklı süreçlerdir.",
+      "Doğal gazı yenilenebilir kaynak saymak.",
+      "Asit yağmurunu yalnızca yerel bir sorun sanmak; rüzgârla sınırlar ötesine taşınır.",
+    ],
+    tips: [
+      "Gaz adına göre eşleştir: CO₂ → sera etkisi, SO₂/NOₓ → asit yağmuru, CFC → ozon incelmesi.",
+      "Ağaçlandırma çok amaçlı bir önlemdir: erozyon, sel, heyelan ve karbon tutma.",
+    ],
+    summary: [
+      "İnsan faaliyetleri hava, su ve toprak kirliliği, erozyon ve iklim değişikliğine yol açabilir.",
+      "Fosil yakıtlar → CO₂ artışı → sera etkisinin güçlenmesi → küresel ısınma.",
+      "SO₂ ve NOₓ asit yağmuruna, CFC ozon incelmesine neden olur.",
+      "Yenilenebilir enerji ve sürdürülebilir kalkınma çevre sorunlarına karşı temel çözümlerdir.",
+    ],
+  },
+];

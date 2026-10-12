@@ -1,0 +1,776 @@
+import type { LessonSeed } from '../../domain/types';
+
+/**
+ * AYT Matematik konu anlatımları (1. bölüm): fonksiyonlar, polinomlar,
+ * ikinci dereceden denklemler, karmaşık sayılar, parabol, eşitsizlikler,
+ * trigonometri, üstel fonksiyon, logaritma.
+ */
+export const lessons: LessonSeed[] = [
+  // ------------------------------------------------------------------ Fonksiyonlar
+  {
+    topicId: "aytmat-fonksiyonlar",
+    intro:
+      "Fonksiyon, AYT Matematik’in omurgasıdır: limit, türev, integral, logaritma, trigonometri… hepsi aslında “özel bir fonksiyon” üzerinde çalışır. Bu yüzden fonksiyon kavramını sağlam kurmayan öğrenci, ileride her konuda aynı yerden takılır.\n\nFonksiyonu bir makine gibi düşün: tanım kümesindeki her elemanı içeri atıyorsun, makine her birine tam olarak bir çıktı veriyor. “Her elemana” ve “tam olarak bir” ifadeleri tanımın kalbidir. Bir girdi boşta kalırsa ya da iki farklı çıktı üretirse o bağıntı fonksiyon değildir.\n\nAYT’de fonksiyon soruları genellikle tek başına gelmez; bileşke, ters fonksiyon, tek-çift fonksiyon ve grafik dönüşümleri iç içe sorulur. Bu anlatımda önce tanım ve görüntü kümesini, sonra fonksiyon çeşitlerini, bileşke ve ters fonksiyonu, en sonda da grafik okuma ve dönüşümleri adım adım işleyeceğiz.",
+    prerequisites: [
+      "Kümeler, kartezyen çarpım ve bağıntı kavramı",
+      "Birinci ve ikinci dereceden denklem çözümü",
+      "Köklü ve rasyonel ifadelerin tanımlı olma koşulları",
+      "Koordinat düzleminde nokta ve doğru grafiği okuma",
+    ],
+    concepts: [
+      { term: "Fonksiyon", definition: "A kümesinin her elemanını B kümesinin yalnız bir elemanına eşleyen bağıntıdır; f: A → B biçiminde gösterilir." },
+      { term: "Tanım ve görüntü kümesi", definition: "Tanım kümesi girdilerin kümesi (A), görüntü kümesi f(A) ise gerçekten elde edilen çıktıların kümesidir. Değer kümesi B, görüntü kümesini kapsar." },
+      { term: "Birebir fonksiyon", definition: "Farklı girdilerin farklı çıktılara gittiği fonksiyondur: f(a) = f(b) ⇒ a = b. Grafiği yatay doğrularla en çok bir noktada kesişir." },
+      { term: "Örten fonksiyon", definition: "Görüntü kümesi değer kümesine eşit olan fonksiyondur: f(A) = B. Değer kümesinde boşta eleman kalmaz." },
+      { term: "Tek ve çift fonksiyon", definition: "f(−x) = f(x) ise çift (grafik y eksenine göre simetrik), f(−x) = −f(x) ise tek (grafik orijine göre simetrik) fonksiyondur." },
+      { term: "Bileşke fonksiyon", definition: "(f∘g)(x) = f(g(x)); önce g uygulanır, çıkan sonuç f’ye girdi olarak verilir." },
+      { term: "Ters fonksiyon", definition: "Birebir ve örten f için f(a) = b ⇔ f⁻¹(b) = a olan fonksiyondur; grafiği f’nin y = x doğrusuna göre simetriğidir." },
+      { term: "Ortalama değişim hızı", definition: "[a, b] aralığında (f(b) − f(a))/(b − a) oranıdır; grafikte iki noktayı birleştiren kirişin eğimidir." },
+    ],
+    formulas: [
+      { expr: "(f∘g)(x) = f(g(x))", meaning: "Bileşke içten dışa hesaplanır; genelde f∘g ≠ g∘f." },
+      { expr: "(f∘g)∘h = f∘(g∘h),  f∘I = I∘f = f", meaning: "Bileşke işleminin birleşme özelliği vardır; birim fonksiyon I(x) = x etkisiz elemandır." },
+      { expr: "(f∘f⁻¹)(x) = (f⁻¹∘f)(x) = x", meaning: "Bir fonksiyon ile tersinin bileşkesi birim fonksiyondur." },
+      { expr: "(f∘g)⁻¹ = g⁻¹∘f⁻¹", meaning: "Bileşkenin tersi alınırken sıra ters çevrilir (önce giyilen çorap en son çıkarılır)." },
+      { expr: "f(x) = (ax + b)/(cx + d) ⇒ f⁻¹(x) = (−dx + b)/(cx − a)", meaning: "Birinci dereceden rasyonel fonksiyonun tersi: a ile d yer ve işaret değiştirir." },
+      { expr: "f(x) = ax + b ⇒ f⁻¹(x) = (x − b)/a", meaning: "Doğrusal fonksiyonun tersi (a ≠ 0)." },
+      { expr: "y = f(x − a) + b", meaning: "Grafik a birim sağa (a > 0), b birim yukarı (b > 0) ötelenir." },
+      { expr: "y = −f(x) ;  y = f(−x)", meaning: "İlki grafiği x eksenine göre, ikincisi y eksenine göre yansıtır." },
+    ],
+    logic:
+      "Neden bileşkede sıra önemli? Çünkü f(g(x)) “önce g, sonra f” demektir. Sabah önce çorap sonra ayakkabı giyersin; ters sırayla giyersen sonuç aynı olmaz. Aynı nedenle bileşkenin tersi alınırken sıra da ters döner: (f∘g)⁻¹ = g⁻¹∘f⁻¹. Önce ayakkabıyı çıkarırsın, sonra çorabı.\n\nNeden tersin olması için birebir ve örten olmak gerekir? Ters fonksiyon çıktıdan girdiye geri döner. İki farklı girdi aynı çıktıya gidiyorsa (birebir değilse) geri dönerken hangisine gideceğini bilemezsin; bazı çıktılar hiç üretilmiyorsa (örten değilse) o çıktılardan geriye bir yol yoktur.\n\nTek-çift ayrıştırma da aynı mantığa dayanır: f(−x) yerine koyunca tek dereceli terimler işaret değiştirir, çift dereceliler değişmez. Bu yüzden bir polinomda yalnız çift kuvvetler varsa fonksiyon çift, yalnız tek kuvvetler varsa (sabit terim yoksa) tektir. f(x) + g(x) toplamı verilip f tek, g çift denirse x yerine −x yazıp iki denklem elde etmek ve toplamak her şeyi çözer.",
+    examples: [
+      {
+        level: "kolay",
+        problem: "f(2x − 1) = 4x + 3 olduğuna göre f(5) kaçtır?",
+        steps: [
+          "f(5) istendiği için parantez içini 5’e eşitle: 2x − 1 = 5.",
+          "Buradan x = 3 bulunur.",
+          "Sağ tarafa x = 3 yaz: 4·3 + 3 = 15.",
+        ],
+        answer: "f(5) = 15",
+      },
+      {
+        level: "orta",
+        problem: "f(x) = 3x − 2 ve (f∘g)(x) = 6x + 4 olduğuna göre g⁻¹(8) kaçtır?",
+        steps: [
+          "(f∘g)(x) = f(g(x)) = 3·g(x) − 2 yazılır.",
+          "3·g(x) − 2 = 6x + 4 ⇒ g(x) = 2x + 2.",
+          "g⁻¹(8) = a demek g(a) = 8 demektir: 2a + 2 = 8 ⇒ a = 3.",
+          "Ters fonksiyonu açıkça bulmaya gerek kalmadan sonuca ulaşıldı.",
+        ],
+        answer: "g⁻¹(8) = 3",
+      },
+      {
+        level: "zor",
+        problem: "f tek, g çift fonksiyon ve her x için f(x) + g(x) = x³ + 2x² − x + 4 olduğuna göre f(2)·g(1) kaçtır?",
+        steps: [
+          "x yerine −x yaz: f(−x) + g(−x) = −x³ + 2x² + x + 4.",
+          "f tek, g çift olduğundan f(−x) = −f(x), g(−x) = g(x): −f(x) + g(x) = −x³ + 2x² + x + 4.",
+          "İki denklemi taraf tarafa topla: 2g(x) = 4x² + 8 ⇒ g(x) = 2x² + 4.",
+          "Çıkar: 2f(x) = 2x³ − 2x ⇒ f(x) = x³ − x.",
+          "f(2) = 8 − 2 = 6, g(1) = 2 + 4 = 6 ⇒ f(2)·g(1) = 36.",
+        ],
+        answer: "36",
+      },
+    ],
+    osymThinking:
+      "Sınavda fonksiyon çoğu zaman “f(ax + b) = …” kalıbında gizlenir; fonksiyonu açıkça bulmadan parantez içini istenen değere eşitlemek zaman kazandırır. Ters fonksiyon değeri sorulduğunda f⁻¹(k) = a ⇔ f(a) = k dönüşümü, tersi hiç bulmadan çözüm sağlar. Grafik ve tablo sorularında bileşke değerleri adım adım okutulur; ölçülen şey hesap değil, tanımı doğru uygulama ve dikkattir. Tek-çift bilgisi de genellikle soru kökünde tek kelimeyle verilir ve x yerine −x yazma fikrini ister.",
+    commonMistakes: [
+      "(f∘g)(x) hesaplanırken önce f’yi uygulamak; bileşke içten dışa hesaplanır.",
+      "f⁻¹(x) ile 1/f(x) ifadesini karıştırmak; ters fonksiyon çarpmaya göre ters değildir.",
+      "(f∘g)⁻¹ = f⁻¹∘g⁻¹ yazmak; doğrusu g⁻¹∘f⁻¹’dir.",
+      "Tanım kümesi bulurken paydadaki kökleri ya da kök içinin negatif olmama koşulunu unutmak.",
+      "y = f(x − 2) grafiğini sola ötelemek; x − a biçimi sağa öteleme demektir.",
+    ],
+    tips: [
+      "f⁻¹(k) sorulduğunda tersi bulma; f(x) = k denklemini çöz.",
+      "f(ax + b) verilip f(c) isteniyorsa ax + b = c yaz; x’i bul ve sağ tarafta yerine koy.",
+      "Tek fonksiyonun tanım kümesi 0’ı içeriyorsa f(0) = 0 olmak zorundadır; bu bilgi sabit terimi hemen verir.",
+      "Rasyonel fonksiyon kendi tersine eşitse (f = f⁻¹), a = −d koşulu yeterlidir.",
+    ],
+    summary: [
+      "Fonksiyon: her girdiye tam olarak bir çıktı.",
+      "Birebir + örten ⇔ ters fonksiyon vardır; f⁻¹ grafiği y = x’e göre simetriktir.",
+      "Bileşke içten dışa: (f∘g)(x) = f(g(x)); tersi (f∘g)⁻¹ = g⁻¹∘f⁻¹.",
+      "Çift: f(−x) = f(x) (y eksenine simetri); tek: f(−x) = −f(x) (orijine simetri).",
+      "f(x − a) + b: a sağa, b yukarı öteleme; −f(x) x eksenine, f(−x) y eksenine yansıma.",
+      "(ax + b)/(cx + d) fonksiyonunun tersi (−dx + b)/(cx − a).",
+    ],
+  },
+
+  // ------------------------------------------------------------------ Polinomlar
+  {
+    topicId: "aytmat-polinomlar",
+    intro:
+      "Polinomlar, değişkenin yalnızca doğal sayı kuvvetlerinden oluşan ifadelerdir: P(x) = aₙxⁿ + … + a₁x + a₀. Günlük hesaplarımızdaki pek çok bağıntı (alan, hacim, kâr, yol) aslında birer polinomdur; bu yüzden polinomlar cebirin en çok kullanılan aracıdır.\n\nAYT’de polinom soruları üç ana fikre dayanır: P(1) ve P(0) gibi “akıllı değer verme”, kalan teoremi ve derece hesabı. Bu üç fikri iyi oturtan öğrenci, uzun bölme işlemine neredeyse hiç ihtiyaç duymadan soruların çoğunu birkaç satırda çözer.\n\nBu konuda önce polinomun tanımını ve temel kavramları, ardından işlemleri ve dereceyi, sonra bölme ve kalan teoremini, en sonda da çarpanlara ayırma, kökler ve rasyonel ifadeleri işleyeceğiz. Polinom bilgisi ikinci dereceden denklemler, limit (0/0 belirsizliği) ve integral konularında da doğrudan kullanılır.",
+    prerequisites: [
+      "Üslü ifadeler ve çarpanlara ayırma (özdeşlikler)",
+      "Birinci ve ikinci dereceden denklem çözümü",
+      "Fonksiyon kavramı ve f(ax + b) biçiminde değer hesaplama",
+      "Kesirli ifadelerde sadeleştirme",
+    ],
+    concepts: [
+      { term: "Polinom", definition: "aₙxⁿ + aₙ₋₁xⁿ⁻¹ + … + a₀ biçimindeki ifadedir; kuvvetler doğal sayı, katsayılar reel sayıdır. √x, 1/x gibi terimler içeren ifadeler polinom değildir." },
+      { term: "Derece", definition: "Katsayısı sıfırdan farklı en büyük kuvvettir; der P(x) ile gösterilir. Sıfırdan farklı sabit polinomun derecesi 0’dır." },
+      { term: "Baş katsayı ve sabit terim", definition: "En büyük dereceli terimin katsayısı baş katsayı, x içermeyen terim sabit terimdir (P(0))." },
+      { term: "Sıfır polinomu", definition: "Tüm katsayıları 0 olan polinomdur; derecesi tanımsızdır." },
+      { term: "Kalan teoremi", definition: "P(x) polinomunun x − a ile bölümünden kalan P(a)’dır." },
+      { term: "Çarpan teoremi", definition: "P(a) = 0 ise x − a, P(x)’in bir çarpanıdır ve a bir köktür." },
+      { term: "Rasyonel ifade", definition: "P(x)/Q(x) biçiminde, Q(x) sıfır polinomu olmayan ifadedir; sadeleştirme ortak çarpanlarla yapılır." },
+    ],
+    formulas: [
+      { expr: "Katsayılar toplamı = P(1),  sabit terim = P(0)", meaning: "Polinoma x = 1 ve x = 0 vererek hızlı bilgi alınır." },
+      { expr: "Çift dereceli terim katsayıları toplamı = [P(1) + P(−1)]/2", meaning: "Tek dereceli terimler P(1) ile P(−1)’de zıt işaretli olduğundan toplamda sadeleşir." },
+      { expr: "Tek dereceli terim katsayıları toplamı = [P(1) − P(−1)]/2", meaning: "Farkta çift dereceli terimler sadeleşir." },
+      { expr: "P(x) = B(x)·Q(x) + K(x),  der K < der B", meaning: "Bölme özdeşliği: bölünen = bölen·bölüm + kalan." },
+      { expr: "P(x) ÷ (ax + b) ⇒ kalan P(−b/a)", meaning: "Birinci dereceden bölen için kalan, bölenin kökündeki değerdir." },
+      { expr: "der(P·Q) = der P + der Q,  der(P∘Q) = der P · der Q", meaning: "Çarpımda dereceler toplanır, bileşkede çarpılır; der Pⁿ = n·der P." },
+      { expr: "der(P ± Q) ≤ en büyük(der P, der Q)", meaning: "Toplamda derece, büyük olanı geçemez (baş terimler sadeleşirse düşebilir)." },
+    ],
+    logic:
+      "Kalan teoremi neden doğrudur? Bölme özdeşliği P(x) = (x − a)·Q(x) + K yazılır. Bölen birinci dereceden olduğu için kalan sabittir. x = a verince (x − a) çarpanı sıfır olur, geriye yalnız K kalır: P(a) = K. Yani uzun bölme yapmak yerine bölenin kökünü polinoma yazmak yeterlidir.\n\nİkinci dereceden bir bölen için kalan en fazla birinci derecedendir: K(x) = mx + n. Bölenin iki kökünü bölme özdeşliğine yazınca iki bilinmeyenli iki denklem elde edilir. Bu, AYT’nin en sevdiği kalıptır.\n\nP(1)’in katsayılar toplamı olması da aynı fikirdir: x = 1 iken her xᵏ terimi 1 olur ve geriye yalnız katsayılar kalır. P(−1)’de ise tek kuvvetler −1, çift kuvvetler 1 olur; bu yüzden P(1) ile P(−1)’in toplamı ve farkı tek-çift katsayıları ayırır. Tüm bu “akıllı değer verme” fikrinin arkasında tek bir ilke vardır: polinom özdeşliği her x için doğrudur, dolayısıyla işimize yarayan x’i seçmekte özgürüz.",
+    examples: [
+      {
+        level: "kolay",
+        problem: "P(x) = 2x³ − x² + 4x − 5 polinomunun x − 2 ile bölümünden kalan kaçtır?",
+        steps: [
+          "Kalan teoremi: x − 2 = 0 ⇒ x = 2 yazılır.",
+          "P(2) = 2·8 − 4 + 8 − 5 = 16 − 4 + 8 − 5.",
+          "P(2) = 15.",
+        ],
+        answer: "15",
+      },
+      {
+        level: "orta",
+        problem: "P(x − 1) = x³ + 2x² − 3x + a ve P(x)’in katsayılar toplamı 14 olduğuna göre P(x)’in sabit terimi kaçtır?",
+        steps: [
+          "Katsayılar toplamı P(1)’dir. x − 1 = 1 ⇒ x = 2: P(1) = 8 + 8 − 6 + a = 10 + a.",
+          "10 + a = 14 ⇒ a = 4.",
+          "Sabit terim P(0)’dır. x − 1 = 0 ⇒ x = 1: P(0) = 1 + 2 − 3 + 4 = 4.",
+        ],
+        answer: "4",
+      },
+      {
+        level: "zor",
+        problem: "P(x) polinomunun x − 2 ile bölümünden kalan 7, x + 1 ile bölümünden kalan 1’dir. P(x)’in x² − x − 2 ile bölümünden kalan nedir?",
+        steps: [
+          "x² − x − 2 = (x − 2)(x + 1). Bölen ikinci dereceden olduğundan kalan K(x) = mx + n biçimindedir.",
+          "P(x) = (x − 2)(x + 1)·B(x) + mx + n yazılır.",
+          "x = 2: P(2) = 2m + n = 7.  x = −1: P(−1) = −m + n = 1.",
+          "Denklemler çıkarılırsa 3m = 6 ⇒ m = 2, n = 3.",
+          "Kalan K(x) = 2x + 3.",
+        ],
+        answer: "2x + 3",
+      },
+    ],
+    osymThinking:
+      "Polinom soruları genellikle P(ax + b) biçiminde gizlenir ve senden katsayılar toplamı, sabit terim ya da bir kalan ister. Soru “uzun bölme yap” demez; ölçülen şey hangi x değerini vermen gerektiğini görmendir. İkinci dereceden bölene göre kalan sorularında iki kök yazıp denklem sistemi kurma becerisi, derece sorularında ise çarpım-bileşke kurallarını karıştırmama dikkati sınanır. Yeni nesil sorularda polinom bir alan ya da hacim formülü olarak karşına çıkabilir.",
+    commonMistakes: [
+      "P(x − 1)’in katsayılar toplamını sorunca x = 1 yazmak; P(x − 1)’in katsayılar toplamı x = 1 için P(0)’dır, P(x)’inki için x − 1 = 1 yazılmalıdır.",
+      "x + 3 ile bölümden kalan için P(3) hesaplamak; doğrusu P(−3)’tür.",
+      "İkinci dereceden bölende kalanı sabit sanmak; kalan mx + n biçimindedir.",
+      "der(P∘Q) ile der(P·Q)’yu karıştırmak: bileşkede dereceler çarpılır, çarpımda toplanır.",
+      "√x ya da x⁻¹ içeren ifadeleri polinom saymak.",
+    ],
+    tips: [
+      "“Katsayılar toplamı” gördüğün an P(1), “sabit terim” gördüğün an P(0) yaz.",
+      "Kökleri bilinen polinomu çarpan biçiminde yaz: P(x) = a(x − x₁)(x − x₂)… + sabit. Aynı değeri üç noktada alan 3. dereceden polinom sorularında bu yöntem çok hızlıdır.",
+      "Bölen çarpanlarına ayrılabiliyorsa her kökü ayrı ayrı bölme özdeşliğine yaz.",
+    ],
+    summary: [
+      "Polinomda kuvvetler doğal sayıdır; derece = en büyük kuvvet.",
+      "P(1) katsayılar toplamı, P(0) sabit terim.",
+      "x − a ile bölümden kalan P(a); ax + b için P(−b/a).",
+      "İkinci dereceden bölende kalan mx + n; iki kök yazılarak bulunur.",
+      "der(P·Q) = der P + der Q; der(P∘Q) = der P · der Q.",
+      "P(a) = 0 ⇔ x − a bir çarpandır.",
+    ],
+  },
+
+  // ------------------------------------------------------------------ İkinci dereceden denklemler
+  {
+    topicId: "aytmat-ikinci-derece-denklemler",
+    intro:
+      "ax² + bx + c = 0 (a ≠ 0) biçimindeki denklemler matematiğin her yerinde karşımıza çıkar: parabol, eşitsizlik, karmaşık sayı ve hatta türevde ekstremum bulurken bile. Bu denklemleri iki yolla çözeriz: çarpanlara ayırarak ya da diskriminant (Δ) formülüyle.\n\nAYT’de bu konunun asıl yıldızı kökleri bulmak değil, kökleri hiç bulmadan kökler hakkında konuşabilmektir. Kökler toplamı ve çarpımı (Viète bağıntıları) sayesinde x₁² + x₂², 1/x₁ + 1/x₂ gibi ifadeleri tek satırda hesaplayabilirsin.",
+    prerequisites: [
+      "Çarpanlara ayırma ve tam kareye tamamlama",
+      "Köklü ifadelerle işlem",
+      "Birinci dereceden denklemler",
+    ],
+    concepts: [
+      { term: "Diskriminant (Δ)", definition: "Δ = b² − 4ac. Δ > 0 ise iki farklı reel kök, Δ = 0 ise çakışık (çift katlı) kök, Δ < 0 ise reel kök yoktur." },
+      { term: "Kökler toplamı ve çarpımı", definition: "x₁ + x₂ = −b/a, x₁·x₂ = c/a (Viète bağıntıları)." },
+      { term: "Çakışık kök", definition: "Δ = 0 iken iki kök eşittir: x₁ = x₂ = −b/(2a)." },
+      { term: "İndirgenebilen denklem", definition: "t = x², t = aˣ ya da t = x² − 2x gibi bir değişken değiştirmeyle ikinci dereceye dönüşen denklemdir." },
+    ],
+    formulas: [
+      { expr: "x₁,₂ = (−b ± √Δ)/(2a)", meaning: "Kök formülü." },
+      { expr: "x₁ + x₂ = −b/a,  x₁·x₂ = c/a", meaning: "Kökleri bulmadan simetrik ifadeleri hesaplamayı sağlar." },
+      { expr: "|x₁ − x₂| = √Δ/|a|", meaning: "Kökler farkının mutlak değeri." },
+      { expr: "x₁² + x₂² = (x₁ + x₂)² − 2x₁x₂", meaning: "En sık kullanılan simetrik ifade." },
+      { expr: "x² − (x₁ + x₂)x + x₁x₂ = 0", meaning: "Kökleri bilinen denklemin kurulması." },
+    ],
+    logic:
+      "Kök formülü tam kareye tamamlamadan gelir: ax² + bx + c = 0 denklemini a’ya bölüp (x + b/2a)² = Δ/4a² biçimine getirirsin. Karekök alabilmek için sağ tarafın negatif olmaması gerekir; işte Δ’nın işareti bu yüzden kök sayısını belirler.\n\nViète bağıntıları ise çarpan biçiminden gelir: a(x − x₁)(x − x₂) açılınca ax² − a(x₁ + x₂)x + a·x₁x₂ olur. Katsayılar eşitlenince x₁ + x₂ = −b/a ve x₁x₂ = c/a kendiliğinden çıkar.",
+    examples: [
+      {
+        level: "kolay",
+        problem: "x² − 5x + 6 = 0 denkleminin çözüm kümesini bulunuz.",
+        steps: [
+          "Çarpımı 6, toplamı −5 olan iki sayı: −2 ve −3.",
+          "(x − 2)(x − 3) = 0 ⇒ x = 2 ya da x = 3.",
+        ],
+        answer: "Ç = {2, 3}",
+      },
+      {
+        level: "orta",
+        problem: "x² − 4x + 1 = 0 denkleminin kökleri x₁ ve x₂ ise x₁² + x₂² ve 1/x₁ + 1/x₂ değerlerini bulunuz.",
+        steps: [
+          "x₁ + x₂ = 4, x₁·x₂ = 1.",
+          "x₁² + x₂² = 4² − 2·1 = 14.",
+          "1/x₁ + 1/x₂ = (x₁ + x₂)/(x₁x₂) = 4/1 = 4.",
+        ],
+        answer: "14 ve 4",
+      },
+      {
+        level: "zor",
+        problem: "(x² − 2x)² − 5(x² − 2x) − 24 = 0 denkleminin reel köklerinin toplamı kaçtır?",
+        steps: [
+          "t = x² − 2x dersen t² − 5t − 24 = 0 ⇒ (t − 8)(t + 3) = 0.",
+          "t = 8: x² − 2x − 8 = 0 ⇒ Δ = 36 > 0, kökler 4 ve −2.",
+          "t = −3: x² − 2x + 3 = 0 ⇒ Δ = 4 − 12 < 0, reel kök yok.",
+          "Reel kökler toplamı 4 + (−2) = 2.",
+        ],
+        answer: "2",
+      },
+    ],
+    osymThinking:
+      "Sorular kökleri tek tek bulmanı değil, Viète bağıntılarıyla simetrik ifadeleri hesaplamanı ister. Değişken değiştirme sorularında her yeni denklemin Δ’sını ayrıca kontrol etmek gerekir; reel kök üretmeyen t değeri sonucu değiştirir. Parametreli sorularda “çakışık kök”, “reel kök yok” gibi ifadeler Δ koşuluna çevrilmelidir.",
+    commonMistakes: [
+      "Kökler toplamını b/a yazmak; doğrusu −b/a’dır.",
+      "Değişken değiştirmede reel kök vermeyen t değerinin köklerini de toplama katmak.",
+      "Denklemin baş katsayısı 1 değilken x₁x₂ = c yazmak (c/a olmalı).",
+      "“İki farklı reel kök” için Δ ≥ 0 yazmak; doğrusu Δ > 0.",
+    ],
+    tips: [
+      "x₁/x₂ + x₂/x₁ = (x₁² + x₂²)/(x₁x₂) — ezberle.",
+      "Çarpanlara ayırma 10 saniyede görünmüyorsa hemen Δ’ya geç.",
+      "a ile c zıt işaretliyse Δ kesinlikle pozitiftir ve kökler zıt işaretlidir.",
+    ],
+    summary: [
+      "Δ = b² − 4ac: kök sayısını belirler.",
+      "x₁ + x₂ = −b/a, x₁x₂ = c/a.",
+      "x₁² + x₂² = (x₁ + x₂)² − 2x₁x₂.",
+      "Kökleri verilen denklem: x² − Tx + Ç = 0.",
+      "Değişken değiştirmede her yeni denklemin Δ’sını kontrol et.",
+    ],
+  },
+
+  // ------------------------------------------------------------------ Karmaşık sayılar
+  {
+    topicId: "aytmat-karmasik-sayilar",
+    intro:
+      "x² + 1 = 0 denkleminin reel sayılarda çözümü yoktur, çünkü hiçbir reel sayının karesi negatif olamaz. Matematikçiler bu engeli aşmak için i² = −1 olan yeni bir sayı tanımlamış ve sayı sistemini karmaşık sayılara genişletmiştir.\n\nBir karmaşık sayı z = a + bi biçimindedir: a reel kısım, b sanal kısımdır. Karmaşık sayılarla dört işlem, i’yi bir değişken gibi kullanıp i² gördüğün yere −1 yazarak yapılır. AYT’de i’nin kuvvetleri, eşlenikle bölme, eşitlik ve Δ < 0 olan denklemlerin kökleri sorulur.",
+    prerequisites: [
+      "İkinci dereceden denklemler ve diskriminant",
+      "Özdeşlikler (iki kare farkı, tam kare)",
+      "Koordinat düzlemi ve Pisagor bağıntısı",
+    ],
+    concepts: [
+      { term: "Sanal birim i", definition: "i² = −1 olan sayıdır; √−4 = 2i gibi negatif sayıların karekökleri i ile yazılır." },
+      { term: "Karmaşık sayı", definition: "z = a + bi (a, b reel). Re(z) = a, İm(z) = b." },
+      { term: "Eşlenik", definition: "z = a + bi ise z̄ = a − bi. z·z̄ = a² + b² daima reeldir." },
+      { term: "Modül (mutlak değer)", definition: "|z| = √(a² + b²); karmaşık düzlemde z’nin orijine uzaklığıdır." },
+    ],
+    formulas: [
+      { expr: "i¹ = i, i² = −1, i³ = −i, i⁴ = 1", meaning: "i’nin kuvvetleri 4’lük döngüyle tekrar eder: iⁿ için n’nin 4 ile bölümünden kalana bak." },
+      { expr: "a + bi = c + di ⇔ a = c ve b = d", meaning: "İki karmaşık sayı, reel ve sanal kısımları ayrı ayrı eşitse eşittir." },
+      { expr: "(a + bi)/(c + di) = (a + bi)(c − di)/(c² + d²)", meaning: "Bölmede pay ve payda paydanın eşleniğiyle çarpılır." },
+      { expr: "(1 + i)² = 2i,  (1 − i)² = −2i", meaning: "Büyük kuvvetleri hızlı hesaplamak için kullanılır." },
+      { expr: "Δ < 0 ⇒ x₁,₂ = (−b ± i√|Δ|)/(2a)", meaning: "Reel katsayılı denklemin karmaşık kökleri birbirinin eşleniğidir." },
+    ],
+    logic:
+      "i’nin kuvvetlerinin 4’te bir tekrar etmesinin nedeni i⁴ = (i²)² = (−1)² = 1 olmasıdır. Her 4 adımda bir 1’e döndüğün için iⁿ yalnızca n’nin 4 ile bölümünden kalana bağlıdır.\n\nEşlenikle çarpma, paydadaki i’yi yok etmek içindir: (c + di)(c − di) = c² − d²i² = c² + d² reel bir sayıdır. Bu, köklü paydayı eşlenikle rasyonel yapmanın karmaşık sayılardaki karşılığıdır.",
+    examples: [
+      {
+        level: "kolay",
+        problem: "i²⁰²⁷ kaçtır?",
+        steps: [
+          "2027’nin 4 ile bölümünden kalan: 2027 = 4·506 + 3.",
+          "i²⁰²⁷ = i³ = −i.",
+        ],
+        answer: "−i",
+      },
+      {
+        level: "orta",
+        problem: "z = (3 + 2i)/(1 − i) sayısının reel ve sanal kısımlarını bulunuz.",
+        steps: [
+          "Pay ve paydayı 1 + i ile çarp: (3 + 2i)(1 + i)/((1 − i)(1 + i)).",
+          "Pay: 3 + 3i + 2i + 2i² = 3 + 5i − 2 = 1 + 5i. Payda: 1 + 1 = 2.",
+          "z = 1/2 + (5/2)i ⇒ Re(z) = 1/2, İm(z) = 5/2.",
+        ],
+        answer: "Re(z) = 1/2, İm(z) = 5/2",
+      },
+      {
+        level: "zor",
+        problem: "x² − 6x + 13 = 0 denkleminin köklerinden biri z ise |z| kaçtır?",
+        steps: [
+          "Δ = 36 − 52 = −16 < 0 ⇒ kökler 3 ± 2i.",
+          "|z| = √(3² + 2²) = √13.",
+          "Kısa yol: kökler eşlenik olduğundan z·z̄ = |z|² = c/a = 13.",
+        ],
+        answer: "√13",
+      },
+    ],
+    osymThinking:
+      "Bu konuda sorular işlem hızını ve i² = −1 dönüşümünü doğru yapmayı ölçer. Kuvvet sorularında 4 ile bölümden kalan, bölme sorularında eşlenik, eşitlik sorularında reel ve sanal kısımları ayrı ayrı eşitleme fikri beklenir. Reel katsayılı denklemin karmaşık köklerinin eşlenik olması, Viète bağıntılarıyla birleştirilerek sıkça sorulur.",
+    commonMistakes: [
+      "i² yerine 1 yazmak ya da i²’yi hiç sadeleştirmemek.",
+      "Sanal kısmı bi olarak yazmak; İm(z) = b’dir, i içermez.",
+      "Eşlenikle yalnız paydayı çarpmak, payı unutmak.",
+      "√(−4)·√(−9) = √36 = 6 yazmak; doğrusu 2i·3i = −6’dır.",
+    ],
+    tips: [
+      "Ardışık dört kuvvetin toplamı daima 0’dır: iⁿ + iⁿ⁺¹ + iⁿ⁺² + iⁿ⁺³ = 0.",
+      "|z|² = z·z̄ bağıntısı, kök formülüne girmeden modül bulmayı sağlar.",
+    ],
+    summary: [
+      "i² = −1; iⁿ için n’yi 4’e böl, kalana bak.",
+      "Bölmede paydanın eşleniğiyle çarp.",
+      "Eşitlikte reel = reel, sanal = sanal.",
+      "|z| = √(a² + b²), z·z̄ = |z|².",
+    ],
+  },
+
+  // ------------------------------------------------------------------ Parabol
+  {
+    topicId: "aytmat-parabol",
+    intro:
+      "f(x) = ax² + bx + c fonksiyonunun grafiğine parabol denir. Havaya atılan topun izlediği yol, uydu çanaklarının kesiti, köprü kemerleri parabol biçimindedir. a > 0 ise kollar yukarı (en küçük değer var), a < 0 ise kollar aşağı (en büyük değer var) bakar.\n\nParabolün en önemli noktası tepe noktasıdır: T(r, k). Simetri ekseni x = r doğrusudur. AYT’de tepe noktası, en büyük-en küçük değer, grafikten katsayı işareti okuma ve parabol-doğru kesişimi sıkça sorulur.",
+    prerequisites: [
+      "İkinci dereceden denklemler, diskriminant ve Viète bağıntıları",
+      "Fonksiyon grafiği okuma",
+      "Doğru denklemi",
+    ],
+    concepts: [
+      { term: "Tepe noktası", definition: "T(r, k); r = −b/(2a), k = f(r) = (4ac − b²)/(4a). Fonksiyonun en büyük ya da en küçük değeri k’dir." },
+      { term: "Simetri ekseni", definition: "x = r doğrusudur; parabol bu doğruya göre simetriktir, x eksenini kestiği noktaların orta noktası r’dir." },
+      { term: "Eksenlerle kesişim", definition: "y eksenini (0, c)’de keser; x eksenini ax² + bx + c = 0 denkleminin reel köklerinde keser." },
+      { term: "Teğetlik", definition: "Parabol ile doğru ortak çözülünce elde edilen ikinci dereceden denklemde Δ = 0 ise doğru parabole teğettir." },
+    ],
+    formulas: [
+      { expr: "r = −b/(2a),  k = f(r)", meaning: "Tepe noktasının koordinatları." },
+      { expr: "f(x) = a(x − r)² + k", meaning: "Tepe noktası biçimi." },
+      { expr: "f(x) = a(x − x₁)(x − x₂)", meaning: "x eksenini kestiği noktalar biliniyorsa kullanılır." },
+      { expr: "Parabol ∩ doğru: Δ > 0 iki nokta, Δ = 0 teğet, Δ < 0 kesişmez", meaning: "Ortak çözümden gelen denklemin diskriminantına bakılır." },
+    ],
+    logic:
+      "Tepe noktasının apsisi neden −b/(2a)? Parabol simetrik olduğu için x eksenini kestiği iki noktanın tam ortasında tepe bulunur. Kökler toplamı −b/a olduğundan ortalama −b/(2a)’dır. Kök olmasa bile tam kareye tamamlama aynı sonucu verir: a(x + b/2a)² ifadesi x = −b/2a’da sıfır olur ve fonksiyon en uç değerini alır.\n\nParabol-doğru ilişkisinde iki denklemi eşitlemek ortak noktaları arar; bu da ikinci dereceden bir denkleme dönüşür. Kök sayısı ortak nokta sayısıdır, bu yüzden Δ kararı verir.",
+    examples: [
+      {
+        level: "kolay",
+        problem: "f(x) = x² − 6x + 5 parabolünün tepe noktasını bulunuz.",
+        steps: [
+          "r = −(−6)/(2·1) = 3.",
+          "k = f(3) = 9 − 18 + 5 = −4.",
+        ],
+        answer: "T(3, −4)",
+      },
+      {
+        level: "orta",
+        problem: "f(x) = −2x² + 8x + c fonksiyonunun en büyük değeri 11 ise c kaçtır?",
+        steps: [
+          "a < 0 olduğundan en büyük değer tepe noktasındadır: r = −8/(−4) = 2.",
+          "f(2) = −8 + 16 + c = 8 + c.",
+          "8 + c = 11 ⇒ c = 3.",
+        ],
+        answer: "3",
+      },
+      {
+        level: "zor",
+        problem: "y = x² + 2 parabolü ile y = 2x + m doğrusu teğet ise m kaçtır?",
+        steps: [
+          "Ortak çözüm: x² + 2 = 2x + m ⇒ x² − 2x + 2 − m = 0.",
+          "Teğetlik: Δ = 4 − 4(2 − m) = 0 ⇒ 4m − 4 = 0.",
+          "m = 1; değme noktası x = 1, y = 3.",
+        ],
+        answer: "1",
+      },
+    ],
+    osymThinking:
+      "Parabol soruları çoğunlukla grafikle gelir: kolların yönü a’nın, y eksenini kestiği yer c’nin, tepe noktasının konumu −b/2a üzerinden b’nin işaretini verir. Modelleme sorularında (atılan top, çit ile alan) ise “en fazla” kelimesi tepe noktasını işaret eder. Parabol-doğru sorularında ölçülen, geometrik durumu Δ koşuluna çevirebilmektir.",
+    commonMistakes: [
+      "r = b/(2a) yazmak; işaret eksiktir.",
+      "a > 0 iken tepe değerini en büyük değer sanmak.",
+      "Tepe noktası biçiminde a(x − r)² + k ifadesinde r’nin işaretini ters okumak.",
+      "Grafikten b’nin işaretini okurken a’nın işaretini hesaba katmamak.",
+    ],
+    tips: [
+      "b’nin işareti: tepe y ekseninin sağındaysa a ile b zıt işaretli, solundaysa aynı işaretlidir.",
+      "Kökler biliniyorsa tepe apsisi kökler ortalamasıdır; hesap kısalır.",
+      "“En büyük alan / en yüksek nokta” gördüğünde tepe noktasına git.",
+    ],
+    summary: [
+      "a > 0 kollar yukarı (min), a < 0 kollar aşağı (max).",
+      "Tepe: r = −b/2a, k = f(r).",
+      "y eksenini c’de keser; x eksenini köklerde keser.",
+      "Parabol-doğru: ortak çözümün Δ’sı durumu belirler.",
+    ],
+  },
+
+  // ------------------------------------------------------------------ Eşitsizlikler
+  {
+    topicId: "aytmat-esitsizlikler",
+    intro:
+      "Eşitsizlikler, bir ifadenin hangi x değerlerinde pozitif ya da negatif olduğunu bulma sanatıdır. İkinci dereceden ve çarpım-bölüm biçimindeki eşitsizliklerin ortak aracı işaret tablosudur.\n\nİşaret tablosunda ifadeyi sıfır ya da tanımsız yapan noktalar (kritik noktalar) sayı doğrusuna dizilir; en sağdaki aralığın işareti bulunur ve kökün katlılığına göre işaret değişir ya da korunur. Bu tek fikirle AYT’deki eşitsizlik sorularının neredeyse tamamı çözülür.",
+    prerequisites: [
+      "Birinci dereceden eşitsizlikler ve aralık gösterimi",
+      "İkinci dereceden denklemler, Δ ve kökler toplam-çarpım bağıntıları",
+      "Çarpanlara ayırma",
+    ],
+    concepts: [
+      { term: "İşaret tablosu", definition: "Kritik noktalara göre ayrılmış aralıklarda ifadenin işaretini gösteren tablodur." },
+      { term: "Tek ve çift katlı kök", definition: "Tek katlı kökte işaret değişir, çift katlı kökte (örneğin (x − 1)²) işaret değişmez." },
+      { term: "Paydanın kökü", definition: "İfadeyi tanımsız yaptığı için çözüm kümesine hiçbir zaman dahil edilmez." },
+      { term: "Her x için pozitiflik", definition: "ax² + bx + c > 0 her x için sağlanıyorsa a > 0 ve Δ < 0 olmalıdır." },
+    ],
+    formulas: [
+      { expr: "ax² + bx + c: köklerin dışında a’nın işareti, arasında ters işaret", meaning: "Δ > 0 iken ikinci dereceden ifadenin işaret kuralı." },
+      { expr: "∀x: ax² + bx + c > 0 ⇔ a > 0 ve Δ < 0", meaning: "Her x için pozitiflik koşulu." },
+      { expr: "∀x: ax² + bx + c < 0 ⇔ a < 0 ve Δ < 0", meaning: "Her x için negatiflik koşulu." },
+      { expr: "İki pozitif kök: Δ > 0, x₁ + x₂ > 0, x₁x₂ > 0", meaning: "Köklerin işaretine ilişkin koşullar." },
+      { expr: "Zıt işaretli kökler: x₁x₂ = c/a < 0", meaning: "Bu durumda Δ zaten pozitiftir." },
+    ],
+    logic:
+      "İşaret neden kökte değişir? (x − a) çarpanı a’nın solunda negatif, sağında pozitiftir; yani x = a noktasını geçerken işaret değiştirir. (x − a)² ise her iki tarafta da pozitif olduğu için işaret değiştirmez. Bir ifade bu çarpanların çarpımı olduğundan, tek katlı köklerde toplam işaret değişir, çift katlılarda korunur.\n\nEşitsizliği iki tarafı paydaya çarparak çözmek tehlikelidir, çünkü paydanın işaretini bilmiyorsun ve negatifle çarpınca eşitsizlik yön değiştirir. İşaret tablosu bu riski ortadan kaldırır.",
+    examples: [
+      {
+        level: "kolay",
+        problem: "x² − x − 6 < 0 eşitsizliğinin çözüm kümesini bulunuz.",
+        steps: [
+          "x² − x − 6 = (x − 3)(x + 2); kökler −2 ve 3.",
+          "a = 1 > 0: kökler arasında ifade negatiftir.",
+          "Ç = (−2, 3).",
+        ],
+        answer: "(−2, 3)",
+      },
+      {
+        level: "orta",
+        problem: "(x − 1)²(x + 2)/(x − 3) ≥ 0 eşitsizliğinin çözüm kümesini bulunuz.",
+        steps: [
+          "Kritik noktalar: −2 (tek katlı), 1 (çift katlı), 3 (payda, tek katlı).",
+          "x > 3 için ifade pozitiftir. 3’te işaret değişir: (1, 3) negatif. 1 çift katlı: (−2, 1) de negatif. −2’de işaret değişir: x < −2 pozitif.",
+          "≥ 0 için pozitif aralıklar ve sıfır yapan noktalar alınır; x = 3 paydayı sıfırladığı için alınmaz, x = 1 ise ifadeyi sıfır yaptığı için alınır.",
+          "Ç = (−∞, −2] ∪ {1} ∪ (3, ∞).",
+        ],
+        answer: "(−∞, −2] ∪ {1} ∪ (3, ∞)",
+      },
+      {
+        level: "zor",
+        problem: "Her x reel sayısı için mx² + 4x + m − 3 > 0 olması için m hangi aralıkta olmalıdır?",
+        steps: [
+          "Koşullar: m > 0 ve Δ < 0.",
+          "Δ = 16 − 4m(m − 3) < 0 ⇒ m² − 3m − 4 > 0 ⇒ (m − 4)(m + 1) > 0 ⇒ m < −1 ya da m > 4.",
+          "m > 0 ile kesiştir: m > 4.",
+        ],
+        answer: "m > 4",
+      },
+    ],
+    osymThinking:
+      "Sorular genellikle “eşitsizliği sağlayan tam sayıların toplamı/sayısı” biçiminde gelir; böylece hem çözüm kümesini hem de uç noktaların dahil olup olmadığını dikkatle belirlemen gerekir. Çift katlı kök ve paydanın kökü, ölçülen asıl dikkattir. Parametreli sorularda “her x için”, “iki pozitif kök” gibi ifadeler Δ, toplam ve çarpım koşullarına çevrilir.",
+    commonMistakes: [
+      "Paydanın kökünü ≤ ya da ≥ durumunda çözüme dahil etmek.",
+      "Çift katlı kökte işareti değiştirmek.",
+      "Eşitsizliğin iki tarafını işareti belli olmayan bir ifadeyle çarpmak.",
+      "≥ 0 çözümünde çift katlı kökü (tek başına sıfır yapan noktayı) çözüme eklemeyi unutmak.",
+    ],
+    tips: [
+      "En sağdaki aralığın işareti, tüm baş katsayıların çarpımının işaretidir.",
+      "Her x için pozitiflikte a = 0 durumunu ayrıca kontrol et (ifade doğrusal olur).",
+      "Sistem sorularında her eşitsizliği ayrı çöz, sonra sayı doğrusunda kesiştir.",
+    ],
+    summary: [
+      "Kritik noktaları bul, işaret tablosu kur.",
+      "Tek katlı kökte işaret değişir, çift katlıda değişmez.",
+      "Paydanın kökü asla çözüme girmez.",
+      "Her x için pozitif: a > 0 ve Δ < 0.",
+    ],
+  },
+
+  // ------------------------------------------------------------------ Trigonometri
+  {
+    topicId: "aytmat-trigonometri",
+    intro:
+      "Trigonometri, açı ile uzunluk arasındaki ilişkiyi inceler. 9. sınıfta dik üçgende tanımladığın sinüs ve kosinüs, 11. sınıfta birim çember sayesinde her açı için (negatif ve 360°’den büyük açılar dahil) tanımlanır. Böylece trigonometrik ifadeler dönen tekerleklerden ses dalgalarına kadar periyodik her olayı modelleyen fonksiyonlara dönüşür.\n\nBirim çember, merkezi orijinde ve yarıçapı 1 olan çemberdir. Pozitif x ekseninden başlayıp saat yönünün tersine x açısı kadar döndüğünde çember üzerinde vardığın noktanın apsisi cos x, ordinatı sin x’tir. Bu tek tanım; işaretleri, sınırları (−1 ≤ sin x ≤ 1), sin²x + cos²x = 1 özdeşliğini ve dönüşüm formüllerini kendiliğinden verir.\n\nAYT’de trigonometriden her yıl birkaç soru gelir ve sorular genellikle zincir hâlindedir: indirgeme + özdeşlik, toplam-fark + iki kat açı, denklem + aralıkta kök sayma, periyot + en büyük değer. Bu anlatımda sırasıyla açı ölçüleri ve birim çember, dönüşüm formülleri, kosinüs-sinüs teoremleri, toplam-fark ve iki kat açı formülleri, grafik ve periyot, en sonda da trigonometrik denklemleri işleyeceğiz.",
+    prerequisites: [
+      "Dik üçgende trigonometrik oranlar ve özel üçgenler (30°-60°-90°, 45°-45°-90°)",
+      "Pisagor bağıntısı",
+      "Fonksiyon kavramı, grafik öteleme ve ters fonksiyon",
+      "İkinci dereceden denklem çözümü",
+    ],
+    concepts: [
+      { term: "Radyan", definition: "Yarıçap uzunluğundaki yayı gören merkez açının ölçüsüdür. π radyan = 180°; derece → radyan için π/180 ile çarpılır." },
+      { term: "Esas ölçü", definition: "Bir açının 360°’nin (2π’nin) katları eklenip çıkarılarak [0°, 360°) aralığına indirilmiş ölçüsüdür." },
+      { term: "Birim çember", definition: "Merkezi O(0, 0), yarıçapı 1 olan çember. x açısının çember üzerindeki noktası P(cos x, sin x)’tir." },
+      { term: "Tanjant ve kotanjant", definition: "tan x = sin x / cos x (cos x ≠ 0), cot x = cos x / sin x (sin x ≠ 0); tan x · cot x = 1." },
+      { term: "Bölgelere göre işaret", definition: "I. bölgede hepsi pozitif; II. bölgede yalnız sin; III. bölgede yalnız tan ve cot; IV. bölgede yalnız cos pozitiftir." },
+      { term: "Periyot", definition: "f(x + T) = f(x) eşitliğini her x için sağlayan en küçük pozitif T sayısıdır. sin ve cos için 2π, tan ve cot için π’dir." },
+      { term: "Ters trigonometrik fonksiyonlar", definition: "arcsin: [−1, 1] → [−π/2, π/2], arccos: [−1, 1] → [0, π], arctan: ℝ → (−π/2, π/2) fonksiyonlarıdır." },
+      { term: "Kosinüs ve sinüs teoremi", definition: "Herhangi bir üçgende kenar ve açı arasındaki bağıntılar: a² = b² + c² − 2bc·cos A ve a/sin A = b/sin B = c/sin C = 2R." },
+    ],
+    formulas: [
+      { expr: "sin²x + cos²x = 1;  1 + tan²x = 1/cos²x;  1 + cot²x = 1/sin²x", meaning: "Temel özdeşlikler; birim çemberde Pisagor bağıntısından gelir." },
+      { expr: "sin(π − x) = sin x,  cos(π − x) = −cos x,  tan(π − x) = −tan x", meaning: "II. bölgeye indirgeme (180° − x)." },
+      { expr: "sin(π + x) = −sin x,  cos(π + x) = −cos x,  tan(π + x) = tan x", meaning: "III. bölgeye indirgeme (180° + x)." },
+      { expr: "sin(−x) = −sin x,  cos(−x) = cos x,  tan(−x) = −tan x", meaning: "Negatif açı: sin ve tan tek, cos çift fonksiyondur." },
+      { expr: "sin(π/2 − x) = cos x,  cos(π/2 − x) = sin x,  tan(π/2 − x) = cot x", meaning: "90° ve 270° ile yapılan dönüşümlerde fonksiyon adı değişir (sin ↔ cos, tan ↔ cot); işaret, açının bulunduğu bölgeden belirlenir." },
+      { expr: "sin(a ± b) = sin a·cos b ± cos a·sin b", meaning: "Sinüs toplam-fark formülü." },
+      { expr: "cos(a ± b) = cos a·cos b ∓ sin a·sin b", meaning: "Kosinüs toplam-fark formülü (işaret ters döner)." },
+      { expr: "tan(a ± b) = (tan a ± tan b)/(1 ∓ tan a·tan b)", meaning: "Tanjant toplam-fark formülü." },
+      { expr: "sin 2x = 2 sin x·cos x", meaning: "Sinüs iki kat açı formülü." },
+      { expr: "cos 2x = cos²x − sin²x = 2cos²x − 1 = 1 − 2sin²x", meaning: "Kosinüs iki kat açı formülü; üç biçimi de kullanılır." },
+      { expr: "tan 2x = 2 tan x/(1 − tan²x)", meaning: "Tanjant iki kat açı formülü." },
+      { expr: "f(x) = a·sin(bx + c) + d ⇒ T = 2π/|b|, en büyük d + |a|, en küçük d − |a|", meaning: "Sinüs ve kosinüs için periyot ve sınırlar; tan(bx + c) için T = π/|b|." },
+      { expr: "sin x = sin α ⇒ x = α + 2kπ ya da x = π − α + 2kπ", meaning: "Sinüs denkleminin genel çözümü (k ∈ ℤ)." },
+      { expr: "cos x = cos α ⇒ x = ±α + 2kπ;  tan x = tan α ⇒ x = α + kπ", meaning: "Kosinüs ve tanjant denklemlerinin genel çözümü." },
+      { expr: "a² = b² + c² − 2bc·cos A;  a/sin A = 2R;  Alan = (1/2)·b·c·sin A", meaning: "Kosinüs teoremi, sinüs teoremi ve iki kenar-arası açı alan formülü." },
+    ],
+    logic:
+      "Neden sin²x + cos²x = 1? Birim çemberde P(cos x, sin x) noktasının orijine uzaklığı 1’dir. Pisagor’dan cos²x + sin²x = 1² olur. Bu özdeşlik her açı için geçerlidir, çünkü tanım her açı için aynı çemberi kullanır. Aynı çember −1 ≤ sin x ≤ 1 ve −1 ≤ cos x ≤ 1 sınırlarını da açıklar.\n\nDönüşüm formülleri neden işe yarar? 180° − x açısının çember üzerindeki noktası, x’in noktasının y eksenine göre simetriğidir: ordinat (sin) aynı kalır, apsis (cos) işaret değiştirir. 180° + x ise orijine göre simetriktir; ikisi de işaret değiştirir, oranları olan tan değişmez. 90°’lik dönüşlerde ise çember çeyrek tur döndüğü için x ve y koordinatları yer değiştirir; fonksiyon adının değişmesinin sebebi budur.\n\nİki kat açı formülleri toplam formülünün özel hâlidir: sin(x + x) = sin x cos x + cos x sin x = 2 sin x cos x. cos 2x’in üç farklı biçimi ise sin²x + cos²x = 1 kullanılarak birinden diğerine geçilerek elde edilir. Soruda yalnız cos x varsa 2cos²x − 1, yalnız sin x varsa 1 − 2sin²x biçimini seçmek denklemi tek bilinmeyene indirir.\n\nPeriyot neden 2π/|b|? sin(bx) ifadesinde bx açısı 2π arttığında değer tekrar eder; bx = 2π ise x = 2π/b’dir. Yani b grafiği yatayda sıkıştırır, a ise dikeyde uzatır. Trigonometrik denklemlerde birden fazla çözüm olmasının nedeni de periyodikliktir: bir değeri çember üzerinde genellikle iki farklı nokta verir ve her tur bu çözümleri tekrarlar.",
+    examples: [
+      {
+        level: "kolay",
+        problem: "sin 150° + cos 240° + tan 315° ifadesinin değeri kaçtır?",
+        steps: [
+          "sin 150° = sin(180° − 30°) = sin 30° = 1/2 (II. bölge, sin pozitif).",
+          "cos 240° = cos(180° + 60°) = −cos 60° = −1/2 (III. bölge, cos negatif).",
+          "tan 315° = tan(360° − 45°) = −tan 45° = −1 (IV. bölge, tan negatif).",
+          "Toplam: 1/2 − 1/2 − 1 = −1.",
+        ],
+        answer: "−1",
+      },
+      {
+        level: "orta",
+        problem: "tan x = 3/4 ve x, III. bölgede bir açı olduğuna göre sin 2x ve cos 2x değerlerini bulunuz.",
+        steps: [
+          "Kenarları 3 ve 4 olan dik üçgende hipotenüs 5’tir.",
+          "III. bölgede sin ve cos negatiftir: sin x = −3/5, cos x = −4/5.",
+          "sin 2x = 2·(−3/5)·(−4/5) = 24/25.",
+          "cos 2x = cos²x − sin²x = 16/25 − 9/25 = 7/25.",
+        ],
+        answer: "sin 2x = 24/25, cos 2x = 7/25",
+      },
+      {
+        level: "zor",
+        problem: "[0, 2π) aralığında 2cos²x − 3 sin x = 0 denklemini sağlayan x değerlerinin toplamı kaçtır?",
+        steps: [
+          "cos²x = 1 − sin²x yaz: 2 − 2sin²x − 3 sin x = 0 ⇒ 2sin²x + 3 sin x − 2 = 0.",
+          "Çarpanlara ayır: (2 sin x − 1)(sin x + 2) = 0.",
+          "sin x = −2 olamaz (−1 ≤ sin x ≤ 1). O hâlde sin x = 1/2.",
+          "[0, 2π) aralığında sin x = 1/2 ⇒ x = π/6 ya da x = π − π/6 = 5π/6.",
+          "Toplam: π/6 + 5π/6 = π.",
+        ],
+        answer: "π",
+      },
+    ],
+    osymThinking:
+      "Trigonometri soruları çoğunlukla bir özdeşliğin arkasına gizlenir: sin x + cos x verilip sin 2x istenir (kare al), tan verilip sin ve cos istenir (dik üçgen çiz, bölgeye göre işaret koy), büyük açı verilip değer istenir (esas ölçü + indirgeme). Denklem sorularında genel çözümü yazmak değil, verilen aralıktaki kökleri eksiksiz saymak ölçülür; sin x = −2 gibi imkânsız kökü elemek de dikkat testidir. Yeni nesil sorularda dönme dolap, gelgit, sarkaç gibi periyodik durumlar a·sin(bx + c) + d modeliyle verilir ve periyot, en yüksek-en alçak değer ya da belirli bir yüksekliğe ilk ulaşma anı sorulur.",
+    commonMistakes: [
+      "Bölge işaretini unutmak: tan x = 3/4 ve x III. bölgedeyken sin x’i +3/5 almak.",
+      "cos(a + b) = cos a cos b + sin a sin b yazmak; kosinüste işaret ters döner.",
+      "90° ve 270° dönüşümlerinde fonksiyon adını değiştirmeyi, 180° ve 360° dönüşümlerinde ise değiştirmemeyi karıştırmak.",
+      "Denklemde sin x = 1/2’nin yalnızca π/6 çözümünü yazıp π − π/6 çözümünü unutmak.",
+      "Periyodu hesaplarken b yerine a’yı kullanmak ya da tanjantta 2π/|b| yazmak (doğrusu π/|b|).",
+      "Derece ve radyanı aynı ifadede karıştırmak.",
+    ],
+    tips: [
+      "(sin x ± cos x)² = 1 ± sin 2x: toplam ya da fark verildiğinde hemen kare al.",
+      "“ASTC” (Hepsi–Sin–Tan–Cos) sırasıyla I, II, III, IV. bölgelerde pozitif olanları hatırla.",
+      "Bir değeri çemberde iki açı verir: sin için x ve π − x, cos için x ve −x (2π − x).",
+      "Periyot sorusunda önce ifadeyi sadeleştir: sin x·cos x = (1/2) sin 2x olduğundan periyot π’dir, 2π değil.",
+      "tan a ve tan b verilip a + b isteniyorsa tan(a + b)’yi hesapla, sonra açıların bölgesine bakarak açıyı seç.",
+    ],
+    summary: [
+      "Birim çember: P(cos x, sin x); sin²x + cos²x = 1, −1 ≤ sin x, cos x ≤ 1.",
+      "180° ve 360° dönüşümlerinde ad aynı, 90° ve 270°’de ad değişir; işaret bölgeden gelir.",
+      "sin(a ± b) = sin a cos b ± cos a sin b; cos(a ± b) = cos a cos b ∓ sin a sin b.",
+      "sin 2x = 2 sin x cos x; cos 2x = 2cos²x − 1 = 1 − 2sin²x.",
+      "a·sin(bx + c) + d: periyot 2π/|b|, aralık [d − |a|, d + |a|]; tan için periyot π/|b|.",
+      "sin x = sin α ⇒ x = α ya da π − α (+2kπ); cos x = cos α ⇒ x = ±α (+2kπ); tan x = tan α ⇒ x = α + kπ.",
+      "Kosinüs teoremi a² = b² + c² − 2bc cos A; sinüs teoremi a/sin A = 2R.",
+    ],
+  },
+
+  // ------------------------------------------------------------------ Üstel fonksiyon
+  {
+    topicId: "aytmat-ustel-fonksiyon",
+    intro:
+      "f(x) = aˣ (a > 0, a ≠ 1) biçimindeki fonksiyonlara üstel fonksiyon denir. Bir bakteri kolonisinin her saat ikiye katlanması, bankadaki paranın bileşik faizle büyümesi ya da radyoaktif maddenin yarı ömrüyle azalması üstel fonksiyonlarla modellenir.\n\nÜstel fonksiyonun davranışı tabana bağlıdır: a > 1 ise fonksiyon artan, 0 < a < 1 ise azalandır. Grafik her durumda (0, 1) noktasından geçer ve x eksenine hiç değmez; görüntü kümesi (0, ∞)’dur. Bu konu logaritmanın temelidir, çünkü logaritma üstel fonksiyonun tersidir.",
+    prerequisites: [
+      "Üslü sayılar ve üslü ifadelerin özellikleri",
+      "İkinci dereceden denklemler",
+      "Fonksiyon, artan-azalan fonksiyon ve ters fonksiyon kavramı",
+    ],
+    concepts: [
+      { term: "Üstel fonksiyon", definition: "f: ℝ → (0, ∞), f(x) = aˣ; a > 0 ve a ≠ 1 olmalıdır." },
+      { term: "Artan/azalan üstel fonksiyon", definition: "a > 1 ise x büyüdükçe aˣ büyür; 0 < a < 1 ise küçülür." },
+      { term: "Yatay asimptot", definition: "y = aˣ grafiği y = 0 doğrusuna yaklaşır ama onu kesmez; y = aˣ + k için asimptot y = k’dir." },
+      { term: "e sayısı", definition: "e ≈ 2,718 olan irrasyonel sayıdır; y = eˣ doğal üstel fonksiyondur." },
+    ],
+    formulas: [
+      { expr: "aˣ = aʸ ⇔ x = y (a > 0, a ≠ 1)", meaning: "Tabanlar eşitse üsler eşitlenir." },
+      { expr: "a > 1: aˣ > aʸ ⇔ x > y", meaning: "Artan fonksiyonda eşitsizlik yönü korunur." },
+      { expr: "0 < a < 1: aˣ > aʸ ⇔ x < y", meaning: "Azalan fonksiyonda eşitsizlik yön değiştirir." },
+      { expr: "N(t) = N₀·kᵗ/ᵀ", meaning: "T sürede k katına çıkan (ya da k < 1 ise azalan) büyüklük modeli; yarı ömürde k = 1/2." },
+    ],
+    logic:
+      "Tabanın 1’den farklı olması neden şart? a = 1 olsaydı 1ˣ = 1 sabit fonksiyon olurdu ve birebir olmazdı; tersini (logaritmayı) tanımlayamazdık. Tabanın pozitif olması ise (−2)^(1/2) gibi tanımsız değerleri engellemek içindir.\n\nEşitsizlik yönünün tabana bağlı olmasının nedeni monotonluktur: artan bir fonksiyon sıralamayı korur, azalan fonksiyon tersine çevirir. (1/2)ˣ fonksiyonunda x büyüdükçe değer küçüldüğünden, üslerin sıralaması değerlerin sıralamasının tersidir.",
+    examples: [
+      {
+        level: "kolay",
+        problem: "8ˣ⁻¹ = 4ˣ⁺² denklemini çözünüz.",
+        steps: [
+          "Tabanları 2’ye çevir: 2³⁽ˣ⁻¹⁾ = 2²⁽ˣ⁺²⁾.",
+          "3x − 3 = 2x + 4 ⇒ x = 7.",
+        ],
+        answer: "x = 7",
+      },
+      {
+        level: "orta",
+        problem: "4ˣ − 3·2ˣ⁺¹ + 8 = 0 denkleminin köklerini bulunuz.",
+        steps: [
+          "2ˣ = t (t > 0) dersen 4ˣ = t², 2ˣ⁺¹ = 2t.",
+          "t² − 6t + 8 = 0 ⇒ t = 2 ya da t = 4.",
+          "2ˣ = 2 ⇒ x = 1; 2ˣ = 4 ⇒ x = 2.",
+        ],
+        answer: "x ∈ {1, 2}",
+      },
+      {
+        level: "zor",
+        problem: "(1/3)ˣ⁻² > 27 eşitsizliğini sağlayan x değerlerini bulunuz.",
+        steps: [
+          "(1/3)ˣ⁻² = 3⁻⁽ˣ⁻²⁾ = 3²⁻ˣ ve 27 = 3³.",
+          "Taban 3 > 1 olduğu için yön korunur: 2 − x > 3.",
+          "x < −1.",
+        ],
+        answer: "x < −1",
+      },
+    ],
+    osymThinking:
+      "Üstel sorular genellikle tabanları eşitleme ya da değişken değiştirme fikrini ister; 4ˣ, 2ˣ⁺¹ gibi terimleri aynı tabana yazmak ilk adımdır. Eşitsizliklerde tabanın 1’den küçük olması yön değiştirme tuzağıdır. Yeni nesil sorularda nüfus, bakteri, faiz ve yarı ömür bağlamında N₀·kᵗ/ᵀ modeli kurulur.",
+    commonMistakes: [
+      "0 < a < 1 tabanlı eşitsizlikte yönü değiştirmeyi unutmak.",
+      "Değişken değiştirmede t = aˣ’in pozitif olduğunu unutup negatif t değerini kabul etmek.",
+      "2ˣ⁺¹’i 2ˣ + 2 sanmak; doğrusu 2·2ˣ’tir.",
+    ],
+    tips: [
+      "Farklı tabanları önce ortak asal tabana çevir (4 = 2², 27 = 3³, 0,2 = 5⁻¹).",
+      "Yarı ömür sorularında “kaç kez yarıya indi?” sorusunu sor: kalan/ilk = (1/2)ⁿ.",
+    ],
+    summary: [
+      "aˣ: a > 0, a ≠ 1; görüntü kümesi (0, ∞); grafik (0, 1)’den geçer.",
+      "a > 1 artan, 0 < a < 1 azalan.",
+      "Eşitsizlikte taban < 1 ise yön değişir.",
+      "Büyüme/azalma: N(t) = N₀·kᵗ/ᵀ.",
+    ],
+  },
+
+  // ------------------------------------------------------------------ Logaritma
+  {
+    topicId: "aytmat-logaritma",
+    intro:
+      "Logaritma, “bir sayıyı elde etmek için tabanın kaçıncı kuvvetini almalıyım?” sorusunun cevabıdır. 2³ = 8 olduğu için log₂8 = 3’tür. Yani logaritma, üstel fonksiyonun tersidir: y = aˣ ⇔ x = logₐy.\n\nLogaritma, çok büyük ya da çok küçük sayıları yönetilebilir hâle getirir. Deprem büyüklüğü (Richter ölçeği), sesin desibel değeri, bir çözeltinin pH’ı ve bileşik faizde paranın kaç yılda katlanacağı logaritmayla hesaplanır. Bir sayının kaç basamaklı olduğunu bile onluk logaritmayla bulabilirsin.\n\nAYT’de logaritma soruları dört aşamada gelir: tanımlılık koşulları, özelliklerle hesaplama (çarpım, bölüm, kuvvet, taban değiştirme), denklem ve eşitsizlikler, grafik ve modelleme. Bu anlatımda her aşamayı “neden” sorusuyla birlikte işleyeceğiz; çünkü logaritma kurallarını ezberleyen değil, üslü sayılarla bağını kuran öğrenci hata yapmaz.",
+    prerequisites: [
+      "Üslü sayılar ve üslü ifadelerin özellikleri",
+      "Üstel fonksiyon, grafiği ve artan-azalan olma durumu",
+      "Ters fonksiyon kavramı",
+      "Birinci ve ikinci dereceden denklem-eşitsizlik çözümü",
+    ],
+    concepts: [
+      { term: "Logaritma", definition: "a > 0, a ≠ 1 ve b > 0 iken aᶜ = b ⇔ logₐb = c. c’ye b’nin a tabanına göre logaritması denir." },
+      { term: "Tanımlılık koşulları", definition: "logₐb ifadesinin tanımlı olması için taban a > 0 ve a ≠ 1, argüman b > 0 olmalıdır." },
+      { term: "Onluk logaritma", definition: "10 tabanlı logaritmadır; log x biçiminde, taban yazılmadan gösterilir." },
+      { term: "Doğal logaritma", definition: "e ≈ 2,718 tabanlı logaritmadır; ln x ile gösterilir." },
+      { term: "Logaritma fonksiyonu", definition: "f: (0, ∞) → ℝ, f(x) = logₐx; y = aˣ fonksiyonunun tersidir ve grafiği onun y = x doğrusuna göre simetriğidir." },
+      { term: "Basamak sayısı", definition: "N > 1 doğal sayısının basamak sayısı ⌊log N⌋ + 1’dir; log N’nin tam kısmına 1 eklenir." },
+      { term: "Düşey asimptot", definition: "y = logₐx grafiği x = 0 doğrusuna yaklaşır ama onu kesmez; y = logₐ(x − h) için asimptot x = h’dir." },
+    ],
+    formulas: [
+      { expr: "logₐb = c ⇔ aᶜ = b", meaning: "Tanım; her logaritma sorusunun ilk aracı." },
+      { expr: "logₐ1 = 0,  logₐa = 1,  logₐaⁿ = n", meaning: "Temel değerler." },
+      { expr: "logₐ(x·y) = logₐx + logₐy", meaning: "Çarpımın logaritması, logaritmaların toplamıdır." },
+      { expr: "logₐ(x/y) = logₐx − logₐy", meaning: "Bölümün logaritması, logaritmaların farkıdır." },
+      { expr: "logₐ(xⁿ) = n·logₐx;  log_(aᵐ)(bⁿ) = (n/m)·logₐb", meaning: "Kuvvet, logaritmanın önüne çarpan olarak iner; tabandaki kuvvet paydaya iner." },
+      { expr: "logₐb = log_c b / log_c a", meaning: "Taban değiştirme kuralı; özel olarak logₐb = log b / log a = ln b / ln a." },
+      { expr: "logₐb · log_b a = 1;  logₐb · log_b c = logₐc", meaning: "Zincir kuralı: ortak taban ve argüman sadeleşir." },
+      { expr: "a^(logₐx) = x;  a^(log_b c) = c^(log_b a)", meaning: "Üs ile logaritma birbirini götürür; ikinci eşitlik taban-argüman yer değiştirmesidir." },
+      { expr: "a > 1: logₐx > logₐy ⇔ x > y > 0;  0 < a < 1: logₐx > logₐy ⇔ 0 < x < y", meaning: "Logaritmik eşitsizliklerde taban 1’den küçükse yön değişir." },
+    ],
+    logic:
+      "Logaritma özellikleri, üslü sayıların özelliklerinin “üs dilinden” söylenmiş hâlidir. aᵐ·aⁿ = aᵐ⁺ⁿ kuralında çarpım, üslerin toplamına dönüşür. logₐx = m ve logₐy = n dersen x·y = aᵐ⁺ⁿ olur; yani logₐ(xy) = m + n. Bölüm ve kuvvet kuralları da aynı yoldan gelir. Kuralları unuttuğunda “üslü sayılarda ne oluyordu?” diye sorman yeter.\n\nTanımlılık koşulları neden var? Taban negatif olsaydı (−2)ˣ bazı x değerlerinde tanımsız olurdu; taban 1 olsaydı 1ˣ her zaman 1 olurdu ve fonksiyon birebir olmazdı. Argüman pozitif olmalıdır, çünkü pozitif bir tabanın hiçbir kuvveti sıfır ya da negatif olamaz. Bu yüzden logaritmik denklem çözdükten sonra bulduğun kökleri mutlaka koşullarda denemelisin; cebirsel işlemler sahte kök üretebilir.\n\nTaban değiştirme kuralı da tanımdan çıkar: logₐb = c ise aᶜ = b’dir. İki tarafın c tabanında logaritmasını alırsan c·log_c a = log_c b ⇒ c = log_c b / log_c a. Hesap makinesinde yalnızca log ve ln tuşu olmasının nedeni budur: her logaritma bu iki tabana çevrilebilir.\n\nEşitsizliklerde yönün tabana bağlı olması monotonluktan gelir. a > 1 iken logₐx artandır, sıralamayı korur; 0 < a < 1 iken azalandır, sıralamayı ters çevirir. Grafik de bunu gösterir: tüm logₐx grafikleri (1, 0) noktasından geçer, x = 0 düşey asimptotuna yaklaşır ve a > 1 ise yükselir, 0 < a < 1 ise alçalır.",
+    examples: [
+      {
+        level: "kolay",
+        problem: "log₂8 + log₃(1/9) − log₅1 ifadesinin değeri kaçtır?",
+        steps: [
+          "log₂8 = log₂2³ = 3.",
+          "log₃(1/9) = log₃3⁻² = −2.",
+          "log₅1 = 0.",
+          "Sonuç: 3 − 2 − 0 = 1.",
+        ],
+        answer: "1",
+      },
+      {
+        level: "orta",
+        problem: "log 2 = a ve log 3 = b olduğuna göre log₁₂18 ifadesini a ve b cinsinden yazınız.",
+        steps: [
+          "Taban değiştir: log₁₂18 = log 18 / log 12.",
+          "18 = 2·3² ⇒ log 18 = a + 2b.",
+          "12 = 2²·3 ⇒ log 12 = 2a + b.",
+          "log₁₂18 = (a + 2b)/(2a + b).",
+        ],
+        answer: "(a + 2b)/(2a + b)",
+      },
+      {
+        level: "zor",
+        problem: "log₂(x − 1) + log₂(x + 1) = 3 denkleminin çözüm kümesini ve log_(1/2)(x − 3) > −2 eşitsizliğini sağlayan tam sayıların sayısını bulunuz.",
+        steps: [
+          "Denklem için koşul: x − 1 > 0 ve x + 1 > 0 ⇒ x > 1.",
+          "log₂[(x − 1)(x + 1)] = 3 ⇒ x² − 1 = 2³ = 8 ⇒ x² = 9 ⇒ x = 3 ya da x = −3.",
+          "x = −3 koşulu sağlamaz; çözüm kümesi {3}.",
+          "Eşitsizlik için koşul: x − 3 > 0 ⇒ x > 3.",
+          "Taban 1/2 < 1 olduğundan yön değişir: x − 3 < (1/2)⁻² = 4 ⇒ x < 7.",
+          "3 < x < 7 ⇒ tam sayılar 4, 5, 6: toplam 3 tane.",
+        ],
+        answer: "Ç = {3}; eşitsizliği sağlayan 3 tam sayı vardır.",
+      },
+    ],
+    osymThinking:
+      "Logaritma soruları çoğunlukla verilen logaritmalar cinsinden yazma (log 2 = a, log 3 = b), taban değiştirme zinciri ve tanım koşulu tuzağıyla gelir. Denklemlerde cebirsel olarak bulunan köklerden birinin koşulu sağlamaması, eşitsizliklerde ise tabanın 1’den küçük olup yön değiştirmesi ölçülen asıl dikkattir. Yeni nesil sorularda pH, Richter ölçeği, bileşik faiz ya da basamak sayısı bağlamı kullanılır; bağlamı logₐb = c ⇔ aᶜ = b denklemine çevirebilmek beklenir. Verilen yaklaşık değerlerle (log 2 ≈ 0,30) hesap yapıp tam sayı sonucu doğru yuvarlamak da sıkça ölçülür.",
+    commonMistakes: [
+      "log(x + y) = log x + log y yazmak; toplamın logaritmasının özel bir kuralı yoktur.",
+      "(log x)² ile log(x²)’yi karıştırmak; log(x²) = 2 log x, fakat (log x)² farklıdır.",
+      "Denklemde bulunan kökleri tanım koşuluna göre kontrol etmemek.",
+      "Tabanı 1’den küçük eşitsizliklerde yönü değiştirmemek.",
+      "Eşitsizlikte argümanın pozitif olma koşulunu çözüm aralığıyla kesiştirmeyi unutmak.",
+      "log_(a²)b = 2·logₐb yazmak; tabandaki kuvvet paydaya iner: (1/2)·logₐb.",
+    ],
+    tips: [
+      "Tüm ifadeleri aynı tabana ya da log 2, log 3 gibi “yapı taşlarına” ayır.",
+      "logₐb · log_b c · log_c d = logₐd: zincir ifadelerde ortak terimler sadeleşir.",
+      "Denklem çözerken en başta koşul aralığını yaz; sonunda kökleri bu aralıkla karşılaştır.",
+      "Basamak sayısı: log N = k,… ise N, k + 1 basamaklıdır.",
+      "a^(logₐx) = x kuralı, üstte logaritma olan ifadeleri anında sadeleştirir.",
+    ],
+    summary: [
+      "logₐb = c ⇔ aᶜ = b; koşul: a > 0, a ≠ 1, b > 0.",
+      "Çarpım → toplam, bölüm → fark, kuvvet → çarpan.",
+      "Taban değiştirme: logₐb = log b / log a; logₐb · log_b a = 1.",
+      "Denklemde bulunan kökleri tanım koşuluyla kontrol et.",
+      "Eşitsizlikte taban 1’den küçükse yön değişir; argüman > 0 koşulunu kesiştir.",
+      "y = logₐx, y = aˣ’in tersidir; (1, 0)’dan geçer, x = 0 düşey asimptottur.",
+      "Basamak sayısı = ⌊log N⌋ + 1.",
+    ],
+  },
+];
