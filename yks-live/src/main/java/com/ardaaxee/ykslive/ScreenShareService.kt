@@ -306,7 +306,7 @@ class ScreenShareService : Service(), SignalingClient.Listener, WebRtcSession.Ca
 
     private fun notification(text: String): Notification {
         val openIntent = PendingIntent.getActivity(
-            this, 1, Intent(this, MainActivity::class.java),
+            this, 1, Intent(this, LiveActivity::class.java),
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
         )
         val stopIntent = PendingIntent.getService(

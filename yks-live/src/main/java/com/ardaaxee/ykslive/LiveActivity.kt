@@ -30,7 +30,7 @@ import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 
-class MainActivity : Activity(), ScreenShareService.UiListener {
+class LiveActivity : Activity(), ScreenShareService.UiListener {
     private lateinit var roomInput: EditText
     private lateinit var status: TextView
     private lateinit var renderer: SurfaceViewRenderer
@@ -51,7 +51,7 @@ class MainActivity : Activity(), ScreenShareService.UiListener {
             val local = binder as? ScreenShareService.LocalBinder ?: return
             service = local.service()
             bound = true
-            service?.setUiListener(this@MainActivity)
+            service?.setUiListener(this@LiveActivity)
             service?.attachRenderer(renderer)
             updateButtons()
         }
@@ -124,7 +124,7 @@ class MainActivity : Activity(), ScreenShareService.UiListener {
             setTypeface(typeface, android.graphics.Typeface.BOLD)
         })
         root.addView(TextView(this).apply {
-            text = "Native Android · görünür izinli ekran paylaşımı"
+            text = "İyi ki YKS · telefon ekranını paylaş, karşı tarafı izle"
             textSize = 13f
             setTextColor(Color.rgb(105, 92, 118))
             setPadding(0, dp(2), 0, dp(12))
@@ -147,7 +147,7 @@ class MainActivity : Activity(), ScreenShareService.UiListener {
         stopButton = Button(this).apply {
             text = "Durdur"
             isEnabled = false
-            setOnClickListener { service?.stopFromUi() ?: stopService(Intent(this@MainActivity, ScreenShareService::class.java)) }
+            setOnClickListener { service?.stopFromUi() ?: stopService(Intent(this@LiveActivity, ScreenShareService::class.java)) }
         }
         buttons.addView(startButton, LinearLayout.LayoutParams(0, dp(52), 1f))
         buttons.addView(stopButton, LinearLayout.LayoutParams(0, dp(52), 1f).apply { marginStart = dp(8) })
@@ -174,10 +174,8 @@ class MainActivity : Activity(), ScreenShareService.UiListener {
         root.addView(videoBox, lp(-1, dp(300)))
 
         root.addView(Button(this).apply {
-            text = "Web YKS canlı sayfasını aç"
-            setOnClickListener {
-                startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(webInviteUrl())))
-            }
+            text = "← YKS'ye dön (paylaşım sürer)"
+            setOnClickListener { returnToYks() }
         }, lp(-1, dp(48)))
 
         val inviteRow = LinearLayout(this).apply { orientation = LinearLayout.HORIZONTAL }
@@ -234,6 +232,14 @@ class MainActivity : Activity(), ScreenShareService.UiListener {
             setPadding(0, dp(12), 0, 0)
         })
         setContentView(root)
+    }
+
+    /** Uygulamanın web tarafına (aynı görevdeki YKS ekranı) döner; ekran paylaşımı arka planda sürer. */
+    private fun returnToYks() {
+        if (isTaskRoot) {
+            packageManager.getLaunchIntentForPackage(packageName)?.let { startActivity(it) }
+        }
+        finish()
     }
 
     private fun requestProjection() {

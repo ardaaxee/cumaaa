@@ -2,7 +2,7 @@ name: YKS Canlı uçtan uca
 
 # Canlı ekran paylaşımını gerçek ağ üzerinden dener:
 #  - web: iki tarayıcı gerçek Supabase odasında (doğrudan WebRTC + yedek yol)
-#  - android: emülatördeki YKS Canlı uygulaması ↔ tarayıcı, iki yönde
+#  - android: emülatördeki İyi ki YKS uygulamasının canlı ekranı ↔ tarayıcı, iki yönde + yedek yol
 on:
   push:
     branches:
@@ -12,7 +12,9 @@ on:
       - 'yks/src/utils/liveRelay.ts'
       - 'yks/scripts/e2e-live.mjs'
       - 'yks/scripts/live-*.mjs'
-      - 'yks-android/**'
+      - 'yks/src/utils/liveAndroid.ts'
+      - 'yks-live/**'
+      - 'yks-play/**'
       - '.github/workflows/yks-live-e2e.yml'
   workflow_dispatch:
 
@@ -71,8 +73,8 @@ jobs:
       - uses: gradle/actions/setup-gradle@v4
         with:
           gradle-version: '8.13'
-      - name: Build debug APK (x86_64 emülatör için tüm ABI'ler)
-        working-directory: yks-android
+      - name: Build İyi ki YKS debug APK (x86_64 emülatör için tüm ABI'ler)
+        working-directory: yks-play
         run: gradle :app:assembleDebug -PYKS_ALL_ABIS=true --stacktrace
       - name: Build web app
         working-directory: yks
@@ -89,7 +91,7 @@ jobs:
           force-avd-creation: false
           emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
           disable-animations: true
-          script: bash yks-android/scripts/emulator-live-test.sh
+          script: bash yks-live/scripts/emulator-live-test.sh
       - name: Günlükler
         if: always()
         uses: actions/upload-artifact@v4

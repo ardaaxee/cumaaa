@@ -1,14 +1,14 @@
 #!/usr/bin/env bash
-# YKS Canlı — Android emülatöründe gerçek uçtan uca test (CI'da reactivecircus/android-emulator-runner içinde çalışır).
-#   1) Uygulama web'deki "Ekranımı paylaş" bağlantısıyla (ykslive://join?room=…&share=1) açılır, ekranını paylaşır;
+# İyi ki YKS · Birlikte Canlı — Android emülatöründe gerçek uçtan uca test (CI'da reactivecircus/android-emulator-runner içinde çalışır).
+#   1) Uygulamanın canlı ekranı web'deki "Ekranımı paylaş" bağlantısıyla (ykslive://join?room=…&share=1) açılır, ekranını paylaşır;
 #      tarayıcıdaki kişi (Playwright) aynı odada Android ekranını görür (doğrudan ya da yedek yoldan).
 #   2) Tarayıcı ekranını paylaşır; uygulamaya karelerin geldiği günlükten doğrulanır.
 # Gereken: derlenmiş debug APK, yks/dist ve Playwright Chromium.
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
-APK="$ROOT/yks-android/app/build/outputs/apk/debug/app-debug.apk"
-PKG=com.ardaaxee.ykslive
+APK="$ROOT/yks-play/app/build/outputs/apk/debug/app-debug.apk"
+PKG=io.github.ardaaxee.iyikiyks
 OUT="$ROOT/live-test-logs"
 mkdir -p "$OUT"
 ROOM="$(node -e "const a='ABCDEFGHJKLMNPQRSTUVWXYZ23456789';let s='';for(let i=0;i<24;i++)s+=a[Math.floor(Math.random()*a.length)];console.log(s)")"

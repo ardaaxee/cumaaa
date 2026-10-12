@@ -2,6 +2,7 @@
  * İyi ki YKS — Google Play paketi (Trusted Web Activity).
  * Uygulama, yayındaki web uygulamasını (https://ardaaxee.github.io/cumaaa/yks/) Chrome altyapısıyla
  * tam ekran açar; web sürümü güncellendiğinde Play'deki uygulama da güncel içeriği gösterir.
+ * Canlı odadaki "Ekranımı paylaş" düğmesi uygulamanın içindeki yerel ekran paylaşımını (:live) açar.
  *
  * İmzalama anahtarı depoda DEĞİLDİR. Yayın derlemesi şu ortam değişkenleriyle imzalanır:
  *   YKS_KEYSTORE_FILE, YKS_KEYSTORE_PASSWORD, YKS_KEY_ALIAS, YKS_KEY_PASSWORD
@@ -19,7 +20,8 @@ android {
 
     defaultConfig {
         applicationId = "io.github.ardaaxee.iyikiyks"
-        minSdk = 23
+        // Ekran paylaşımı (MediaProjection + WebRTC) Android 8+ ister.
+        minSdk = 26
         targetSdk = 36
         versionCode = (System.getenv("YKS_VERSION_CODE") ?: "1").toInt()
         versionName = System.getenv("YKS_VERSION_NAME") ?: "1.0.0"
@@ -30,6 +32,11 @@ android {
         manifestPlaceholders["themeColor"] = "#5B3FA0"
         manifestPlaceholders["navigationColor"] = "#F7F5FB"
         manifestPlaceholders["backgroundColor"] = "#F7F5FB"
+
+        // Telefonlar için yeterli; APK boyutunu yarıya indirir. Emülatör testi (-PYKS_ALL_ABIS=true) tüm ABI'leri alır.
+        if (providers.gradleProperty("YKS_ALL_ABIS").orNull != "true") {
+            ndk { abiFilters += listOf("arm64-v8a", "armeabi-v7a") }
+        }
     }
 
     val keystorePath = System.getenv("YKS_KEYSTORE_FILE")
@@ -59,4 +66,5 @@ android {
 
 dependencies {
     implementation("com.google.androidbrowserhelper:androidbrowserhelper:2.5.0")
+    implementation(project(":live"))
 }

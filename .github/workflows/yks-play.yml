@@ -9,6 +9,7 @@ on:
       - claude/yks-study-platform-p15aod
     paths:
       - 'yks-play/**'
+      - 'yks-live/**'
       - '.github/workflows/yks-play.yml'
   workflow_dispatch:
 
@@ -56,7 +57,10 @@ jobs:
           YKS_KEY_ALIAS: upload
           YKS_VERSION_CODE: ${{ github.run_number }}
           YKS_VERSION_NAME: 1.0.${{ github.run_number }}
-        run: gradle :app:bundleRelease :app:assembleRelease --stacktrace
+          ORG_GRADLE_PROJECT_TURN_URL: ${{ secrets.TURN_URL }}
+          ORG_GRADLE_PROJECT_TURN_USERNAME: ${{ secrets.TURN_USERNAME }}
+          ORG_GRADLE_PROJECT_TURN_PASSWORD: ${{ secrets.TURN_PASSWORD }}
+        run: gradle :live:testDebugUnitTest :app:bundleRelease :app:assembleRelease --stacktrace
       - name: Verify signature
         if: env.YKS_KEYSTORE_FILE != ''
         run: |

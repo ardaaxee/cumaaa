@@ -176,12 +176,29 @@ function blockDirectConnection() {
   window.RTCPeerConnection.prototype = Native.prototype;
 }
 
+/** Android tarayıcısı gibi: ekran paylaşımı (getDisplayMedia) yok; uygulamayı açan bağlantılar kaydedilir. */
+function noDisplayMedia() {
+  Object.defineProperty(navigator.mediaDevices, 'getDisplayMedia', { value: undefined, configurable: true });
+  window.__iyikiOpenAppLink = (url) => {
+    const links = JSON.parse(sessionStorage.getItem('__appLinks') || '[]');
+    sessionStorage.setItem('__appLinks', JSON.stringify([...links, url]));
+  };
+}
+
+/** Sayfanın açmaya çalıştığı uygulama bağlantıları (intent://). */
+export function appLinks(page) {
+  return page.evaluate(() => JSON.parse(sessionStorage.getItem('__appLinks') || '[]'));
+}
+
 const MOBILE = { viewport: { width: 393, height: 851 }, isMobile: true, hasTouch: true, userAgent: 'Mozilla/5.0 (Linux; Android 14; Pixel 8) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/129.0 Mobile Safari/537.36' };
 
 /** Yeni bir kişi (ayrı tarayıcı profili) açar ve profil kurulumunu geçer. */
-export async function openPerson(browser, app, name, { sharer = false, blockDirect = false, mobile = false, errors = [] } = {}) {
-  const context = await browser.newContext(mobile ? MOBILE : { viewport: { width: 1280, height: 900 } });
+export async function openPerson(browser, app, name, { sharer = false, blockDirect = false, mobile = false, androidBrowser = false, errors = [] } = {}) {
+  const context = await browser.newContext(mobile || androidBrowser ? MOBILE : { viewport: { width: 1280, height: 900 } });
   if (sharer) await context.addInitScript(fakeDisplayMedia);
+  if (androidBrowser) {
+    await context.addInitScript(noDisplayMedia);
+  }
   if (blockDirect) await context.addInitScript(blockDirectConnection);
   if (BACKEND === 'fake') {
     await context.route(SUPABASE_ESM, (route) => route.fulfill({ status: 200, contentType: 'text/javascript', body: FAKE_SUPABASE_MODULE, headers: { 'Access-Control-Allow-Origin': '*' } }));

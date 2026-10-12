@@ -6,17 +6,15 @@
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PROJECTION" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
 
-    <application
-        android:allowBackup="false"
-        android:label="YKS Canlı"
-        android:supportsRtl="true"
-        android:theme="@android:style/Theme.Material.Light.NoActionBar"
-        android:usesCleartextTraffic="false">
-        <activity android:name=".MainActivity" android:exported="true">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
+    <application>
+        <!-- İyi ki YKS içindeki canlı ekran paylaşımı: web'deki "Ekranımı paylaş" düğmesi
+             ykslive://join?room=…&share=1 bağlantısıyla bu ekranı açar. Başlatıcıda ayrı simge yoktur. -->
+        <activity
+            android:name="com.ardaaxee.ykslive.LiveActivity"
+            android:exported="true"
+            android:label="Birlikte Canlı"
+            android:launchMode="singleTask"
+            android:theme="@android:style/Theme.Material.Light.NoActionBar">
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />
@@ -25,7 +23,7 @@
             </intent-filter>
         </activity>
         <service
-            android:name=".ScreenShareService"
+            android:name="com.ardaaxee.ykslive.ScreenShareService"
             android:exported="false"
             android:foregroundServiceType="mediaProjection"
             android:stopWithTask="false" />

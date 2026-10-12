@@ -13,29 +13,25 @@ import {
   encryptFrame,
   frameFingerprint,
 } from '../utils/liveRelay';
+import {
+  ANDROID_APK_URL,
+  androidLiveIntentUrl,
+  clearHandoff,
+  isAndroidDevice,
+  isInsideApp,
+  openAppLink,
+  readHandoff,
+  saveHandoff,
+} from '../utils/liveAndroid';
 
 const SUPABASE_URL = 'https://wvtkcjutgcigxyenwkfs.supabase.co';
 const SUPABASE_PUBLISHABLE_KEY = 'sb_publishable_mDx9F5vv4aUuRjrGbP1vkQ_LzdiYAJi';
 const SUPABASE_ESM = 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
 const LIVE_ROOM_KEY = 'iyikiYks.liveRoom.v1';
-/** Android tarayıcıları ekran paylaşımı (getDisplayMedia) sunmaz; paylaşım aynı şifreli odaya bağlanan YKS Canlı uygulamasıyla yapılır. */
-const ANDROID_APP_PACKAGE = 'com.ardaaxee.ykslive';
-// Servis çalışanının kapsamı (/yks/) dışında tutulur ki indirme uygulama önbelleğine karışmasın.
-const ANDROID_APK_URL = 'https://ardaaxee.github.io/cumaaa/indir/yks-canli.apk';
 /** Bu süre içinde selamı görülen eşe tekrar selam dönülmez (iki taraf arasında bitmeyen selam döngüsünü önler). */
 const HELLO_REPLY_GAP_MS = 25_000;
 /** Selamı bu süredir gelmeyen eş çevrimdışı sayılır. */
 const PEER_ALIVE_MS = 30_000;
-
-function isAndroidDevice() {
-  return typeof navigator !== 'undefined' && /Android/i.test(navigator.userAgent);
-}
-
-/** Uygulama yüklüyse odayı dolu açıp paylaşım iznini sorar; yüklü değilse Chrome APK indirme bağlantısına gider. */
-function androidShareIntentUrl(room: string) {
-  const fallback = encodeURIComponent(ANDROID_APK_URL);
-  return `intent://join?room=${encodeURIComponent(room)}&share=1#Intent;scheme=ykslive;package=${ANDROID_APP_PACKAGE};S.browser_fallback_url=${fallback};end`;
-}
 
 type ChatMessage = {
   id: string;
@@ -254,8 +250,16 @@ export default function LiveTogetherPage() {
 
   const normalizedRoom = roomCode.trim().toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 24);
   const shareSupported = typeof navigator !== 'undefined' && !!navigator.mediaDevices?.getDisplayMedia;
-  const isAndroid = useMemo(isAndroidDevice, []);
+  const isAndroid = useMemo(() => isAndroidDevice(), []);
+  const inApp = useMemo(() => isInsideApp(), []);
   const nativeShare = !shareSupported && isAndroid;
+  // Paylaşım uygulamanın canlı ekranına devredildiyse bu sayfa aynı odaya ikinci kez girmez (oda iki kişilik).
+  const [handoffVersion, setHandoffVersion] = useState(0);
+  const handoff = useMemo(
+    () => (isAndroid ? readHandoff(normalizedRoom) : null),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [isAndroid, normalizedRoom, handoffVersion],
+  );
   const sharedRemaining = sharedStudy.running && sharedStudy.endsAt != null
     ? Math.max(0, sharedStudy.endsAt - studyTick)
     : sharedStudy.remainingMs;
@@ -713,6 +717,7 @@ export default function LiveTogetherPage() {
 
   useEffect(() => {
     if (joined || connection !== 'offline' || !roomFromHash() || normalizedRoom.length < 12) return;
+    if (isAndroidDevice() && readHandoff(normalizedRoom)) return;
     const timer = window.setTimeout(() => void joinRoom(), 120);
     return () => window.clearTimeout(timer);
     // Davet bağlantısıyla gelen kişi kod yazmadan yalnız odaya bağlanır; ekran paylaşımı ayrıca açık izin ister.
@@ -720,16 +725,28 @@ export default function LiveTogetherPage() {
   }, []);
 
   /**
-   * Android: YKS Canlı uygulamasını aynı odayla açar; uygulama izin penceresini hemen gösterir ve ekranı aynı şifreli odaya yayınlar.
-   * Bu sekme odadan çıkar ki odada iki kişi kalsın (uygulama karşı tarafın ekranını da kendi içinde gösterir).
+   * Android: İyi ki YKS uygulamasının canlı ekranını aynı odayla açar; izin penceresi hemen sorulur ve ekran aynı şifreli
+   * odaya yayınlanır. Bu sayfa odadan çıkar ki odada iki kişi kalsın (canlı ekran karşı tarafın ekranını ve mesajları da gösterir).
    */
   const shareWithAndroidApp = async () => {
     if (normalizedRoom.length < 12) return toast('Oda kodu en az 12 karakter olmalı.');
     try { localStorage.setItem(LIVE_ROOM_KEY, normalizedRoom); } catch { /* noop */ }
-    const target = androidShareIntentUrl(normalizedRoom);
+    const target = androidLiveIntentUrl(normalizedRoom, true);
     if (joined) await leaveRoom();
-    toast('YKS Canlı açılıyor… Yüklü değilse indirme başlar; kurup bu düğmeye tekrar dokun.', 7000);
-    window.location.href = target;
+    saveHandoff(normalizedRoom);
+    setHandoffVersion((v) => v + 1);
+    toast(inApp ? 'Canlı ekran açılıyor…' : 'İyi ki YKS açılıyor… Yüklü değilse indirme başlar; kurup bu düğmeye tekrar dokun.', 7000);
+    openAppLink(target);
+  };
+
+  const backToAppLive = () => {
+    openAppLink(androidLiveIntentUrl(normalizedRoom, false));
+  };
+
+  const joinHereAfterHandoff = () => {
+    clearHandoff();
+    setHandoffVersion((v) => v + 1);
+    void joinRoom();
   };
 
   const startScreenShare = async () => {
@@ -945,7 +962,7 @@ export default function LiveTogetherPage() {
               autoCapitalize="characters"
             />
           </label>
-          {!joined ? (
+          {!joined && handoff ? null : !joined ? (
             <>
               <button className="btn primary" type="button" onClick={() => void joinRoom()}>Odaya bağlan</button>
               <button
@@ -983,6 +1000,18 @@ export default function LiveTogetherPage() {
             >
               Davet bağlantısını kopyala
             </button>
+          </div>
+        )}
+
+        {!joined && handoff && (
+          <div className="notice live-handoff mt-12" data-testid="live-handoff">
+            <div>
+              <b>📱 Ekranın uygulamanın canlı ekranından paylaşılıyor.</b> Karşı tarafın ekranı ve mesajlar da orada.
+              <div className="row mt-12">
+                <button className="btn primary" type="button" onClick={backToAppLive}>Canlı ekranına dön</button>
+                <button className="btn ghost" type="button" onClick={joinHereAfterHandoff}>Paylaşımı bitirdim, buradan bağlan</button>
+              </div>
+            </div>
           </div>
         )}
 
@@ -1026,7 +1055,7 @@ export default function LiveTogetherPage() {
           <div className="live-share-actions">
             {!sharing ? (
               <button className="btn primary" type="button" onClick={() => void startScreenShare()}>
-                {nativeShare ? 'Ekranımı paylaş (YKS Canlı)' : 'Ekranımı paylaş'}
+                Ekranımı paylaş
               </button>
             ) : (
               <button className="btn danger" type="button" onClick={() => void stopScreenShare()}>
@@ -1036,8 +1065,14 @@ export default function LiveTogetherPage() {
             <span className="tiny muted">
               {nativeShare ? (
                 <>
-                  Android’de paylaşım YKS Canlı uygulamasıyla aynı odadan yapılır; {remoteName} seni burada canlı görür.{' '}
-                  <a href={ANDROID_APK_URL} rel="noopener">Uygulamayı indir (APK)</a>
+                  {inApp ? (
+                    <>Telefon ekranın uygulamanın canlı ekranından, tek izinle paylaşılır; {remoteName} seni canlı görür.</>
+                  ) : (
+                    <>
+                      Android’de ekran paylaşımı İyi ki YKS uygulamasıyla yapılır; {remoteName} seni canlı görür.{' '}
+                      <a href={ANDROID_APK_URL} rel="noopener">İyi ki YKS’yi indir (APK)</a>
+                    </>
+                  )}
                 </>
               ) : !shareSupported ? (
                 'Bu tarayıcı ekran paylaşamıyor; karşı tarafın ekranını izleyebilirsin.'
@@ -1191,7 +1226,7 @@ export default function LiveTogetherPage() {
       </section>
 
       <section className="notice section">
-        <b>Kesintisiz bağlantı hakkında:</b> Ağ değişimlerinde bağlantı otomatik yeniden kurulmaya çalışır. Bilgisayarda paylaşım doğrudan tarayıcıdan yapılır. Android’de “Ekranımı paylaş” YKS Canlı uygulamasını aynı odayla açar: tek izinle tüm telefon ekranı paylaşılır, ekran kilitlense de yayın sürer ve karşı tarafın ekranı uygulamada da görünür. İzlemek için hiçbir şey kurmak gerekmez.
+        <b>Kesintisiz bağlantı hakkında:</b> Ağ değişimlerinde bağlantı otomatik yeniden kurulmaya çalışır. Bilgisayarda paylaşım doğrudan tarayıcıdan yapılır. Android’de “Ekranımı paylaş” İyi ki YKS uygulamasının canlı ekranını aynı odayla açar: tek izinle tüm telefon ekranı paylaşılır, ekran kilitlense de yayın sürer ve karşı tarafın ekranı orada da görünür. İzlemek için hiçbir şey kurmak gerekmez.
       </section>
     </>
   );

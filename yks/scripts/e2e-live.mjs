@@ -10,6 +10,7 @@
  */
 import {
   BACKEND,
+  appLinks,
   assert,
   joinRoom,
   launchBrowser,
@@ -94,6 +95,34 @@ await step('Yedek yol: doğrudan bağlantı kurulamazsa ekran şifreli karelerle
     await cuma.page.getByText('Ekran bekleniyor').waitFor({ timeout: 15_000 });
   } finally {
     await zeynep.context.close();
+    await cuma.context.close();
+  }
+});
+
+await step('Android tarayıcı: paylaşım uygulamaya devredilir, sayfa odaya ikinci kez girmez', async () => {
+  const room = roomCode();
+  const cuma = await openPerson(browser, app, 'Cuma', { androidBrowser: true, errors });
+  const page = cuma.page;
+  try {
+    await joinRoom(page, app, room);
+    await page.getByRole('button', { name: 'Ekranımı paylaş' }).click();
+    await page.getByTestId('live-handoff').waitFor({ timeout: 10_000 });
+    const links = await appLinks(page);
+    assert(
+      links.some((u) => u.startsWith('intent://join?') && u.includes(`room=${room}`) && u.includes('share=1') && u.includes('package=io.github.ardaaxee.iyikiyks')),
+      'Uygulamanın canlı ekranını açan bağlantı gönderilmedi: ' + links.join(', '),
+    );
+    assert(!(await page.getByRole('button', { name: 'Odadan çık' }).count()), 'Devirden sonra sayfa odada kaldı');
+    // Davet bağlantısıyla yeniden açılınca da kendiliğinden odaya girmez.
+    await page.reload({ waitUntil: 'networkidle' });
+    await page.getByTestId('live-handoff').waitFor({ timeout: 10_000 });
+    await page.waitForTimeout(1_500);
+    await page.getByRole('button', { name: 'Canlı ekranına dön' }).click();
+    assert((await appLinks(page)).some((u) => u.includes(`room=${room}`) && !u.includes('share=1')), 'Canlı ekranına dönüş bağlantısı gönderilmedi');
+    assert(!(await page.getByRole('button', { name: 'Odadan çık' }).count()), 'Devir varken sayfa odaya kendiliğinden girdi');
+    await page.getByRole('button', { name: 'Paylaşımı bitirdim, buradan bağlan' }).click();
+    await page.getByRole('button', { name: 'Odadan çık' }).waitFor({ timeout: 30_000 });
+  } finally {
     await cuma.context.close();
   }
 });

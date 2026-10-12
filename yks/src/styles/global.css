@@ -14612,3 +14612,5 @@ textarea:focus-visible {
   object-fit:contain;
   background:#0f1115;
 }
+.live-handoff > div { min-width:0; }
+.live-handoff .btn { white-space:normal; }

@@ -4,7 +4,10 @@ Yayındaki web uygulamasını (https://ardaaxee.github.io/cumaaa/yks/) Android'd
 **Trusted Web Activity** paketi. Web sürümü güncellendiğinde uygulama da otomatik güncel içeriği gösterir;
 Play'e yeni sürüm yüklemek yalnız uygulama kabuğu (simge, ad, renkler) değişirse gerekir.
 
-- Paket adı: `io.github.ardaaxee.iyikiyks`
+- Paket adı: `io.github.ardaaxee.iyikiyks` (Android 8+)
+- **Canlı ekran paylaşımı uygulamanın içindedir** (`:live` modülü, kaynak `../yks-live`): Canlı sayfasındaki
+  "Ekranımı paylaş" telefon ekranını tek izinle paylaşır; ayrı uygulama gerekmez. Play Console'da ön plan hizmeti
+  türü **mediaProjection** beyan edilmelidir.
 - Alan adı doğrulaması: https://ardaaxee.github.io/.well-known/assetlinks.json
 - Derleme: `.github/workflows/yks-play.yml` (Actions → "YKS Google Play paketi" → Run workflow)
 

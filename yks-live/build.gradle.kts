@@ -1,5 +1,11 @@
+/**
+ * Birlikte Canlı — İyi ki YKS uygulamasının içindeki Android ekran paylaşımı (kütüphane modülü).
+ * Web'deki canlı odayla aynı uçtan uca şifreli Supabase/WebRTC protokolünü kullanır; doğrudan bağlantı
+ * kurulamazsa ekranı şifreli JPEG karelerle aynı odadan gönderir (yedek yol).
+ * yks-play bu modülü `:live` olarak içerir.
+ */
 plugins {
-    id("com.android.application")
+    id("com.android.library")
     id("org.jetbrains.kotlin.android")
     id("org.jetbrains.kotlin.plugin.serialization")
 }
@@ -12,16 +18,8 @@ android {
     compileSdk = 36
 
     defaultConfig {
-        applicationId = "com.ardaaxee.ykslive"
         minSdk = 26
-        targetSdk = 35
-        versionCode = (providers.environmentVariable("YKS_LIVE_VERSION_CODE").orNull ?: "2").toInt()
-        versionName = providers.environmentVariable("YKS_LIVE_VERSION_NAME").orNull ?: "1.1.0"
-
-        // Telefonlar için yeterli; APK boyutunu yarıya indirir. Emülatör testi (-PYKS_ALL_ABIS=true) tüm ABI'leri alır.
-        if (providers.gradleProperty("YKS_ALL_ABIS").orNull != "true") {
-            ndk { abiFilters += listOf("arm64-v8a", "armeabi-v7a") }
-        }
+        consumerProguardFiles("consumer-rules.pro")
 
         buildConfigField("String", "SUPABASE_URL", quoted("https://wvtkcjutgcigxyenwkfs.supabase.co"))
         buildConfigField("String", "SUPABASE_PUBLISHABLE_KEY", quoted("sb_publishable_mDx9F5vv4aUuRjrGbP1vkQ_LzdiYAJi"))
@@ -32,21 +30,15 @@ android {
 
     buildFeatures { buildConfig = true }
 
-    buildTypes {
-        release {
-            // Supabase/Ktor/serialization yansıma kullanır; küçültme cihazda sessiz kırılmalara yol açabileceği için kapalı.
-            isMinifyEnabled = false
-        }
-    }
-
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
     }
-    kotlin {
-        compilerOptions {
-            jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17)
-        }
+}
+
+kotlin {
+    compilerOptions {
+        jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17)
     }
 }
 
