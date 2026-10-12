@@ -15,8 +15,11 @@ android {
         applicationId = "com.ardaaxee.ykslive"
         minSdk = 26
         targetSdk = 35
-        versionCode = 1
-        versionName = "1.0.0"
+        versionCode = (providers.environmentVariable("YKS_LIVE_VERSION_CODE").orNull ?: "2").toInt()
+        versionName = providers.environmentVariable("YKS_LIVE_VERSION_NAME").orNull ?: "1.1.0"
+
+        // Telefonlar için yeterli; APK boyutunu yarıya indirir.
+        ndk { abiFilters += listOf("arm64-v8a", "armeabi-v7a") }
 
         buildConfigField("String", "SUPABASE_URL", quoted("https://wvtkcjutgcigxyenwkfs.supabase.co"))
         buildConfigField("String", "SUPABASE_PUBLISHABLE_KEY", quoted("sb_publishable_mDx9F5vv4aUuRjrGbP1vkQ_LzdiYAJi"))
@@ -29,9 +32,8 @@ android {
 
     buildTypes {
         release {
-            isMinifyEnabled = true
-            isShrinkResources = true
-            proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
+            // Supabase/Ktor/serialization yansıma kullanır; küçültme cihazda sessiz kırılmalara yol açabileceği için kapalı.
+            isMinifyEnabled = false
         }
     }
 

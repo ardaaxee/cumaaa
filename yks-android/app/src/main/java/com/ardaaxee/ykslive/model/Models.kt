@@ -20,7 +20,7 @@ data class SignalEnvelope(
 )
 
 @Serializable
-data class HelloPayload(val from: String, val at: Long)
+data class HelloPayload(val from: String, val at: Long, val name: String? = null)
 
 @Serializable
 data class SecurePacket(
@@ -37,6 +37,7 @@ data class ChatPayload(
     val from: String,
     val text: String,
     val at: Long,
+    val name: String? = null,
 )
 
-data class ChatLine(val mine: Boolean, val text: String, val at: Long)
+data class ChatLine(val mine: Boolean, val text: String, val at: Long, val sender: String? = null)

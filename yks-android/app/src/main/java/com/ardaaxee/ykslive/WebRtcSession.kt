@@ -51,6 +51,8 @@ class WebRtcSession(
     private var remoteDescriptionSet = false
     private val pendingCandidates = mutableListOf<IceCandidate>()
     private var closed = false
+    @Volatile private var connected = false
+    private var lastPeerOfferAt = 0L
 
     init {
         PeerConnectionFactory.initialize(
@@ -161,21 +163,40 @@ class WebRtcSession(
                 if (track is VideoTrack) callbacks.onRemoteVideo(track)
             }
             override fun onConnectionChange(newState: PeerConnection.PeerConnectionState?) {
-                if (newState == PeerConnection.PeerConnectionState.CONNECTED) {
-                    callbacks.onStatus("Canlı bağlantı kuruldu")
-                }
+                connected = newState == PeerConnection.PeerConnectionState.CONNECTED
+                if (connected) callbacks.onStatus("Canlı bağlantı kuruldu")
             }
         }) ?: error("PeerConnection oluşturulamadı")
         peer = created
         return created
     }
 
+    @Synchronized
     fun onPeerSeen(peerId: String) {
-        if (peerId == clientId) return
-        remoteId = peerId
+        if (peerId == clientId || closed) return
+        bindRemote(peerId)
+        // Selam her 10 sn'de gelir; bağlıyken ya da yeni teklif yolda iken tekrar teklif verilmez.
+        val now = System.currentTimeMillis()
+        if (connected || now - lastPeerOfferAt < PEER_OFFER_RETRY_MS) return
+        lastPeerOfferAt = now
         callbacks.onStatus("Karşı taraf bulundu · WebRTC hazırlanıyor")
         val webPeer = !peerId.startsWith("android-")
         maybeOffer(false, force = webPeer)
+    }
+
+    /** Karşı taraf değiştiyse (sayfayı yeniledi / uygulamayı yeniden açtı) eski bağlantı atılıp temiz bir bağlantı kurulur. */
+    private fun bindRemote(peerId: String) {
+        val previous = remoteId
+        remoteId = peerId
+        if (previous == null || previous == peerId) return
+        callbacks.onRemoteVideo(null)
+        runCatching { peer?.close() }
+        peer = null
+        connected = false
+        remoteDescriptionSet = false
+        pendingCandidates.clear()
+        lastPeerOfferAt = 0L
+        ensurePeer().addTrack(videoTrack, listOf("yks-screen"))
     }
 
     private fun amOfferer(): Boolean = remoteId?.let { clientId < it } == true
@@ -201,9 +222,10 @@ class WebRtcSession(
         }, constraints)
     }
 
+    @Synchronized
     fun handleSignal(signal: SignalEnvelope) {
         if (signal.from == clientId || closed) return
-        remoteId = signal.from
+        bindRemote(signal.from)
         val pc = ensurePeer()
 
         signal.description?.let { d ->
@@ -272,6 +294,10 @@ class WebRtcSession(
         peer = null
         runCatching { factory.dispose() }
         runCatching { eglBase.release() }
+    }
+
+    private companion object {
+        const val PEER_OFFER_RETRY_MS = 8_000L
     }
 
     private open class SdpAdapter : SdpObserver {

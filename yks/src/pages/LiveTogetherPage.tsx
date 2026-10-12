@@ -7,6 +7,23 @@ const SUPABASE_URL = 'https://wvtkcjutgcigxyenwkfs.supabase.co';
 const SUPABASE_PUBLISHABLE_KEY = 'sb_publishable_mDx9F5vv4aUuRjrGbP1vkQ_LzdiYAJi';
 const SUPABASE_ESM = 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
 const LIVE_ROOM_KEY = 'iyikiYks.liveRoom.v1';
+/** Android tarayıcıları ekran paylaşımı (getDisplayMedia) sunmaz; paylaşım aynı şifreli odaya bağlanan YKS Canlı uygulamasıyla yapılır. */
+const ANDROID_APP_PACKAGE = 'com.ardaaxee.ykslive';
+const ANDROID_APK_URL = 'https://github.com/ardaaxee/cumaaa/releases/latest/download/yks-canli.apk';
+/** Bu süre içinde selamı görülen eşe tekrar selam dönülmez (iki taraf arasında bitmeyen selam döngüsünü önler). */
+const HELLO_REPLY_GAP_MS = 25_000;
+/** Selamı bu süredir gelmeyen eş çevrimdışı sayılır. */
+const PEER_ALIVE_MS = 30_000;
+
+function isAndroidDevice() {
+  return typeof navigator !== 'undefined' && /Android/i.test(navigator.userAgent);
+}
+
+/** Uygulama yüklüyse odayı dolu açıp paylaşım iznini sorar; yüklü değilse Chrome APK indirme bağlantısına gider. */
+function androidShareIntentUrl(room: string) {
+  const fallback = encodeURIComponent(ANDROID_APK_URL);
+  return `intent://join?room=${encodeURIComponent(room)}&share=1#Intent;scheme=ykslive;package=${ANDROID_APP_PACKAGE};S.browser_fallback_url=${fallback};end`;
+}
 
 type ChatMessage = {
   id: string;
@@ -209,9 +226,13 @@ export default function LiveTogetherPage() {
   const sharedStudyRef = useRef<SharedStudyState>(sharedStudy);
   const reactionTimerRef = useRef<number | null>(null);
   const studyStorageKeyRef = useRef<string | null>(null);
+  const remotePeerRef = useRef<string | null>(null);
+  const helloSeenRef = useRef<Map<string, number>>(new Map());
 
   const normalizedRoom = roomCode.trim().toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 24);
   const shareSupported = typeof navigator !== 'undefined' && !!navigator.mediaDevices?.getDisplayMedia;
+  const isAndroid = useMemo(isAndroidDevice, []);
+  const nativeShare = !shareSupported && isAndroid;
   const sharedRemaining = sharedStudy.running && sharedStudy.endsAt != null
     ? Math.max(0, sharedStudy.endsAt - studyTick)
     : sharedStudy.remainingMs;
@@ -248,7 +269,23 @@ export default function LiveTogetherPage() {
     pcRef.current?.close();
     pcRef.current = null;
     remoteStreamRef.current = new MediaStream();
+    pendingCandidates.current = [];
+    ignoreOffer.current = false;
+    makingOffer.current = false;
     setRemoteSharing(false);
+  };
+
+  /** Karşı taraf değiştiyse (sayfayı yeniledi, uygulamayı yeniden açtı) eski WebRTC bağlantısı atılır; yoksa yeni teklif eski şifreleme parmak iziyle çakışıp bağlantı hiç kurulmaz. */
+  const bindRemote = (peerId: string) => {
+    const previous = remotePeerRef.current;
+    remotePeerRef.current = peerId;
+    if (previous && previous !== peerId) cleanupPeer();
+  };
+
+  const hasLivePeer = () => {
+    const now = Date.now();
+    for (const at of helloSeenRef.current.values()) if (now - at < PEER_ALIVE_MS) return true;
+    return false;
   };
 
   const ensurePeer = () => {
@@ -322,6 +359,7 @@ export default function LiveTogetherPage() {
   const handleSignal = async (payload: SignalPayload) => {
     if (!payload || payload.from === clientId) return;
     polite.current = payload.from.startsWith('android-') || clientId.localeCompare(payload.from) > 0;
+    bindRemote(payload.from);
     const pc = ensurePeer();
 
     try {
@@ -376,6 +414,8 @@ export default function LiveTogetherPage() {
     setRoomFull(false);
     setRemoteName('Karşı taraf');
     setReaction(null);
+    remotePeerRef.current = null;
+    helloSeenRef.current.clear();
     cryptoKeyRef.current = null;
     setConnection('offline');
   };
@@ -451,10 +491,17 @@ export default function LiveTogetherPage() {
             .then((clear) => {
               if (!clear || clear.from === clientId) return;
               if (clear.name?.trim()) setRemoteName(clear.name.trim().slice(0, 40));
+              const now = Date.now();
+              const previous = helloSeenRef.current.get(clear.from);
+              helloSeenRef.current.set(clear.from, now);
               setOnlineCount((n) => Math.max(2, n));
-              setConnection('connecting');
-              ensurePeer();
-              void sendBroadcast('hello', { from: clientId, at: Date.now(), name: localName });
+              bindRemote(clear.from);
+              const pc = ensurePeer();
+              if (pc.connectionState !== 'connected') setConnection('connecting');
+              // Her selama cevap vermek iki taraf arasında bitmeyen bir selam döngüsü yaratıp kanalı tıkıyordu:
+              // yalnız yeni (ya da uzun süre sessiz kalmış) eşe hemen cevap verilir; gerisi 10 sn'lik nabızla gider.
+              if (previous != null && now - previous < HELLO_REPLY_GAP_MS) return;
+              void sendBroadcast('hello', { from: clientId, at: now, name: localName });
               void sendBroadcast('study-sync', sharedStudyRef.current);
             });
         })
@@ -515,19 +562,24 @@ export default function LiveTogetherPage() {
         .on('presence', { event: 'sync' }, () => {
           const state = channel.presenceState() as Record<string, unknown[]>;
           const peers = Object.values(state).reduce((n, arr) => n + arr.length, 0);
-          setOnlineCount(peers);
+          // Android uygulaması presence kullanmaz, yalnız selam gönderir; onu da çevrimiçi say.
+          const appPeer = hasLivePeer();
+          setOnlineCount(appPeer ? Math.max(2, peers) : peers);
           setRoomFull(peers > 2);
-          if (peers >= 2) {
-            setConnection('connecting');
-            ensurePeer();
+          if (peers >= 2 || appPeer) {
+            const pc = ensurePeer();
+            if (pc.connectionState !== 'connected') setConnection('connecting');
           } else {
             setConnection('connecting');
             setRemoteSharing(false);
           }
         })
-        .on('presence', { event: 'leave' }, () => {
+        .on('presence', { event: 'leave' }, ({ key }: { key?: string }) => {
+          // Uygulamayla bağlı eş presence'ta görünmez; tarayıcıdaki başka bir sekmenin ayrılması onun yayınını kesmesin.
+          if (key && remotePeerRef.current && key !== remotePeerRef.current) return;
           setRemoteSharing(false);
           cleanupPeer();
+          remotePeerRef.current = null;
           setConnection('reconnecting');
         })
         .subscribe(async (status: string) => {
@@ -563,10 +615,24 @@ export default function LiveTogetherPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  /**
+   * Android: YKS Canlı uygulamasını aynı odayla açar; uygulama izin penceresini hemen gösterir ve ekranı aynı şifreli odaya yayınlar.
+   * Bu sekme odadan çıkar ki odada iki kişi kalsın (uygulama karşı tarafın ekranını da kendi içinde gösterir).
+   */
+  const shareWithAndroidApp = async () => {
+    if (normalizedRoom.length < 12) return toast('Oda kodu en az 12 karakter olmalı.');
+    try { localStorage.setItem(LIVE_ROOM_KEY, normalizedRoom); } catch { /* noop */ }
+    const target = androidShareIntentUrl(normalizedRoom);
+    if (joined) await leaveRoom();
+    toast('YKS Canlı açılıyor… Yüklü değilse indirme başlar; kurup bu düğmeye tekrar dokun.', 7000);
+    window.location.href = target;
+  };
+
   const startScreenShare = async () => {
+    if (nativeShare) return shareWithAndroidApp();
     if (!joined) return toast('Önce canlı odaya bağlan.');
     if (!shareSupported) {
-      return toast('Bu cihaz/tarayıcı sistem ekranı paylaşımını desteklemiyor. Android’de tam ekran paylaşımı için native uygulama gerekir.', 7000);
+      return toast('Bu tarayıcı ekran paylaşamıyor (iPhone/iPad Safari dahil). Karşı tarafın ekranını buradan izleyebilirsin; paylaşmak için bilgisayardan ya da Android telefondan bağlan.', 8000);
     }
 
     try {
@@ -846,7 +912,7 @@ export default function LiveTogetherPage() {
           <div className="live-share-actions">
             {!sharing ? (
               <button className="btn primary" type="button" onClick={() => void startScreenShare()}>
-                Ekranımı paylaş
+                {nativeShare ? 'Ekranımı paylaş (YKS Canlı)' : 'Ekranımı paylaş'}
               </button>
             ) : (
               <button className="btn danger" type="button" onClick={() => void stopScreenShare()}>
@@ -854,7 +920,16 @@ export default function LiveTogetherPage() {
               </button>
             )}
             <span className="tiny muted">
-              {!shareSupported ? 'Bu tarayıcı sistem ekranı paylaşımını desteklemiyor.' : 'Ekran kilitlenirse veya tarayıcı kapanırsa paylaşım durabilir.'}
+              {nativeShare ? (
+                <>
+                  Android’de paylaşım YKS Canlı uygulamasıyla aynı odadan yapılır; {remoteName} seni burada canlı görür.{' '}
+                  <a href={ANDROID_APK_URL} rel="noopener">Uygulamayı indir (APK)</a>
+                </>
+              ) : !shareSupported ? (
+                'Bu tarayıcı ekran paylaşamıyor; karşı tarafın ekranını izleyebilirsin.'
+              ) : (
+                'Ekran kilitlenirse veya tarayıcı kapanırsa paylaşım durabilir.'
+              )}
             </span>
           </div>
         </div>
@@ -1002,7 +1077,7 @@ export default function LiveTogetherPage() {
       </section>
 
       <section className="notice section">
-        <b>Kesintisiz bağlantı hakkında:</b> Ağ değişimlerinde bağlantı otomatik yeniden kurulmaya çalışır. Ancak web tarayıcıları ekran kilitliyken, uygulama kapalıyken veya işletim sistemi paylaşımı durdurduğunda 7/24 ekran yayınına izin vermez. Tam Android sistem ekranı paylaşımı için native uygulama gerekir.
+        <b>Kesintisiz bağlantı hakkında:</b> Ağ değişimlerinde bağlantı otomatik yeniden kurulmaya çalışır. Bilgisayarda paylaşım doğrudan tarayıcıdan yapılır. Android’de “Ekranımı paylaş” YKS Canlı uygulamasını aynı odayla açar: tek izinle tüm telefon ekranı paylaşılır, ekran kilitlense de yayın sürer ve karşı tarafın ekranı uygulamada da görünür. İzlemek için hiçbir şey kurmak gerekmez.
       </section>
     </>
   );

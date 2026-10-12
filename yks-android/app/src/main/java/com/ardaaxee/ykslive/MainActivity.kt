@@ -69,6 +69,15 @@ class MainActivity : Activity(), ScreenShareService.UiListener {
         buildUi()
         val restored = savedInstanceState?.getString("room") ?: roomFromIntent(intent) ?: roomStore.load() ?: generateRoomCode()
         roomInput.setText(restored)
+        if (savedInstanceState == null) maybeAutoShare(intent)
+    }
+
+    /** Web sayfasındaki "Ekranımı paylaş" düğmesi uygulamayı share=1 ile açar: oda dolu gelir, izin penceresi hemen sorulur. */
+    private fun maybeAutoShare(intent: Intent?) {
+        if (intent?.data?.getQueryParameter("share") != "1" || ScreenShareService.running) return
+        if (roomFromIntent(intent) == null) return
+        status.text = "Ekranını paylaşmak için Android'in izin penceresinde \"Şimdi başlat\"a dokun."
+        roomInput.post { requestProjection() }
     }
 
     override fun onNewIntent(intent: Intent?) {
@@ -77,6 +86,7 @@ class MainActivity : Activity(), ScreenShareService.UiListener {
         roomFromIntent(intent)?.let {
             if (!ScreenShareService.running) roomInput.setText(it)
         }
+        maybeAutoShare(intent)
     }
 
     override fun onStart() {
@@ -276,7 +286,7 @@ class MainActivity : Activity(), ScreenShareService.UiListener {
             return
         }
         roomStore.save(room)
-        val text = "YKS Canlı odasına katıl:\n" + webInviteUrl() + "\n\nUygulama yüklüyse: ykslive://join?room=" + Uri.encode(room)
+        val text = "YKS Canlı odasına katıl:\n" + webInviteUrl()
         startActivity(
             Intent.createChooser(
                 Intent(Intent.ACTION_SEND).apply {
@@ -331,7 +341,7 @@ class MainActivity : Activity(), ScreenShareService.UiListener {
         runOnUiThread {
             val fmt = SimpleDateFormat("HH:mm", Locale("tr", "TR"))
             chatText.text = if (lines.isEmpty()) "Henüz mesaj yok." else lines.takeLast(30).joinToString("\n\n") {
-                val who = if (it.mine) "Ben" else "Zeynep"
+                val who = if (it.mine) "Ben" else it.sender ?: "Karşı taraf"
                 "$who · ${fmt.format(Date(it.at))}\n${it.text}"
             }
         }

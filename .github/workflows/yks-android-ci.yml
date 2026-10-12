@@ -10,7 +10,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
 
 concurrency:
   group: yks-android-native-${{ github.ref }}
@@ -36,16 +36,31 @@ jobs:
       - uses: gradle/actions/setup-gradle@v4
         with:
           gradle-version: '8.13'
-      - name: Build debug APK
+      - name: Build debug APK + release bundle
         working-directory: yks-android
         env:
           ORG_GRADLE_PROJECT_TURN_URL: ${{ secrets.TURN_URL }}
           ORG_GRADLE_PROJECT_TURN_USERNAME: ${{ secrets.TURN_USERNAME }}
           ORG_GRADLE_PROJECT_TURN_PASSWORD: ${{ secrets.TURN_PASSWORD }}
-        run: gradle :app:assembleDebug --stacktrace
+        run: |
+          export YKS_LIVE_VERSION_CODE=$((100 + GITHUB_RUN_NUMBER))
+          export YKS_LIVE_VERSION_NAME="1.1.${GITHUB_RUN_NUMBER}"
+          gradle :app:assembleDebug :app:bundleRelease --stacktrace
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
           name: yks-live-android-debug
           path: yks-android/app/build/outputs/apk/debug/app-debug.apk
           if-no-files-found: error
+      # İmza anahtarı depoda/Actions'ta tutulmaz: imzasız paket ayrı dala yazılır, sabit anahtarla yerelde imzalanır
+      # (her sürüm aynı anahtarla imzalandığı için telefondaki uygulama silinmeden güncellenir).
+      - name: Publish unsigned bundle to yks-android-dist branch
+        run: |
+          mkdir -p "$RUNNER_TEMP/dist" && cp yks-android/app/build/outputs/bundle/release/app-release.aab "$RUNNER_TEMP/dist/yks-canli-unsigned.aab"
+          cd "$RUNNER_TEMP/dist"
+          git init -q -b yks-android-dist
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          echo "Kaynak: ${GITHUB_SHA} · sürüm 1.1.${GITHUB_RUN_NUMBER} (versionCode $((100 + GITHUB_RUN_NUMBER)))" > README.txt
+          git add . && git commit -qm "İmzasız YKS Canlı paketi ${GITHUB_SHA::7} (#${GITHUB_RUN_NUMBER})"
+          git push -f "https://x-access-token:${{ github.token }}@github.com/${GITHUB_REPOSITORY}.git" HEAD:yks-android-dist

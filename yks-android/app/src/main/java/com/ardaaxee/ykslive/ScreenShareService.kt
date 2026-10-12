@@ -162,7 +162,7 @@ class ScreenShareService : Service(), SignalingClient.Listener, WebRtcSession.Ca
     override fun onPeerSeen(peerId: String) { rtc?.onPeerSeen(peerId) }
 
     override fun onChat(message: ChatPayload) {
-        chat += ChatLine(false, message.text.take(1000), message.at)
+        chat += ChatLine(false, message.text.take(1000), message.at, message.name?.trim()?.take(40)?.ifBlank { null })
         while (chat.size > 100) chat.removeAt(0)
         main.post { ui?.onChat(chat.toList()) }
     }

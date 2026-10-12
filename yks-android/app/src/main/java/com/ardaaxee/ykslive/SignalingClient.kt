@@ -49,6 +49,7 @@ class SignalingClient(
     private val crypto = RoomCrypto(roomCode)
     private val channel = supabase.channel("yks-live:" + RoomCrypto.topicId(roomCode))
     private var heartbeat: Job? = null
+    private val lastHelloFrom = java.util.concurrent.ConcurrentHashMap<String, Long>()
 
     suspend fun connect() {
         listener.onStatus("Şifreli odaya bağlanıyor…")
@@ -64,8 +65,12 @@ class SignalingClient(
             .onEach { packet ->
                 if (packet.from == clientId) return@onEach
                 decode<HelloPayload>("hello", packet)?.let {
+                    // Yalnız yeni (ya da uzun süre sessiz kalmış) eşe hemen cevap verilir; her selama cevap
+                    // vermek iki taraf arasında bitmeyen bir selam döngüsü yaratıp kanalı tıkıyordu.
+                    val now = System.currentTimeMillis()
+                    val previous = lastHelloFrom.put(it.from, now)
                     listener.onPeerSeen(it.from)
-                    sendHello()
+                    if (previous == null || now - previous > HELLO_REPLY_GAP_MS) sendHello()
                 }
             }
             .launchIn(scope)
@@ -113,6 +118,10 @@ class SignalingClient(
         }.onFailure {
             listener.onStatus("Şifreli paket doğrulanamadı")
         }.getOrNull()
+    }
+
+    private companion object {
+        const val HELLO_REPLY_GAP_MS = 25_000L
     }
 
     suspend fun close() {
