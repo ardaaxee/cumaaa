@@ -250,7 +250,11 @@ export async function waitAnyVideo(page, timeout) {
         relay: !!img && img.complete && img.naturalWidth > 0,
       };
     });
-    if (state.relay) return (await relayFrames(page, 2, 10_000)) >= 2 ? 'yedek yol' : 'yedek yol (tek kare)';
+    if (state.relay) {
+      // Ekran değişmese de en geç 5 sn'de bir kare yenilenir; iki farklı kare görmek yolun sürdüğünü kanıtlar.
+      if ((await relayFrames(page, 2, 15_000)) < 2) throw new Error('Yedek yoldan tek kare geldi, akış sürmedi');
+      return 'yedek yol';
+    }
     if (state.direct) {
       await waitDirectVideo(page, 10_000);
       return 'doğrudan';

@@ -77,4 +77,17 @@ if [ -z "$OK" ]; then
   exit 1
 fi
 echo "Android tarayıcının ekranını aldı: $OK"
-echo "Canlı paylaşım emülatör testi geçti."
+
+echo "== 3) Doğrudan bağlantı engelli: Android ekranı yedek yoldan gider =="
+set +e
+(cd "$ROOT/yks" && LIVE_BLOCK_DIRECT=1 node scripts/live-peer.mjs watch "$ROOM" 90) >"$OUT/relay.log" 2>&1
+RELAY_CODE=$?
+set -e
+cat "$OUT/relay.log"
+adb logcat -d -s YksLive:I >"$OUT/android-3.log" || true
+tail -n 20 "$OUT/android-3.log"
+if [ "$RELAY_CODE" -ne 0 ] || ! grep -q "Android ekranı görüldü: yedek yol" "$OUT/relay.log"; then
+  echo "::error::Yedek yol: tarayıcı Android ekranını göremedi"
+  exit 1
+fi
+echo "Canlı paylaşım emülatör testi geçti (doğrudan + ters yön + yedek yol)."

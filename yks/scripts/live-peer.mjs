@@ -3,6 +3,7 @@
  * Android emülatör testinin web tarafı: tek bir tarayıcı kişisi canlı odaya girer.
  *   node scripts/live-peer.mjs watch <ODA> <sn>  → karşı tarafın (Android uygulaması) ekranı gelene kadar bekler
  *   node scripts/live-peer.mjs share <ODA> <sn>  → sahte ekranını <sn> saniye paylaşır
+ *   LIVE_BLOCK_DIRECT=1 ile doğrudan bağlantı engellenir (yedek yol testi).
  * Başarıda 0, görüntü gelmezse 1 ile çıkar.
  */
 import { BACKEND, joinRoom, launchBrowser, openPerson, startServer, waitAnyVideo } from './live-harness.mjs';
@@ -19,7 +20,9 @@ const browser = await launchBrowser();
 const errors = [];
 let code = 0;
 try {
-  const person = await openPerson(browser, app, mode === 'watch' ? 'Zeynep' : 'Cuma', { sharer: mode === 'share', errors });
+  // LIVE_BLOCK_DIRECT=1: doğrudan bağlantı kurulamaz → karşı taraf (Android) yedek yola geçmek zorunda kalır.
+  const blockDirect = process.env.LIVE_BLOCK_DIRECT === '1';
+  const person = await openPerson(browser, app, mode === 'watch' ? 'Zeynep' : 'Cuma', { sharer: mode === 'share', blockDirect, errors });
   await joinRoom(person.page, app, room);
   console.log(`[web] odaya girildi (${BACKEND})`);
   if (mode === 'watch') {
