@@ -9,7 +9,8 @@ const SUPABASE_ESM = 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm'
 const LIVE_ROOM_KEY = 'iyikiYks.liveRoom.v1';
 /** Android tarayıcıları ekran paylaşımı (getDisplayMedia) sunmaz; paylaşım aynı şifreli odaya bağlanan YKS Canlı uygulamasıyla yapılır. */
 const ANDROID_APP_PACKAGE = 'com.ardaaxee.ykslive';
-const ANDROID_APK_URL = 'https://github.com/ardaaxee/cumaaa/releases/latest/download/yks-canli.apk';
+// Servis çalışanının kapsamı (/yks/) dışında tutulur ki indirme uygulama önbelleğine karışmasın.
+const ANDROID_APK_URL = 'https://ardaaxee.github.io/cumaaa/indir/yks-canli.apk';
 /** Bu süre içinde selamı görülen eşe tekrar selam dönülmez (iki taraf arasında bitmeyen selam döngüsünü önler). */
 const HELLO_REPLY_GAP_MS = 25_000;
 /** Selamı bu süredir gelmeyen eş çevrimdışı sayılır. */

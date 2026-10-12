@@ -37,3 +37,11 @@ gradle :app:assembleDebug
 ```
 
 APK: `app/build/outputs/apk/debug/app-debug.apk`
+
+## Kurulum ve güncelleme
+
+- İndir: <https://ardaaxee.github.io/cumaaa/indir/yks-canli.apk> (Android 8+). Web'deki Canlı sayfasında Android'de
+  "Ekranımı paylaş (YKS Canlı)" düğmesi uygulamayı aynı odayla açar; yüklü değilse bu APK iner.
+- CI (`yks-android-ci.yml`) imzasız sürüm paketini `yks-android-dist` dalına yazar; paket depoda bulunmayan sabit
+  anahtarla `bundletool build-apks --mode=universal --ks=…` ile imzalanır. Aynı anahtar kullanıldığı sürece yeni sürüm
+  eskisinin üstüne silmeden kurulur.
