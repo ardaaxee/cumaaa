@@ -33,6 +33,8 @@ class WebRtcSession(
     private val clientId: String,
     private val scope: CoroutineScope,
     private val sendSignal: suspend (SignalEnvelope) -> Unit,
+    private val sendRelayFrame: suspend (ByteArray) -> Unit,
+    private val peerAlive: () -> Boolean,
     private val callbacks: Callbacks,
 ) {
     interface Callbacks {
@@ -53,6 +55,16 @@ class WebRtcSession(
     private var closed = false
     @Volatile private var connected = false
     private var lastPeerOfferAt = 0L
+    /** Karşı taraf görüldüğü/bağlantı koptuğu andan beri doğrudan bağlantı yok (0 = bağlı ya da eş yok). */
+    @Volatile private var notDirectSince = 0L
+    @Volatile private var relaying = false
+    private val relay = RelayFrameEncoder(::relayWanted) { jpeg ->
+        scope.launch { runCatching { sendRelayFrame(jpeg) } }
+        if (!relaying) {
+            relaying = true
+            callbacks.onStatus("Doğrudan bağlantı kurulamadı · ekran yedek yoldan gidiyor")
+        }
+    }
 
     init {
         PeerConnectionFactory.initialize(
@@ -81,6 +93,7 @@ class WebRtcSession(
         val (width, height) = captureSize()
         capturer.startCapture(width, height, 15)
         videoTrack = factory.createVideoTrack("yks-screen", source)
+        videoTrack.addSink(relay)
         ensurePeer().addTrack(videoTrack, listOf("yks-screen"))
         callbacks.onStatus("Ekran yakalama açık · karşı taraf bekleniyor")
     }
@@ -164,7 +177,13 @@ class WebRtcSession(
             }
             override fun onConnectionChange(newState: PeerConnection.PeerConnectionState?) {
                 connected = newState == PeerConnection.PeerConnectionState.CONNECTED
-                if (connected) callbacks.onStatus("Canlı bağlantı kuruldu")
+                if (connected) {
+                    notDirectSince = 0L
+                    relaying = false
+                    callbacks.onStatus("Canlı bağlantı kuruldu")
+                } else if (notDirectSince == 0L && remoteId != null) {
+                    notDirectSince = System.currentTimeMillis()
+                }
             }
         }) ?: error("PeerConnection oluşturulamadı")
         peer = created
@@ -175,6 +194,7 @@ class WebRtcSession(
     fun onPeerSeen(peerId: String) {
         if (peerId == clientId || closed) return
         bindRemote(peerId)
+        if (!connected && notDirectSince == 0L) notDirectSince = System.currentTimeMillis()
         // Selam her 10 sn'de gelir; bağlıyken ya da yeni teklif yolda iken tekrar teklif verilmez.
         val now = System.currentTimeMillis()
         if (connected || now - lastPeerOfferAt < PEER_OFFER_RETRY_MS) return
@@ -185,6 +205,12 @@ class WebRtcSession(
     }
 
     /** Karşı taraf değiştiyse (sayfayı yeniledi / uygulamayı yeniden açtı) eski bağlantı atılıp temiz bir bağlantı kurulur. */
+    private fun relayWanted(): Boolean {
+        val since = notDirectSince
+        return !closed && !connected && since > 0L &&
+            System.currentTimeMillis() - since >= RELAY_AFTER_MS && peerAlive()
+    }
+
     private fun bindRemote(peerId: String) {
         val previous = remoteId
         remoteId = peerId
@@ -226,6 +252,7 @@ class WebRtcSession(
     fun handleSignal(signal: SignalEnvelope) {
         if (signal.from == clientId || closed) return
         bindRemote(signal.from)
+        if (!connected && notDirectSince == 0L) notDirectSince = System.currentTimeMillis()
         val pc = ensurePeer()
 
         signal.description?.let { d ->
@@ -286,6 +313,8 @@ class WebRtcSession(
         if (closed) return
         closed = true
         callbacks.onRemoteVideo(null)
+        runCatching { videoTrack.removeSink(relay) }
+        relay.close()
         runCatching { capturer.stopCapture() }
         runCatching { capturer.dispose() }
         runCatching { surfaceHelper.dispose() }
@@ -298,6 +327,7 @@ class WebRtcSession(
 
     private companion object {
         const val PEER_OFFER_RETRY_MS = 8_000L
+        const val RELAY_AFTER_MS = 8_000L
     }
 
     private open class SdpAdapter : SdpObserver {

@@ -32,12 +32,19 @@ class RoomCrypto(roomCode: String) {
         bytes.fill(0)
     }
 
-    fun encrypt(event: String, from: String, plaintext: String): SecurePacket {
+    fun encrypt(event: String, from: String, plaintext: String): SecurePacket =
+        encryptBytes(event, from, plaintext.toByteArray(Charsets.UTF_8))
+
+    fun decrypt(event: String, packet: SecurePacket): String =
+        decryptBytes(event, packet).toString(Charsets.UTF_8)
+
+    /** Ham baytlar (ör. yedek yoldaki JPEG kareler) için; web tarafındaki liveRelay.ts ile aynı biçim. */
+    fun encryptBytes(event: String, from: String, clear: ByteArray): SecurePacket {
         val iv = ByteArray(12).also(random::nextBytes)
         val cipher = Cipher.getInstance("AES/GCM/NoPadding")
         cipher.init(Cipher.ENCRYPT_MODE, key, GCMParameterSpec(128, iv))
         cipher.updateAAD(event.toByteArray(Charsets.UTF_8))
-        val encrypted = cipher.doFinal(plaintext.toByteArray(Charsets.UTF_8))
+        val encrypted = cipher.doFinal(clear)
         return SecurePacket(
             from = from,
             iv = encode(iv),
@@ -46,7 +53,7 @@ class RoomCrypto(roomCode: String) {
         )
     }
 
-    fun decrypt(event: String, packet: SecurePacket): String {
+    fun decryptBytes(event: String, packet: SecurePacket): ByteArray {
         require(packet.v == 2) { "Unsupported packet version" }
         require(kotlin.math.abs(System.currentTimeMillis() - packet.at) < 10 * 60 * 1000L) {
             "Expired packet"
@@ -56,7 +63,7 @@ class RoomCrypto(roomCode: String) {
         val cipher = Cipher.getInstance("AES/GCM/NoPadding")
         cipher.init(Cipher.DECRYPT_MODE, key, GCMParameterSpec(128, iv))
         cipher.updateAAD(event.toByteArray(Charsets.UTF_8))
-        return cipher.doFinal(decode(packet.data)).toString(Charsets.UTF_8)
+        return cipher.doFinal(decode(packet.data))
     }
 
     private fun encode(bytes: ByteArray): String =

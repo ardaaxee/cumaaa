@@ -34,6 +34,8 @@ class MainActivity : Activity(), ScreenShareService.UiListener {
     private lateinit var roomInput: EditText
     private lateinit var status: TextView
     private lateinit var renderer: SurfaceViewRenderer
+    private lateinit var relayImage: ImageView
+    private val hideRelay = Runnable { relayImage.visibility = android.view.View.GONE }
     private lateinit var chatText: TextView
     private lateinit var messageInput: EditText
     private lateinit var startButton: Button
@@ -160,7 +162,16 @@ class MainActivity : Activity(), ScreenShareService.UiListener {
         root.addView(status)
 
         renderer = SurfaceViewRenderer(this).apply { setBackgroundColor(Color.rgb(18, 18, 22)) }
-        root.addView(renderer, lp(-1, dp(300)))
+        relayImage = ImageView(this).apply {
+            scaleType = ImageView.ScaleType.FIT_CENTER
+            setBackgroundColor(Color.rgb(18, 18, 22))
+            visibility = android.view.View.GONE
+            contentDescription = "Karşı tarafın ekranı"
+        }
+        val videoBox = android.widget.FrameLayout(this)
+        videoBox.addView(renderer, android.widget.FrameLayout.LayoutParams(-1, -1))
+        videoBox.addView(relayImage, android.widget.FrameLayout.LayoutParams(-1, -1))
+        root.addView(videoBox, lp(-1, dp(300)))
 
         root.addView(Button(this).apply {
             text = "Web YKS canlı sayfasını aç"
@@ -335,6 +346,13 @@ class MainActivity : Activity(), ScreenShareService.UiListener {
             status.text = text
             updateButtons()
         }
+    }
+
+    override fun onRelayFrame(bitmap: Bitmap) {
+        relayImage.setImageBitmap(bitmap)
+        relayImage.visibility = android.view.View.VISIBLE
+        relayImage.removeCallbacks(hideRelay)
+        relayImage.postDelayed(hideRelay, 4_000)
     }
 
     override fun onChat(lines: List<ChatLine>) {

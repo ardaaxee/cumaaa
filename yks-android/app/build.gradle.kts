@@ -18,8 +18,10 @@ android {
         versionCode = (providers.environmentVariable("YKS_LIVE_VERSION_CODE").orNull ?: "2").toInt()
         versionName = providers.environmentVariable("YKS_LIVE_VERSION_NAME").orNull ?: "1.1.0"
 
-        // Telefonlar için yeterli; APK boyutunu yarıya indirir.
-        ndk { abiFilters += listOf("arm64-v8a", "armeabi-v7a") }
+        // Telefonlar için yeterli; APK boyutunu yarıya indirir. Emülatör testi (-PYKS_ALL_ABIS=true) tüm ABI'leri alır.
+        if (providers.gradleProperty("YKS_ALL_ABIS").orNull != "true") {
+            ndk { abiFilters += listOf("arm64-v8a", "armeabi-v7a") }
+        }
 
         buildConfigField("String", "SUPABASE_URL", quoted("https://wvtkcjutgcigxyenwkfs.supabase.co"))
         buildConfigField("String", "SUPABASE_PUBLISHABLE_KEY", quoted("sb_publishable_mDx9F5vv4aUuRjrGbP1vkQ_LzdiYAJi"))

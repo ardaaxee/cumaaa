@@ -2,6 +2,17 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { PageHeader } from '../components/Layout';
 import { toast } from '../components/ui';
 import { useSelector } from '../store/store';
+import {
+  RELAY_AFTER_MS,
+  RELAY_EVENT,
+  RELAY_INTERVAL_MS,
+  RELAY_KEEPALIVE_MS,
+  RELAY_STALE_MS,
+  captureRelayFrame,
+  decryptFrame,
+  encryptFrame,
+  frameFingerprint,
+} from '../utils/liveRelay';
 
 const SUPABASE_URL = 'https://wvtkcjutgcigxyenwkfs.supabase.co';
 const SUPABASE_PUBLISHABLE_KEY = 'sb_publishable_mDx9F5vv4aUuRjrGbP1vkQ_LzdiYAJi';
@@ -209,6 +220,9 @@ export default function LiveTogetherPage() {
   const [studyTick, setStudyTick] = useState(() => Date.now());
   const [reaction, setReaction] = useState<LiveReaction | null>(null);
   const [sharedStudy, setSharedStudy] = useState<SharedStudyState>(() => initialStudyState(clientId));
+  const [relayView, setRelayView] = useState(false);
+  const [relayFrameUrl, setRelayFrameUrl] = useState<string | null>(null);
+  const [relaySending, setRelaySending] = useState(false);
 
   const channelRef = useRef<any>(null);
   const supabaseRef = useRef<any>(null);
@@ -229,6 +243,14 @@ export default function LiveTogetherPage() {
   const studyStorageKeyRef = useRef<string | null>(null);
   const remotePeerRef = useRef<string | null>(null);
   const helloSeenRef = useRef<Map<string, number>>(new Map());
+  const presencePeersRef = useRef(0);
+  const relayTimerRef = useRef<number | null>(null);
+  const relayBusyRef = useRef(false);
+  const notDirectSinceRef = useRef<number | null>(null);
+  const lastRelayFpRef = useRef('');
+  const lastRelaySentAtRef = useRef(0);
+  const relayUrlRef = useRef<string | null>(null);
+  const relayHideTimerRef = useRef<number | null>(null);
 
   const normalizedRoom = roomCode.trim().toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 24);
   const shareSupported = typeof navigator !== 'undefined' && !!navigator.mediaDevices?.getDisplayMedia;
@@ -357,6 +379,77 @@ export default function LiveTogetherPage() {
     return pc;
   };
 
+  // ---------- Yedek görüntü yolu (doğrudan WebRTC bağlantısı kurulamazsa) ----------
+
+  /** Paylaşan taraf: doğrudan bağlantı RELAY_AFTER_MS içinde kurulamadıysa ekranı şifreli kareler hâlinde gönderir. */
+  const relayTick = async () => {
+    const track = localStreamRef.current?.getVideoTracks()[0];
+    const key = cryptoKeyRef.current;
+    const channel = channelRef.current;
+    if (!track || track.readyState !== 'live' || !key || !channel) return;
+    const now = Date.now();
+    const direct = pcRef.current?.connectionState === 'connected';
+    const peerHere = presencePeersRef.current >= 2 || hasLivePeer();
+    if (direct || !peerHere) {
+      notDirectSinceRef.current = null;
+      setRelaySending(false);
+      return;
+    }
+    if (notDirectSinceRef.current == null) notDirectSinceRef.current = now;
+    if (now - notDirectSinceRef.current < RELAY_AFTER_MS || relayBusyRef.current) return;
+    relayBusyRef.current = true;
+    try {
+      const jpeg = await captureRelayFrame(track, localVideoRef.current);
+      if (!jpeg) return;
+      const fp = frameFingerprint(jpeg);
+      if (fp === lastRelayFpRef.current && now - lastRelaySentAtRef.current < RELAY_KEEPALIVE_MS) return;
+      const packet = await encryptFrame(key, clientId, jpeg);
+      await channel.send({ type: 'broadcast', event: RELAY_EVENT, payload: packet });
+      lastRelayFpRef.current = fp;
+      lastRelaySentAtRef.current = now;
+      setRelaySending(true);
+    } catch {
+      /* bir sonraki tikte yeniden denenir */
+    } finally {
+      relayBusyRef.current = false;
+    }
+  };
+
+  const startRelaySender = () => {
+    if (relayTimerRef.current) window.clearInterval(relayTimerRef.current);
+    notDirectSinceRef.current = null;
+    lastRelayFpRef.current = '';
+    relayTimerRef.current = window.setInterval(() => void relayTick(), RELAY_INTERVAL_MS);
+  };
+
+  const stopRelaySender = () => {
+    if (relayTimerRef.current) window.clearInterval(relayTimerRef.current);
+    relayTimerRef.current = null;
+    notDirectSinceRef.current = null;
+    setRelaySending(false);
+  };
+
+  /** İzleyen taraf: gelen kareyi gösterir; RELAY_STALE_MS boyunca kare gelmezse yedek görüntüyü kapatır. */
+  const showRelayFrame = (jpeg: Uint8Array) => {
+    const url = URL.createObjectURL(new Blob([jpeg as BlobPart], { type: 'image/jpeg' }));
+    const previous = relayUrlRef.current;
+    relayUrlRef.current = url;
+    setRelayFrameUrl(url);
+    setRelayView(true);
+    if (previous) window.setTimeout(() => URL.revokeObjectURL(previous), 2_000);
+    if (relayHideTimerRef.current) window.clearTimeout(relayHideTimerRef.current);
+    relayHideTimerRef.current = window.setTimeout(() => setRelayView(false), RELAY_STALE_MS);
+  };
+
+  const clearRelayView = () => {
+    if (relayHideTimerRef.current) window.clearTimeout(relayHideTimerRef.current);
+    relayHideTimerRef.current = null;
+    if (relayUrlRef.current) URL.revokeObjectURL(relayUrlRef.current);
+    relayUrlRef.current = null;
+    setRelayFrameUrl(null);
+    setRelayView(false);
+  };
+
   const handleSignal = async (payload: SignalPayload) => {
     if (!payload || payload.from === clientId) return;
     polite.current = payload.from.startsWith('android-') || clientId.localeCompare(payload.from) > 0;
@@ -402,6 +495,8 @@ export default function LiveTogetherPage() {
     localStreamRef.current?.getTracks().forEach((t) => t.stop());
     localStreamRef.current = null;
     setSharing(false);
+    stopRelaySender();
+    clearRelayView();
     cleanupPeer();
 
     const channel = channelRef.current;
@@ -417,6 +512,7 @@ export default function LiveTogetherPage() {
     setReaction(null);
     remotePeerRef.current = null;
     helloSeenRef.current.clear();
+    presencePeersRef.current = 0;
     cryptoKeyRef.current = null;
     setConnection('offline');
   };
@@ -506,6 +602,12 @@ export default function LiveTogetherPage() {
               void sendBroadcast('study-sync', sharedStudyRef.current);
             });
         })
+        .on('broadcast', { event: RELAY_EVENT }, ({ payload }: any) => {
+          if (!payload || payload.from === clientId) return;
+          void decryptFrame(cryptoKeyRef.current, payload).then((jpeg) => {
+            if (jpeg) showRelayFrame(jpeg);
+          });
+        })
         .on('broadcast', { event: 'chat' }, ({ payload }: any) => {
           if (!payload || payload.from === clientId) return;
           void decryptPacket<{ id: string; from: string; text: string; at: number; name?: string }>(cryptoKeyRef.current, 'chat', payload as SecurePacket)
@@ -563,6 +665,7 @@ export default function LiveTogetherPage() {
         .on('presence', { event: 'sync' }, () => {
           const state = channel.presenceState() as Record<string, unknown[]>;
           const peers = Object.values(state).reduce((n, arr) => n + arr.length, 0);
+          presencePeersRef.current = peers;
           // Android uygulaması presence kullanmaz, yalnız selam gönderir; onu da çevrimiçi say.
           const appPeer = hasLivePeer();
           setOnlineCount(appPeer ? Math.max(2, peers) : peers);
@@ -656,10 +759,12 @@ export default function LiveTogetherPage() {
 
       track.onended = () => {
         setSharing(false);
+        stopRelaySender();
         localStreamRef.current = null;
         void sendBroadcast('screen-stopped', { from: clientId });
       };
       setSharing(true);
+      startRelaySender();
       await sendBroadcast('screen-started', { from: clientId });
     } catch {
       toast('Ekran paylaşımı başlatılmadı.');
@@ -667,6 +772,7 @@ export default function LiveTogetherPage() {
   };
 
   const stopScreenShare = async () => {
+    stopRelaySender();
     localStreamRef.current?.getTracks().forEach((t) => t.stop());
     localStreamRef.current = null;
     setSharing(false);
@@ -888,13 +994,18 @@ export default function LiveTogetherPage() {
           <div className="live-video-head">
             <div>
               <b>{remoteName}'ın ekranı</b>
-              <span className="tiny muted">{remoteSharing ? 'Canlı yayın alınıyor' : onlineCount >= 2 ? 'Paylaşım bekleniyor' : remoteName + ' çevrimdışı'}</span>
+              <span className="tiny muted">
+                {relayView
+                  ? 'Canlı · yedek yoldan (doğrudan bağlantı kurulamadı)'
+                  : remoteSharing ? 'Canlı yayın alınıyor' : onlineCount >= 2 ? 'Paylaşım bekleniyor' : remoteName + ' çevrimdışı'}
+              </span>
             </div>
-            {remoteSharing && <span className="live-pill">CANLI</span>}
+            {(remoteSharing || relayView) && <span className="live-pill">CANLI</span>}
           </div>
           <div className="live-video-frame remote">
             <video ref={remoteVideoRef} playsInline autoPlay muted />
-            {!remoteSharing && <div className="live-empty"><span>📱</span><b>Ekran bekleniyor</b><small>{remoteName} paylaşımı başlattığında burada görünecek.</small></div>}
+            {relayView && relayFrameUrl && <img className="live-relay-frame" src={relayFrameUrl} alt={remoteName + ' ekranı'} data-testid="live-relay-frame" />}
+            {!remoteSharing && !relayView && <div className="live-empty"><span>📱</span><b>Ekran bekleniyor</b><small>{remoteName} paylaşımı başlattığında burada görünecek.</small></div>}
           </div>
         </div>
 
@@ -902,7 +1013,9 @@ export default function LiveTogetherPage() {
           <div className="live-video-head">
             <div>
               <b>{localName}'in ekranı</b>
-              <span className="tiny muted">{sharing ? remoteName + ' seni canlı görüyor' : 'Paylaşım kapalı'}</span>
+              <span className="tiny muted">
+                {!sharing ? 'Paylaşım kapalı' : relaySending ? 'Doğrudan bağlantı kurulamadı; ekranın yedek yoldan gidiyor' : connection === 'connected' ? remoteName + ' seni canlı görüyor' : remoteName + ' bekleniyor'}
+              </span>
             </div>
             {sharing && <span className="live-pill mine">PAYLAŞILIYOR</span>}
           </div>

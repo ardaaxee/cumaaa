@@ -33,6 +33,7 @@ class SignalingClient(
         fun onPeerSeen(peerId: String)
         fun onChat(message: ChatPayload)
         fun onStatus(status: String)
+        fun onRelayFrame(jpeg: ByteArray)
     }
 
     private val supabase = createSupabaseClient(
@@ -75,6 +76,15 @@ class SignalingClient(
             }
             .launchIn(scope)
 
+        channel.broadcastFlow<SecurePacket>(RELAY_EVENT)
+            .onEach { packet ->
+                if (packet.from == clientId) return@onEach
+                runCatching { crypto.decryptBytes(RELAY_EVENT, packet) }
+                    .getOrNull()
+                    ?.let(listener::onRelayFrame)
+            }
+            .launchIn(scope)
+
         channel.broadcastFlow<SecurePacket>("chat")
             .onEach { packet ->
                 if (packet.from == clientId) return@onEach
@@ -97,6 +107,17 @@ class SignalingClient(
 
     suspend fun sendSignal(signal: SignalEnvelope) {
         channel.broadcast("signal", encode("signal", signal))
+    }
+
+    /** Doğrudan bağlantı kurulamadığında ekran karesini şifreli olarak kanaldan gönderir. */
+    suspend fun sendFrame(jpeg: ByteArray) {
+        channel.broadcast(RELAY_EVENT, crypto.encryptBytes(RELAY_EVENT, clientId, jpeg))
+    }
+
+    /** Karşı tarafın selamı yakın zamanda geldi mi? */
+    fun hasLivePeer(): Boolean {
+        val now = System.currentTimeMillis()
+        return lastHelloFrom.values.any { now - it < PEER_ALIVE_MS }
     }
 
     suspend fun sendChat(message: ChatPayload) {
@@ -122,6 +143,8 @@ class SignalingClient(
 
     private companion object {
         const val HELLO_REPLY_GAP_MS = 25_000L
+        const val PEER_ALIVE_MS = 30_000L
+        const val RELAY_EVENT = "frame"
     }
 
     suspend fun close() {

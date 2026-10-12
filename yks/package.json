@@ -17,6 +17,7 @@
     "gen:content": "node --experimental-strip-types --no-warnings scripts/gen-content-index.mjs",
     "pretest": "npm run gen:content && npm run test:study",
     "e2e": "node scripts/e2e.mjs",
+    "e2e:live": "node scripts/e2e-live.mjs",
     "audit:content": "node --experimental-strip-types --no-warnings scripts/audit-content.mjs",
     "test:study": "node --experimental-strip-types tests/studyTools.test.mjs"
   },

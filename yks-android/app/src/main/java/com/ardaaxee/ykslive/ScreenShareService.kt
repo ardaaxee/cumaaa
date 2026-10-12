@@ -7,6 +7,9 @@ import android.app.PendingIntent
 import android.app.Service
 import android.content.Intent
 import android.content.pm.ServiceInfo
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
+import android.util.Log
 import android.net.ConnectivityManager
 import android.net.Network
 import android.os.Binder
@@ -24,6 +27,8 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
 import org.webrtc.SurfaceViewRenderer
+import org.webrtc.VideoFrame
+import org.webrtc.VideoSink
 import org.webrtc.VideoTrack
 import java.util.UUID
 
@@ -31,6 +36,8 @@ class ScreenShareService : Service(), SignalingClient.Listener, WebRtcSession.Ca
     interface UiListener {
         fun onStatus(text: String)
         fun onChat(lines: List<ChatLine>)
+        /** Doğrudan bağlantı yokken karşı tarafın ekranı yedek yoldan JPEG kare olarak gelir. */
+        fun onRelayFrame(bitmap: Bitmap)
     }
 
     inner class LocalBinder : Binder() {
@@ -50,6 +57,14 @@ class ScreenShareService : Service(), SignalingClient.Listener, WebRtcSession.Ca
     private var currentStatus = "Başlatılıyor…"
     private var wakeLock: PowerManager.WakeLock? = null
     private var networkCallback: ConnectivityManager.NetworkCallback? = null
+    /** Gelen görüntünün gerçekten aktığını günlüğe yazar (emülatör uçtan uca testi bunu okur). */
+    private val remoteFrameLog = object : VideoSink {
+        @Volatile var count = 0
+        override fun onFrame(frame: VideoFrame) {
+            val n = ++count
+            if (n == 1 || n == 30 || n % 300 == 0) Log.i(TAG, "remote frames $n")
+        }
+    }
 
     companion object {
         const val ACTION_START = "com.ardaaxee.ykslive.START"
@@ -58,6 +73,7 @@ class ScreenShareService : Service(), SignalingClient.Listener, WebRtcSession.Ca
         const val EXTRA_PROJECTION_DATA = "projection_data"
         private const val CHANNEL_ID = "yks_live_share"
         private const val NOTIFICATION_ID = 848
+        private const val TAG = "YksLive"
         @Volatile var running: Boolean = false
     }
 
@@ -107,6 +123,8 @@ class ScreenShareService : Service(), SignalingClient.Listener, WebRtcSession.Ca
             clientId = clientId,
             scope = scope,
             sendSignal = { sig.sendSignal(it) },
+            sendRelayFrame = { sig.sendFrame(it) },
+            peerAlive = { sig.hasLivePeer() },
             callbacks = this,
         )
         scope.launch {
@@ -161,6 +179,12 @@ class ScreenShareService : Service(), SignalingClient.Listener, WebRtcSession.Ca
     override fun onSignal(signal: SignalEnvelope) { rtc?.handleSignal(signal) }
     override fun onPeerSeen(peerId: String) { rtc?.onPeerSeen(peerId) }
 
+    override fun onRelayFrame(jpeg: ByteArray) {
+        val bitmap = runCatching { BitmapFactory.decodeByteArray(jpeg, 0, jpeg.size) }.getOrNull() ?: return
+        Log.i(TAG, "relay frame ${bitmap.width}x${bitmap.height}")
+        main.post { ui?.onRelayFrame(bitmap) }
+    }
+
     override fun onChat(message: ChatPayload) {
         chat += ChatLine(false, message.text.take(1000), message.at, message.name?.trim()?.take(40)?.ifBlank { null })
         while (chat.size > 100) chat.removeAt(0)
@@ -173,9 +197,14 @@ class ScreenShareService : Service(), SignalingClient.Listener, WebRtcSession.Ca
     }
 
     override fun onRemoteVideo(track: VideoTrack?) {
+        Log.i(TAG, if (track != null) "remote video track" else "remote video cleared")
         main.post {
-            remoteTrack?.let { old -> renderer?.let { old.removeSink(it) } }
+            remoteTrack?.let { old ->
+                renderer?.let { r -> runCatching { old.removeSink(r) } }
+                runCatching { old.removeSink(remoteFrameLog) }
+            }
             remoteTrack = track
+            track?.addSink(remoteFrameLog)
             renderer?.let { r -> track?.addSink(r) }
         }
     }
@@ -183,6 +212,7 @@ class ScreenShareService : Service(), SignalingClient.Listener, WebRtcSession.Ca
     override fun onProjectionStopped() = stopEverything("Android ekran paylaşımını sonlandırdı")
 
     private fun postStatus(text: String) {
+        Log.i(TAG, "status: $text")
         currentStatus = text
         main.post { ui?.onStatus(text) }
     }

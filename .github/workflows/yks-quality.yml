@@ -48,3 +48,8 @@ jobs:
 
       - name: E2E (real browser, phone size)
         run: npm run e2e
+
+      - name: E2E canlı ekran paylaşımı (yerel sahte kanal)
+        run: npm run e2e:live
+        env:
+          LIVE_BACKEND: fake
