@@ -260,7 +260,14 @@ class ScreenShareService : Service(), SignalingClient.Listener, WebRtcSession.Ca
     private fun registerNetworkRecovery() {
         val manager = getSystemService(ConnectivityManager::class.java)
         val callback = object : ConnectivityManager.NetworkCallback() {
+            // Kayıt anında mevcut ağ için de onAvailable gelir; o gerçek bir ağ değişikliği değildir.
+            private var initial = true
+
             override fun onAvailable(network: Network) {
+                if (initial) {
+                    initial = false
+                    return
+                }
                 main.postDelayed({
                     if (running) {
                         postStatus("Ağ değişikliği algılandı · bağlantı yenileniyor")

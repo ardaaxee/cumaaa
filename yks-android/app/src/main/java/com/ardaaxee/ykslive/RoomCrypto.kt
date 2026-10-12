@@ -46,6 +46,7 @@ class RoomCrypto(roomCode: String) {
         cipher.updateAAD(event.toByteArray(Charsets.UTF_8))
         val encrypted = cipher.doFinal(clear)
         return SecurePacket(
+            v = PACKET_VERSION,
             from = from,
             iv = encode(iv),
             data = encode(encrypted),
@@ -54,7 +55,7 @@ class RoomCrypto(roomCode: String) {
     }
 
     fun decryptBytes(event: String, packet: SecurePacket): ByteArray {
-        require(packet.v == 2) { "Unsupported packet version" }
+        require(packet.v == PACKET_VERSION) { "Unsupported packet version" }
         require(kotlin.math.abs(System.currentTimeMillis() - packet.at) < 10 * 60 * 1000L) {
             "Expired packet"
         }
@@ -73,6 +74,8 @@ class RoomCrypto(roomCode: String) {
         Base64.decode(value, Base64.URL_SAFE or Base64.NO_WRAP or Base64.NO_PADDING)
 
     companion object {
+        const val PACKET_VERSION = 2
+
         fun topicId(roomCode: String): String {
             val normalized = roomCode.trim().uppercase(Locale.ROOT)
             val digest = MessageDigest.getInstance("SHA-256")
